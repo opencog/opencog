@@ -177,8 +177,8 @@ void MihalceaEdge::annotate_parse_pair(const Handle& ha, const Handle& hb)
 bool MihalceaEdge::annotate_word_pair(const Handle& first, const Handle& second)
 {
 #ifdef DETAIL_DEBUG
-	const std::string &fn = as->getName(first);
-	const std::string &sn = as->getName(second);
+	const std::string &fn = as->get_name(first);
+	const std::string &sn = as->get_name(second);
 	printf ("; WordPair %d: (%s, %s)\n", word_pair_count, fn.c_str(), sn.c_str());
 #endif
 
@@ -200,7 +200,7 @@ bool MihalceaEdge::sense_of_first_inst(const Handle& first_word_sense_h,
 	first_word_sense = first_word_sense_h;
 
 #ifdef SENSE_DETAIL_DEBUG
-	const std::string &fn = as->getName(first_word_sense_h);
+	const std::string &fn = as->get_name(first_word_sense_h);
 	printf ("; First word sense: %s\n", fn.c_str());
 #endif
 
@@ -239,7 +239,7 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
                                         const Handle& second_sense_link)
 {
 #ifdef SENSE_DETAIL_DEBUG
-	const std::string &fn = as->getName(second_word_sense_h);
+	const std::string &fn = as->get_name(second_word_sense_h);
 	printf ("; Second word sense: %s\n", fn.c_str());
 #endif
 
@@ -262,7 +262,7 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
 #endif
 
 	// Skip making edges between utterly unrelated nodes.
-	if (stv->getMean() < 0.01) return false;
+	if (stv->get_mean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
 	HandleSeq out;
@@ -275,13 +275,13 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
 #ifdef LINK_DEBUG
 	Handle fw = get_word_instance_of_sense_link(first_sense_link);
 	Handle fs = get_word_sense_of_sense_link(first_sense_link);
-	const char *vfw = as->getName(fw).c_str();
-	const char *vfs = as->getName(fs).c_str();
+	const char *vfw = as->get_name(fw).c_str();
+	const char *vfs = as->get_name(fs).c_str();
 
 	Handle sw = get_word_instance_of_sense_link(second_sense_link);
 	Handle ss = get_word_sense_of_sense_link(second_sense_link);
-	const char *vsw = as->getName(sw).c_str();
-	const char *vss = as->getName(ss).c_str();
+	const char *vsw = as->get_name(sw).c_str();
+	const char *vss = as->get_name(ss).c_str();
 
 	printf("slink: %s ## %s <<-->> %s ## %s add\n", vfw, vsw, vfs, vss); 
 	printf("slink: %s ## %s <<-->> %s ## %s add\n", vsw, vfw, vss, vfs); 

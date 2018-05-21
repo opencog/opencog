@@ -4,7 +4,7 @@
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
-(define sociality (psi-demand "Sociality" .8))
+(define sociality (psi-demand "Sociality"))
 
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules
@@ -22,8 +22,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "fuzzy_matcher"
     )
+    "fuzzy_matcher"
 )
 
 (psi-set-controlled-rule
@@ -41,8 +41,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "fuzzy_matcher"
     )
+    "fuzzy_matcher"
 )
 
 (psi-set-controlled-rule
@@ -59,8 +59,8 @@
         (True)
         (stv .7 .7)
         sociality
-        "fuzzy_matcher"
     )
+    "fuzzy_matcher"
 )
 
 (psi-set-controlled-rule
@@ -76,8 +76,8 @@
         (True)
         (stv 0 .9)
         sociality
-        "aiml"
     )
+    "aiml"
 )
 
 (psi-set-controlled-rule
@@ -94,8 +94,8 @@
         (True)
         (stv 0 .9)
         sociality
-        "aiml"
     )
+    "aiml"
 )
 
 (psi-set-controlled-rule
@@ -114,8 +114,8 @@
         (True)
         (stv 0 .9)
         sociality
-        "aiml"
     )
+    "aiml"
 )
 
 (psi-set-controlled-rule
@@ -132,8 +132,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatscript"
     )
+    "chatscript"
 )
 
 (psi-set-controlled-rule
@@ -151,8 +151,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatscript"
     )
+    "chatscript"
 )
 
 (psi-set-controlled-rule
@@ -170,8 +170,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatscript"
     )
+    "chatscript"
 )
 
 (psi-set-controlled-rule
@@ -189,8 +189,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatscript"
     )
+    "chatscript"
 )
 
 (psi-set-controlled-rule
@@ -208,8 +208,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatscript"
     )
+    "chatscript"
 )
 
 (psi-set-controlled-rule
@@ -223,8 +223,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "duckduckgo"
     )
+    "duckduckgo"
 )
 
 (psi-set-controlled-rule
@@ -239,8 +239,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "duckduckgo"
     )
+    "duckduckgo"
 )
 
 (psi-set-controlled-rule
@@ -256,8 +256,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "duckduckgo"
     )
+    "duckduckgo"
 )
 
 (psi-set-controlled-rule
@@ -272,8 +272,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "wolframalpha"
     )
+    "wolframalpha"
 )
 
 (psi-set-controlled-rule
@@ -288,8 +288,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "wolframalpha"
     )
+    "wolframalpha"
 )
 
 (psi-set-controlled-rule
@@ -305,8 +305,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "wolframalpha"
     )
+    "wolframalpha"
 )
 
 (psi-set-controlled-rule
@@ -322,8 +322,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "openweathermap"
     )
+    "openweathermap"
 )
 
 (psi-set-controlled-rule
@@ -337,8 +337,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "openweathermap"
     )
+    "openweathermap"
 )
 
 (psi-set-controlled-rule
@@ -356,8 +356,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "random_sentence_pkd"
     )
+    "random_sentence_pkd"
 )
 
 (psi-set-controlled-rule
@@ -375,8 +375,8 @@
         (True)
         (stv 0 .9)
         sociality
-        "random_sentence_blogs"
     )
+    "random_sentence_blogs"
 )
 
 (psi-set-controlled-rule
@@ -394,8 +394,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "random_sentence_kurzweil"
     )
+    "random_sentence_kurzweil"
 )
 
 (psi-set-controlled-rule
@@ -408,8 +408,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "random_sentence_pkd"
     )
+    "random_sentence_pkd"
 )
 
 (psi-set-controlled-rule
@@ -422,8 +422,8 @@
         (True)
         (stv 0 .9)
         sociality
-        "random_sentence_blogs"
     )
+    "random_sentence_blogs"
 )
 
 (psi-set-controlled-rule
@@ -436,8 +436,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "random_sentence_kurzweil"
     )
+    "random_sentence_kurzweil"
 )
 
 (psi-set-controlled-rule
@@ -451,8 +451,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatbot_eva"
     )
+    "chatbot_eva"
 )
 
 (psi-set-controlled-rule
@@ -465,8 +465,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatbot_eva"
     )
+    "chatbot_eva"
 )
 
 ; Emotion state inquiry
@@ -483,8 +483,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "emotion_state"
     )
+    "emotion_state"
 )
 
 (psi-set-controlled-rule
@@ -498,8 +498,8 @@
         (True)
         (stv .9 .9)
         sociality
-        "emotion-state"
     )
+    "emotion-state"
 )
 
 (psi-rule

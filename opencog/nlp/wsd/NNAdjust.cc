@@ -76,8 +76,8 @@ bool NNAdjust::adjust_relation(const std::string &relname,
 {
 	if (relname.compare("_nn")) return false;
 #ifdef DEBUG
-	const std::string &fn = NodeCast(first)->getName();
-	const std::string &sn = NodeCast(second)->getName();
+	const std::string &fn = first->get_name();
+	const std::string &sn = second->get_name();
 	printf("_nn(%s, %s)\n", fn.c_str(), sn.c_str());
 #endif
 
@@ -95,7 +95,7 @@ bool NNAdjust::adjust_relation(const std::string &relname,
 bool NNAdjust::sense_of_first_inst(const Handle& first_word_sense_h,
                                    const Handle& first_sense_link_h)
 {
-	// printf("first sense %s\n", sense->getName().c_str());
+	// printf("first sense %s\n", sense->get_name().c_str());
 	// Get the handle of the link itself .. 
 	first_sense_link = first_sense_link_h;
 
@@ -127,7 +127,7 @@ bool NNAdjust::sense_of_first_inst(const Handle& first_word_sense_h,
 bool NNAdjust::sense_of_second_inst(const Handle& second_word_sense_h,
                                     const Handle& second_sense_link)
 {
-	// printf("second sense %s!\n", sense->getName().c_str());
+	// printf("second sense %s!\n", sense->get_name().c_str());
 	second_sense_link->foreach_incoming(&NNAdjust::sense_pair, this);
 	return false;
 }
@@ -135,19 +135,19 @@ bool NNAdjust::sense_of_second_inst(const Handle& second_word_sense_h,
 bool NNAdjust::sense_pair(const Handle& pair_link)
 {
 	// If this is not a cosense link, skip it.
-	Type t = pair_link->getType();
+	Type t = pair_link->get_type();
 	if (classserver().isA(t, COSENSE_LINK)) return false;
 
 	// If this link is not linking the first and second sense, skip it.
-	HandleSeq outset = LinkCast(pair_link)->getOutgoingSet();
+	const HandleSeq& outset = pair_link->getOutgoingSet();
 	if ((first_sense_link != outset[0]) && 
 	    (first_sense_link != outset[1])) return false;
 
 	// If we are here, we've got the link that we want. 
 	// Increase its strength.
 	TruthValuePtr tv = pair_link->getTruthValue();
-	float strength = tv->getMean() * (float) strength_adjust;
-	TruthValuePtr stv(SimpleTruthValue::createTV(strength, tv->getConfidence()));
+	double strength = tv->get_mean() * strength_adjust;
+	TruthValuePtr stv(SimpleTruthValue::createTV(strength, tv->get_confidence()));
 
 	pair_link->setTruthValue(stv);
 

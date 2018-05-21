@@ -26,13 +26,14 @@
 #include <opencog/util/Logger.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
 class MicroplanningUTest :  public CxxTest::TestSuite
 {
 private:
+    AtomSpace* _as;
     SchemeEval* _evaluator;
 
 public:
@@ -48,6 +49,29 @@ public:
             std::cerr << e.get_message() << std::endl;
         }
         logger().set_timestamp_flag(false);
+        _as = new AtomSpace();
+        _evaluator = new SchemeEval(_as);
+
+        // need this for loading LG dictionary
+        _evaluator->eval("(setlocale LC_CTYPE \"\")");
+        _evaluator->clear_pending();
+
+
+        std::string rv;
+        rv = _evaluator->eval("(use-modules (opencog))");
+        printf("setup opencog=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp))");
+        printf("setup nlp=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+        printf("setup lg-dict=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog spacetime))");
+        printf("setup spacetime=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+        printf("setup r2l=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp sureal))");
+        printf("setup sureal=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp microplanning))");
+        printf("setup micropanning=%s", rv.c_str());
     }
 
     ~MicroplanningUTest()
@@ -66,33 +90,6 @@ public:
 
 void MicroplanningUTest::setUp(void)
 {
-    server(CogServer::createInstance);
-    _evaluator = new SchemeEval(&cogserver().getAtomSpace());
-
-    // need this for loading LG dictionary
-    _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->clear_pending();
-
-    _evaluator->eval("(use-modules (opencog))");
-
-    _evaluator->eval("(add-to-load-path \"/usr/local/share\")");
-/*
- These extra paths cause the unit tests to fail ... I don't understand why.
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
-*/
-    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-         "\"/usr/local/lib/opencog:"
-         PROJECT_BINARY_DIR "/opencog/nlp/sureal:"
-         PROJECT_BINARY_DIR "/opencog/nlp/lg-dict"
-         "\")");
-
-    _evaluator->eval("(use-modules (opencog nlp))");
-    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-    _evaluator->eval("(use-modules (opencog nlp microplanning))");
-    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-    _evaluator->eval("(use-modules (opencog nlp sureal))");
-
     _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
                  "/tests/nlp/microplanning/r2l-atomspace.scm\")");
     _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
@@ -103,8 +100,7 @@ void MicroplanningUTest::setUp(void)
 
 void MicroplanningUTest::tearDown(void)
 {
-    delete _evaluator;
-    _evaluator = NULL;
+    _as->clear();
 }
 
 void MicroplanningUTest::test_declarative(void)

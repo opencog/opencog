@@ -144,11 +144,11 @@ void TulipWriter::writeNodeNames()
     myfile << "(property  0 string \"viewLabel\" " << endl;
     myfile << "  (default \"\" \"\" )" << endl;
     for (Handle h : nodeHandles) {
-        myfile << "  (node " << h << " \"" << h->getName() << "\")" << endl;
+        myfile << "  (node " << h << " \"" << h->get_name() << "\")" << endl;
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {
-        myfile << "(node " << h << " \"" << classserver().getTypeName(h->getType()) 
+        myfile << "(node " << h << " \"" << classserver().getTypeName(h->get_type()) 
             << "\" )" << endl;
     }
     myfile << ")" << endl;
@@ -178,7 +178,7 @@ void TulipWriter::writeTruthValue()
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
     for (const Handle& h : handles) {
         myfile << "  (node " << h << " \"" <<
-          h->getTruthValue()->getMean() << "\")" << endl;
+          h->getTruthValue()->get_mean() << "\")" << endl;
     }
     myfile << ")" << endl;
 
@@ -195,7 +195,7 @@ void TulipWriter::writeTruthValue()
         HandleSeq out = h->getOutgoingSet();
         for (const Handle& d : out) {
             myfile << "(edge " << h << d << " \"" << 1.0 /
-              (h->getTruthValue()->getMean()+0.0000001) << "\")" << endl;
+              (h->getTruthValue()->get_mean()+0.0000001) << "\")" << endl;
         }
     }
     myfile << ")" << endl;
@@ -205,7 +205,7 @@ void TulipWriter::writeTruthValue()
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
     for (const Handle& h : handles) {
         myfile << "  (node " << h << " \"" <<
-           h->getTruthValue()->getConfidence() << "\")" << endl;
+           h->getTruthValue()->get_confidence() << "\")" << endl;
     }
     myfile << ")" << endl;
 }

@@ -1,4 +1,4 @@
-; This is file is used for specifying function used for choosing a focus-set
+; This file is used for specifying functions used for choosing a focus-set.
 
 (use-modules (opencog))
 (use-modules (opencog atom-types))

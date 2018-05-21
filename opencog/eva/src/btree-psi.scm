@@ -26,32 +26,28 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog logger))
 (use-modules (opencog query))  ; XXX work-around relex2logic bug
-(load "time-map.scm") ;;; octomap for faces
+(use-modules (opencog eva-model))
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.
 (use-modules (opencog cogserver))
-(start-cogserver "../scripts/opencog.conf")
+(start-cogserver)
 
-; Load the behavior trees.
-(use-modules (opencog eva-behavior))
+; Load the behavior trees associated psi-rules.
 (use-modules (opencog openpsi))
+(use-modules (opencog eva-behavior))
 
+; Load the sophia's personality configuration.
+(load-sophia-config)
+
+; Module from ros-behavior-scripting
 (use-modules (opencog movement))
 (start-ros-movement-node)
 
-; Load the Eva personality configuration.
-; (display %load-path)
-(add-to-load-path "../src")
-; (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
-(load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
-
-;; Load the actual psi rules.
-(load-from-path "psi-behavior.scm")
-
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
-(define (run) (psi-run))
+(define (run) (psi-run-per-demand))
 (define (halt) (psi-halt))
 
 ; ---------------------------------------------------------
@@ -81,9 +77,40 @@
    (stv 1 1)
 )
 
-; ---------------------------------------------------------
-; Run the hacky garbage collection loop.
-(run-behavior-tree-gc)
+; Configure the logger
+(define (configure-loggers LOG-LEVEL)
+"
+  configure-loggers LOG-LEVEL
+
+  Set the loggers to the same level and separate their logs between runs.
+  For each call of this function, the logs are created in
+  /tmp/<current-filename>/<module-name>-Year-Month-Day-Hour-Minute-Second.log
+"
+  (define log-dir (format #f "/tmp/~a" (basename (current-filename))))
+  (define z-time (strftime "%F-%H-%M-%S" (localtime (current-time))))
+  (define (configure-logger logger name)
+    (cog-logger-set-level! logger LOG-LEVEL)
+    (cog-logger-set-stdout! logger #f)
+    (cog-logger-set-filename! logger
+      (format #f "~a/~a-~a.log" log-dir name z-time)))
+
+  (if (not (file-exists? log-dir)) (mkdir log-dir))
+
+  ; Configure openpsi logger
+  (configure-logger (psi-get-logger) "openpsi")
+
+  ; Configure eva-model logger
+  (configure-logger (eva-get-logger) "eva")
+
+  ; Configure opencog default logger
+  (let ((oc-log-file (format #f "~a/opencog-~a.log" log-dir z-time)))
+    (cog-logger-set-level! LOG-LEVEL)
+    (cog-logger-set-filename! oc-log-file)
+    (cog-logger-set-stdout! #f)
+  )
+)
+
+(configure-loggers "debug")
 
 ; Silence the output.
 *unspecified*

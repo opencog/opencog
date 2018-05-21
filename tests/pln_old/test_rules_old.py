@@ -50,7 +50,7 @@ class RulesTest(TestCase):
         self._inh_animal_breathe()
 
         result = self.chainer._apply_forward(rule)
-        print result
+        print(result)
 
     def test_InversionRule_backward(self):
         rule = InversionRule(self.chainer, types.InheritanceLink)
@@ -60,7 +60,7 @@ class RulesTest(TestCase):
         self.inh_breathe_animal.av = {'sti':1}
 
         result = self.chainer._apply_backward(rule)
-        print result
+        print(result)
 
     def disabled_test_rules_generically(self):
         '''See what happens if you give a rule the generic inputs. This makes sure that the rule and formula don't have any basic code errors, but doesn't check that they do the right thing.'''

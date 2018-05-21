@@ -1,0 +1,196 @@
+# set term png small color
+#set term png small
+#set out 'ranked.png'
+
+# set data style linespoints
+# set data style points
+
+#################################################
+# Used to generate the word ranking graphs.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-word-obs.eps'
+set xrange [1:200000]
+set yrange [1:4000000]
+set logscale x
+set logscale y
+set format x "10^{%L}"
+set format y "10^{%L}"
+set title "Observed counts of words"
+set xlabel "Rank"
+set ylabel "Number of observations"
+plot "ranked-word-obs.dat" using 1:2 with lines linewidth 5 title "", \
+     (3170000/x ** 1.1) with lines linewidth 5 title "rank^{-1.1}"
+
+
+#################################################
+# Used to generate the disjunct ranking graphs.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-dj-obs.eps'
+set xrange [1:3100000]
+set yrange [1:140000]
+set logscale x
+set logscale y
+set format x "10^{%L}"
+set format y "10^{%L}"
+set title "Observed counts of disjuncts"
+set xlabel "Rank"
+set ylabel "Number of observations"
+plot "ranked-dj-obs.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-dj-obs.dat" using 1:(540000/$1 ** 0.9) with lines linewidth 5 title "rank^{-0.9}", \
+     "ranked-dj-obs.dat" using 1:(100000/$1 ** 0.8) with lines linewidth 5 title "rank^{-0.8}"
+
+#################################################
+# Used to generate the connector-set ranking graph.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-cset-obs.eps'
+set xrange [1:2000000]
+set yrange [1:100000]
+set logscale x
+set logscale y
+set format y "10^{%L}"
+set title "Observed count of connector sets"
+set xlabel "Rank"
+set ylabel "Number of observations"
+plot "ranked-cset-obs.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-cset-obs.dat" using 1:(121000/$1 ** 0.8) with lines linewidth 5 title "rank^{-0.8}"
+
+#################################################
+# Used to generate the support ranking graphs.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-support.eps'
+set xrange [1:100000]
+set yrange [1:500000]
+set logscale x
+set logscale y
+set format x "10^{%L}"
+set format y "10^{%L}"
+set title "Ranking by support of the disjunct set"
+set xlabel "Rank"
+set ylabel "Size of the set"
+plot "ranked-support.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-support.dat" using 1:(540000/$1 ** 0.9) with lines linewidth 5 title "rank^{-0.9}"
+
+#################################################
+# Used to generate the averge connector-set ranking graphs.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-avg.eps'
+set logscale x
+set logscale y
+set yrange [1:200]
+set xrange [1:20000]
+set title "Rank by average observations"
+set xlabel "Rank"
+set ylabel "Average observations per disjunct"
+plot "ranked-avg-400.dat" using 1:2 with lines linewidth 5 title "400+ obs", \
+     "ranked-avg-100.dat" using 1:2 with lines linewidth 5 title "100+ obs", \
+     "ranked-avg-20.dat" using 1:2 with lines linewidth 5 title "20+ obs", \
+     "ranked-avg-20.dat" using 1:(100/$1 ** 0.5) with lines linewidth 5 title "rank^{-0.5}", \
+     "ranked-avg-20.dat" using 1:(8/$1 ** 0.25) with lines linewidth 5 title "rank^{-0.25}"
+
+#################################################
+# Used to generate the euclidean-length ranking graph.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-lengths.eps'
+set xrange [1:100000]
+set yrange [1:200000]
+set logscale x
+set logscale y
+set format x "10^{%L}"
+set format y "10^{%L}"
+set title "Ranked RMS size of set of disjuncts"
+set xlabel "Rank"
+set ylabel "RMS size of disjunct set"
+plot "ranked-lengths.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-lengths.dat" using 1:(120000/$1 ** 1) with lines linewidth 5 title "rank^{-1.00}"
+
+#################################################
+# Used to generate the word-mi ranking graphs.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-word-mi-hi-p.eps'
+set logscale x
+set title "Marginal mutual information of words"
+set xlabel "Rank"
+set ylabel "Marginal MI of word"
+plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 5 title ""
+
+#################################################
+# Used to generate the word-entropy ranking graphs.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-word-ent.eps'
+set logscale x
+set format x "10^{%L}"
+set title "Ranking by fractional word entropy"
+set xlabel "Rank"
+set ylabel "Fractional Word Entropy"
+plot "ranked-word-ent.dat" using 1:2 with lines linewidth 5 title ""
+
+#################################################
+# Used to generate the vertex-degree ranking graph.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-avg-connectors.eps'
+set yrange [1:150]
+set logscale x
+set logscale y
+set format x "10^{%L}"
+set format y "10^{%L}"
+set title "Ranking by avg num connectors"
+set xlabel "Rank"
+set ylabel "Avg num connectors"
+plot "ranked-avg-connectors.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-avg-connectors.dat" using 1:(8.5/$1 ** 0.14) with lines linewidth 5 title "rank^{-0.14}"
+
+#################################################
+# Used to generate the similarity ranking graph.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-sims.eps'
+rop=317206
+# c(x)=1-(log(x)**3)/1070
+c(x)=1-(log(x)**2)/160
+e(x)=exp(c(x)-1)
+l(x)=1+log(1-(log(x)**2)/180)
+t(x)=-((log(x/rop))**3)/115
+f(x)=exp(t(x))-1
+
+# set key left bottom
+set key at 25000,0.25
+set yrange [0:1]
+set logscale x
+set format x "10^{%L}"
+set title "Ranking by cosine similarity"
+set xlabel "Rank"
+set ylabel "Cosine similarity"
+plot "ranked-sims.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-sims.dat" using 1:(c($1)) with lines linewidth 5 title "1-log(rank)^2/160", \
+     "ranked-sims.dat" using 1:(t($1)) with lines linewidth 5 title "-(log(rank/max))^3/115"
+#     "ranked-sims.dat" using 1:(f($1)*e($1)/(f($1)+e($1))) with lines
+#     linewidth 5 title "para"
+
+
+#################################################
+# Used to generate the similarity ranking graph.
+#
+set term postscript eps enhanced color 28
+set out 'ranked-graded-sims.eps'
+
+set yrange [0:1]
+set logscale x
+set format x "10^{%L}"
+set title "Ranking by cosine similarity"
+set xlabel "Rank"
+set ylabel "Cosine similarity"
+plot "ranked-sims.dat" using 1:2 with lines linewidth 5 title "L>128", \
+     "ranked-sims-256.dat" using 1:2 with lines linewidth 5 title "L>256", \
+     "ranked-sims-512.dat" using 1:2 with lines linewidth 5 title "L>512", \
+     "ranked-sims-1024.dat" using 1:2 with lines linewidth 5 title "L>1024", \
+     "ranked-sims-2048.dat" using 1:2 with lines linewidth 5 title "L>2048"
+

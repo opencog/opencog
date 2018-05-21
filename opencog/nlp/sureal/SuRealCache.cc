@@ -53,11 +53,11 @@ void SuRealCache::add_match(HandleCacheMap &map, const Handle &h1, const Handle 
 
     SuRealCache::HandleCacheMap::iterator it1 = map.find(h1);
     if (it1 == map.end()) {
-        HandleMap new_map;
-        new_map.insert(HandleMap::value_type(h2, value));
+        HandleBoolMap new_map;
+        new_map.insert(HandleBoolMap::value_type(h2, value));
         map.insert(HandleCacheMap::value_type(h1, new_map));
     } else {
-        (*it1).second.insert(HandleMap::value_type(h2, value));
+        (*it1).second.insert(HandleBoolMap::value_type(h2, value));
     }
 }
 
@@ -68,7 +68,7 @@ int SuRealCache::match(HandleCacheMap &map, const Handle &h1, const Handle &h2)
 
     SuRealCache::HandleCacheMap::iterator it1 = map.find(h1);
     if (it1 != map.end()) {
-        HandleMap::iterator it2 = (*it1).second.find(h2);
+        HandleBoolMap::iterator it2 = (*it1).second.find(h2);
         if (it2 != (*it1).second.end()) {
             answer = ((*it2).second ? 1 : 0);
         }
@@ -77,9 +77,8 @@ int SuRealCache::match(HandleCacheMap &map, const Handle &h1, const Handle &h2)
     return answer;
 }
 
-void SuRealCache::add_grounding_match(const std::map<Handle, Handle> &m1, bool value) 
+void SuRealCache::add_grounding_match(const HandleMap &m1, bool value) 
 {
-
     std::string key1 = build_map_hash_key(m1);
     SuRealCache::StringMap::iterator it1 = m_partial_grounding_cache.find(key1);
     if (it1 == m_partial_grounding_cache.end()) {
@@ -87,7 +86,7 @@ void SuRealCache::add_grounding_match(const std::map<Handle, Handle> &m1, bool v
     }
 }
 
-void SuRealCache::add_grounding_match(const std::map<Handle, Handle> &m1, const std::map<Handle, Handle> &m2, bool value) 
+void SuRealCache::add_grounding_match(const HandleMap &m1, const HandleMap &m2, bool value) 
 {
 
     std::string key1 = build_map_hash_key(m1);
@@ -102,7 +101,7 @@ void SuRealCache::add_grounding_match(const std::map<Handle, Handle> &m1, const 
     }
 }
 
-int SuRealCache::grounding_match(const std::map<Handle, Handle> &m1, const std::map<Handle, Handle> &m2) 
+int SuRealCache::grounding_match(const HandleMap &m1, const HandleMap &m2) 
 {
 
     int answer = -1;
@@ -197,11 +196,11 @@ std::string SuRealCache::handle_to_hash_key(const Handle &h)
 {
 
     std::string answer = "";
-    Type type = h->getType();
+    Type type = h->get_type();
     if (classserver().isNode(type)) {
         answer += classserver().getTypeName(type);
         answer += ":";
-        answer += h->getName();
+        answer += h->get_name();
     } else {
         answer += classserver().getTypeName(type);
         answer += "(";
@@ -215,14 +214,14 @@ std::string SuRealCache::handle_to_hash_key(const Handle &h)
     return answer;
 }
 
-std::string SuRealCache::build_map_hash_key(const std::map<Handle, Handle> &m) 
+std::string SuRealCache::build_map_hash_key(const HandleMap &m) 
 {
 
     std::string answer = "";
     for (auto it = m.begin(); it != m.end(); it++) {
-        answer += handle_to_hash_key((*it).first);
+        answer += handle_to_hash_key(it->first);
         answer += "-";
-        answer += handle_to_hash_key((*it).second);
+        answer += handle_to_hash_key(it->second);
         answer += "#";
     }
 

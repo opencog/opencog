@@ -163,7 +163,7 @@
          (say-pattern (Evaluation (Predicate "say") (List P V)))
          (query-pattern (And say-pattern (InheritanceLink V S)))
          (query (Get vardecl query-pattern))
-         (results (cog-satisfying-set query)))
+         (results (cog-execute! query)))
     (length (cog-outgoing-set results))))
 
 (define (sentiment-sentence-to-person-l2s-formula Person Name)
@@ -350,9 +350,12 @@
     (ure-set-fuzzy-bool-parameter rb "URE:attention-allocation" 0)
 
     ;; Add rules to rulebases.
-    (ure-define-add-rule rb "rule1" sentiment-sentence-to-person-l2s-rule .8)
-    (ure-define-add-rule rb "rule2" unary-predicate-speech-act-l2s-rule .8)
-    (ure-define-add-rule rb "rule3" implication-direct-evaluation-rule .8)
+    (ure-define-add-rule rb "rule1" sentiment-sentence-to-person-l2s-rule
+      (stv 1 1))
+    (ure-define-add-rule rb "rule2" unary-predicate-speech-act-l2s-rule
+      (stv 1 1))
+    (ure-define-add-rule rb "rule3" implication-direct-evaluation-rule
+      (stv 1 1))
 
     ; Return the rule-base
     rb

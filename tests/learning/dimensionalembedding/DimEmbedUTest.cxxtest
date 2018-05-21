@@ -30,7 +30,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 
@@ -163,7 +162,6 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
-        AttentionBank* bank = &attentionbank(atomSpace);
         atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
         
@@ -202,7 +200,7 @@ public:
         TS_ASSERT(dimEmbed.isEmbedded(SIMILARITY_LINK));
         // Every node is a pivot, so every node should be nondisposable
         for (int i=0;i<7;i++) {
-            TS_ASSERT(bank->get_vlti(handles[i])
+            TS_ASSERT(get_vlti(handles[i])
                      != AttentionValue::DISPOSABLE);
         }
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
@@ -316,7 +314,7 @@ public:
         //We cleared the embedding, so the VLTI of each pivot should be back
         //to normal
         for (int i=0; i<7; i++) {
-            TS_ASSERT(bank->get_vlti(handles[i])
+            TS_ASSERT(get_vlti(handles[i])
                       == AttentionValue::DISPOSABLE);
         }
     }

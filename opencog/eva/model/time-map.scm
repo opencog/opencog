@@ -14,8 +14,6 @@
 ; Copyright 2016 Hanson Robotics
 ;
 (use-modules (srfi srfi-1) )
-(use-modules (opencog) (opencog atom-types)
-	(opencog eva-model) (opencog eva-behavior))
 
 (use-modules (opencog pointmem)); needed for maps
 
@@ -130,13 +128,13 @@
 	(cog-execute!
 	(PutLink
 		(AtTimeLink
-			(TimeNode (number->string (current-time)))
 			(EvaluationLink
 				(PredicateNode "say_face")
 					(ListLink
 						(VariableNode "$fid")
 						(SentenceNode sent)))
-				(Concept "sound-perception"))
+            (TimeNode (number->string (current-time)))
+            (Concept "sound-perception"))
 		(Get (State last-speaker (Variable "$fid")))
 	))
 )

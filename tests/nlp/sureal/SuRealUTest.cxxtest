@@ -26,13 +26,15 @@
 #include <opencog/util/Logger.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/nlp/sureal/SuRealCache.h>
 
 using namespace opencog;
 
 class SuRealUTest :  public CxxTest::TestSuite
 {
 private:
+    AtomSpace* _as;
     SchemeEval* _evaluator;
 
 public:
@@ -47,6 +49,29 @@ public:
         {
             std::cerr << e.get_message() << std::endl;
         }
+
+        // XXX FIXME This unit test fails, if multiple atomspaces
+        // are used, instead of re-using the same atomspace (and
+        // clearing it.) Something is majorly wrong with this, but
+        // I can't figure it out...
+        _as = new AtomSpace();
+
+        _evaluator = new SchemeEval(_as);
+
+        // need this for loading LG dictionary
+        _evaluator->eval("(setlocale LC_CTYPE \"\")");
+        _evaluator->clear_pending();
+
+        _evaluator->eval("(use-modules (opencog))");
+        _evaluator->eval("(use-modules (opencog nlp))");
+        _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+        // MUST load spacetime types, before loading relex2logic,
+        // else the libspacetime-types.so won't be found.
+        // _evaluator->eval("(use-modules (opencog spacetime))");
+
+        _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+        _evaluator->eval("(use-modules (opencog nlp sureal))");
+        _evaluator->clear_pending();
     }
 
     ~SuRealUTest()
@@ -70,37 +95,20 @@ public:
 
 void SuRealUTest::setUp(void)
 {
-    server(CogServer::createInstance);
-    cogserver().getAtomSpace().clear();
-
-    _evaluator = new SchemeEval(&cogserver().getAtomSpace());
-
-    // need this for loading LG dictionary
-    _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->clear_pending();
-
-    _evaluator->eval("(use-modules (opencog))");
-/*
-These cause the unit test to fail. I don't think they are needed.
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
-*/
-
-    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-		"\"/usr/local/lib/opencog"
-		"\")");
-
-    _evaluator->eval("(use-modules (opencog nlp))");
-    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-    _evaluator->eval("(use-modules (opencog nlp sureal))");
-    _evaluator->clear_pending();
+    // XXX Do not create an atomspace here, see comments above.
+    //_as = new AtomSpace();
 }
 
 void SuRealUTest::tearDown(void)
 {
-    delete _evaluator;
-    _evaluator = NULL;
+    // delete _evaluator;
+    // _evaluator = NULL;
+
+    // SuReal keeps a cache of atoms!  Aiiieee This needs fixing!!!
+    nlp::SuRealCache::instance().reset();
+    _as->clear();
+    // XXX Deleting the _as causes weird malloc pool corruption!
+    // delete _as;
 }
 
 void SuRealUTest::test_basic(void)
@@ -118,8 +126,9 @@ void SuRealUTest::test_basic(void)
     _evaluator->eval_h(R"( (WordNode "eats") )");
 
     // test sureal with short sentence
-    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
+    std::string rv = _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
     bool eval_err = _evaluator->eval_error();
+    if (eval_err) printf("got %s\n", rv.c_str());
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run sureal!", !eval_err);
 
@@ -152,7 +161,10 @@ void SuRealUTest::test_complex(void)
                          (ListLink (ConceptNode "cat") (ConceptNode "dog")))
                         (InheritanceLink (ConceptNode "cat") (ConceptNode "green")))))
                      )");
+    std::string sent = _evaluator->eval(R"( s-result  )");
+    printf("got %s\n", sent.c_str());
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "the" "green" "cat" "loves" "the" "dog" "."))) )");
+    printf("equality?  %s\n", result.c_str());
     TSM_ASSERT("Failed to sureal complex sentence!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);

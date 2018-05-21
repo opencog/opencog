@@ -33,13 +33,27 @@
 using namespace opencog;
 
 // Some random RFC 854 characters
-#define IAC 0xff  // Telnet Interpret As Command
-#define IP 0xf4   // Telnet IP Interrupt Process
-#define AO 0xf5   // Telnet AO Abort Output
-#define EL 0xf8   // Telnet EL Erase Line
+#define IAC  0xff // Telnet Interpret As Command
+#define TEOF 0xec // Telnet EOF
+#define SUSP 0xed // Telnet suspend
+#define ABRT 0xee // Telnet abort
+#define NOP  0xf1 // Telnet NOP no-op
+#define BRK  0xf3 // Telnet break
+#define IP   0xf4 // Telnet IP Interrupt Process
+#define AO   0xf5 // Telnet AO Abort Output
+#define AYT  0xf6 // Telnet AYT Are You There
+#define EC   0xf7 // Telnet EC Erase Character
+#define EL   0xf8 // Telnet EL Erase Line
+#define GA   0xf9 // Telnet GA Go ahead
 #define WILL 0xfb // Telnet WILL
-#define DO 0xfd   // Telnet DO
-#define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
+#define WONT 0xfc // Telnet WONT
+#define DO   0xfd // Telnet DO
+#define DONT 0xfe // Telnet DONT
+
+#define RFC_ECHO          1  // Telnet RFC 857 ECHO option
+#define SUPPRESS_GO_AHEAD 3  // Telnet RFC 858 supporess go ahead
+#define TIMING_MARK       6  // Telnet RFC 860 timing mark
+#define LINEMODE          34 // Telnet RFC 1116 linemode
 
 // Some random ASCII control characters (unix semantics)
 #define EOT 0x4   // end    or ^D at keyboard.
@@ -52,12 +66,8 @@ GenericShell::GenericShell(void)
 	show_output = true;
 	show_prompt = true;
 	normal_prompt = "> ";
+	abort_prompt = normal_prompt;
 	pending_prompt = "... ";
-	abort_prompt = "asdf"; // simply reserve 4 chars
-	abort_prompt[0] = IAC;
-	abort_prompt[1] = WILL;
-	abort_prompt[2] = TIMING_MARK;
-	abort_prompt[3] = '\n';
 
 	socket = nullptr;
 	evalthr = nullptr;
@@ -132,7 +142,10 @@ void GenericShell::set_socket(ConsoleSocket *s)
 /* ============================================================== */
 
 static std::mutex _stdout_redirect_mutex;
+
+#ifdef PERFORM_STDOUT_DUPLICATION
 static GenericShell* _redirector = nullptr;
+#endif
 
 // Implementation requirements:
 //
@@ -273,6 +286,28 @@ void GenericShell::eval(const std::string &expr)
 	}
 }
 
+/**
+ * Handle user-generated interrupt (ctrl-C, etc)
+ */
+void GenericShell::user_interrupt()
+{
+	// Discard all pending, unevaluated junk in the queue.
+	// Failure to do so will typically result in confusing
+	// the shell user.
+	while (not evalque.is_empty()) evalque.pop();
+
+	// Work around timing window, where queue was just now emptyied,
+	// but the scheme evaluator has not yet started... and so the
+	// command that is to be interrupted hasn't even to begun to
+	// execute, when we go to interrupt it.
+	usleep(10000);
+
+	_evaluator->interrupt();
+	_evaluator->clear_pending();
+	put_output(abort_prompt);
+	finish_eval();
+}
+
 /* ============================================================== */
 /**
  * Handle special characters, evaluate the expression
@@ -295,7 +330,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	// characters, starting at the end of the input string. If they
 	// are there, then don't process input, and clear out the evaluator.
 	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
-	// doesn't sit there flushing output forever.
+	// doesn't sit there discarding output forever.
 	//
 	// Search for IAC to at most 20 chars from the end of the string.
 	int i = len-2;
@@ -307,28 +342,91 @@ void GenericShell::line_discipline(const std::string &expr)
 		if (IAC == c)
 		{
 			c = expr[i+1];
-			if ((IP == c) || (AO == c))
+			if (IP == c or AO == c or SUSP == c)
 			{
-				logger().debug("[GenericShell] got user-interrupt");
-				// Discard all pending, unevaluated junk in the queue.
-				// Failure to do so will typically result in confusing
-				// the shell user.
-				while (not evalque.is_empty()) evalque.pop();
-
-				// Must write the abort prompt, first, because
-				// telnet will silently ignore any bytes that
-				// come before it.
-				put_output(abort_prompt);
-				_evaluator->interrupt();
-				_evaluator->clear_pending();
-				finish_eval();
+				logger().debug("[GenericShell] got telnet IAC user-interrupt %d", c);
+				// Must send TIMING-MARK first, as otherwise telnet silently
+				// ignores any bytes that come before it.
+				unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+				put_output((const char *) ok);
+				user_interrupt();
 				return;
 			}
 
 			// Erase line -- just ignore this line.
-			if (EL == c)
+			// Also other things we want to ignore, like break and abort.
+			if (EL == c or EC == c or BRK == c or ABRT == c or
+			    AYT == c or GA == c or NOP == c)
 			{
+				logger().debug("[GenericShell] ignoring telnet IAC %d", c);
 				put_output(get_prompt());
+				return;
+			}
+
+			// End-of-file just like ctrl-D
+			if (TEOF == c)
+			{
+				logger().debug("[GenericShell] got end-of-file; exiting shell");
+				self_destruct = true;
+				evalque.cancel();
+				if (show_prompt)
+					put_output("Exiting the shell\n");
+				return;
+			}
+
+			if (DO == c)
+			{
+				c = expr[i+2];
+				// Some telnets, including on Debian Stable, send us
+				// IAC DO TIMING-MARK instead of a IAC IP or IAC AO
+				// when the user hits ctrl-C.  This seems broken to me,
+				// but whatever. Pretend its a normal interrupt.
+				if (TIMING_MARK == c)
+				{
+					logger().debug("[GenericShell] timing mark (user-interrupt?)");
+					// Must send TIMING-MARK first, as otherwise telnet silently
+					// ignores any bytes that come before it.
+					unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+					put_output((const char *) ok);
+					user_interrupt();
+					return;
+				}
+
+				// If telnet ever tries to go into character mode,
+				// it will send us SUPPRESS-GO-AHEAD and ECHO. Try to
+				// stop that, we don't want to effing fiddle with that.
+				if (SUPPRESS_GO_AHEAD == c)
+				{
+					unsigned char ok[] = {IAC, WILL, SUPPRESS_GO_AHEAD, 0};
+					put_output((const char *) ok);
+					return;
+				}
+				if (RFC_ECHO == c)
+				{
+					unsigned char ok[] = {IAC, WONT, RFC_ECHO, '\n', 0};
+					put_output((const char *) ok);
+					return;
+				}
+				logger().debug("[GenericShell] IAC WONT %d", c);
+				unsigned char ok[] = {IAC, WONT, c, '\n', 0};
+				put_output((const char *) ok);
+				return;
+			}
+
+			if (WILL == c)
+			{
+				// Refuse to perform sub-negotation when
+				// IAC WILL LINEMODE is sent by the telnet client.
+				c = expr[i+2];
+				if (LINEMODE == c)
+				{
+					unsigned char ok[] = {IAC, DONT, LINEMODE, '\n', 0};
+					put_output((const char *) ok);
+					return;
+				}
+
+				// Ignore anything else.
+				logger().debug("[GenericShell] ignoring telnet IAC WILL %d", c);
 				return;
 			}
 		}
@@ -341,15 +439,8 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
-		// Discard all pending, unevaluated junk in the queue.
-		while (not evalque.is_empty()) evalque.pop();
-
-		_evaluator->interrupt();
-		_evaluator->clear_pending();
-
-		put_output("\n");
-		finish_eval();
-		put_output(normal_prompt);
+		logger().debug("[GenericShell] got user-interrupt %d", c);
+		user_interrupt();
 		return;
 	}
 
@@ -427,12 +518,13 @@ void GenericShell::eval_loop(void)
 	auto poll_wrapper = [&](void) { poll_loop(); };
 	pollthr = new std::thread(poll_wrapper);
 
-	// Derived-class initializer. (The scheme shell uses this to set the
-	// atomspace).
+	// Derived-class initializer. (The scheme shell uses this to set
+	// the atomspace).
 	thread_init();
 
+	// Go through the body of the loop at least once.
 	std::string in;
-	while (not self_destruct)
+	do
 	{
 		try
 		{
@@ -441,7 +533,7 @@ void GenericShell::eval_loop(void)
 			// weird crashes in the SchemeEval class.
 			while_not_done();
 
-			// Note that this pop will wait until the queue
+			// Note that this pop will stall until the queue
 			// becomes non-empty.
 			evalque.pop(in);
 			logger().debug("[GenericShell] start eval of '%s'", in.c_str());
@@ -453,7 +545,7 @@ void GenericShell::eval_loop(void)
 		{
 			break;
 		}
-	}
+	} while (not self_destruct);
 
 	// If we are here, then we can safely assume that the socket has
 	// been closed, that the dtor for this instance has been called.
@@ -474,11 +566,11 @@ void GenericShell::eval_loop(void)
 	{
 		// As mentioned before, do not begin the next queued expr until
 		// the last has finished. Failure to do this results in crashes.
-		poll_output();
+		poll_and_send();
 		while (not _eval_done)
 		{
 			usleep(10000);
-			poll_output();
+			poll_and_send();
 		}
 
 		try
@@ -497,10 +589,25 @@ void GenericShell::eval_loop(void)
 		_evaluator->eval_expr(in);
 	}
 
+	// Continue polling until the evaluation really is done.
+	poll_and_send();
+	while (not _eval_done)
+	{
+		usleep(10000);
+		poll_and_send();
+	}
+
 	// After we exit, the _evaluator will be reclaimed by the
 	// thread dtor running in the evaluator pool.
 	_evaluator = nullptr;
 	logger().debug("[GenericShell] exit eval loop");
+}
+
+void GenericShell::poll_and_send(void)
+{
+	std::string retstr(poll_output());
+	if (0 < retstr.size())
+		socket->Send(retstr);
 }
 
 void GenericShell::poll_loop(void)
@@ -510,9 +617,7 @@ void GenericShell::poll_loop(void)
 	// Poll for output from the evaluator, and send back results.
 	while (not self_destruct)
 	{
-		std::string retstr(poll_output());
-		if (0 < retstr.size())
-			socket->Send(retstr);
+		poll_and_send();
 
 		// Continue polling, about 100 times per second, even if
 		// evaluation of the the previous expr is completed. It
@@ -523,19 +628,18 @@ void GenericShell::poll_loop(void)
 		if (_eval_done) usleep(10000);
 	}
 
-	// It's also possible that it reaches the dtor (turning self_destruct == true)
-	// shortly after an evaluation has just finished. It may then exit the loop
-	// above without polling the output, eventually causing the evalthr to stay
-	// in while_not_done() forever. So let's do it one more time here
-	std::string retstr(poll_output());
-	if (0 < retstr.size())
-		socket->Send(retstr);
-
-	while (not _eval_done)
+	// It's also possible that another thread reaches the dtor
+	// (setting self_destruct == true) shortly after an evaluation
+	// has just finished. It may then exit the loop above without
+	// polling the output, eventually causing the evalthr to stay
+	// in while_not_done() forever. So let's poll again, one more
+	// time, here.
+	do
 	{
-		poll_output();
 		usleep(10000);
+		poll_and_send();
 	}
+	while (not _eval_done);
 }
 
 void GenericShell::thread_init(void)

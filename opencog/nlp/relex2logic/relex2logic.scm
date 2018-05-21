@@ -3,7 +3,11 @@
 
 ; (add-to-load-path "/usr/local/share/opencog/scm")
 
-(use-modules (opencog) (opencog atom-types) (opencog nlp))
+(use-modules (srfi srfi-1))
+(use-modules (opencog))
+(use-modules (opencog spacetime))
+(use-modules (opencog nlp))
+(use-modules (opencog rule-engine))
 
 (load "relex2logic/rule-utils.scm")
 (load "relex2logic/r2l-utilities.scm")
@@ -91,7 +95,8 @@
     (map interpret (sentence-get-parses SENT))
 )
 ; -----------------------------------------------------------------------
-; This loads all the rules into the cogserver shell.
+
+; This loads all the rules into the atomspace
 (define-public (load-r2l-rulebase)
 
 	; "." in case the cogserver is started from in-source build directory.

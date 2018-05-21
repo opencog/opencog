@@ -1,7 +1,7 @@
 ;
 ; batch-word-pair.scm
 ;
-; Batch-compute the mutual information of pairs of nautral-language words.
+; Batch-compute the mutual information of pairs of natural-language words.
 ;
 ; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
@@ -79,7 +79,7 @@
 
   Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
   log_2 P(*,y) will be placed on the following, which is returned
-  by the 'left-wildcard methd:
+  by the 'left-wildcard method:
 
     EvaluationLink
        LinkGrammarRelationshipNode \"ANY\"
@@ -122,7 +122,7 @@
 			(EvaluationLink any-pair-pred PAIR))
 
 		; Return the raw observational count on PAIR. If the counter for
-		; PAIR does not exist (was not oberved), then return 0.
+		; PAIR does not exist (was not observed), then return 0.
 		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
 			(if (null? pr) 0 (get-count pr)))
@@ -168,6 +168,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Link Grammar ANY link Word Pairs"))
+					((id)   (lambda () "ANY"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -223,7 +224,7 @@
 			(EvaluationLink pair-pred PAIR))
 
 		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
+		; If the PAIR does not exist (was not observed) return 0.
 		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
 			(if (null? pr) 0 (get-count pr)))
@@ -238,7 +239,8 @@
 			(make-pair (ListLink any-left any-right)))
 
 		; get-all-pairs - return a list holding all of the observed
-		; word-pairs.  Caution: this can be tens of millions long!
+		; word-pairs.  Caution: this can be tens of millions long, and
+		; take many hours to run!
 		(define (do-get-all-pairs)
 			; The list of pairs is mostly just the incoming set of the
 			; ANY node. However, this does include some junk, sooo ...
@@ -266,6 +268,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Sentence Clique Word Pairs"))
+					((id)   (lambda () "cliq"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -338,7 +341,7 @@
 			(EvaluationLink pair-max PAIR))
 
 		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
+		; If the PAIR does not exist (was not observed) return 0.
 		; Return a list of atoms that hold the count.
 		(define (get-pair-count PAIR)
 			(fold
@@ -386,6 +389,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Sentence Clique Distance-Limited Word Pairs"))
+					((id)   (lambda () "cldist"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -408,7 +412,7 @@
 (define-public (verify-clique-pair-sums)
 "
   This checks consistency of the the clique-pair total count, with
-  the subcounts of each pair, accodring to the distance between
+  the subcounts of each pair, according to the distance between
   the words. The sum of the subtotals should equal the total.
   It should not throw.
 
@@ -467,9 +471,10 @@
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once (lambda() (LLOBJ 'fetch-pairs)))
-	(display "Finished loading any-word-pairs\n")
+	(display "Finished loading sparse matrix pairs\n")
 
 	(batch-all-pair-mi LLOBJ)
+	(print-matrix-summary-report LLOBJ)
 )
 
 (define-public (batch-any-pairs)
@@ -499,7 +504,7 @@
 ; AND typecodes.typename='WordNode';
 ;
 ; If it all looks good, then:
-; (batch-all-pair-mi (make-any-link-api))
+; (batch-pairs (make-any-link-api))
 ;
 ; (define wtfl  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
 ;   (ListLink (AnyNode "left-word") (WordNode "famille"))))

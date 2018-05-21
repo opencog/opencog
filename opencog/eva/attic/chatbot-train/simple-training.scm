@@ -108,8 +108,8 @@
             (cog-new-link 'ListLink (cog-outgoing-set listified-string))
 
             ; Now unify the rule and listified string in the temp atomspace
-            (set! bind-results (cog-bind temp-rule))
-            ;(display "cog-bind temp-rule: ")(display bind-results)(newline)
+            (set! bind-results (cog-execute! temp-rule))
+            ;(display "cog-execute! temp-rule: ")(display bind-results)(newline)
 
             ; Now switch back to the orig atomspace and evaluate the
             ; behavior rule conssequence.
@@ -128,7 +128,7 @@
         (set! result #f)
     )
     ; Remove the temp needed listified string
-    (cog-delete listified-string)
+    (cog-extract listified-string)
 	result
 )
 

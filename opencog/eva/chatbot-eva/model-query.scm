@@ -90,7 +90,7 @@
 	)
 )
 
-(define (prt-curr-sent) (cog-bind prt-sent))
+(define (prt-curr-sent) (cog-execute! prt-sent))
 
 ;--------------------------------------------------------------------
 ; XXX hack
@@ -200,8 +200,8 @@
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
-	; (cog-bind where-look-rule)
-	(cog-bind what-doing-rule)
+	; (cog-execute! where-look-rule)
+	(cog-execute! what-doing-rule)
 
 (format #t  "Replies to questions:\n~a\n" (get-grounded-replies))
 
@@ -216,7 +216,7 @@
 		)
 
 		; Free up anything attached to the anchor.
-		(map cog-delete-recursive (get-grounded-replies))
+		(map cog-extract-recursive (get-grounded-replies))
 
 		reply-words
 	)

@@ -63,7 +63,7 @@ PatternMinerAgent::PatternMinerAgent(CogServer& cs) : Agent(cs, 100)
 //                        "pm_test_corpus.scm"
 //                      );
 
-    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()));
+    this->patternMiner = new PatternMiner(cs.getAtomSpace());
 
     logger().info("[PatternMinerAgent] constructor");
 
@@ -76,15 +76,16 @@ PatternMinerAgent::~PatternMinerAgent()
 
 void PatternMinerAgent::selectSubSetFromCorpus()
 {
-    vector<string> topics;
-   // topics.push_back("Neurology");
-   // topics.push_back("Geology");
-    topics.push_back("Physics");
-    topics.push_back("Politics");
-   // topics.push_back("Music");
-   // topics.push_back("Biology");
-    topics.push_back("Western_philosophy");
-   // topics.push_back("Chemistry");
+    set<string> topics = {
+        // "Neurology",
+        // "Geology",
+        "Physics",
+        "Politics",
+        // "Music",
+        // "Biology",
+        "Western_philosophy",
+        // "Chemistry"
+    };
     this->patternMiner->selectSubsetFromCorpus(topics, 2);
 }
 

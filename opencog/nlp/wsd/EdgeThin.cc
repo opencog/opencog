@@ -77,7 +77,7 @@ bool EdgeThin::prune_word(const Handle& h)
 	foreach_word_sense_of_inst(h, &EdgeThin::count_sense, this);
 
 	Handle wh = get_dict_word_of_word_instance(h);
-	const char *wd = atom_space->getName(wh).c_str();
+	const char *wd = atom_space->get_name(wh).c_str();
 	printf("; post-prune, word = %s has %d senses\n", wd, sense_count);
 	fflush (stdout);
 #endif
@@ -104,7 +104,7 @@ bool EdgeThin::dbg_senses(Handle sense_h, Handle sense_link_h)
 {
 	if (atom_space->getIncoming(sense_link_h).size() > 0)
 	{
-		const char* s = atom_space->getName(sense_h).c_str();
+		const char* s = atom_space->get_name(sense_h).c_str();
 		printf("non-null incoming set for %s\n", s);
 	}
 	sense_count ++;
@@ -118,7 +118,7 @@ bool EdgeThin::dbg_word(Handle word_h)
 
 	if (0 < sense_count)
 	{
-		const std::string &wn = atom_space->getName(word_h);
+		const std::string &wn = atom_space->get_name(word_h);
 		printf ("; EdgeThin::dbg_word %s has %d senses left \n",
 			wn.c_str(), sense_count);
 	}
@@ -157,8 +157,8 @@ void EdgeThin::thin_parse(const Handle& h, int _keep)
  */
 static bool sense_compare(const Handle& ha, const Handle& hb)
 {
-	double sa = ha->getTruthValue()->getCount();
-	double sb = hb->getTruthValue()->getCount();
+	double sa = ha->getTruthValue()->get_count();
+	double sb = hb->getTruthValue()->get_count();
 	if (sa > sb) return true;
 	return false;
 }
@@ -183,13 +183,13 @@ bool EdgeThin::delete_sim(const Handle& h)
 
 	Handle fw = get_word_instance_of_sense_link(first_sense_link);
 	Handle fs = get_word_sense_of_sense_link(first_sense_link);
-	const char *vfw = atom_space.getName(fw).c_str();
-	const char *vfs = atom_space.getName(fs).c_str();
+	const char *vfw = atom_space.get_name(fw).c_str();
+	const char *vfs = atom_space.get_name(fs).c_str();
 
 	Handle sw = get_word_instance_of_sense_link(second_sense_link);
 	Handle ss = get_word_sense_of_sense_link(second_sense_link);
-	const char *vsw = atom_space.getName(sw).c_str();
-	const char *vss = atom_space.getName(ss).c_str();
+	const char *vsw = atom_space.get_name(sw).c_str();
+	const char *vss = atom_space.get_name(ss).c_str();
 
 	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vfw, vsw, vfs, vss); 
 	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vsw, vfw, vss, vfs); 
@@ -214,7 +214,7 @@ bool EdgeThin::thin_word(const Handle& word_h)
 
 #ifdef THIN_DEBUG
 	Handle wh = get_dict_word_of_word_instance(word_h);
-	const std::string &wn = atom_space->getName(wh);
+	const std::string &wn = atom_space->get_name(wh);
 	printf ("; EdgeThin::thin_word %s to %d from %d\n",
 		wn.c_str(), keep, sense_list.size());
 #endif
@@ -240,10 +240,10 @@ bool EdgeThin::thin_word(const Handle& word_h)
 			deleted_links ++;
 		}
 #ifdef THIN_DEBUG
-		double sa = atom_space->getTV(sense_h).getCount();
+		double sa = atom_space->getTV(sense_h).get_count();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
 		printf ("; delete %s with score %f (%d links)\n",
-			atom_space->getName(hws).c_str(), sa, deleted_links);
+			atom_space->get_name(hws).c_str(), sa, deleted_links);
 #endif
 	}
 

@@ -35,19 +35,26 @@ namespace nlp
 /**
  * A Cache between SuReal and PatternMatcher. This class is a Singleton.
  *
- * This cache stores the results of calls to differents methods of PatternMatcherCallBack 
+ * XXX THIS IS A BROKEN DESIGN! -- FIXME! (The fix is easy) The cache
+ * needs to be kept in the atomspace; just put the atoms there, keep
+ * them there, put them in well-known locations!  The problem with this
+ * cache is that it does NOT work with multiple atomspaces; see for
+ * example SuRealUTest, which bombs when multiple atomspces are used!!
+ * FIXME by getting rid of this class!!!
+ *
+ * This cache stores the results of calls to differents methods of PatternMatcherCallBack
  * in separate Caches. This makes sense because such calls in SuReal are
  * time expensive and in some scenarios (in particular when SuReal is being used
  * by microplanner) sureal is called A LOT of times with very similar
  * parameters.
  *
- * This class have a reeset() methoid whihc is supposed to be called when the
+ * This class have a reset() method which is supposed to be called when the
  * bunch of similar SuReal requests have ended.
  *
  * A major deficiency of this cache is that is is not ready to be used in a
  * multi-thread scenario.
  */
-class SuRealCache 
+class SuRealCache
 {
 
 public:
@@ -58,8 +65,8 @@ public:
     typedef std::unordered_map<Handle, HandleSeq> HandleSeqCache;
     typedef std::unordered_map<std::string, bool> StringMap;
     typedef std::unordered_map<std::string, StringMap> StringCacheMap;
-    typedef std::unordered_map<Handle, bool> HandleMap;
-    typedef std::unordered_map<Handle, HandleMap> HandleCacheMap;
+    typedef std::unordered_map<Handle, bool> HandleBoolMap;
+    typedef std::unordered_map<Handle, HandleBoolMap> HandleCacheMap;
 
     int variable_match(const Handle &h1, const Handle &h2);
     void add_variable_match(const Handle &h1, const Handle &h2, bool value);
@@ -67,9 +74,9 @@ public:
     int clause_match(const Handle &h1, const Handle &h2);
     void add_clause_match(const Handle &h1, const Handle &h2, bool value);
 
-    int grounding_match(const std::map<Handle, Handle> &m1, const std::map<Handle, Handle> &m2);
-    void add_grounding_match(const std::map<Handle, Handle> &m1, bool value);
-    void add_grounding_match(const std::map<Handle, Handle> &m1, const std::map<Handle, Handle> &m2, bool value);
+    int grounding_match(const HandleMap &m1, const HandleMap &m2);
+    void add_grounding_match(const HandleMap &m1, bool value);
+    void add_grounding_match(const HandleMap &m1, const HandleMap &m2, bool value);
 
     bool get_node_list(const Handle &h, HandleSeq &list);
     void add_node_list(const Handle &h, const HandleSeq &list);
@@ -91,7 +98,7 @@ private:
 
     int match(HandleCacheMap &map, const Handle &h1, const Handle &h2);
     void add_match(HandleCacheMap &map, const Handle &h1, const Handle &h2, bool value);
-    std::string build_map_hash_key(const std::map<Handle, Handle> &m);
+    std::string build_map_hash_key(const HandleMap &m);
     std::string handle_to_hash_key(const Handle &h);
 };
 

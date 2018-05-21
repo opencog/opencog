@@ -21,14 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/nlp/types/atom_types.h>
-
 #include "LGDictExpContainer.h"
 
-
-using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * Constructor for CONNECTOR_type.
@@ -36,11 +34,12 @@ using namespace opencog;
  * @param t     must be CONNECTOR_type
  * @param exp   pointer to the LG Exp structure
  */
-LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParamException)
+LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
     : m_type(t)
 {
     if (t != CONNECTOR_type)
-        throw InvalidParamException(TRACE_INFO, "Expected CONNECTOR_type for expression type.");
+        throw InvalidParamException(TRACE_INFO,
+            "Expected CONNECTOR_type for expression type.");
 
     // fill stuff with fixed junk for the OPTIONAL connector
     if (exp == NULL)
@@ -51,9 +50,21 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParam
         return;
     }
 
+#if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION == 4) && (LINK_MICRO_VERSION < 4)
     m_string = exp->u.string;
     m_direction = exp->dir;
     m_multi = exp->multi;
+#endif
+
+#if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION == 4) && (LINK_MICRO_VERSION == 4)
+    #error "This version of link-grammar has a broken API! Use an earlier or a later version!"
+#endif
+
+#if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION >= 5)
+    m_string = lg_exp_get_string(exp);
+    m_direction = lg_exp_get_dir(exp);
+    m_multi = lg_exp_get_multi(exp);
+#endif
 }
 
 /**
@@ -62,11 +73,13 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParam
  * @param t    AND_type or OR_type
  * @param s    vector of next level's containers
  */
-LGDictExpContainer::LGDictExpContainer(Exp_type t, std::vector<LGDictExpContainer> s) throw (InvalidParamException)
+LGDictExpContainer::LGDictExpContainer(Exp_type t,
+                                       std::vector<LGDictExpContainer> s)
     : m_type(t), m_subexps(s)
 {
     if (t != AND_type && t != OR_type)
-        throw InvalidParamException(TRACE_INFO, "Expected AND_type/OR_type for expression type.");
+        throw InvalidParamException(TRACE_INFO,
+            "Expected AND_type/OR_type for expression type.");
 
     // flatten & dnf on construction
     basic_flatten();
@@ -82,8 +95,8 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, std::vector<LGDictExpContaine
 /**
  * Flatten the container.
  *
- * Remove nested and recursive structures (eg. AND(A, AND(B, C)) becomes
- * AND(A, B, C)), assuming the sub-levels are already flatten.
+ * Remove nested and-recursive trees. Thus, AND(A, AND(B, C)) becomes
+ * AND(A, B, C), assuming the sub-levels are already flattened.
  */
 void LGDictExpContainer::basic_flatten()
 {
@@ -128,8 +141,8 @@ void LGDictExpContainer::basic_flatten()
 /**
  * Construct disjunctive normal form.
  *
- * Convert the expression into DNF form (ie. a disjuction of conjunctions of
- * connctors).
+ * Convert the expression into DNF form (ie. a disjuction of
+ * conjunctions of connectors).
  *
  * Connectors are OR-distributive but not AND-distributive. Thus, while
  * (A & (B or C)) = ((A & B) or (A & C)), it is NOT the case that
@@ -144,7 +157,9 @@ void LGDictExpContainer::basic_dnf()
         return;
 
     // find the first OR to distribute
-    auto or_exp_it = std::find_if(new_subexps.begin(), new_subexps.end(), [](LGDictExpContainer& exp) { return exp.m_type == OR_type; });
+    auto or_exp_it = std::find_if(new_subexps.begin(),
+                                  new_subexps.end(),
+           [](LGDictExpContainer& exp) { return exp.m_type == OR_type; });
 
     // no OR, the end
     if (or_exp_it == new_subexps.end())
@@ -154,7 +169,8 @@ void LGDictExpContainer::basic_dnf()
     LGDictExpContainer or_exp = *or_exp_it;
     new_subexps.erase(or_exp_it);
 
-    // change the type of this container to OR, and distribute the stuff in or_exp
+    // Change the type of this container to OR, and distribute
+    // the stuff in or_exp
     m_type = OR_type;
     m_subexps.clear();
 
@@ -176,8 +192,8 @@ void LGDictExpContainer::basic_dnf()
 /**
  * Convert to normal order.
  *
- * Putting connectors with - direction before those with + direction. Assume
- * everything already in DNF.
+ * Putting connectors with - direction before those with + direction.
+ * Assume everything already in DNF.
  */
 void LGDictExpContainer::basic_normal_order()
 {
@@ -197,7 +213,9 @@ void LGDictExpContainer::basic_normal_order()
     }
 
     m_subexps = new_leftexps;
-    m_subexps.insert(m_subexps.end(), new_rightexps.begin(), new_rightexps.end());
+    m_subexps.insert(m_subexps.end(),
+                     new_rightexps.begin(),
+                     new_rightexps.end());
 }
 
 /**
@@ -206,46 +224,55 @@ void LGDictExpContainer::basic_normal_order()
  * @param as   pointer to the AtomSpace
  * @return     handle to the atom
  */
-HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
+HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
 {
+    static Handle multi(createNode(LG_CONN_MULTI_NODE, "@"));
+    static Handle optnl(createLink(LG_CONNECTOR,
+                           Handle(createNode(LG_CONNECTOR_NODE, "0"))));
+
     if (m_type == CONNECTOR_type)
     {
-        if (m_string == "OPTIONAL")
-            return { as->add_link(LG_CONNECTOR, as->add_node(LG_CONNECTOR_NODE, "0")) };
+        // XXX FIXME this does not smell right; optionals should get
+        // blown up into pairs of disjuncts, one with and one without.
+        if (m_string == "OPTIONAL") return { optnl };
 
-        Handle connector = as->add_node(LG_CONNECTOR_NODE, m_string);
-        Handle direction = as->add_node(LG_CONN_DIR_NODE, std::string(1, m_direction));
+        Handle connector(createNode(LG_CONNECTOR_NODE, m_string));
+        Handle direction(createNode(LG_CONN_DIR_NODE,
+                          std::string(1, m_direction)));
 
         if (m_multi)
-            return { as->add_link(LG_CONNECTOR, connector, direction, as->add_node(LG_CONN_MULTI_NODE, "@")) };
+            return { Handle(createLink(LG_CONNECTOR, connector, direction, multi)) };
         else
-            return { as->add_link(LG_CONNECTOR, connector, direction) };
+            return { Handle(createLink(LG_CONNECTOR, connector, direction)) };
     }
 
     HandleSeq outgoing;
 
     for (auto& exp: m_subexps)
     {
-        HandleSeq q = exp.to_handle(as, hWordNode);
+        HandleSeq q = exp.to_handle(hWordNode);
         outgoing.insert(outgoing.end(), q.begin(), q.end());
     }
 
     if (m_type == AND_type)
-        return { as->add_link(LG_AND, outgoing) };
+        return { Handle(createLink(outgoing, LG_AND)) };
 
     // remove repeated atoms from OR
     if (m_type == OR_type)
     {
+        // XXX FIXME ... using an std::map would be more efficient.
         std::sort(outgoing.begin(), outgoing.end());
-        outgoing.erase(std::unique(outgoing.begin(), outgoing.end()), outgoing.end());
-
+        outgoing.erase(std::unique(outgoing.begin(),
+                                   outgoing.end()),
+                                   outgoing.end());
         HandleSeq qDisjuncts;
-        for (Handle& h : outgoing)
-            qDisjuncts.push_back(as->add_link(LG_DISJUNCT, hWordNode, h));
+        for (const Handle& h : outgoing)
+            qDisjuncts.push_back(Handle(createLink(LG_DISJUNCT, hWordNode, h)));
 
         return qDisjuncts;
     }
 
-    // should never get here
+    // Should never get here
+    OC_ASSERT(false, "Unknown Link Grammar Expression type %d", m_type);
     return HandleSeq();
 }

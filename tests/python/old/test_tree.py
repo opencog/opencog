@@ -134,8 +134,8 @@ class TreeTest(TestCase):
         a = self.a
         
         conj = (
-            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347010'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'EnergyDemandGoal'), a.add(t.ListLink, out=[])])])])]),
-            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), a.add(t.ListLink, out=[a.add(t.ExecutionLink, out=[a.add(t.GroundedSchemaNode, 'eat'), a.add(t.ListLink, out=[a.add(t.AccessoryNode, 'id_-54646')])])])])]),
+            a.add(t.AtTimeLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'EnergyDemandGoal'), a.add(t.ListLink, out=[])])])]), a.add(t.TimeNode, '11210347010')]),
+            a.add(t.AtTimeLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), a.add(t.ListLink, out=[a.add(t.ExecutionLink, out=[a.add(t.GroundedSchemaNode, 'eat'), a.add(t.ListLink, out=[a.add(t.AccessoryNode, 'id_-54646')])])])]), a.add(t.TimeNode, '11210347000')]),
             a.add(t.SequentialAndLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.TimeNode, '11210347010')])
         )
         conj = tuple(map(tree.tree_from_atom, conj))
@@ -151,8 +151,8 @@ class TreeTest(TestCase):
         goal = tree.atom_from_tree(tree.new_var(), a)
         
         conj = (
-            a.add(t.AtTimeLink, out=[t1, a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), action])]),
-            a.add(t.AtTimeLink, out=[t2, a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[goal, a.add(t.ListLink, out=[])])])])]),
+            a.add(t.AtTimeLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), action]), t1]),
+            a.add(t.AtTimeLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[goal, a.add(t.ListLink, out=[])])])]), t2]),
             a.add(t.SequentialAndLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.TimeNode, '11210347010')])
         )
         conj = tuple(map(tree.tree_from_atom, conj))

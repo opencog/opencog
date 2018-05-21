@@ -159,7 +159,9 @@ void ConsoleSocket::OnConnection()
 
 void ConsoleSocket::sendPrompt()
 {
-    Send(_prompt);
+    // Hush prompts are empty. Don't call.
+    if (0 < _prompt.size())
+        Send(_prompt);
 }
 
 void ConsoleSocket::OnLine(const std::string& line)
@@ -243,7 +245,7 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     if (is_shell)
     {
-        logger().debug("ConsoleSocket::OnLine() request %s is a shell",
+        logger().debug("ConsoleSocket::OnLine() request \"%s\" is a shell",
                        line.c_str());
 
         // Force a drain of the request queue, because we *must* enter

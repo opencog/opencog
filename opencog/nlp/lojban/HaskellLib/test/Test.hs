@@ -39,10 +39,11 @@ mystate s = State {sFlags = M.empty
                   ,sSeed = 0
                   ,sNow = cCN "now_here" noTv
                   ,sCtx = [cCN "now_here" noTv]
-                  ,sJAI = Nothing}
+                  ,sJAI = Nothing
+                  ,sXU = []}
 
 loadwl = do
-    (wl :: WordList State) <- loadWordLists "cmavo.csv" "gismu.csv"
+    (wl :: WordList State) <- loadWordLists
     return wl
 
 mpag :: WordList State -> Syntax a -> String -> Either String (a,State,())

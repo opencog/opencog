@@ -30,6 +30,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
+using namespace std::placeholders;
 
 SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
         _cogServer(nullptr)
@@ -39,18 +40,22 @@ SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
 
 SystemActivityTable::~SystemActivityTable()
 {
-    logger().debug("[SystemActivityTable] enter destructor");
-    _conn.disconnect();
-    clearActivity();
-    logger().debug("[SystemActivityTable] exit destructor");
+    logger().debug("[SystemActivityTable] destructor");
 }
 
 void SystemActivityTable::init(CogServer *cogServer)
 {
     logger().debug("[SystemActivityTable] init");
     _cogServer = cogServer;
-    _conn = cogServer->getAtomSpace().removeAtomSignal(
-            boost::bind(&SystemActivityTable::atomRemoved, this, _1));
+    _conn = cogServer->getAtomSpace().atomRemovedSignal().connect(
+            std::bind(&SystemActivityTable::atomRemoved, this, _1));
+}
+
+void SystemActivityTable::halt()
+{
+    logger().debug("[SystemActivityTable] halt");
+    clearActivity();
+    _cogServer->getAtomSpace().atomRemovedSignal().disconnect(_conn);
 }
 
 void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)
@@ -76,7 +81,7 @@ void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
 
 void SystemActivityTable::atomRemoved(AtomPtr atom)
 {
-    Handle h = atom->getHandle();
+    Handle h = atom->get_handle();
     std::lock_guard<std::mutex> lock(_activityTableMutex);
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); ++it) {

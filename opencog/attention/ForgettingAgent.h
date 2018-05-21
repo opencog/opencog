@@ -108,13 +108,13 @@ struct ForgettingLTIThenTVAscendingSort
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = _bank->get_lti(h1);
-        lti2 = _bank->get_lti(h2);
+        lti1 = get_lti(h1);
+        lti2 = get_lti(h2);
         if (lti1 != lti2) return lti1 < lti2;
         else {
             double tv1, tv2;
-            tv1 = fabs(h1->getTruthValue()->getMean());
-            tv2 = fabs(h2->getTruthValue()->getMean());
+            tv1 = fabs(h1->getTruthValue()->get_mean());
+            tv2 = fabs(h2->getTruthValue()->get_mean());
             return tv1 < tv2;
         }
     }

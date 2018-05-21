@@ -52,8 +52,18 @@ BaseServer* BaseServer::createInstance(AtomSpace* as)
 // take over.  The user can specify this atomspace.
 BaseServer::BaseServer(AtomSpace* as)
 {
-    atomSpace = as;
-    attentionbank(as);
+    // We shouldn't get called with a non-NULL atomSpace static global;
+    // that's indicative of a missing call to BaseServer::~BaseServer.
+    if (atomSpace) {
+        throw (RuntimeException(TRACE_INFO,
+               "Found non-NULL atomSpace. BaseServer::~BaseServer not called!"));
+    }
+
+    if (as) {
+        atomSpace = as;
+        attentionbank(as);
+    }
+
     // Set this server as the current server.
     set_current_server(this);
 }
@@ -61,7 +71,8 @@ BaseServer::BaseServer(AtomSpace* as)
 BaseServer::~BaseServer()
 {
     // We are no longer the current server.
-    set_current_server(NULL);
+    set_current_server(nullptr);
+    atomSpace = nullptr;
 }
 
 AtomSpace& BaseServer::getAtomSpace()

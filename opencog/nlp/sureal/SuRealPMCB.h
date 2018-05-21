@@ -52,8 +52,8 @@ public:
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
     virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h);
-    virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &pred_soln);
+    virtual bool grounding(const HandleMap &var_soln,
+                           const HandleMap &pred_soln);
     virtual bool initiate_search(PatternMatchEngine*);
     virtual void set_pattern(const Variables& vars,
                              const Pattern& pat)
@@ -62,7 +62,7 @@ public:
         DefaultPatternMatchCB::set_pattern(vars, pat);
     }
 
-    std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;   // store the PM results
+    std::map<Handle, HandleMapSeq> m_results;   // store the PM results
 
 private:
     virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&, size_t&);

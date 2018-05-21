@@ -43,7 +43,7 @@ FrameQuery::~FrameQuery()
 #ifdef DEBUG
 static void prt(Atom *atom)
 {
-   std::string str = atom->toString();
+   std::string str = atom->to_string();
    printf ("%s\n", str.c_str());
 }
 #endif
@@ -56,7 +56,7 @@ static void prt(Atom *atom)
  */
 bool FrameQuery::is_frame_elt(Atom *atom)
 {
-	if (DEFINED_FRAME_ELEMENT_NODE == atom->getType()) return true;
+	if (DEFINED_FRAME_ELEMENT_NODE == atom->get_type()) return true;
 	return false;
 }
 
@@ -65,10 +65,10 @@ bool FrameQuery::discard_question_markup(Atom *atom)
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
 
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atype)
 	{
-		const char *name = n->getName().c_str();
+		const char *name = n->get_name().c_str();
 
 		/* Throw away #what, #which, etc. 
 		 * as that frame will never occur as a part of the answer.
@@ -94,7 +94,7 @@ bool FrameQuery::discard_question_markup(Atom *atom)
  */
 bool FrameQuery::discard_eval_markup(Atom *atom)
 {
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 
 	if (LIST_LINK == atype)
 	{
@@ -117,7 +117,7 @@ bool FrameQuery::discard_eval_markup(Atom *atom)
 	/* By default, keep frame elt links */
 	do_discard = false;
 
-	const char *name = n->getName().c_str();
+	const char *name = n->get_name().c_str();
 
 	/* Throw away #Questioning,
 	 * as that frame will never occur as a part of the answer.
@@ -132,9 +132,9 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 
-	const char *name = n->getName().c_str();
+	const char *name = n->get_name().c_str();
 	if (CONCEPT_NODE == atype)
 	{
 		/* frame links never have concept nodes in them. */
@@ -180,7 +180,7 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 bool FrameQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = atom->handle;
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 	if (EVALUATION_LINK == atype)
 	{
 		bool keep = foreach_outgoing_atom(ah, &FrameQuery::is_frame_elt, this);
@@ -224,7 +224,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
-	Type ntype = aa->getType();
+	Type ntype = aa->get_type();
 
 	// DefinedLinguisticConcept nodes must match exactly;
 	// so if we are here, there's already a mismatch.
@@ -245,8 +245,8 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
 	        classserver().getTypeName(ntype).c_str());
 
-	std::string sa = aa->toString();
-	std::string sb = ab->toString();
+	std::string sa = aa->to_string();
+	std::string sb = ab->to_string();
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 

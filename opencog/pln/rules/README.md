@@ -54,4 +54,4 @@ To test the rules, use the following steps.
 - In the opencog scheme shell run (relex-parse "some sentence"),
   preferably sentences on which the rules are applicable.
 
-- Run (cog-bind rule-which-should-be-a-BindLink)
+- Run (cog-execute! rule-which-should-be-a-BindLink)

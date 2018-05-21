@@ -21,8 +21,7 @@
 
 ;XXX This is bad and broken and wrong; one should not try to bypass the
 ; scheme module system like this, its just asking for carpet burns.
-(load-from-path "utilities.scm")
-(load-from-path "av-tv.scm")
+(load-from-path "opencog/pln/utilities.scm")
 (load-from-path "opencog/rule-engine/rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -67,19 +66,19 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+;; List the rules
 (define rules
-  (list (list implication-partial-instantiation-rule-name 1)
-        (list implication-scope-to-implication-rule-name 1)
-        (list and-lambda-distribution-rule-name 1)
-        (list closed-lambda-evaluation-rule-name 1)
-        (list implication-introduction-rule-name 1)
-        (list implication-implicant-distribution-rule-name 1)
-        (list implication-and-lambda-factorization-rule-name 1)
-        (list deduction-implication-rule-name 1)
-        (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-implication-rule-name 1)
-        (list implication-implicant-disjunction-rule-name 1)
+  (list implication-partial-instantiation-rule-name
+        implication-scope-to-implication-rule-name
+        and-lambda-distribution-rule-name
+        closed-lambda-evaluation-rule-name
+        implication-introduction-rule-name
+        implication-implicant-distribution-rule-name
+        implication-and-lambda-factorization-rule-name
+        deduction-implication-rule-name
+        implication-full-instantiation-rule-name
+        equivalence-to-implication-rule-name
+        implication-implicant-disjunction-rule-name
         )
   )
 

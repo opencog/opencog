@@ -3,34 +3,53 @@
 ;
 ; Maximum Spanning Tree parser.
 ;
-; Copyright (c) 2014 Linas Vepstas
+; Copyright (c) 2014, 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below use a simple spanning-tree (MST) parser to create
-; MST parse of a sentence. The goal of this parse is to create a base
-; set of link-grammar disjuncts.
+; The scripts below use a simple minimum spanning-tree (MST) parser to
+; create an MST parse of a text sentence. This parse tree is then used
+; to create a set of equivalent Link Grammar disjuncts (which are
+; essentially the same thing as a local section of a sheaf of graphs;
+; this is explained more, below).
 ;
-; Input to this should be a single sentence. It is presumed, as
-; background, that a large number of word-pairs with associated mutual
-; information is already avaialable from the atomspace (obtained
-; previously).
+; Input to this should be a single unicode utf8-encoded text sentence.
+; It is presumed, as background, that the atomspace is loaded with a
+; large number of word-pairs and their associated mutual information.
+; These word-pairs need to have been previously computed.
 ;
-; The algorithm implemented is a basic maximum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with
-; with every word in the sentence being connected to every other word.
-; The edge-lengths are given by the mutual information betweeen word-pairs
-; (although perhaps other metrics are possible; see below).
+; The sentence is tokenized, assuming that white-space represents word
+; boundaries. Leading and trailing punctuation is stripped from each
+; word, and is treated as a distinct "word".
 ;
-; The spanning tree is then obtained. Finally, disjuncts are created from
-; the resulting parse, by looking at how each word is attached to the
-; other words.  The disjuncts are then recorded.
+; The set of words is treated as the set of vertexes of a complete graph
+; or "clique", with the edges being word-pairs. The MST parser obtains
+; the spanning tree that maximizes the sum of the mutual information (or
+; other additive quantity) associated with the edges. This tree is the
+; MST tree.
 ;
+; After an sentence has been parsed with the MST parser, the links
+; between words in the parse can be interpreted as Link Grammar links.
+; There are two possible interpretations that can be given to these
+; links: they are either "ANY" links, that connect between any words,
+; or they are links capable of connecting ONLY those two words.
+; In the later case, the link-name can be thought of as the
+; concatenation of the two words it connects.
+;
+; In either case, one can work "backwards", and obtain the effective
+; disjunct on each word, that would have lead to the given MST parse.
+; For each word, this disjunct is just the collection of the other words
+; that it is connected to. It is the unit-distance section of a sheaf.
+;
+; All the hard work is done in the `sheaf` module. This is just a very
+; slim wrapper to parse the text, and update the number of times the
+; disjunct has been observed.
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
+(use-modules (opencog matrix))
 (use-modules (opencog sheaf))
 
 ; ---------------------------------------------------------------------
@@ -46,7 +65,7 @@
 ; suffixes. This list is not complete nor terribly organized; rather,
 ; it is built up from experience of parsing assorted texts and noting
 ; the kinds of stuff that actually gets used. Its slanted towards
-; European langauges, and may be inadequate for other langauges.
+; European languages, and may be inadequate for other languages.
 ;
 ; I did not want to get too fancy here; I want just enough to parse
 ; most "ordinary" text, for now.  A fancier treatment must await
@@ -192,10 +211,196 @@
 
 	(define scorer (make-score-fn mi-source 'pair-fmi))
 
+	; Assign a bad cost to links that are too long --
+	; longer than 16. This is a sharp cutoff.
+	; This causes parser to run at O(N^3) for LEN < 16 and
+	; a faster rate, O(N^2.3) for 16<LEN. This should help.
+	(define (trunc-scorer LW RW LEN)
+		(if (< 16 LEN) -2e25 (scorer LW RW LEN)))
+
 	; Process the list of words.
-	(mst-parse-atom-seq word-list scorer)
+	(mst-parse-atom-seq word-list trunc-scorer)
 )
 
+; ---------------------------------------------------------------------
+; Return #t if the section is bigger than what the current postgres
+; backend can store. Currently, the limit is atoms with at most 330
+; atoms in the outgoing set.
+;
+; This typically occurs when the MST parser is fed a long string of
+; punctuation, or a table of some kind, or other strings that are not
+; actual sentences.
+(define (is-oversize? SECTION)
+	(< 330 (cog-arity (gdr SECTION)))
+)
+
+(define-public (observe-mst plain-text)
+"
+  observe-mst -- update pseduo-disjunct counts by observing raw text.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up.
+"
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
+		(make-sections (mst-parse-text plain-text))
+	)
+)
+
+(define-public (observe-mst-extra plain-text)
+"
+  observe-mst-extra -- update pseduo-disjunct counts by observing raw
+  text.
+
+  See also 'observe-mst'.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up. In addition to what 'observe-mst'
+  does, extra atoms will be generated to preserve the MST parse
+  for each of the inputs.
+"
+	; Tokenize the text, create WordNodes as well as WordIntanceNodes
+	; for each of the words
+	(define word-strs (tokenize-text plain-text))
+	(define word-list (map WordNode word-strs))
+	(define word-insts (map (lambda (w) (WordInstanceNode
+		(random-node-name 'WordInstanceNode 36 (string-append w "@"))))
+			word-strs))
+
+	; Create a ParseNode, link each of the WordInstanceNodes with it
+	; by using WordInstanceLinks
+	; ReferenceLinks will also be created to link the WordInstanceNodes
+	; with their corresponding WordNodes
+	(define parse-node
+		(ParseNode (random-node-name 'ParseNode 36 "mst_parse@")))
+	(define word-inst-lks
+		(map (lambda (wi) (WordInstanceLink wi parse-node)) word-insts))
+	(define reference-lks
+		(map (lambda (wi w) (ReferenceLink wi w)) word-insts word-list))
+
+	; Create WordSequenceLink to record the word order
+	(define num-nodes '())
+	(define word-seq-lks (map
+		(lambda (wi)
+			(define n (NumberNode (length num-nodes)))
+			(set! num-nodes (append num-nodes (list n)))
+			(WordSequenceLink wi n))
+		word-insts))
+
+	; Do the MST parse
+	(define mstparse (mst-parse-text plain-text))
+	(define sections (make-sections mstparse))
+
+	; Take the parse from above, replace the WordNodes with WordInstanceNodes
+	; and create sections for those instances also
+	(define mstparse-insts
+		(map (lambda (w)
+			(define l-idx (overt-get-index (wedge-get-left-overt w)))
+			(define r-idx (overt-get-index (wedge-get-right-overt w)))
+			(cons ; Pair this connection with the score
+				(cons ; Pair the left and right word instances with their indexes
+					(cons l-idx (list-ref word-insts (- l-idx 1)))
+					(cons r-idx (list-ref word-insts (- r-idx 1)))
+				)
+				(wedge-get-score w)
+			))
+			mstparse))
+
+	; Make sections using the instances
+	(define section-insts (make-sections mstparse-insts))
+
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
+		sections
+	)
+
+	; And store the whole parse
+	(for-each
+		(lambda (x)
+			(if (equal? (cog-type x) 'Section)
+				(if (not (is-oversize? x)) (store-atom x))
+				(store-atom x)))
+		(append section-insts word-seq-lks word-inst-lks reference-lks)
+	)
+
+	; Export the parse to a file
+	(export-mst-parses "mst-parses.txt")
+
+	; Remove the instances and the links containing them
+	(for-each cog-extract-recursive word-insts)
+
+	; Also remove those newly generated nodes
+	(for-each cog-extract num-nodes)
+	(cog-extract parse-node)
+)
+
+(define-public (export-mst-parses filename)
+"
+  Export all the MST-parses that can be found in the
+  atomspace to a text file named \"filename\", so that
+  it would be easier for people to examine the parses.
+
+  The format is:
+  [sentence]
+  [word1#] [word1] [word2#] [word2]
+"
+	(define file-port (open-file filename "a"))
+
+	; Given a WordInstanceNode, return its word sequence number
+	(define (get-index w)
+		(inexact->exact (string->number
+			(cog-name (word-inst-get-number w)))))
+
+	; Given a WordInstanceNode, return its corresponding word
+	(define (get-word w)
+		(cog-name (word-inst-get-word w)))
+
+	; Export a single parse
+	(define (export-parse word-insts)
+		; Print the sentence first
+		(if (not (null? word-insts))
+			(display
+				(format #f "~a\n"
+					(string-join (map get-word (cdr word-insts)) " "))
+				file-port))
+
+		(for-each
+			(lambda (w) ; WordInstanceNodes
+				(for-each
+					(lambda (cs) ; ConnectorSeq
+						(for-each
+							(lambda (c) ; Connector
+								(if (equal? (cog-name (gdr c)) "+")
+									(display
+										(format #f "~a ~a ~a ~a\n"
+											(get-index w)
+											(get-word w)
+											(get-index (gar c))
+											(get-word (gar c)))
+										file-port)))
+							(cog-outgoing-set cs)))
+					(cog-chase-link 'Section 'ConnectorSeq w)))
+			word-insts
+		)
+
+		; Add a new line at the end
+		(display "\n" file-port)
+	)
+
+	; Export the MST-parses
+	(for-each
+		(lambda (p)
+			(export-parse (parse-get-words-in-order p)))
+		(cog-get-atoms 'ParseNode))
+
+	(close-port file-port)
+)
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))

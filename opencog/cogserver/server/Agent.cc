@@ -80,7 +80,7 @@ std::string Agent::to_string() const
 
 void Agent::atomRemoved(const AtomPtr& atom)
 {
-    Handle h(atom->getHandle());
+    Handle h(atom->get_handle());
     {
         std::lock_guard<std::mutex> lock(_handleSetMutex);
         for (size_t i = 0; i < _utilizedHandleSets.size(); i++)

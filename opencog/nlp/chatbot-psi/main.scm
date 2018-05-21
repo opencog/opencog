@@ -68,5 +68,5 @@
 
 ; Define the demand here to prevent error if this chatbot is loaded before
 ; loading the aiml psi-rules
-(define aiml-chat-demand (psi-demand "AIML chat demand" .8))
+(define aiml-chat-demand (psi-demand "AIML chat demand"))
 (psi-demand-skip aiml-chat-demand)

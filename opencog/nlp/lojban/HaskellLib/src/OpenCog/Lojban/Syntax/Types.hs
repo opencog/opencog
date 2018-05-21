@@ -14,7 +14,7 @@ import qualified Data.Map as M
 import Iso
 import qualified Syntax
 
-import Lojban
+import Lojban hiding (State(..))
 
 import OpenCog.AtomSpace
 import OpenCog.Lojban.Util
@@ -33,7 +33,13 @@ type Tag = String
 type Sumti = Tagged Atom
 
 --Selbri are Atoms with a TruthVal they can also be tagged with a strength modifier
-type Selbri = (TruthVal,Atom) --STring represents TV
+type Selbri = (TruthVal,Atom)
+type SelbriNA = (Maybe NA,Selbri)
+
+type NA = (String,[UI])
+
+--Attitude
+type UI = (Atom,TruthVal)
 
 type Tagged a = (a,Maybe Tag)
 
@@ -49,6 +55,7 @@ type Bridi = ([Sumti],BTCT)
 type Flag = String
 data State = State { sFlags :: M.Map String String
                    , sAtoms :: [Atom]
+                   , sTVLs  :: [Atom]
                    , sText  :: String
                    , sSeed  :: Int
                    , sNow   :: Atom
@@ -67,7 +74,7 @@ type Syntax a   = SynIso () a
 --The parser Requirse that the State is a SyntaxState
 instance Syntax.SyntaxState State where
     getText = sText
-    addText str sta = sta {sText = str ++ (sText sta)}
+    addText str sta = sta {sText = str ++ sText sta}
     setText str sta = sta {sText = str}
 
 -------------------------------------------------------------------------------
@@ -78,9 +85,9 @@ data ConnectorTree c e = CTNode c (ConnectorTree c e,ConnectorTree c e)
                        | CTLeaf e
                        deriving (Show,Eq,Functor,Foldable)
 
-type JJCTTS = ConnectorTree JOIK_JEK (Tagged Selbri)
+type JJCTTS = ConnectorTree JOIK_JEK (Tagged SelbriNA)
 
-type BT = (Selbri,[Sumti])
+type BT = (SelbriNA,[Sumti])
 
 type BTCT = ConnectorTree Con BT
 

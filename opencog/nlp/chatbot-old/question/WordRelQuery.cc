@@ -59,7 +59,7 @@ WordRelQuery::~WordRelQuery()
 #ifdef DEBUG
 static void prt(Atom *atom)
 {
-   std::string str = atom->toString();
+   std::string str = atom->to_string();
    printf ("%s\n", str.c_str());
 }
 #else
@@ -89,7 +89,7 @@ bool WordRelQuery::is_qVar(Handle word_prop)
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atomspace->getType(word_prop))
         return false;
 
-	const std::string& name = atomspace->getName(word_prop);
+	const std::string& name = atomspace->get_name(word_prop);
 	const char * str = name.c_str();
 	if (0 == strcmp(str, "who"))
 		return true;
@@ -124,13 +124,13 @@ bool WordRelQuery::is_word_a_query(Handle word_inst)
  */
 bool WordRelQuery::is_ling_cncpt(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->getType()) return true;
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->get_type()) return true;
 	return false;
 }
 
 bool WordRelQuery::is_cncpt(Atom *atom)
 {
-	if (CONCEPT_NODE == atom->getType()) return true;
+	if (CONCEPT_NODE == atom->get_type()) return true;
 	return false;
 }
 
@@ -236,10 +236,10 @@ const char * WordRelQuery::get_word_instance(Atom *atom)
 	Atom *wrd = fl.follow_binary_link(atom, REFERENCE_LINK);
 	if (!wrd) return NULL;
 
-	if (WORD_NODE != wrd->getType()) return NULL;
+	if (WORD_NODE != wrd->get_type()) return NULL;
 
 	Node *n = static_cast<Node *>(wrd);
-	const std::string& name = n->getName();
+	const std::string& name = n->get_name();
 
 	return name.c_str();
 }
@@ -257,8 +257,8 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
-	Type pattype = npat->getType();
-	Type soltype = nsoln->getType();
+	Type pattype = npat->get_type();
+	Type soltype = nsoln->get_type();
 	if ((pattype != soltype) && 
 	    (WORD_NODE != soltype) && 
 	    (SEME_NODE != soltype) && 
@@ -269,9 +269,9 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	if ((DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype) ||
 	    (PREPOSITIONAL_RELATIONSHIP_NODE == soltype))
 	{
-		const char *spat = npat->getName().c_str();
+		const char *spat = npat->get_name().c_str();
 		if (strcmp("isa", spat) && strcmp("hypothetical_isa", spat)) return false;
-		const char *ssol = npat->getName().c_str();
+		const char *ssol = npat->get_name().c_str();
 		if (strcmp("isa", ssol) && strcmp("hypothetical_isa", ssol)) return false;
 
 		// If we got to here then we matched isa to isa or hypothetical_isa,
@@ -298,8 +298,8 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 		 * be have more relaxed agreement for tense...
 		 * i.e. match #past to #past_infinitive, etc.
 		 */
-		const char * sa = npat->getName().c_str();
-		const char * sb = nsoln->getName().c_str();
+		const char * sa = npat->get_name().c_str();
+		const char * sb = nsoln->get_name().c_str();
 printf("duude compare %s to %s\n", sa, sb);
 		const char * ua = strchr(sa, '_');
 		if (ua)
@@ -325,8 +325,8 @@ printf("duude compare %s to %s\n", sa, sb);
 	fprintf(stderr, "Error: unexpected ground node type %d %s\n", soltype,
 	        classserver().getTypeName(soltype).c_str());
 
-	std::string sa = npat->toString();
-	std::string sb = nsoln->toString();
+	std::string sa = npat->to_string();
+	std::string sb = nsoln->to_string();
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 
@@ -335,17 +335,17 @@ printf("duude compare %s to %s\n", sa, sb);
 
 /* ======================================================== */
 
-bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
-                          std::map<Handle, Handle> &var_grounding)
+bool WordRelQuery::solution(HandleMap &pred_grounding,
+                          HandleMap &var_grounding)
 {
 	// Reject any solution where a variable is solved
 	// by another variable (e.g. if there are multiple
 	// questions in the corpus, and we just happened to
 	// find one of them.)
-	std::map<Handle, Handle>::const_iterator j;
+	HandleMap::const_iterator j;
 	for (j=var_grounding.begin(); j != var_grounding.end(); ++j)
 	{
-		std::pair<Handle, Handle> pv = *j;
+		HandlePair pv = *j;
 		Handle soln = pv.second;
 
 		// Solution is a word instance; is it also a query variable?
@@ -370,7 +370,7 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 		// at this point, and that's what we return as the
 		// answer.
 		if (!atom_space->isNode(atom_space->getType(ha))) return false;
-		printf("duude answer=%s\n", atom_space->getName(ha).c_str());
+		printf("duude answer=%s\n", atom_space->get_name(ha).c_str());
 
 		Handle hw = ha;
 		atom_space->addLink(LIST_LINK, hq, hw);

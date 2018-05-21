@@ -63,18 +63,15 @@ DistributedPatternMinerClient::DistributedPatternMinerClient(CogServer& cs) : Ag
 //                        "pm_test_corpus.scm"
 //                      );
 
-    this->patternMiner = new DistributedPatternMiner(&(cs.getAtomSpace()));
+    this->patternMiner = new DistributedPatternMiner(cs.getAtomSpace());
 
     logger().info("[DistributedPatternMinerClient] constructor");
-
 }
 
 DistributedPatternMinerClient::~DistributedPatternMinerClient()
 {
     logger().info("[DistributedPatternMinerClient] destructor");
 }
-
-
 
 void DistributedPatternMinerClient::run()
 {
@@ -83,9 +80,7 @@ void DistributedPatternMinerClient::run()
     if (hasRun)
         return;
 
-
     this->patternMiner->launchADistributedWorker();
 
     hasRun = true;
-
 }

@@ -17,6 +17,9 @@
 ;;       deduction-implication-rule
 ;;       deduction-subset-rule
 ;;
+;; This deduction rule makes assumptions to avoid having too many
+;; premises. Another more precise rule should be created as well.
+;;
 ;; -----------------------------------------------------------------------------
 
 (use-modules (opencog logger))
@@ -43,15 +46,15 @@
         (Not (Identical A C)))
       (ExecutionOutput
         (GroundedSchema "scm: deduction-formula")
-          (List
-            ;; Conclusion
-            AC
-            ;; Premises
-            ;;
-            ;; TODO: perhaps A, B, C should be added as premises as
-            ;; they are used in the formula.
-            AB
-            BC)))))
+        (List
+          ;; Conclusion
+          AC
+          ;; Premises
+          ;;
+          ;; TODO: perhaps A, B, C should be added as premises as
+          ;; they are used in the formula.
+          AB
+          BC)))))
 
 (define deduction-inheritance-rule
   (let ((var-type (TypeChoice

@@ -90,19 +90,19 @@ void ForgettingAgent::forget()
 
     for (unsigned int i = 0; i < atomsVector.size(); i++)
     {
-        if (_bank->get_lti(atomsVector[i]) <= forgetThreshold
+        if (get_lti(atomsVector[i]) <= forgetThreshold
                 and count < removalAmount)
         {
-            if (_bank->get_vlti(atomsVector[i]) == AttentionValue::DISPOSABLE )
+            if (get_vlti(atomsVector[i]) == AttentionValue::DISPOSABLE )
             {
-                std::string atomName = atomsVector[i]->toString();
+                std::string atomName = atomsVector[i]->to_string();
                 _log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
                 IncomingSet iset = atomsVector[i]->getIncomingSet(_as);
                 recursive = true;
                 for (const LinkPtr& h : iset)
                 {
-                    if (h->getType() != ASYMMETRIC_HEBBIAN_LINK) {
+                    if (h->get_type() != ASYMMETRIC_HEBBIAN_LINK) {
                         recursive = false;
                         break;
                     }

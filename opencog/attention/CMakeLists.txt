@@ -1,6 +1,6 @@
 # To make Boost ublas much more efficient.
 ADD_DEFINITIONS(-DNDEBUG)
-ADD_DEFINITIONS(-DLOG_AV_STAT)
+#ADD_DEFINITIONS(-DLOG_AV_STAT)
 
 # --------------------------------------------------
 OPENCOG_ADD_ATOM_TYPES(atom_types.script

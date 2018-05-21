@@ -90,10 +90,10 @@ class PLNUnitTester(TestCase):
 
     def test_all(self):
         if len(self.testFiles) == 0:
-            print "No test files have been selected."
+            print("No test files have been selected.")
         else:
             for testFile in self.testFiles:
-                print "Testing file: " + testFile
+                print("Testing file: " + testFile)
                 self.run_file(testFile)
 
     def addTestFile(self, testFile):
@@ -109,8 +109,8 @@ class PLNUnitTester(TestCase):
 
     def run_chaining_steps(self):
         if __VERBOSE__:
-            print "Rules that can be applied:"
-            print [" *" + r.name for r in self.chainer.rules]
+            print("Rules that can be applied:")
+            print([" *" + r.name for r in self.chainer.rules])
 
         numberOfSteps = 1
         try:
@@ -125,7 +125,7 @@ class PLNUnitTester(TestCase):
             if not result is None:
                 numberOfSteps -= 1
                 if __VERBOSE__:
-                    print result
+                    print(result)
 
     def reset_atom_spaces(self):
         self.reset_atom_space(self.atomSpaceFileData)
@@ -175,14 +175,14 @@ class PLNUnitTester(TestCase):
         allNodes = atomspace.get_atoms_by_type(types.Node)
 
         for node in allNodes:
-            print str(node.type) + " called " + node.name
+            print(str(node.type) + " called " + node.name)
 
         allLinks = atomspace.get_atoms_by_type(types.Link)
 
         for link in allLinks:
-            print str(link.type) + " called " + link.name
+            print(str(link.type) + " called " + link.name)
             for out in link.out:
-                print "  has a node of type " + str(out.type) + " called " + out.name
+                print("  has a node of type " + str(out.type) + " called " + out.name)
 
     def load_outputs(self):
         self.fill_atomspace(self.atomSpaceExpected, self.get_predicate_arguments(self.atomSpaceFileData, "outputs"))
@@ -222,7 +222,7 @@ class PLNUnitTester(TestCase):
                     if not "ListLink" in listItem:
                         result = False
                         error = "Unable to find \n" + listItem
-                        print error
+                        print(error)
 
         return result
 
@@ -230,20 +230,20 @@ class PLNUnitTester(TestCase):
         allPredictedItemsExist = False
         allItemsWerePredicted = False
 
-        print "Checking if all predicted items were created:"
+        print("Checking if all predicted items were created:")
 
         if self.check_atomspace_contains_atomspace(self.atomSpaceExpected, self.atomSpaceInputs):
-            print "  Yes, all predicted items exist"
+            print("  Yes, all predicted items exist")
             allPredictedItemsExist = True
         else:
-            print "  No, not all predicted items were created (see above for details)"
-        print "Checking if all created items were predicted:"
+            print("  No, not all predicted items were created (see above for details)")
+        print("Checking if all created items were predicted:")
 
         if self.check_atomspace_contains_atomspace(self.atomSpaceInputs, self.atomSpaceExpected):
-            print "  Yes, all created items were predicted"
+            print("  Yes, all created items were predicted")
             allItemsWerePredicted = True
         else:
-            print "  No, some created items were not predicted (see above for details)"
+            print("  No, some created items were not predicted (see above for details)")
 
         self.assertTrue(allPredictedItemsExist and allItemsWerePredicted)
 
@@ -268,7 +268,7 @@ class PLNUnitTester(TestCase):
 
             self.verify_result()
         else:
-            print "File does not exist: " + filename
+            print("File does not exist: " + filename)
 
     def transfer_atom(self, new_atomspace, atom):
         """

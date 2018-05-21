@@ -20,10 +20,10 @@ to test the temporal rules which can only be used for crisp reasoning.
 In the example, links are of the following form:
 ```
 (AtTimeLink (stv 0.1 1.0)
-  (TimeNode "6000")
   (EvaluationLink
      (PredicateNode "shower")
   )
+  (TimeNode "6000")
 )
 ```
 

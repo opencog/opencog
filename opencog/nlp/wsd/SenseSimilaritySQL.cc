@@ -130,8 +130,8 @@ SenseSimilaritySQL::~SenseSimilaritySQL()
 SimpleTruthValuePtr SenseSimilaritySQL::similarity(const Handle& first_sense,
         const Handle& second_sense)
 {
-	std::string fk = as->getName(first_sense);
-	std::string sk = as->getName(second_sense);
+	std::string fk = as->get_name(first_sense);
+	std::string sk = as->get_name(second_sense);
 
 	escape_single_quotes(fk);
 	escape_single_quotes(sk);

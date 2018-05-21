@@ -8,19 +8,15 @@
 ; Copyright (c) 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; This code is part of the language-learning effort.  The project
-; requires that a lot of text be observed, withe the goal of deducing
+; requires that a lot of text be observed, with the goal of deducing
 ; a grammar from it, using entropy and other basic probability methods.
 ;
 ; Main entry point: `(observe-text plain-text)`
 ;
-; Call this entry point with exactly one sentance as a plain text
-; string. It will be parsed by RelEx, and the resulting link-grammar
-; link usage counts will be updated in the atomspace. The counts are
-; flushed to the SQL database so that they're not forgotten.
-;
-; RelEx is used for only one reason: it prints out the required
-; atomese format. The rule-engine in RelEx is NOT used!  This could
-; be redesigned and XXX FIXME, it should be.
+; Call this entry point with exactly one sentence as a plain text
+; string. It will be parsed, and the resulting link-grammar link usage
+; counts will be updated in the atomspace. The counts are flushed to
+; the SQL database so that they're not forgotten.
 ;
 ; This tracks multiple, independent counts:
 ; *) how many sentences have been observed.
@@ -55,8 +51,8 @@
 ; word-pair.  In addition, a count is maintained of the length of that
 ; link.
 ;
-; For the initial stages of the langauge-learning project, the parses
-; are produced by the "any" langauge parser, which produces random planar
+; For the initial stages of the language-learning project, the parses
+; are produced by the "any" language parser, which produces random planar
 ; trees.  This creates a sampling of word-pairs that is different than
 ; merely having them show up in the same sentence.  That is, a covering
 ; of a sentence by random trees does not produce the same edge statistics
@@ -69,6 +65,7 @@
 ; maintained on the LgWordCset for a given word.
 ;
 (use-modules (opencog) (opencog nlp) (opencog persist))
+(use-modules (opencog exec) (opencog nlp lg-parse))
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
@@ -88,9 +85,6 @@
 ;         (NumberNode "4"))
 ;
 ; when the sentence was "this is some foo".
-;
-; Due to a RelEx bug in parenthesis handling, the `word-inst-get-word`
-; function used here can throw an exception. See documentation.
 ;
 (define (make-word-sequence PARSE)
 
@@ -151,7 +145,7 @@
 )
 
 ; ---------------------------------------------------------------------
-; update-clique-pair-counts -- count occurances of random word-pairs.
+; update-clique-pair-counts -- count occurrences of random word-pairs.
 ;
 ; This generates what are termed "clique pairs" throughout: these are
 ; all possible word-pair combinations, given a sequence of words.
@@ -163,7 +157,7 @@
 ;    than they would in a random planar tree parse.  In particular,
 ;    it generates more pairs between distant words than the planar tree
 ;    would. This could be ameliorated by simply not generating pairs
-;    for words that are more than 6 lengths apart. Or, altnernately,
+;    for words that are more than 6 lengths apart. Or, alternately,
 ;    only the statistics for closer pairs closer together than 6 could
 ;    be used.  Anyway, this is probably not a big deal, by itself.
 ;
@@ -171,7 +165,7 @@
 ;    (See below for the format).  This is might be interesting to
 ;    look at for academic reasons, but it currently puts a huge
 ;    impact on the size of the atomspace, and the size of the
-;    database, impacting performance in a sharply neggative way.
+;    database, impacting performance in a sharply negative way.
 ;    That's because, for every possible word-pair, chances are that
 ;    it will appear, sooner or later, with with every possible distance
 ;    from 1 to about 30. Each distance requires it's own atom to keep
@@ -186,7 +180,7 @@
 ;    hit is still huge.
 ;
 ; 3) On a per-sentence basis, when clique-counting is turned on, the
-;    number of databse updates increases by 3x-4x atom value updates.
+;    number of database updates increases by 3x-4x atom value updates.
 ;    If your database is on spinning disks, not SSD, this means that
 ;    database updates will be limited by the disk I/O subsystem, and
 ;    this additional traffic can slow down statistics gathering by...
@@ -212,10 +206,10 @@
 ;             WordNode "righty"
 ;         NumberNode 3
 ;
-; Here, the NumberNode encdes the distance between the words. It is always
+; Here, the NumberNode encodes the distance between the words. It is always
 ; at least one -- i.e. it is the difference between their ordinals.
 ;
-; Paramters:
+; Parameters:
 ; MAX-LEN -- integer: don't count a pair, if the words are farther apart
 ;            than this.
 ; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
@@ -229,12 +223,11 @@
 
 	; Create and count a word-pair, and the distance.
 	(define (count-one-pair left-seq right-seq)
-		(define pare (ListLink (gar left-seq) (gar right-seq)))
 		(define dist (- (get-no right-seq) (get-no left-seq)))
 
 		; Only count if the distance is less than the cap.
 		(if (<= dist MAX-LEN)
-			(begin
+			(let ((pare (ListLink (gar left-seq) (gar right-seq))))
 				(count-one-atom (EvaluationLink pair-pred pare))
 				(if RECORD-LEN
 					(count-one-atom
@@ -420,7 +413,7 @@
  observe-text -- update word and word-pair counts by observing raw text.
 
  This is the first part of the learning algo: simply count the words
- and word-pairs oberved in incoming text. This takes in raw text, gets
+ and word-pairs observed in incoming text. This takes in raw text, gets
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
@@ -430,7 +423,7 @@
 	; then avoid doing any counting at all for this sentence.
 	;
 	; Note: update-clique-pair-counts commented out. If you want this,
-	; then uncommment it, and adjust the length.
+	; then uncomment it, and adjust the length.
 	; Note: update-disjunct-counts commented out. It generates some
 	; data, but none of it will be interesting to most people.
 	(define (update-counts sent)
@@ -441,20 +434,17 @@
 				; (update-clique-pair-counts sent 6 #f)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
+				; If you uncomment this, be sure to also uncomment
+				; LgParseLink below, because LgParseMinimal is not enough.
 				; (update-disjunct-counts sent)
 			))
 			(lambda (key . args) #f)))
 
-	; Loop -- process any that we find. This will typically race
-	; against other threads, but I think that's OK.
-	(define (process-sents)
-		(let ((sent (get-one-new-sentence)))
-			(if (null? sent) '()
-				(begin
-					(update-counts sent)
-					(delete-sentence sent)
-					(monitor-rate '())
-					(process-sents)))))
+	; Count the atoms in the sentence, and then delete it.
+	(define (process-sent SENT)
+		(update-counts SENT)
+		(delete-sentence SENT)
+		(monitor-rate '()))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -480,8 +470,11 @@
 				(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
 				(define elapsed-time (* 1.0e-9 (- now start-time)))
 				(define cpu-time (* 1.0e-9 (- run run-time)))
-				(format #t "Elapsed time: ~5f secs. GC: ~5f%  cpu-usage: ~5f%\n"
+				(define ngc (- (assoc-ref cur 'gc-times)
+					(assoc-ref last-gc 'gc-times)))
+				(format #t "Elapsed: ~5f secs. Rate: ~5f gc/min %cpu-GC: ~5f%  %cpu-use: ~5f%\n"
 					elapsed-time
+					(/ (* ngc 60) elapsed-time)
 					(* 100 (/ gc-time-taken elapsed-time))
 					(* 100 (/ cpu-time elapsed-time))
 				)
@@ -494,7 +487,7 @@
 	; from relex seem to cause bad memory fragmentation.
 	(define maybe-gc
 		(let ((cnt 0)
-				(max-size (* 750 1000 1000)))  ; 750 MB
+				(max-size (* 2750 1000 1000)))  ; 750 MB
 			(lambda ()
 				(if (< max-size (- (assoc-ref (gc-stats) 'heap-size)
 							(assoc-ref (gc-stats) 'heap-free-size)))
@@ -504,9 +497,52 @@
 						;(avg-gc-cpu-time)
 					)))))
 
-	(relex-parse plain-text) ;; send plain-text to server
-	(process-sents)
-	(maybe-gc) ;; need agressive gc to keep RAM under control.
+	; Use the RelEx server to parse the text via Link Grammar.
+	; Return a SentenceNode. Attention: when run in parallel,
+	; the returned SentenceNode is not necessarily that of the
+	; the one that was submitted for parsing! It might be just
+	; some other sentence that is sitting there, ready to go.
+	(define (relex-process TXT)
+		(define (do-all-sents)
+			(let ((sent (get-one-new-sentence)))
+				(if (not (null? sent))
+					(begin (process-sent sent) (do-all-sents)))))
+
+		(relex-parse TXT)
+		(do-all-sents)
+		(maybe-gc) ;; need agressive gc to keep RAM under control.
+	)
+
+	; Process the text locally, using the LG API link.
+	(define (local-process TXT)
+		; try-catch wrapper for duplicated text. Here's the problem:
+		; If this routine is called in rapid succession with the same
+		; block of text, then only one PhraseNode and LgParseLink will
+		; be created for both calls.  The extract at the end will remove
+		; this, even while these atoms are being accessed by the second
+		; call.  Thus, `lgn` might throw because `phr` doesn't exist, or
+		; `cog-execute!` might throw because lgn does't exist. Either of
+		; the cog-extracts might also throw. Hide this messiness.
+		(catch #t
+			(lambda ()
+				(let* ((phr (Phrase TXT))
+						;(lgn (LgParseLink phr (LgDict "any") (Number 24)))
+						(lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+						(sent (cog-execute! lgn))
+					)
+					(process-sent sent)
+					; Remove crud so it doesn't build up.
+					(cog-extract lgn)
+					(cog-extract phr)
+				))
+			(lambda (key . args) #f))
+	)
+
+	;; Send plain-text to the relex server
+	; (relex-process plain-text)
+
+	; Handle the plain-text locally
+	(local-process plain-text)
 )
 
 ; ---------------------------------------------------------------------

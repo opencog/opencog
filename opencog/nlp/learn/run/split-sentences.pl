@@ -21,6 +21,7 @@ my $mydir = "$RealBin/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
+my $hanzi = 1;
 my $QUIET = 0;
 my $HELP = 0;
 
@@ -35,6 +36,17 @@ if ($HELP) {
 	print "Usage ./split-sentences.perl (-l [en|de|...]) < textfile > splitfile\n";
 	exit;
 }
+
+# Specifying `-l zh` or `-l yue` will pad each and every hanzi
+# character with whitespace.  Specifying `-l zh-pre` or `-l yue-pre`
+# implies that the input text is pre-split into words, and whitespace
+# is not added. In either case, splitting into sentences is still
+# performed.
+if ($language =~ /-pre$/) {
+	$language =~ s/-pre//;
+	$hanzi = 0;
+}
+
 if (!$QUIET) {
 	print STDERR "Sentence Splitter v3\n";
 	print STDERR "Language: $language\n";
@@ -135,9 +147,10 @@ sub preprocess
 	# Sentences that end in punctuation, followed by a double-dash.
 	$text =~ s/([?!\.]) +(--[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	$text =~ s/([。．？！♪])/$1\n/g;
+	# Sentence-ending punctuation, followed by optional close-quote.
+	$text =~ s/([。．？！♪]”?)/$1\n/g;
 	$text =~ s/([\.?!]) *(\p{InCJK})/$1\n$2/g;
-	$text =~ s/(\p{InCJK})/ $1 /g;
+	if ($hanzi) { $text =~ s/(\p{InCJK})/ $1 /g; }
 	$text =~ s/ +/ /g;
 
 	# Special punctuation cases are covered. Check all remaining periods.

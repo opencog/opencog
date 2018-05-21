@@ -30,8 +30,8 @@
 )
 
 ;; Define pln-fc and pln-bc for convenience
-(define (pln-fc source) (cog-fc pln-rbs source (List) (Set)))
-(define (pln-bc target vardecl) (cog-bc pln-rbs target vardecl (Set)))
+(define (pln-fc source) (cog-fc pln-rbs source))
+(define (pln-bc target vardecl) (cog-bc pln-rbs target #:vardecl vardecl))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -48,10 +48,10 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+; List the rules
 (define rules
   (list
-    (list universal-full-instantiation-forall-1ary-meta-rule-name 1)))
+    universal-full-instantiation-forall-1ary-meta-rule-name))
 
 ;; Associate rules to PLN
 (ure-add-rules pln-rbs rules)

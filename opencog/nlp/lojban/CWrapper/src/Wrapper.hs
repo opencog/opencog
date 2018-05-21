@@ -21,15 +21,13 @@ foreign export ccall "lojban_print" c_print :: Ptr AtomSpaceRef
                                      -> Handle
                                      -> IO CString
 
-foreign export ccall "lojban_init" c_init :: CString -> CString -> IO (StablePtr WordList)
+foreign export ccall "lojban_init" c_init :: IO (StablePtr WordList)
 
 foreign export ccall "lojban_exit" c_exit :: StablePtr WordList -> IO ()
 
-c_init :: CString -> CString -> IO (StablePtr WordList)
-c_init cCmavoSrc cGismuSrc = do
-    cmavoSrc <- peekCString cCmavoSrc
-    gismuSrc <- peekCString cGismuSrc
-    wl <- loadWordLists cmavoSrc gismuSrc
+c_init :: IO (StablePtr WordList)
+c_init = do
+    wl <- loadWordLists
     newStablePtr wl
 
 c_exit :: StablePtr WordList -> IO ()
@@ -45,7 +43,8 @@ c_parse asRef swl ctext = do
     print text
     case lojbanToAtomese wl seed text of
         Left m  -> pure nullPtr
-        Right r -> do
+        Right Nothing -> pure nullPtr
+        Right (Just r) -> do
             print r
             mres <- as <: insertAndGetHandle r
             case mres of

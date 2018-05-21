@@ -9,13 +9,14 @@
 ; OVERVIEW
 ; --------
 ; The scripts below compute the cosine-similarity (and other similarity
-; meaasures) between pseudo-connector-set vectors.
+; measures) between pseudo-connector-set vectors.
 ;
 ; An example connector-set, for the word "playing", illustrating
 ; that it can connect to the word "level" on the left, and "field"
-; on the right, is shown below. In terms of ENglish grammar, it is
-; a bad example, because English should not connect this way. But
-; it is an example...
+; on the right, is shown below. (Please note that this is for
+; illustrating the atomese structure, and not for illustrating actual
+; English grammar; its a bad grammatical example, although the MST
+; parser does find things like this.)
 ;
 ;    (Section
 ;       (WordNode "playing")
@@ -27,20 +28,25 @@
 ;             (WordNode "field")
 ;             (LgConnDirNode "+"))))
 ;
-; The `PseudoAnd` part of this structure is refered to as the
+; In dictionary short-hand, this would be written as
+;
+;     playing:  level- & field+;
+;
+; The `ConnectorSeq` part of this structure is refered to as the
 ; pseudo-disjunct, in that it resembles a normal linkgrammar
-; disjunct, but has word appearing where connectors should be.
+; disjunct, but has words appearing where connectors should be.
 ;
 ; Any given word may have dozens or hundreds or thousands of these
-; connector sets. The totality of these sets, for a given, fixed word
-; form a vector.  The disjunct is a basis element, and the raw
-; observational count on the `Section` is the magnitude of the
+; sections. The totality of these sections, for a given, fixed word
+; form a vector.  The connector seq (the disjunct) is a basis element,
+; and the raw observational count on the `Section` is the magnitude
 ; of the vector in that basis direction.
 ;
 ; Note that these vectors are sparse: if a particular disjunct is
 ; missing, then the associated count is zero.  Note that the dimension
 ; of the vector-space is extremely high, possibly in the
-; tens-of-millions.
+; tens-of-millions, while a "typical" English word might have a few
+; thousand non-zero sections.
 ;
 ; As vectors, dot-products can be taken. The most interesting of these
 ; is the cosine similarity between two words. This quantity indicates how
@@ -49,7 +55,7 @@
 ;
 ; Not implemented: the Pearson R.  There is both a theoretical and a
 ; practical difficulty with it. The theoretical difficulty is that
-; wen never expect connector sets to be correlated, with have a
+; we never expect connector sets to be correlated, with a
 ; different mean offset!  This doesn't make sense, because when a
 ; disjunct is not seen, it literally isn't there; it does NOT get
 ; folded into a mean-value offset.  The practical difficulty is that
@@ -61,9 +67,8 @@
 ;
 ; Also not implemented: Tanimoto metric. The formula for this gives
 ; an actual metric only when the vectors are bit-vectors, and we don't
-; have bit-vectors, so I am not implementing this.
-;
-; XXX support can be taken as bit-vectors ....
+; have bit-vectors, so I am not implementing this. Note, however, that
+; the presence/absence of support can be viewed as a bit-vector.
 ;
 ; ---------------------------------------------------------------------
 ;
@@ -109,25 +114,10 @@
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
 
-		; get-all-csets - return a list holding all of the observed
-		; csets. Caution: this can be tens of millions long!
-		(define (do-get-all-csets)
-			(define all '())
-			(cog-map-type
-				(lambda (atom) (set! all (cons atom all)) #f)
-				'Section)
-			all)
-
-		(define (get-all-csets)
-			(if (null? all-csets) (set! all-csets (do-get-all-csets)))
-			all-csets)
-
 		; Fetch (from the database) all pseudo-csets
-		; XXX this doesn't get the wild-cards, making the report
-		; not work, and also some of the freq-api, right? Because we
-		; put the wild-cards into List's above....
 		(define (fetch-pseudo-csets)
 			(define start-time (current-time))
+			; marginals are located on any-left, any-right
 			(fetch-incoming-set any-left)
 			(fetch-incoming-set any-right)
 			(load-atoms-of-type 'Section)
@@ -138,6 +128,7 @@
 		(lambda (message . args)
 			(apply (case message
 				((name) (lambda () "Word-Disjunct Pairs (Connector Sets)"))
+				((id)   (lambda () "cset"))
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
@@ -147,21 +138,23 @@
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)
-				((all-pairs) get-all-csets)
 				((fetch-pairs) fetch-pseudo-csets)
 				((provides) (lambda (symb) #f))
 				((filters?) (lambda () #f))
-				(else (error "Bad method call on psuedo-cset:" message)))
+				(else (error "Bad method call on pseudo-cset:" message)))
 			args)))
 )
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Use the new, modern object API for all this stuff.
-; XXX Everything below here should be removed/destroyed.
-; The problem is that we don't get a chance to specify the dataset
-; filters, before making use of the API below.
+; XXX Everything below should eventually be removed/destroyed.
+; Why? Because (1) its a cheesy wrapper for the modern object API
+; that the user could easily do themselves. Most of these are one-liner
+; functions with documentation. Another problem: (2) The API below
+; does not allow the user to specify any sort of filtering.  Using
+; a filtered matrix radically alters results (in both good and bad
+; ways)!
 ;
 (define pseudo-cset-api (make-pseudo-cset-api))
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))

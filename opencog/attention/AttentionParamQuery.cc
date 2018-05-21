@@ -1,9 +1,10 @@
 
-#include "AttentionParamQuery.h"
-
 #include <opencog/atoms/base/Link.h>
-#include <opencog/util/Config.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+
+#include "AttentionParamQuery.h"
 
 using namespace opencog;
 
@@ -72,9 +73,9 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
 
     bool has_value = false;
     for(Handle h : hseq){
-        if(h->getType() == STATE_LINK ){
+        if(h->get_type() == STATE_LINK ){
             Handle hvalue = h->getOutgoingSet()[1];
-            std::string str = hvalue->getName();
+            std::string str = hvalue->get_name();
             str.erase (str.find_last_not_of('0') + 1,
                     std::string::npos);
 
@@ -105,5 +106,5 @@ HandleSeq AttentionParamQuery::get_params(void)
 void AttentionParamQuery::load_default_values(void)
 {
      SchemeEval scm(_as);
-     scm.eval("(load \"" DATADIR "/scm/attention/default-param-values.scm\")");
+     scm.eval("(load \"" DATADIR"/scm/opencog/attention/default-param-values.scm\")");
 }

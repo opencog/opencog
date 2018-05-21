@@ -2,6 +2,7 @@
 ; control.scm
 ;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 ;
 ; Design Notes:
 ; Weights are associated to rules using a StateLink.  However, the
@@ -17,28 +18,28 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define-public (psi-set-updater! updater tag-node)
+(define (psi-set-updater! component-node updater)
 "
-  psi-set-updater! UPDATER TAG
+  psi-set-updater! COMPONENT UPDATER
 
-  Returns the alias node that represents the updater UPDATER.  An
-  updater is an evaluatable atom that, when evaluated, updates the
-  values for a given demand/modulator.
+  An UPDATER is an evaluatable atom that, when evaluated, updates the
+  values for a given COMPONENT.
 
-  The TAG is a demand/modulator node that the updater is being added to.
+  The COMPONENT is a component node that the updater is being added to.
 "
-    (psi-set-functionality updater #t tag-node "updater")
+    (psi-set-func! updater "#t" component-node "updater")
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-updater tag-node)
+(define (psi-get-updater component-node)
 "
-  psi-get-updater TAG
+  psi-get-updater COMPONENT
 
-  Returns a list containing the updater for the given tag-node TAG.
-  Null is returned if there is no updater for TAG.
+  Returns the updater atom for the given COMPONENT, which when evaluated
+  will update the weight of psi-rules. Null is returned if there is no
+  updater for COMPONENT.
 "
-    (psi-get-functionality tag-node "updater")
+    (psi-func component-node "updater")
 )
 
 ; --------------------------------------------------------------
@@ -48,7 +49,7 @@
 ; NOTE: This is a hack b/c once the weight of the rules is separated into atom
 ; or protoatom wrapped in a StateLink then (or somehting like that) then it
 ; would be easier to update.
-(define psi-controller-demand (psi-demand "controller" .000000000))
+(define psi-controller-demand (psi-demand "controller"))
 
 ; --------------------------------------------------------------
 ; To indicate whether the weights of the psi-controlled-rules
@@ -57,13 +58,13 @@
 ; updating the weights at a time.
 
 ; The states of the psi-controller
-(define-public psi-controller (Anchor
+(define psi-controller (Anchor
     (string-append psi-prefix-str "psi-controller")))
 
-(define-public psi-controller-idle
+(define psi-controller-idle
     (Concept (string-append psi-prefix-str "psi-controller-idle")))
 
-(define-public psi-controller-busy
+(define psi-controller-busy
     (Concept (string-append psi-prefix-str "psi-controller-busy")))
 
 (State psi-controller psi-controller-idle)
@@ -71,7 +72,7 @@
 ; -----
 ; For locking and releasing the controller
 
-(define-public (psi-controller-occupy)
+(define (psi-controller-occupy)
     (while (equal? psi-controller-busy
             (gar (cog-execute! (Get (State psi-controller (Variable "$x"))))))
         (sleep 0.5)
@@ -80,14 +81,14 @@
     (State psi-controller psi-controller-busy)
 )
 
-(define-public (psi-controller-release)
+(define (psi-controller-release)
     (State psi-controller psi-controller-idle)
 )
 
 ; --------------------------------------------------------------
 ; FIXME -- can we have a shorter/better name for this method?
 ;
-(define-public (psi-rule-set-atomese-weight psi-rule weight)
+(define (psi-rule-set-atomese-weight psi-rule weight)
 "
   psi-rule-set-atomese-weight RULE WEIGHT
 
@@ -116,22 +117,24 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-set-controlled-rule psi-rule)
+(define (psi-set-controlled-rule psi-rule name)
 "
-  psi-set-controlled-rule RULE
+  psi-set-controlled-rule RULE NAME
 
-  Specify that RULE is to be controlled. Controlling means modifying the
-  weight of the rule, thus affecting the likelyhood of it being choosen.
+  Specify that RULE is to be controlled and give it a NAME. Controlling means
+  modifying the weight of the rule, thus affecting the likelyhood of it being choosen.
 "
     (MemberLink psi-rule psi-controller-demand)
 
     (psi-rule-set-atomese-weight psi-rule (tv-mean (cog-tv psi-rule)))
 
+    (psi-rule-set-alias! psi-rule name)
+
     psi-rule
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-controlled-rules)
+(define (psi-get-controlled-rules)
 "
   Returns a list of all the rules that are going to be controlled
 "
@@ -145,7 +148,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-atomese-weight psi-rule)
+(define (psi-rule-atomese-weight psi-rule)
 "
   Returns a list with a NumberNode that has the weight of the given psi-rule if
   the weight is represented in atomese, if not it returns `null`.
@@ -153,7 +156,7 @@
   psi-rule:
   - An ImplicationLink whose weight is going to be modified.
 "
-    (cog-outgoing-set (cog-bind
+    (cog-outgoing-set (cog-execute!
         (BindLink
             (VariableList
                 (TypedVariableLink
@@ -178,7 +181,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-controller-update-weights)
+(define (psi-controller-update-weights)
 "
   This gets all the psi-rules that inherit from the psi-control-node & update
   their weight.
@@ -200,7 +203,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-disable rule-alias psi-rule-list)
+(define (psi-rule-disable rule-alias psi-rule-list)
 "
   Disable the psi-rule which is aliased as `rule-alias`. A disabled rule is
   one with weight of zero.
@@ -212,6 +215,7 @@
   - a list with psi-rules.
 "
     (receive (filtered other)
+        ; TODO: Use categories instead of aliases for categorization
         (psi-partition-rule-with-alias rule-alias psi-rule-list)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
@@ -220,7 +224,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-enable rule-alias psi-rule-list)
+(define (psi-rule-enable rule-alias psi-rule-list)
 "
   Disable the psi-rule which is aliased as `rule-alias`. An enabled rule is
   one with weight greater than zero. Here the weight is set to 0.9
@@ -232,6 +236,7 @@
   - a list with psi-rules.
 "
     (receive (filtered other)
+      ; TODO: Use categories instead of aliases for categorization
         (psi-partition-rule-with-alias rule-alias psi-rule-list)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))

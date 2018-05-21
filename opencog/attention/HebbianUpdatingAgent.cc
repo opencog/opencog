@@ -53,7 +53,7 @@ void HebbianUpdatingAgent::run()
     HandleSeq atoms;
     size_t size;
 
-    std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
+    std::back_insert_iterator<HandleSeq> out_hi(atoms);
 
     _bank->get_handle_set_in_attentional_focus(out_hi);
 
@@ -82,7 +82,7 @@ void HebbianUpdatingAgent::run()
   //    auto magnitued = as->get_normalised_zero_to_one_STI(source,true,true);
   //    auto direction = as->get_normalised_STI(target,true,true);
 
-  //    old_tc = link->getTruthValue()->getMean();
+  //    old_tc = link->getTruthValue()->get_mean();
 
   //    new_tc = new_tc + magnitued * direction * learningRate;
   //    new_tc = std::min(std::max(new_tc,0.0),1.0);
@@ -108,7 +108,7 @@ void HebbianUpdatingAgent::updateHebbianLinks(Handle source)
 
         // old link strength decays
         TruthValuePtr oldtv  = h->getTruthValue();
-        old_tc = oldtv->getMean();
+        old_tc = oldtv->get_mean();
         tc = tcDecayRate * new_tc + (1.0 - tcDecayRate) * old_tc;
 
         //update truth value accordingly
@@ -126,8 +126,8 @@ double HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
 
-    auto normsti_i = _bank->getNormalisedZeroToOneSTI(_bank->get_av(handles[0]), true, true);
-    auto normsti_j = _bank->getNormalisedZeroToOneSTI(_bank->get_av(handles[1]), true, true);
+    auto normsti_i = _bank->getNormalisedZeroToOneSTI(get_av(handles[0]), true, true);
+    auto normsti_j = _bank->getNormalisedZeroToOneSTI(get_av(handles[1]), true, true);
     double conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
 
     conj = (conj + 1.0) / 2.0;

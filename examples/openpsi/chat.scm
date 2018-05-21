@@ -55,8 +55,8 @@
 ;-------------------------------------------------------------------------------
 ; Define two demands, with default values.
 
-(define sociality (psi-demand "Sociality" .8))
-(define humor (psi-demand "Humor" .5))
+(define sociality (psi-demand "Sociality"))
+(define humor (psi-demand "Humor"))
 
 ;-------------------------------------------------------------------------------
 ; Define and set an action selector
@@ -233,7 +233,7 @@
 ;---------------------------------------------------------------------
 ; Run OpenPsi (in a separate thread).
 
-(psi-run)
+(psi-run-per-demand)
 
 ; Now try talking to it...
 ; For example ...

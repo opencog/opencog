@@ -18,7 +18,7 @@ import System.Process
 
 main :: IO ()
 main = do
-    (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
+    (parser,printer) <- initParserPrinter
     mainloop parser printer
 
 mainloop parser printer = do
@@ -28,7 +28,8 @@ mainloop parser printer = do
     let res = parser input
 
     case res of
-        Right x -> printAtom x
+        Right (Just x)  -> printAtom x
+        Right (Nothing) -> putStrLn "Empty parse no Error"
         Left e  -> putStrLn e
 
     putStrLn ""

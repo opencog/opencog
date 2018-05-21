@@ -47,8 +47,8 @@ class FishgramTest(TestCase):
 
     def test_bfs(self):
 #        conj = (
-#            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347010'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'EnergyDemandGoal'), a.add(t.ListLink, out=[])])])])]),
-#            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), a.add(t.ListLink, out=[a.add(t.ExecutionLink, out=[a.add(t.GroundedSchemaNode, 'eat'), a.add(t.ListLink, out=[a.add(t.AccessoryNode, 'id_-54646')])])])])]),
+#            a.add(t.AtTimeLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'EnergyDemandGoal'), a.add(t.ListLink, out=[])])])]), a.add(t.TimeNode, '11210347010')]),
+#            a.add(t.AtTimeLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), a.add(t.ListLink, out=[a.add(t.ExecutionLink, out=[a.add(t.GroundedSchemaNode, 'eat'), a.add(t.ListLink, out=[a.add(t.AccessoryNode, 'id_-54646')])])])]), a.add(t.TimeNode, '11210347000')]),
 #            a.add(t.SequentialAndLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.TimeNode, '11210347010')])
 #            )
 #        conj = tuple(map(tree.tree_from_atom, conj))
@@ -90,23 +90,24 @@ class FishgramTest(TestCase):
     #                            a(t.PredicateNode, name = 'EnergyDemandGoal')
     #            )
     #    
-    #    action = T('AtTimeLink', 1,
+    #    action = T('AtTimeLink',
     #                T('EvaluationLink',
     #                    a(t.PredicateNode, name='actionDone'),
     #                    T('ListLink',
     #                       bark
     #                     )
-    #                )
+    #                ),
+    #                1
     #            )
     #    seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
     #    result =    T('AtTimeLink',
-    #                    2,
     #                    T('EvaluationLink',
     #                        a(t.PredicateNode, name='increased'),
     #                        T('ListLink',
     #                            goal
     #                        )
-    #                    )
+    #                    ),
+    #                    2
     #                )
     #    
     #    premises = (action, seq_and)
@@ -134,17 +135,17 @@ class FishgramTest(TestCase):
     #        T('ListLink')
     #    )
     #    
-    #    action = T('AtTimeLink', 1,
+    #    action = T('AtTimeLink',
     #                    T('EvaluationLink',
     #                        a(t.PredicateNode, name='actionDone'),
     #                        T('ListLink',
     #                           bark
     #                         )
-    #                    )
+    #                    ),
+    #                    1
     #                )
     #    seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
     #    increase = T('AtTimeLink',
-    #                 2,
     #                 T('EvaluationLink',
     #                        a(t.PredicateNode, name='increased'),
     #                        T('ListLink',
@@ -152,7 +153,8 @@ class FishgramTest(TestCase):
     #                                a(t.PredicateNode, name = 'EnergyDemandGoal')
     #                            )
     #                        )
-    #                    )
+    #                    ),
+    #                 2
     #                 )
     #    
     #    # Add the pattern (still with some variables) into the ForestExtractor results, then see if it can be looked up correclty

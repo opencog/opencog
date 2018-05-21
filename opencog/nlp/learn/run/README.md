@@ -3,7 +3,7 @@ Parse management scripts
 ========================
 
 The scripts here are used to automate the ingestion of plain-text
-UTF-8 files into the language learning pipleine.  These can be applied
+UTF-8 files into the language learning pipeline.  These can be applied
 to any flat text files from any origin of your choice.  Some tools
 for downloading Wikipedia and Project Gutenberg texts can be found
 in the `../download` directory.
@@ -18,7 +18,7 @@ A quick overview:
 
 * `wiki-ss-*.sh`: the top-level parser script. It pulls text files, one
   by one, from the data directory, and submits them for parsing and
-  counting.  This script should be manually lanuched in the 'parse'
+  counting.  This script should be manually launched in the 'parse'
   byobu window.  Be sure to open the database, first. The data directory
   needs to be manually adjusted here, and also in the ss-one.sh script.
 
@@ -26,6 +26,9 @@ A quick overview:
   text file, moving the file to a different directory when finished
   with it.  Note that there are hard-coded paths in here, pointing to
   the sentence splitter.
+
+* `ss-nosplit-one.sh`: similar to above, but assumes that the text-file
+  contains one sentence per line - i.e. has been pre-split.
 
 * `submit-one.pl`: script to actually send sentences to the REPL server.
 

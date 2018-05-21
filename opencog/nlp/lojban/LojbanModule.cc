@@ -42,21 +42,7 @@ DECLARE_MODULE(LojbanModule);
 LojbanModule::LojbanModule(CogServer& cs) :
         Module(cs) , _cs(cs) , _as(&cs.getAtomSpace()) , scmeval(_as)
 {
-    std::string cmavosrc = "cmavo.csv";
-    std::string gismusrc = "gismu.csv";
-    std::string url = "https://raw.githubusercontent.com/rTreutlein"
-                      "/lojban-data/master/";
-    struct stat buffer;
-    if (stat (cmavosrc.c_str(),&buffer) != 0) {
-        int i = system(("wget " + url + cmavosrc).c_str());
-        std::cout << i << "\n";
-    }
-    if (stat (gismusrc.c_str(),&buffer) != 0) {
-        int i = system(("wget " + url + gismusrc).c_str());
-        std::cout << i << "\n";
-    }
-
-    _wordlist = lojban_init(cmavosrc.c_str(),gismusrc.c_str());
+    _wordlist = lojban_init();
 }
 
 /**
@@ -88,7 +74,7 @@ std::string LojbanModule::do_parse_lojban(Request *req, std::list<std::string> a
     if (!hptr or (*hptr) == Handle::UNDEFINED)
         return "Parsing Failed";
     else
-        return h_to_string((*hptr));
+        return (*hptr)->to_string();
 }
 
 std::string LojbanModule::do_load_lojban(Request *req, std::list<std::string> args)
