@@ -63,16 +63,8 @@
         (* context-weight
           (assoc-ref context-alist (psi-get-context R))) 1))
     (define sti (if SKIP-STI
-      ; Weight higher if the rule is in the current topic, and/or
-      ; it's a rejoinder
-      (let ((topic-weight
-              (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5))
-            (rejoinder-weight
-             ; A crude way to see if R is a rejoinder
-             (if (any (lambda (x) (equal? x ghost-last-executed))
-                      (cog-get-all-nodes R))
-                 1 0.1)))
-        (* topic-weight rejoinder-weight))
+      ; Weight higher if the rule is in the current topic
+      (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
       (if (> sti-weight 0)
         (* sti-weight (cog-av-sti R)) 1)))
     (define urge
@@ -151,19 +143,40 @@
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
   ; TODO: Return the actual action instead of a rule
-  (if (equal? (length action-weight-alist) 1)
+  (if (= (length action-weight-alist) 1)
     (assoc-ref action-rule-alist (caar action-weight-alist))
-    (let* ((accum-weight 0)
-           (cutoff (* total-weight (random:uniform (random-state-from-platform))))
-           (action-rtn
-             (find
-               (lambda (a)
-                 (set! accum-weight (+ accum-weight (cdr a)))
-                 (<= cutoff accum-weight))
-               action-weight-alist)))
-      (if (equal? #f action-rtn)
-        (list)
-        (assoc-ref action-rule-alist (car action-rtn))))))
+    ; Here there are special handling for rejoinders:
+    ; 1) If there is a rejoinder that satisfy the current context, always trigger it
+    ; 2) If there are more than one rejoinders that satisfy the current context,
+    ;    always choose the one that is defined first
+    (let ((rejoinder
+            (fold
+              (lambda (rej top-rej)
+                (if (and (not (null? (cog-value rej ghost-rej-seq-num)))
+                         (or (null? top-rej)
+                             (< (car (cog-value->list
+                                       (cog-value rej ghost-rej-seq-num)))
+                                (car (cog-value->list
+                                       (cog-value top-rej ghost-rej-seq-num))))))
+                  rej
+                  top-rej))
+              (list)
+              (map (lambda (a) (assoc-ref action-rule-alist (car a))) action-weight-alist))))
+      (if (null? rejoinder)
+        (begin
+          ; If there is no rejoinder that safisfy the current context, try the responders
+          (let* ((accum-weight 0)
+                 (cutoff (* total-weight (random:uniform (random-state-from-platform))))
+                 (action-rtn
+                   (find
+                     (lambda (a)
+                       (set! accum-weight (+ accum-weight (cdr a)))
+                       (<= cutoff accum-weight))
+                     action-weight-alist)))
+            (if (equal? #f action-rtn)
+              (list)
+              (assoc-ref action-rule-alist (car action-rtn)))))
+        rejoinder))))
 
 ; ----------
 (define-public (ghost-find-rules SENT)
