@@ -209,8 +209,8 @@ calculate the resulting TV on the implication as follows
 TV.strength = |C|/|A|
 TV.count = |A|
 ```
-(note that this is not the best possible estimate, this may vary
-depending on the prior, but we let aside for sake of simplicity).
+(this is not the best possible estimate which may vary depending on
+the prior, but we let aside for sake of simplicity).
 
 It is important to realize that the pattern matchings required to
 obtain `A` and `C` need to take place over the entire distributed
@@ -219,6 +219,56 @@ AtomSpace of traces.
 Of course interesting control rules will require more sophisticated
 reasoning schemes such as pattern mining but in the end it will
 probably end up requiring the same sort of distributed pattern
-matching processing as in this simple case. So I suggest to start with
-that.
+matching as in this simple case. So starting with that should already
+be quite meaningful.
 
+Kownledge Base Properties
+-------------------------
+
+The size of an atomspace of trace seems to grow almost linearly in our
+toy problem (the one in that same directory)
+
+50 Iterations -> 1K atoms of traces
+100 Iterations -> 2.1K atoms of traces
+200 Iterations -> 4.3K atoms of traces
+
+this makes sense. First, each successful iteration produces an
+inference. Second, although inferences grow with the depth of the
+search, much of their content is being shared due to being stored on
+the atomspace. However, it is not expected that the grow would be
+linear in the worst case, because due to unification/substitution a
+new inference may share little with the inference it has been expanded
+from. Based on that we conclude that the growth is quadractically
+bounded, and probably in average as follows
+```
+|T| = a*N^b
+```
+where `N` is the number of iterations, and `a` and `b` are parameters
+ultimately depending on the problem, the knowledge and rule bases. `b`
+is likely withing 1 and 2, linear in the best case, quadratic in the
+worst. If the rule base is sufficiently restricted it may even go
+sub-linear, as in this case not all inferences can be successfully
+expanded.
+
+Let us estimate the size of an atomspace of traces for a real world
+problem. Let say that `N=10K`, `a=10` and `b=1.1`, thus `|T|=251K`,
+which to our experience requires about 250MB of RAM. According to our
+early experiments about a hundred of problem instances must be run to
+begin to collect enough traces to learn more sophisticated (beyong
+context-free) control rules, though that seems to be really a minimum.
+
+So it seems a few workstations, each with a dozen cores and dozen GB
+of RAM would be able run a moderate scale (beyond toyish) inference
+control learning experiment in about a day. A couple of hours for
+solving 100+ problem instances, and perhaps the rest of the day for
+mining and producing control rules, the effort depending essentially
+on how sophisticated we want it to be, which is hard to determine in
+advance. Learning context-free rules might just be a question of
+minutes, while mining conplex patterns for producing
+context-sensistive rules might easily take hours or days.
+
+Actual Databases and Test Scripts
+---------------------------------
+
+A toy single-thread experiment can be found in that same folder and
+described in length in the [README.md](README.md).
