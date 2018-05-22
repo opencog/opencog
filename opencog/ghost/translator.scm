@@ -23,7 +23,8 @@
          (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
          ; It's possible that the sequence does not having any word or concept etc,
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
-         (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
+         (negation-only? (every (lambda (t) (equal? 'negation (car t))) TERMS))
+         (empty-seq? (and (= 1 (length TERMS)) (equal? 'empty-context (caar TERMS))))
          (func-only? (and (> (length TERMS) 0)
            (every (lambda (t) (equal? 'function (car t))) TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
@@ -67,7 +68,9 @@
                      ; get it and add an extra wildcard
                      (append start after-anchor-end (list wc) end))))
              ; Just having one wildcard is enough for an empty sequence
-             (empty-seq? (append TERMS (list wc)))
+             (negation-only? (append TERMS (list wc)))
+             ; If the context is empty, not even a wildcard is needed
+             (empty-seq? TERMS)
              ; If there is no anchor, the main-seq should start and
              ; end with a wildcard
              (else (append (list wc) TERMS (list wc))))))
@@ -189,6 +192,11 @@
                   (list-set! pt 2 (list (List (list-ref pt 2))))
                   (list-set! pt 3 (list (List (list-ref pt 3))))
                   (update-lists pt)))
+            ; If it's an empty context, e.g. "u: ()"
+            ; it's always true and should be triggered
+            ; even if there is no perception input
+            ((equal? 'empty-context (car t))
+              (set! c (list (TrueLink))))
             (else (begin
               (cog-logger-warn ghost-logger
                 "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
