@@ -585,11 +585,12 @@
   (set! rule-label-list (append rule-label-list (list rule-name)))
 
   (set! rule-alist
-    (assq-set! rule-alist rule-name (list PATTERN ACTION GOAL rule-name TYPE)))
+    (assq-set! rule-alist rule-name
+      (list PATTERN ACTION (process-goal GOAL) GOAL rule-name TYPE)))
 )
 
 ; ----------
-(define (instantiate-rule PATTERN ACTION GOAL NAME TYPE)
+(define (instantiate-rule PATTERN ACTION ALL-GOALS RULE-LV-GOALS NAME TYPE)
 "
   To process and create the rule in the AtomSpace.
 "
@@ -626,13 +627,12 @@
                         (list-ref proc-type 1)))
          (type (list-ref proc-type 2))
          (action (process-action ACTION NAME))
-         (goals (process-goal GOAL))
          (is-rejoinder? (equal? type strval-rejoinder))
          (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
     (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
     (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
-    (cog-logger-debug ghost-logger "Goal: ~a" goals)
+    (cog-logger-debug ghost-logger "Goal: ~a" ALL-GOALS)
 
     ; Update the count -- how many rules we've seen under this top level goal
     ; Do it only if the rules are ordered and it's not a rejoinder
@@ -673,7 +673,7 @@
             ; Check if the goal is defined at the rule level
             ; If the rule is ordered, the weight should change
             ; accordingly as well
-            (if (or (member goal GOAL) (not is-rule-seq))
+            (if (or (member goal RULE-LV-GOALS) (not is-rule-seq))
               (stv (cdr goal) .9)
               (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
             ghost-component))
@@ -747,7 +747,7 @@
 
         ; Return
         a-rule)
-      goals)))
+      ALL-GOALS)))
 
 ; ----------
 (define (create-concept NAME MEMBERS)
