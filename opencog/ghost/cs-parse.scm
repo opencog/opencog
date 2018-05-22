@@ -426,7 +426,7 @@
     )
 
     (context
-      (LPAREN RPAREN) : "(cons 'wildcard (cons 0 -1))"
+      (LPAREN RPAREN) : "(cons 'empty-context (list))"
       (LPAREN negation RPAREN) : $2
       (LPAREN context-patterns RPAREN) : $2
       (LPAREN negation context-patterns RPAREN) : (format #f "~a ~a" $2 $3)
