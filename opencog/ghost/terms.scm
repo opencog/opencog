@@ -22,10 +22,8 @@
 "
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
-         (v1 (Variable (gen-var STR #f)))
-         (l (WordNode nstr))
-         (v (list (TypedVariable v1 (Type "WordNode")))))
-    (list v (list) (list v1) (list l))))
+         (l (WordNode nstr)))
+    (list (list) (list) (list l) (list l))))
 
 ; ----------
 (define (lemma STR)
