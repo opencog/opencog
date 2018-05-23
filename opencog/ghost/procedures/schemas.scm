@@ -47,7 +47,7 @@
   Record the current time for TIMER-ID.
   If TIMER-ID is not given, a default timer will be used.
 "
-  (set-time-perceived! timer-id)
+  (set-time-perceived! (Concept (cog-name timer-id)))
   fini
 )
 
