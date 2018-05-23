@@ -146,7 +146,7 @@
 )
 
 (define* (word_perceived word #:optional (time-interval dti-node))
-  (was-perceived? word time-interval)
+  (was-perceived? (Word (cog-name word)) time-interval)
 )
 
 (define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))

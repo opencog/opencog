@@ -184,6 +184,7 @@
   Returns WORD after increasing its sti.
 "
   (define wn (Word word))
+  (define cn (Concept word))
   (set-time-perceived! wn)
 
   ; 'ghost-word-seq' is shared among the rules with word-related pattern
@@ -193,6 +194,7 @@
   (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))
 
   (ghost-stimulate wn)
+  (ghost-stimulate cn)
 )
 
 (define (perceive-face-talking face-id new-conf)
