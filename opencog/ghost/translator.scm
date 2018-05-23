@@ -560,6 +560,7 @@
   ; Clear the states
   (set! rule-label-list '())
   (set! rule-alist '())
+  (set! rule-hierarchy '())
 )
 
 ; ----------
@@ -775,9 +776,13 @@
 "
   Create a top level goal that will be shared among the rules under it.
 "
+  ; Instantiate the rules in the stack when we see a new top level goal
+  ; It's cleaner to do it this way in case there are multiple goals
+  ; defined in the same file
+  (process-rule-stack)
+
   (set! top-lv-goals GOALS)
   (set! is-rule-seq ORDERED)
-  (set! rule-hierarchy '())
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
