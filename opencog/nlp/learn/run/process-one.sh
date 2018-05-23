@@ -22,7 +22,7 @@ splitdir=split-articles
 cnt_mode="lg"
 cnt_reach=25
 mst_dist="#f"
-store_fmi="#f"
+exp_parses="#f"
 source ./config/params.txt # overrides default values, if present
 
 # Gets mode of counter for the cogserver
@@ -30,17 +30,15 @@ case $1 in
    pairs)
       subdir=submitted-articles
       observe="observe-text"
-      params="$cnt_mode $mst_dist $store_fmi"
+      params="$cnt_mode $cnt_reach"
       ;;
    mst)
       subdir=mst-articles
       observe="observe-mst"
-      params="$cnt_mode $cnt_reach \"#f\""
-      ;;
-   mst-extra)
-      subdir=mst-articles
-      observe="observe-mst-extra"
-      params="$cnt_mode $cnt_reach \"#f\""
+      if ["$exp_parses" == "#t"]
+          then observe="observe-mst-extra"
+      fi
+      params="$cnt_mode $mst_dist"
       ;;
 esac
 
@@ -55,7 +53,6 @@ base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
 echo "Processing file >>>$rest<<<"
-
 
 # Create directories if missing
 mkdir -p $(dirname "$splitdir/$rest")

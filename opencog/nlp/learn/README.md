@@ -169,7 +169,7 @@ Now, let's set up the **text-ingestion pipeline:**
    the following in a second terminal:
 ```
    rlwrap telnet localhost 17005
-   opencog-en> (observe-text "this is a test" 'lg' 24)
+   opencog-en> (observe-text "this is a test" "lg" 24)
 ```
 
    Or better yet (in a third terminal):
@@ -262,8 +262,8 @@ fan-fiction website. Once you are sure you have the right material to start, fol
    (you don't want to mess up the original files after all the work
    done to get them).
 
-   If you used the provided download scripts, you should have your
-   files in the `alpha-pages` folder. Make a copy of this folder with
+   If you used the provided download scripts, you should have a test
+   file in the `alpha-pages` folder. Make a copy of this folder with
    the desired name.
    ```
       cp -pr alpha-pages beta-pages
@@ -306,11 +306,6 @@ fan-fiction website. Once you are sure you have the right material to start, fol
            parses obtained for the sentence with link-parses in "any" mode.
            If cnt_reach is set to 0, then it uses all returned parses.
 
-   cnt-mode used for observing is still being used. Also, if you want to give
-   weight to the word-pairs MI (multiplied by 1/separation), assign mst_dist="#t".
-   The parameter cnt_reach does not have an effect at this stage, you can leave
-   it as is.
-
 5) In your working directory run the following:
    ```
       ./run-multiple-terminals.sh pairs lang ??_pairs your_user your_password
@@ -328,9 +323,9 @@ fan-fiction website. Once you are sure you have the right material to start, fol
 6) In the parse tab of the byobu (you can navigate with the F3 and F4 keys),
    run the following:
    ```
-      ./text-process.sh pairs lang
+      ./text-process.sh pairs en
    ```
-   Remember to change the variable `lang` to the respective language (ex: en). 
+   Or can change 'en' for the respective language initials. 
    If this command shows the error
    > nc: invalid option -- 'N'
    
@@ -390,14 +385,15 @@ on four different kinds of structures:
                  You almost surely do not need this.  This is for my
                  own personal curiosity.
 
+Edit the comments on that file if it is the case.
+
 This pipeline requires postgres 9.3 or newer, for multiple reasons.
 One reason is that older postgres don't automatically VACUUM. The other is
 that the list membership functions are needed.
 
-Be sure to perform the postgres tuning recommendations found in
+Also, be sure to perform the postgres tuning recommendations found in
 various online postgres performance wikis, or in the
-[atomspace/opencog/persist/sql/README.md](https://github.com/opencog/atomspace/tree/master/opencog/persist/sql)
-file. See also 'Performance' section below.
+[atomspace/opencog/persist/sql/README.md](https://github.com/opencog/atomspace/tree/master/opencog/persist/sql) file. See 'Performance' section below.
 
 
 Mutual Information of Word Pairs
@@ -423,17 +419,16 @@ will automatically pick up where they left off.
    ```
       guile -l compute-mi.scm  -- --lang ?? --db ??_pairs --user your_user --password your_password
    ```
-
-   This script uses commands from the scripts in the `scm` directory.
-   The code for computing word-pair MI is in `batch-word-pair.scm`.
-   It uses the `(opencog matrix)` subsystem to perform the core work.
-
    Replace the arguements above with the ones that apply to the language
    you are using and your database credentials. User and password are
    optional, as previously explained. For example, for english run:
    ```
       guile -l compute-mi.scm  -- --lang en --db en_pairs --user opencog_user --password cheese
    ```
+   
+   This script uses commands from the scripts in the `scm` directory.
+   The code for computing word-pair MI is in `batch-word-pair.scm`.
+   It uses the `(opencog matrix)` subsystem to perform the core work.
 
 General remakrs:
 
@@ -528,10 +523,12 @@ version works well. To run it follow the next steps:
 
    * Open `params.txt` and make sure the cnt-mode used for observing is
    still being used. Also, if you want to give weight to the word-pairs
-   MI (multiplied by 1/separation), assign mst_dist="#t". The parameter
-   cnt_reach does not have an effect at this stage, you can leave it as is.
+   MI (multiplied by 1/separation), assign mst_dist="#t". Set exp_parses
+   as true if you want to export the actual sentence parses to a txt file.
+   The parameter cnt_reach does not have an effect at this stage, you can
+   leave it as is.
 
-   * Open `mst-launch.scm` and uncoment only one of the following two lines:
+   * Open `launch-mst-parser.scm` and uncoment only one of the following two lines:
    if you used cnt_mode (defined in params.txt) as "lg", uncomment:
    >(define ala (make-any-link-api)) 
    if you used cnt_mode as "clique" or "clique-dist", uncomment:
@@ -557,9 +554,9 @@ version works well. To run it follow the next steps:
 6) Once the above has finished loading, the parse script can be started.
    In one of the unused unbyob windows, (navigate with F3, F4) run:
    ```
-      ./text-process.sh mst lang
+      ./text-process.sh mst en
    ```
-   Remember to change the variable lang to the respective language. Wait
+   Remember to change 'en' to the respective language if it applies. Wait
    a few days for data to accumulate. Once again, if the above command
    shows the error
    > nc: invalid option -- 'N'
@@ -569,12 +566,6 @@ version works well. To run it follow the next steps:
    If the process is stopped for any reason, you can just re-run these
    scripts; they will pick up where they left off. When finished,
    remember to stop the cogserver.
-   
-   If you are interested in the actual sentence parses, change the mode
-   from "mst" to "mst-extra", that is for example for English run:
-   ```
-      ./text-process.sh mst-extra en
-   ```
 
 Once this is done, you can move to the next step, which is explained in
 the next section. If you activated the option, you can check out the
@@ -716,18 +707,18 @@ Before you follow the next steps make sure you have cloned the repositories from
     $ createdb learn_pairs
     $ cat /atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
    ```
+   Use tmux to create parallel sessions of the container. If you are not familiar with
+   it you can use this cheatsheet in [here](https://gist.github.com/MohamedAlaa/2961058).
 
    b) In a separate session start the REPL server. Make sure you are inside
       your working directory (`my_working_dir`):
    ```
     $ guile -l launch-pair-count.scm  -- --lang en --db learn_pairs --user opencog_user --password cheese
    ```
-   Use tmux to create parallel sessions of the container. If you are not familiar with
-   it you can use this cheatsheet in [here](https://gist.github.com/MohamedAlaa/2961058).
 
    c) Send input to the pipeline:
    ```
-    $ echo -e "(observe-text \"This is a test\" 'lg' 24)" |nc localhost 17005
+    $ echo -e "(observe-text \"This is a test\" \"lg\" 24)" |nc localhost 17005
    ```
 
    d) Check that the input was registered in the database:

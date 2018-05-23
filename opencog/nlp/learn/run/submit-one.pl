@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 #
-# submit-one.pl <cogserver-host> <cogserver-port> <observe-cmd> <parameter-mode> <count-reach>
+# submit-one.pl <cogserver-host> <cogserver-port> <observe-cmd> <count-mode> <parameters>
 #
 # Submit a collection of sentences, one sentence at a time, to the
 # cogserver located on host ARGV[0] and port ARGV[1].  The sentences
@@ -9,7 +9,7 @@
 # For word-pair counting, ARGV[2] is "observe-text"
 # For disjunct counting, ARGV[2] is "observe-mst"
 # ARGV[3] and ARGV[4] are necessary arguments for parameter configuration
-# (see file calling submit-one.pl to see them)
+# (see file process-one.sh to see them)
 #
 # Example usage:
 #    cat file | ./submit-one.pl localhost 17001 observe-text "lg" 24

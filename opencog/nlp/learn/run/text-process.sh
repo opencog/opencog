@@ -56,3 +56,4 @@ esac
 PORT=$(($port_ini + $port_end))
 
 time find $directory -type f -exec ./process-one.sh $1 $2 {} localhost $PORT \;
+
