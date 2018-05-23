@@ -595,12 +595,13 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
 
         auto r = sti/seq.size();
         for(const Handle& h : seq)
+        {      ++NRECURSION;
             redistribute(h, r, refund);
+        }
     }
     else{
         refund.push_back(std::make_pair(target, sti));
     }
 
-    ++NRECURSION;
     return 0;
 }
