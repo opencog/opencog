@@ -141,6 +141,7 @@
   its sti.
 "
   (let ((model (see-face face-id)))
+    (set-time-perceived! model)
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
@@ -155,6 +156,7 @@
   truth-value to (stv 1 CONFIDENCE).
 "
   (let ((model (face-emotion face-id emotion-type)))
+    (set-time-perceived! model)
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
