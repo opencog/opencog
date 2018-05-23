@@ -46,6 +46,8 @@
     min_sti_rules
 
     ; Utilities
+    set-dti!
+    get-dti
     is-model-true?
     any-model-true?
     set-time-perceived! ; temporarily exported
@@ -307,7 +309,6 @@
   )
 )
 
-
 (define (is-recent-transition-true? model)
 "
   is-recent-transition-true? MODEL
@@ -434,7 +435,31 @@
 ; Default time interval used as a window, backward from current time,
 ; for which the perception is considered valid. This is in seconds.
 (define dti 2)
-(define dti-node (Time dti))
+(define dti-node (Number dti))
+
+(define (set-dti! sec)
+"
+  set-dti! SEC
+
+  Set the default-time-interval(dti) used as a time window for considering
+  a valid perception and returns the NumberNode that represents it.
+"
+  (if (not (number? sec))
+    (error "Only numbers should be passed as argument"))
+
+  (set! dti sec)
+  (set! dti-node (Number sec))
+)
+
+(define (get-dti)
+"
+  get-dti
+
+  Returns the NumberNode used to represent the default-time-interval(dti)
+  used as a time window for considering a valid perception.
+"
+ dti-node
+)
 
 (define (current-time-us)
 "
