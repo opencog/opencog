@@ -429,6 +429,11 @@
 ; These allow adding time based predicates.
 (define time-key (Predicate "time-perceived"))
 
+; Default time interval used as a window, backward from current time,
+; for which the perception is considered valid. This is in seconds.
+(define dti 2)
+(define dti-node (Time dti))
+
 (define (current-time-us)
 "
   Returns the current-time including microseconds by converting the pair
@@ -478,9 +483,9 @@
     (<= time end-time))
 )
 
-(define (was-perceived? atom end-time time-interval)
+(define (perceived? atom end-time time-interval)
 "
-  was-perceived? ATOM END-TIME TIME-INTERVAL
+  perceived? ATOM END-TIME TIME-INTERVAL
 
   Returns (stv 1 1) if
     (END-TIME - TIME-INTERVAL) <= time-perceived <= END-TIME, else it
@@ -493,6 +498,18 @@
       (stv 0 1)
     )
   )
+)
+
+(define* (was-perceived? atom #:optional (time-interval dti-node))
+"
+  was-perceived? ATOM TIME-INTERVAL
+
+  Returns (stv 1 1) if
+    (current-time - TIME-INTERVAL) <= time-perceived <= current-time, else it
+  returns (stv 0 1). All times passed as argument should be in seconds.
+"
+  (perceived? atom (current-time-us)
+    (string->number (cog-name time-interval)))
 )
 
 ; --------------------------------------------------------------

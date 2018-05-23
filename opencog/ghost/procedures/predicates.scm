@@ -1,11 +1,6 @@
 ; Perception APIs and predicates
 
 ; --------------------------------------------------------------
-; Default time interval used as a window, backward from current time,
-; for which the perception is considered valid.
-(define default-time-interval (Time 0.01))
-
-; --------------------------------------------------------------
 ; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
@@ -127,8 +122,8 @@
   (negate-stv! (person_talking face-id))
 )
 
-(define* (word_perceived word #:optional (time-interval default-time-interval))
-  (was-perceived? word (current-time-us)
+(define* (word_perceived word #:optional (time-interval dti-node))
+  (perceived? word (current-time-us)
     (string->number (cog-name time-interval)))
 )
 
