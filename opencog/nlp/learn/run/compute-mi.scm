@@ -18,11 +18,10 @@
 (sql-open database-uri)
 
 (define ala (make-any-link-api))
+;(define ala (make-clique-pair-api))
 (define asa (add-pair-stars ala))
 (batch-pairs asa)
-(print-matrix-summary-report asa)
+;(print-matrix-summary-report asa)
 
-; FIXME Is an sql-store needed?
 (sql-close)
-
 (display "Done\n")

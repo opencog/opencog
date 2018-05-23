@@ -1,0 +1,7 @@
+# PARAMETERS for NLP pipeline
+#       variable_name=value	#possibilities
+
+export cnt_mode="lg" 	# clique, clique-dist or lg
+export mst_dist="#f"		# #t or #f
+export cnt_reach=25		# num-parses for lg, or win-size for clique
+#TODO export store_fmi="#t" # #t or #f 

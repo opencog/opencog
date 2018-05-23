@@ -1,5 +1,5 @@
 ;
-; observe-launch.scm
+; launch-pair-count.scm
 ;
 ; Run the cogserver, needed for the language-learning disjunct
 ; counting pipeline. Starts the cogserver, opens the database,
@@ -22,16 +22,13 @@
 (repl-default-option-set! 'prompt (string-append "scheme@(" 
     language "-pairs)> "))
 
-; Get the database connection details
-(define database-uri (get-connection-uri))
-(define language (get-lang))
-
 ; Start the cogserver with configs for the given language
-(start-cogserver (string-append "opencog-" language ".conf"))
+(start-cogserver (string-append "config/opencog-" language ".conf"))
 
 ; Open the database.
 (sql-open database-uri)
 (display "Opened database: ")
 (display database-uri)
 (display "\n")
+
 (fetch-all-words)
