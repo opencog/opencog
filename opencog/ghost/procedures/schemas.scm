@@ -47,7 +47,7 @@
   Record the current time for TIMER-ID.
   If TIMER-ID is not given, a default timer will be used.
 "
-  (set-time-perceived! timer-id)
+  (set-time-perceived! (Concept (cog-name timer-id)))
   fini
 )
 
@@ -68,8 +68,19 @@
 
   Increase the urge of GOAL by VALUE.
 "
-  (psi-increase-urge (Concept (cog-name goal))
+  (define goal-node (Concept (cog-name goal)))
+  (define related-psi-rules
+    (filter psi-rule? (cog-incoming-set goal-node)))
+
+  (psi-increase-urge goal-node
     (string->number (cog-name value)))
+
+  ; Stimulate the rules associate with this goal
+  (for-each
+    (lambda (r)
+      (cog-stimulate r default-stimulus))
+    related-psi-rules)
+
   fini
 )
 
