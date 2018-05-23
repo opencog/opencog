@@ -14,6 +14,7 @@
     perceive-emotion
     perceive-word
     perceive-face-talking
+    perceive-eye-state
 
     ; Perceptual predicates
     person_appears
@@ -109,6 +110,18 @@
         (Type "ConceptNode"))))
 )
 
+(define (eye-open face-id eye-id)
+"
+  eye-open FACE-ID EYE-ID
+
+  Define the atom used to represent whether FACE-ID face's EYE-ID eye is open.
+"
+  (Evaluation
+    (Predicate "eye-open")
+    (List
+      (Concept face-id)
+      (Concept eye-id)))
+)
 
 (define (get-models sign)
 "
@@ -204,6 +217,21 @@
     (cog-set-tv! model (stv 1 new-conf))
     (cog-stimulate model default-stimulus)
     (set-event-times! face-talking-sign model old-conf new-conf)
+  )
+)
+
+(define (perceive-eye-state face-id eye-id confidence)
+"
+  perceive-eye-state FACE-ID EYE-ID
+
+  Return the atom used to represent whether FACE-ID face's EYE-ID eye is open,
+  after updating its stv and recording perception time and giving it an
+  ecan stimulation.
+"
+  (let ((model (eye-open face-id eye-id)))
+    (set-time-perceived! model)
+    (cog-stimulate model default-stimulus)
+    (cog-set-tv! model (stv 1 confidence))
   )
 )
 
