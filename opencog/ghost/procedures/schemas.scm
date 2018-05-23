@@ -68,8 +68,19 @@
 
   Increase the urge of GOAL by VALUE.
 "
-  (psi-increase-urge (Concept (cog-name goal))
+  (define goal-node (Concept (cog-name goal)))
+  (define related-psi-rules
+    (filter psi-rule? (cog-incoming-set goal-node)))
+
+  (psi-increase-urge goal-node
     (string->number (cog-name value)))
+
+  ; Stimulate the rules associate with this goal
+  (for-each
+    (lambda (r)
+      (cog-stimulate r default-stimulus))
+    related-psi-rules)
+
   fini
 )
 
