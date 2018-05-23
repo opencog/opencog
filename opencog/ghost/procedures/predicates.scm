@@ -45,6 +45,10 @@
           (GroundedPredicate "scm: is-model-true?")
           (List
             (Variable "face-emotion")))
+        (Evaluation
+          (GroundedPredicate "scm: was-perceived?")
+          (List
+            (Variable "face-emotion")))
         (Variable "face-emotion"))))
 
   (let ((models (cog-outgoing-set (cog-execute! get-models))))
@@ -68,6 +72,10 @@
       (And
         (Evaluation
           (GroundedPredicate "scm: is-model-true?")
+          (List
+            (Variable "face-talking")))
+        (Evaluation
+          (GroundedPredicate "scm: was-perceived?")
           (List
             (Variable "face-talking")))
         (Variable "face-talking"))))
@@ -123,8 +131,7 @@
 )
 
 (define* (word_perceived word #:optional (time-interval dti-node))
-  (perceived? word (current-time-us)
-    (string->number (cog-name time-interval)))
+  (was-perceived? word time-interval)
 )
 
 (define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
