@@ -432,3 +432,19 @@
 
   ; Return an atom
   (True))
+
+; ----------
+(define-public (ghost-record-executed-rule RULENAME)
+"
+  ghost-record-executed-rule RULENAME
+
+  Keep a record of which rule is triggered and when.
+  This information is used during action selection.
+"
+  (Evaluation ghost-rule-executed (List RULENAME))
+
+  (cog-set-value!
+    (get-rule-from-label (cog-name RULENAME))
+    ghost-time-last-executed
+    (FloatValue (current-time)))
+)
