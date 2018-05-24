@@ -25,7 +25,7 @@ This predicate triggers when a face appears in the visual perception system. Opt
 ```
 ^person_eyes_closed(#:optional face-id)
 ```
-[perception_ctrl.py::70](https://github.com/opencog/ghost_bridge/blob/1e554bbf79ea890f8fdc1b0ce6681f65e6a38869/src/ghost_bridge/perception_ctrl.py#L70)->[🔥procedures.scm](#)->[🔥predicates.scm](#)
+[perception_ctrl.py::70](https://github.com/opencog/ghost_bridge/blob/1e554bbf79ea890f8fdc1b0ce6681f65e6a38869/src/ghost_bridge/perception_ctrl.py#L70)->[procedures.scm::225](https://github.com/opencog/opencog/blob/34ee04d02cec967f7afa8999ce63879dec4c65f5/opencog/ghost/procedures/procedures.scm#L225)->[🔥predicates.scm](#)
 
   - Currently being implemented.
 
