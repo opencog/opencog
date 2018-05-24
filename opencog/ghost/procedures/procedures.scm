@@ -51,6 +51,7 @@
     set-time-perceived! ; temporarily exported
     time-perceived ; temporarily exported
     was-perceived?
+    ghost-stimulate-timer
   )
 )
 
@@ -566,6 +567,23 @@
 "
   (perceived? atom (current-time-us)
     (string->number (cog-name time-interval)))
+)
+
+; --------------------------------------------------------------
+(define timer-last-stimulated 0)
+(define (ghost-stimulate-timer)
+"
+  Stimulate the timer predicate, so that the rules having time-related
+  predicates will likely have some non-zero STI.
+
+  Currently the stimulus will be proportional to the elapsed time (sec)
+  since last time it's called.
+"
+  (if (> timer-last-stimulated 0)
+    (cog-stimulate (Concept "timer-predicate")
+      (* 10 (- (current-time) timer-last-stimulated))))
+
+  (set! timer-last-stimulated (current-time))
 )
 
 ; --------------------------------------------------------------
