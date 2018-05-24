@@ -4,10 +4,7 @@
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
   #:use-module (opencog exec)
-  #:use-module (opencog pointmem)
   #:use-module (opencog openpsi)
-  #:use-module (opencog spacetime)
-  #:use-module (opencog ghost)
   #:export (
     ; Sensory input
     perceive-face
