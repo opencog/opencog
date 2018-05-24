@@ -83,9 +83,15 @@
   ; ----------
   (for-each
     (lambda (r)
-      ; Skip the rule if its STI or strength is zero
+      ; Skip the rule if its STI or strength is zero, or if it's
+      ; still with the refractory period
       (if (or SKIP-STI
-              (and (> (cog-av-sti r) 0) (> (cog-stv-strength r) 0)))
+              (and (> (cog-av-sti r) 0) (> (cog-stv-strength r) 0)
+                   (or (null? (cog-value r ghost-time-last-executed))
+                       (> (- (current-time)
+                             (car (cog-value->list
+                               (cog-value r ghost-time-last-executed))))
+                          refractory-period))))
         (let ((rc (psi-get-context r))
               (ra (psi-get-action r)))
           ; Though an action may be in multiple psi-rule, but it doesn't

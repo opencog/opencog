@@ -317,9 +317,9 @@
 "
   Given the label of a rule in string, return the rule with that lavel.
 "
-  (define rule
+  (define rule (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept LABEL)))
+      (Concept LABEL))))
 
   (if (null? rule)
       (begin
