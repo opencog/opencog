@@ -447,4 +447,7 @@
     (get-rule-from-label (cog-name RULENAME))
     ghost-time-last-executed
     (FloatValue (current-time)))
+
+  ; Return an atom
+  (True)
 )
