@@ -54,7 +54,7 @@
 "
   (cog-logger-debug ghost-logger
     "In ghost-lemma? LEMMA: ~aGRD: ~a" LEMMA GRD)
-  (if (equal? (get-lemma (cog-name GRD)) (cog-name LEMMA))
+  (if (string-ci=? (get-lemma (cog-name GRD)) (cog-name LEMMA))
       (stv 1 1)
       (stv 0 1)))
 
