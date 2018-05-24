@@ -557,7 +557,7 @@ void ImportanceDiffusionBase::processDiffusionStack()
  *
  * @refund a list of pairs of atoms and redistributed sti.
  *
- * @return void.
+ * @return 0 on successfull redistribution or @param sti on failure to do so.
  *
  */
 double ImportanceDiffusionBase::redistribute(const Handle& target, const double& sti,
@@ -569,14 +569,10 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
             });
 
     if(ij != hsFilterOut.end()){
-        // This is to prevent indefinite recursion which could
-        // happen incase of a cyclic graph.
-        // Assuming MIN_SPREADING_VALUE will be very small
-        // compared to the minimum STI in the AF and no direct stimulation,
-        // this  atoms should never get the chance to enter into the AF.
-        // the remaining value(sti) should in theory be collected back by rent collection
-        // agent.
-        // FIXME it could accumulate such small sti values over time and endup in the AF?
+        // If STI to be distributed is smaller that the af boundary or the
+        // recursion has reached maximum depth allowed, assign the sti to
+        // the valid atom type in refund vector or if the refund is empty,
+        // return the STI itself.
         auto min_spreading_value = _bank->get_af_min_sti();
         if(sti < min_spreading_value or NRECURSION > 100){
             if(not refund.empty()){
