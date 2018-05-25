@@ -567,7 +567,7 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
             [target](const Handle& h){
             return (target->get_type() == nameserver().getType(h->get_name()));
             });
-
+    double not_redistributed = 0;
     if(ij != hsFilterOut.end()){
         // If STI to be distributed is smaller that the af boundary or the
         // recursion has reached maximum depth allowed, assign the sti to
@@ -590,15 +590,27 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
 
         target->getIncomingSet(std::back_inserter(seq));
 
-        auto r = sti/seq.size();
+        size_t spreaded_to = 0;
+        double r = sti/(double)seq.size();
         for(const Handle& h : seq)
-        {      ++NRECURSION;
-            redistribute(h, r, refund);
+        {
+            ++NRECURSION;
+            ++spreaded_to;
+            double rsti = redistribute(h, r, refund);
+            // Adjust sti per atom if sti isn't spread.
+            if( rsti > 0){
+                // If the last one failed. return amount.
+                if( spreaded_to == seq.size()){
+                    not_redistributed = rsti;
+                    break;
+                }
+                r += (rsti / ( seq.size() - spreaded_to));
+            }
         }
     }
     else{
         refund.push_back(std::make_pair(target, sti));
     }
 
-    return 0;
+    return not_redistributed;
 }
