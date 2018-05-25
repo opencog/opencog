@@ -177,9 +177,11 @@
   )
 )
 
-(define (perceive-word word)
+(define (perceive-word face-id word)
 "
   perceive-word WORD
+
+  If FACE-ID = \"\" then an unidentified source is talking.
 
   Returns WORD after increasing its sti.
 "
