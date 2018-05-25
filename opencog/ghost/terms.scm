@@ -6,9 +6,10 @@
 "
   Occurrence of a word, a word that should be matched literally.
 "
-  (let* ((v1 (WordNode STR))
-         (v2 (Variable (gen-var STR #f)))
-         (l (WordNode (get-lemma STR)))
+  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
+         (v1 (WordNode str-dc))
+         (v2 (Variable (gen-var str-dc #f)))
+         (l (WordNode (get-lemma str-dc)))
          (v (list (TypedVariable v2 (Type "WordInstanceNode"))))
          (c (list (WordInstanceLink v2 (Variable "$P"))
                   (ReferenceLink v2 v1))))
@@ -22,7 +23,8 @@
 "
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
-         (l (WordNode nstr)))
+         (l (WordNode
+              (if (string-prefix? "I'" nstr) nstr (string-downcase nstr)))))
     (list (list) (list) (list l) (list l))))
 
 ; ----------
@@ -31,9 +33,10 @@
   Lemma occurrence, aka canonical form of a term.
   This is the default for word mentions in the rule pattern.
 "
-  (let* ((v1 (Variable (gen-var STR #t)))
-         (v2 (Variable (gen-var STR #f)))
-         (l (WordNode (get-lemma STR)))
+  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
+         (v1 (Variable (gen-var str-dc #t)))
+         (v2 (Variable (gen-var str-dc #f)))
+         (l (WordNode (get-lemma str-dc)))
          (v (list (TypedVariable v1 (Type "WordNode"))
                   (TypedVariable v2 (Type "WordInstanceNode"))))
          (c (list (ReferenceLink v2 v1)
