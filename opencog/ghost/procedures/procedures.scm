@@ -196,6 +196,8 @@
 
   Returns WORD after increasing its sti.
 "
+  ;TODO: How to represent word said by face-id without having an
+  ; explosion of atoms.
   (define wn (Word word))
   (define cn (Concept word))
   (set-time-perceived! wn)
