@@ -7,6 +7,7 @@
   #:use-module (opencog logger)
   #:use-module (opencog exec)
   #:use-module (opencog eva-behavior)
+  #:use-module (opencog ghost procedures)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs io ports)
   #:use-module (ice-9 popen)
