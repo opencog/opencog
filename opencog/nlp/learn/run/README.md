@@ -9,20 +9,23 @@ Connecting to Cogserver:
                     command-line arguments for getting language and
                     database details.
 
- -- `opencog-??.conf` contains configuration settings for the cogserver, 
+ -- `det-port-num.sh` script used to determine the port number for the cogserver,
+                      takes as language the processing mode and the language.
+
+ -- `opencog-pairs-??.conf` contains configuration settings for the cogserver, 
                       including the language-specific port to use inside
                       config folder).
+
+ -- `opencog-cmi-??.conf` same as above but with particular configurations
+                          for MI computing (inside config folder).
 
  -- `opencog-mst-??.conf` same as above but with particular configurations
                           for MST parsing (inside config folder).
 
- -- `launch-pair-count.scm` starts the cogserver and opens the database. You
-                            need to pass it the language and the database
-                            credentials.
+ -- `launch-cogserver.scm` starts the cogserver and opens the database. You
+                            need to pass it the processing mode, the language
+                            and the database credentials.
 
- -- `launch-mst-parse.scm` starts the cogserver, opens the database and loads 
-                           the word pairs. You need to pass it the language and
-                           the database credentials as arguments. 
 
 
 Text Processing / Parsing:
@@ -69,11 +72,23 @@ Text Processing / Parsing:
 Mutual Information of Word Pairs:
 ---------------------------------
 
- -- `compute-mi.scm` this script calls functions defined in `(opencog nlp learn)` to compute
-                     the mutal entropy between the word pairs registerd in the database. The
-                     actual code for computing word-pair MI is in `batch-word-pair.scm`. It
-                     uses the `(opencog matrix)` subsystem to perform the core work.
+ -- `compute-mi.scm` this script defines the function used to compute the mutal entropy between
+                     the word pairs registerd in the database. The function takes as input
+                     the counting mode and it calls functions defined in `(opencog nlp learn)`.
+                     The actual code for computing word-pair MI is in `batch-word-pair.scm`.
+                     It uses the `(opencog matrix)` subsystem to perform the core work.
 
+ -- `export-mi.scm` this script is used to export the word-pairs FMI for every possible pair
+                    in the corpus to allow analysis of the MI-based MST-parser. For research
+                    purposes only, it is not used in the pipeline.
+
+ -- `process-word-pairs.sh` this script is used to pass the intructions to the cogserver for
+                            computing the MI between word pairs or for fetching them if the
+                            last has already been done. You have to pass it the processing
+                            mode and the language.
+
+-- `fetch-word-pairs.scm` this scripts defines the function used to loads the word-pairs and
+                          its counts. The function takes as input the counting mode.
 
 Sentence Splitting
 ------------------

@@ -15,7 +15,7 @@
 #    cat file | ./submit-one.pl localhost 17001 observe-text "lg" 24
 #
 
-die "Wrong number of args!" if ($#ARGV != 5);
+die "Wrong number of args!" if ($#ARGV != 4);
 
 # Verify that the host and port number are OK.
 `nc -z $ARGV[0] $ARGV[1]`;

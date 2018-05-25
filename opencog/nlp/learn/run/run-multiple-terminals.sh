@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# run-multiple-terminals.sh
+# run-multiple-terminals.sh <mode> <language> <db_name> [<username>] [<password>]
 #
 # Start cogserver on the local machine
 # This runs tmux with byobu to multiplex several terminals;
@@ -22,62 +22,22 @@ then
   exit 0
 fi
 
-args=("$@")
-
-# Gets mode of counter for the cogserver
-if [ "$1" = "pairs" ]
-then
-   launcher=launch-pair-count.scm
-   port_ini=17000
-elif [ "$1" = "mst" ]
-then
-   launcher=launch-mst-parser.scm
-   port_ini=19000
-else
-   echo "Usage: ./run-multiple-terminals.sh <mode> <language> <db_name> [<username>] [<password>]"
-   echo "<mode> must be either pairs or mst"
-   exit 0
-fi
-
-# Assign port value according to language
-case $2 in
-   en)
-      port_end=5
-      ;;
-   fr)
-      port_end=3
-      ;;
-   lt)
-      port_end=2
-      ;;
-   pl)
-      port_end=4
-      ;;
-   yue)
-      port_end=6
-      ;;
-   zh)
-      port_end=7
-      ;;
-   *)
-      echo "Usage: ./run-multiple-terminals.sh <mode> <language> <db_name> [<username>] [<password>]"
-      echo "<language> must be one of: en, fr, lt, pl, yue, zh"
-      exit 0
-esac
-PORT=$(($port_ini + $port_end))
+# Get port number according to mode and language
+source ./config/det-port-num.sh $1 $2
+launcher=launch-cogserver.scm
 
 # Start multiple sessions (use byobu so that the scroll bars actually work)
 # Call launch-??.scm to start cogserver
 byobu new-session -d -n 'cntl' '$SHELL'
 case $# in
    3)
-      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --lang $2 --db $3; $SHELL"
+      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --mode $1 --lang $2 --db $3; $SHELL"
       ;;
    4)
-      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --lang $2 --db $3 --user $4; $SHELL"
+      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --mode $1 --lang $2 --db $3 --user $4; $SHELL"
       ;;
    *)
-      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --lang $2 --db $3 --user $4 --password $5; $SHELL"
+      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --mode $1 --lang $2 --db $3 --user $4 --password $5; $SHELL"
       ;;
 esac
 sleep 2;

@@ -159,7 +159,7 @@ Now, let's set up the **text-ingestion pipeline:**
    create your own working directory and copy all the files from the `run`
    directory into it. Now start the REPL server by writting:
    ```
-     guile -l launch-pair-count.scm  -- --lang en --db learn_pairs --user opencog_user --password cheese
+     guile -l launch-cogserver  -- --mode pairs --lang en --db learn_pairs --user opencog_user --password cheese
    ```
    The *--user* option is needed only if the database owner is different from the
    current user.
@@ -279,7 +279,7 @@ fan-fiction website. Once you are sure you have the right material to start, fol
    directory into your working directory (if you don't have them 
    already):
    - run-multiple-terminals.sh
-   - launch-pair-count.scm
+   - launch-cogserver.scm
    - utilities.scm
    - text-process.sh
    - process-one.sh
@@ -406,35 +406,51 @@ will automatically pick up where they left off.
 
 1) Copy the following files from the [opencog/opencog/nlp/learn/run](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run)
    directory into your working directory (if you don't have them already):
-   - compute-mi.scm
+   - run-multiple-terminals.sh
+   - launch-cogserver.scm
    - utilities.scm
+   - process-word-pairs.sh
+   - compute-mi.scm
+   - config (the complete folder)
 
-2) Open `compute-mi.scm` and uncoment only one of the following two lines:
-   if you used cnt_mode (defined in params.txt) as "lg", uncomment:
-   >(define ala (make-any-link-api)) 
-   if you used cnt_mode as "clique" or "clique-dist", uncomment:
-   >(define ala (make-clique-pair-api))
+2) In your working directory run the following:
+   ```
+      ./run-multiple-terminals.sh cmi lang ??_pairs your_user your_password
+   ```
+   This starts the cogserver and sets a default prompt: set up by
+   default to avoid conflicts and confusion, and to allow multiple 
+   languages to be processed at the same time. 
 
-3) Run:
-   ```
-      guile -l compute-mi.scm  -- --lang ?? --db ??_pairs --user your_user --password your_password
-   ```
    Replace the arguements above with the ones that apply to the language
    you are using and your database credentials. User and password are
    optional, as previously explained. For example, for english run:
    ```
-      guile -l compute-mi.scm  -- --lang en --db en_pairs --user opencog_user --password cheese
+      ./run-multiple-terminals.sh cmi en en_pairs opencog_user cheese
    ```
+3) In one of the unused byobu windows (you can navigate with the F3 and F4 keys),
+   run the following:
+   ```
+      ./process-word-pairs.sh cmi en
+   ```
+   Or can change 'en' for the respective language initials. 
+   If this command shows the error
+   > nc: invalid option -- 'N'
+   
+   open `process-word-pairs.sh` and remove the -N option from the nc commands
+   (some old version of netcat don't support this option).
+
+4) Wait some time, possibly a few days. When finished, stop the cogserver.
    
    This script uses commands from the scripts in the `scm` directory.
    The code for computing word-pair MI is in `batch-word-pair.scm`.
    It uses the `(opencog matrix)` subsystem to perform the core work.
 
+
 General remakrs:
 
 * The system might not be robust enough at this stage yet, so if you
   find an error while executing this code, run each command from the
-  script separately to trace it.
+  old compute-mi.scm script separately to trace it.
 
 * Batch-counting might take hours or longer, depending on your dataset
   size. The batching routine will print to stdout, giving a hint of
@@ -496,8 +512,10 @@ version works well. To run it follow the next steps:
 1) Copy the following files from the [opencog/opencog/nlp/learn/run](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run)
    directory into your working directory (if you don't have them already):
    - run-multiple-terminals.sh
-   - launch-mst-parser.scm
+   - launch-cogserver.scm
    - utilities.scm
+   - process-word-pairs.sh
+   - fetch-word-pairs.scm
    - text-process.sh
    - process-one.sh
    - submit-one.pl
@@ -528,12 +546,6 @@ version works well. To run it follow the next steps:
    The parameter cnt_reach does not have an effect at this stage, you can
    leave it as is.
 
-   * Open `launch-mst-parser.scm` and uncoment only one of the following two lines:
-   if you used cnt_mode (defined in params.txt) as "lg", uncomment:
-   >(define ala (make-any-link-api)) 
-   if you used cnt_mode as "clique" or "clique-dist", uncomment:
-   >(define ala (make-clique-pair-api))
-
 5) In your working directory run the following:
    ```
       ./run-multiple-terminals.sh mst lang dbname your_user your_password
@@ -545,14 +557,25 @@ version works well. To run it follow the next steps:
       ./run-multiple-terminals.sh mst en en_pairs opencog_user cheese
    ```
 
+6) In the cntl tab of the byobu (you can navigate with the F3 and F4 keys),
+   run the following:
+   ```
+      ./process-word-pairs.sh mst en
+   ```
+   Or can change 'en' for the respective language initials. 
+   Once again, if this command shows the error
+   > nc: invalid option -- 'N'
+   
+   open `process-word-pairs.sh` and remove the -N option from the nc commands.
+
    Wait 10 to 60+ minutes for the guile prompt to appear. This script
    opens a connection to the database, and then loads all word-pairs
    into the atomspace. This can take a long time, depending on the
    size of the database. The word-pairs are needed to get the pair-costs
    that are used to perform the MST parse.
 
-6) Once the above has finished loading, the parse script can be started.
-   In one of the unused unbyob windows, (navigate with F3, F4) run:
+7) Once the above has finished loading, the parse script can be started.
+   In the parse tab of the byobu run:
    ```
       ./text-process.sh mst en
    ```
@@ -713,7 +736,7 @@ Before you follow the next steps make sure you have cloned the repositories from
    b) In a separate session start the REPL server. Make sure you are inside
       your working directory (`my_working_dir`):
    ```
-    $ guile -l launch-pair-count.scm  -- --lang en --db learn_pairs --user opencog_user --password cheese
+    $ guile -l launch-cogserver.scm  -- --mode pairs --lang en --db learn_pairs --user opencog_user --password cheese
    ```
 
    c) Send input to the pipeline:

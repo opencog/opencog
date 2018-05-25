@@ -18,14 +18,14 @@ cogport=$5
 splitter=./split-sentences.pl
 splitdir=split-articles
 
-#default parameter values
+# Default parameter values
 cnt_mode="lg"
 cnt_reach=25
 mst_dist="#f"
 exp_parses="#f"
 source ./config/params.txt # overrides default values, if present
 
-# Gets mode of counter for the cogserver
+# Gets processing mode for the cogserver
 case $1 in
    pairs)
       subdir=submitted-articles
