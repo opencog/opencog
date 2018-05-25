@@ -203,3 +203,8 @@
   (Concept "timer-predicate"))
 (Inheritance (GroundedPredicate "scm: after_user_stopped_talking")
   (Concept "timer-predicate"))
+(Inheritance (GroundedPredicate "scm: person_appears") (Predicate "see"))
+(Inheritance (GroundedPredicate "scm: person_smiles") (Predicate "emotion"))
+(Inheritance (GroundedPredicate "scm: person_angry") (Predicate "emotion"))
+(Inheritance (GroundedPredicate "scm: person_talking") (Predicate "talking"))
+(Inheritance (GroundedPredicate "scm: person_not_talking") (Predicate "talking"))
