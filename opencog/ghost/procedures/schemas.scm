@@ -14,7 +14,10 @@
 
 (DefineLink
   (DefinedSchema "say")
-  (LambdaLink (Variable "sentence")
+  (LambdaLink
+    (VariableList
+      (Variable "sentence")
+      (Variable "fallback-id"))
     (ExecutionOutput
       (GroundedSchema "scm: print-by-action-logger")
       (List
