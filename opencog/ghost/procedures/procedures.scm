@@ -4,10 +4,7 @@
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
   #:use-module (opencog exec)
-  #:use-module (opencog pointmem)
   #:use-module (opencog openpsi)
-  #:use-module (opencog spacetime)
-  #:use-module (opencog ghost)
   #:export (
     ; Sensory input
     perceive-face
@@ -15,6 +12,9 @@
     perceive-word
     perceive-face-talking
     perceive-eye-state
+
+    ; Sensory input hooks
+    perceive-word-hook
 
     ; Perceptual predicates
     person_appears
@@ -54,6 +54,7 @@
     set-time-perceived! ; temporarily exported
     time-perceived ; temporarily exported
     was-perceived?
+    ghost-stimulate-timer
   )
 )
 
@@ -177,26 +178,32 @@
   )
 )
 
+(define hook-perceive-word (make-hook 0))
+(define (perceive-word-hook)
+"
+  perceive-word-hook
+
+  Returns the hook that is run when 'perceive-word' is called.
+"
+  hook-perceive-word
+)
+
 (define (perceive-word face-id word)
 "
-  perceive-word WORD
+  perceive-word FACE-ID WORD
 
   If FACE-ID = \"\" then an unidentified source is talking.
 
   Returns WORD after increasing its sti.
 "
+  ;TODO: How to represent word said by face-id without having an
+  ; explosion of atoms.
   (define wn (Word word))
   (define cn (Concept word))
   (set-time-perceived! wn)
-
-  ; 'ghost-word-seq' is shared among the rules with word-related pattern
-  ; This is mainly to make sure the rules with only a wildcard in the pattern
-  ; will also get some non-zero STI.
-  ; TODO: Find some better representation for that
-  (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))
-
-  (ghost-stimulate wn)
-  (ghost-stimulate cn)
+  (run-hook hook-perceive-word)
+  (perception-stimulate wn)
+  (perception-stimulate cn)
 )
 
 (define (perceive-face-talking face-id new-conf)
@@ -569,6 +576,35 @@
 "
   (perceived? atom (current-time-us)
     (string->number (cog-name time-interval)))
+)
+
+; --------------------------------------------------------------
+(define timer-last-stimulated 0)
+(define (ghost-stimulate-timer)
+"
+  Stimulate the timer predicate, so that the rules having time-related
+  predicates will likely have some non-zero STI.
+
+  Currently the stimulus will be proportional to the elapsed time (sec)
+  since last time it's called.
+"
+  (if (> timer-last-stimulated 0)
+    (cog-stimulate (Concept "timer-predicate")
+      (* 10 (- (current-time) timer-last-stimulated))))
+
+  (set! timer-last-stimulated (current-time))
+)
+
+; --------------------------------------------------------------
+(define perception-stimulus 150)
+(define-public (perception-stimulate . atoms)
+"
+  perception-stimulate ATOMS
+
+  Stimulate the given list of ATOMS with perception's  default stimulus
+  amount.
+"
+  (map (lambda (a) (cog-stimulate a perception-stimulus)) atoms)
 )
 
 ; --------------------------------------------------------------
