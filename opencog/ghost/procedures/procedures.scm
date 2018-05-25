@@ -13,6 +13,9 @@
     perceive-face-talking
     perceive-eye-state
 
+    ; Sensory input hooks
+    perceive-word-hook
+
     ; Perceptual predicates
     person_appears
     person_smiles
@@ -175,9 +178,19 @@
   )
 )
 
+(define hook-perceive-word (make-hook 0))
+(define (perceive-word-hook)
+"
+  perceive-word-hook
+
+  Returns the hook that is run when 'perceive-word' is called.
+"
+  hook-perceive-word
+)
+
 (define (perceive-word face-id word)
 "
-  perceive-word WORD
+  perceive-word FACE-ID WORD
 
   If FACE-ID = \"\" then an unidentified source is talking.
 
@@ -186,15 +199,9 @@
   (define wn (Word word))
   (define cn (Concept word))
   (set-time-perceived! wn)
-
-  ; 'ghost-word-seq' is shared among the rules with word-related pattern
-  ; This is mainly to make sure the rules with only a wildcard in the pattern
-  ; will also get some non-zero STI.
-  ; TODO: Find some better representation for that
-  (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))
-
-  (ghost-stimulate wn)
-  (ghost-stimulate cn)
+  (run-hook hook-perceive-word)
+  (perception-stimulate wn)
+  (perception-stimulate cn)
 )
 
 (define (perceive-face-talking face-id new-conf)
@@ -584,6 +591,18 @@
       (* 10 (- (current-time) timer-last-stimulated))))
 
   (set! timer-last-stimulated (current-time))
+)
+
+; --------------------------------------------------------------
+(define perception-stimulus 150)
+(define-public (perception-stimulate . atoms)
+"
+  perception-stimulate ATOMS
+
+  Stimulate the given list of ATOMS with perception's  default stimulus
+  amount.
+"
+  (map (lambda (a) (cog-stimulate a perception-stimulus)) atoms)
 )
 
 ; --------------------------------------------------------------

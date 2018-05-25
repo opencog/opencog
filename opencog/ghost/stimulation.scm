@@ -21,10 +21,11 @@
     (cog-logger-warn ghost-logger "Stimulus should be a number!"))
 )
 
-(define-public (ghost-stimulate . ATOMS)
-"
-  Stimulate the given list of atoms with the default stimulus.
-"
-  (map (lambda (a) (cog-stimulate a default-stimulus)) ATOMS)
-)
 
+; Add a hook to be run when a word is perceived
+; 'ghost-word-seq' is shared among the rules with word-related pattern
+; This is mainly to make sure the rules with only a wildcard in the pattern
+; will also get some non-zero STI.
+; TODO: Find some better representation for that
+(add-hook! (perceive-word-hook)
+  (lambda () (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))))
