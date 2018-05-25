@@ -400,8 +400,7 @@
   (extract ACTIONS)
   ; Is there anything to say?
   (if (not (string-null? txt-str))
-      (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt-str)
-             (cog-execute! (Put (DefinedPredicate "Say") (Node txt-str)))))
+      (begin (cog-execute! (Put (DefinedSchema "say") (Node txt-str)))))
   ; New atoms being created
   (if (not (null? atoms-created))
       (cog-logger-info ghost-logger "Atoms Created: ~a" atoms-created))
