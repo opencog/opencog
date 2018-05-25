@@ -183,14 +183,9 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 
     // Redistribute sti values that should not go to types in hsFilterOut.
     std::map<Handle, double> refund;
-    double remaining_sti = 0;
     for(auto it = probabilityVector.begin() ; it !=probabilityVector.end() ; ++it){
         std::vector<std::pair<Handle, double>> tempRefund;
-        auto r = redistribute(it->first, it->second, tempRefund);
-        if( r != 0){
-            remaining_sti += r;
-            continue;
-        }
+        redistribute(it->first, it->second, tempRefund);
         // Now lets append the tempRefund map to refund map
         for(const auto& p : tempRefund){
            if(refund.find(p.first) == refund.end())
@@ -199,11 +194,6 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
                refund[p.first] += (refund[p.first] + p.second);
         }
     }
-
-    // Divide STIs not distributed.
-    double per_atom = remaining_sti/ refund.size();
-    for(auto& p : refund)
-        p.second += per_atom;
 
     // Finishe the redistribution by assigning new values to probabilityVector.
     probabilityVector = refund;
@@ -579,7 +569,7 @@ void ImportanceDiffusionBase::processDiffusionStack()
  * @return void.
  *
  */
-double ImportanceDiffusionBase::redistribute(const Handle& target, const double& sti,
+void ImportanceDiffusionBase::redistribute(const Handle& target, const double& sti,
                                            std::vector<std::pair<Handle, double>>& refund){
     static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
     auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
@@ -598,12 +588,8 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
         // FIXME it could accumulate such small sti values over time and endup in the AF?
         auto min_spreading_value = _bank->get_af_min_sti();
         if(sti < min_spreading_value or NRECURSION > 100){
-            if(not refund.empty()){
-                refund[refund.size()-1].second += sti;
-                return 0;
-            } else{
-                return sti;
-            }
+            refund.push_back(std::make_pair(target, sti));
+            return;
         }
 
         // Redistribute to all neighbors.
@@ -615,13 +601,12 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
 
         auto r = sti/seq.size();
         for(const Handle& h : seq)
-        {      ++NRECURSION;
             redistribute(h, r, refund);
-        }
     }
     else{
         refund.push_back(std::make_pair(target, sti));
     }
 
-    return 0;
+    ++NRECURSION;
+    return;
 }
