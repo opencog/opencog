@@ -3,6 +3,7 @@
   #:use-module (opencog)
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
+  #:use-module (opencog logger)
   #:use-module (opencog exec)
   #:use-module (opencog openpsi)
   #:export (
@@ -45,6 +46,7 @@
     min_sti_words
     min_sti_concepts
     min_sti_rules
+    print-by-action-logger
 
     ; Utilities
     set-dti!
@@ -55,6 +57,7 @@
     time-perceived ; temporarily exported
     was-perceived?
     ghost-stimulate-timer
+    action-logger
   )
 )
 
@@ -618,3 +621,30 @@
   (car (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
       (Concept alias)))))
+
+; --------------------------------------------------------------
+; Define the logger for actions.
+(define schema-logger (cog-new-logger))
+
+; Default configuration for the perception logger
+(cog-logger-set-component! schema-logger "ACTION")
+(cog-logger-set-level! schema-logger "info")
+(cog-logger-set-stdout! schema-logger #t)
+
+(define (action-logger)
+"
+  Return the logger for actions.
+"
+  schema-logger)
+
+(define (print-by-action-logger action-node str-node)
+"
+  say ACTION-NODE STR-NODE
+
+  Display the string that forms the name of the nodes ACTION-NODE and
+  STR-NODE to stdout with the format of \"ACTION-NODE-name: STR-NODE-name\".
+"
+  (cog-logger-set-component! schema-logger (cog-name action-node))
+  (cog-logger-info schema-logger (cog-name str-node))
+  fini
+)
