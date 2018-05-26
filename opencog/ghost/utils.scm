@@ -120,14 +120,14 @@
                    "'"  ; This will turn "’" into "'", for consistency
                    (string-drop next-word-str 1)))))
            (set! final-word-seq (append final-word-seq (list merged-word)))
-           (set! word-apos-alist (assoc-set! word-apos-alist i merged-word))
+           (set! word-apos-alist (assoc-set! word-apos-alist (cons i (1+ i)) merged-word))
            (set! i (1+ i))))
         ; The current word may also have an apostrophe, make sure to turn
         ; "’" into "'" as well for consistency
         ((> (length current-word-splitted) 1)
          (let ((new-word (WordNode (string-join current-word-splitted "'"))))
            (set! final-word-seq (append final-word-seq (list new-word)))
-           (set! word-apos-alist (assoc-set! word-apos-alist i new-word))))
+           (set! word-apos-alist (assoc-set! word-apos-alist (cons i i) new-word))))
         (else (set! final-word-seq (append final-word-seq (list current-word-node)))))))
 
   (Evaluation ghost-word-seq (List SENT (List final-word-seq)))
@@ -158,11 +158,17 @@
       (do ((i 0 (1+ i)))
           ((>= i (length lemma-seq)))
         (set! final-lemma-seq (append final-lemma-seq (list
-          (if (assoc-ref word-apos-alist i)
-            (begin
-              (set! i (1+ i))
-              (assoc-ref word-apos-alist (1- i)))
-            (list-ref lemma-seq i))))))
+          (cond
+            ; For the next-word-prefix-with-apos? case
+            ((assoc-ref word-apos-alist (cons i (1+ i)))
+             (begin
+               (set! i (1+ i))
+               (assoc-ref word-apos-alist (cons (1- i) i))))
+            ; For having apos in the same word
+            ((assoc-ref word-apos-alist (cons i i))
+             (assoc-ref word-apos-alist (cons i i)))
+            ; Just a normal word
+            (else (list-ref lemma-seq i)))))))
     (Evaluation ghost-lemma-seq (List SENT (List final-lemma-seq))))))
 
 ; ----------
@@ -317,9 +323,9 @@
 "
   Given the label of a rule in string, return the rule with that lavel.
 "
-  (define rule
+  (define rule (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept LABEL)))
+      (Concept LABEL))))
 
   (if (null? rule)
       (begin

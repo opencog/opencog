@@ -6,9 +6,10 @@
 "
   Occurrence of a word, a word that should be matched literally.
 "
-  (let* ((v1 (WordNode STR))
-         (v2 (Variable (gen-var STR #f)))
-         (l (WordNode (get-lemma STR)))
+  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
+         (v1 (WordNode str-dc))
+         (v2 (Variable (gen-var str-dc #f)))
+         (l (WordNode (get-lemma str-dc)))
          (v (list (TypedVariable v2 (Type "WordInstanceNode"))))
          (c (list (WordInstanceLink v2 (Variable "$P"))
                   (ReferenceLink v2 v1))))
@@ -22,7 +23,8 @@
 "
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
-         (l (WordNode nstr)))
+         (l (WordNode
+              (if (string-prefix? "I'" nstr) nstr (string-downcase nstr)))))
     (list (list) (list) (list l) (list l))))
 
 ; ----------
@@ -31,9 +33,10 @@
   Lemma occurrence, aka canonical form of a term.
   This is the default for word mentions in the rule pattern.
 "
-  (let* ((v1 (Variable (gen-var STR #t)))
-         (v2 (Variable (gen-var STR #f)))
-         (l (WordNode (get-lemma STR)))
+  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
+         (v1 (Variable (gen-var str-dc #t)))
+         (v2 (Variable (gen-var str-dc #f)))
+         (l (WordNode (get-lemma str-dc)))
          (v (list (TypedVariable v1 (Type "WordNode"))
                   (TypedVariable v2 (Type "WordInstanceNode"))))
          (c (list (ReferenceLink v2 v1)
@@ -54,7 +57,7 @@
 "
   (cog-logger-debug ghost-logger
     "In ghost-lemma? LEMMA: ~aGRD: ~a" LEMMA GRD)
-  (if (equal? (get-lemma (cog-name GRD)) (cog-name LEMMA))
+  (if (string-ci=? (get-lemma (cog-name GRD)) (cog-name LEMMA))
       (stv 1 1)
       (stv 0 1)))
 
@@ -400,8 +403,8 @@
   (extract ACTIONS)
   ; Is there anything to say?
   (if (not (string-null? txt-str))
-      (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt-str)
-             (cog-execute! (Put (DefinedPredicate "Say") (Node txt-str)))))
+      (begin (cog-execute!
+        (Put (DefinedSchema "say") (List (Node txt-str) (Concept ""))))))
   ; New atoms being created
   (if (not (null? atoms-created))
       (cog-logger-info ghost-logger "Atoms Created: ~a" atoms-created))
@@ -432,3 +435,22 @@
 
   ; Return an atom
   (True))
+
+; ----------
+(define-public (ghost-record-executed-rule RULENAME)
+"
+  ghost-record-executed-rule RULENAME
+
+  Keep a record of which rule is triggered and when.
+  This information is used during action selection.
+"
+  (Evaluation ghost-rule-executed (List RULENAME))
+
+  (cog-set-value!
+    (get-rule-from-label (cog-name RULENAME))
+    ghost-time-last-executed
+    (FloatValue (current-time)))
+
+  ; Return an atom
+  (True)
+)

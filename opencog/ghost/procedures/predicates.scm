@@ -45,6 +45,10 @@
           (GroundedPredicate "scm: is-model-true?")
           (List
             (Variable "face-emotion")))
+        (Evaluation
+          (GroundedPredicate "scm: was-perceived?")
+          (List
+            (Variable "face-emotion")))
         (Variable "face-emotion"))))
 
   (let ((models (cog-outgoing-set (cog-execute! get-models))))
@@ -70,6 +74,10 @@
           (GroundedPredicate "scm: is-model-true?")
           (List
             (Variable "face-talking")))
+        (Evaluation
+          (GroundedPredicate "scm: was-perceived?")
+          (List
+            (Variable "face-talking")))
         (Variable "face-talking"))))
 
   (let ((models (cog-outgoing-set (cog-execute! get-models))))
@@ -92,21 +100,36 @@
 
 (define* (person_appears #:optional face-id)
   (if face-id
-    (is-model-true? (see-face (cog-name face-id)))
+    (let ((model (see-face (cog-name face-id))))
+      (if (equal? (stv 1 1) (was-perceived? model))
+        (is-model-true? model)
+        (stv 0 1)
+      )
+    )
     (any-face-seen?)
   )
 )
 
 (define* (person_smiles #:optional face-id)
   (if face-id
-    (is-model-true? (face-emotion (cog-name face-id) "smile"))
+    (let ((model (face-emotion (cog-name face-id) "smile")))
+      (if (equal? (stv 1 1) (was-perceived? model))
+        (is-model-true? model)
+        (stv 0 1)
+      )
+    )
     (any-person-emotion? "smile")
   )
 )
 
 (define* (person_angry #:optional face-id)
   (if face-id
-    (is-model-true? (face-emotion (cog-name face-id) "angry"))
+    (let ((model (face-emotion (cog-name face-id) "angry")))
+      (if (equal? (stv 1 1) (was-perceived? model))
+        (is-model-true? model)
+        (stv 0 1)
+      )
+    )
     (any-person-emotion? "angry")
   )
 )
@@ -122,12 +145,8 @@
   (negate-stv! (person_talking face-id))
 )
 
-(define* (word_perceived word #:optional time-interval)
-  (if time-interval
-    (was-perceived? word (current-time-us)
-      (string->number (cog-name time-interval)))
-    (was-perceived? word (current-time-us) 0.01)
-  )
+(define* (word_perceived word #:optional (time-interval dti-node))
+  (was-perceived? (Word (cog-name word)) time-interval)
 )
 
 (define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
@@ -184,3 +203,8 @@
   (Concept "timer-predicate"))
 (Inheritance (GroundedPredicate "scm: after_user_stopped_talking")
   (Concept "timer-predicate"))
+(Inheritance (GroundedPredicate "scm: person_appears") (Predicate "see"))
+(Inheritance (GroundedPredicate "scm: person_smiles") (Predicate "emotion"))
+(Inheritance (GroundedPredicate "scm: person_angry") (Predicate "emotion"))
+(Inheritance (GroundedPredicate "scm: person_talking") (Predicate "talking"))
+(Inheritance (GroundedPredicate "scm: person_not_talking") (Predicate "talking"))

@@ -6,7 +6,7 @@
   #:use-module (opencog openpsi)
   #:use-module (opencog logger)
   #:use-module (opencog exec)
-  #:use-module (opencog eva-behavior)
+  #:use-module (opencog ghost procedures)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs io ports)
   #:use-module (ice-9 popen)
@@ -74,6 +74,7 @@
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
+(define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
@@ -150,6 +151,7 @@
 (define urge-weight 1)
 (define responder-sti-boost 1)
 (define rejoinder-sti-boost 10)
+(define refractory-period 1)
 
 ;; --------------------
 ;; For monitoring the status

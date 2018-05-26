@@ -452,9 +452,9 @@
                   (Number 0)))
           (list))
       ; Keep a record of which rules have been executed
-      (Put
-        (Evaluation ghost-rule-executed (List (Variable "$x")))
-        (Concept RULENAME))
+      (ExecutionOutput
+        (GroundedSchema "scm: ghost-record-executed-rule")
+        (List (Concept RULENAME)))
       ; Set the current topic, for backward compatibility
       (if ghost-with-ecan
         (list)

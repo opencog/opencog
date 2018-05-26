@@ -12,6 +12,20 @@
 ; --------------------------------------------------------------
 (define fini (Node "finished-action"))
 
+(DefineLink
+  (DefinedSchema "say")
+  (LambdaLink
+    (VariableList
+      (Variable "sentence")
+      (Variable "fallback-id"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "say")
+        (Variable "sentence")))
+  )
+)
+
 (define (animation emotion gesture)
   ;TODO: Remove this hack.
   (let* ((e (cog-name emotion))

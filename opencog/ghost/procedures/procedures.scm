@@ -3,17 +3,19 @@
   #:use-module (opencog)
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
+  #:use-module (opencog logger)
   #:use-module (opencog exec)
-  #:use-module (opencog pointmem)
   #:use-module (opencog openpsi)
-  #:use-module (opencog spacetime)
-  #:use-module (opencog ghost)
   #:export (
     ; Sensory input
     perceive-face
     perceive-emotion
     perceive-word
     perceive-face-talking
+    perceive-eye-state
+
+    ; Sensory input hooks
+    perceive-word-hook
 
     ; Perceptual predicates
     person_appears
@@ -44,13 +46,18 @@
     min_sti_words
     min_sti_concepts
     min_sti_rules
+    print-by-action-logger
 
     ; Utilities
+    set-dti!
+    get-dti
     is-model-true?
     any-model-true?
     set-time-perceived! ; temporarily exported
     time-perceived ; temporarily exported
     was-perceived?
+    ghost-stimulate-timer
+    action-logger
   )
 )
 
@@ -107,6 +114,18 @@
         (Type "ConceptNode"))))
 )
 
+(define (eye-open face-id eye-id)
+"
+  eye-open FACE-ID EYE-ID
+
+  Define the atom used to represent whether FACE-ID face's EYE-ID eye is open.
+"
+  (Evaluation
+    (Predicate "eye-open")
+    (List
+      (Concept face-id)
+      (Concept eye-id)))
+)
 
 (define (get-models sign)
 "
@@ -141,6 +160,7 @@
   its sti.
 "
   (let ((model (see-face face-id)))
+    (set-time-perceived! model)
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
@@ -155,27 +175,38 @@
   truth-value to (stv 1 CONFIDENCE).
 "
   (let ((model (face-emotion face-id emotion-type)))
+    (set-time-perceived! model)
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
 )
 
-(define (perceive-word word)
+(define hook-perceive-word (make-hook 0))
+(define (perceive-word-hook)
 "
-  perceive-word WORD
+  perceive-word-hook
+
+  Returns the hook that is run when 'perceive-word' is called.
+"
+  hook-perceive-word
+)
+
+(define (perceive-word face-id word)
+"
+  perceive-word FACE-ID WORD
+
+  If FACE-ID = \"\" then an unidentified source is talking.
 
   Returns WORD after increasing its sti.
 "
+  ;TODO: How to represent word said by face-id without having an
+  ; explosion of atoms.
   (define wn (Word word))
+  (define cn (Concept word))
   (set-time-perceived! wn)
-
-  ; 'ghost-word-seq' is shared among the rules with word-related pattern
-  ; This is mainly to make sure the rules with only a wildcard in the pattern
-  ; will also get some non-zero STI.
-  ; TODO: Find some better representation for that
-  (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))
-
-  (ghost-stimulate wn)
+  (run-hook hook-perceive-word)
+  (perception-stimulate wn)
+  (perception-stimulate cn)
 )
 
 (define (perceive-face-talking face-id new-conf)
@@ -200,6 +231,21 @@
     (cog-set-tv! model (stv 1 new-conf))
     (cog-stimulate model default-stimulus)
     (set-event-times! face-talking-sign model old-conf new-conf)
+  )
+)
+
+(define (perceive-eye-state face-id eye-id confidence)
+"
+  perceive-eye-state FACE-ID EYE-ID
+
+  Return the atom used to represent whether FACE-ID face's EYE-ID eye is open,
+  after updating its stv and recording perception time and giving it an
+  ecan stimulation.
+"
+  (let ((model (eye-open face-id eye-id)))
+    (set-time-perceived! model)
+    (cog-stimulate model default-stimulus)
+    (cog-set-tv! model (stv 1 confidence))
   )
 )
 
@@ -304,7 +350,6 @@
     )
   )
 )
-
 
 (define (is-recent-transition-true? model)
 "
@@ -429,6 +474,35 @@
 ; These allow adding time based predicates.
 (define time-key (Predicate "time-perceived"))
 
+; Default time interval used as a window, backward from current time,
+; for which the perception is considered valid. This is in seconds.
+(define dti 2)
+(define dti-node (Number dti))
+
+(define (set-dti! sec)
+"
+  set-dti! SEC
+
+  Set the default-time-interval(dti) used as a time window for considering
+  a valid perception and returns the NumberNode that represents it.
+"
+  (if (not (number? sec))
+    (error "Only numbers should be passed as argument"))
+
+  (set! dti sec)
+  (set! dti-node (Number sec))
+)
+
+(define (get-dti)
+"
+  get-dti
+
+  Returns the NumberNode used to represent the default-time-interval(dti)
+  used as a time window for considering a valid perception.
+"
+ dti-node
+)
+
 (define (current-time-us)
 "
   Returns the current-time including microseconds by converting the pair
@@ -478,9 +552,9 @@
     (<= time end-time))
 )
 
-(define (was-perceived? atom end-time time-interval)
+(define (perceived? atom end-time time-interval)
 "
-  was-perceived? ATOM END-TIME TIME-INTERVAL
+  perceived? ATOM END-TIME TIME-INTERVAL
 
   Returns (stv 1 1) if
     (END-TIME - TIME-INTERVAL) <= time-perceived <= END-TIME, else it
@@ -495,6 +569,47 @@
   )
 )
 
+(define* (was-perceived? atom #:optional (time-interval dti-node))
+"
+  was-perceived? ATOM TIME-INTERVAL
+
+  Returns (stv 1 1) if
+    (current-time - TIME-INTERVAL) <= time-perceived <= current-time, else it
+  returns (stv 0 1). All times passed as argument should be in seconds.
+"
+  (perceived? atom (current-time-us)
+    (string->number (cog-name time-interval)))
+)
+
+; --------------------------------------------------------------
+(define timer-last-stimulated 0)
+(define (ghost-stimulate-timer)
+"
+  Stimulate the timer predicate, so that the rules having time-related
+  predicates will likely have some non-zero STI.
+
+  Currently the stimulus will be proportional to the elapsed time (sec)
+  since last time it's called.
+"
+  (if (> timer-last-stimulated 0)
+    (cog-stimulate (Concept "timer-predicate")
+      (* 10 (- (current-time) timer-last-stimulated))))
+
+  (set! timer-last-stimulated (current-time))
+)
+
+; --------------------------------------------------------------
+(define perception-stimulus 150)
+(define-public (perception-stimulate . atoms)
+"
+  perception-stimulate ATOMS
+
+  Stimulate the given list of ATOMS with perception's  default stimulus
+  amount.
+"
+  (map (lambda (a) (cog-stimulate a perception-stimulus)) atoms)
+)
+
 ; --------------------------------------------------------------
 (define (get-rule-from-alias alias)
 "
@@ -506,3 +621,30 @@
   (car (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
       (Concept alias)))))
+
+; --------------------------------------------------------------
+; Define the logger for actions.
+(define schema-logger (cog-new-logger))
+
+; Default configuration for the perception logger
+(cog-logger-set-component! schema-logger "ACTION")
+(cog-logger-set-level! schema-logger "info")
+(cog-logger-set-stdout! schema-logger #t)
+
+(define (action-logger)
+"
+  Return the logger for actions.
+"
+  schema-logger)
+
+(define (print-by-action-logger action-node str-node)
+"
+  say ACTION-NODE STR-NODE
+
+  Display the string that forms the name of the nodes ACTION-NODE and
+  STR-NODE to stdout with the format of \"ACTION-NODE-name: STR-NODE-name\".
+"
+  (cog-logger-set-component! schema-logger (cog-name action-node))
+  (cog-logger-info schema-logger (cog-name str-node))
+  fini
+)

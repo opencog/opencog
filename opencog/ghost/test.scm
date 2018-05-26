@@ -195,6 +195,7 @@
       "AV = ~a\n"
       "TV = ~a\n"
       "Satisfiability: ~a\n"
+      "Time last executed: ~a\n"
       "Next responder: ~a\n"
       "Next rejoinder: ~a\n")
       (cog-av rule)
@@ -202,6 +203,10 @@
       (every
         (lambda (x) (> (cdr (assoc 'mean (cog-tv->alist (cog-evaluate! x)))) 0))
         (psi-get-context rule))
+      (if (null? (cog-value rule ghost-time-last-executed))
+        "N.A."
+        (strftime "%D %T" (localtime (inexact->exact
+          (car (cog-value->list (cog-value rule ghost-time-last-executed)))))))
       (if (null? next-responder)
         (list)
         (append-map psi-rule-alias (cog-value->list next-responder)))
@@ -220,6 +225,7 @@
       (string-append
         "GHOST loop count: ~a\n"
         "AF only? ~a\n"
+        "Refractory period: ~a sec\n"
         "-----\n"
         "Strength weight: ~a\n"
         "Context weight: ~a\n"
@@ -232,6 +238,7 @@
         "Last Triggered Rule: (~a)\n\n")
       (psi-loop-count (ghost-get-component))
       (if ghost-af-only? "T" "F")
+      refractory-period
       strength-weight
       context-weight
       sti-weight
@@ -247,6 +254,7 @@
   Show a list of rules that have been executed.
 "
   (define rset (cog-execute! (Get
+    (TypedVariable (Variable "$x") (Type "ConceptNode"))
     (Evaluation (Predicate "GHOST Rule Executed") (List (Variable "$x"))))))
 
   (define rtn (cog-outgoing-set rset))
@@ -328,4 +336,17 @@
     (set! rejoinder-sti-boost VAL)
     (cog-logger-warn ghost-logger
       "The rejoinder STI boost has to be a numberic value!"))
+)
+
+; ----------
+(define-public (ghost-set-refractory-period VAL)
+"
+  ghost-set-refractory-period VAL
+
+  Set the refractory period to VAL seconds.
+"
+  (if (number? VAL)
+    (set! refractory-period VAL)
+    (cog-logger-warn ghost-logger
+      "The refractory period has to be a numberic value!"))
 )
