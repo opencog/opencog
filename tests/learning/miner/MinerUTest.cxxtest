@@ -75,6 +75,7 @@ public:
 	void test_2conjuncts_5();
 	void test_InferenceControl();
 	void test_SodaDrinker();
+	void xtest_lojban();
 };
 
 MinerUTest::MinerUTest() : _scm(&_as)
@@ -710,6 +711,64 @@ void MinerUTest::test_SodaDrinker()
 		                                 is_man,
 		                                 is_soda_drinker,
 		                                 is_ugly));
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
+
+	TS_ASSERT(content_is_in(expected_pattern, results));
+}
+
+void MinerUTest::xtest_lojban()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Load lojban-test.scm
+	std::string rs =
+		_scm.eval("(load-from-path \"lojban-dataset.scm\")");
+
+	// Define initial pattern (to speed up mining)
+	Handle P1 = tmp_an(VARIABLE_NODE, "$P1"),
+		P3 = tmp_an(VARIABLE_NODE, "$P3"),
+		X1 = tmp_an(VARIABLE_NODE, "$X1"),
+		X2 = tmp_an(VARIABLE_NODE, "$X2"),
+		Z2 = tmp_an(VARIABLE_NODE, "$Z2"),
+		VARS = tmp_al(VARIABLE_LIST, X1, X2, Z2, P1, P3),
+		clauses = tmp_al(AND_LINK,
+		                 tmp_al(EVALUATION_LINK, P1, tmp_al(LIST_LINK, X1, X2)),
+		                 tmp_al(EVALUATION_LINK, P3, tmp_al(LIST_LINK, X1, Z2))),
+		initpat = tmp_al(LAMBDA_LINK, VARS, clauses);
+
+	// Run the pattern miner
+	XPMParameters param(5/*minsup*/, 2/*nconjuncts*/, initpat, 3/*maxdepth*/, 1/*info*/);
+	Miner pm(_as, param);
+	HandleTree results = pm();
+
+	// The pattern of interest looks like
+	//
+	// Lambda
+	//   X
+	// And
+	//   EvaluationLink
+	//     PredicateNode "sumti1"
+	//     ListLink
+	//       X
+	//       Concept "jitfa"
+	//   EvaluationLink
+	//     PredicateNode "sumti2"
+	//     ListLink
+	//       X
+	//       Concept "ko'a"
+	Handle jitfa = tmp_an(CONCEPT_NODE, "jitfa"),
+		koa = tmp_an(CONCEPT_NODE, "ko'a"),
+		sumti1 = tmp_an(PREDICATE_NODE, "sumti1"),
+		sumti2 = tmp_an(PREDICATE_NODE, "sumti2"),
+		is_sumti1 = tmp_al(EVALUATION_LINK, sumti1, tmp_al(LIST_LINK, X1, jitfa)),
+		is_sumti2 = tmp_al(EVALUATION_LINK, sumti2, tmp_al(LIST_LINK, X1, koa)),
+		expected_pattern = tmp_al(LAMBDA_LINK,
+		                          X1,
+		                          tmp_al(AND_LINK,
+		                                 is_sumti1,
+		                                 is_sumti2));
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
