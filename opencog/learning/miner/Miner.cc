@@ -317,7 +317,7 @@ Handle Miner::matched_results(const Handle& pattern, const Handle& text) const
 		tmp_text = 	tmp_as.add_atom(text),
 		ml = tmp_as.add_link(MAP_LINK, tmp_pattern, tmp_text);
 	Instantiator inst(&tmp_as);
-	return inst.execute(ml);
+	return HandleCast(inst.execute(ml));
 }
 
 HandleSetSeq Miner::shallow_abstract(const Handle& pattern,
