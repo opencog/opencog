@@ -1,0 +1,5 @@
+A mom is a human.
+A dad is a human.
+A mom is a parent.
+A dad is a parent.
+A son is a child.

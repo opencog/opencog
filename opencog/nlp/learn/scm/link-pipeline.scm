@@ -11,7 +11,7 @@
 ; requires that a lot of text be observed, with the goal of deducing
 ; a grammar from it, using entropy and other basic probability methods.
 ;
-; Main entry point: `(observe-text plain-text)`
+; Main entry point: `(observe-text plain-text observe-mode count-reach)`
 ;
 ; Call this entry point with exactly one sentence as a plain text
 ; string. It will be parsed, and the resulting link-grammar link usage
@@ -133,13 +133,13 @@
 	; exception, avoid counting if its thrown.
 	(define (try-count-one-word word-inst)
 		(catch 'wrong-type-arg
-			(lambda () (count-one-atom (word-inst-get-word word-inst)))
+			(lambda () (count-one-atom (word-inst-get-word word-inst) 1))
 			(lambda (key . args) #f)))
 
-	(count-one-atom any-sent)
+	(count-one-atom any-sent 1)
 	(for-each
 		(lambda (parse)
-			(count-one-atom any-parse)
+			(count-one-atom any-parse 1)
 			(for-each try-count-one-word (parse-get-words parse)))
 		(sentence-get-parses single-sent))
 )
@@ -215,7 +215,13 @@
 ; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
 ;            If enabled, see warning about the quantity of data, above.
 ;
-(define (update-pair-counts-once PARSE MAX-LEN RECORD-LEN)
+(define (update-pair-counts-once PARSE DIST-MODE MAX-LEN RECORD-LEN)
+
+	; Function to calculate how many times to count a word-pair
+	(define calc-times
+		(if (equal? DIST-MODE "clique-dist")
+			(lambda (d) (quotient MAX-LEN d))
+			(lambda (d) 1)))
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)
@@ -227,11 +233,12 @@
 
 		; Only count if the distance is less than the cap.
 		(if (<= dist MAX-LEN)
-			(let ((pare (ListLink (gar left-seq) (gar right-seq))))
-				(count-one-atom (EvaluationLink pair-pred pare))
+			(let ((pare (ListLink (gar left-seq) (gar right-seq)))
+					(counts (calc-times dist)))
+				(count-one-atom (EvaluationLink pair-pred pare) counts)
 				(if RECORD-LEN
 					(count-one-atom
-						(ExecutionLink pair-dist pare (NumberNode dist)))))))
+						(ExecutionLink pair-dist pare (NumberNode dist)) 1)))))
 
 	; Create pairs from `first`, and each word in the list in `rest`,
 	; and increment counts on these pairs.
@@ -253,19 +260,20 @@
 	(define word-seq (make-word-sequence PARSE))
 
 	; What the heck. Go ahead and count these, too.
-	(for-each count-one-atom word-seq)
+	(for-each  (lambda (w) (count-one-atom w 1)) 
+		word-seq)
 
 	; Count the pairs, too.
 	(make-pairs word-seq)
 )
 
 ; See above for explanation.
-(define (update-clique-pair-counts SENT MAX-LEN RECORD-LEN)
+(define (update-clique-pair-counts SENT DIS-MODE MAX-LEN RECORD-LEN)
 	; In most cases, all parses return the same words in the same order.
-	; Thus, counting only requires us to look at only one parse.
-	(update-pair-counts-once
-		(car (sentence-get-parses SENT))
-		MAX-LEN RECORD-LEN)
+ 	; Thus, counting only requires us to look at only one parse.
+ 	(update-pair-counts-once
+ 		(car (sentence-get-parses SENT))
+ 		DIS-MODE MAX-LEN RECORD-LEN)
 )
 
 ; ---------------------------------------------------------------------
@@ -362,7 +370,7 @@
 	; this exception, and avoid it, if possible.
 	(define (try-count-one-link link)
 		(catch 'wrong-type-arg
-			(lambda () (count-one-atom (make-word-link link)))
+			(lambda () (count-one-atom (make-word-link link) 1))
 			(lambda (key . args) #f)))
 
 	(for-each-lg-link try-count-one-link (list single-sent))
@@ -377,7 +385,7 @@
 
 	(define (try-count-one-cset CSET)
 		(catch 'wrong-type-arg
-			(lambda () (count-one-atom (make-word-cset CSET)))
+			(lambda () (count-one-atom (make-word-cset CSET) 1))
 			(lambda (key . args) #f)))
 
 	(for-each
@@ -408,7 +416,7 @@
 		)))
 
 ; ---------------------------------------------------------------------
-(define-public (observe-text plain-text)
+(define-public (observe-text plain-text observe-mode count-reach)
 "
  observe-text -- update word and word-pair counts by observing raw text.
 
@@ -441,8 +449,11 @@
 			(lambda (key . args) #f)))
 
 	; Count the atoms in the sentence, and then delete it.
-	(define (process-sent SENT)
-		(update-counts SENT)
+	(define (process-sent SENT cnt-mode win-size)
+		(update-word-counts SENT)
+		(if (equal? cnt-mode "lg")
+			(update-lg-link-counts SENT)
+			(update-clique-pair-counts SENT cnt-mode win-size #f))
 		(delete-sentence SENT)
 		(monitor-rate '()))
 
@@ -502,19 +513,19 @@
 	; the returned SentenceNode is not necessarily that of the
 	; the one that was submitted for parsing! It might be just
 	; some other sentence that is sitting there, ready to go.
-	(define (relex-process TXT)
-		(define (do-all-sents)
-			(let ((sent (get-one-new-sentence)))
-				(if (not (null? sent))
-					(begin (process-sent sent) (do-all-sents)))))
+	; (define (relex-process TXT)
+	; 	(define (do-all-sents)
+	; 		(let ((sent (get-one-new-sentence)))
+	; 			(if (not (null? sent))
+	; 				(begin (process-sent sent) (do-all-sents)))))
 
-		(relex-parse TXT)
-		(do-all-sents)
-		(maybe-gc) ;; need agressive gc to keep RAM under control.
-	)
+	; 	(relex-parse TXT)
+	; 	(do-all-sents)
+	; 	(maybe-gc) ;; need agressive gc to keep RAM under control.
+	; )
 
 	; Process the text locally, using the LG API link.
-	(define (local-process TXT)
+	(define (local-process TXT obs-mode cnt-reach)
 		; try-catch wrapper for duplicated text. Here's the problem:
 		; If this routine is called in rapid succession with the same
 		; block of text, then only one PhraseNode and LgParseLink will
@@ -527,10 +538,11 @@
 			(lambda ()
 				(let* ((phr (Phrase TXT))
 						;(lgn (LgParseLink phr (LgDict "any") (Number 24)))
-						(lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+						(num-parses (if (equal? obs-mode "lg") cnt-reach 1))
+						(lgn (LgParseMinimal phr (LgDict "any") (Number num-parses)))
 						(sent (cog-execute! lgn))
 					)
-					(process-sent sent)
+					(process-sent sent obs-mode cnt-reach)
 					; Remove crud so it doesn't build up.
 					(cog-extract lgn)
 					(cog-extract phr)
@@ -542,7 +554,7 @@
 	; (relex-process plain-text)
 
 	; Handle the plain-text locally
-	(local-process plain-text)
+	(local-process plain-text observe-mode count-reach)
 )
 
 ; ---------------------------------------------------------------------
@@ -568,4 +580,3 @@
 ; (for-each-lg-link (lambda (x) (cog-inc-count! (make-word-link x) 1))
 ;    (get-new-parsed-sentences))
 ;
-; (observe-text "abcccccccccc  defffffffffffffffff")

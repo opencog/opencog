@@ -29,7 +29,7 @@
 ; other additive quantity) associated with the edges. This tree is the
 ; MST tree.
 ;
-; After an sentence has been parsed with the MST parser, the links
+; After a sentence has been parsed with the MST parser, the links
 ; between words in the parse can be interpreted as Link Grammar links.
 ; There are two possible interpretations that can be given to these
 ; links: they are either "ANY" links, that connect between any words,
@@ -195,7 +195,7 @@
 ; A list of word-pairs, together with the associated mutual information,
 ; is returned.
 ;
-(define-public (mst-parse-text plain-text)
+(define-public (mst-parse-text plain-text cnt-mode dist-mode)
 
 	; Tokenize the sentence into a list of words.
 	(define word-strs (tokenize-text plain-text))
@@ -204,19 +204,26 @@
 	(define word-list (map (lambda (str) (WordNode str)) word-strs))
 
 	; Define where the costs are coming from.
-	(define pair-obj (make-any-link-api))
-	; (define pair-obj (make-clique-pair-api))
+	(define pair-obj 
+		(if (equal? cnt-mode "lg") 
+			(make-any-link-api)
+			(make-clique-pair-api)))
 
 	(define mi-source (add-pair-freq-api pair-obj))
 
 	(define scorer (make-score-fn mi-source 'pair-fmi))
 
 	; Assign a bad cost to links that are too long --
-	; longer than 16. This is a sharp cutoff.
+	; longer than window used for clique-counting. 
+	; This is a sharp cutoff.
 	; This causes parser to run at O(N^3) for LEN < 16 and
 	; a faster rate, O(N^2.3) for 16<LEN. This should help.
 	(define (trunc-scorer LW RW LEN)
-		(if (< 16 LEN) -2e25 (scorer LW RW LEN)))
+		(if (< 16 LEN) 
+			-2e25
+			(let 
+				((modifier (if dist-mode (/ 1 LEN) 0)))
+				(+ modifier (scorer LW RW LEN)))))
 
 	; Process the list of words.
 	(mst-parse-atom-seq word-list trunc-scorer)
@@ -234,7 +241,7 @@
 	(< 330 (cog-arity (gdr SECTION)))
 )
 
-(define-public (observe-mst plain-text)
+(define-public (observe-mst plain-text CNT-MODE DIST-MODE)
 "
   observe-mst -- update pseduo-disjunct counts by observing raw text.
 
@@ -242,14 +249,14 @@
   often pseudo-disjuncts show up.
 "
 	; The count-one-atom function fetches from the SQL database,
-	; increments the count by one, and stores the result back
+	; increments the count by 1, and stores the result back
 	(for-each
-		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
-		(make-sections (mst-parse-text plain-text))
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj 1)))
+		(make-sections (mst-parse-text plain-text CNT-MODE DIST-MODE))
 	)
 )
 
-(define-public (observe-mst-extra plain-text)
+(define-public (observe-mst-extra plain-text CNT-MODE DIST-MODE)
 "
   observe-mst-extra -- update pseduo-disjunct counts by observing raw
   text.
@@ -261,7 +268,7 @@
   does, extra atoms will be generated to preserve the MST parse
   for each of the inputs.
 "
-	; Tokenize the text, create WordNodes as well as WordIntanceNodes
+	; Tokenize the text, create WordNodes as well as WordInstanceNodes
 	; for each of the words
 	(define word-strs (tokenize-text plain-text))
 	(define word-list (map WordNode word-strs))
@@ -290,7 +297,7 @@
 		word-insts))
 
 	; Do the MST parse
-	(define mstparse (mst-parse-text plain-text))
+	(define mstparse (mst-parse-text plain-text CNT-MODE DIST-MODE))
 	(define sections (make-sections mstparse))
 
 	; Take the parse from above, replace the WordNodes with WordInstanceNodes
@@ -314,7 +321,7 @@
 	; The count-one-atom function fetches from the SQL database,
 	; increments the count by one, and stores the result back
 	(for-each
-		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj 1)))
 		sections
 	)
 

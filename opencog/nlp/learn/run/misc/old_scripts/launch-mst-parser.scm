@@ -1,5 +1,5 @@
 ;
-; parse-launch.scm
+; launch-mst-parser.scm
 ;
 ; Run the cogserver, needed for the language-learning disjunct
 ; counting pipeline. Starts the cogserver, opens the database,
@@ -25,7 +25,7 @@
     language "-mst)> "))
 
 ; Start the cogserver with configs for the given language
-(start-cogserver (string-append "opencog-mst-" language ".conf"))
+(start-cogserver (string-append "config/opencog-mst-" language ".conf"))
 
 ; Open the database.
 (sql-open database-uri)
@@ -35,16 +35,17 @@
 ; an observe pass over the same sentences to be parsed.
 
 ; Load up the words
-(display "Fetch all words from database. This may take a few minutes.\n")
+(display "Fetching all words from database. This may take a few minutes.\n")
 (fetch-all-words)
 
 ; Load up the word-pairs -- this can take over half an hour!
-(display "Fetch all word-pairs. This may take a few minutes!\n")
+(display "Fetching all word-pairs. This may take a few minutes.\n")
 
 ; The object which will be providing pair-counts for us.
 ; We can also do MST parsing with other kinds of pair-count objects,
 ; for example, the clique-pairs, or the distance-pairs.
 (define pair-obj (make-any-link-api))
+;(define pair-obj (make-clique-pair-api))
 (define star-obj (add-pair-stars pair-obj))
 (pair-obj 'fetch-pairs)
 
@@ -54,6 +55,6 @@
 ; Clear the sql cache and the stats counters
 (sql-clear-cache)
 (sql-clear-stats)
-(print-matrix-summary-report star-obj)
+;(print-matrix-summary-report star-obj)
 
 (display "Done fetching pairs.\n")
