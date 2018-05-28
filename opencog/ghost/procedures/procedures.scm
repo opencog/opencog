@@ -21,12 +21,12 @@
     emotion
     face
     talking
+    new_talking
     person_not_talking
     word_perceived
 
     ; Time related predicates
     after_min
-    after_user_started_talking
     after_user_stopped_talking
 
     ; schemas
@@ -397,6 +397,7 @@
   )
 )
 
+; --------------------------------------------------------------
 (define (true-value? value)
 "
   true-value? VALUE
