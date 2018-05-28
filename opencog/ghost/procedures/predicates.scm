@@ -110,27 +110,21 @@
   )
 )
 
-(define* (person_smiles #:optional face-id)
-  (if face-id
-    (let ((model (face-emotion (cog-name face-id) "smile")))
-      (if (equal? (stv 1 1) (was-perceived? model))
-        (is-model-true? model)
-        (stv 0 1)
-      )
-    )
-    (any-person-emotion? "smile")
-  )
-)
+(define* (emotion emotion-type #:optional (face-id (Concept "")))
+"
+  emotion EMOTION-TYPE [FACE-ID]
 
-(define* (person_angry #:optional face-id)
-  (if face-id
-    (let ((model (face-emotion (cog-name face-id) "angry")))
-      (if (equal? (stv 1 1) (was-perceived? model))
-        (is-model-true? model)
-        (stv 0 1)
-      )
+  Check if face with FACE-ID was seen to have EMOTION-TYPE emotion.
+  Returns (stv 1 1) if the the model associated with FACE-ID is true,
+  within the default-time-interval, otherwise it returns (stv 0 1).
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+  (let ((model (face-emotion (cog-name face-id) (cog-name emotion-type))))
+    (if (equal? (stv 1 1) (was-perceived? model))
+      (is-model-true? model)
+      (stv 0 1)
     )
-    (any-person-emotion? "angry")
   )
 )
 

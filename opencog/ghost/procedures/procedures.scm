@@ -18,9 +18,8 @@
     perceive-word-hook
 
     ; Perceptual predicates
+    emotion
     person_appears
-    person_smiles
-    person_angry
     person_talking
     person_not_talking
     word_perceived
@@ -167,9 +166,9 @@
   )
 )
 
-(define (perceive-emotion face-id emotion-type confidence)
+(define (perceive-emotion emotion-type face-id confidence)
 "
-  perceive-emotion FACE-ID EMOTION-TYPE CONFIDENCE
+  perceive-emotion EMOTION-TYPE FACE-ID CONFIDENCE
 
   Returns the atom representing whether the face with id FACE-ID is in an
   emotional-state EMOTION-TYPE, after increasing its sti and setting its
