@@ -11,17 +11,18 @@
 (use-modules (opencog matrix))
 
 (define (fetch-wp cnt-mode)
-
+  (define pair-obj '())
+  (define star-obj '())
   (display "Fetching all word-pairs from the database. This may take a few minutes.\n")
   (cond
     ((equal? cnt-mode "lg")
-      (define pair-obj (make-any-link-api)))
+      (set! pair-obj (make-any-link-api)))
 
     ((or (equal? cnt-mode "clique")
          (equal? cnt-mode "clique-dist"))
-      (define pair-obj (make-clique-pair-api))))
+      (set! pair-obj (make-clique-pair-api))))
 
-  (define star-obj (add-pair-stars pair-obj)) ;TODO: Can it be left out??
+  (set! star-obj (add-pair-stars pair-obj)) ;TODO: Can it be left out??
   (pair-obj 'fetch-pairs)
 
   ; Print the sql stats

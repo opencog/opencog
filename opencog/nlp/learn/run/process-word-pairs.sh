@@ -8,7 +8,7 @@
 #    ./process-word-pairs.sh cmi en
 #
 
-if [ $# -ne 2 ]
+if [ $# -ne 2 ]our
 then 
   echo "Usage: ./process-word-pairs.sh <mode> <language>"
   exit 0
@@ -22,12 +22,12 @@ source ./config/det-port-num.sh $1 $2
 # Gets processing instructions for the cogserver
 case $1 in
    cmi)
-      module="fetch-word-pairs.scm"
-      func="fetch-wp"
-      ;;
-   mst)
       module="compute-mi.scm"
       func="comp-mi"
+      ;;
+   mst)
+      module="fetch-word-pairs.scm"
+      func="fetch-wp"
       ;;
    *)
       echo "Usage: ./process-word-pairs.sh <mode> <language>"
@@ -42,5 +42,5 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Submit instruction to the cogserver
-echo -e "(load $module)" | nc -N localhost $PORT
+echo -e "(load \"$module\")" | nc -N localhost $PORT
 echo -e "($func \"$cnt_mode\")" | nc -N localhost $PORT

@@ -6,15 +6,17 @@
 (use-modules (opencog matrix))
 
 (define (comp-mi cnt-mode)
+  (define pair-obj '())
+  (define star-obj '())
   (cond
     ((equal? cnt-mode "lg")
-    	(define pair-obj (make-any-link-api)))
+    	(set! pair-obj (make-any-link-api)))
 
     ((or (equal? cnt-mode "clique")
          (equal? cnt-mode "clique-dist"))
-        (define pair-obj (make-clique-pair-api))))
+        (set! pair-obj (make-clique-pair-api))))
 
-  (define star-obj (add-pair-stars pair-obj))
+  (set! star-obj (add-pair-stars pair-obj))
   (batch-pairs star-obj)
   
   ; Print the sql stats
