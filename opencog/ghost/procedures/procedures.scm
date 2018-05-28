@@ -383,7 +383,7 @@
   returns #f.
 "
   (if (is-recent-transition-true? model)
-    (>= (- (current-time-us) (time-true-transition model)) secs)
+    (> (- (current-time-us) (time-true-transition model)) secs)
     #f
   )
 )
@@ -397,7 +397,34 @@
   returns #f.
 "
   (if (is-recent-transition-false? model)
-    (>= (- (current-time-us) (time-false-transition model)) secs)
+    (> (- (current-time-us) (time-false-transition model)) secs)
+    #f
+  )
+)
+
+(define (true-transition-occurring? model secs)
+"
+  true-transition-occurring? MODEL SECS
+
+  Return #t if the time passed since the MODEL had a true transition is
+  less than SECS, and there hasn't been a false transition. If not,
+  returns #f.
+"
+  (if (is-recent-transition-true? model)
+    (< (- (current-time-us) (time-true-transition model)) secs)
+    #f
+  )
+)
+(define (false-transition-occurring? model secs)
+"
+  false-transition-occurring? MODEL SECS
+
+  Return #t if the time passed since the MODEL had a false transition is
+  less than SECS, and there hasn't been a true transition. If not,
+  returns #f.
+"
+  (if (is-recent-transition-false? model)
+    (< (- (current-time-us) (time-false-transition model)) secs)
     #f
   )
 )
