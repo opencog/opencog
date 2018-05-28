@@ -72,6 +72,11 @@
 ; APIs used to create the atoms used to represent the world, aka
 ; world-model. These are not exported.
 ; --------------------------------------------------------------
+; Identifier used for an unidentified source of perceptual stimulus.
+(define any-id "")
+; Node used to represent an unidentified source of perceptual stimulus.
+(define any-node (Concept ""))
+
 (define (see-face face-id)
 "
   Define the atom used to represent that the face represented by FACE-ID

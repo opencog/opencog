@@ -111,7 +111,7 @@
 )
 
 ; --------------------------------------------------------------
-(define* (face #:optional (face-id (Concept "")))
+(define* (face #:optional (face-id any-node))
 "
   face [FACE-ID]
 
@@ -122,7 +122,7 @@
   (perception-occuring? (see-face (cog-name face-id)))
 )
 
-(define* (emotion emotion-type #:optional (face-id (Concept "")))
+(define* (emotion emotion-type #:optional (face-id any-node))
 "
   emotion EMOTION-TYPE [FACE-ID]
 
@@ -136,7 +136,7 @@
     (face-emotion (cog-name face-id) (cog-name emotion-type)))
 )
 
-(define* (talking #:optional (face-id (Concept "")))
+(define* (talking #:optional (face-id any-node))
 "
   talking [FACE-ID]
 
