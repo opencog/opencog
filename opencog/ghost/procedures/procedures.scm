@@ -19,7 +19,7 @@
 
     ; Perceptual predicates
     emotion
-    person_appears
+    face
     person_talking
     person_not_talking
     word_perceived
