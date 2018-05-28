@@ -225,13 +225,13 @@
 
   If FACE-ID = \"\" then an unidentified source is talking.
 "
-  (let* ((model
-           (if (equal? "" face-id) face-talking-sign (face-talking face-id)))
+  (let* ((model (face-talking face-id))
     (old-conf (tv-conf (cog-tv model))))
 
+    (set-time-perceived! model)
+    (set-event-times! model old-conf new-conf)
     (cog-set-tv! model (stv 1 new-conf))
     (cog-stimulate model default-stimulus)
-    (set-event-times! face-talking-sign model old-conf new-conf)
   )
 )
 
@@ -294,21 +294,16 @@
 
 ; TODO Move the time related helpers to the time-server. Some of this
 ; utilities should have been provided by it.
-(define (set-event-times! sign model old-value new-value)
+(define (set-event-times! model old-value new-value)
 "
-  set-event-times! SIGN MODEL OLD-VALUE NEW-VALUE
+  set-event-times! MODEL OLD-VALUE NEW-VALUE
 
-  Record the time that MODEL transitions to true or false. Also, records
-  the time of the recent transition for the set of models having the same
-  pattern as MODEL and represented in SIGN, a SignatureLink representing
-  the patterns.
+  Record the time that MODEL transitions to true or false.
 "
   (cond
     ((true-transition-occurs? old-value new-value)
-      (cog-set-value! sign event-start (FloatValue (current-time-us)))
       (cog-set-value! model event-start (FloatValue (current-time-us))))
     ((false-transition-occurs? old-value new-value)
-      (cog-set-value! sign event-stop (FloatValue (current-time-us)))
       (cog-set-value! model event-stop (FloatValue (current-time-us))))
     (else model)
   )
@@ -320,10 +315,6 @@
 
   Returns the time in seconds of the last time the MODEL transitioned
   into a true state. If no time had been recorded then nil is returned.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would give the time for the recent
-  true transition for the set of models which have the same pattern as
-  MODEL.
 "
   (let ((time (cog-value model event-start)))
     (if (null? time)
@@ -339,10 +330,6 @@
 
   Returns the time in seconds of the last time the MODEL transitioned
   into a false state. If no time had been recorded then nil is returned.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would give the time for the recent
-  false transition for the set of models which have the same pattern as
-  MODEL.
 "
   (let ((time (cog-value model event-stop)))
     (if (null? time)
@@ -357,10 +344,6 @@
   is-recent-transition-true? MODEL
 
   Return #t if the recent state transition of MODEL is a true-transition.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would return #t if the recent transition
-  for any member of the set of models which have the same pattern as MODEL
-  had a true-transition.
 "
   (let ((true-t (time-true-transition model))
     (false-t (time-false-transition model)))
@@ -376,10 +359,6 @@
   is-recent-transition-false? MODEL
 
   Return #t if the recent state transition of MODEL is a false-transition.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would return #t if the recent transition
-  for any member of the set of models which have the same pattern as MODEL
-  had a false-transition.
 "
   (let ((true-t (time-true-transition model))
     (false-t (time-false-transition model)))
@@ -396,10 +375,7 @@
 
   Return #t if the time passed since the MODEL had a true transition is
   greater than SECS, and there hasn't been a false transition. If not,
-  returns #f. MODEL could be a SignatureLink representing the patterns of
-  the models. If a SignatureLink is used then it would return #t if the check
-  is #t for any member of the set of models which have the same pattern
-  as MODEL.
+  returns #f.
 "
   (if (is-recent-transition-true? model)
     (>= (- (current-time-us) (time-true-transition model)) secs)
@@ -413,10 +389,7 @@
 
   Return #t if the time passed since the MODEL had a false transition is
   greater than SECS, and there hasn't been a true transition. If not,
-  returns #f. MODEL could be a SignatureLink representing the patterns of
-  the models. If a SignatureLink is used then it would return #t if the check
-  is #t  for any member of the set of models which have the same pattern
-  as MODEL.
+  returns #f.
 "
   (if (is-recent-transition-false? model)
     (>= (- (current-time-us) (time-false-transition model)) secs)
