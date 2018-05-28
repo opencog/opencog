@@ -167,7 +167,7 @@
         (stv 0 1)))
 )
 
-(define (after_user_started_talking secs)
+(define (new_talking secs)
 "
   after_user_started_talking SECS
 
