@@ -330,7 +330,7 @@ fan-fiction website. Once you are sure you have the right material to start, fol
    > nc: invalid option -- 'N'
    
    open `process-one.sh` and remove the -N option from the nc commands
-   (some old version of netcat don't support this option).
+   (some old version of netcat still support this option).
 
 7) Wait some time, possibly a few days. When finished, stop the cogserver.
  
@@ -437,11 +437,11 @@ will automatically pick up where they left off.
    > nc: invalid option -- 'N'
    
    open `process-word-pairs.sh` and remove the -N option from the nc commands
-   (some old version of netcat don't support this option).
+   (some old version of netcat still support this option).
 
 4) Wait some time, possibly a few days. When finished, stop the cogserver.
    
-   This script uses commands from the scripts in the `scm` directory.
+   These scripts use commands from the scripts in the `scm` directory.
    The code for computing word-pair MI is in `batch-word-pair.scm`.
    It uses the `(opencog matrix)` subsystem to perform the core work.
 
@@ -541,10 +541,10 @@ version works well. To run it follow the next steps:
 
    * Open `params.txt` and make sure the cnt-mode used for observing is
    still being used. Also, if you want to give weight to the word-pairs
-   MI (multiplied by 1/separation), assign mst_dist="#t". Set exp_parses
-   as true if you want to export the actual sentence parses to a txt file.
-   The parameter cnt_reach does not have an effect at this stage, you can
-   leave it as is.
+   MI (multiplied by 1/separation), assign mst_dist="#t". Set the export
+   parses variable to true (exp_parses="#t") if you want to export the
+   actual sentence parses to a txt file. The parameter cnt_reach does not
+   have an effect at this stage, you can leave it as is.
 
 5) In your working directory run the following:
    ```
@@ -557,7 +557,7 @@ version works well. To run it follow the next steps:
       ./run-multiple-terminals.sh mst en en_pairs opencog_user cheese
    ```
 
-6) In the cntl tab of the byobu (you can navigate with the F3 and F4 keys),
+6) In an unused tab of the byobu (you can navigate with the F3 and F4 keys),
    run the following:
    ```
       ./process-word-pairs.sh mst en
@@ -754,25 +754,34 @@ Before you follow the next steps make sure you have cloned the repositories from
 IF EVERYTHING WORKED FINE YOU ARE READY TO WORK (go to [Bulk Text Parsing](#bulk-text-parsing)),
 OTHERWISE GO BACK TO STEP 0 (or fix your bug if you happen to know what went wrong)!!
 
-***Note 1***: Steps 1-5 are only necessary the first time you install the docker container and images.
-Afterwards, you just need to follow steps 6 and 7 every time you want to create a new opencog container,
-or access directly your already existing contianer (see next note).
+***Note 1***: If something went wrong when trying to connect to the cogserver consider making a clean build
+and re-installing inside the container all three: cogutil, atomspace, opencog. For example for the first one:
+  ```
+   ~$ cd /cogutil/build
+   /cogutil/build$ rm -rf *
+   /cogutil/build$ cmake ..
+   /cogutil/build$ make && sudo make install
+   ```
 
-***Note 2***: Keep in mind that everytime you run `docker-compose run dev` it will create a new instance of *opencog*
+***Note 2***: Steps 1-5 are only necessary the first time you install the docker container and images.
+Afterwards, you just need to follow steps 6 and 7 every time you want to create a new opencog container,
+or you might want to access directly your already existing contianer (see next note).
+
+***Note 3***: Keep in mind that everytime you run `docker-compose run dev` it will create a new instance of *opencog*
 but the same instances of *postgres* and *relex* will be running on the background. Use (Ctrl+D) to exit a container.
 Some usefull commands for managing your containers on your local machine are listed below:
   - `docker ps`                     To see the list of all the active containers (it shows *container_ID*).
   - `docker ps -a`                  To see the list of all the existing containers.
-  - `docker start container_ID`     To start an inactive existing container (for example an existing instance of *opencog.
-  - `docker attach container_ID`    To "log-in" to an running (existing active) container in a terminal.
+  - `docker start container_ID`     To start an inactive existing container (for example an existing instance of *opencog).
+  - `docker attach container_ID`    To "log-in" to a running (existing & active) container in a terminal.
   - `docker stop container_ID`      To stop a running container.
   - `docker stop $(docker ps -q)`   To stop all running containers.
-  - `docker kill container_ID`      To kill a running container.
+  - `docker kill container_ID`      To kill a running container (forces the stop).
   - `docker rm container_ID`        To delete an existing but inactive container.
   - `docker rm -f container_ID`     To delete a running container (it will kill it first).
   
 **DO NOT** try to delete all running containers unless strictly necessary because it will delete the *postgres* instance as well, which means losing all your databases!!!
 
-***Note 3***: Remember to always close any cogserver (Ctrl+D) sessions you have started before continuing,
+***Note 4***: Remember to always close any cogserver (Ctrl+D) sessions you have started before continuing,
 otherwise you will have problems accessing your databases later.
 

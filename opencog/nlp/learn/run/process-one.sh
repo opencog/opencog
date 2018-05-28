@@ -35,7 +35,7 @@ case $1 in
    mst)
       subdir=mst-articles
       observe="observe-mst"
-      if ["$exp_parses" == "#t"]
+      if [[ "$exp_parses" == "#t" ]]
           then observe="observe-mst-extra"
       fi
       params="$cnt_mode $mst_dist"

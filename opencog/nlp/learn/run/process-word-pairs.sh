@@ -8,7 +8,7 @@
 #    ./process-word-pairs.sh cmi en
 #
 
-if [ $# -ne 2 ]our
+if [ $# -ne 2 ]
 then 
   echo "Usage: ./process-word-pairs.sh <mode> <language>"
   exit 0
@@ -36,7 +36,7 @@ case $1 in
 esac
 
 # Punt if the cogserver has crashed: use netcat to ping it.
-haveping=`echo foo | nc -N $coghost $cogport`
+haveping=`echo foo | nc -N localhost $PORT`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
