@@ -94,10 +94,23 @@
 ; similar to word_perceived. If the time-window is passed then it returns
 ; false.
 
-;(define (person_appears face-id)
-;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
-;)
+; --------------------------------------------------------------
+(define (perception-occuring? model)
+"
+  perception-occuring? MODEL
 
+  Check if the perception-model MODEL face with FACE-ID was seen.
+
+  Returns (stv 1 1) if the perception-model MODEL is true within the
+  default-time-interval, otherwise it returns (stv 0 1).
+"
+  (if (equal? (stv 1 1) (was-perceived? model))
+    (is-model-true? model)
+    (stv 0 1)
+  )
+)
+
+; --------------------------------------------------------------
 (define* (face #:optional (face-id (Concept "")))
 "
   face [FACE-ID]
@@ -106,12 +119,7 @@
 
   IF FACE-ID is not passed then the return value is for any person.
 "
-  (let ((model (see-face (cog-name face-id))))
-    (if (equal? (stv 1 1) (was-perceived? model))
-      (is-model-true? model)
-      (stv 0 1)
-    )
-  )
+  (perception-occuring? (see-face (cog-name face-id)))
 )
 
 (define* (emotion emotion-type #:optional (face-id (Concept "")))
@@ -124,21 +132,19 @@
 
   IF FACE-ID is not passed then the return value is for any person.
 "
-  (let ((model (face-emotion (cog-name face-id) (cog-name emotion-type))))
-    (if (equal? (stv 1 1) (was-perceived? model))
-      (is-model-true? model)
-      (stv 0 1)
-    )
-  )
+  (perception-occuring?
+    (face-emotion (cog-name face-id) (cog-name emotion-type)))
 )
 
 (define* (talking #:optional (face-id (Concept "")))
-  (let ((model (face-talking (cog-name face-id))))
-    (if (equal? (stv 1 1) (was-perceived? model))
-      (is-model-true? model)
-      (stv 0 1)
-    )
-  )
+"
+  talking [FACE-ID]
+
+  Check if face with FACE-ID is talking.
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+  (perception-occuring? (face-talking (cog-name face-id)))
 )
 
 (define* (person_not_talking #:optional face-id)
