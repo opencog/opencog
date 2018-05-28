@@ -98,15 +98,19 @@
 ;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
 ;)
 
-(define* (person_appears #:optional face-id)
-  (if face-id
-    (let ((model (see-face (cog-name face-id))))
-      (if (equal? (stv 1 1) (was-perceived? model))
-        (is-model-true? model)
-        (stv 0 1)
-      )
+(define* (face #:optional (face-id (Concept "")))
+"
+  face [FACE-ID]
+
+  Check if face with FACE-ID was seen.
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+  (let ((model (see-face (cog-name face-id))))
+    (if (equal? (stv 1 1) (was-perceived? model))
+      (is-model-true? model)
+      (stv 0 1)
     )
-    (any-face-seen?)
   )
 )
 
