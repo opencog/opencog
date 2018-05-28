@@ -54,6 +54,16 @@
   )
 )
 
+(define (fallback_on fallback-id)
+"
+  fallback_on  FALLBACK-ID
+
+  Use the fallback system identified by FALLBACK-ID
+"
+  (cog-execute! (Put (DefinedSchema "say") (List (Concept "") fallback-id)))
+  fini
+)
+
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
