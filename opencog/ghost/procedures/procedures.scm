@@ -20,7 +20,7 @@
     ; Perceptual predicates
     emotion
     face
-    person_talking
+    talking
     person_not_talking
     word_perceived
 
@@ -160,7 +160,7 @@
   its sti.
 "
   (let ((model (see-face face-id)))
-    (set-time-perceived! model)
+    (set-time-perceived! model (FloatValue (current-time-us)))
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
@@ -175,7 +175,7 @@
   truth-value to (stv 1 CONFIDENCE).
 "
   (let ((model (face-emotion face-id emotion-type)))
-    (set-time-perceived! model)
+    (set-time-perceived! model (FloatValue (current-time-us)))
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
@@ -203,7 +203,7 @@
   ; explosion of atoms.
   (define wn (Word word))
   (define cn (Concept word))
-  (set-time-perceived! wn)
+  (set-time-perceived! wn (FloatValue (current-time-us)))
   (run-hook hook-perceive-word)
   (perception-stimulate wn)
   (perception-stimulate cn)
@@ -225,10 +225,11 @@
   If FACE-ID = \"\" then an unidentified source is talking.
 "
   (let* ((model (face-talking face-id))
-    (old-conf (tv-conf (cog-tv model))))
+    (old-conf (tv-conf (cog-tv model)))
+    (time (FloatValue (current-time-us))))
 
-    (set-time-perceived! model)
-    (set-event-times! model old-conf new-conf)
+    (set-time-perceived! model (FloatValue (current-time-us)))
+    (set-event-times! model old-conf new-conf time)
     (cog-set-tv! model (stv 1 new-conf))
     (cog-stimulate model default-stimulus)
   )
@@ -243,7 +244,7 @@
   ecan stimulation.
 "
   (let ((model (eye-open face-id eye-id)))
-    (set-time-perceived! model)
+    (set-time-perceived! model (FloatValue (current-time-us)))
     (cog-stimulate model default-stimulus)
     (cog-set-tv! model (stv 1 confidence))
   )
@@ -293,17 +294,17 @@
 
 ; TODO Move the time related helpers to the time-server. Some of this
 ; utilities should have been provided by it.
-(define (set-event-times! model old-value new-value)
+(define (set-event-times! model old-value new-value time)
 "
-  set-event-times! MODEL OLD-VALUE NEW-VALUE
+  set-event-times! MODEL OLD-VALUE NEW-VALUE TIME
 
-  Record the time that MODEL transitions to true or false.
+  Record the time TIME that MODEL transitions to true or false.
 "
   (cond
     ((true-transition-occurs? old-value new-value)
-      (cog-set-value! model event-start (FloatValue (current-time-us))))
+      (cog-set-value! model event-start time))
     ((false-transition-occurs? old-value new-value)
-      (cog-set-value! model event-stop (FloatValue (current-time-us))))
+      (cog-set-value! model event-stop time))
     (else model)
   )
 )
@@ -487,13 +488,13 @@
   )
 )
 
-(define (set-time-perceived! atom)
+(define (set-time-perceived! atom time)
 "
-  set-time-perceived! ATOM
+  set-time-perceived! ATOM TIME
 
-  Record the current time as the time of perception of ATOM, and return ATOM.
+  Record TIME as the time of perception of ATOM, and return ATOM.
 "
-  (cog-set-value! atom time-key (FloatValue (current-time-us)))
+  (cog-set-value! atom time-key time)
 )
 
 (define (time-perceived atom)
