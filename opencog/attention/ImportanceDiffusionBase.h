@@ -94,7 +94,7 @@ protected:
 
     // Recursively try to redistribute STI which was supposed to be delivered to
     // certain atom types which should not receive STI.
-    void redistribute(const Handle& target, const double& sti, std::vector<std::pair<Handle,
+    double redistribute(const Handle& target, const double& sti, std::vector<std::pair<Handle,
                       double>>& refund);
 public:
     ImportanceDiffusionBase(CogServer&);
