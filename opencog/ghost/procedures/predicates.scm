@@ -134,10 +134,12 @@
   )
 )
 
-(define* (person_talking #:optional face-id)
-  (if face-id
-    (is-model-true? (face-talking (cog-name face-id)))
-    (any-person-talking?)
+(define* (person_talking #:optional (face-id (Concept "")))
+  (let ((model (face-talking (cog-name face-id))))
+    (if (equal? (stv 1 1) (was-perceived? model))
+      (is-model-true? model)
+      (stv 0 1)
+    )
   )
 )
 
