@@ -442,15 +442,15 @@
   )
 )
 
-(define (negate-stv! stv)
+(define-public (negate-stv! tv)
 "
-  negate-stv! STV
+  negate-stv! TV
 
-  Returns (stv 1 1) if STV is (stv 0 1) and vice-versa.
+  Returns (stv 1 1) if TV is (stv 0 1) and vice-versa.
 "
   (cond
-    ((equal? (stv 1 1) stv) (stv 0 1))
-    ((equal? (stv 0 1) stv) (stv 1 1))
+    ((equal? (stv 1 1) tv) (stv 0 1))
+    ((equal? (stv 0 1) tv) (stv 1 1))
     (else (error "negate-stv! expected (stv 1 1)/(stv 0 1) got=~a\n" stv))
   )
 )
