@@ -24,6 +24,13 @@
     new_talking
     person_not_talking
     word_perceived
+    ;; Perceptual predicates for a talking face
+    new_talking
+    talking
+    after_user_started_talking
+    end_talking
+    not_talking
+    after_user_stopped_talking
 
     ; Time related predicates
     after_min
@@ -61,8 +68,6 @@
   )
 )
 
-(load "procedures/predicates.scm")
-(load "procedures/schemas.scm")
 
 ; --------------------------------------------------------------
 ; There is a spacemap in eva-model module called faces. Thus the rename.
@@ -100,13 +105,14 @@
       (Concept face-id)))
 )
 
+(define face-talking-predicate (Predicate "talking"))
 (define (face-talking face-id)
 "
   Define the atom used to represent that the face represented by FACE-ID
   is talking.
 "
   (Evaluation
-    (Predicate "talking")
+     face-talking-predicate
     (List
       (Concept face-id)))
 )
@@ -661,3 +667,9 @@
   (cog-logger-info schema-logger (cog-name str-node))
   fini
 )
+
+; --------------------------------------------------------------
+; Because macros require all the bindings used before expansion load
+; the files last.
+(load "procedures/predicates.scm")
+(load "procedures/schemas.scm")

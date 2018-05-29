@@ -95,11 +95,9 @@
 ; false.
 
 ; --------------------------------------------------------------
-(define (perception-occuring? model)
+(define (true-perception-occuring? model)
 "
-  perception-occuring? MODEL
-
-  Check if the perception-model MODEL face with FACE-ID was seen.
+  true-perception-occuring? MODEL
 
   Returns (stv 1 1) if the perception-model MODEL is true within the
   default-time-interval, otherwise it returns (stv 0 1).
@@ -161,6 +159,127 @@
 )
 
 ; --------------------------------------------------------------
+(define-syntax-rule
+  (define-face-predicates model-func predicate-node
+    t-transitioning? t-occuring? since-t?
+    f-transitioning? f-occuring? since-f?)
+  ; The definitons are not public so as to be able to control which
+  ; of them are exported by this module.
+  (begin
+    (define* (t-transitioning? #:optional (face-id any-node))
+      (true-event-occuring?  (model-func (cog-name face-id))))
+    (Inheritance
+      (GroundedPredicate (format #f "scm: ~a" 't-transitioning?))
+       predicate-node)
+
+    (define* (t-occuring? #:optional (face-id any-node))
+      (true-perception-occuring? (model-func (cog-name face-id))))
+    (Inheritance
+      (GroundedPredicate (format #f "scm: ~a" 't-occuring?))
+       predicate-node)
+
+    (define* (since-t? secs #:optional (face-id any-node))
+      (since-event-started-occuring? (model-func (cog-name face-id)) secs))
+    (Inheritance
+      (GroundedPredicate (format #f "scm: ~a" 'since-t?))
+       predicate-node)
+
+    (define* (f-transitioning? #:optional (face-id any-node))
+      (false-event-occuring? (model-func (cog-name face-id))))
+    (Inheritance
+      (GroundedPredicate (format #f "scm: ~a" 'f-transitioning?))
+       predicate-node)
+
+    (define* (f-occuring? #:optional (face-id any-node))
+      (negate-stv! (t-occuring? face-id)))
+    (Inheritance
+      (GroundedPredicate (format #f "scm: ~a" 'f-occuring?))
+       predicate-node)
+
+    (define* (since-f? secs  #:optional (face-id any-node))
+      (since-event-stopped-occuring? (model-func (cog-name face-id)) secs))
+    (Inheritance
+      (GroundedPredicate (format #f "scm: ~a" 'since-f?))
+       predicate-node)
+  )
+)
+
+; --------------------------------------------------------------
+; Define predicates for face-talking
+(define-face-predicates face-talking face-talking-predicate
+   new_talking
+   talking
+   after_user_started_talking
+   end_talking
+   not_talking
+   after_user_stopped_talking
+)
+
+(set-procedure-property! new_talking 'documentation
+"
+  new_talking [FACE-ID]
+
+  Return (stv 1 1) if the face identified by FACE-ID is starting to talk
+  within the last event-period, otherwise returns (stv 0 1).
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+)
+
+(set-procedure-property! talking 'documentation
+"
+  talking [FACE-ID]
+
+  Check if face with FACE-ID is talking.
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+)
+
+(set-procedure-property! after_user_started_talking 'documentation
+"
+  after_user_started_talking SECS [FACE-ID]
+
+  Returns (stv 1 1) if current time >= the time that the user identified by
+  FACE-ID started talking + SECS. Otherwise, returns (stv 0 1).
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+)
+
+(set-procedure-property! end_talking 'documentation
+"
+  end_talking [FACE-ID]
+
+  Return (stv 1 1) if the face identified by FACE-ID is stopping to talk
+  within the last event-period, otherwise returns (stv 0 1).
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+)
+
+(set-procedure-property! not_talking 'documentation
+"
+  not_talking [FACE-ID]
+
+  Check if face with FACE-ID is not talking.
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+)
+
+(set-procedure-property! after_user_stopped_talking 'documentation
+"
+  after_user_stopped_talking SECS [FACE-ID]
+
+  Returns (stv 1 1) if current time >= the time that the user identified by
+  FACE-ID stopped talking + SECS. Otherwise, returns (stv 0 1).
+
+  IF FACE-ID is not passed then the return value is for any person.
+"
+)
+
+; --------------------------------------------------------------
 (define* (face #:optional (face-id any-node))
 "
   face [FACE-ID]
@@ -169,7 +288,7 @@
 
   IF FACE-ID is not passed then the return value is for any person.
 "
-  (perception-occuring? (see-face (cog-name face-id)))
+  (true-perception-occuring? (see-face (cog-name face-id)))
 )
 
 (define* (emotion emotion-type #:optional (face-id any-node))
@@ -182,35 +301,11 @@
 
   IF FACE-ID is not passed then the return value is for any person.
 "
-  (perception-occuring?
+  (true-perception-occuring?
     (face-emotion (cog-name face-id) (cog-name emotion-type)))
 )
 
-(define* (talking #:optional (face-id any-node))
-"
-  talking [FACE-ID]
-
-  Check if face with FACE-ID is talking.
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-  (perception-occuring? (face-talking (cog-name face-id)))
-)
-
-(define* (new_talking secs #:optional (face-id any-node))
-"
-  new_talking SECS FACE-ID
-
-  Return (stv 1 1) if the face identified by FACE-ID started talking
-  within the last event-period, otherwise returns (stv 0 1).
-"
-  (true-event-occuring?  (face-talking (cog-name secs)))
-)
-
-(define* (person_not_talking #:optional face-id)
-  (negate-stv! (person_talking face-id))
-)
-
+; --------------------------------------------------------------
 (define* (word_perceived word #:optional (time-interval dti-node))
   (was-perceived? (Word (cog-name word)) time-interval)
 )
@@ -233,30 +328,11 @@
         (stv 0 1)))
 )
 
-(define (after_user_stopped_talking secs)
-"
-  after_user_stopped_talking SECS
-
-  Returns (stv 1 1) if current time >= the time any user-stopped talking plus
-  SECS. Otherwise, returns (stv 0 1).
-"
-  (if (since-false-transition-occurred? face-talking-sign
-    (string->number (cog-name secs)))
-    (stv 1 1)
-    (stv 0 1)
-  )
-)
 
 ; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
 (Inheritance (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
-(Inheritance (GroundedPredicate "scm: after_user_started_talking")
-  (Concept "timer-predicate"))
-(Inheritance (GroundedPredicate "scm: after_user_stopped_talking")
-  (Concept "timer-predicate"))
 (Inheritance (GroundedPredicate "scm: person_appears") (Predicate "see"))
 (Inheritance (GroundedPredicate "scm: person_smiles") (Predicate "emotion"))
 (Inheritance (GroundedPredicate "scm: person_angry") (Predicate "emotion"))
-(Inheritance (GroundedPredicate "scm: person_talking") (Predicate "talking"))
-(Inheritance (GroundedPredicate "scm: person_not_talking") (Predicate "talking"))
