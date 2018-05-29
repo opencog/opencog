@@ -112,7 +112,7 @@
 
 (define (true-event-occuring? model)
 "
-  ture-event-occuring? MODEL
+  true-event-occuring? MODEL
 
   Returns (stv 1 1) if the MODEL made a true transition within the last
   event-period time, otherwise returns (stv 0 1).
@@ -123,13 +123,38 @@
   )
 )
 
+(define (false-event-occuring? model)
+"
+  false-event-occuring? MODEL
+
+  Returns (stv 1 1) if the MODEL made a false transition within the last
+  event-period time, otherwise returns (stv 0 1).
+"
+  (if (false-transition-occurring? model event-period)
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
 (define (since-event-started-occuring? model secs)
 "
-  event-started-occuring? MODEL SECS
+  since-event-started-occuring? MODEL SECS
 
   An atomese wrapper of the function since-true-transition-occurred?
 "
   (if (since-true-transition-occurred? model (string->number (cog-name secs)))
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
+(define (since-event-stopped-occuring? model secs)
+"
+  since-event-stopped-occuring? MODEL SECS
+
+  An atomese wrapper of the function since-false-transition-occurred?
+"
+  (if (since-false-transition-occurred? model (string->number (cog-name secs)))
     (stv 1 1)
     (stv 0 1)
   )
