@@ -135,7 +135,7 @@
 ;    (List (Number x) (Number y) (Number z)))
 (define default-stimulus 150)
 
-(define (record-perception model)
+(define (record-perception model new-conf)
   (let ((old-conf (tv-conf (cog-tv model)))
     (time (FloatValue (current-time-us))))
 
@@ -154,7 +154,7 @@
   seen, after setting its truth-value to (stv 1 CONFIDENCE) and increasing
   its sti.
 "
-  (record-perception (see-face face-id))
+  (record-perception (see-face face-id) confidence)
 )
 
 (define (perceive-emotion emotion-type face-id confidence)
@@ -165,13 +165,13 @@
   emotional-state EMOTION-TYPE, after increasing its sti and setting its
   truth-value to (stv 1 CONFIDENCE).
 "
-  (record-perception (face-emotion face-id emotion-type))
+  (record-perception (face-emotion face-id emotion-type) confidence)
 )
 
 
-(define (perceive-face-talking face-id new-conf)
+(define (perceive-face-talking face-id confidence)
 "
-  perceive-face-talking FACE-ID NEW-CONF
+  perceive-face-talking FACE-ID CONFIDENCE
 
   Returns the atom representing that the face with id FACE-ID is talking,
   after increasing its sti, setting its truth-value to (stv 1 NEW-CONF),
@@ -184,7 +184,7 @@
 
   If FACE-ID = \"\" then an unidentified source is talking.
 "
-  (record-perception (face-talking face-id))
+  (record-perception (face-talking face-id) confidence)
 )
 
 (define (perceive-eye-state face-id eye-id confidence)
@@ -195,7 +195,7 @@
   after updating its stv and recording perception time and giving it an
   ecan stimulation.
 "
-  (record-perception (eye-open face-id eye-id))
+  (record-perception (eye-open face-id eye-id) confidence)
 )
 
 ; --------------------------------------------------------------
