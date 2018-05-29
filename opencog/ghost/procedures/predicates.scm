@@ -280,7 +280,17 @@
 )
 
 ; --------------------------------------------------------------
-(define* (face #:optional (face-id any-node))
+; Define predicates for face-visiblity
+(define-face-predicates see-face see-face-predicate
+   new_face
+   face
+   visible_for
+   end_face
+   not_visible
+   not_visible_for
+)
+
+(set-procedure-property! face 'documentation
 "
   face [FACE-ID]
 
@@ -288,9 +298,9 @@
 
   IF FACE-ID is not passed then the return value is for any person.
 "
-  (true-perception-occuring? (see-face (cog-name face-id)))
 )
 
+; --------------------------------------------------------------
 (define* (emotion emotion-type #:optional (face-id any-node))
 "
   emotion EMOTION-TYPE [FACE-ID]
@@ -334,5 +344,4 @@
 ; the specific predicates connecting to it
 (Inheritance (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
 (Inheritance (GroundedPredicate "scm: person_appears") (Predicate "see"))
-(Inheritance (GroundedPredicate "scm: person_smiles") (Predicate "emotion"))
-(Inheritance (GroundedPredicate "scm: person_angry") (Predicate "emotion"))
+(Inheritance (GroundedPredicate "scm: emotion") (Predicate "emotion"))
