@@ -68,11 +68,6 @@
   )
 )
 
-
-; --------------------------------------------------------------
-; There is a spacemap in eva-model module called faces. Thus the rename.
-; (define facemap (SpaceMapNode "perceived-faces"))
-
 ; --------------------------------------------------------------
 ; APIs used to create the atoms used to represent the world, aka
 ; world-model. These are not exported.
@@ -82,13 +77,14 @@
 ; Node used to represent an unidentified source of perceptual stimulus.
 (define any-node (Concept ""))
 
+(define see-face-predicate (Predicate "see"))
 (define (see-face face-id)
 "
   Define the atom used to represent that the face represented by FACE-ID
   is being seen.
 "
   (Evaluation
-    (Predicate "see")
+    see-face-predicate
     (List
       (Concept "I")
       (Concept face-id)))
@@ -117,14 +113,6 @@
       (Concept face-id)))
 )
 
-(define face-talking-sign
-  (Signature
-    (Evaluation
-      (Predicate "talking")
-      (List
-        (Type "ConceptNode"))))
-)
-
 (define (eye-open face-id eye-id)
 "
   eye-open FACE-ID EYE-ID
@@ -138,22 +126,6 @@
       (Concept eye-id)))
 )
 
-(define (get-models sign)
-"
-  get-models SIGN
-
-  Returns a list containing all the atoms that have the pattern defined by
-  the SignatureLink SIGN.
-"
-  (cog-outgoing-set (cog-execute!
-    (Get
-      (TypedVariable
-        (Variable "model")
-        sign)
-      (Variable "face-talking"))
-  ))
-)
-
 ; --------------------------------------------------------------
 ; APIs for inputing sensory information.
 ; --------------------------------------------------------------
@@ -161,6 +133,17 @@
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
 ;    (List (Number x) (Number y) (Number z)))
 (define default-stimulus 150)
+
+(define (record-perception model)
+  (let ((old-conf (tv-conf (cog-tv model)))
+    (time (FloatValue (current-time-us))))
+
+    (set-time-perceived! model (FloatValue (current-time-us)))
+    (set-event-times! model old-conf new-conf time)
+    (cog-set-tv! model (stv 1 new-conf))
+    (cog-stimulate model default-stimulus)
+  )
+)
 
 (define (perceive-face face-id confidence)
 "
@@ -170,11 +153,7 @@
   seen, after setting its truth-value to (stv 1 CONFIDENCE) and increasing
   its sti.
 "
-  (let ((model (see-face face-id)))
-    (set-time-perceived! model (FloatValue (current-time-us)))
-    (cog-stimulate model default-stimulus)
-    (cog-set-tv! model (stv 1 confidence))
-  )
+  (record-perception (see-face face-id))
 )
 
 (define (perceive-emotion emotion-type face-id confidence)
@@ -185,13 +164,40 @@
   emotional-state EMOTION-TYPE, after increasing its sti and setting its
   truth-value to (stv 1 CONFIDENCE).
 "
-  (let ((model (face-emotion face-id emotion-type)))
-    (set-time-perceived! model (FloatValue (current-time-us)))
-    (cog-stimulate model default-stimulus)
-    (cog-set-tv! model (stv 1 confidence))
-  )
+  (record-perception (face-emotion face-id emotion-type))
 )
 
+
+(define (perceive-face-talking face-id new-conf)
+"
+  perceive-face-talking FACE-ID NEW-CONF
+
+  Returns the atom representing that the face with id FACE-ID is talking,
+  after increasing its sti, setting its truth-value to (stv 1 NEW-CONF),
+  and recording the start/stop time of the face starting/stoping talking.
+
+  When NEW-CONF increases past 0.5 then the time is recorded as
+  the start time for the event of the person starting talking, and when
+  NEW-CONF decreases past 0.5 the time is recorded as the stop time for
+  event of the person stopped talking.
+
+  If FACE-ID = \"\" then an unidentified source is talking.
+"
+  (record-perception (face-talking face-id))
+)
+
+(define (perceive-eye-state face-id eye-id confidence)
+"
+  perceive-eye-state FACE-ID EYE-ID
+
+  Return the atom used to represent whether FACE-ID face's EYE-ID eye is open,
+  after updating its stv and recording perception time and giving it an
+  ecan stimulation.
+"
+  (record-perception (eye-open face-id eye-id))
+)
+
+; --------------------------------------------------------------
 (define hook-perceive-word (make-hook 0))
 (define (perceive-word-hook)
 "
@@ -218,47 +224,6 @@
   (run-hook hook-perceive-word)
   (perception-stimulate wn)
   (perception-stimulate cn)
-)
-
-(define (perceive-face-talking face-id new-conf)
-"
-  perceive-face-talking FACE-ID NEW-CONF
-
-  Returns the atom representing that the face with id FACE-ID is talking,
-  after increasing its sti, setting its truth-value to (stv 1 NEW-CONF),
-  and recording the start/stop time of the face starting/stoping talking.
-
-  When NEW-CONF increases past 0.5 then the time is recorded as
-  the start time for the event of the person starting talking, and when
-  NEW-CONF decreases past 0.5 the time is recorded as the stop time for
-  event of the person stopped talking.
-
-  If FACE-ID = \"\" then an unidentified source is talking.
-"
-  (let* ((model (face-talking face-id))
-    (old-conf (tv-conf (cog-tv model)))
-    (time (FloatValue (current-time-us))))
-
-    (set-time-perceived! model (FloatValue (current-time-us)))
-    (set-event-times! model old-conf new-conf time)
-    (cog-set-tv! model (stv 1 new-conf))
-    (cog-stimulate model default-stimulus)
-  )
-)
-
-(define (perceive-eye-state face-id eye-id confidence)
-"
-  perceive-eye-state FACE-ID EYE-ID
-
-  Return the atom used to represent whether FACE-ID face's EYE-ID eye is open,
-  after updating its stv and recording perception time and giving it an
-  ecan stimulation.
-"
-  (let ((model (eye-open face-id eye-id)))
-    (set-time-perceived! model (FloatValue (current-time-us)))
-    (cog-stimulate model default-stimulus)
-    (cog-set-tv! model (stv 1 confidence))
-  )
 )
 
 ; --------------------------------------------------------------
