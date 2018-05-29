@@ -178,6 +178,8 @@
       (GroundedPredicate (format #f "scm: ~a" 't-occuring?))
        predicate-node)
 
+    ; FIXME: This has issues when the window of perception (dti) is passed.
+    ; Just because we don't know it doesn't mean it is true
     (define* (since-t? secs #:optional (face-id any-node))
       (since-event-started-occuring? (model-func (cog-name face-id)) secs))
     (Inheritance
@@ -196,6 +198,8 @@
       (GroundedPredicate (format #f "scm: ~a" 'f-occuring?))
        predicate-node)
 
+    ; FIXME: This has issues when the window of perception (dti) is passed.
+    ; Just because we don't know it doesn't mean it is true
     (define* (since-f? secs  #:optional (face-id any-node))
       (since-event-stopped-occuring? (model-func (cog-name face-id)) secs))
     (Inheritance
