@@ -19,15 +19,12 @@
 
     ; Perceptual predicates
     emotion
-    person_not_talking
     word_perceived
     ;; Perceptual predicates for a talking face
     new_talking
     talking
-    after_user_started_talking
     end_talking
     not_talking
-    after_user_stopped_talking
     ;; Perceptual predicates for visibility of a face
     new_face
     face
@@ -35,7 +32,6 @@
 
     ; Time related predicates
     after_min
-    after_user_stopped_talking
 
     ; schemas
     animation
