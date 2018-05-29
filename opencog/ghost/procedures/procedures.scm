@@ -19,9 +19,6 @@
 
     ; Perceptual predicates
     emotion
-    face
-    talking
-    new_talking
     person_not_talking
     word_perceived
     ;; Perceptual predicates for a talking face
@@ -31,6 +28,10 @@
     end_talking
     not_talking
     after_user_stopped_talking
+    ;; Perceptual predicates for visibility of a face
+    new_face
+    face
+    end_face
 
     ; Time related predicates
     after_min
