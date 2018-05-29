@@ -40,7 +40,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
   - Currently only Scheme functions are accepted, can support other languages if needed
   - Should be in the public interface, e.g. use `define-public` when defining the function
-  - There are several build-in functions that are available
+  - There are several built-in functions that are available
     - `reuse`, to reuse the action of another rule, e.g.
       - `^reuse(some_label)` will reuse the action of another rule with a label named "some_label". It's recommended to use a unique label for each of the rules in the rulebase, `topic.label` is not supported.
       - Once triggered, the rule being reused will also be considered as triggered, so it will not be triggered again unless you `^keep()` it.
