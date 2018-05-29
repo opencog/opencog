@@ -268,6 +268,11 @@
 (define event-start (Predicate "event-start-time"))
 ; Key used to record the time an event stopped occuring at.
 (define event-stop (Predicate "event-stop-time"))
+; The refractory period in seconds. This is the period in which certain
+; predicates will not be returning true after an event transition was made.
+(define refractory-period 1)
+; This is the window within which a transition is occuring.
+(define event-period (/ refractory-period 2))
 
 (define (true-transition-occurs? old-value new-value)
 "
@@ -415,6 +420,7 @@
     #f
   )
 )
+
 (define (false-transition-occurring? model secs)
 "
   false-transition-occurring? MODEL SECS
