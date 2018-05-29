@@ -110,6 +110,31 @@
   )
 )
 
+(define (true-event-occuring? model)
+"
+  ture-event-occuring? MODEL
+
+  Returns (stv 1 1) if the MODEL made a true transition within the last
+  event-period time, otherwise returns (stv 0 1).
+"
+  (if (true-transition-occurring? model event-period)
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
+(define (since-event-started-occuring? model secs)
+"
+  event-started-occuring? MODEL SECS
+
+  An atomese wrapper of the function since-true-transition-occurred?
+"
+  (if (since-true-transition-occurred? model (string->number (cog-name secs)))
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
 ; --------------------------------------------------------------
 (define* (face #:optional (face-id any-node))
 "
@@ -147,6 +172,16 @@
   (perception-occuring? (face-talking (cog-name face-id)))
 )
 
+(define* (new_talking secs #:optional (face-id any-node))
+"
+  new_talking SECS FACE-ID
+
+  Return (stv 1 1) if the face identified by FACE-ID started talking
+  within the last event-period, otherwise returns (stv 0 1).
+"
+  (true-event-occuring?  (face-talking (cog-name secs)))
+)
+
 (define* (person_not_talking #:optional face-id)
   (negate-stv! (person_talking face-id))
 )
@@ -171,20 +206,6 @@
             (+ t (* (string->number (cog-name minutes)) 60)))
         (stv 1 1)
         (stv 0 1)))
-)
-
-(define (new_talking secs)
-"
-  after_user_started_talking SECS
-
-  Returns (stv 1 1) if current time >= the time any user started talking plus
-  SECS. Otherwise, returns (stv 0 1).
-"
-  (if (since-true-transition-occurred? face-talking-sign
-    (string->number (cog-name secs)))
-    (stv 1 1)
-    (stv 0 1)
-  )
 )
 
 (define (after_user_stopped_talking secs)
