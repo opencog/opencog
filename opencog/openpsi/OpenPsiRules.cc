@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
@@ -57,7 +57,7 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   // cast will be valid; else construct a PatternLink wrapping the context
   // in an AndLink.
   if ((1 == context.size()) and
-    classserver().isA(SATISFACTION_LINK, context[0]->get_type())) {
+    nameserver().isA(SATISFACTION_LINK, context[0]->get_type())) {
       // This is for ghost.
 
       // Add to the index of rules.

@@ -65,6 +65,7 @@ void NetworkServer::stop()
     pthread_cancel(_listener_thread->native_handle());
 
     _listener_thread->join();
+    delete _listener_thread;
     _listener_thread = nullptr;
 }
 

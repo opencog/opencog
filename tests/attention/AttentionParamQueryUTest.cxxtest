@@ -37,8 +37,9 @@ private:
 AtomSpace as;
 AttentionParamQuery _atq;
 
-std::vector<std::string> params = {"param-1", "param-2", "param-3", "param-4"};
-Handle h1,h2,h3,h4;
+std::vector<std::string> params = {"param-1", "param-2", "param-3", "param-4"
+                                   ,"param-5"};
+Handle h1,h2,h3,h4, hvalue;
 
 public:
 AttentionParamQueryUTest(): _atq(&as){
@@ -46,11 +47,16 @@ AttentionParamQueryUTest(): _atq(&as){
     _atq.set_param(params[1], 2.5f);
     _atq.set_param(params[2], 4.5);
     _atq.set_param(params[3], 2);
+
+    Handle h1 = as.add_node(TYPE_NODE, "MemberLink");
+    hvalue = as.add_link(MEMBER_LINK, h1);
+    _atq.set_param(params[4], hvalue);
 }
 
 ~AttentionParamQueryUTest(){}
 
 void test_get_param_value();
+void test_get_param_hvalue();
 void test_set_param();
 void test_get_params();
 };
@@ -64,6 +70,11 @@ void AttentionParamQueryUTest::test_get_param_value()
     TS_ASSERT_EQUALS("2", _atq.get_param_value(params[3]));
 }
 
+void AttentionParamQueryUTest::test_get_param_hvalue()
+{
+    TS_ASSERT_EQUALS(hvalue, _atq.get_param_hvalue(params[4]));
+}
+
 void AttentionParamQueryUTest::test_set_param()
 {
     _atq.set_param(params[0], false);
@@ -75,7 +86,7 @@ void AttentionParamQueryUTest::test_set_param()
 void AttentionParamQueryUTest::test_get_params()
 {
     HandleSeq hseq = _atq.get_params();
-    TS_ASSERT_EQUALS(4, hseq.size());
+    TS_ASSERT_EQUALS(5, hseq.size());
     for(const std::string& pname : params){
         Handle h = as.add_node(CONCEPT_NODE, pname);
         auto it = std::find(hseq.begin(), hseq.end(), h);

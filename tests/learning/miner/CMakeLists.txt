@@ -1,0 +1,9 @@
+ADD_CXXTEST(MinerUTest)
+TARGET_LINK_LIBRARIES(MinerUTest
+  miner
+)
+
+ADD_CXXTEST(UREMinerUTest)
+TARGET_LINK_LIBRARIES(UREMinerUTest
+  miner
+)

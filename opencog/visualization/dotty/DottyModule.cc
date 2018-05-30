@@ -28,6 +28,7 @@
 
 #include <boost/pointer_cast.hpp>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -67,10 +68,10 @@ public:
 
         std::ostringstream ost;
         ost << h.value() << " [";
-        if (!classserver().isNode(a->get_type()))
+        if (!nameserver().isNode(a->get_type()))
             ost << "shape=\"diamond\" ";
-        ost << "label=\"[" << classserver().getTypeName(a->get_type()) << "]";
-        if (classserver().isNode(a->get_type())) {
+        ost << "label=\"[" << nameserver().getTypeName(a->get_type()) << "]";
+        if (nameserver().isNode(a->get_type())) {
             NodePtr n(NodeCast(a));
             ost << " " << n->get_name();
         } //else {
@@ -99,7 +100,7 @@ public:
             if (compact and out.size() == 2 and h->getIncomingSetSize() == 0)
             {
 	            ost << out[0].value() << " -> " << out[1].value() << " [label=\""
-                    << classserver().getTypeName(a->get_type()) << "\"];\n";
+                    << nameserver().getTypeName(a->get_type()) << "\"];\n";
                 answer += ost.str();
                 return false;
             }

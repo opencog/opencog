@@ -17,8 +17,6 @@ ADD_LIBRARY (builtinreqs SHARED
 
 TARGET_LINK_LIBRARIES(builtinreqs
 	server
-	${ATOMSPACE_LIBRARY}
-	${COGUTIL_LIBRARY}
 )
 
 INSTALL (TARGETS builtinreqs
@@ -40,21 +38,16 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
-	nlp-types
-	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_attentionbank_LIBRARY}
+	${ATOMSPACE_execution_LIBRARY}
+	${ATOMSPACE_smob_LIBRARY}
 	${COGUTIL_LIBRARY}
 	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_THREAD_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 	dl
 )
 
 IF (HAVE_CYTHON)
-	TARGET_LINK_LIBRARIES(server
-		${ATOMSPACE_PythonEval_LIBRARY}
-		#py-shell
-		${ATOMSPACE_LIBRARIES}
-		${PYTHON_LIBRARIES})
+	TARGET_LINK_LIBRARIES(server ${ATOMSPACE_PythonEval_LIBRARY})
 ENDIF (HAVE_CYTHON)
 
 # IF (HAVE_GUILE)
@@ -87,7 +80,6 @@ ADD_EXECUTABLE(cogserver
 TARGET_LINK_LIBRARIES(cogserver
 	server
 	${Boost_SYSTEM_LIBRARY}
-	${GUILE_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_DIRECTORIES "${BOOST_LIBRARY_DIRS}")
@@ -102,19 +94,14 @@ INSTALL (TARGETS server DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	Agent.h
 	BaseServer.h
-	BuiltinRequestsModule.h
 	CogServer.h
 	ConsoleSocket.h
 	Factory.h
-	ListRequest.h
-	LoadModuleRequest.h
 	Module.h
 	NetworkServer.h
 	SystemActivityTable.h
 	Registry.h
 	Request.h
 	RequestClassInfo.h
-	ShutdownRequest.h
-	UnloadModuleRequest.h
 	DESTINATION "include/${PROJECT_NAME}/cogserver/server"
 )

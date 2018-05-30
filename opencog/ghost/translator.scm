@@ -23,7 +23,8 @@
          (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
          ; It's possible that the sequence does not having any word or concept etc,
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
-         (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
+         (negation-only? (every (lambda (t) (equal? 'negation (car t))) TERMS))
+         (empty-seq? (and (= 1 (length TERMS)) (equal? 'empty-context (caar TERMS))))
          (func-only? (and (> (length TERMS) 0)
            (every (lambda (t) (equal? 'function (car t))) TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
@@ -67,7 +68,9 @@
                      ; get it and add an extra wildcard
                      (append start after-anchor-end (list wc) end))))
              ; Just having one wildcard is enough for an empty sequence
-             (empty-seq? (append TERMS (list wc)))
+             (negation-only? (append TERMS (list wc)))
+             ; If the context is empty, not even a wildcard is needed
+             (empty-seq? TERMS)
              ; If there is no anchor, the main-seq should start and
              ; end with a wildcard
              (else (append (list wc) TERMS (list wc))))))
@@ -138,6 +141,9 @@
             ((equal? 'word (car t))
              (update-lists (word (cdr t)))
              (set! has-words? #t))
+            ((equal? 'word-apos (car t))
+             (update-lists (word-apos (cdr t)))
+             (set! has-words? #t))
             ((equal? 'lemma (car t))
              (update-lists (lemma (cdr t)))
              (set! has-words? #t))
@@ -186,6 +192,11 @@
                   (list-set! pt 2 (list (List (list-ref pt 2))))
                   (list-set! pt 3 (list (List (list-ref pt 3))))
                   (update-lists pt)))
+            ; If it's an empty context, e.g. "u: ()"
+            ; it's always true and should be triggered
+            ; even if there is no perception input
+            ((equal? 'empty-context (car t))
+              (set! c (list (TrueLink))))
             (else (begin
               (cog-logger-warn ghost-logger
                 "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
@@ -252,7 +263,7 @@
                           lemma-seq))))
       (MemberLink (List lemma-seq) ghost-no-constant))
 
-  (list vars conds))
+  (list vars conds has-words?))
 
 ; ----------
 (define (process-action ACTION RULENAME)
@@ -262,7 +273,11 @@
 "
   ; The system functions that are commonly used
   (define reuse #f)
+  (define reused-rule-label "")
   (define keep (topic-has-feature? rule-topic "keep"))
+
+  ; The GroundedSchemaNode that will be used
+  (define gsn-action (GroundedSchema "scm: ghost-execute-action"))
 
   (define (to-atomese actions)
     (define choices '())
@@ -298,10 +313,31 @@
                (set! keep #t)
                (list))
               ; A system function -- reuse
+              ; First of all, try to see if the rule has been created in
+              ; the AtomSpace, and get its action directly if so
+              ; Otherwise, check the rule-alist to see if the rule is
+              ; defined in the same file being parsed
               ((and (equal? 'function (car n))
                     (equal? "reuse" (cadr n)))
-               (set! reuse #t)
-               (action-function (cadr n) (to-atomese (cddr n))))
+               (let* ((label (cdaddr n))
+                      (reused-rule (get-rule-from-label label)))
+                 (if (null? reused-rule)
+                   (let ((reused-rule-from-alist (assoc-ref rule-alist label)))
+                     (if (null? reused-rule-from-alist)
+                       (cog-logger-error ghost-logger
+                         "Please make sure the rule with label \"~a\" is defined!" label)
+                       (begin
+                         (cog-logger-debug ghost-logger
+                           "Found the rule \"~a\" in the rule-alist" label)
+                         (set! reuse #t)
+                         (set! reused-rule-label label)
+                         (process-action
+                           ; The 2nd item in the list is the action
+                           (list-ref reused-rule-from-alist 1) label))))
+                   (begin
+                     (set! reuse #t)
+                     (set! reused-rule-label label)
+                     (psi-get-action reused-rule)))))
               ; Other functions
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
@@ -314,28 +350,116 @@
           '()
           (list (action-choices choices)))))
 
+  ; Whether or not the rule that's being reused is also reusing
+  ; another rule
+  (define is-reusing-another-rule? #f)
+
+  ; A typical action of a GHOST rule looks like this:
+  ;
+  ; (TrueLink
+  ;   (ExecutionOutputLink
+  ;     (GroundedSchemaNode "scm: ghost-execute-action")
+  ;     (ListLink
+  ;        ... words & functions ...
+  ;     )
+  ;   )
+  ;   ... and maybe more ...
+  ; and here we try to get the words & functions
+  ; from the rule being reused and append it to
+  ; rule that uses the reuse function, as well as
+  ; the additional ones that are in the same TrueLink
+  ; TODO: Handle variables as well
+  (define (get-reused-action atomese)
+    (define action-atomese
+      (append-map
+        (lambda (x)
+          (cond ; "x" could just be a list if ^keep() is used
+                ; in the same rule, skip it that's the case
+                ((and keep (list? x) (null? x)) (list))
+                ((equal? 'TrueLink (cog-type x))
+                 (get-reused-action (cog-outgoing-set x)))
+                ((and (equal? 'ExecutionOutputLink (cog-type x))
+                      (equal? gsn-action (gar x)))
+                 (get-reused-action (cog-outgoing-set (gdr x))))
+                (else (list x))))
+        atomese))
+      ; Filter out duplicate PutLinks in the action -- the ones that
+      ; are updating the same state, e.g. if there are (Put (State A) B)
+      ; and (Put (State A) C) in a list, then only (Put (State A) C)
+      ; is kept as it's the last one in the list
+      ; Filtering may be needed when "reuse" is called more than one time,
+      ; either in a single rule, or other rule in the chain
+      ; The fold-right and reverse are there to perserve the execution order
+      (reverse
+        (fold-right
+          (lambda (atom rtn)
+            (if (and (equal? 'PutLink (cog-type atom))
+                     (equal? 'StateLink (cog-type (gar atom)))
+                     (find (lambda (x) (equal? (gar atom) (gar x))) rtn))
+              (begin
+                ; A crude way to find whether the rule is reusing
+                ; another rule
+                (if (equal? ghost-last-executed (gaar atom))
+                  (set! is-reusing-another-rule? #t))
+                rtn)
+              (append rtn (list atom))))
+          (list)
+          action-atomese)))
+
+  (define action-atomese (to-atomese (cdar ACTION)))
+
   (True
-    (if reuse
-      (to-atomese (cdar ACTION))
-      (list (ExecutionOutput
-              (GroundedSchema "scm: ghost-execute-action")
-              (List (to-atomese (cdar ACTION))))
-            (if (not keep)
-                ; The default behavior is to not executed the
-                ; same action more than once -- update the
-                ; TV strength to zero so that the action
-                ; selector won't select it again
-                (ExecutionOutput
-                  (GroundedSchema "scm: ghost-update-rule-strength")
-                  ; Note: This is generated by psi-rule-set-alias!
-                  (List (Concept (string-append psi-prefix-str RULENAME))
-                        (Number 0)))
-                (list))
-            ; Set the current topic, for backward compatibility
-            (if ghost-with-ecan
-              (list)
-              (Put (State ghost-curr-topic (Variable "$x"))
-                   rule-topic))))))
+    (list
+      (ExecutionOutput
+        gsn-action
+        (List
+          (if reuse
+            (get-reused-action action-atomese)
+            action-atomese)))
+      ; Keep a record of which rule got executed, just for rejoinders
+      ; And when a "reuse" is used, it becomes slightly more complicated
+      ; The expected behavior is that, when (the action of) a rule is reused,
+      ; the rule will be considered as fired, so mark the last executed rule
+      ; as the reused one instead of the one that calls the reuse function,
+      ; so that the rejoinders (if any) of the reused rule can be triggered
+      ; correctly
+      (cond ; If it's reusing a rule that reuses another rule,
+            ; no need to generate this as we only need to record the last
+            ; one down the line
+            ((and reuse is-reusing-another-rule?) (list))
+            ; If it's reusing a rule that does not reuse any other rule,
+            ; generate this so that the reused rule will be marked as
+            ; the last executed once the action is executed
+            ; If there are more than one "reuse"s being used in a single action,
+            ; the last reused rule will be mark as the last executed rule
+            (reuse
+              (Put (State ghost-last-executed (Variable "$x"))
+                   (Concept reused-rule-label)))
+            ; If no reuse is called, just mark the current one as the last
+            ; executed rule
+            (else
+              (Put (State ghost-last-executed (Variable "$x"))
+                   (Concept RULENAME))))
+      (if (not keep)
+          ; The default behavior is to not executed the
+          ; same action more than once -- update the
+          ; TV strength to zero so that the action
+          ; selector won't select it again
+          (ExecutionOutput
+            (GroundedSchema "scm: ghost-update-rule-strength")
+            ; Note: This is generated by psi-rule-set-alias!
+            (List (Concept RULENAME)
+                  (Number 0)))
+          (list))
+      ; Keep a record of which rules have been executed
+      (ExecutionOutput
+        (GroundedSchema "scm: ghost-record-executed-rule")
+        (List (Concept RULENAME)))
+      ; Set the current topic, for backward compatibility
+      (if ghost-with-ecan
+        (list)
+        (Put (State ghost-curr-topic (Variable "$x"))
+             rule-topic)))))
 
 ; ----------
 (define (process-goal GOAL)
@@ -360,9 +484,20 @@
   return the type as a StringValue.
 "
   (cond ((or (equal? #\u TYPE)
-             (equal? #\s TYPE)
-             (equal? #\? TYPE))
+             (equal? #\s TYPE))
          (list '() '() strval-responder))
+        ((equal? #\? TYPE)
+         (let ((var (Variable (gen-var "Interpretation" #f))))
+           (list
+             (list (TypedVariable var (Type "InterpretationNode")))
+             (list
+               (InterpretationLink var (Variable "$P"))
+               (ChoiceLink
+                 (InheritanceLink var
+                   (DefinedLinguisticConcept "InterrogativeSpeechAct"))
+                 (InheritanceLink var
+                   (DefinedLinguisticConcept "TruthQuerySpeechAct"))))
+             strval-responder)))
         ((equal? #\r TYPE)
          (list '() '() strval-random-gambit))
         ((equal? #\t TYPE)
@@ -381,9 +516,52 @@
             (list (TypedVariable var (Type "ConceptNode")))
             (list (State ghost-last-executed var)
                   (Equal var
-                    (Concept (string-append psi-prefix-str
-                      (last (list-ref rule-hierarchy (- lv 1)))))))
+                    (Concept (last (list-ref rule-hierarchy (- lv 1))))))
             strval-rejoinder)))))
+
+; ----------
+; Key used to set the value of psi-rules as either (stv 1 1) or (stv 0 1).
+(define handles-sent-key (Predicate "handles-sentence-input"))
+
+; ----------
+(define (handles-sent! rule)
+"
+  set-handles-sent! RULE
+
+  Returns the RULE after setting the handles-sentence-input value to (stv 1 1).
+"
+  (cog-set-value! rule handles-sent-key (stv 1 1)))
+
+; ----------
+(define (handles-sent? rule)
+"
+  handles-sent? RULE
+
+  Returns (stv 1 1) if the RULE is tagged to handle sentences, else
+  it returns (stv 0 1).
+"
+  (let ((result (cog-value rule handles-sent-key)))
+    (if (null? result)
+      (stv 0 1)
+      result
+    )
+  ))
+
+; ----------
+(define (process-rule-stack)
+"
+  Instantiate the rules accumulated in rule-label-list.
+"
+  (for-each
+    (lambda (l)
+      (apply instantiate-rule (assoc-ref rule-alist l)))
+    rule-label-list)
+
+  ; Clear the states
+  (set! rule-label-list '())
+  (set! rule-alist '())
+  (set! rule-hierarchy '())
+)
 
 ; ----------
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
@@ -398,6 +576,24 @@
 
   TYPE is a grouping idea from ChatScript, e.g. responders, rejoinders,
   gambits etc.
+"
+  ; Label the rule with NAME, if given, generate one otherwise
+  (define rule-name
+    (if (string-null? NAME)
+      (string-append "GHOST-rule-" (random-string 36))
+      NAME))
+
+  (set! rule-label-list (append rule-label-list (list rule-name)))
+
+  (set! rule-alist
+    (assq-set! rule-alist rule-name
+      (list PATTERN ACTION (process-goal GOAL) GOAL rule-name TYPE)))
+)
+
+; ----------
+(define (instantiate-rule PATTERN ACTION ALL-GOALS RULE-LV-GOALS NAME TYPE)
+"
+  To process and create the rule in the AtomSpace.
 "
   (define (add-to-rule-hierarchy LV RULE)
     ; Reset the rule hierarchy if it's not a rejoinder
@@ -420,19 +616,10 @@
   (if (null? rule-topic)
     (set! rule-topic (create-topic "Default Topic")))
 
-  ; Update the count -- how many rules we've seen under this top level goal
-  ; Do it only if the rules are ordered
-  (if is-rule-seq
-    (set! goal-rule-cnt (+ goal-rule-cnt 1)))
-
   ; Reset the list of local variables
   (set! pat-vars '())
 
-  (let* (; Label the rule with NAME, if given, generate one otherwise
-         (rule-name (if (string-null? NAME)
-                        (string-append "GHOST-rule-" (random-string 36))
-                        NAME))
-         (proc-type (process-type TYPE))
+  (let* ((proc-type (process-type TYPE))
          (ordered-terms (order-terms PATTERN))
          (proc-terms (process-pattern-terms ordered-terms))
          (vars (append (list-ref proc-terms 0)
@@ -440,84 +627,128 @@
          (conds (append (list-ref proc-terms 1)
                         (list-ref proc-type 1)))
          (type (list-ref proc-type 2))
-         (action (process-action ACTION rule-name))
-         (goals (process-goal GOAL)))
+         (action (process-action ACTION NAME))
+         (is-rejoinder? (equal? type strval-rejoinder))
+         (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
-        (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
-        (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
-        (cog-logger-debug ghost-logger "Goal: ~a" goals)
+    (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
+    (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+    (cog-logger-debug ghost-logger "Goal: ~a" ALL-GOALS)
 
-        (map (lambda (rule)
-               ; Label the rule
-               (psi-rule-set-alias! rule rule-name)
-               ; Set the type
-               (cog-set-value! rule ghost-rule-type type)
-               ; Associate it with its topic
-               (if (not ghost-with-ecan)
-                 (Inheritance rule rule-topic))
-               ; Keep track of the rule hierarchy, and link rules that
-               ; are defined in a sequence
-               (cond ((or (equal? type strval-responder)
-                          (equal? type strval-random-gambit)
-                          (equal? type strval-gambit))
-                      ; If it's not a rejoinder, its parent rules should
-                      ; be the rules at every level that are still in
-                      ; the rule-hierarchy
-                      (if (and is-rule-seq (not (null? rule-hierarchy)))
-                        (for-each
-                          (lambda (lv)
-                            (for-each
-                              (lambda (r)
-                                (set-next-rule
-                                  (get-rule-from-label r)
-                                    rule ghost-next-responder))
-                              lv))
-                          rule-hierarchy))
-                      (add-to-rule-hierarchy 0 rule-name))
-                     ((equal? type strval-rejoinder)
-                      ; If it's a rejoinder, its parent rule should be the
-                      ; last rule one level up in rule-hierarchy
-                      ; 'process-type' will make sure there is a responder
-                      ; defined beforehand so rule-hierarchy is not empty
-                      (if is-rule-seq
-                        (set-next-rule
-                          (get-rule-from-label
-                            (last (list-ref rule-hierarchy
-                              (1- (get-rejoinder-level TYPE)))))
-                          rule ghost-next-rejoinder))
-                      (add-to-rule-hierarchy
-                        (get-rejoinder-level TYPE) rule-name)))
-               ; Connect words, concepts and predicates from the context
-               ; directly to the rule via a HebbianLink
-               (for-each
-                 (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
-                 (filter
-                   (lambda (x)
-                     (or (equal? ghost-word-seq x)
-                         (equal? 'WordNode (cog-type x))
-                         (equal? 'ConceptNode (cog-type x))
-                         (equal? 'GroundedPredicateNode (cog-type x))))
-                   (append-map cog-get-all-nodes conds)))
-               ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
-               ; Return
-               rule)
-             (map (lambda (goal)
-                    ; Create the rule(s)
-                    (psi-rule
-                      (list (Satisfaction (VariableList vars) (And conds)))
-                      action
-                      (psi-goal (car goal)
-                        ; Check if an initial urge has been assigned to it
-                        (let ((urge (assoc-ref initial-urges (car goal))))
-                          (if urge (- 1 urge) 0)))
-                      ; Check if the goal is defined at the rule level
-                      ; If the rule is ordered, the weight should change
-                      ; accordingly as well
-                      (if (or (member goal GOAL) (not is-rule-seq))
-                        (stv (cdr goal) .9)
-                        (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
-                      ghost-component))
-                  goals))))
+    ; Update the count -- how many rules we've seen under this top level goal
+    ; Do it only if the rules are ordered and it's not a rejoinder
+    (if (and is-rule-seq (not is-rejoinder?))
+      (begin
+        (set! goal-rule-cnt (+ goal-rule-cnt 1))
+        ; Force the rules defined in a sequence to be triggered
+        ; in an ordered fashion
+        ; Note: psi-action-executed? is not used here, because
+        ; when (the action of) a rule is "reused", it will be
+        ; considered as "used". But "reuse" is just about executing
+        ; the action of another rule, it doesn't evaluate the
+        ; context of a rule, i.e. it doesn't go through the
+        ; PsiImplicator, so psi-action-executed? will return
+        ; false for the reused rule even if its action has been
+        ; executed already, which is not the behavior we want here
+        ; TODO: Remove the geometric series as it is no longer needed?
+        (if (> (length rule-hierarchy) 0)
+          (let ((var (Variable (gen-var "GHOST-executed-rule" #f))))
+            (set! vars (append vars (list
+              (TypedVariable var (Type "ConceptNode")))))
+            (set! conds (append conds (list
+              (Evaluation ghost-rule-executed (List var))
+              (Equal var (Concept (caar rule-hierarchy))))))))
+    ))
+
+    (map
+      (lambda (goal)
+        ; Create the rule
+        (define a-rule
+          (psi-rule
+            (list (Satisfaction (VariableList vars) (And conds)))
+            action
+            (psi-goal (car goal)
+              ; Check if an initial urge has been assigned to it
+              (let ((urge (assoc-ref initial-urges (car goal))))
+                (if urge (- 1 urge) 0)))
+            ; Check if the goal is defined at the rule level
+            ; If the rule is ordered, the weight should change
+            ; accordingly as well
+            (if (or (member goal RULE-LV-GOALS) (not is-rule-seq))
+              (stv (cdr goal) .9)
+              (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
+            ghost-component))
+
+        ; If the rule can possibly be satisfied by input sentence
+        ; tag it as such.
+        (if (list-ref proc-terms 2)
+          (handles-sent! a-rule)
+          a-rule)
+
+        ; Label the rule
+        (psi-rule-set-alias! a-rule NAME)
+
+        ; Set the type
+        (cog-set-value! a-rule ghost-rule-type type)
+
+        ; Associate it with its topic
+        (if (not ghost-with-ecan)
+          (Inheritance a-rule rule-topic))
+
+        ; Keep track of the rule hierarchy, and link rules that
+        ; are defined in a sequence
+        (if is-rejoinder?
+          ; If it's a rejoinder, its parent rule should be the
+          ; last rule one level up in rule-hierarchy
+          ; 'process-type' will make sure there is a responder
+          ; defined beforehand so rule-hierarchy is not empty
+          (begin
+            (set-next-rule
+              (get-rule-from-label
+                (last (list-ref rule-hierarchy
+                  (1- (get-rejoinder-level TYPE)))))
+              a-rule ghost-next-rejoinder)
+            (add-to-rule-hierarchy
+              (get-rejoinder-level TYPE) NAME)
+            ; Record the sequence number of the rejoinder
+            ; This is used during matching, basically rejoinders is treated
+            ; as a sequence, and the one defined first will be matched first
+            ; if it satisfies the context
+            (cog-set-value! a-rule ghost-rej-seq-num (FloatValue
+              (length (list-ref rule-hierarchy (get-rejoinder-level TYPE))))))
+          (begin
+            ; If it's not a rejoinder, its parent rules should
+            ; be the rules at every level that are still in
+            ; the rule-hierarchy
+            (if (and is-rule-seq (not (null? rule-hierarchy)))
+              (for-each
+                (lambda (lv)
+                  (for-each
+                    (lambda (r)
+                      (set-next-rule
+                        (get-rule-from-label r)
+                          a-rule ghost-next-responder))
+                    lv))
+                rule-hierarchy))
+            (add-to-rule-hierarchy 0 NAME)))
+
+        ; Connect words, concepts and predicates from the context
+        ; directly to the rule via a HebbianLink
+        (for-each
+          (lambda (node) (AsymmetricHebbianLink node a-rule (stv 1 1)))
+          (filter
+            (lambda (x)
+              (or (equal? ghost-word-seq x)
+                  (equal? 'WordNode (cog-type x))
+                  (equal? 'ConceptNode (cog-type x))
+                  (equal? 'GroundedPredicateNode (cog-type x))))
+            (append-map cog-get-all-nodes conds)))
+
+        ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
+
+        ; Return
+        a-rule)
+      ALL-GOALS)))
 
 ; ----------
 (define (create-concept NAME MEMBERS)
@@ -545,6 +776,11 @@
 "
   Create a top level goal that will be shared among the rules under it.
 "
+  ; Instantiate the rules in the stack when we see a new top level goal
+  ; It's cleaner to do it this way in case there are multiple goals
+  ; defined in the same file
+  (process-rule-stack)
+
   (set! top-lv-goals GOALS)
   (set! is-rule-seq ORDERED)
 

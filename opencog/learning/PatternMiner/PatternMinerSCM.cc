@@ -27,6 +27,7 @@
 #ifndef _OPENCOG_PATTERNMINER_SCM_H
 #define _OPENCOG_PATTERNMINER_SCM_H
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
@@ -126,7 +127,7 @@ public:
     {
         string result =  "Ignore_Link_Types:";
         for (Type type : patternMiner->param.get_ignore_link_types())
-            result +=  " " + classserver().getTypeName(type);
+            result +=  " " + nameserver().getTypeName(type);
 
         return result;
     }
@@ -135,7 +136,7 @@ public:
     {
         string result =  "linktype_white_list:";
         for (Type type : patternMiner->param.get_linktype_white_list())
-            result +=  " " + classserver().getTypeName(type);
+            result +=  " " + nameserver().getTypeName(type);
 
         return result;
     }
@@ -175,7 +176,7 @@ public:
 
     string add_Link_Type_to_white_list(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -192,7 +193,7 @@ public:
 
     string remove_Link_Type_from_white_list(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -208,7 +209,7 @@ public:
 
     string add_ignore_link_type(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -225,7 +226,7 @@ public:
 
     string remove_Ignore_Link_Type(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -375,14 +376,14 @@ public:
     {
         string result =  "node_types_should_not_be_vars:";
         for (Type type : patternMiner->param.get_node_types_should_not_be_vars())
-            result +=  " " + classserver().getTypeName(type);
+            result +=  " " + nameserver().getTypeName(type);
 
         return result;
     }
 
     string add_node_type_to_node_types_should_not_be_vars(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -399,7 +400,7 @@ public:
 
     string remove_node_type_from_node_types_should_not_be_vars(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -436,14 +437,14 @@ public:
     {
         string result =  "node_types_should_be_vars:";
         for (Type type : patternMiner->param.get_node_types_should_be_vars())
-            result +=  " " + classserver().getTypeName(type);
+            result +=  " " + nameserver().getTypeName(type);
 
         return result;
     }
 
     string add_node_type_to_node_types_should_be_vars(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -459,7 +460,7 @@ public:
 
     string remove_node_type_from_node_types_should_be_vars(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -496,14 +497,14 @@ public:
     {
         string result =  "same_link_types_not_share_second_outgoing Link_Types:";
         for (Type type : patternMiner->param.get_same_link_types_not_share_second_outgoing())
-            result +=  " " + classserver().getTypeName(type);
+            result +=  " " + nameserver().getTypeName(type);
 
         return result;
     }
 
     string add_link_type_to_same_link_types_not_share_second_outgoing(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 
@@ -520,7 +521,7 @@ public:
 
     string remove_link_type_from_same_link_types_not_share_second_outgoing(const string& _typeStr)
     {
-        Type atomType = classserver().getType(_typeStr);
+        Type atomType = nameserver().getType(_typeStr);
         if (atomType == NOTYPE)
             return "Error: Input type doesn't exist!";
 

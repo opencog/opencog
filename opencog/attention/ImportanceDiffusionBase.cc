@@ -41,6 +41,7 @@
 
 #include "ImportanceDiffusionBase.h"
 #include "AttentionStat.h"
+#include "AttentionUtils.h"
 
 #define DEBUG
 #define _unused(x) ((void)x)
@@ -292,27 +293,6 @@ HandleSeq ImportanceDiffusionBase::hebbianAdjacentAtoms(Handle h)
             get_target_neighbors(h, ASYMMETRIC_HEBBIAN_LINK);
 
     return resultSet;
-}
-
-void ImportanceDiffusionBase::removeHebbianLinks(HandleSeq& sources)
-{
-    auto it_end =
-        std::remove_if(sources.begin(), sources.end(),
-                [=](const Handle& h)
-                {
-                Type type = h->get_type();
-
-                if (type == ASYMMETRIC_HEBBIAN_LINK ||
-                    type == HEBBIAN_LINK ||
-                    type == SYMMETRIC_HEBBIAN_LINK ||
-                    type == INVERSE_HEBBIAN_LINK ||
-                    type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
-                         return true;
-                else
-                         return false;
-                });
-
-    sources.erase(it_end, sources.end());
 }
 
 /*

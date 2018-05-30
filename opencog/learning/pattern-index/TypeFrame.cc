@@ -1,5 +1,5 @@
 #include "TypeFrame.h"
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 
 using namespace opencog;
 using namespace std;
@@ -47,7 +47,7 @@ bool TypeFrame::typeAtEqualsTo(unsigned int pos, Type type) const
 
 bool TypeFrame::typeAtIsSymmetricLink(unsigned int pos) const
 {
-    return (classserver().isA(at(pos).first, UNORDERED_LINK));
+    return (nameserver().isA(at(pos).first, UNORDERED_LINK));
 }
 
 string TypeFrame::nodeNameAt(unsigned int pos) const
@@ -635,7 +635,7 @@ TypeFrame TypeFrame::copyReplacingFrame(const TypeFrame &key,
 string TypeFrame::toSCMString(unsigned int cursor) const
 {
     string answer = "(";
-    answer += classserver().getTypeName(at(cursor).first) + " ";
+    answer += nameserver().getTypeName(at(cursor).first) + " ";
     if (at(cursor).second == 0) {
         answer += "\"" + nodeNameAt(cursor) + "\"";
     } else {
@@ -653,7 +653,7 @@ void TypeFrame::printForDebug(string prefix, string suffix, bool showNames) cons
     printf("%s", prefix.c_str());
     for (unsigned int i = 0; i < size(); i++) {
         if (showNames && (at(i).first < 1000)) {
-            printf("(%s %lu) ", classserver().getTypeName(at(i).first).c_str(), at(i).second);
+            printf("(%s %lu) ", nameserver().getTypeName(at(i).first).c_str(), at(i).second);
         } else {
             if (at(i).first != 1000) {
                 printf("(%u %lu) ", at(i).first, at(i).second);
@@ -740,12 +740,12 @@ int TypeFrame::recursiveParse(const string &txt, unsigned int begin)
     if (DEBUG) printf("separatorPos = %d\n", separatorPos);
     string typeName = txt.substr(begin + 1, separatorPos - begin - 1);
     if (DEBUG) printf("typeName = %s\n", typeName.c_str());
-    Type type = classserver().getType(typeName);
+    Type type = nameserver().getType(typeName);
     if (type == NOTYPE) {
         fprintf(stderr, "Unknown type name: %s\n", typeName.c_str());
         return -1;
     }
-    if (classserver().isLink(type)) {
+    if (nameserver().isLink(type)) {
         if (DEBUG) printf("isLink\n");
         int tvBegin = txt.find_first_of("(", separatorPos);
         if (tvBegin == -1) {

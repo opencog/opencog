@@ -24,7 +24,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 

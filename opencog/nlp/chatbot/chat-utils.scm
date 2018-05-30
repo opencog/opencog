@@ -18,6 +18,12 @@
              (opencog nlp relex2logic)
              (opencog exec))
 
+; Temporarily used during transitioning. The aim is to make life easier for
+; developers who work with atomspace before opencog/atomspace/pull/1664 while
+; waiting for opencog/opencog/issues/3107 to resolve.
+(if (resolve-module '(opencog attention-bank) #:ensure #f)
+  (use-modules (opencog attention-bank)))
+
 ; -----------------------------------------------------------------------
 ; TODO: Replace these time related utilities with one from TimeMap, when it is
 ; ready.
@@ -34,6 +40,16 @@
 		sent
 		(TimeNode (number->string (current-time)))
 		time-domain)
+)
+
+(define-public (sent-get-parse-time sent)
+"
+  sent-get-parse-time SENT
+
+  Returns the time, in seconds, at which the SentenceNode SENT was parsed.
+"
+  (string->number (cog-name (car
+    (cog-chase-link 'AtTimeLink 'TimeNode sent))))
 )
 
 (define-public (get-last-said-sent)
@@ -155,7 +171,7 @@
     (let* ((word-inst-list
                 (append-map parse-get-words (sentence-get-parses SENT)))
            (word-list (map word-inst-get-word word-inst-list)))
-        (map stimulate word-inst-list)
+        ; (map stimulate word-inst-list)
         (map stimulate word-list)
     )
 )

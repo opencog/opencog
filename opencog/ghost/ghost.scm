@@ -6,7 +6,7 @@
   #:use-module (opencog openpsi)
   #:use-module (opencog logger)
   #:use-module (opencog exec)
-  #:use-module (opencog eva-behavior)
+  #:use-module (opencog ghost procedures)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs io ports)
   #:use-module (ice-9 popen)
@@ -17,6 +17,12 @@
   #:use-module (ice-9 eval-string)
   #:use-module (ice-9 receive)
   #:use-module (system base lalr))
+
+; Temporarily used during transitioning. The aim is to make life easier for
+; developers who work with atomspace before opencog/atomspace/pull/1664 while
+; waiting for opencog/opencog/issues/3107 to resolve.
+(if (resolve-module '(opencog attention-bank) #:ensure #f)
+  (use-modules (opencog attention-bank)))
 
 ;; --------------------
 ;; Shared things being used in the module
@@ -67,6 +73,8 @@
 (define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
+(define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
+(define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
@@ -74,10 +82,18 @@
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
+(define ghost-rej-seq-num (Predicate (ghost-prefix "Rejoinder Sequence Number")))
 (define strval-rejoinder (StringValue "rejoinder"))
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))
 (define strval-gambit (StringValue "gambit"))
+
+;; --------------------
+(define-public (ghost-word-seq-pred)
+"
+  Returns the Predicate that represent word sequences.
+"
+  ghost-word-seq)
 
 ;; --------------------
 ;; For rule parsing
@@ -102,6 +118,14 @@
 ; during rule parsing & creation
 (define pat-vars '())
 
+; A list of all the labels of the rules we have seen
+(define rule-label-list '())
+
+; An association list that contains all the terms needed to create
+; the actual rules
+; The key of this list is the labels of the rules
+(define rule-alist '())
+
 ; A list to keep track of what rules hierarchy
 ; Will be used when dealing with rejoinders
 (define rule-hierarchy '())
@@ -125,6 +149,9 @@
 (define context-weight 1)
 (define sti-weight 1)
 (define urge-weight 1)
+(define responder-sti-boost 1)
+(define rejoinder-sti-boost 10)
+(define refractory-period 1)
 
 ;; --------------------
 ;; For monitoring the status
@@ -144,20 +171,68 @@
 (load "ghost/stimulation.scm")
 
 ;; --------------------
+;; Key used to create a singly linked-list to record the sequence of
+;; input sentences.
+(define sent-input-seq (Anchor "Sentence Input Sequence"))
+(define next-sent-key (Predicate "next-sentence"))
+(define tail-sent-key (Predicate "last-inputed-sentence"))
+
+;; --------------------
+(define (tail-input-sent)
+"
+  Returns nil or the SentenceNode for the last inputed sentence.
+"
+  (cog-value sent-input-seq tail-sent-key))
+
+;; --------------------
+(define (append-to-sent-seq sent)
+"
+  append-to-sent-seq SENT
+
+  Returns the SentenceNode SENT after appending it to the sentence
+  input sequence.
+"
+  ; The assumption is that there is only one thread that is adding
+  ; to the sequence.
+  (let ((tail-sent (tail-input-sent)))
+    (if (null? tail-sent)
+      (begin
+        (cog-set-value! sent-input-seq tail-sent-key sent)
+        (cog-set-value! sent-input-seq next-sent-key sent))
+      (begin
+        (cog-set-value! sent-input-seq tail-sent-key sent)
+        (cog-set-value! tail-sent next-sent-key sent))
+    )
+  ))
+
+;; --------------------
+(define (next-input-sent sent)
+"
+  next-input-sent SENT
+
+  Returns nil or the input SentenceNode that followed SENT SentenceNode.
+"
+  (cog-value sent next-sent-key))
+
+;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
 
 (define-public (ghost-parse TXT)
 "
   Parse the TXT, convert them into atomese.
 "
-  (test-parse TXT))
+  (test-parse TXT)
+  (process-rule-stack)
+)
 
 ; ----------
 (define-public (ghost-parse-file FILE)
 "
   Parse everything in the topic FILE, and convert them into atomese.
 "
-  (test-parse-file FILE))
+  (test-parse-file FILE)
+  (process-rule-stack)
+)
 
 ; ----------
 (define-public (ghost TXT)
@@ -167,7 +242,9 @@
 "
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
-  (State ghost-curr-proc sent))
+  (append-to-sent-seq sent)
+  (State ghost-curr-proc sent)
+  sent)
 
 ; ----------
 (define-public (ghost-run)

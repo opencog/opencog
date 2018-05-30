@@ -23,13 +23,13 @@ ADD_EXECUTABLE (patternIndexQueryExample patternIndexQueryExample.cc)
 ADD_EXECUTABLE (patternIndexMiningExample patternIndexMiningExample.cc)
 TARGET_LINK_LIBRARIES(patternIndexQueryExample
 	patternindex
-	${COGUTIL_LIBRARY}
 	${ATOMSPACE_LIBRARIES}
+	${COGUTIL_LIBRARY}
 )
 TARGET_LINK_LIBRARIES(patternIndexMiningExample
 	patternindex
-	${COGUTIL_LIBRARY}
 	${ATOMSPACE_LIBRARIES}
+	${COGUTIL_LIBRARY}
 )
 
 INSTALL (FILES

@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
@@ -48,7 +48,7 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   if (0 < var_soln.size()) {
     for( auto it = var_soln.begin(); it != var_soln.end(); ++it )
     {
-      if(classserver().isA(VARIABLE_NODE, (it->second)->get_type())) {
+      if(nameserver().isA(VARIABLE_NODE, (it->second)->get_type())) {
         return false;
       }
     }
@@ -127,8 +127,8 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
   {
     Instantiator inst(_as);
 
-    Handle result = \
-      inst.instantiate(opr.get_action(rule), it->second, true);
+    Handle result =
+      HandleCast(inst.instantiate(opr.get_action(rule), it->second, true));
     rule->setValue(_action_executed, ProtoAtomCast(TruthValue::TRUE_TV()));
 
     return result;

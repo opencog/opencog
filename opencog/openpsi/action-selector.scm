@@ -6,6 +6,12 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
+; Temporarily used during transitioning. The aim is to make life easier for
+; developers who work with atomspace before opencog/atomspace/pull/1664 while
+; waiting for opencog/opencog/issues/3107 to resolve.
+(if (resolve-module '(opencog attention-bank) #:ensure #f)
+  (use-modules (opencog attention-bank)))
+
 ; ----------------------------------------------------------------------
 (define (psi-set-action-selector! component exec-term)
 "

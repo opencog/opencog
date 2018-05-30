@@ -11,6 +11,15 @@
 ;; Set a logger for the experiment
 (define icl-logger (cog-new-logger))
 (cog-logger-set-component! icl-logger "ICL")
+(define (icl-logger-set-level! l) (cog-logger-set-level! icl-logger l))
+(define (icl-logger-get-level) (cog-logger-get-level icl-logger))
+(define (icl-logger-set-stdout! . args) (apply cog-logger-set-stdout! (cons icl-logger args)))
+(define (icl-logger-set-sync! . args) (apply cog-logger-set-sync! (cons icl-logger args)))
+(define (icl-logger-error-enabled?) (cog-logger-error-enabled? icl-logger))
+(define (icl-logger-warn-enabled?) (cog-logger-warn-enabled? icl-logger))
+(define (icl-logger-info-enabled?) (cog-logger-info-enabled? icl-logger))
+(define (icl-logger-debug-enabled?) (cog-logger-debug-enabled? icl-logger))
+(define (icl-logger-fine-enabled?) (cog-logger-fine-enabled? icl-logger))
 (define (icl-logger-error . args) (apply cog-logger-error (cons icl-logger args)))
 (define (icl-logger-warn . args) (apply cog-logger-warn (cons icl-logger args)))
 (define (icl-logger-info . args) (apply cog-logger-info (cons icl-logger args)))
@@ -51,9 +60,14 @@
 
 ;; Log the given atomspace at some level
 (define (icl-logger-info-atomspace as)
-  (icl-logger-info "~a" (atomspace->string as)))
+  (if (icl-logger-info-enabled?)
+      (icl-logger-info "~a" (atomspace->string as))))
 (define (icl-logger-debug-atomspace as)
-  (icl-logger-debug "~a" (atomspace->string as)))
+  (if (icl-logger-debug-enabled?)
+      (icl-logger-debug "~a" (atomspace->string as))))
+(define (icl-logger-fine-atomspace as)
+  (if (icl-logger-fine-enabled?)
+      (icl-logger-fine "~a" (atomspace->string as))))
 
 ;; Convert the given atomspace into a string.
 (define (atomspace->string as)
@@ -183,6 +197,15 @@
   icl-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns the list of copied atoms.
 "
   (icl-cp AS (apply append (map cog-get-atoms (cog-get-types)))))
+
+(define (icl-count-all AS)
+"
+  Return the total number of atoms in atomspace AS
+"
+  (let ((old-as (cog-set-atomspace! AS))
+        (as-count (count-all)))
+    (cog-set-atomspace! old-as)
+    as-count))
 
 (define (preproof-of arg)
   (Evaluation

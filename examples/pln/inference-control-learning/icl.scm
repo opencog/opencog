@@ -2,7 +2,7 @@
 
 ;; Set parameters
 (define pss 100)                    ; Problem set size
-(define niter 2)                    ; Number of iterations
+(define niter 1)                    ; Number of iterations
 (define piter 30)                   ; Number of iterations used for each problem
 
 ;; Load utils
@@ -14,19 +14,19 @@
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
-(cog-logger-set-level! "debug")
-(cog-logger-set-level! icl-logger "debug")
-(cog-logger-set-level! (cog-ure-logger) "fine")
+(cog-logger-set-level! "info")
+(icl-logger-set-level! "debug")
+(ure-logger-set-level! "info")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
-(cog-logger-set-stdout! icl-logger #t)
-;; (cog-logger-set-stdout! (cog-ure-logger) #t)
+(icl-logger-set-stdout! #t)
+;; (ure-logger-set-stdout! #t)
 
 ;; ;; Set loggers sync (for debugging)
 ;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-sync! icl-logger #t)
-;; (cog-logger-set-sync! (cog-ure-logger) #t)
+;; (icl-logger-set-sync! #t)
+;; (ure-logger-set-sync! #t)
 
 ;; Clear and reload the kb and rb
 (define (reload)
@@ -75,7 +75,7 @@
     ;; Remove dangling atoms from history-as. These are produced due
     ;; to alpha-conversion. It creates inconsistencies, see
     ;; https://github.com/opencog/atomspace/issues/1417. It's not too
-    ;; harmful for now but it will have to be remedy at some point.
+    ;; harmful for now but it will have to be remedied at some point.
     (icl-logger-info "Remove dangling atoms from history-as")
     (remove-dangling-atoms history-as)
 

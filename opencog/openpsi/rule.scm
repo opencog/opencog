@@ -75,12 +75,17 @@
   then it is used as the desired-goal-value for the goal otherwise,
   1 is assumed to be the desired-goal-value.
 
-  Goal-value should be in the range [0, 1].
+  VALUE and DGV should be in the range [0, 1].
 "
   ; NOTE: Why not make this part of psi-rule function? Because, developers
   ; might want to specify the behavior they prefer, when it comes to how
   ; to measure the level of achivement of goal, and how the goal's measurement
   ; value should change.
+  (if (not (and (<= 0 dgv) (<= dgv 1)))
+    (error "Expected 0 <= dgv <= 1, got" dgv))
+  (if (not (and (<= 0 value) (<= value 1)))
+    (error "Expected 0 <= value <= 1, got" value))
+
   (let* ((goal (Concept name)))
     (InheritanceLink goal psi-goal-node)
     (psi-set-gv! goal value)
@@ -88,7 +93,10 @@
     ; to change. Of course a StateLink can be used. At present there isn't
     ; any process that uses that explicit(aka queryable) information, thus
     ; nothing is lost.
-    (psi-set-dgv! goal dgv)
+    (if (and (<= 0 dgv) (<= dgv 1))
+      (psi-set-dgv! goal dgv)
+      (error "Expected 0 <= dgv <= 1, got" dgv)
+    )
   )
 )
 
@@ -111,6 +119,7 @@
   where GOAL_VALUE is the present value of the goal, and DGV is the
   desired-goal-value for the GOAL.
 "
+  ; TODO: Add utilities for declaring custom urge formula.
   (- (psi-dgv goal) (psi-goal-value goal))
 )
 
@@ -121,15 +130,17 @@
 
   Return GOAL after decreasing the urge by given value. Decreasing means
   minimizing the difference between the desired-goal-value and present
-  goal-value, thus VALUE should be a positive number.
+  goal-value, thus VALUE should be a positive number. This assumes
+  the desired-goal-value to be 1.
 "
-  (let ((u (psi-urge goal))
-    (dgv (psi-dgv goal)))
+  ; TODO: Add utilities for declaring custom decrease-urge formula.
+  (let* ((u (psi-urge goal))
+    (gv (- 1 (- u (abs value)))))
 
     (cond
       ((equal? 0.0 u) goal)
-      ((>= 0.0001 (abs u)) (psi-set-gv! goal dgv))
-      (else (psi-set-gv! goal (- dgv (- u (* value (/ u (abs u))))))))
+      ((<= 1 gv) (psi-set-gv! goal 1))
+      (else (psi-set-gv! goal gv)))
   )
 )
 
@@ -139,16 +150,11 @@
   psi-increase-urge GOAL VALUE
 
   Return GOAL after increasing the magnitude of the urge by VALUE. VALUE
-  should be a positive number.
+  should be a positive number. This assumes the desired-goal-value to be 1.
 "
-  (define (new-gv u dgv) ; u = urge & dgv = desired-goal-value
-    (if (equal? 0.0 u)
-      (+ dgv value)
-      (- dgv (+ u (* value (/ u (abs u)))))))
-
+  ; TODO: Add utilities for declaring custom increase-urge formula.
   (let* ((u (psi-urge goal))
-    (dgv (psi-dgv goal))
-    (gv (new-gv u dgv)))
+    (gv (- 1 (+ u (abs value)))))
 
     (cond
       ((<= 1 gv) (psi-set-gv! goal 1))
@@ -180,7 +186,7 @@
     psi-rule-name-predicate-node
     (ListLink
       rule
-      (ConceptNode (string-append psi-prefix-str name))))
+      (ConceptNode name)))
 
   ; TODO Uncomment after testing with ghost
   ;(cog-set-value!
@@ -188,6 +194,7 @@
   ;  psi-rule-name-predicate-node
   ;  (StringValue name))
 )
+
 ; --------------------------------------------------------------
 (define (psi-rule-alias rule)
 "

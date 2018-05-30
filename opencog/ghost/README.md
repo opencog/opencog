@@ -41,14 +41,14 @@ Here is a list of features that are fully supported in GHOST:
   - Currently only Scheme functions are accepted, can support other languages if needed
   - Should be in the public interface, e.g. use `define-public` when defining the function
   - There are several build-in functions that are available
-    - `noaccess`, a topic feature that prevent any of the rules in it get triggered, unless being called explicitly. This should only be used when it's absolutely necessary.
     - `reuse`, to reuse the action of another rule, e.g.
       - `^reuse(some_label)` will reuse the action of another rule with a label named "some_label". It's recommended to use a unique label for each of the rules in the rulebase, `topic.label` is not supported.
+      - Once triggered, the rule being reused will also be considered as triggered, so it will not be triggered again unless you `^keep()` it.
       - Note, currently reusing a rule with local variables in the action of the rule is not supported, but user variables are fine.
     - `keep`, to keep the rule in the system so that it can be selected and executed more than once, this can be used at topic level too
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
-Note: Currently there is no special handling for various types of responders (`u` `s` `?`) and gambits (`r` `t`), they are treated the same way.
+Note: Currently there is no special handling for various types of responders (`u` `s`) and gambits (`r` `t`), they are treated the same way, except for questions (`?`).
 
 The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them. The value assigned to a goal will affect the strength of the rules (`ImplicationLinks`) linked to that goal.
 
@@ -72,6 +72,9 @@ The rules being created under a `ordered-goals` will have a different weight, ba
 For example, if there are five rules under the above `please_user=0.8` goal, the first rule will have a weight of 0.4, the second one will have 0.2, the third one will have 0.1, and so on. The sum of the weights will get closer to the weight of the top level goal (0.8) if more rules are created under it.
 
 Additionally, when a rule in a sequence is triggered, it will have a lower STI while the next rules in the same sequence will receive a boost in STI, so as to increase the chance of being selected in the next cycle.
+
+Updated May 2018:
+Looks like the above methods of biasing the rules to be triggered in the defined order are not enough to give the behavior that one would expect, so an extra condition has been added to the context of the rules to make sure the rule will be triggered only if the previous rules has been triggered.
 
 2) Rule level goal(s)
 

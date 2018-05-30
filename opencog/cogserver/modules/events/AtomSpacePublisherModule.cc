@@ -36,6 +36,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/tbb.h>
 
+#include <opencog/atoms/proto/NameServer.h>
+
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/FuzzyTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
@@ -307,7 +309,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
     Type type = h->get_type();
-    std::string typeNameString = classserver().getTypeName(type);
+    std::string typeNameString = nameserver().getTypeName(type);
 
     // Name
     std::string nameString = h->get_name();

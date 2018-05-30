@@ -13,6 +13,9 @@
 set(ATOMSPACE_LIBPATH
    /usr/lib/ /usr/lib64/ /usr/local/lib/ /usr/local/lib64/)
 
+find_library(ATOMSPACE_atomproto_LIBRARY atomproto
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+   
 find_library(ATOMSPACE_atombase_LIBRARY atombase
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
@@ -71,6 +74,7 @@ find_library(ATOMSPACE_zmqatoms_LIBRARY zmqatoms
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 set(ATOMSPACE_LIBRARIES
+	${ATOMSPACE_atomproto_LIBRARY}
 	${ATOMSPACE_atombase_LIBRARY}
 	${ATOMSPACE_atomcore_LIBRARY}
 	${ATOMSPACE_attentionbank_LIBRARY}
