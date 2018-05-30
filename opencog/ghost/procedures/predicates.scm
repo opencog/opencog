@@ -161,8 +161,7 @@
 ; --------------------------------------------------------------
 (define-syntax-rule
   (define-face-predicates model-func predicate-node
-    t-transitioning? t-occuring? since-t?
-    f-transitioning? f-occuring? since-f?)
+    t-transitioning? t-occuring? f-transitioning? f-occuring?)
   ; The definitons are not public so as to be able to control which
   ; of them are exported by this module.
   (begin
@@ -180,11 +179,11 @@
 
     ; FIXME: This has issues when the window of perception (dti) is passed.
     ; Just because we don't know it doesn't mean it is true
-    (define* (since-t? secs #:optional (face-id any-node))
-      (since-event-started-occuring? (model-func (cog-name face-id)) secs))
-    (Inheritance
-      (GroundedPredicate (format #f "scm: ~a" 'since-t?))
-       predicate-node)
+    ;(define* (since-t? secs #:optional (face-id any-node))
+    ;  (since-event-started-occuring? (model-func (cog-name face-id)) secs))
+    ;(Inheritance
+    ;  (GroundedPredicate (format #f "scm: ~a" 'since-t?))
+    ;   predicate-node)
 
     (define* (f-transitioning? #:optional (face-id any-node))
       (false-event-occuring? (model-func (cog-name face-id))))
@@ -200,11 +199,11 @@
 
     ; FIXME: This has issues when the window of perception (dti) is passed.
     ; Just because we don't know it doesn't mean it is true
-    (define* (since-f? secs  #:optional (face-id any-node))
-      (since-event-stopped-occuring? (model-func (cog-name face-id)) secs))
-    (Inheritance
-      (GroundedPredicate (format #f "scm: ~a" 'since-f?))
-       predicate-node)
+    ;(define* (since-f? secs  #:optional (face-id any-node))
+    ;  (since-event-stopped-occuring? (model-func (cog-name face-id)) secs))
+    ;(Inheritance
+    ;  (GroundedPredicate (format #f "scm: ~a" 'since-f?))
+    ;   predicate-node)
   )
 )
 
@@ -213,10 +212,8 @@
 (define-face-predicates face-talking face-talking-predicate
    new_talking
    talking
-   after_user_started_talking
    end_talking
    not_talking
-   after_user_stopped_talking
 )
 
 (set-procedure-property! new_talking 'documentation
@@ -240,16 +237,16 @@
 "
 )
 
-(set-procedure-property! after_user_started_talking 'documentation
-"
-  after_user_started_talking SECS [FACE-ID]
-
-  Returns (stv 1 1) if current time >= the time that the user identified by
-  FACE-ID started talking + SECS. Otherwise, returns (stv 0 1).
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-)
+;(set-procedure-property! after_user_started_talking 'documentation
+;"
+;  after_user_started_talking SECS [FACE-ID]
+;
+;  Returns (stv 1 1) if current time >= the time that the user identified by
+;  FACE-ID started talking + SECS. Otherwise, returns (stv 0 1).
+;
+;  IF FACE-ID is not passed then the return value is for any person.
+;"
+;)
 
 (set-procedure-property! end_talking 'documentation
 "
@@ -272,26 +269,24 @@
 "
 )
 
-(set-procedure-property! after_user_stopped_talking 'documentation
-"
-  after_user_stopped_talking SECS [FACE-ID]
-
-  Returns (stv 1 1) if current time >= the time that the user identified by
-  FACE-ID stopped talking + SECS. Otherwise, returns (stv 0 1).
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-)
+;(set-procedure-property! after_user_stopped_talking 'documentation
+;"
+;  after_user_stopped_talking SECS [FACE-ID]
+;
+;  Returns (stv 1 1) if current time >= the time that the user identified by
+;  FACE-ID stopped talking + SECS. Otherwise, returns (stv 0 1).
+;
+;  IF FACE-ID is not passed then the return value is for any person.
+;"
+;)
 
 ; --------------------------------------------------------------
 ; Define predicates for face-visiblity
 (define-face-predicates see-face see-face-predicate
    new_face
    face
-   visible_for
    end_face
-   not_visible
-   not_visible_for
+   no_face
 )
 
 (set-procedure-property! face 'documentation
