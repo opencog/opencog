@@ -561,8 +561,9 @@ void ImportanceDiffusionBase::processDiffusionStack()
  *
  */
 double ImportanceDiffusionBase::redistribute(const Handle& target, const double& sti,
-                                           std::vector<std::pair<Handle, double>>& refund){
-    static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
+                                           std::vector<std::pair<Handle, double>>& refund
+                                           ,unsigned int NRECURSION/*=0*/){
+    //static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
     auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
             [target](const Handle& h){
             return (target->get_type() == nameserver().getType(h->get_name()));
@@ -574,7 +575,7 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
         // the valid atom type in refund vector or if the refund is empty,
         // return the STI itself.
         auto min_spreading_value = _bank->get_af_min_sti();
-        if(sti < min_spreading_value or NRECURSION > 100){
+        if(sti < min_spreading_value or NRECURSION > 20){
             if(not refund.empty()){
                 refund[refund.size()-1].second += sti;
                 return 0;
@@ -594,9 +595,9 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
         double r = sti/(double)seq.size();
         for(const Handle& h : seq)
         {
-            ++NRECURSION;
+            //++NRECURSION;
             ++spreaded_to;
-            double rsti = redistribute(h, r, refund);
+            double rsti = redistribute(h, r, refund, NRECURSION+1);
             // Adjust sti per atom if sti isn't spread.
             if( rsti > 0){
                 // If the last one failed. return amount.
