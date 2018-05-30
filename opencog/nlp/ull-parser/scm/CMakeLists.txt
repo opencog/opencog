@@ -1,5 +1,5 @@
 ADD_GUILE_MODULE (FILES
-	ullparser.scm
+	ull-parser.scm
 	batch-word-pair.scm
 	common.scm
 	link-pipeline.scm

@@ -2,7 +2,7 @@
 ; Language learning module.
 ; Wraps up the assorted tools and scripts into one module.
 ;
-(define-module (opencog nlp ullparser))
+(define-module (opencog nlp ull-parser))
 
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
