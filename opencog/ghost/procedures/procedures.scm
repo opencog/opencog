@@ -153,9 +153,9 @@
   (record-perception (see-face face-id) confidence)
 )
 
-(define (perceive-emotion emotion-type face-id confidence)
+(define (perceive-emotion face-id emotion-type confidence)
 "
-  perceive-emotion EMOTION-TYPE FACE-ID CONFIDENCE
+  perceive-emotion FACE-ID EMOTION-TYPE CONFIDENCE
 
   Returns the atom representing whether the face with id FACE-ID is in an
   emotional-state EMOTION-TYPE, after increasing its sti and setting its
