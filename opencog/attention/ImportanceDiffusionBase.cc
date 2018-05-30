@@ -546,36 +546,40 @@ void ImportanceDiffusionBase::processDiffusionStack()
 
 }
 /**
- * Redistributed amount of sti that should have gone to target atom if
- * the atom type is in the Fitler set. The sti will be equally distributed
- * to the incoming or outgoing set of target atom.
+ * Redistribute amount of sti that should have gone to target atom if
+ * the atom type wasn't in the FitlerOut list. The sti will be equally distributed
+ * to the all neighboring atoms. if any of the atoms are invalid types, the
+ * amount they were supposed to receive will be recursively redistributed untill
+ * it reaches the maximum allowed traversal depth.
  *
  * @param target the atom whose to type is to be checked against the filter set.
- *
- * @sti   the sti that should be redistribited if the target's type is in Filter
+ * @param sti   the sti that should be redistribited if the target's type is in Filter
  * set.
+ * @param refund a list of pairs of atoms and redistributed sti.
+ * @param depth the current depth of the traversing.
  *
- * @refund a list of pairs of atoms and redistributed sti.
- *
- * @return 0 on successfull redistribution or @param sti on failure to do so.
+ * @return 0 on successfull redistribution or @param sti on failure to do so
+ * before depth reaches maximum allowable value.
  *
  */
 double ImportanceDiffusionBase::redistribute(const Handle& target, const double& sti,
                                            std::vector<std::pair<Handle, double>>& refund
-                                           ,unsigned int NRECURSION/*=0*/){
-    //static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
-    auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
+                                           ,unsigned int depth/*=0*/){
+    auto it = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
             [target](const Handle& h){
             return (target->get_type() == nameserver().getType(h->get_name()));
             });
     double not_redistributed = 0;
-    if(ij != hsFilterOut.end()){
-        // If STI to be distributed is smaller that the af boundary or the
+    // If target is a type in the hsFilterOut list, redistribute sti to
+    // neighbors.
+    if(hsFilterOut.end() != it){
+        // If STI to be distributed is smaller than the af boundary or the
         // recursion has reached maximum depth allowed, assign the sti to
-        // the valid atom type in refund vector or if the refund is empty,
-        // return the STI itself.
+        // the last atom in refund vector and return 0 balance. If the refund 
+        // vector is empty, return the sti itself.
         auto min_spreading_value = _bank->get_af_min_sti();
-        if(sti < min_spreading_value or NRECURSION > 20){
+        // TODO define a parameter for the maximum depth?
+        if(sti < min_spreading_value or depth > 20){
             if(not refund.empty()){
                 refund[refund.size()-1].second += sti;
                 return 0;
@@ -583,7 +587,6 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
                 return sti;
             }
         }
-
         // Redistribute to all neighbors.
         HandleSeq seq;
         if(target->is_link())
@@ -591,21 +594,21 @@ double ImportanceDiffusionBase::redistribute(const Handle& target, const double&
 
         target->getIncomingSet(std::back_inserter(seq));
 
-        size_t spreaded_to = 0;
-        double r = sti/(double)seq.size();
+        size_t spreaded_to = 0; // Number of atoms visited.
+        // Equally divide sti to neighbors.
+        double dividened = sti/(double)seq.size(); 
         for(const Handle& h : seq)
         {
-            //++NRECURSION;
             ++spreaded_to;
-            double rsti = redistribute(h, r, refund, NRECURSION+1);
-            // Adjust sti per atom if sti isn't spread.
-            if( rsti > 0){
-                // If the last one failed. return amount.
+            double balance = redistribute(h, dividened, refund, depth+1);
+            // Adjust dividened if sti isn't spread to this atom.
+            if( balance > 0){
+                // If the last one failed. return amount not distributed.
                 if( spreaded_to == seq.size()){
-                    not_redistributed = rsti;
+                    not_redistributed = balance;
                     break;
                 }
-                r += (rsti / ( seq.size() - spreaded_to));
+                dividened += (balance / ( seq.size() - spreaded_to));
             }
         }
     }
