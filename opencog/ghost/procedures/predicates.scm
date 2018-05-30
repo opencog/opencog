@@ -167,13 +167,13 @@
   (begin
     (define* (t-transitioning? #:optional (face-id any-node))
       (true-event-occuring?  (model-func (cog-name face-id))))
-    (Inheritance
+    (Implication
       (GroundedPredicate (format #f "scm: ~a" 't-transitioning?))
        predicate-node)
 
     (define* (t-occuring? #:optional (face-id any-node))
       (true-perception-occuring? (model-func (cog-name face-id))))
-    (Inheritance
+    (Implication
       (GroundedPredicate (format #f "scm: ~a" 't-occuring?))
        predicate-node)
 
@@ -181,19 +181,19 @@
     ; Just because we don't know it doesn't mean it is true
     ;(define* (since-t? secs #:optional (face-id any-node))
     ;  (since-event-started-occuring? (model-func (cog-name face-id)) secs))
-    ;(Inheritance
+    ;(Implication
     ;  (GroundedPredicate (format #f "scm: ~a" 'since-t?))
     ;   predicate-node)
 
     (define* (f-transitioning? #:optional (face-id any-node))
       (false-event-occuring? (model-func (cog-name face-id))))
-    (Inheritance
+    (Implication
       (GroundedPredicate (format #f "scm: ~a" 'f-transitioning?))
        predicate-node)
 
     (define* (f-occuring? #:optional (face-id any-node))
       (negate-stv! (t-occuring? face-id)))
-    (Inheritance
+    (Implication
       (GroundedPredicate (format #f "scm: ~a" 'f-occuring?))
        predicate-node)
 
@@ -201,7 +201,7 @@
     ; Just because we don't know it doesn't mean it is true
     ;(define* (since-f? secs  #:optional (face-id any-node))
     ;  (since-event-stopped-occuring? (model-func (cog-name face-id)) secs))
-    ;(Inheritance
+    ;(Implication
     ;  (GroundedPredicate (format #f "scm: ~a" 'since-f?))
     ;   predicate-node)
   )
@@ -341,6 +341,6 @@
 ; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
-(Inheritance (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
-(Inheritance (GroundedPredicate "scm: person_appears") (Predicate "see"))
-(Inheritance (GroundedPredicate "scm: emotion") (Predicate "emotion"))
+; TODO: Replace the ConceptNode with a PredicateNode
+(Implication (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
+(Implication (GroundedPredicate "scm: emotion") (Predicate "emotion"))
