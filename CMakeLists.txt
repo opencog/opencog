@@ -349,66 +349,100 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 # NOTE: Python interpreter is needed for runing python unit tests,
 # and for running the FindCython module.
 
+# --- Python 3 ----
 FIND_PACKAGE(Python3Interp)
-IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
-	SET (HAVE_PY_INTERP 1)
-	SET (PYTHON_VER python3.5)
-	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
+IF (3.4.0 VERSION_LESS ${PYTHON_VERSION_STRING})
+	SET (HAVE_PY3_INTERP 1)
+	SET (PYTHON3_VER python3.5)
+	MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
 ENDIF()
 
-IF (NOT HAVE_PY_INTERP)
-	FIND_PACKAGE(PythonInterp)
-	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
-		SET (HAVE_PY_INTERP 1)
-		SET (PYTHON_VER python2.7)
-		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
-	ENDIF()
-ENDIF()
-
-FIND_PACKAGE(PythonLibs)
+FIND_PACKAGE(PythonLibs 3)
 IF (PYTHONLIBS_FOUND AND
-     ((PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
-     OR
-     (2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})))
-	SET (HAVE_PY_LIBS 1)
-	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
+     (PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING}))
+   SET (HAVE_PY3_LIBS 1)
+   MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
 ELSE()
-	MESSAGE(STATUS "Python libraries NOT found.")
+	MESSAGE(STATUS "Python3 libraries NOT found.")
 ENDIF()
 
 # Cython is used to generate python bindings.
-IF (HAVE_PY_INTERP)
+IF (HAVE_PY3_INTERP)
 	FIND_PACKAGE(Cython 0.19.0)
 
-	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
+	IF (CYTHON_FOUND AND HAVE_PY3_LIBS)
 		# Find python destination dir for python bindings because it may
 		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
 
 		# Hack together some reasonable install location.
-		SET(PYTHON_DEST
-			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		SET(PYTHON3_DEST
+			"lib${LIB_DIR_SUFFIX}/${PYTHON3_VER}/dist-packages/opencog")
 		MESSAGE(STATUS
-			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON3_DEST}" )
 
-	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
+	ELSE (CYTHON_FOUND AND HAVE_PY3_LIBS)
 		IF(NOT CYTHON_FOUND)
 			MESSAGE(STATUS "Cython executable not found.")
 		ENDIF(NOT CYTHON_FOUND)
-	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
+	ENDIF (CYTHON_FOUND AND HAVE_PY3_LIBS)
 
 	# Nosetests will find and automatically run python tests.
-	IF (PYTHON3INTERP_FOUND)
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
-	ELSE ()
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
-	ENDIF ()
-	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+    FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
+	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY3_LIBS)
 		SET(HAVE_NOSETESTS 1)
 		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
-	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
-ENDIF (HAVE_PY_INTERP)
+	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY3_LIBS)
+ENDIF (HAVE_PY3_INTERP)
+
+# ---- Python 2 ----
+FIND_PACKAGE(Python2Interp)
+IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
+    SET (HAVE_PY2_INTERP 1)
+    SET (PYTHON2_VER python2.7)
+    MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+ENDIF()
+
+FIND_PACKAGE(PythonLibs 2.7)
+IF  (PYTHONLIBS_FOUND AND
+     (PYTHON2INTERP_FOUND AND 2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING}))
+    SET (HAVE_PY2_LIBS 1)
+	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
+ELSE()
+	MESSAGE(STATUS "Python2 libraries NOT found.")
+ENDIF()
+
+
+# Cython is used to generate python bindings.
+IF (HAVE_PY2_INTERP)
+	FIND_PACKAGE(Cython 0.19.0)
+
+	IF (CYTHON_FOUND AND HAVE_PY2_LIBS)
+		# Find python destination dir for python bindings because it may
+		# differ on each operating system.
+		ADD_DEFINITIONS(-DHAVE_CYTHON)
+		SET(HAVE_CYTHON 1)
+
+		# Hack together some reasonable install location.
+		SET(PYTHON2_DEST
+			"lib${LIB_DIR_SUFFIX}/${PYTHON2_VER}/dist-packages/opencog")
+		MESSAGE(STATUS
+			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON2_DEST}" )
+
+	ELSE (CYTHON_FOUND AND HAVE_PY2_LIBS)
+		IF(NOT CYTHON_FOUND)
+			MESSAGE(STATUS "Cython executable not found.")
+		ENDIF(NOT CYTHON_FOUND)
+	ENDIF (CYTHON_FOUND AND HAVE_PY2_LIBS)
+
+	# Nosetests will find and automatically run python tests.
+    FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY2_LIBS)
+		SET(HAVE_NOSETESTS 1)
+		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
+	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY2_LIBS)
+ENDIF (HAVE_PY2_INTERP)
 
 # -----------------------------------------------------------------------------
 

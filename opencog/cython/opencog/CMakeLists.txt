@@ -71,7 +71,9 @@ IF (HAVE_ATOMSPACE)
 		OUTPUT_NAME cogserver_type_constructors)
 
 	INSTALL (TARGETS cogserver_type_constructors
-		DESTINATION "${PYTHON_DEST}")
+		DESTINATION "${PYTHON2_DEST}")
+    INSTALL (TARGETS cogserver_type_constructors
+        DESTINATION "${PYTHON3_DEST}")
 
 ENDIF (HAVE_ATOMSPACE)
 
@@ -103,7 +105,9 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME cogserver)
 
 	INSTALL (TARGETS cogserver_cython
-		DESTINATION "${PYTHON_DEST}")
+		DESTINATION "${PYTHON2_DEST}")
+    INSTALL (TARGETS cogserver_cython
+        DESTINATION "${PYTHON3_DEST}")
 
 	####################### agent finder ########################
 	CYTHON_ADD_MODULE_PYX(agent_finder
@@ -132,7 +136,9 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME agent_finder)
 
 	INSTALL (TARGETS agent_finder
-		DESTINATION "${PYTHON_DEST}")
+		DESTINATION "${PYTHON2_DEST}")
+	INSTALL (TARGETS agent_finder
+		DESTINATION "${PYTHON3_DEST}")
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_STATISTICS)
@@ -160,9 +166,14 @@ IF (HAVE_STATISTICS)
 		OUTPUT_NAME statistics)
 
 	INSTALL (TARGETS statistics_cython
-		DESTINATION "${PYTHON_DEST}")
+		DESTINATION "${PYTHON2_DEST}")
+    INSTALL (TARGETS statistics_cython
+		DESTINATION "${PYTHON3_DEST}")
 ENDIF (HAVE_STATISTICS)
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "${PYTHON_DEST}")
+	DESTINATION "${PYTHON2_DEST}")
+INSTALL (FILES
+	__init__.py
+	DESTINATION "${PYTHON3_DEST}")
