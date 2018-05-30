@@ -467,6 +467,7 @@
       (action-pattern) : $1
       (action-patterns action-pattern) : (format #f "~a ~a" $1 $2)
       (action-patterns enter) : $1
+      (action-patterns TRAILSPACE) : $1
     )
 
     (action-pattern
