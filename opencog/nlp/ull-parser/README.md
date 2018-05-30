@@ -2,7 +2,7 @@ Language Learning
 =================
 Linas Vepstas December 2013
 
-Updated April 2018
+Updated May 2018 by Claudia Castillo
 
 Current project, under construction. See the [language learning wiki](http://wiki.opencog.org/w/Language_learning)
 for an alternate overview.
@@ -28,7 +28,7 @@ and L. Vepstas (2014) on [ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372).
 A shorter sketch is given below. Most of this README concerns the
 practical details of configuring and operating the system, and some
 diary-like notes about system configuration and operation. A diary of
-scientific notes and results is in the `learn-lang-diary` directory.
+scientific notes and results is in the [`nlp/learn/learn-lang-diary`](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary) directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 
@@ -54,9 +54,8 @@ merging algorithm might be, or how it will work.
 Steps A-C are "well-known" in the academic literature, with results
 reported by many researchers over the last two decades. The results
 from Steps D & E are new, and have never been published before.
-(Results from Step D can be found in the file, in this directory
-`learn-lang-diary/drafts/connector-sets.lyx`, the PDF of which
-was posted to the mailing lists)
+(Results from Step D can be found in the `drafts/connector-sets.lyx` file,
+inside the [`nlp/learn/learn-lang-diary`](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary) directory, the PDF of which was posted to the mailing lists)
  
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
@@ -138,7 +137,7 @@ Now, let's set up the **text-ingestion pipeline:**
    a database. Pick any name you want; here it is `learn_pairs`.
 ```
    createdb learn_pairs
-   cat /atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
+   cat $ATOMSPACE_SOURCE_DIR/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
 ```
 
 3) Create/edit the `~/.guile` file and add the following content:
@@ -247,7 +246,7 @@ battles, etc. that get mistaken for sentences, and leads to unusual
 deductions of grammar.  Thus, Wikipedia is not a good choice for
 learning text.
  
-There are various scripts in the [download](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/download)
+There are various scripts in the [nlp/learn/download](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/download)
 directory for downloading and pre-processing texts from Project Gutenberg, Wikipedia, and the "Archive of Our Own"
 fan-fiction website. Once you are sure you have the right material to start, follow the next steps:
 
@@ -262,7 +261,7 @@ fan-fiction website. Once you are sure you have the right material to start, fol
    (you don't want to mess up the original files after all the work
    done to get them).
 
-   If you used the provided download scripts, you should have a test
+   If you used the provided example scripts, you should have a test
    file in the `alpha-pages` folder. Make a copy of this folder with
    the desired name.
    ```
@@ -272,10 +271,10 @@ fan-fiction website. Once you are sure you have the right material to start, fol
 2) Set up distinct databases, one for each language you will work with:
    ```
       createdb fr_pairs lt_pairs pl_pairs en_pairs
-      cat /atomspace/opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
+      cat $ATOMSPACE_SOURCE_DIR/opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
    ```
 
-3) Copy the following files from the `opencog/opencog/nlp/learn/run`
+3) Copy the following files from the `opencog/opencog/nlp/ull-parser/run`
    directory into your working directory (if you don't have them 
    already):
    - run-multiple-terminals.sh
@@ -288,7 +287,7 @@ fan-fiction website. Once you are sure you have the right material to start, fol
    - config (the complete folder)
    - nonbreaking_prefixes (the complete folder)
 
-   Review the file [opencog/nlp/learn/run/README.md](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run)
+   Review the file [opencog/nlp/ull-parser/run/README.md](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
    if you want to have a general understanding of what each of these scripts/files do.
 
 4) If you are familiar with the counting and parsing methods used in the
@@ -404,7 +403,7 @@ mutual entropy between them. Follow the next steps to do so. Note that
 if the parsing is interrupted, you can restart the various scripts; they
 will automatically pick up where they left off.
 
-1) Copy the following files from the [opencog/opencog/nlp/learn/run](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run)
+1) Copy the following files from the [opencog/opencog/nlp/ull-parser/run](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
    directory into your working directory (if you don't have them already):
    - run-multiple-terminals.sh
    - launch-cogserver.scm
@@ -450,7 +449,8 @@ General remakrs:
 
 * The system might not be robust enough at this stage yet, so if you
   find an error while executing this code, run each command from the
-  old compute-mi.scm script separately to trace it.
+  function in compute-mi.scm directly on the cogserver and separately
+  to trace the error.
 
 * Batch-counting might take hours or longer, depending on your dataset
   size. The batching routine will print to stdout, giving a hint of
@@ -509,7 +509,7 @@ MI have been accomplished.
 The minimum spanning tree code is in `scm/mst-parser.scm`. The current
 version works well. To run it follow the next steps:
 
-1) Copy the following files from the [opencog/opencog/nlp/learn/run](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run)
+1) Copy the following files from the [opencog/opencog/nlp/ull-parser/run](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
    directory into your working directory (if you don't have them already):
    - run-multiple-terminals.sh
    - launch-cogserver.scm
@@ -523,7 +523,7 @@ version works well. To run it follow the next steps:
    - config (the complete folder)
    - nonbreaking_prefixes (the complete folder)
 
-   Review the file [opencog/nlp/learn/run/README](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run)
+   Review the file [opencog/nlp/ull-parser/run/README](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
    if you want to have a general understanding of what each of these scripts/files do.
 
 2) Copy again all your text files, now to the `gamma-pages` directory
@@ -541,7 +541,7 @@ version works well. To run it follow the next steps:
 
    * Open `params.txt` and make sure the cnt-mode used for observing is
    still being used. Also, if you want to give weight to the word-pairs
-   MI (multiplied by 1/separation), assign mst_dist="#t". Set the export
+   MI (adding 1/separation), assign mst_dist="#t". Set the export
    parses variable to true (exp_parses="#t") if you want to export the
    actual sentence parses to a txt file. The parameter cnt_reach does not
    have an effect at this stage, you can leave it as is.
@@ -598,71 +598,14 @@ sentence parses in `mst-parses.txt`.
 Exploring Connector-Sets
 -------------------------
 Once you have a database with some fair number of connector sets in it,
-you can start exploring.
+you can start exploring. For ideas checkout the original version of this
+README in [opencog/nlp/learn](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn).
 
-* (optional) Make a copy of the MST database created above.
-
-* Do not run the connector-set code at the same time (on the same
-  database) as the MST parser. For one, if you are actively updating
-  the counts, then the connector-set counting will get confused.
-  Also, if you have two servers writing to the same database
-  at the same time, the issueing of UUID's will get confused, and
-  one or both the servers will crash, and possible database corruption
-  may occur.  It is possible to have multiple writers (and I've done
-  this before, any years ago), but this takes additional configuration,
-  and a miscellany of coding changes and a couple of enhancements, to
-  keep things in sync.
-
-* So, assuming a clean start: just start `guile` by hand, and enter
-  the following commands (by hand). They load the full disjunct/
-  connector-set database into the atomspace; it needs to be loaded
-  in order to get access to the cosine-distance tool.
-```
-  (use-modules (opencog) (opencog persist) (opencog persist-sql))
-  (use-modules (opencog nlp) (opencog nlp learn))
-  (use-modules (opencog matrix))
-  (sql-open "postgres:///db_name?user=opencog_user")
-  (fetch-all-words)
-  (length (get-all-words))
-  ; This reports 396262 for one my DB's has.
-
-  (define pca (make-pseudo-cset-api))
-  (define psa (add-pair-stars pca))
-  (psa 'fetch-pairs)
-  (define all-cset-words (get-all-cset-words))
-  (length all-cset-words)
-  ; This reports 37413 in for my `en_pairs_sim` database.
-  (define all-disjuncts (get-all-disjuncts))
-  (length all-disjuncts)
-  ; This reports 291637 in for my `en_pairs_sim` database.
-
-```
-  You can now play games:
-```
-  (cset-vec-cosine (Word "this") (Word "that"))
-  (cset-vec-cosine (Word "he") (Word "she"))
-```
-  Recall that subroutine documentation can be gotten by typing
-  `,apropos` or `,a` for short at the guile command line.  Docs
-  for individual routines can be read by saying `,describe subr-name`
-  or `,d` for short.
-
-  The `pseudo-csets.scm` file contains code for this stuff. Any routine
-  that is `define-public` can be invoked at the guile prompt. Most are
-  safe.  If its not `define-public`, you should not call it by hand.
-
-  The `lang-learn-diary/disjunct-stats.scm` file contains ad-hoc code
-  used to prepare the summary report.  To use it, just cut-n-paste to
-  the guile prompt, to get it to do things.
-
-  The marginal entropies and the mutual information between words and
-  disjuncts can be computed in the same way that it's done for
-  word-pairs:
-```
-  (define pca (make-pseudo-cset-api))
-  (define psa (add-pair-stars pca))
-  (batch-pairs psa)
-```
+I add here some links to other usefull resources for understanding:
+* Structure of the atomstpace: [atoms](https://wiki.opencog.org/w/Atom) and its [types](https://wiki.opencog.org/w/Atom_types)
+* The basic operations on atoms: [README](https://github.com/opencog/atomspace/tree/master/opencog/guile).
+* Atom structure used for NLP: [sentence-representation-wiki](https://wiki.opencog.org/w/Sentence_representation).
+* 
 
 After this, clusterization and feedback steps should be performed,
 but for now you are on your own.. Good luck!!
@@ -720,7 +663,7 @@ Before you follow the next steps make sure you have cloned the repositories from
    
 7) Create a working directory inside your container and copy all the files from the `run` folder
    ```
-   ~$ cp -pr /opencog/opencog/nlp/learn/run $HOME/my_working_dir
+   ~$ cp -pr /opencog/opencog/nlp/ull-parser/run $HOME/my_working_dir
    ```
 
 8) Test that everything is working:
@@ -770,15 +713,16 @@ or you might want to access directly your already existing contianer (see next n
 ***Note 3***: Keep in mind that everytime you run `docker-compose run dev` it will create a new instance of *opencog*
 but the same instances of *postgres* and *relex* will be running on the background. Use (Ctrl+D) to exit a container.
 Some usefull commands for managing your containers on your local machine are listed below:
-  - `docker ps`                     To see the list of all the active containers (it shows *container_ID*).
-  - `docker ps -a`                  To see the list of all the existing containers.
-  - `docker start container_ID`     To start an inactive existing container (for example an existing instance of *opencog).
-  - `docker attach container_ID`    To "log-in" to a running (existing & active) container in a terminal.
-  - `docker stop container_ID`      To stop a running container.
-  - `docker stop $(docker ps -q)`   To stop all running containers.
-  - `docker kill container_ID`      To kill a running container (forces the stop).
-  - `docker rm container_ID`        To delete an existing but inactive container.
-  - `docker rm -f container_ID`     To delete a running container (it will kill it first).
+  - `docker ps`                         To see the list of all the active containers (it shows *container_ID*).
+  - `docker ps -a`                      To see the list of all the existing containers.
+  - `docker start container_ID`         To start an inactive existing container (for example an existing instance of *opencog*).
+  - `docker attach container_ID`        To "log-in" to a running (existing & active) container in a terminal.
+  - `docker stop container_ID`          To stop a running container.
+  - `docker stop $(docker ps -q)`       To stop all running containers.
+  - `docker kill container_ID`          To kill a running container (forces the stop).
+  - `docker rm container_ID`            To delete an existing but inactive container.
+  - `docker rm -f container_ID`         To delete a running container (it will kill it first).
+  - `docker cp container_ID:/path file` To copy a file from host to the container.
   
 **DO NOT** try to delete all running containers unless strictly necessary because it will delete the *postgres* instance as well, which means losing all your databases!!!
 
