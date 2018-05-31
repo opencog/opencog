@@ -346,7 +346,9 @@
   Set the refractory period to VAL seconds.
 "
   (if (number? VAL)
-    (set! refractory-period VAL)
+    (begin
+      (set-percep-refractory-period! VAL)
+      (set! refractory-period VAL))
     (cog-logger-warn ghost-logger
       "The refractory period has to be a numberic value!"))
 )

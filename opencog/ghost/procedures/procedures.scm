@@ -18,7 +18,6 @@
     perceive-word-hook
 
     ; Perceptual predicates
-    emotion
     word_perceived
     ;; Perceptual predicates for a talking face
     new_talking
@@ -29,6 +28,10 @@
     new_face
     face
     end_face
+    ;; Perceptual predicates for emotion of a face
+    new_emotion
+    emotion
+    end_emotion
 
     ; Time related predicates
     after_min
@@ -62,6 +65,8 @@
     was-perceived?
     ghost-stimulate-timer
     action-logger
+    percep-refractory-period
+    set-percep-refractory-period!
   )
 )
 
@@ -87,15 +92,17 @@
       (Concept face-id)))
 )
 
+(define face-emotion-predicate (Predicate "is"))
 (define (face-emotion face-id emotion-type)
 "
   Define the atom used to represent EMOTION-TYPE of the face with
   id FACE-ID.
 "
   (Evaluation
-    (Predicate emotion-type)
+    face-emotion-predicate
     (List
-      (Concept face-id)))
+      (Concept face-id)
+      (Concept emotion-type)))
 )
 
 (define face-talking-predicate (Predicate "talking"))
@@ -153,9 +160,9 @@
   (record-perception (see-face face-id) confidence)
 )
 
-(define (perceive-emotion emotion-type face-id confidence)
+(define (perceive-emotion face-id emotion-type confidence)
 "
-  perceive-emotion EMOTION-TYPE FACE-ID CONFIDENCE
+  perceive-emotion FACE-ID EMOTION-TYPE CONFIDENCE
 
   Returns the atom representing whether the face with id FACE-ID is in an
   emotional-state EMOTION-TYPE, after increasing its sti and setting its
@@ -241,6 +248,28 @@
 (define refractory-period 1)
 ; This is the window within which a transition is occuring.
 (define event-period (/ refractory-period 2))
+(define (set-activation-period!)
+  (set! event-period (/ refractory-period 2))
+)
+
+(define (percep-refractory-period)
+"
+  percep-refractory-period
+
+  Returns the refractory-period used by the perception module.
+"
+  refractory-period
+)
+
+(define (set-percep-refractory-period! secs)
+"
+  set-percep-refractory-period! SECS
+
+  Sets the refractory-period of the perception module to SECS.
+"
+  (set! refractory-period secs)
+  (set-activation-period!)
+)
 
 (define (true-transition-occurs? old-value new-value)
 "
