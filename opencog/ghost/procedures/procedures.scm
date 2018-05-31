@@ -58,6 +58,7 @@
     shutup
     gaze_at
     blink
+    emote
 
     ; Utilities
     set-dti!
