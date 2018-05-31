@@ -37,7 +37,7 @@
 )
 
 ; --------------------------------------------------------------
-(DefineLink
+(Define
   (DefinedSchema "say-cancel")
   (ExecutionOutput
     (GroundedSchema "scm: print-by-action-logger")
@@ -49,6 +49,26 @@
 (define (shutup)
   (cog-execute! (Put (DefinedSchema "say-cancel") (List)))
   fini
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "gaze-at")
+  (LambdaLink
+    (VariableList
+      (Variable "face-id")
+      (Variable "speed"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "gaze-at")
+        (Variable "face-id")
+        (Variable "speed")))
+  )
+)
+
+(define (gaze_at face-id speed)
+  (cog-execute! (Put (DefinedSchema "gaze-at") (List face-id speed)))
 )
 
 ; --------------------------------------------------------------
