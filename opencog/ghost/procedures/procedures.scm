@@ -57,6 +57,7 @@
     fallback_on
     shutup
     gaze_at
+    blink
 
     ; Utilities
     set-dti!

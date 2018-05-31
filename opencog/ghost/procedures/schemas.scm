@@ -72,6 +72,26 @@
 )
 
 ; --------------------------------------------------------------
+(Define
+  (DefinedSchema "blink")
+  (LambdaLink
+    (VariableList
+      (Variable "mean")
+      (Variable "variation"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "blink")
+        (Variable "mean")
+        (Variable "variation")))
+  )
+)
+
+(define (blink mean variation)
+  (cog-execute! (Put (DefinedSchema "blink") (List mean variation)))
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
