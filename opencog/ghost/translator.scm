@@ -273,7 +273,6 @@
 "
   ; The system functions that are commonly used
   (define reuse #f)
-  (define reused-rule-label "")
   (define keep (topic-has-feature? rule-topic "keep"))
 
   ; The GroundedSchemaNode that will be used
@@ -330,13 +329,11 @@
                          (cog-logger-debug ghost-logger
                            "Found the rule \"~a\" in the rule-alist" label)
                          (set! reuse #t)
-                         (set! reused-rule-label label)
                          (process-action
                            ; The 2nd item in the list is the action
                            (list-ref reused-rule-from-alist 1) label))))
                    (begin
                      (set! reuse #t)
-                     (set! reused-rule-label label)
                      (psi-get-action reused-rule)))))
               ; Other functions
               ((equal? 'function (car n))
@@ -349,10 +346,6 @@
       (if (null? choices)
           '()
           (list (action-choices choices)))))
-
-  ; Whether or not the rule that's being reused is also reusing
-  ; another rule
-  (define is-reusing-another-rule? #f)
 
   ; A typical action of a GHOST rule looks like this:
   ;
@@ -396,12 +389,7 @@
             (if (and (equal? 'PutLink (cog-type atom))
                      (equal? 'StateLink (cog-type (gar atom)))
                      (find (lambda (x) (equal? (gar atom) (gar x))) rtn))
-              (begin
-                ; A crude way to find whether the rule is reusing
-                ; another rule
-                (if (equal? ghost-last-executed (gaar atom))
-                  (set! is-reusing-another-rule? #t))
-                rtn)
+              rtn
               (append rtn (list atom))))
           (list)
           action-atomese)))
@@ -416,30 +404,17 @@
           (if reuse
             (get-reused-action action-atomese)
             action-atomese)))
-      ; Keep a record of which rule got executed, just for rejoinders
+      ; Keep a record of which rule is the last executed one, just for rejoinders
       ; And when a "reuse" is used, it becomes slightly more complicated
       ; The expected behavior is that, when (the action of) a rule is reused,
       ; the rule will be considered as fired, so mark the last executed rule
       ; as the reused one instead of the one that calls the reuse function,
       ; so that the rejoinders (if any) of the reused rule can be triggered
       ; correctly
-      (cond ; If it's reusing a rule that reuses another rule,
-            ; no need to generate this as we only need to record the last
-            ; one down the line
-            ((and reuse is-reusing-another-rule?) (list))
-            ; If it's reusing a rule that does not reuse any other rule,
-            ; generate this so that the reused rule will be marked as
-            ; the last executed once the action is executed
-            ; If there are more than one "reuse"s being used in a single action,
-            ; the last reused rule will be mark as the last executed rule
-            (reuse
-              (Put (State ghost-last-executed (Variable "$x"))
-                   (Concept reused-rule-label)))
-            ; If no reuse is called, just mark the current one as the last
-            ; executed rule
-            (else
-              (Put (State ghost-last-executed (Variable "$x"))
-                   (Concept RULENAME))))
+      (if reuse
+        (list)
+        (Put (State ghost-last-executed (Variable "$x"))
+             (Concept RULENAME)))
       ; The default behavior is to not executed the same action
       ; more than once -- update the TV strength to zero so that
       ; the action selector won't select it again
