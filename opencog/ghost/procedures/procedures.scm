@@ -1,5 +1,6 @@
 (define-module (opencog ghost procedures)
   #:use-module (ice-9 optargs)
+  #:use-module (srfi srfi-1)
   #:use-module (opencog)
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
@@ -79,7 +80,34 @@
 ; Node used to represent an unidentified source of perceptual stimulus.
 (define any-node (Concept ""))
 
+(define (get-models sign)
+"
+  get-models SIGN
+
+  Returns a list containing all the atoms that have the pattern defined by
+  the SignatureLink SIGN.
+"
+  (cog-outgoing-set (cog-execute!
+    (Get
+      (TypedVariable
+        (Variable "model")
+        sign)
+      (Variable "model"))
+  ))
+)
+
+; --------------------------------------------------------------
 (define see-face-predicate (Predicate "see"))
+
+(define see-face-sign
+  (Signature
+    (Evaluation
+      see-face-predicate
+      (List
+        (Concept "I")
+        (Type "ConceptNode"))))
+)
+
 (define (see-face face-id)
 "
   Define the atom used to represent that the face represented by FACE-ID
@@ -92,7 +120,18 @@
       (Concept face-id)))
 )
 
+; --------------------------------------------------------------
 (define face-emotion-predicate (Predicate "is"))
+
+(define face-emotion-sign
+  (Signature
+    (Evaluation
+      face-emotion-predicate
+      (List
+        (Type "ConceptNode")
+        (Type "ConceptNode"))))
+)
+
 (define (face-emotion face-id emotion-type)
 "
   Define the atom used to represent EMOTION-TYPE of the face with
@@ -105,7 +144,17 @@
       (Concept emotion-type)))
 )
 
+; --------------------------------------------------------------
 (define face-talking-predicate (Predicate "talking"))
+
+(define face-talking-sign
+  (Signature
+    (Evaluation
+      face-talking-predicate
+      (List
+        (Type "ConceptNode"))))
+)
+
 (define (face-talking face-id)
 "
   Define the atom used to represent that the face represented by FACE-ID
@@ -117,6 +166,7 @@
       (Concept face-id)))
 )
 
+; --------------------------------------------------------------
 (define (eye-open face-id eye-id)
 "
   eye-open FACE-ID EYE-ID
@@ -467,7 +517,7 @@
   )
 )
 
-(define-public (negate-stv! tv)
+(define (negate-stv! tv)
 "
   negate-stv! TV
 
@@ -610,7 +660,7 @@
 
 ; --------------------------------------------------------------
 (define perception-stimulus 150)
-(define-public (perception-stimulate . atoms)
+(define (perception-stimulate . atoms)
 "
   perception-stimulate ATOMS
 
