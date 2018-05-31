@@ -248,6 +248,9 @@
 (define refractory-period 1)
 ; This is the window within which a transition is occuring.
 (define event-period (/ refractory-period 2))
+(define (set-activation-period!)
+  (set! event-period (/ refractory-period 2))
+)
 
 (define (percep-refractory-period)
 "
@@ -265,6 +268,7 @@
   Sets the refractory-period of the perception module to SECS.
 "
   (set! refractory-period secs)
+  (set-activation-period!)
 )
 
 (define (true-transition-occurs? old-value new-value)
