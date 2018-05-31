@@ -26,34 +26,6 @@
   )
 )
 
-(define (animation emotion gesture)
-  ;TODO: Remove this hack.
-  (let* ((e (cog-name emotion))
-    (g (cog-name gesture))
-    (temp-gesture (if (equal? "nod" g) "nod-1" g)))
-  (cog-evaluate!
-    (Put
-      (DefinedPredicate "Show class gesture")
-      (List
-        (Concept e)
-        (Concept temp-gesture))))
-
-     fini
-   )
-)
-
-(define (expression expression-type)
-  (let ((e (cog-name expression-type)))
-    (cog-evaluate!
-      (Put
-        (DefinedPredicate "Show class expression")
-        (List
-          (Concept "neutral-keep-alive")
-          (Concept e))))
-    fini
-  )
-)
-
 (define (fallback_on fallback-id)
 "
   fallback_on  FALLBACK-ID
