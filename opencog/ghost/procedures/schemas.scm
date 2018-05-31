@@ -26,34 +26,6 @@
   )
 )
 
-(define (animation emotion gesture)
-  ;TODO: Remove this hack.
-  (let* ((e (cog-name emotion))
-    (g (cog-name gesture))
-    (temp-gesture (if (equal? "nod" g) "nod-1" g)))
-  (cog-evaluate!
-    (Put
-      (DefinedPredicate "Show class gesture")
-      (List
-        (Concept e)
-        (Concept temp-gesture))))
-
-     fini
-   )
-)
-
-(define (expression expression-type)
-  (let ((e (cog-name expression-type)))
-    (cog-evaluate!
-      (Put
-        (DefinedPredicate "Show class expression")
-        (List
-          (Concept "neutral-keep-alive")
-          (Concept e))))
-    fini
-  )
-)
-
 (define (fallback_on fallback-id)
 "
   fallback_on  FALLBACK-ID
@@ -64,6 +36,137 @@
   fini
 )
 
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "say-cancel")
+  (ExecutionOutput
+    (GroundedSchema "scm: print-by-action-logger")
+    (List
+      (Concept "say-cancel"))
+  )
+)
+
+(define (shutup)
+  (cog-execute! (Put (DefinedSchema "say-cancel") (List)))
+  fini
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "gaze-at")
+  (LambdaLink
+    (VariableList
+      (Variable "face-id")
+      (Variable "speed"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "gaze-at")
+        (Variable "face-id")
+        (Variable "speed")))
+  )
+)
+
+(define (gaze_at face-id speed)
+  (cog-execute! (Put (DefinedSchema "gaze-at") (List face-id speed)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "blink")
+  (LambdaLink
+    (VariableList
+      (Variable "mean")
+      (Variable "variation"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "blink")
+        (Variable "mean")
+        (Variable "variation")))
+  )
+)
+
+(define (blink mean variation)
+  (cog-execute! (Put (DefinedSchema "blink") (List mean variation)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "emote")
+  (LambdaLink
+    (VariableList
+      (Variable "name")
+      (Variable "magnitude")
+      (Variable "duration")
+      (Variable "blend"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "emote")
+        (Variable "name")
+        (Variable "magnitude")
+        (Variable "duration")
+        (Variable "blend")))
+  )
+)
+
+(define (emote name magni duration blend)
+  (cog-execute!
+    (Put (DefinedSchema "emote") (List name magni duration blend)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "gesture")
+  (LambdaLink
+    (VariableList
+      (Variable "name")
+      (Variable "speed")
+      (Variable "magnitude")
+      (Variable "repeat"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "gesture")
+        (Variable "name")
+        (Variable "speed")
+        (Variable "magnitude")
+        (Variable "repeat")))
+  )
+)
+
+(define (gesture name speed magni repeat)
+  (cog-execute!
+    (Put (DefinedSchema "gesture") (List name speed magni repeat)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "soma")
+  (LambdaLink
+    (VariableList
+      (Variable "name")
+      (Variable "magnitude")
+      (Variable "rate")
+      (Variable "ease_in"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "soma")
+        (Variable "name")
+        (Variable "magnitude")
+        (Variable "rate")
+        (Variable "ease_in")))
+  )
+)
+
+(define (soma name magni rate ease-in)
+  (cog-execute!
+    (Put (DefinedSchema "soma") (List name magni rate ease-in)))
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
