@@ -142,6 +142,31 @@
 )
 
 ; --------------------------------------------------------------
+(Define
+  (DefinedSchema "soma")
+  (LambdaLink
+    (VariableList
+      (Variable "name")
+      (Variable "magnitude")
+      (Variable "rate")
+      (Variable "ease_in"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "soma")
+        (Variable "name")
+        (Variable "magnitude")
+        (Variable "rate")
+        (Variable "ease_in")))
+  )
+)
+
+(define (soma name magni rate ease-in)
+  (cog-execute!
+    (Put (DefinedSchema "soma") (List name magni rate ease-in)))
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
