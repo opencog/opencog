@@ -15,7 +15,7 @@ then
 fi
 
 # Set up assorted constants needed to run.
-cnt_mode="lg"
+cnt_mode="clique-dist"
 source ./config/params.txt
 source ./config/det-port-num.sh $1 $2
 

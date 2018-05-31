@@ -19,10 +19,10 @@ splitter=./split-sentences.pl
 splitdir=split-articles
 
 # Default parameter values
-cnt_mode="lg"
-cnt_reach=25
-mst_dist="#f"
-exp_parses="#f"
+cnt_mode="clique-dist"
+cnt_reach=6
+mst_dist="#t"
+exp_parses="#t"
 source ./config/params.txt # overrides default values, if present
 
 # Gets processing mode for the cogserver
