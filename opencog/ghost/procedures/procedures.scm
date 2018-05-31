@@ -56,6 +56,7 @@
     print-by-action-logger
     fallback_on
     shutup
+    gaze_at
 
     ; Utilities
     set-dti!
