@@ -36,6 +36,22 @@
   fini
 )
 
+; --------------------------------------------------------------
+(DefineLink
+  (DefinedSchema "say-cancel")
+  (ExecutionOutput
+    (GroundedSchema "scm: print-by-action-logger")
+    (List
+      (Concept "say-cancel"))
+  )
+)
+
+(define (shutup)
+  (cog-execute! (Put (DefinedSchema "say-cancel") (List)))
+  fini
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
