@@ -92,6 +92,31 @@
 )
 
 ; --------------------------------------------------------------
+(Define
+  (DefinedSchema "emote")
+  (LambdaLink
+    (VariableList
+      (Variable "name")
+      (Variable "magnitude")
+      (Variable "duration")
+      (Variable "blend"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "emote")
+        (Variable "name")
+        (Variable "magnitude")
+        (Variable "duration")
+        (Variable "blend")))
+  )
+)
+
+(define (emote name magni duration blend)
+  (cog-execute!
+    (Put (DefinedSchema "emote") (List name magni duration blend)))
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
