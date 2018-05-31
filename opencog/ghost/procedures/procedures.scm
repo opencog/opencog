@@ -1,5 +1,6 @@
 (define-module (opencog ghost procedures)
   #:use-module (ice-9 optargs)
+  #:use-module (srfi srfi-1)
   #:use-module (opencog)
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
