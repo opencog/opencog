@@ -93,22 +93,30 @@
 )
 
 (define-syntax-rule
-  (define-face-predicates (model-func face-feature-nodes ...) predicate-node
+  (define-face-predicates (model-func face-feature-nodes ...)
+    predicate-node signature-link
     t-transitioning? t-occuring? f-transitioning? f-occuring?)
   ; The definitons are not public so as to be able to control which
   ; of them are exported by this module.
   (begin
-    (define* (t-transitioning? face-feature-nodes ...
-                               #:optional (face-id any-node))
-      (true-event-occuring?
-        (get-model model-func face-id face-feature-nodes ...)))
+    (define* (t-transitioning? face-feature-nodes ... #:optional face-id)
+      (if face-id
+        (true-event-occuring?
+          (get-model model-func face-id face-feature-nodes ...))
+        (any-check true-event-occuring? signature-link)
+      )
+    )
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 't-transitioning?))
        predicate-node)
 
-    (define* (t-occuring? face-feature-nodes ... #:optional (face-id any-node))
-      (true-perception-occuring?
-        (get-model model-func face-id face-feature-nodes ...)))
+    (define* (t-occuring? face-feature-nodes ... #:optional face-id)
+      (if face-id
+        (true-perception-occuring?
+          (get-model model-func face-id face-feature-nodes ...))
+        (any-check true-perception-occuring? signature-link)
+      )
+    )
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 't-occuring?))
        predicate-node)
@@ -122,16 +130,24 @@
     ;  (GroundedPredicate (format #f "scm: ~a" 'since-t?))
     ;   predicate-node)
 
-    (define* (f-transitioning? face-feature-nodes ...
-                               #:optional (face-id any-node))
-      (false-event-occuring?
-        (get-model model-func face-id face-feature-nodes ...)))
+    (define* (f-transitioning? face-feature-nodes ... #:optional face-id)
+      (if face-id
+        (false-event-occuring?
+          (get-model model-func face-id face-feature-nodes ...))
+        (any-check false-event-occuring? signature-link)
+      )
+    )
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 'f-transitioning?))
        predicate-node)
 
-    (define* (f-occuring? face-feature-nodes ... #:optional (face-id any-node))
-      (negate-stv! (t-occuring? face-id)))
+    (define* (f-occuring? face-feature-nodes ... #:optional face-id)
+      (define (not-occuring? faceid) (negate-stv! (t-occuring? faceid)))
+      (if face-id
+        (not-occuring? face-id)
+        (any-check not-occuring? signature-link)
+      )
+    )
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 'f-occuring?))
        predicate-node)
@@ -149,7 +165,8 @@
 
 ; --------------------------------------------------------------
 ; Define predicates for face-talking
-(define-face-predicates (face-talking) face-talking-predicate
+(define-face-predicates (face-talking)
+   face-talking-predicate face-talking-sign
    new_talking
    talking
    end_talking
@@ -222,7 +239,7 @@
 
 ; --------------------------------------------------------------
 ; Define predicates for face-visiblity
-(define-face-predicates (see-face) see-face-predicate
+(define-face-predicates (see-face) see-face-predicate see-face-sign
    new_face
    face
    end_face
@@ -241,7 +258,8 @@
 
 ; --------------------------------------------------------------
 ; Define predicates for emotions of faces
-(define-face-predicates (face-emotion emotion-type) face-emotion-predicate
+(define-face-predicates (face-emotion emotion-type)
+   face-emotion-predicate face-emotion-sign
    new_emotion
    emotion
    end_emotion
