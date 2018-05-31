@@ -121,6 +121,10 @@
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
+; An association list of the types (responders, rejoinders etc)
+; of the rules
+(define rule-type-alist '())
+
 ; An association list that contains all the terms needed to create
 ; the actual rules
 ; The key of this list is the labels of the rules
