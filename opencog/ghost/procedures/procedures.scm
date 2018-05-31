@@ -55,6 +55,12 @@
     min_sti_rules
     print-by-action-logger
     fallback_on
+    shutup
+    gaze_at
+    blink
+    emote
+    gesture
+    soma
 
     ; Utilities
     set-dti!
@@ -697,15 +703,15 @@
 "
   schema-logger)
 
-(define (print-by-action-logger action-node str-node)
+(define (print-by-action-logger action-node . str-nodes)
 "
-  say ACTION-NODE STR-NODE
+  say ACTION-NODE . STR-NODES
 
   Display the string that forms the name of the nodes ACTION-NODE and
   STR-NODE to stdout with the format of \"ACTION-NODE-name: STR-NODE-name\".
 "
   (cog-logger-set-component! schema-logger (cog-name action-node))
-  (cog-logger-info schema-logger (cog-name str-node))
+  (cog-logger-info schema-logger "~a" (map cog-name str-nodes))
   fini
 )
 
