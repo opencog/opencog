@@ -4,95 +4,19 @@
 ; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
-(define (any-face-seen?)
-  (define get-models
-    (Get
-      (TypedVariable
-        (Variable "seen-faces")
-        (Signature
-          (Evaluation
-            (Predicate "see")
-            (List
-              (Concept "I")
-              (Type "ConceptNode")))))
-      (And
-        (Evaluation
-          (GroundedPredicate "scm: is-model-true?")
-          (List
-            (Variable "seen-faces")))
-        (Variable "seen-faces"))))
 
-  (let ((models (cog-outgoing-set (cog-execute! get-models))))
-    (if (null? models)
-      (stv 0 1)
-      (stv 1 1)
-    )
+(define (any-check proc sign)
+"
+  any-check PROC SIGN
+
+  Check if any of the models that can be fetched by the SignatureLink SIGN
+  returns (stv 1 1) when checked against the procedure PROC.
+"
+  (if (any (lambda (x) (equal? (stv 1 1) (proc x))) (get-models sign))
+    (stv 1 1)
+    (stv 0 1)
   )
 )
-
-(define (any-person-emotion? emotion-type)
-  (define get-models
-    (Get
-      (TypedVariable
-        (Variable "face-emotion")
-        (Signature
-          (Evaluation
-            (Predicate emotion-type)
-            (List
-              (Type "ConceptNode")))))
-      (And
-        (Evaluation
-          (GroundedPredicate "scm: is-model-true?")
-          (List
-            (Variable "face-emotion")))
-        (Evaluation
-          (GroundedPredicate "scm: was-perceived?")
-          (List
-            (Variable "face-emotion")))
-        (Variable "face-emotion"))))
-
-  (let ((models (cog-outgoing-set (cog-execute! get-models))))
-    (if (null? models)
-      (stv 0 1)
-      (stv 1 1)
-    )
-  )
-)
-
-(define (any-person-talking?)
-  (define get-models
-    (Get
-      (TypedVariable
-        (Variable "face-talking")
-        (Signature
-          (Evaluation
-            (Predicate "talking")
-            (List
-              (Type "ConceptNode")))))
-      (And
-        (Evaluation
-          (GroundedPredicate "scm: is-model-true?")
-          (List
-            (Variable "face-talking")))
-        (Evaluation
-          (GroundedPredicate "scm: was-perceived?")
-          (List
-            (Variable "face-talking")))
-        (Variable "face-talking"))))
-
-  (let ((models (cog-outgoing-set (cog-execute! get-models))))
-    (if (null? models)
-      (stv 0 1)
-      (stv 1 1)
-    )
-  )
-)
-
-; TODO: If the stream of sensory inputs are interupted, for whatever reason,
-; then the variations in the confidence value are not updated and thus the
-; state of the world wouldn't be correct. To fix this add a time window
-; similar to word_perceived. If the time-window is passed then it returns
-; false.
 
 ; --------------------------------------------------------------
 (define (true-perception-occuring? model)
