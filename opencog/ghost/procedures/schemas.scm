@@ -117,6 +117,31 @@
 )
 
 ; --------------------------------------------------------------
+(Define
+  (DefinedSchema "gesture")
+  (LambdaLink
+    (VariableList
+      (Variable "name")
+      (Variable "speed")
+      (Variable "magnitude")
+      (Variable "repeat"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "gesture")
+        (Variable "name")
+        (Variable "speed")
+        (Variable "magnitude")
+        (Variable "repeat")))
+  )
+)
+
+(define (gesture name speed magni repeat)
+  (cog-execute!
+    (Put (DefinedSchema "gesture") (List name speed magni repeat)))
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
