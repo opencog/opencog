@@ -55,6 +55,7 @@
     min_sti_rules
     print-by-action-logger
     fallback_on
+    shutup
 
     ; Utilities
     set-dti!
