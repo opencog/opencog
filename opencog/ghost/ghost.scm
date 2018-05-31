@@ -244,7 +244,7 @@
   Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
   Should run this with the main OpenPsi loop.
 "
-  (define sent (car (nlp-parse TXT)))
+  (define sent (car (nlp-parse (string-trim TXT))))
   (generate-word-seqs sent)
   (append-to-sent-seq sent)
   (State ghost-curr-proc sent)
