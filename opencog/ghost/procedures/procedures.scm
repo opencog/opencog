@@ -59,6 +59,7 @@
     gaze_at
     blink
     emote
+    gesture
 
     ; Utilities
     set-dti!
