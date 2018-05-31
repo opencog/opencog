@@ -18,7 +18,6 @@
     perceive-word-hook
 
     ; Perceptual predicates
-    emotion
     word_perceived
     ;; Perceptual predicates for a talking face
     new_talking
@@ -29,6 +28,10 @@
     new_face
     face
     end_face
+    ;; Perceptual predicates for emotion of a face
+    new_emotion
+    emotion
+    end_emotion
 
     ; Time related predicates
     after_min
@@ -87,15 +90,17 @@
       (Concept face-id)))
 )
 
+(define face-emotion-predicate (Predicate "is"))
 (define (face-emotion face-id emotion-type)
 "
   Define the atom used to represent EMOTION-TYPE of the face with
   id FACE-ID.
 "
   (Evaluation
-    (Predicate emotion-type)
+    face-emotion-predicate
     (List
-      (Concept face-id)))
+      (Concept face-id)
+      (Concept emotion-type)))
 )
 
 (define face-talking-predicate (Predicate "talking"))

@@ -159,20 +159,32 @@
 )
 
 ; --------------------------------------------------------------
+(define-syntax get-model
+  (syntax-rules ()
+    ((_  func-name face-id)
+      (func-name (cog-name face-id)))
+    ((_  func-name face-id face-feature-1)
+      (func-name (cog-name face-id) (cog-name face-feature-1)))
+  )
+)
+
 (define-syntax-rule
-  (define-face-predicates model-func predicate-node
+  (define-face-predicates (model-func face-feature-nodes ...) predicate-node
     t-transitioning? t-occuring? f-transitioning? f-occuring?)
   ; The definitons are not public so as to be able to control which
   ; of them are exported by this module.
   (begin
-    (define* (t-transitioning? #:optional (face-id any-node))
-      (true-event-occuring?  (model-func (cog-name face-id))))
+    (define* (t-transitioning? face-feature-nodes ...
+                               #:optional (face-id any-node))
+      (true-event-occuring?
+        (get-model model-func face-id face-feature-nodes ...)))
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 't-transitioning?))
        predicate-node)
 
-    (define* (t-occuring? #:optional (face-id any-node))
-      (true-perception-occuring? (model-func (cog-name face-id))))
+    (define* (t-occuring? face-feature-nodes ... #:optional (face-id any-node))
+      (true-perception-occuring?
+        (get-model model-func face-id face-feature-nodes ...)))
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 't-occuring?))
        predicate-node)
@@ -180,18 +192,21 @@
     ; FIXME: This has issues when the window of perception (dti) is passed.
     ; Just because we don't know it doesn't mean it is true
     ;(define* (since-t? secs #:optional (face-id any-node))
-    ;  (since-event-started-occuring? (model-func (cog-name face-id)) secs))
+    ;  (since-event-started-occuring?
+    ;    (get-model model-func face-id face-feature-nodes ...)))
     ;(Implication
     ;  (GroundedPredicate (format #f "scm: ~a" 'since-t?))
     ;   predicate-node)
 
-    (define* (f-transitioning? #:optional (face-id any-node))
-      (false-event-occuring? (model-func (cog-name face-id))))
+    (define* (f-transitioning? face-feature-nodes ...
+                               #:optional (face-id any-node))
+      (false-event-occuring?
+        (get-model model-func face-id face-feature-nodes ...)))
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 'f-transitioning?))
        predicate-node)
 
-    (define* (f-occuring? #:optional (face-id any-node))
+    (define* (f-occuring? face-feature-nodes ... #:optional (face-id any-node))
       (negate-stv! (t-occuring? face-id)))
     (Implication
       (GroundedPredicate (format #f "scm: ~a" 'f-occuring?))
@@ -200,7 +215,8 @@
     ; FIXME: This has issues when the window of perception (dti) is passed.
     ; Just because we don't know it doesn't mean it is true
     ;(define* (since-f? secs  #:optional (face-id any-node))
-    ;  (since-event-stopped-occuring? (model-func (cog-name face-id)) secs))
+    ;  (since-event-stopped-occuring?
+    ;    (get-model model-func face-id face-feature-nodes ...)))
     ;(Implication
     ;  (GroundedPredicate (format #f "scm: ~a" 'since-f?))
     ;   predicate-node)
@@ -209,7 +225,7 @@
 
 ; --------------------------------------------------------------
 ; Define predicates for face-talking
-(define-face-predicates face-talking face-talking-predicate
+(define-face-predicates (face-talking) face-talking-predicate
    new_talking
    talking
    end_talking
@@ -282,7 +298,7 @@
 
 ; --------------------------------------------------------------
 ; Define predicates for face-visiblity
-(define-face-predicates see-face see-face-predicate
+(define-face-predicates (see-face) see-face-predicate
    new_face
    face
    end_face
@@ -300,7 +316,15 @@
 )
 
 ; --------------------------------------------------------------
-(define* (emotion emotion-type #:optional (face-id any-node))
+; Define predicates for emotions of faces
+(define-face-predicates (face-emotion emotion-type) face-emotion-predicate
+   new_emotion
+   emotion
+   end_emotion
+   no_emotion
+)
+
+(set-procedure-property! emotion 'documentation
 "
   emotion EMOTION-TYPE [FACE-ID]
 
@@ -310,8 +334,6 @@
 
   IF FACE-ID is not passed then the return value is for any person.
 "
-  (true-perception-occuring?
-    (face-emotion (cog-name face-id) (cog-name emotion-type)))
 )
 
 ; --------------------------------------------------------------
