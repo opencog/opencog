@@ -60,6 +60,7 @@
     blink
     emote
     gesture
+    soma
 
     ; Utilities
     set-dti!
