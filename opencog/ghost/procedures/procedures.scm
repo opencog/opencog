@@ -65,6 +65,8 @@
     was-perceived?
     ghost-stimulate-timer
     action-logger
+    percep-refractory-period
+    set-percep-refractory-period!
   )
 )
 
@@ -246,6 +248,24 @@
 (define refractory-period 1)
 ; This is the window within which a transition is occuring.
 (define event-period (/ refractory-period 2))
+
+(define (percep-refractory-period)
+"
+  percep-refractory-period
+
+  Returns the refractory-period used by the perception module.
+"
+  refractory-period
+)
+
+(define (set-percep-refractory-period! secs)
+"
+  set-percep-refractory-period! SECS
+
+  Sets the refractory-period of the perception module to SECS.
+"
+  (set! refractory-period secs)
+)
 
 (define (true-transition-occurs? old-value new-value)
 "
