@@ -407,7 +407,7 @@
         (Put (DefinedSchema "say") (List (Node txt-str) (Concept ""))))))
   ; New atoms being created
   (if (not (null? atoms-created))
-      (cog-logger-info ghost-logger "Atoms Created: ~a" atoms-created))
+      (cog-logger-debug ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
   (set! ghost-result (append txt-atoms atoms-created))
   ; Reset the state
