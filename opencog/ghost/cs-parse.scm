@@ -628,6 +628,7 @@
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL_APOS) : (format #f "(cons 'arg \"~a\")" $1)
+      (LITERAL NUM) : (format #f "(cons 'arg \"~a~a\")" $1 $2)
       (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1
