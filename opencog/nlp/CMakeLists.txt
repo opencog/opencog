@@ -6,6 +6,7 @@ ADD_SUBDIRECTORY (learn)
 ADD_SUBDIRECTORY (scm)
 ADD_SUBDIRECTORY (sentiment)
 ADD_SUBDIRECTORY (types)
+ADD_SUBDIRECTORY (ull-parser)
 ADD_SUBDIRECTORY (wsd)
 
 # NOTE: Set BUILD_LOJBAN variable by running `cmake -DBUILD_LOJBAN=1 ..` from
