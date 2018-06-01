@@ -306,5 +306,5 @@
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
 ; TODO: Replace the ConceptNode with a PredicateNode
-(Implication (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
+(Implication (GroundedPredicate "scm: after_min") timer-predicate)
 (Implication (GroundedPredicate "scm: emotion") (Predicate "emotion"))
