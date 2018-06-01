@@ -648,7 +648,9 @@
 )
 
 ; --------------------------------------------------------------
+(define timer-predicate (Predicate "timer-predicate"))
 (define timer-last-stimulated 0)
+
 (define (ghost-stimulate-timer)
 "
   Stimulate the timer predicate, so that the rules having time-related
@@ -658,7 +660,7 @@
   since last time it's called.
 "
   (if (> timer-last-stimulated 0)
-    (cog-stimulate (Concept "timer-predicate")
+    (cog-stimulate timer-predicate
       (* 10 (- (current-time) timer-last-stimulated))))
 
   (set! timer-last-stimulated (current-time))
