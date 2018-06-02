@@ -507,6 +507,16 @@
 						;(report-avg-gc-cpu-time)
 					)))))
 
+	; Caution: RelEx-bassed parsing is deprecated, for three reasons:
+	; 1) Its slower, because it has to go to the relex server;
+	; 2) The RelEx server returns long strings containing scheme,
+	;    (often up to 8MBytes long) which cause HUGE GC issues for
+	;    guile - blowing up RAM usage.
+	; 3) The current guile-2.2 compiler has a bug compiling code
+	;    obtained from strings, and intermittently crashes. (A bug
+	;    report has been submitted, but is missing code to reproduce
+	;    it, and so is not getting fixed...)
+	;
 	; Use the RelEx server to parse the text via Link Grammar.
 	; Return a SentenceNode. Attention: when run in parallel,
 	; the returned SentenceNode is not necessarily that of the
@@ -523,7 +533,7 @@
 		(maybe-gc) ;; need agressive gc to keep RAM under control.
 	)
 
-	; Process the text locally, using the LG API link.
+	; Process the text locally (in RAM), using the LG API link.
 	(define (local-process TXT)
 		; try-catch wrapper for duplicated text. Here's the problem:
 		; If this routine is called in rapid succession with the same
