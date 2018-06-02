@@ -12678,7 +12678,7 @@ h1 2 3 4 are nodes
 hl hl2 hl3
 delete hl3 then hl2 then hl
 
-wait -- were teh uuids removed? yes they were.
+wait -- were the uuids removed? yes they were.
 
 cog-delete-recursive is wierd
 how to find handles....  handle_to_scm won't work.
@@ -13148,7 +13148,7 @@ how?
 
 2) fetch incoming for one word
 3) do left+right MI for that word
-4) do marginals for taht word
+4) do marginals for that word
 5) delete the pair.
 
 ------------------------
@@ -13349,3 +13349,4 @@ Bugs: lxc containers not shutting down correctly during power loss
 
 Bugs/feat:  no way to compute marginals incrementally, if the DB does
       not fit in RAM.
+x

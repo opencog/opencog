@@ -536,7 +536,7 @@
 
 ; ---------------------------------------------------------------
 ; Given the list LST of atoms, trim it, discarding atoms with
-; low observation couns, and then sort it, returning the sorted
+; low observation counts, and then sort it, returning the sorted
 ; list, ranked in order of the observed number of sections on the
 ; word. (i.e. the sum of the counts on each of the sections).
 ;
