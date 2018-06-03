@@ -348,13 +348,15 @@
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
 ; XXX do something fancy here.
-; XXX need to have pca, psa, pcos globally defined!
-(define (ok-to-merge WORD-A WORD-B)
+;
+; COSOBJ must offer the 'right-cosine method
+;
+(define (ok-to-merge COSOBJ WORD-A WORD-B)
 	; (define pca (make-pseudo-cset-api))
 	; (define psa (add-dynamic-stars pca))
 	; (define pcos (add-pair-cosine-compute psa))
 
-	(define sim (pcos 'right-cosine WORD-A WORD-B))
+	(define sim (COSOBJ 'right-cosine WORD-A WORD-B))
 
 	(define cut 0.65)
 	(format #t "Cosine=~A for ~A \"~A\" -- \"~A\"\n" sim
@@ -387,7 +389,7 @@
 		(let ((cls (car CLS-LST)))
 			; If the word can be merged into a class, then do it,
 			; and return the class. Else try again.
-			(if (ok-to-merge cls WRD)
+			(if (ok-to-merge LLOBJ cls WRD)
 				(merge-ortho LLOBJ FRAC cls WRD)
 				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
 )
@@ -418,7 +420,7 @@
 				(rest (cdr WRD-LST)))
 			; If the word can be merged into a class, then do it,
 			; and then expand the class. Else try again.
-			(if (ok-to-merge WRD-OR-CLS wrd)
+			(if (ok-to-merge LLOBJ WRD-OR-CLS wrd)
 				; Merge, and try to expand.
 				(assign-expand-class LLOBJ FRAC
 					(merge-ortho LLOBJ FRAC WRD-OR-CLS wrd) rest)
@@ -483,7 +485,7 @@
 (define (classify-pair-wise LLOBJ FRAC WRD-LST)
 
 	(define (check-pair WORD-A WORD-B CLS-LST)
-		(if (ok-to-merge WORD-A WORD-B)
+		(if (ok-to-merge LLOBJ WORD-A WORD-B)
 			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
 				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
@@ -651,7 +653,7 @@
 		; (define all-words (cog-get-atoms 'WordNode))
 		(format #t "Finished loading ~A words\n"
 			(length (cog-get-atoms 'WordNode)))
-		(loop-over-words psa 0.3
+		(loop-over-words pcos 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))
 	)
@@ -683,11 +685,11 @@
 ;
 ; Is it OK to merge?
 ; (define pcos (add-pair-cosine-compute psa))
-; (ok-to-merge (Word "run") (Word "jump"))
-; (ok-to-merge (Word "city") (Word "village"))
+; (ok-to-merge pcos (Word "run") (Word "jump"))
+; (ok-to-merge pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
-; (merge-ortho psa 0.3 (Word "city") (Word "village"))
+; (merge-ortho pcos 0.3 (Word "city") (Word "village"))
 ;
 ; Verify presence in the database:
 ; select count(*) from atoms where type=22;
