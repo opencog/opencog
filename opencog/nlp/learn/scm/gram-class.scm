@@ -356,16 +356,27 @@
 	; (define psa (add-dynamic-stars pca))
 	; (define pcos (add-pair-cosine-compute psa))
 
-	(define sim (COSOBJ 'right-cosine WORD-A WORD-B))
-
+	; Merge them if the cosin is greater than this
 	(define cut 0.65)
-	(format #t "Cosine=~A for ~A \"~A\" -- \"~A\"\n" sim
-		(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
-		(cog-name WORD-A) (cog-name WORD-B))
-	(if (< cut sim) (display "------------------------------ Bingo!\n"))
+
+	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
+
+	(define (report-cosine)
+		(let* ((start-time (get-internal-real-time))
+				(sim (get-cosine))
+				(now (get-internal-real-time))
+				(elapsed-time (* 1.0e-9 (- now start-time))))
+
+			(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
+				sim
+				(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+				(cog-name WORD-A) (cog-name WORD-B)
+				elapsed-time)
+			(if (< cut sim) (display "------------------------------ Bingo!\n"))
+			sim))
 
 	; True, if sim is more than 0.9
-	(< cut sim)
+	(< cut (report-cosine))
 )
 
 ; ---------------------------------------------------------------
