@@ -689,11 +689,13 @@
 	; The support API won't work, if we don't have the wild-cards
 	; in the atomspace before we sort. The wild-cards hold/contain
 	; the support subtotals.
+	(define start-time (get-internal-real-time))
 	(for-each
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
 		LST)
 
-	(display "Finished fetching wildcards\n")
+	(format #t "Finished fetching wildcards in ~5F sconds\n"
+		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
 	(sort!
 		; Before sorting, trim the list, discarding words with
@@ -771,6 +773,7 @@
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pcos (add-pair-cosine-compute psa))
+			(start-time (get-internal-real-time))
 		)
 
 		(display "Start loading words and word-classes\n")
@@ -779,8 +782,9 @@
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
 		; (define all-words (cog-get-atoms 'WordNode))
-		(format #t "Finished loading ~A words\n"
-			(length (cog-get-atoms 'WordNode)))
+		(format #t "Finished loading ~A words in ~5f seconds\n"
+			(length (cog-get-atoms 'WordNode))
+			(* 1.0e-9 (- (get-internal-real-time) start-time)))
 		(loop-over-words pcos 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))

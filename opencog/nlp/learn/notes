@@ -13373,10 +13373,27 @@ Total observations: 69447009.0  Avg obs per pair: 2.1760
 Entropy Total: 23.092   Left: 21.137   Right: 10.112
 Total MI: 8.1569
 
-assign-word-to-class OK
-assign-to-classes
+----
+(WordNode "slow-cooked")
+add-support-api 'right-count fails
+So, some words just haven't been used in the MST oparses.
 
-add-dynamic-stars
+==========
+
+Non-perpendicularity from the 0.3 thingy --
+Cosine=0.6862397194384998 for word "?" -- "!"
+------------------------------ Bingo!
+Cosine=0.5531525850466233 for class "? !" -- "!"
+
+which looks odd ...
+
+Likewise:
+Cosine=0.7398859541229513 for word "would" -- "will"
+------------------------------ Bingo!
+Cosine=0.6030429912609625 for class "would will" -- "will"
+
+
+
 =========================================================================
 =========================================================================
 =========================================================================
