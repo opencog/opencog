@@ -383,11 +383,34 @@
 )
 
 ; ---------------------------------------------------------------
-; Given a single word and a list of words or grammatical classes,
-; attempt to assign the the word to one of the classes (or merge
-; the word with one of the other words).  Return the class
-; it was assigned to, or just the original word itself, if it was
-; not assigned to any of them.
+; XXX This is a generic utility, it should be moved to some generic
+; utility location or module.
+;
+(define (par-find PRED LST)
+"
+  par-find PRED LST
+
+  Apply PRED to elements in LST, and return the first element for
+  which PRED evaluates to #t; else return #f.
+
+  This is similar to the srfi-1 `find` function, except that the
+  processing is done in parallel, over multiple threads.
+"
+	(find PRED LST)
+)
+
+; ---------------------------------------------------------------
+; Given a single word and a list of grammatical classes, attempt to
+; assign the the word to one of the classes.
+;
+; Given a single word and a list of words, attempt to merge the word
+; with one of the other words.
+;
+; In either case, return the class it was merged into, or just the
+; original word itself, if it was not assigned to any of them.
+; A core assumption here is that the word can be assigned to just one
+; and only one class; thus, all merge determinations can be done in
+; parallel.
 ;
 ; Run-time is O(n) in the length n of CLS-LST, as the word is
 ; compared to every element in the CLS-LST.
@@ -402,13 +425,14 @@
 ; (These last two are passed blindly to the merge function).
 ;
 (define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
-	(if (null? CLS-LST) WRD
-		(let ((cls (car CLS-LST)))
-			; If the word can be merged into a class, then do it,
-			; and return the class. Else try again.
-			(if (ok-to-merge LLOBJ cls WRD)
-				(merge-ortho LLOBJ FRAC cls WRD)
-				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
+
+	; Return #t if cls can be merged with WRD
+	(define (merge-pred cls) (ok-to-merge LLOBJ cls WRD))
+
+	(let ((cls (par-find merge-pred CLS-LST)))
+		(if (not cls)
+			WRD
+			(merge-ortho LLOBJ FRAC cls WRD)))
 )
 
 ; ---------------------------------------------------------------
@@ -446,6 +470,9 @@
 )
 
 ; ---------------------------------------------------------------
+; XXX This is a generic utility, it should be moved to some generic
+; utility location or module.
+;
 (define (for-all-unordered-pairs FUNC LST)
 "
   for-all-unordered-pairs FUNC LST
@@ -475,6 +502,9 @@
 )
 
 ; ---------------------------------------------------------------
+; XXX This is a generic utility, it should be moved to some generic
+; utility location or module.
+;
 (define (fold-unordered-pairs ACC FUNC LST)
 "
   Call function FUNC on all possible unordered pairs created from LST.
