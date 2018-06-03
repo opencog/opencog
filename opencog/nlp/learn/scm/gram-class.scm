@@ -149,6 +149,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
+(use-modules (ice-9 receive))   ; for partition
 (use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------------
@@ -396,7 +397,64 @@
   This is similar to the srfi-1 `find` function, except that the
   processing is done in parallel, over multiple threads.
 "
-	(find PRED LST)
+	; If the number of threads was just 1, then do exactly this:
+	; (find PRED LST)
+
+	(define NTHREADS 5)
+	(define SLEEP-TIME 1)
+
+	; Return #t if thr is a thread, and if its still running
+	(define (is-running? thr)
+		(and (thread? thr) (not (thread-exited? thr))))
+
+	; Return exit value of the thread, if its actually a thread.
+	(define (get-result thr)
+		(if (thread? thr) (join-thread thr) #f)
+
+	; Convenience wrapper for srfi-1 partition
+	(define (parton PRED LST)
+		(receive (y n) (partition PRED LST) (list y n)))
+
+	; thread launcher - return a list of the launched threads.
+	; Note: CNT musr be equal to or smaller than (length ITM-LST)
+	(define (launch ITM-LST CNT)
+		(if (< 0 CNT)
+			(cons
+				(call-with-new-thread
+					(lambda () (if (PRED (car ITM-LST)) (car ITM-LST) #f)))
+				(launch (cdr ITM-LST) (- CNT 1)))
+			'()))
+
+	; Check the threads to see if any got an answer.
+	; If so, return the answer.
+	; If not, examine ITEMS in some threads.
+	(define (check-threads THRD-LST ITEMS)
+		; Partition list of threads into those that are running,
+		; and those that are stopped.
+		(define status (parton is-running? THRD-LST))
+		(define running (car status))
+		(define stopped (cadr status))
+
+		; Did any of the stopped threads return a value
+		; other than #f? If so, then return that value.
+		(define found
+			(find (lambda (v) (not (not v))) (map get-result stopped)))
+
+		; Compute number of new threads to start
+		(define num-to-launch
+			(min (- NTHREADS (length running)) (length ITEMS)))
+
+		; If we found a value, we are done.
+		; If list is exhausted, we are done.
+		; Else, lanuch some threads and wait.
+		(if found found
+			(if (= 0 num-to-launch) #f
+				(let ((thrd-lst (cons (launch ITEMS num-to-launch) running)))
+					(sleep SLEEP-TIME)
+					(check-threads thrd-lst (drop ITEMS num-to-launch)))))
+	)
+
+	(check-threads (make-list NTHREADS #f) LST)
 )
 
 ; ---------------------------------------------------------------
