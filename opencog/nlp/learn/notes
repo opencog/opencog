@@ -13366,6 +13366,12 @@ select count(*) from atoms; -- same as before
 select count(*) from valuations; -- same as before
 
 (print-matrix-summary-report psa) ; same as before
+Rows: 444903 Columns: 23444293
+Size: 31914870 non-zero entries of 10430436288579 possible
+Fraction non-zero: 3.0598E-6 Sparsity (-log_2): 18.318
+Total observations: 69447009.0  Avg obs per pair: 2.1760
+Entropy Total: 23.092   Left: 21.137   Right: 10.112
+Total MI: 8.1569
 
 assign-word-to-class OK
 assign-to-classes

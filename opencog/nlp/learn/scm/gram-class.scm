@@ -348,6 +348,7 @@
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
 ; XXX do something fancy here.
+; XXX need to have pca, psa, pcos globally defined!
 (define (ok-to-merge WORD-A WORD-B)
 	; (define pca (make-pseudo-cset-api))
 	; (define psa (add-dynamic-stars pca))
@@ -563,6 +564,8 @@
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
 		LST)
 
+	(display "Finished fetching wildcards\n")
+	(format #t "Now trim to min of !A observation counts\n" MIN-CNT)
 	(sort!
 		; Before sorting, trim the list, discarding words with
 		; low counts.
@@ -632,17 +635,22 @@
 
 ; ---------------------------------------------------------------
 
+; XXX FIXME the 0.3 is a user-tunable paramter, for how much of the
+; non-overlapping fraction to bring forwards.
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pcos (add-pair-cosine-compute psa))
 		)
 
+		(display "Start loading words and word-classes\n")
 		(load-atoms-of-type 'WordNode)
 		(load-atoms-of-type 'WordClassNode)
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
 		; (define all-words (cog-get-atoms 'WordNode))
+		(format #t "Finished loading ~A words\n"
+			(length (cog-get-atoms 'WordNode)))
 		(loop-over-words psa 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))
@@ -674,6 +682,7 @@
 ; (for-each (lambda (pr) (ptu 'pair-count pr)) cit-vil)
 ;
 ; Is it OK to merge?
+; (define pcos (add-pair-cosine-compute psa))
 ; (ok-to-merge (Word "run") (Word "jump"))
 ; (ok-to-merge (Word "city") (Word "village"))
 ;
