@@ -13272,7 +13272,7 @@ is it idempotent?
 
 delete-dup-atoms
 
-Oof -- need to fetch secions, need to fetch Connector too
+Oof -- need to fetch sections, need to fetch Connector too
 done.
 
 (AnyNode "left-word")
@@ -13306,8 +13306,74 @@ Hans writes:
 Mark Weaver writes:
 > http://www.hboehm.info/gc/gcdescr.html
 
-and see eail about this.
+and see email about this.
 
+=========================================================================
+=========================================================================
+
+2 June 2018
+-----------
+where we at? Answer: all grammatical class results are gone!???
+
+guile -l x.scm
+
+(sql-open "postgres:///en_pairs_cfive_class?user=ubuntu&password=asdf")
+
+so gram-class.scm ...
+
+ (fetch-all-words)         ; 82 seconds
+ (length (get-all-words))  ; 623548
+
+(load-atoms-of-type 'WordClassNode)
+(cog-count-atoms 'WordClassNode)
+
+How about members?
+
+(load-atoms-of-type 'MemberLink)
+(cog-count-atoms 'MemberLink)
+
+select * from typecodes;
+22 | MemberLink
+select count(*) from atoms where type=22;
+
+So .. what .. nothing at all???  WTF?? where's the data?
+
+CREATE DATABASE en_pairs_cfive_class WITH TEMPLATE en_pairs_cfive_mst OWNER ubuntu;
+
+(psa 'fetch-pairs)
+; 118 GB size
+; 490 cpu-mins to load so about 3+ hours wall-clock
+(print-matrix-summary-report psa)
+
+31914870 pairs = 32M sections
+81350150 atoms = 2.5 atoms/pair
+81350150 atoms / 496 mins = 2.7k/cpu-sec  load-speed
+                          = 2.5 * 2.7K = 6.8K atoms/wall-clock-sec
+118GB / 81M atoms = 1.45KBytes/atom
+
+445K words that have sections
+
+add-tuple-math
+
+There is no count on the ConnectorSeq ? why? How can that be?
+Oh, because its mostly meaningless. we want l1 norm, etc.
+
+(define wtf (psa 'right-stars (Word "jump")))
+(map (lambda (cs) (cog-keys (gdr cs))) wtf)
+(map (lambda (cs) (fetch-atom (gdr cs))) wtf)
+
+select count(*) from atoms; -- same as before
+select count(*) from valuations; -- same as before
+
+(print-matrix-summary-report psa) ; same as before
+
+assign-word-to-class OK
+assign-to-classes
+
+add-dynamic-stars
+=========================================================================
+=========================================================================
+=========================================================================
 =========================================================================
 OK-ish misses the mark:
 arxiv 1703.08314v1 coecke Interacting conceptual spaces
@@ -13324,9 +13390,9 @@ arxiv  1702.00764v1
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.
 
-Bugs: relex is returning incorrect disjuncts because LG is reporting the 
+Bugs: relex is returning incorrect disjuncts because LG is reporting the
 multi-connectors only ... with the incorrect mutiplicities.
-??? Is this still an issue? 
+??? Is this still an issue?
 
 Bugs: using ListLink for the partial sums on csets... why???
       (ListLink (AnyNode "cset-word") (ConnectorSeq...))
@@ -13349,9 +13415,11 @@ Bugs: cleanup embedded dashes in en  DONE
 Bugs: sentences with more than 254 words....
 
 Bugs: make postgres run nice. half-done, w/ renice.
+   What more is there to do?? More automation?
 
 Bugs: lxc containers not shutting down correctly during power loss
+    Partly done - rc.local.shutdown rc-local-shutdown.service
+    rc.lxc.shutdown Does the README describe this ??
 
 Bugs/feat:  no way to compute marginals incrementally, if the DB does
       not fit in RAM.
-x
