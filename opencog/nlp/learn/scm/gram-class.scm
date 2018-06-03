@@ -152,7 +152,7 @@
 
 (define (merge-ortho LLOBJ FRAC WA WB)
 "
-  merge-ortho WA WB FRAC - merge WA and WB into a grammatical class.
+  merge-ortho FRAC WA WB - merge WA and WB into a grammatical class.
   Return the merged class.
 
   WA and WB should be WordNodes or WordClassNodes.
@@ -163,7 +163,7 @@
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
 
-  The merger of WA and WB are performed, using the 'orthogoanal
+  The merger of WA and WB are performed, using the 'orthogonal
   merge' strategy. This is done like so. If WA and WB are both
   WordNodes, then a WordClass is created, having both WA and WB as
   members.  The counts on that word-class are the sum of the counts
@@ -173,7 +173,7 @@
   any non-positive components are erased.
 
   The counts are summed only if both counts are non-zero. Otherwise,
-  only a WEIGHT fraction of a single, unmatched count is transfered.
+  only a FRAC fraction of a single, unmatched count is transfered.
 
   If WA is a WordClassNode, and WB is not, then WB is merged into
   WA. Currently, WB must never be a WordClass....
@@ -348,12 +348,15 @@
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
 ; XXX do something fancy here.
-(define (ok-to-merge WORD-A WORD-B)
+;
+; COSOBJ must offer the 'right-cosine method
+;
+(define (ok-to-merge COSOBJ WORD-A WORD-B)
 	; (define pca (make-pseudo-cset-api))
 	; (define psa (add-dynamic-stars pca))
 	; (define pcos (add-pair-cosine-compute psa))
 
-	(define sim (pcos 'right-cosine WORD-A WORD-B))
+	(define sim (COSOBJ 'right-cosine WORD-A WORD-B))
 
 	(define cut 0.65)
 	(format #t "Cosine=~A for ~A \"~A\" -- \"~A\"\n" sim
@@ -386,7 +389,7 @@
 		(let ((cls (car CLS-LST)))
 			; If the word can be merged into a class, then do it,
 			; and return the class. Else try again.
-			(if (ok-to-merge cls WRD)
+			(if (ok-to-merge LLOBJ cls WRD)
 				(merge-ortho LLOBJ FRAC cls WRD)
 				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
 )
@@ -417,7 +420,7 @@
 				(rest (cdr WRD-LST)))
 			; If the word can be merged into a class, then do it,
 			; and then expand the class. Else try again.
-			(if (ok-to-merge WRD-OR-CLS wrd)
+			(if (ok-to-merge LLOBJ WRD-OR-CLS wrd)
 				; Merge, and try to expand.
 				(assign-expand-class LLOBJ FRAC
 					(merge-ortho LLOBJ FRAC WRD-OR-CLS wrd) rest)
@@ -482,7 +485,7 @@
 (define (classify-pair-wise LLOBJ FRAC WRD-LST)
 
 	(define (check-pair WORD-A WORD-B CLS-LST)
-		(if (ok-to-merge WORD-A WORD-B)
+		(if (ok-to-merge LLOBJ WORD-A WORD-B)
 			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
 				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
@@ -493,7 +496,7 @@
 ; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
-; assigned, treat it as if it werre a new class. Return a list
+; assigned, treat it as if it were a new class. Return a list
 ; of all of the classes, the ones that were given plus the ones
 ; that were created.
 ;
@@ -503,6 +506,7 @@
 ; If the class-list contains WordNodes (instead of the expected
 ; WordClassNodes) and a merge is possible, then that WordNode will
 ; be merged to create a class.
+;
 (define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
 	(format #t "---------  Words remaining=~A Classes=~A ------------\n"
 		(length WRD-LST) (length CLS-LST))
@@ -536,7 +540,7 @@
 
 ; ---------------------------------------------------------------
 ; Given the list LST of atoms, trim it, discarding atoms with
-; low observation couns, and then sort it, returning the sorted
+; low observation counts, and then sort it, returning the sorted
 ; list, ranked in order of the observed number of sections on the
 ; word. (i.e. the sum of the counts on each of the sections).
 ;
@@ -556,12 +560,14 @@
 	(define (nobs WRD) (pss 'right-count WRD))
 
 	; The support API won't work, if we don't have the wild-cards
-	; in the atomspace before we sort. The wild-cards store the
-	; support subtotals.
+	; in the atomspace before we sort. The wild-cards hold/contain
+	; the support subtotals.
 	(for-each
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
 		LST)
 
+	(display "Finished fetching wildcards\n")
+	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
 	(sort!
 		; Before sorting, trim the list, discarding words with
 		; low counts.
@@ -572,12 +578,14 @@
 
 ; ---------------------------------------------------------------
 ; Loop over all words, attempting to place them into grammatical
-; classes. This is an O(N^2) algorithm, and so several "cheats"
-; are employed to maintain some amount of progress. So,
-; A) the list of words is ranked by order of the number of
+; classes. This is an O(N^2) algorithm, and so several "cheats" are
+; employed to maintain some reasonable amount of forward progress. So,
+;
+; A) The list of words is ranked by order of the number of
 ;    observations; thus punctuation and "the, "a" come first.
 ; B) The ranked list is divided into power-of-two ranges, and only
 ;    the words in a given range are compared to one-another.
+;
 ; The idea is that it is unlikely that words with very different
 ; observational counts will be similar.  NOTE: this idea has NOT
 ; been empirically tested, yet.
@@ -585,9 +593,9 @@
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
 ;
-; XXX There is a user-adjustable paramter used below, to
+; XXX There is a user-adjustable parameter used below, to
 ; control the ranking. It should be exposed in the API or
-; something like that!
+; something like that! min-obs-cutoff, chunk-block-size
 ;
 (define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
 	; XXX Adjust the minimum cutoff as desired!!!
@@ -629,18 +637,23 @@
 
 ; ---------------------------------------------------------------
 
+; XXX FIXME the 0.3 is a user-tunable paramter, for how much of the
+; non-overlapping fraction to bring forwards.
 (define (do-it)
-	(let ((pca (make-pseudo-cset-api))
+	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pcos (add-pair-cosine-compute psa))
 		)
 
+		(display "Start loading words and word-classes\n")
 		(load-atoms-of-type 'WordNode)
 		(load-atoms-of-type 'WordClassNode)
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
 		; (define all-words (cog-get-atoms 'WordNode))
-		(loop-over-words psa 0.3
+		(format #t "Finished loading ~A words\n"
+			(length (cog-get-atoms 'WordNode)))
+		(loop-over-words pcos 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))
 	)
@@ -649,13 +662,34 @@
 ; ---------------------------------------------------------------
 ; Example usage
 ;
+; (load-atoms-of-type 'WordNode)          ; Typicaly about 80 seconds
 ; (define pca (make-pseudo-cset-api))
 ; (define psa (add-dynamic-stars pca))
 ;
 ; Verify that support is correctly computed.
+; cit-vil is a vector of pairs for matching sections for "city" "village".
+; Note that the null list '() means 'no such section'
+;
 ; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
 ; (define ptu (add-tuple-math psa bogus))
-; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
-; (ptu 'pair-count (car run-n-jump))
+; (define cit-vil (ptu 'right-stars (list (Word "city") (Word "village"))))
+; (length cit-vil)
 ;
-; (merge-ortho psa (Word "run") (Word "jump"))
+; Show the first three values of the vector:
+; (ptu 'pair-count (car cit-vil))
+; (ptu 'pair-count (cadr cit-vil))
+; (ptu 'pair-count (caddr cit-vil))
+;
+; print the whole vector:
+; (for-each (lambda (pr) (ptu 'pair-count pr)) cit-vil)
+;
+; Is it OK to merge?
+; (define pcos (add-pair-cosine-compute psa))
+; (ok-to-merge pcos (Word "run") (Word "jump"))
+; (ok-to-merge pcos (Word "city") (Word "village"))
+;
+; Perform the actual merge
+; (merge-ortho pcos 0.3 (Word "city") (Word "village"))
+;
+; Verify presence in the database:
+; select count(*) from atoms where type=22;

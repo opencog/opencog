@@ -7,7 +7,7 @@
 ; OVERVIEW
 ; --------
 ; The merging of words into word-classes proceeds in two parts. The
-; first part is reviewed in `gram-class.scm` and concists on comparing
+; first part is reviewed in `gram-class.scm` and consists on comparing
 ; words to see if they share similar sets of sections. If they do,
 ; then the words can be judged to be similar, and merged into a word
 ; class.  The second part, reviewed here, is to merge connector
