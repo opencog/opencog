@@ -356,7 +356,7 @@
 	; (define psa (add-dynamic-stars pca))
 	; (define pcos (add-pair-cosine-compute psa))
 
-	; Merge them if the cosin is greater than this
+	; Merge them if the cosine is greater than this
 	(define cut 0.65)
 
 	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
@@ -440,13 +440,20 @@
 )
 
 ; ---------------------------------------------------------------
-; Call function FUNC on all unordered pairs from LST.
-; The function FUNC must accept two arguments.
-; The return value is unspecified.
-; All of the N(N-1)/2 unordered pairs are explored.
-; This means that the runtime is O(N^2)
 (define (for-all-unordered-pairs FUNC LST)
+"
+  for-all-unordered-pairs FUNC LST
 
+  Call function FUNC on all possible unordered pairs created from LST.
+  That is, given the LST of N items, create all possible pairs of items
+  from this LST. There will be N(N-1)/2 such pairs.  Then call FUNC on
+  each of these pairs.  This means that the runtime is O(N^2).
+
+  The function FUNC must accept two arguments. The return value of FUNC
+  is ignored.
+
+  The return value is unspecified.
+"
 	(define (make-next-pair primary rest)
 		(define more (cdr primary))
 		(if (not (null? more))
@@ -462,15 +469,19 @@
 )
 
 ; ---------------------------------------------------------------
-; Call function FUNC on all unordered pairs from LST.
-; The function FUNC must accept three arguments: the first two
-; are the pair, and the last is the accumulated (folded) value.
-; It must return the (modified) accumulated value.
-; The return value is the result of folding on these.
-; All of the N(N-1)/2 unordered pairs are explored.
-; This means that the runtime is O(N^2)
 (define (fold-unordered-pairs ACC FUNC LST)
+"
+  Call function FUNC on all possible unordered pairs created from LST.
+  That is, given the LST of N items, create all possible pairs of items
+  from this LST. There will be N(N-1)/2 such pairs.  Then call FUNC on
+  each of these pairs.  This means that the runtime is O(N^2).
 
+  The function FUNC must accept three arguments: the first two
+  are the pair, and the last is the accumulated (folded) value.
+  It must return the (modified) accumulated value.
+
+  This returns the result of folding on these pairs.
+"
 	(define (make-next-pair primary rest accum)
 		(define more (cdr primary))
 		(if (null? more) accum
