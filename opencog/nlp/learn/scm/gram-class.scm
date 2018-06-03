@@ -409,7 +409,7 @@
 
 	; Return exit value of the thread, if its actually a thread.
 	(define (get-result thr)
-		(if (thread? thr) (join-thread thr) #f)
+		(if (thread? thr) (join-thread thr) #f))
 
 	; Convenience wrapper for srfi-1 partition
 	(define (parton PRED LST)
@@ -444,13 +444,19 @@
 		(define num-to-launch
 			(min (- NTHREADS (length running)) (length ITEMS)))
 
+		; Return #t if we've looked at them all.
+		(define done
+			(and (= 0 num-to-launch)
+				(= 0 (length running))
+				(= 0 (length ITEMS))))
+
 		; If we found a value, we are done.
 		; If list is exhausted, we are done.
-		; Else, lanuch some threads and wait.
+		; Else, launch some threads and wait.
 		(if found found
-			(if (= 0 num-to-launch) #f
-				(let ((thrd-lst (cons (launch ITEMS num-to-launch) running)))
-					(sleep SLEEP-TIME)
+			(if done #f
+				(let ((thrd-lst (append (launch ITEMS num-to-launch) running)))
+					(if (= 0 num-to-launch) (sleep SLEEP-TIME))
 					(check-threads thrd-lst (drop ITEMS num-to-launch)))))
 	)
 
