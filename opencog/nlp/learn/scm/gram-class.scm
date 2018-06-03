@@ -3,6 +3,8 @@
 ;
 ; Merge words into grammatical categories.
 ;
+; Copyright (c) 2017, 2018 Linas Vepstas
+;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
@@ -146,6 +148,7 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 threads))
 (use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------------
@@ -386,6 +389,9 @@
 ; it was assigned to, or just the original word itself, if it was
 ; not assigned to any of them.
 ;
+; Run-time is O(n) in the length n of CLS-LST, as the word is
+; compared to every element in the CLS-LST.
+;
 ; See also the `assign-expand-class` function.
 ;
 ; WORD should be the WordNode to test.
@@ -522,8 +528,13 @@
 ; of all of the classes, the ones that were given plus the ones
 ; that were created.
 ;
-; The typical use is to call this with an empty class-list,
-; initially.
+; A common use is to call this with an empty class-list, initially.
+; In this case, words are compared pair-wise to see if they can be
+; merged together, for a run-time of O(N^2) in the length N of WRD-LST.
+;
+; If CLS-LST is not empty, and is of length M, then the runtime will
+; be roughly O(MN) + O(K^2) where K is what's left of the initial N
+; words that have not been assigned to classes.
 ;
 ; If the class-list contains WordNodes (instead of the expected
 ; WordClassNodes) and a merge is possible, then that WordNode will
@@ -625,15 +636,16 @@
 	; Right now, set to 20 observations, minimum. Less
 	; than this and weird typos and stuff get in.
 	(define min-obs-cutoff 20)
-	(define ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
+	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
 	; Been there, done that; drop the top-20.
-	; (define top-trimed-words (drop ranked-words 20))
+	; (define ranked-words (drop all-ranked-words 10))
+	(define ranked-words all-ranked-words)
 
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
-					; the smallier of word-list and requested size.
+					; the smaller of word-list and requested size.
 					(minsz (if (< wsz size) wsz size))
 					; the first block
 					(chunk (take wlist minsz))
