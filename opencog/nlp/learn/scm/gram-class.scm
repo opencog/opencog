@@ -565,7 +565,7 @@
 		LST)
 
 	(display "Finished fetching wildcards\n")
-	(format #t "Now trim to min of !A observation counts\n" MIN-CNT)
+	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
 	(sort!
 		; Before sorting, trim the list, discarding words with
 		; low counts.
@@ -638,7 +638,7 @@
 ; XXX FIXME the 0.3 is a user-tunable paramter, for how much of the
 ; non-overlapping fraction to bring forwards.
 (define (do-it)
-	(let ((pca (make-pseudo-cset-api))
+	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pcos (add-pair-cosine-compute psa))
 		)
