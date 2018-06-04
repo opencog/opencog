@@ -17,6 +17,18 @@
 ; dictate how to judge when words belong to a class; this is done
 ; independently of the structure of the classes themselves.
 ;
+; The above describes the general concept of "agglomerative clustering",
+; which is what is effectively implemented in this file.  Note, however,
+; that the general problem is not quite this simple: in addition to
+; assigning words to grammatical classes, one must also cluster the
+; connectors, which in turn alters the notion of similarity. That is,
+; words are not isolated points to be clustered; the location of those
+; "points" depend on the connectors and sections ("disjuncts") which
+; must also be clustered in a consistent manner: these two clustering
+; steps form a feedback loop.
+;
+; Representation
+; --------------
 ; A grammatical class is represented as
 ;
 ;     MemberLink
@@ -41,12 +53,12 @@
 ; -----------------
 ; It is assumed that grammatical classes are stepping stones to word
 ; meaning; that meaning and grammatical class are at least partly
-; correlated. It is assumed that words can have multiple meanings,
-; and can belong to multiple grammatical classes. It is assumed that
+; correlated. It is assumed that words can have multiple meanings, and
+; thus can belong to multiple grammatical classes. It is assumed that
 ; the sum total number of observations of a word is a linear combination
 ; of the different ways that the word was used in the text sample.
 ; Thus, the task is to decompose the observed counts on a single word,
-; and assign them to one of a number of different grammatical classes.
+; and assign them to one of several different grammatical classes.
 ;
 ; The above implies that each word should be viewed as a vector; the
 ; disjuncts form the basis of the vector space, and the count of
@@ -58,9 +70,79 @@
 ; vary from a few to a few dozen; in addition, there will be some
 ; unknown amount of "noise": incorrect sections due to incorrect parses.
 ;
-; It is assumed that when a word belong to several grammatical classes,
+; It is assumed that when a word belongs to several grammatical classes,
 ; the sets of disjuncts defining those classes are not necessarily
-; disjoint; there may be significant overlap.
+; disjoint; there may be significant overlap. That is, different
+; grammatical classes are not orthogonal, in general.
+;
+; Core algorithm
+; --------------
+; The core algorithm implemented here is a variant form of agglomerative
+; clustering:  looping over all words and word-clusters, the similarity
+; between
+;
+; Similarity
+; ----------
+; There are several different means of comparing similarity between
+; two words.  The simplest is cosine distance: if the cosine of two
+; word-vectors is greater than a threshold, they should be merged.
+;
+; The cosine-distance is a user tunable parameter in the code below;
+; it is currently hard-coded to 0.65.
+;
+; Semantic similarity
+; -------------------
+; A very different, and more semantically correct merge and clustering
+; criterion is possible.  Its inspired by the observation that some
+; words have multiple different meanings. Consider the word "saw" with
+; the meanings "observe" and "cut".
+;
+; The cosine distance between the two words w_a, w_b is
+;
+;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
+;
+; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
+; The vector v_b can be decomposed into parallel and perpendicular parts:
+;
+;   v_b = v_llel + v_perp
+;
+;   v_llel = v_a |v_b| cos / |v_a|
+;   v_perp = v_b - v_llel
+;
+; which has the properties that v_llel points in the same direction as
+; v_a and v_perp is perpendicular to v_a.  Now, because v_perp involves
+; a subtraction, there will be, in general, vector components in v_perp
+; that are negative (as mentioned above). However, if all vector
+; components of v_perp are positive, then we can conclude that v_b can
+; be decomposed into "two meanings" (or more).  One "meaning" is indeed
+; v_a (i.e. is v_llel), the second meaning is v_perp.
+;
+; It seems reasonable to expect that "saw" would obey this relationship,
+; with w_a == observe, w_b == saw, w_perp == cut.
+;
+; However, if v_perp has lots of negative components, then such an
+; orthogonalization seems incorrect. That is, suppose that some other
+; v_a and v_b had a small cosine distance (viz are almost collinear) but
+; v_perp had many negative components. One cannot reasonably expect
+; v_perp to identify "some other meaning" for v_b. Instead, it would
+; seem that v_perp just consists of grunge that "should have been" in
+; v_a, but wasn't.
+;
+; Thus, to solve problem b) above, (the LEXICAL issue), the correct
+; merge algo would seem to be:
+;
+;   Let w_a be an existing cluster
+;   Let w_b be a candidate word to be merged into the cluster.
+;   Compute v_llel and v_perp.
+;   Let v_clamp = v_perp with negative components set to zero.
+;   Let v_anew = v_a + v_llel + (v_b - v_clamp)
+;   Let v_bnew = v_clamp
+;
+; This would seem to have the effect of "broadening" v_a with missing
+; vector components, while cleanly extracting the semantically different
+; parts of v_b and sticking them into v_bnew.
+;
+; XXX this is not yet implemented; FIXME.
 ;
 ; Merging
 ; -------
@@ -143,68 +225,6 @@
 ; XXX Except this is not what the code actually does, as written. It
 ; deviates a bit from this, in a slightly wacky fashion. XXX FIXME.
 ;
-; Cosine similarity
-; -----------------
-; There are several different means of comparing similarity between
-; two words.  The simplest is cosine distance: if the cosine of two
-; word-vectors is greater than a threshold, they should be merged.
-;
-; The cosine-distance is a user tunable parameter in the code below;
-; it is currently hard-coded to 0.65.
-;
-; Semantic similarity
-; -------------------
-; A very different, and more semantically correct merge and clustering
-; criterion is possible.  Its inspired by the observation that some
-; words have multiple different meanings. Consider the word "saw" with
-; the meanings "observe" and "cut".
-;
-; The cosine distance between the two words w_a, w_b is
-;
-;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
-;
-; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
-; The vector v_b can be decomposed into parallel and perpendicular parts:
-;
-;   v_b = v_llel + v_perp
-;
-;   v_llel = v_a |v_b| cos / |v_a|
-;   v_perp = v_b - v_llel
-;
-; which has the properties that v_llel points in the same direction as
-; v_a and v_perp is perpendicular to v_a.  Now, because v_perp involves
-; a subtraction, there will be, in general, vector components in v_perp
-; that are negative (as mentioned above). However, if all vector
-; components of v_perp are positive, then we can conclude that v_b can
-; be decomposed into "two meanings" (or more).  One "meaning" is indeed
-; v_a (i.e. is v_llel), the second meaning is v_perp.
-;
-; It seems reasonable to expect that "saw" would obey this relationship,
-; with w_a == observe, w_b == saw, w_perp == cut.
-;
-; However, if v_perp has lots of negative components, then such an
-; orthogonalization seems incorrect. That is, suppose that some other
-; v_a and v_b had a small cosine distance (viz are almost collinear) but
-; v_perp had many negative components. One cannot reasonably expect
-; v_perp to identify "some other meaning" for v_b. Instead, it would
-; seem that v_perp just consists of grunge that "should have been" in
-; v_a, but wasn't.
-;
-; Thus, to solve problem b) above, (the LEXICAL issue), the correct
-; merge algo would seem to be:
-;
-;   Let w_a be an existing cluster
-;   Let w_b be a candidate word to be merged into the cluster.
-;   Compute v_llel and v_perp.
-;   Let v_clamp = v_perp with negative components set to zero.
-;   Let v_anew = v_a + v_llel + (v_b - v_clamp)
-;   Let v_bnew = v_clamp
-;
-; This would seem to have the effect of "broadening" v_a with missing
-; vector components, while cleanly extracting the semantically different
-; parts of v_b and sticking them into v_bnew.
-;
-; XXX this is not yet implemented; FIXME.
 ;
 ; Broadening
 ; ----------
@@ -779,6 +799,12 @@
 ; However, for WordNodes, this does not work very well, as the
 ; observation count may be high from any-pair parsing, but
 ; infrequently used in MST parsing.
+;
+; The current version gets observation counts from the partial sums
+; on the LLOBJ.  This is fine when starting from scratch, but gets
+; distorted, as word-merges transfer counts from the word to the
+; word-class, but fail to update the partial sums. XXX this needs
+; fixing. XXX FIXME
 ;
 (define (trim-and-rank LLOBJ LST MIN-CNT)
 	(define pss (add-support-api LLOBJ))
