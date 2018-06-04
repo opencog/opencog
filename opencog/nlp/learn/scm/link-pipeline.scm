@@ -431,7 +431,7 @@
 			(define cpu-time (* 1.0e-9 (- run run-time)))
 			(define ngc (- (assoc-ref cur 'gc-times)
 				(assoc-ref last-gc 'gc-times)))
-			(format #t "Elapsed: ~5f secs. Rate: ~5f gc/min %cpu-GC: ~5f%  %cpu-use: ~5f%\n"
+			(format #t "Elapsed: ~6f secs. Rate: ~5f gc/min %cpu-GC: ~5f%  %cpu-use: ~5f%\n"
 				elapsed-time
 				(/ (* ngc 60) elapsed-time)
 				(* 100 (/ gc-time-taken elapsed-time))
