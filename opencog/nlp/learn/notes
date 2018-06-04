@@ -13392,6 +13392,45 @@ Cosine=0.7398859541229513 for word "would" -- "will"
 ------------------------------ Bingo!
 Cosine=0.6030429912609625 for class "would will" -- "will"
 
+==============================
+Performance of par-find code
+
+-- with 2 threads, took 0:30 to do exactly 12 of them
+-- with 1 thread, took 1986 = 0:33 to do 12...
+
+-- alt: 1-thread: 01:19:30 - 12:56:12 = 23:18 for first 20
+-- again 1 thread:
+     01:47:45 - 01:28:21 = 19:24 for first 20
+     01:54:54 - 01:47:45 = 7:09 next 19
+     02:01:39 - 01:54:54 = 6:45 next 18
+     02:08:34 - 02:01:39 = 6:55 next 17
+     02:14:52 - 02:08:34 = 6:18 next 16
+     02:20:58 - 02:14:52 = 6:06 next 15
+     02:26:45 - 02:20:58 = 5:47 next 14
+     02:31:56 - 02:26:45 = 5:11 next 13
+
+alt: 2-threads:
+     03:01:35 - 02:43:20 = 18:15 first 20
+     03:07:57 - 03:01:35 =  6:22 next 19
+     03:13:39 - 03:07:57 =  5:42 next 18
+     03:19:26 - 03:13:39 =  5:50 next 17
+
+                         alt-2thr       alt-1thr
+      "was is" -- "-" in 187.7  secs   80.51  secs
+         "? !" -- "-" in  54.48 secs   19.55  secs
+"city village" -- "-" in  16.09 secs    5.307 secs
+     "her him" -- "-" in  86.21 secs   39.32  secs
+       "of in" -- "-" in 612.1  secs  320.2   secs
+  "would will" -- "-" in  28.96 secs   22.97  secs
+      "but or" -- "-" in  38.83 secs   30.16  secs
+         ", ;" -- "-" in 335.4  secs  237.1   secs
+     "they we" -- "-" in  48.27 secs   26.95  secs
+    "are were" -- "-" in  56.62 secs   34.19  secs
+
+Clearly pretty loosing -- execution takes much longer.
+but since in parallel... 1.x speedup!?
+
+
 
 
 =========================================================================

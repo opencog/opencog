@@ -366,7 +366,11 @@
 	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
 
 	(define (report-cosine)
-		(let* ((start-time (get-internal-real-time))
+		(let* (
+; (foo (format #t "Start cosine ~A \"~A\" -- \"~A\"\n"
+; (if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+; (cog-name WORD-A) (cog-name WORD-B)))
+				(start-time (get-internal-real-time))
 				(sim (get-cosine))
 				(now (get-internal-real-time))
 				(elapsed-time (* 1.0e-9 (- now start-time))))
@@ -400,8 +404,17 @@
 	; If the number of threads was just 1, then do exactly this:
 	; (find PRED LST)
 
-	(define NTHREADS 5)
+	(define NTHREADS 2)
 	(define SLEEP-TIME 1)
+
+	; Design issues:
+	; 1) This uses sleep in a hacky manner, to poll for finished
+	;    threads. This is OK for the current application but is
+	;    hacky, and needs to be replaced by some semaphore.
+	; 2) Guile threads suck.  There's some kind of lock contention,
+	;    somewhere, which leads to lots of thrashing, when more
+	;    than 2-3 threads are run. The speedup from even 2 threads
+	;    is lackluster and barely acceptable.
 
 	; Return #t if thr is a thread, and if its still running
 	(define (is-running? thr)
@@ -493,7 +506,9 @@
 	; Return #t if cls can be merged with WRD
 	(define (merge-pred cls) (ok-to-merge LLOBJ cls WRD))
 
-	(let ((cls (par-find merge-pred CLS-LST)))
+	(let (; (cls (find merge-pred CLS-LST))
+			(cls (par-find merge-pred CLS-LST))
+		)
 		(if (not cls)
 			WRD
 			(merge-ortho LLOBJ FRAC cls WRD)))
@@ -635,8 +650,9 @@
 ; be merged to create a class.
 ;
 (define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
-	(format #t "---------  Words remaining=~A Classes=~A ------------\n"
-		(length WRD-LST) (length CLS-LST))
+	(format #t "-------  Words remaining=~A Classes=~A ~A ------\n"
+		(length WRD-LST) (length CLS-LST)
+		(strftime "%c" (localtime (current-time))))
 
 	; If the WRD-LST is empty, we are done; otherwise compute.
 	(if (null? WRD-LST) CLS-LST
@@ -735,8 +751,8 @@
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
 	; Been there, done that; drop the top-20.
-	; (define ranked-words (drop all-ranked-words 10))
-	(define ranked-words all-ranked-words)
+	(define ranked-words (drop all-ranked-words 20))
+	; (define ranked-words all-ranked-words)
 
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
