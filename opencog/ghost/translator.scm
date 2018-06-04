@@ -654,10 +654,11 @@
           (psi-rule
             (list (Satisfaction (VariableList vars) (And conds)))
             action
+            ; Make sure the goal has been created
             (psi-goal (car goal)
               ; Check if an initial urge has been assigned to it
               (let ((urge (assoc-ref initial-urges (car goal))))
-                (if urge (- 1 urge) 0)))
+                (if urge (- 1 urge) default-urge)))
             ; Check if the goal is defined at the rule level
             ; If the rule is ordered, the weight should change
             ; accordingly as well
@@ -754,7 +755,9 @@
 "
   (for-each
     (lambda (u)
-      (set! initial-urges (assoc-set! initial-urges (car u) (cdr u))))
+      (set! initial-urges (assoc-set! initial-urges (car u) (cdr u)))
+      ; Also, create the goal in the AtomSpace
+      (psi-goal (car u) (- 1 (cdr u))))
     URGES
   )
 )
@@ -767,6 +770,15 @@
   ; It's cleaner to do it this way in case there are multiple goals
   ; defined in the same file
   (process-rule-stack)
+
+  ; Actually create the goals in the AtomSpace
+  (for-each
+    (lambda (goal)
+      (psi-goal (car goal)
+        ; Check if an initial urge has been assigned to it
+        (let ((urge (assoc-ref initial-urges (car goal))))
+          (if urge (- 1 urge) default-urge))))
+    GOALS)
 
   (set! top-lv-goals GOALS)
   (set! is-rule-seq ORDERED)
