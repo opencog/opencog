@@ -3,12 +3,14 @@
 ;
 ; Merge words into grammatical categories.
 ;
+; Copyright (c) 2017, 2018 Linas Vepstas
+;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
 ; When a pair of words are judged to be grammatically similar, they
 ; can be used to create a "grammatical class", containing both the
-; words, and behaving as thier union/sum.  When a word is judged to
+; words, and behaving as their union/sum.  When a word is judged to
 ; belong to an existing grammatical-class, then some mechanism must
 ; be provided to add that word to the class.  This file implements
 ; the tools for creating and managing such classes.  It does not
@@ -37,11 +39,11 @@
 ;
 ; Basic assumptions
 ; -----------------
-; It is assummed that grammatical classes are stepping stones to word
+; It is assumed that grammatical classes are stepping stones to word
 ; meaning; that meaning and grammatical class are at least partly
 ; correlated. It is assumed that words can have multiple meanings,
 ; and can belong to multiple grammatical classes. It is assumed that
-; the sum total numner of observations of a word is a linear combination
+; the sum total number of observations of a word is a linear combination
 ; of the different ways that the word was used in the text sample.
 ; Thus, the task is to decompose the observed counts on a single word,
 ; and assign them to one of a number of different grammatical classes.
@@ -72,7 +74,7 @@
 ; Given two words, add them as vectors, creating a new vector, the
 ; word-class. This is purely linear summation. Next, compute the
 ; orthogonal components of the words to the word-class, and replace
-; the words by thier orthogonal components - i.e. subtract the parallel
+; the words by their orthogonal components - i.e. subtract the parallel
 ; components. It seems best to avoid negative observation counts, so
 ; if any count on any section is negative, it is clamped to zero (i.e.
 ; that section is removed, as this is a sparse vector). This last step
@@ -82,19 +84,21 @@
 ; a) The combined vector has strictly equal or larger support than
 ;    the parts. This might not be correct, as it seems that it will
 ;    mix in disjuncts that should have been assigned to other meanings.
+;    (the SUPPORT issue; discussed further below).
 ; b) The process is not quite linear, as orthogonal components with
 ;    negative counts are clamped to zero.
+;    (the LEXICAL issue; discussed further, below)
 ; c) The number of vectors being tracked in the system is increasing:
 ;    before there were two, once for each word, now there are three:
-;    each word remains, with altered counts, as well as thier sum.
+;    each word remains, with altered counts, as well as their sum.
 ;    It might be nice to prune the number of vectors, so that the
 ;    dataset does not get outrageously large. Its possible that short
 ;    vectors might be mostly noise.
 ; d) There is another non-linearity, when a word is assigned to an
 ;    existing word-class. This assignment will slightly alter the
 ;    direction of the word-class vector, but will not trigger the
-;    recomputation of previous orthognoal components.
-; e) The replacement of word-vectors by thier orthogonal components
+;    recomputation of previous orthogonal components.
+; e) The replacement of word-vectors by their orthogonal components
 ;    means that the original word vectors are "lost". This could be
 ;    avoided by creating new "left-over" word vectors to hold just
 ;    the orthogonal components. However, this increases the size of
@@ -104,21 +108,103 @@
 ; ---------------
 ; Similar to the above, a linear sum is taken, but the sum is only over
 ; those disjuncts that both words share in common. This might be more
-; appropriate for disentangling linear combinaations of multiple
-; word-senes. It seems like it could be robust even with lower
+; appropriate for disentangling linear combinations of multiple
+; word-senses. It seems like it could be robust even with lower
 ; similarity scores (e.g. when using cosine similarity).
 ;
-; Overlap merging appears to solve the problem a) above, but. on the
-; flip side, it also seems to prevent the discovery and broadening
-; of the ways in which a word might be used.
+; Overlap merging appears to solve the problem a) above (the SUPPORT
+; issue), but, on the flip side, it also seems to prevent the discovery
+; and broadening of the ways in which a word might be used.
 ;
 ; merge-ortho
 ; -----------
 ; The above two merge methods are implemented in the `merge-ortho`
 ; function. It takes, as an argument, a fractional weight which is
 ; used when the disjunct isn't shared between both words. Setting
-; the weight to zero gives overlap merging; setting it ton one gives
-; union merging.
+; the weight to zero gives overlap merging; setting it to one gives
+; union merging. Setting it to fractional values provides a merge
+; that is intermediate between the two: an overlap, plus a bit more,
+; viz some of the union.
+;
+; In the code below, this is currently a hard-coded parameter, set to
+; the ad hoc value of 0.3.  Behavior with different values is unexplored.
+;
+; Agglomerative clustering
+; ------------------------
+; The de facto algorithm implemented here is agglomerative clustering.
+; That is, each word is compared to each of the existing clusters, and
+; if it is close enough, it is merged in.  If a word cannot be assigned
+; to a cluster, it is treated as a new cluster-point, and is tacked onto
+; the list of existing clusters.
+;
+; That is, the existing clusters act as a sieve: new words either fall
+; into one of the existing "holes", or start a new "hole".
+;
+; XXX Except this is not what the code actually does, as written. It
+; deviates a bit from this, in a slightly wacky fashion. XXX FIXME.
+;
+; Cosine similarity
+; -----------------
+; There are several different means of comparing similarity between
+; two words.  The simplest is cosine distance: if the cosine of two
+; word-vectors is greater than a threshold, they should be merged.
+;
+; The cosine-distance is a user tunable parameter in the code below;
+; it is currently hard-coded to 0.65.
+;
+; Semantic similarity
+; -------------------
+; A very different, and more semantically correct merge and clustering
+; criterion is possible.  Its inspired by the observation that some
+; words have multiple different meanings. Consider the word "saw" with
+; the meanings "observe" and "cut".
+;
+; The cosine distance between the two words w_a, w_b is
+;
+;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
+;
+; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
+; The vector v_b can be decomposed into parallel and perpendicular parts:
+;
+;   v_b = v_llel + v_perp
+;
+;   v_llel = v_a |v_b| cos / |v_a|
+;   v_perp = v_b - v_llel
+;
+; which has the properties that v_llel points in the same direction as
+; v_a and v_perp is perpendicular to v_a.  Now, because v_perp involves
+; a subtraction, there will be, in general, vector components in v_perp
+; that are negative (as mentioned above). However, if all vector
+; components of v_perp are positive, then we can conclude that v_b can
+; be decomposed into "two meanings" (or more).  One "meaning" is indeed
+; v_a (i.e. is v_llel), the second meaning is v_perp.
+;
+; It seems reasonable to expect that "saw" would obey this relationship,
+; with w_a == observe, w_b == saw, w_perp == cut.
+;
+; However, if v_perp has lots of negative components, then such an
+; orthogonalization seems incorrect. That is, suppose that some other
+; v_a and v_b had a small cosine distance (viz are almost collinear) but
+; v_perp had many negative components. One cannot reasonably expect
+; v_perp to identify "some other meaning" for v_b. Instead, it would
+; seem that v_perp just consists of grunge that "should have been" in
+; v_a, but wasn't.
+;
+; Thus, to solve problem b) above, (the LEXICAL issue), the correct
+; merge algo would seem to be:
+;
+;   Let w_a be an existing cluster
+;   Let w_b be a candidate word to be merged into the cluster.
+;   Compute v_llel and v_perp.
+;   Let v_clamp = v_perp with negative components set to zero.
+;   Let v_anew = v_a + v_llel + (v_b - v_clamp)
+;   Let v_bnew = v_clamp
+;
+; This would seem to have the effect of "broadening" v_a with missing
+; vector components, while cleanly extracting the semantically different
+; parts of v_b and sticking them into v_bnew.
+;
+; XXX this is not yet implemented; FIXME.
 ;
 ; Broadening
 ; ----------
@@ -127,25 +213,27 @@
 ; are two distinct opportunities to broaden: first, in the union vs.
 ; overlap merging above, and second, in the merging of disjuncts. That
 ; is, the above merging did not alter the number of disjuncts in use:
-; its disjuncts is a sequence of connectors, each connector specifies
-; a single word. At some point, disjuncts should also be merged, i.e.
-; by merging the connectors on them.
+; the disjuncts on the merged class are still disjuncts with single-word
+; connectors. At some point, disjuncts should also be merged, i.e. by
+; merging the connectors on them.
 ;
 ; If disjunct merging is performed after a series of word mergers have
 ; been done, then when a connector-word is replaced by a connector
 ; word-class, that class may be larger than the number of connectors
-; originally witnessed. Again, the known usage of the word is broaded.
+; originally witnessed. Again, the known usage of the word is broadened.
 ;
 ; Disjunct merging
 ; ----------------
 ; Disjunct merging is the second step in creating grammatical classes.
-; The idea here is to replace individual connectors that specifiy words
+; The idea here is to replace individual connectors that specify words
 ; with connectors that specify word-classes. This step is examined in
 ; greater detail in `cset-class.scm`.
 ;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 threads))
+(use-modules (ice-9 receive))   ; for partition
 (use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------------
@@ -356,24 +444,137 @@
 	; (define psa (add-dynamic-stars pca))
 	; (define pcos (add-pair-cosine-compute psa))
 
-	(define sim (COSOBJ 'right-cosine WORD-A WORD-B))
-
+	; Merge them if the cosine is greater than this
 	(define cut 0.65)
-	(format #t "Cosine=~A for ~A \"~A\" -- \"~A\"\n" sim
-		(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
-		(cog-name WORD-A) (cog-name WORD-B))
-	(if (< cut sim) (display "------------------------------ Bingo!\n"))
+
+	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
+
+	(define (report-cosine)
+		(let* (
+; (foo (format #t "Start cosine ~A \"~A\" -- \"~A\"\n"
+; (if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+; (cog-name WORD-A) (cog-name WORD-B)))
+				(start-time (get-internal-real-time))
+				(sim (get-cosine))
+				(now (get-internal-real-time))
+				(elapsed-time (* 1.0e-9 (- now start-time))))
+
+			(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
+				sim
+				(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+				(cog-name WORD-A) (cog-name WORD-B)
+				elapsed-time)
+			(if (< cut sim) (display "------------------------------ Bingo!\n"))
+			sim))
 
 	; True, if sim is more than 0.9
-	(< cut sim)
+	(< cut (report-cosine))
 )
 
 ; ---------------------------------------------------------------
-; Given a single word and a list of words or grammatical classes,
-; attempt to assign the the word to one of the classes (or merge
-; the word with one of the other words).  Return the class
-; it was assigned to, or just the original word itself, if it was
-; not assigned to any of them.
+; XXX This is a generic utility, it should be moved to some generic
+; utility location or module.
+;
+(define (par-find PRED LST)
+"
+  par-find PRED LST
+
+  Apply PRED to elements in LST, and return the first element for
+  which PRED evaluates to #t; else return #f.
+
+  This is similar to the srfi-1 `find` function, except that the
+  processing is done in parallel, over multiple threads.
+"
+	; If the number of threads was just 1, then do exactly this:
+	; (find PRED LST)
+
+	(define NTHREADS 2)
+	(define SLEEP-TIME 1)
+
+	; Design issues:
+	; 1) This uses sleep in a hacky manner, to poll for finished
+	;    threads. This is OK for the current application but is
+	;    hacky, and needs to be replaced by some semaphore.
+	; 2) Guile threads suck.  There's some kind of lock contention,
+	;    somewhere, which leads to lots of thrashing, when more
+	;    than 2-3 threads are run. The speedup from even 2 threads
+	;    is lackluster and barely acceptable.
+
+	; Return #t if thr is a thread, and if its still running
+	(define (is-running? thr)
+		(and (thread? thr) (not (thread-exited? thr))))
+
+	; Return exit value of the thread, if its actually a thread.
+	(define (get-result thr)
+		(if (thread? thr) (join-thread thr) #f))
+
+	; Convenience wrapper for srfi-1 partition
+	(define (parton PRED LST)
+		(receive (y n) (partition PRED LST) (list y n)))
+
+	; thread launcher - return a list of the launched threads.
+	; Note: CNT musr be equal to or smaller than (length ITM-LST)
+	(define (launch ITM-LST CNT)
+		(if (< 0 CNT)
+			(cons
+				(call-with-new-thread
+					(lambda () (if (PRED (car ITM-LST)) (car ITM-LST) #f)))
+				(launch (cdr ITM-LST) (- CNT 1)))
+			'()))
+
+	; Check the threads to see if any got an answer.
+	; If so, return the answer.
+	; If not, examine ITEMS in some threads.
+	(define (check-threads THRD-LST ITEMS)
+		; Partition list of threads into those that are running,
+		; and those that are stopped.
+		(define status (parton is-running? THRD-LST))
+		(define running (car status))
+		(define stopped (cadr status))
+
+		; Did any of the stopped threads return a value
+		; other than #f? If so, then return that value.
+		(define found
+			(find (lambda (v) (not (not v))) (map get-result stopped)))
+
+		; Compute number of new threads to start
+		(define num-to-launch
+			(min (- NTHREADS (length running)) (length ITEMS)))
+
+		; Return #t if we've looked at them all.
+		(define done
+			(and (= 0 num-to-launch)
+				(= 0 (length running))
+				(= 0 (length ITEMS))))
+
+		; If we found a value, we are done.
+		; If list is exhausted, we are done.
+		; Else, launch some threads and wait.
+		(if found found
+			(if done #f
+				(let ((thrd-lst (append (launch ITEMS num-to-launch) running)))
+					(if (= 0 num-to-launch) (sleep SLEEP-TIME))
+					(check-threads thrd-lst (drop ITEMS num-to-launch)))))
+	)
+
+	(check-threads (make-list NTHREADS #f) LST)
+)
+
+; ---------------------------------------------------------------
+; Given a single word and a list of grammatical classes, attempt to
+; assign the the word to one of the classes.
+;
+; Given a single word and a list of words, attempt to merge the word
+; with one of the other words.
+;
+; In either case, return the class it was merged into, or just the
+; original word itself, if it was not assigned to any of them.
+; A core assumption here is that the word can be assigned to just one
+; and only one class; thus, all merge determinations can be done in
+; parallel.
+;
+; Run-time is O(n) in the length n of CLS-LST, as the word is
+; compared to every element in the CLS-LST.
 ;
 ; See also the `assign-expand-class` function.
 ;
@@ -385,13 +586,16 @@
 ; (These last two are passed blindly to the merge function).
 ;
 (define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
-	(if (null? CLS-LST) WRD
-		(let ((cls (car CLS-LST)))
-			; If the word can be merged into a class, then do it,
-			; and return the class. Else try again.
-			(if (ok-to-merge LLOBJ cls WRD)
-				(merge-ortho LLOBJ FRAC cls WRD)
-				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
+
+	; Return #t if cls can be merged with WRD
+	(define (merge-pred cls) (ok-to-merge LLOBJ cls WRD))
+
+	(let (; (cls (find merge-pred CLS-LST))
+			(cls (par-find merge-pred CLS-LST))
+		)
+		(if (not cls)
+			WRD
+			(merge-ortho LLOBJ FRAC cls WRD)))
 )
 
 ; ---------------------------------------------------------------
@@ -429,13 +633,23 @@
 )
 
 ; ---------------------------------------------------------------
-; Call function FUNC on all unordered pairs from LST.
-; The function FUNC must accept two arguments.
-; The return value is unspecified.
-; All of the N(N-1)/2 unordered pairs are explored.
-; This means that the runtime is O(N^2)
+; XXX This is a generic utility, it should be moved to some generic
+; utility location or module.
+;
 (define (for-all-unordered-pairs FUNC LST)
+"
+  for-all-unordered-pairs FUNC LST
 
+  Call function FUNC on all possible unordered pairs created from LST.
+  That is, given the LST of N items, create all possible pairs of items
+  from this LST. There will be N(N-1)/2 such pairs.  Then call FUNC on
+  each of these pairs.  This means that the runtime is O(N^2).
+
+  The function FUNC must accept two arguments. The return value of FUNC
+  is ignored.
+
+  The return value is unspecified.
+"
 	(define (make-next-pair primary rest)
 		(define more (cdr primary))
 		(if (not (null? more))
@@ -451,15 +665,22 @@
 )
 
 ; ---------------------------------------------------------------
-; Call function FUNC on all unordered pairs from LST.
-; The function FUNC must accept three arguments: the first two
-; are the pair, and the last is the accumulated (folded) value.
-; It must return the (modified) accumulated value.
-; The return value is the result of folding on these.
-; All of the N(N-1)/2 unordered pairs are explored.
-; This means that the runtime is O(N^2)
+; XXX This is a generic utility, it should be moved to some generic
+; utility location or module.
+;
 (define (fold-unordered-pairs ACC FUNC LST)
+"
+  Call function FUNC on all possible unordered pairs created from LST.
+  That is, given the LST of N items, create all possible pairs of items
+  from this LST. There will be N(N-1)/2 such pairs.  Then call FUNC on
+  each of these pairs.  This means that the runtime is O(N^2).
 
+  The function FUNC must accept three arguments: the first two
+  are the pair, and the last is the accumulated (folded) value.
+  It must return the (modified) accumulated value.
+
+  This returns the result of folding on these pairs.
+"
 	(define (make-next-pair primary rest accum)
 		(define more (cdr primary))
 		(if (null? more) accum
@@ -500,16 +721,22 @@
 ; of all of the classes, the ones that were given plus the ones
 ; that were created.
 ;
-; The typical use is to call this with an empty class-list,
-; initially.
+; A common use is to call this with an empty class-list, initially.
+; In this case, words are compared pair-wise to see if they can be
+; merged together, for a run-time of O(N^2) in the length N of WRD-LST.
+;
+; If CLS-LST is not empty, and is of length M, then the runtime will
+; be roughly O(MN) + O(K^2) where K is what's left of the initial N
+; words that have not been assigned to classes.
 ;
 ; If the class-list contains WordNodes (instead of the expected
 ; WordClassNodes) and a merge is possible, then that WordNode will
 ; be merged to create a class.
 ;
 (define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
-	(format #t "---------  Words remaining=~A Classes=~A ------------\n"
-		(length WRD-LST) (length CLS-LST))
+	(format #t "-------  Words remaining=~A Classes=~A ~A ------\n"
+		(length WRD-LST) (length CLS-LST)
+		(strftime "%c" (localtime (current-time))))
 
 	; If the WRD-LST is empty, we are done; otherwise compute.
 	(if (null? WRD-LST) CLS-LST
@@ -562,11 +789,13 @@
 	; The support API won't work, if we don't have the wild-cards
 	; in the atomspace before we sort. The wild-cards hold/contain
 	; the support subtotals.
+	(define start-time (get-internal-real-time))
 	(for-each
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
 		LST)
 
-	(display "Finished fetching wildcards\n")
+	(format #t "Finished fetching wildcards in ~5F sconds\n"
+		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
 	(sort!
 		; Before sorting, trim the list, discarding words with
@@ -603,15 +832,21 @@
 	; Right now, set to 20 observations, minimum. Less
 	; than this and weird typos and stuff get in.
 	(define min-obs-cutoff 20)
-	(define ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
+	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
 	; Been there, done that; drop the top-20.
-	; (define top-trimed-words (drop ranked-words 20))
+	; (define ranked-words (drop all-ranked-words 20))
+	; (define ranked-words all-ranked-words)
+	; Ad hoc restart point. If we already have N classes, we've
+	; surely pounded the cosines of the first N(N-1)/2 words into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(define ncl (length CLS-LST))
+	(define ranked-words (drop all-ranked-words (* 0.35 ncl cnl)))
 
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
-					; the smallier of word-list and requested size.
+					; the smaller of word-list and requested size.
 					(minsz (if (< wsz size) wsz size))
 					; the first block
 					(chunk (take wlist minsz))
@@ -643,6 +878,7 @@
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pcos (add-pair-cosine-compute psa))
+			(start-time (get-internal-real-time))
 		)
 
 		(display "Start loading words and word-classes\n")
@@ -651,8 +887,9 @@
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
 		; (define all-words (cog-get-atoms 'WordNode))
-		(format #t "Finished loading ~A words\n"
-			(length (cog-get-atoms 'WordNode)))
+		(format #t "Finished loading ~A words in ~5f seconds\n"
+			(length (cog-get-atoms 'WordNode))
+			(* 1.0e-9 (- (get-internal-real-time) start-time)))
 		(loop-over-words pcos 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))
