@@ -84,8 +84,10 @@
 ; a) The combined vector has strictly equal or larger support than
 ;    the parts. This might not be correct, as it seems that it will
 ;    mix in disjuncts that should have been assigned to other meanings.
+;    (the SUPPORT issue; discussed further below).
 ; b) The process is not quite linear, as orthogonal components with
 ;    negative counts are clamped to zero.
+;    (the LEXICAL issue; discussed further, below)
 ; c) The number of vectors being tracked in the system is increasing:
 ;    before there were two, once for each word, now there are three:
 ;    each word remains, with altered counts, as well as thier sum.
@@ -107,12 +109,12 @@
 ; Similar to the above, a linear sum is taken, but the sum is only over
 ; those disjuncts that both words share in common. This might be more
 ; appropriate for disentangling linear combinations of multiple
-; word-senes. It seems like it could be robust even with lower
+; word-senses. It seems like it could be robust even with lower
 ; similarity scores (e.g. when using cosine similarity).
 ;
-; Overlap merging appears to solve the problem a) above, but, on the
-; flip side, it also seems to prevent the discovery and broadening
-; of the ways in which a word might be used.
+; Overlap merging appears to solve the problem a) above (the SUPPORT
+; issue), but, on the flip side, it also seems to prevent the discovery
+; and broadening of the ways in which a word might be used.
 ;
 ; merge-ortho
 ; -----------
@@ -141,8 +143,8 @@
 ; XXX Except this is not what the code actually does, as written. It
 ; deviates a bit from this, in a slightly wacky fashion. XXX FIXME.
 ;
-; Similarity; Cosine similarity
-; -----------------------------
+; Cosine similarity
+; -----------------
 ; There are several different means of comparing similarity between
 ; two words.  The simplest is cosine distance: if the cosine of two
 ; word-vectors is greater than a threshold, they should be merged.
@@ -150,7 +152,59 @@
 ; The cosine-distance is a user tunable paramter in the code below;
 ; it is currently hard-coded to 0.65.
 ;
-; A very diff
+; Semantic similarity
+; -------------------
+; A very different, and more semantically correct merge and clustering
+; criterion is possible.  Its inspired by the observation that some
+; words have multiple different meanings. Consider the word "saw" with
+; the meanings "observe" and "cut".
+;
+; The cosine distance between the two words w_a, w_b is
+;
+;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
+;
+; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
+; The vector v_b can be decomposed int parallel and perendicular parts:
+;
+;   v_b = v_llel + v_perp
+;
+;   v_llel = v_a |v_b| cos / |v_a|
+;   v_perp = v_b - v_llel
+;
+; which has the properties that v_llel points in the same direction as
+; v_a and v_perp is perpendicular to v_a.  Now, because v_perp involves
+; a subtraction, there will be, in general, vector components in v_perp
+; that are negative (as mentioned above). However, if all vector
+; components of v_perp are positive, then we can conclude that v_b can
+; be decomposed into "two meanings" (or more).  One "meaning" is indeed
+; v_a (i.e. is v_llel), the second meaning is v_perp.
+;
+; It seems reasonable to expect that "saw" would obey this relationship,
+; with w_a == observe, w_b == saw, w_perp == cut.
+;
+; However, if v_perp has lots of negative components, then such an
+; orthogonalization seems incorrect. That is, suppose that some other
+; v_a and v_b had a small cosine distance (viz are alost colinear) but
+; v_perp had many negative components. One cannot reasonably expect
+; v_perp to identify "some other meaning" for v_b. Instead, it would
+; seem that v_perp just consists of grunge that "should have been" in
+; v_a, but wasn't.
+;
+; Thus, to solve problem b) above, (the LEXICAL issue), the correct
+; merge algo would seem to be:
+;
+;   Let w_a be an existing cluster
+;   Let w_b be a candidate word to be merged into the cluster.
+;   Compute v_llel and v_perp.
+;   Let v_clamp = v_perp with negative components set to zero.
+;   Let v_anew = v_a + v_llel + (v_b - v_clamp)
+;   Let v_bnew = v_clamp
+;
+; This would seem to have the effect of "broadening" v_a with missing
+; vector components, while cleanly extracting the semantically different
+; parts of v_b and sticking them into v_bnew.
+;
+; XXX this is not yet implemented; FIXME.
 ;
 ; Broadening
 ; ----------
