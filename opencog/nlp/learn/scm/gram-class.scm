@@ -27,6 +27,7 @@
 ; must also be clustered in a consistent manner: these two clustering
 ; steps form a feedback loop.
 ;
+;
 ; Representation
 ; --------------
 ; A grammatical class is represented as
@@ -75,14 +76,9 @@
 ; disjoint; there may be significant overlap. That is, different
 ; grammatical classes are not orthogonal, in general.
 ;
-; Core algorithm
-; --------------
-; The core algorithm implemented here is a variant form of agglomerative
-; clustering:  looping over all words and word-clusters, the similarity
-; between
 ;
-; Similarity
-; ----------
+; Word Similarity
+; ---------------
 ; There are several different means of comparing similarity between
 ; two words.  The simplest is cosine distance: if the cosine of two
 ; word-vectors is greater than a threshold, they should be merged.
@@ -90,12 +86,28 @@
 ; The cosine-distance is a user tunable parameter in the code below;
 ; it is currently hard-coded to 0.65.
 ;
-; Semantic similarity
-; -------------------
-; A very different, and more semantically correct merge and clustering
-; criterion is possible.  Its inspired by the observation that some
-; words have multiple different meanings. Consider the word "saw" with
-; the meanings "observe" and "cut".
+; Other similarity measures are possible, but have not yet been
+; explored.
+;
+;
+; Semantic disambiguation
+; -----------------------
+; The correct notion of a grammatical class is not so much as a
+; collection of words, but rather as a collection of word-senses.
+; Consider the word "saw": it can be the past tense of the verb
+; "to see", or it can be the cutting tool, a noun.  Thus, the word
+; "saw" should belong to at least two different grammatical classes.
+; The actual word-sense is "hidden", only the actual word is observed.
+; The "hidden" word-sense can be partly (or mostly) discerned by looking
+; at how the word was used: nouns are used differently than verbs.
+; The different usage is reflected in the collection of sections
+; ("disjuncts") that are associated with the word-sense.
+;
+; Thus, the vector associated to the word "saw" is the (linear) sum
+; for a noun-vector (the cutting tool) and two different verb-vector
+; (observing; cutting).  This section describes how the cosine-distance
+; can be used to distinguish between these different forms, how to
+; factor the vector of observation counts into distinct classes.
 ;
 ; The cosine distance between the two words w_a, w_b is
 ;
@@ -118,7 +130,8 @@
 ; v_a (i.e. is v_llel), the second meaning is v_perp.
 ;
 ; It seems reasonable to expect that "saw" would obey this relationship,
-; with w_a == observe, w_b == saw, w_perp == cut.
+; with w_a == observe, w_b == saw, w_perp == cut. (This example ignores
+; "saw == cutting tool").
 ;
 ; However, if v_perp has lots of negative components, then such an
 ; orthogonalization seems incorrect. That is, suppose that some other
@@ -128,8 +141,13 @@
 ; seem that v_perp just consists of grunge that "should have been" in
 ; v_a, but wasn't.
 ;
-; Thus, to solve problem b) above, (the LEXICAL issue), the correct
-; merge algo would seem to be:
+; That is, due to a limited (small) number of observations, the negative
+; coefficients in v_perp correspond to ways in which the word w_b was
+; (observed to have been) used in a sentence, and a way that word w_a
+; might have been used in a sentence, but wasn't (hadn't been observed).
+; At least, this is the operational hypothesis, here.
+;
+; Thus, correct merge algo would seem to be:
 ;
 ;   Let w_a be an existing cluster
 ;   Let w_b be a candidate word to be merged into the cluster.
@@ -142,7 +160,23 @@
 ; vector components, while cleanly extracting the semantically different
 ; parts of v_b and sticking them into v_bnew.
 ;
+; It seems reasonable to parameterize the above with a tunable parameter
+; 0 <= alpha <= 1 so that
+;
+;   Let v_anew = v_a + v_llel + alpha (v_b - v_clamp)
+;
 ; XXX this is not yet implemented; FIXME.
+;
+; The above presents a rough argument or hypothesis for extracting
+; "hidden" word-senses from observation probabilities. There is
+; currently no formal data analysis to support or reject this hypothesis,
+; or to measure the quality the results it generates. Insofar as it
+; describes "hidden" meanings infered from observation probabilities,
+; it is plausible to assume that perhaps a Hidden Markov Model (HMM)
+; style approach might provide better results, or that alternately,
+; an Artificial Neural Net (ANN), possibly with deep-learning, might
+; provide a better factorization. At this time, these remain unexplored.
+;
 ;
 ; Merging
 ; -------
@@ -211,6 +245,7 @@
 ; In the code below, this is currently a hard-coded parameter, set to
 ; the ad hoc value of 0.3.  Behavior with different values is unexplored.
 ;
+;
 ; Agglomerative clustering
 ; ------------------------
 ; The de facto algorithm implemented here is agglomerative clustering.
@@ -241,6 +276,7 @@
 ; been done, then when a connector-word is replaced by a connector
 ; word-class, that class may be larger than the number of connectors
 ; originally witnessed. Again, the known usage of the word is broadened.
+;
 ;
 ; Disjunct merging
 ; ----------------
