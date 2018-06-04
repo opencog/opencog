@@ -13421,16 +13421,16 @@ alt: 2-threads:
 
 
                          alt-2thr       alt-1thr
-      "was is" -- "-" in 187.7  secs   80.51  secs
-         "? !" -- "-" in  54.48 secs   19.55  secs
-"city village" -- "-" in  16.09 secs    5.307 secs
-     "her him" -- "-" in  86.21 secs   39.32  secs
        "of in" -- "-" in 612.1  secs  320.2   secs
-  "would will" -- "-" in  28.96 secs   22.97  secs
-      "but or" -- "-" in  38.83 secs   30.16  secs
          ", ;" -- "-" in 335.4  secs  237.1   secs
-     "they we" -- "-" in  48.27 secs   26.95  secs
+      "was is" -- "-" in 187.7  secs   80.51  secs
+     "her him" -- "-" in  86.21 secs   39.32  secs
     "are were" -- "-" in  56.62 secs   34.19  secs
+         "? !" -- "-" in  54.48 secs   19.55  secs
+     "they we" -- "-" in  48.27 secs   26.95  secs
+      "but or" -- "-" in  38.83 secs   30.16  secs
+  "would will" -- "-" in  28.96 secs   22.97  secs
+"city village" -- "-" in  16.09 secs    5.307 secs
 
 Clearly pretty loosing -- execution takes much longer.
 but since in parallel... 1.x speedup!?

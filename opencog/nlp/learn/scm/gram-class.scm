@@ -106,11 +106,11 @@
 ; ---------------
 ; Similar to the above, a linear sum is taken, but the sum is only over
 ; those disjuncts that both words share in common. This might be more
-; appropriate for disentangling linear combinaations of multiple
+; appropriate for disentangling linear combinations of multiple
 ; word-senes. It seems like it could be robust even with lower
 ; similarity scores (e.g. when using cosine similarity).
 ;
-; Overlap merging appears to solve the problem a) above, but. on the
+; Overlap merging appears to solve the problem a) above, but, on the
 ; flip side, it also seems to prevent the discovery and broadening
 ; of the ways in which a word might be used.
 ;
@@ -119,8 +119,38 @@
 ; The above two merge methods are implemented in the `merge-ortho`
 ; function. It takes, as an argument, a fractional weight which is
 ; used when the disjunct isn't shared between both words. Setting
-; the weight to zero gives overlap merging; setting it ton one gives
-; union merging.
+; the weight to zero gives overlap merging; setting it to one gives
+; union merging. Setting it to fractional values provides a merge
+; that is intermediate betwen the two: an overlap, plus a bit more,
+; viz some of the union.
+;
+; In the code below, this is currently a hard-coded paramter, set to
+; the ad hoc value of 0.3.  Behavior with different values is unexplored.
+;
+; Agglomerative clustering
+; ------------------------
+; The de facto algorithm implemented here is agglomerative clustering.
+; That is, each word is compared to each of the existing clusters, and
+; if it is close enough, it is merged in.  If a word cannot be assigned
+; to a cluster, it is treated as a new cluster-point, and is tacked onto
+; the list of existing clusters.
+;
+; That is, the existing clusters act as a seive: new words either fall
+; into one of the existing "holes", or start a new "hole".
+;
+; XXX Except this is not what the code actually does, as written. It
+; deviates a bit from this, in a slightly wacky fashion. XXX FIXME.
+;
+; Similarity; Cosine similarity
+; -----------------------------
+; There are several different means of comparing similarity between
+; two words.  The simplest is cosine distance: if the cosine of two
+; word-vectors is greater than a threshold, they should be merged.
+;
+; The cosine-distance is a user tunable paramter in the code below;
+; it is currently hard-coded to 0.65.
+;
+; A very diff
 ;
 ; Broadening
 ; ----------
@@ -129,14 +159,14 @@
 ; are two distinct opportunities to broaden: first, in the union vs.
 ; overlap merging above, and second, in the merging of disjuncts. That
 ; is, the above merging did not alter the number of disjuncts in use:
-; its disjuncts is a sequence of connectors, each connector specifies
-; a single word. At some point, disjuncts should also be merged, i.e.
-; by merging the connectors on them.
+; the disjuncts on the merged class are still disjuncts with single-word
+; connectors. At some point, disjuncts should also be merged, i.e. by
+; merging the connectors on them.
 ;
 ; If disjunct merging is performed after a series of word mergers have
 ; been done, then when a connector-word is replaced by a connector
 ; word-class, that class may be larger than the number of connectors
-; originally witnessed. Again, the known usage of the word is broaded.
+; originally witnessed. Again, the known usage of the word is broadened.
 ;
 ; Disjunct merging
 ; ----------------
