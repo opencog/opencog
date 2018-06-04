@@ -118,7 +118,7 @@
 ;
 ;   v_b = v_llel + v_perp
 ;
-;   v_llel = v_a |v_b| cos / |v_a|
+;   v_llel = v_a |v_b| cos() / |v_a|
 ;   v_perp = v_b - v_llel
 ;
 ; which has the properties that v_llel points in the same direction as
@@ -153,8 +153,8 @@
 ;   Let w_b be a candidate word to be merged into the cluster.
 ;   Compute v_llel and v_perp.
 ;   Let v_clamp = v_perp with negative components set to zero.
-;   Let v_anew = v_a + v_llel + (v_b - v_clamp)
-;   Let v_bnew = v_clamp
+;   Let v_a^new = v_a + v_llel + (v_b - v_clamp)
+;   Let v_b^new = v_clamp
 ;
 ; This would seem to have the effect of "broadening" v_a with missing
 ; vector components, while cleanly extracting the semantically different
@@ -163,23 +163,67 @@
 ; It seems reasonable to parameterize the above with a tunable parameter
 ; 0 <= alpha <= 1 so that
 ;
-;   Let v_anew = v_a + v_llel + alpha (v_b - v_clamp)
+;   Let v_a^new = v_a + v_llel + alpha (v_b - v_clamp)
 ;
 ; It might also be useful replace `alpha (v_b - v_clamp)` by a sigmoid
 ; function `sigmoid(v_b - v_clamp)`, possibly incorporating the absolute
 ; values |v_b| and |v_clamp| into the sigmoid.
 ;
-; XXX this is not yet implemented; FIXME.
+; The above "semantic merge" vector merge algorithm should be taken
+; as a rough argument or hypothesis for extracting "hidden" word-senses
+; from observation probabilities. There is currently no formal data
+; analysis to support or reject this hypothesis, or to measure the
+; quality the results it generates.
 ;
-; The above presents a rough argument or hypothesis for extracting
-; "hidden" word-senses from observation probabilities. There is
-; currently no formal data analysis to support or reject this hypothesis,
-; or to measure the quality the results it generates. Insofar as it
-; describes "hidden" meanings infered from observation probabilities,
-; it is plausible to assume that perhaps a Hidden Markov Model (HMM)
-; style approach might provide better results, or that alternately,
-; an Artificial Neural Net (ANN), possibly with deep-learning, might
-; provide a better factorization. At this time, these remain unexplored.
+;
+; merge-semantic
+; --------------
+; The above-described "semantic disambiguation" merge algorithm is
+; implemented below, in the `merge-semantic` function.
+;
+; The above seems adequate when w_a is an existing cluster that is
+; already well-aligned with a single word-sense. However, there is
+; a boot-strapping problem: when two words are merged for the first
+; time to create a new cluster, how can one be assured that this new
+; seed-cluster is limited to only one word-sense?
+;
+; The solution to this would seem to be to perform an "overlap merge":
+; that is, to compute the intersection of basis elements (the
+; intersection of "disjuncts" aka "sections") of the two words, and
+; then sum the counts only on this intersected set.  That is, let
+;
+;   {e_a} = set of basis elements in v_a with non-zero coefficients
+;   {e_b} = set of basis elements in v_b with non-zero coefficients
+;   {e_overlap} = {e_a} set-intersection {e_b}
+;   v_o = vector of {e_overlap} i.e. having unit coeffs for each basis.
+;   pi_overlap = v_o v_o^transpose
+;              == projection matrix onto the subspace {e_overlap}
+;   v_a^pi = pi_overlap . v_a == projection of v_a onto {e_overlap}
+;   v_b^pi = pi_overlap . v_b == projection of v_b onto {e_overlap}
+;
+;   v_cluster = v_a^pi + v_b^pi
+;   v_a^new = v_a - v_a^pi
+;   v_b^new = v_b - v_b^pi
+;
+; The idea here is that the vector subspace {e_overlap} consists of
+; those grammatical usages that are common for both words a and b,
+; and thus hopefully correspond to how words a and b are used in a
+; common sense. Thus v_cluster is the common word-sense, while v_a^new
+; and v_b^new are everything else, everything left-over.  Note that
+; v_a^new and v_b^new are orthogonal to v_cluster.
+;
+; Of course, this is not quite correct, if v_a and v_b have several
+; word-senses in common; then v_cluster will be an amalgam of both.
+;
+;
+; Alternative Merge Strategies
+; ----------------------------
+; Insofar as the above "semantic merge" aglorithm describes "hidden"
+; meanings infered from observation probabilities, it is plausible to
+; assume that perhaps a Hidden Markov Model (HMM) style approach might
+; provide better results, or that alternately, an Artificial Neural
+; Net (ANN), possibly with deep-learning, might provide a better
+; factorization. At this time, these remain unexplored.
 ;
 ;
 ; Simpler Merge Algos
@@ -303,12 +347,47 @@
 
 ; ---------------------------------------------------------------------
 
+(define (merge-semantic LLOBJ FRAC WA WB)
+"
+  merge-semantic FRAC WA WB - merge WB into WA, returning the merged
+  class.  If WA is a word, and not a class, then a new class is created
+  and returned. The counts on both WA and WB are altered.
+
+  WA should be a WordNode or a WordClassNode.
+  WB is expected to be a WordNode.
+  FRAC should be a floating point nummber between zero and one,
+     indicating the fraction of the non-shared count of WB to be
+     merged into WA. Setting this to a non-zero value broadens
+     the class. Setting this to 1.0 gives the "pure" semantic merge
+     (described in the primary docs).
+  LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
+     that is, are (word,disjunct) pairs wrapped in a SectionLink.
+
+  The merger of WB into WA is performed, using the 'semantic
+  merge' strategy. This is done like so. If WA and WB are both
+  WordNodes, then a WordClass is created, having both WA and WB as
+  members.  The counts on that word-class are the sum of the counts
+  on the subspace defined by the intersection of WA and WB. (See main
+  docs on the definition of this intersection/projection). Next, the
+  counts on WA and WB are adjusted, so that the projected components
+  are removed, leaving only the orthogonal components that are
+  orthogonal to the new cluster.
+
+  If WA is a WordClassNode, and WB is a WordNode, then WB is merged
+  into WA. Counts are adjusted according to the 'semantic merge' policy
+  described in the main docs.
+"
+)
+
+; ---------------------------------------------------------------------
+
 (define (merge-ortho LLOBJ FRAC WA WB)
 "
   merge-ortho FRAC WA WB - merge WA and WB into a grammatical class.
   Return the merged class.
 
-  WA and WB should be WordNodes or WordClassNodes.
+  WA should be a WordNode or a WordClassNode.
+  WB is expected to be a WordNode.
   FRAC should be a floating point nummber between zero and one,
      indicating the fraction of a non-shared count to be used.
      Setting this to 1.0 gives the sum of the union of supports;
@@ -329,7 +408,7 @@
   only a FRAC fraction of a single, unmatched count is transfered.
 
   If WA is a WordClassNode, and WB is not, then WB is merged into
-  WA. Currently, WB must never be a WordClass....
+  WA.
 "
 	(define psa (add-dynamic-stars LLOBJ))
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
