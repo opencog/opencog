@@ -165,6 +165,10 @@
 ;
 ;   Let v_anew = v_a + v_llel + alpha (v_b - v_clamp)
 ;
+; It might also be useful replace `alpha (v_b - v_clamp)` by a sigmoid
+; function `sigmoid(v_b - v_clamp)`, possibly incorporating the absolute
+; values |v_b| and |v_clamp| into the sigmoid.
+;
 ; XXX this is not yet implemented; FIXME.
 ;
 ; The above presents a rough argument or hypothesis for extracting
@@ -178,12 +182,15 @@
 ; provide a better factorization. At this time, these remain unexplored.
 ;
 ;
-; Merging
-; -------
-; There are several ways in which two words might be merged into a
-; word-class, or a word added to a word-class. All of these are
-; quasi-linear, trying to project out the different classes that
-; the word belongs to.
+; Simpler Merge Algos
+; -------------------
+; Besides the above "semantic disambiguation" merge algorithm, there
+; are several other, very slightly simpler ways in which two words
+; might be merged into a word-class, or a word added to a word-class.
+; These are described below. Compared to the above, the gut sense is
+; that they are "less correct"; however, there is so far no data
+; analysis by which to judge thier utility.
+;
 ;
 ; Union word-pair merging
 ; ------------------------
@@ -196,7 +203,7 @@
 ; that section is removed, as this is a sparse vector). This last step
 ; renders this process only quasi-linear.
 ;
-; Note the following properties of the above algo:
+; Note the following properties of this algo:
 ; a) The combined vector has strictly equal or larger support than
 ;    the parts. This might not be correct, as it seems that it will
 ;    mix in disjuncts that should have been assigned to other meanings.
@@ -220,6 +227,7 @@
 ;    the orthogonal components. However, this increases the size of
 ;    the dataset, and does not seem to serve any useful purpose.
 ;
+;
 ; Overlap merging
 ; ---------------
 ; Similar to the above, a linear sum is taken, but the sum is only over
@@ -231,6 +239,7 @@
 ; Overlap merging appears to solve the problem a) above (the SUPPORT
 ; issue), but, on the flip side, it also seems to prevent the discovery
 ; and broadening of the ways in which a word might be used.
+;
 ;
 ; merge-ortho
 ; -----------
