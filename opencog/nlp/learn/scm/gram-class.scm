@@ -751,8 +751,13 @@
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
 	; Been there, done that; drop the top-20.
-	(define ranked-words (drop all-ranked-words 20))
+	; (define ranked-words (drop all-ranked-words 20))
 	; (define ranked-words all-ranked-words)
+	; Ad hoc restart point. If we already have N classes, we've
+	; surely pounded the cosines of the first N(N-1)/2 words into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(define ncl (length CLS-LST))
+	(define ranked-words (drop all-ranked-words (* 0.35 ncl cnl)))
 
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
