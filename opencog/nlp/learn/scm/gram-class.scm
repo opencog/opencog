@@ -10,7 +10,7 @@
 ; --------
 ; When a pair of words are judged to be grammatically similar, they
 ; can be used to create a "grammatical class", containing both the
-; words, and behaving as thier union/sum.  When a word is judged to
+; words, and behaving as their union/sum.  When a word is judged to
 ; belong to an existing grammatical-class, then some mechanism must
 ; be provided to add that word to the class.  This file implements
 ; the tools for creating and managing such classes.  It does not
@@ -39,11 +39,11 @@
 ;
 ; Basic assumptions
 ; -----------------
-; It is assummed that grammatical classes are stepping stones to word
+; It is assumed that grammatical classes are stepping stones to word
 ; meaning; that meaning and grammatical class are at least partly
 ; correlated. It is assumed that words can have multiple meanings,
 ; and can belong to multiple grammatical classes. It is assumed that
-; the sum total numner of observations of a word is a linear combination
+; the sum total number of observations of a word is a linear combination
 ; of the different ways that the word was used in the text sample.
 ; Thus, the task is to decompose the observed counts on a single word,
 ; and assign them to one of a number of different grammatical classes.
@@ -74,7 +74,7 @@
 ; Given two words, add them as vectors, creating a new vector, the
 ; word-class. This is purely linear summation. Next, compute the
 ; orthogonal components of the words to the word-class, and replace
-; the words by thier orthogonal components - i.e. subtract the parallel
+; the words by their orthogonal components - i.e. subtract the parallel
 ; components. It seems best to avoid negative observation counts, so
 ; if any count on any section is negative, it is clamped to zero (i.e.
 ; that section is removed, as this is a sparse vector). This last step
@@ -90,15 +90,15 @@
 ;    (the LEXICAL issue; discussed further, below)
 ; c) The number of vectors being tracked in the system is increasing:
 ;    before there were two, once for each word, now there are three:
-;    each word remains, with altered counts, as well as thier sum.
+;    each word remains, with altered counts, as well as their sum.
 ;    It might be nice to prune the number of vectors, so that the
 ;    dataset does not get outrageously large. Its possible that short
 ;    vectors might be mostly noise.
 ; d) There is another non-linearity, when a word is assigned to an
 ;    existing word-class. This assignment will slightly alter the
 ;    direction of the word-class vector, but will not trigger the
-;    recomputation of previous orthognoal components.
-; e) The replacement of word-vectors by thier orthogonal components
+;    recomputation of previous orthogonal components.
+; e) The replacement of word-vectors by their orthogonal components
 ;    means that the original word vectors are "lost". This could be
 ;    avoided by creating new "left-over" word vectors to hold just
 ;    the orthogonal components. However, this increases the size of
@@ -123,10 +123,10 @@
 ; used when the disjunct isn't shared between both words. Setting
 ; the weight to zero gives overlap merging; setting it to one gives
 ; union merging. Setting it to fractional values provides a merge
-; that is intermediate betwen the two: an overlap, plus a bit more,
+; that is intermediate between the two: an overlap, plus a bit more,
 ; viz some of the union.
 ;
-; In the code below, this is currently a hard-coded paramter, set to
+; In the code below, this is currently a hard-coded parameter, set to
 ; the ad hoc value of 0.3.  Behavior with different values is unexplored.
 ;
 ; Agglomerative clustering
@@ -137,7 +137,7 @@
 ; to a cluster, it is treated as a new cluster-point, and is tacked onto
 ; the list of existing clusters.
 ;
-; That is, the existing clusters act as a seive: new words either fall
+; That is, the existing clusters act as a sieve: new words either fall
 ; into one of the existing "holes", or start a new "hole".
 ;
 ; XXX Except this is not what the code actually does, as written. It
@@ -149,7 +149,7 @@
 ; two words.  The simplest is cosine distance: if the cosine of two
 ; word-vectors is greater than a threshold, they should be merged.
 ;
-; The cosine-distance is a user tunable paramter in the code below;
+; The cosine-distance is a user tunable parameter in the code below;
 ; it is currently hard-coded to 0.65.
 ;
 ; Semantic similarity
@@ -164,7 +164,7 @@
 ;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
 ;
 ; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
-; The vector v_b can be decomposed int parallel and perendicular parts:
+; The vector v_b can be decomposed into parallel and perpendicular parts:
 ;
 ;   v_b = v_llel + v_perp
 ;
@@ -184,7 +184,7 @@
 ;
 ; However, if v_perp has lots of negative components, then such an
 ; orthogonalization seems incorrect. That is, suppose that some other
-; v_a and v_b had a small cosine distance (viz are alost colinear) but
+; v_a and v_b had a small cosine distance (viz are almost collinear) but
 ; v_perp had many negative components. One cannot reasonably expect
 ; v_perp to identify "some other meaning" for v_b. Instead, it would
 ; seem that v_perp just consists of grunge that "should have been" in
@@ -225,7 +225,7 @@
 ; Disjunct merging
 ; ----------------
 ; Disjunct merging is the second step in creating grammatical classes.
-; The idea here is to replace individual connectors that specifiy words
+; The idea here is to replace individual connectors that specify words
 ; with connectors that specify word-classes. This step is examined in
 ; greater detail in `cset-class.scm`.
 ;
