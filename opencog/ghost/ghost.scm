@@ -104,6 +104,9 @@
 ; The initial urge of goals
 (define initial-urges '())
 
+; The default urge is 0
+(define default-urge 0)
+
 ; A list of top level goals that will be shared with all the rules
 ; defined under it
 (define top-lv-goals '())
