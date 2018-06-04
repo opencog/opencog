@@ -41,7 +41,10 @@
 
   Return the present value of GOAL.
 "
-  (cog-value-ref (cog-value goal (Predicate "value")) 0)
+  (define gv (cog-value goal (Predicate "value")))
+  (if (null? gv)
+    (error (format #f "Goal \"~a\" has not been created?" (cog-name goal)))
+    (cog-value-ref gv 0))
 )
 
 ; --------------------------------------------------------------
@@ -62,7 +65,10 @@
   Returns the present desired-goal-value for GOAL. GOAL is a node
   representin the goal concerned.
 "
-  (cog-value-ref (cog-value goal dgv-key) 0)
+  (define gv (cog-value goal dgv-key))
+  (if (null? gv)
+    (error (format #f "Goal \"~a\" has not been created?" (cog-name goal)))
+    (cog-value-ref gv 0))
 )
 
 ; --------------------------------------------------------------
