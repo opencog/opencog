@@ -139,17 +139,17 @@
 
 ;; Given various TVs calculate the TV of Q(a)
 (define (conditional-full-instantiation-tv-formula Pinst-tv Impl-tv P-tv)
-  (let* ((Impl-s (tv-mean Impl-tv))
-         (Impl-c (tv-conf Impl-tv))
-         (P-s (tv-mean P-tv))
-         (P-c (tv-conf P-tv))
+  (let* ((Impl-s (cog-tv-mean Impl-tv))
+         (Impl-c (cog-tv-conf Impl-tv))
+         (P-s (cog-tv-mean P-tv))
+         (P-c (cog-tv-conf P-tv))
          ;; Hacks to overcome the lack of distributional TV. If s=1
          ;; and c=0, then assign s to the mode value satisfying the
          ;; deduction consistency constraint (what a pain, let's use
          ;; 0.25 for now).
          (P-s (if (and (< 0.99 P-s) (<= P-c 0)) 0.25 P-s))
-         (Pinst-s (tv-mean Pinst-tv))
-         (Pinst-c (tv-conf Pinst-tv))
+         (Pinst-s (cog-tv-mean Pinst-tv))
+         (Pinst-c (cog-tv-conf Pinst-tv))
          (Qinst-s (* Impl-s Pinst-s))
          ;; (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
          (Qinst-c (* Impl-c Pinst-c (if (< 0.99 Qinst-s) 1 (- 1 P-s)))))
@@ -231,7 +231,7 @@
          (Impl-tv (cog-tv Impl))
          (P-tv (cog-tv P))
          (Qinst-tv (conditional-full-instantiation-tv-formula Pinst-tv Impl-tv P-tv)))
-    (if (< 0 (tv-conf Qinst-tv)) ; avoid creating informationless knowledge
+    (if (< 0 (cog-tv-conf Qinst-tv)) ; avoid creating informationless knowledge
         (cog-merge-hi-conf-tv! Qinst Qinst-tv))))
 
 ;; Name the implication scope meta rule
@@ -346,7 +346,7 @@
          (Impl-tv (cog-tv Impl))
          (P-tv (cog-tv P))
          (Qinst-tv (conditional-full-instantiation-tv-formula Pinst-tv Impl-tv P-tv)))
-    (if (< 0 (tv-conf Qinst-tv)) ; avoid creating informationless knowledge
+    (if (< 0 (cog-tv-conf Qinst-tv)) ; avoid creating informationless knowledge
         (cog-merge-hi-conf-tv! Qinst Qinst-tv))))
 
 ;; Generate and name

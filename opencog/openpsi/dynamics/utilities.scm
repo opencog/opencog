@@ -74,8 +74,8 @@
 	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
 		(set! result (string->number (cog-name result))))
 	; if result is a tv and confidenct is 0, means that it has not been set
-	(if (and (cog-tv? result) (> (tv-conf result) 0))
-		(set! result (tv-mean result)))
+	(if (and (cog-tv? result) (> (cog-tv-conf result) 0))
+		(set! result (cog-tv-mean result)))
 	(if (not (number? result))
 		(set! result #f))
     ;(format #t "return result: ~a\n" result)
@@ -159,7 +159,7 @@
 		; else value representation type is not yet set
 		;begin
 		; Check if value is stored in StateLink, which is the default
-		(if (eq? (tv-mean
+		(if (eq? (cog-tv-mean
 			(cog-evaluate!
 				(Satisfaction
 					(State
@@ -178,7 +178,7 @@
 				(if (or (equal? atom-type 'PredicateNode)
 					   (equal? atom-type 'GroundedPredicateNode)
 					   (equal? atom-type 'DefinedPredicateNode))
-					(let ((confidence (tv-conf
+					(let ((confidence (cog-tv-conf
 							(cog-evaluate! (Evaluation entity (List))))))
 						(if (not (eq? confidence 0))
 							(begin

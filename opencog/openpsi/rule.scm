@@ -284,8 +284,8 @@
     ; stv-list, for the purpose of estimating the truthvalue of a
     ; context when it is true.
     (stv
-      (fold * 1 (map (lambda (x) (tv-mean x)) stv-list))
-      (fold min 1 (map (lambda (x) (tv-conf x)) stv-list)))
+      (fold * 1 (map (lambda (x) (cog-tv-mean x)) stv-list))
+      (fold min 1 (map (lambda (x) (cog-tv-conf x)) stv-list)))
   )
 
   ; map-in-order is used to simulate AndLink assuming
