@@ -29206,7 +29206,8 @@ Merge Results 5 June 2018
 After a very long hiatus, restart.
  All earlier merge data lost!? So: running the 'ortho-merge' strategy from
  gram-class.scm, for 48 hours, get find 230 words in classified into 38 classes.
- This table list them exhaustively:
+ (Seven more words got classified as I prepared this, so the counts may
+ be off.) This table list them exhaustively:
 \end_layout
 
 \begin_layout Standard
@@ -29517,7 +29518,7 @@ will would might should may can must could
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Imperatives
 \end_layout
 
 \end_inset
@@ -29546,7 +29547,7 @@ or but perhaps nor though And while
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Conjunctions
 \end_layout
 
 \end_inset
@@ -30010,7 +30011,7 @@ thus sometimes
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Deduction
 \end_layout
 
 \end_inset
@@ -30039,7 +30040,7 @@ therefore indeed
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Deduction
 \end_layout
 
 \end_inset
@@ -30068,7 +30069,7 @@ is was
 \begin_inset Text
 
 \begin_layout Plain Layout
-Present
+to be - Singular
 \end_layout
 
 \end_inset
@@ -30097,7 +30098,7 @@ are were
 \begin_inset Text
 
 \begin_layout Plain Layout
-Past
+to be - Plural
 \end_layout
 
 \end_inset
@@ -30126,7 +30127,7 @@ Past
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Sentence end
 \end_layout
 
 \end_inset
@@ -30155,7 +30156,7 @@ Past
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Punct
 \end_layout
 
 \end_inset
@@ -30213,7 +30214,7 @@ they we
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Anaphora
 \end_layout
 
 \end_inset
@@ -30242,7 +30243,7 @@ cannot shall
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+Imperatives
 \end_layout
 
 \end_inset
@@ -30340,6 +30341,29 @@ France England
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+Here's a graph of the above distribution.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/class-sizes.eps
+	width 60page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Looks to be approximately Zipfian.
+ No surprise.
 \end_layout
 
 \begin_layout Section*
