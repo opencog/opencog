@@ -66,10 +66,35 @@
 	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
 	(prt-distribution nmemb))
 
-; Print disjunct distribution, viz, number of disjuncts on each class
+; Print disjunct support distribution, viz, number of disjuncts on
+; each class
+; Viz, this is the "support" or l_0 size.
 ; First column: numerical ID for the class.
 ; Second column: number of disjuncts in that class.
 (define (prt-disjunct-distribution)
 	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'Section)))
+	(prt-distribution nmemb))
+
+; Print disjunct-count distribution, viz, total number of observations
+; of disjuncts on each class
+; Viz, this is the "count" or l_1 size.
+; First column: numerical ID for the class.
+; Second column: sum of observations of disjuncts in that class.
+(define (prt-disjunct-count-distribution)
+	(define (nmemb CLS)
+		(fold (lambda (SECT cnt) (+ cnt (cog-tv-count(cog-tv SECT)))) 0
+ 			(cog-incoming-by-type CLS 'Section)))
+	(prt-distribution nmemb))
+
+; Print disjunct-length distribution, viz, mean-square number of
+; observations of disjuncts on each class
+; Viz, this is the "length" or l_2 size.
+; First column: numerical ID for the class.
+; Second column: mean-square number of observations of disjuncts in that class.
+(define (prt-disjunct-length-distribution)
+	(define (nmemb CLS) (sqrt
+		(fold (lambda (SECT cnt) (+ cnt 
+			(* (cog-tv-count(cog-tv SECT)) (cog-tv-count(cog-tv SECT))))) 0
+ 			(cog-incoming-by-type CLS 'Section))))
 	(prt-distribution nmemb))
 ; 

@@ -30470,18 +30470,39 @@ Here's a graph of the above distribution.
 
 \end_inset
 
-
+ 
 \end_layout
 
 \begin_layout Standard
 Here's a graph of the number disjuncts in each grammatical class.
- (There were 259 wordsclassified into 42 classes when this was prepared).
+ (There were 259 words classified into 42 classes when this was prepared).
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+number of disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+ is the same as the 
+\begin_inset Quotes eld
+\end_inset
+
+support
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+ size of the vector.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename word-classes/class-disjuncts.eps
+	filename word-classes/class-dj-support.eps
 	width 80text%
 
 \end_inset
@@ -30490,7 +30511,53 @@ Here's a graph of the number disjuncts in each grammatical class.
 \end_layout
 
 \begin_layout Standard
-So then...
+Continuing, below is the total count of the number of observations of the
+ disjuncts (There were 269 words classified into 44 classes when this was
+ prepared).
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+count of disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+ is the same as the 
+\begin_inset Quotes eld
+\end_inset
+
+count
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Manhatten distance
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Formula $l_{1}$
+\end_inset
+
+ size of the vector.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/class-dj-count.eps
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Soo
 \end_layout
 
 \begin_layout Section*
