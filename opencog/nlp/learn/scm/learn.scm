@@ -8,6 +8,7 @@
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
 (load "learn/common.scm")
+(load "learn/utilities.scm")
 (load "learn/link-pipeline.scm")
 (load "learn/singletons.scm")
 (load "learn/batch-word-pair.scm")
