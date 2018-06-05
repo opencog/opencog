@@ -20,13 +20,33 @@
 ; Print the members of one class.
 (define (prt-members-of-class CLS)
 	(define membs (cog-incoming-by-type CLS 'MemberLink))
-	(format #t "Class <~A> has ~A members:\n"
+	(format #t "Class <~A> has ~A members:\n   "
 		(cog-name CLS) (length membs))
 	(for-each
 		(lambda (memb)
-			(format #t "      ~A\n" (cog-name (gar memb))))
-		membs))
+			(format #t "~A " (cog-name (gar memb))))
+		membs)
+	(newline))
 
 ; Print all classes and members
-(for-each prt-members-of-class (cog-get-atoms 'WordClassNode))
+(define (prt-all-classes)
+	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
+	(define all-classes (cog-get-atoms 'WordClassNode))
+	(define by-size
+		(sort! all-classes
+			(lambda (CLS-A CLS-B) (> (nmemb CLS-A) (nmemb CLS-B)))))
+	(for-each prt-members-of-class by-size))
 
+; Print size distribution
+(define (prt-distribution)
+	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
+	(define all-classes (cog-get-atoms 'WordClassNode))
+	(define by-size
+		(sort! all-classes
+			(lambda (CLS-A CLS-B) (> (nmemb CLS-A) (nmemb CLS-B)))))
+	(define cnt 1)
+	(for-each
+		(lambda (CLS)
+			(format #t "~A	~A\n" cnt (nmemb CLS))
+			(set! cnt (+ cnt 1)))
+		by-size))
