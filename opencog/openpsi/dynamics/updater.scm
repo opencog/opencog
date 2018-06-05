@@ -703,7 +703,7 @@
 	;(format #t "\nevaluating: ~a\n" antecedent)
 
 	; starting out not using time server but will add
-	(if (equal? (tv-mean (cog-evaluate! antecedent)) 1.0)
+	(if (equal? (got-tv-mean (cog-evaluate! antecedent)) 1.0)
 		(let ((consequent (list-ref (cog-outgoing-set rule) 2)))
 			;(format #t "\n**********************************\nexecuting: ~a"
 			;	consequent)
