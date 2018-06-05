@@ -1,7 +1,10 @@
 #
-# Distribution of word-class sizes
+# Number of words in each class.
 # After 48 hour run of `merge-ortho`on `en_pairs_cfive_class`
 # 2 June 2018
+#
+# first column: class-id
+# second column: number of words in that class.
 #
 1	45
 2	18

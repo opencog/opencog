@@ -10,9 +10,9 @@ set logscale y
 set logscale x
 set xrange [1:40]
 set yrange [1:50]
-set title "Number of words in each word-classes"
+set title "Number of words in each word-class"
 set xlabel "Rank"
-set ylabel "Size"
+set ylabel "Number of words"
 plot "class-words.dat" using 1:2 with lines linewidth 5 title "", \
      "class-words.dat" using  1:(40.0/($1)** 0.85) with lines linewidth 2 \
       title "40 / N^{0.85}"

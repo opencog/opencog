@@ -30466,7 +30466,7 @@ Here's a graph of the above distribution.
 \align center
 \begin_inset Graphics
 	filename word-classes/class-words.eps
-	width 60page%
+	width 80text%
 
 \end_inset
 
@@ -30474,7 +30474,23 @@ Here's a graph of the above distribution.
 \end_layout
 
 \begin_layout Standard
-The 
+Here's a graph of the number disjuncts in each grammatical class.
+ (There were 259 wordsclassified into 42 classes when this was prepared).
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/class-disjuncts.eps
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So then...
 \end_layout
 
 \begin_layout Section*
