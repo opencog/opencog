@@ -30460,6 +30460,19 @@ Here's a graph of the above distribution.
  It looks to be approximately Zipfian.
  That's no surprise.
  Total of 38 classes shown.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This and the remaining graphs built with 'word-classes.scm'prt-disjunct-distribut
+ion, etc.
+ 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -30496,7 +30509,7 @@ support
 \begin_inset Formula $l_{0}$
 \end_inset
 
- size of the vector.
+ norm of the vector.
 \end_layout
 
 \begin_layout Standard
@@ -30542,7 +30555,7 @@ Manhatten distance
 \begin_inset Formula $l_{1}$
 \end_inset
 
- size of the vector.
+ norm of the vector.
 \end_layout
 
 \begin_layout Standard
@@ -30557,7 +30570,47 @@ Manhatten distance
 \end_layout
 
 \begin_layout Standard
-Soo
+And again, below is the length of each vector, viz, the root-mean-square
+ count of the number of observations of the disjuncts (There were 269 words
+ classified into 44 classes when this was prepared).
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+RMS count of disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+ is the same as the 
+\begin_inset Quotes eld
+\end_inset
+
+length
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+ norm of the vector.
+ The initial part of this graph is the most Zipfian so far, with a slope
+ of exactly 1.0, as eyeballed.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/class-dj-length.eps
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Soooo....
 \end_layout
 
 \begin_layout Section*
