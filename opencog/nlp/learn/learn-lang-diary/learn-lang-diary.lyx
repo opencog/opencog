@@ -29204,20 +29204,128 @@ Merge Results 5 June 2018
 
 \begin_layout Standard
 After a very long hiatus, restart.
- All earlier merge data lost!? So: running the 'ortho-merge' strategy from
- gram-class.scm, for 48 hours, get find 230 words in classified into 38 classes.
+ All earlier merge data lost!? 
+\end_layout
+
+\begin_layout Standard
+Here's a sample of automatically-discovered grammatical classes, using the
+ '
+\family typewriter
+ortho-merge
+\family default
+' strategy from '
+\family typewriter
+gram-class.scm
+\family default
+'.
+ I seem to have lost/corrupted a previous, larger dataset, so this was remade
+ from scratch the last few days.
+ Source dataset is '
+\family typewriter
+en_pairs_cfive_class
+\family default
+'.
+ 
+\end_layout
+
+\begin_layout Standard
+This run took 48 hours (its very far from done, this is a snapshot), it
+ found 230 words that it could classify into 38 classes.
  (Seven more words got classified as I prepared this, so the counts may
- be off.) This table list them exhaustively:
+ be off.) The table below lists them exhaustively.
+ Note that some words appear in multiple classes: for example, 
+\begin_inset Quotes eld
+\end_inset
+
+mother father
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Some words are clearly mis-classified, but there are not many of those.
+ Some classes are a bit confusing as to thier content, but most seem very
+ clear.
+ The classes are clearly semantic in nature; for example, there are two
+ distinct classes of prepositions.
+ The semantics is entertainingly insightful: 
+\begin_inset Quotes eld
+\end_inset
+
+voice mother hands heart head father mind face feet
+\begin_inset Quotes erd
+\end_inset
+
+ are parts of oneself, with some unexpected members: 
+\begin_inset Quotes eld
+\end_inset
+
+mother, father
+\begin_inset Quotes erd
+\end_inset
+
+ are not normally considered to be body parts, but are, in some sense, deeply,
+ 
+\begin_inset Quotes eld
+\end_inset
+
+parts of oneself
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Similarly, 
+\begin_inset Quotes eld
+\end_inset
+
+wife arm daughter friend mouth friends brother
+\begin_inset Quotes erd
+\end_inset
+
+ are mostly relatives and relationships, yet 
+\begin_inset Quotes eld
+\end_inset
+
+arm mouth
+\begin_inset Quotes erd
+\end_inset
+
+ are not.
+ Perhaps the arm and mouth have a mind of thier own, functioning a bit independe
+ntly from the true self?
+\end_layout
+
+\begin_layout Standard
+I'll try to run this a few more days, and present a newer report.
+ While reviving this old code, I realized that the classification algorithm
+ being used here has multiple faults and is a bit crude.
+ I'm writing a nicer algo right now.
+ I don't really know how to compare the quality of the algos, at this point.
+\end_layout
+
+\begin_layout Standard
+Meanwhile, you shuld be able to get similar results, by applying the code
+ in '
+\family typewriter
+gram-class.scm
+\family default
+' to a dataset that contains disjuncts dervied from MST parses.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="38" columns="3">
-<features tabularvalignment="middle" tabularwidth="80page%">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
-<column alignment="left" valignment="top" width="60col%">
-<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="80col%">
+<column alignment="left" valignment="top" width="18col%">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -29766,7 +29874,7 @@ Possesive verbs
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29775,7 +29883,7 @@ son arms own eyes
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29795,7 +29903,7 @@ son arms own eyes
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29804,7 +29912,7 @@ her me him us
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29824,7 +29932,7 @@ Anaphora
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29833,7 +29941,7 @@ heard felt knew saw
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29853,7 +29961,7 @@ Simple past - action
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29862,7 +29970,7 @@ making such like
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29882,7 +29990,7 @@ making such like
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29891,7 +29999,7 @@ our its their
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29911,7 +30019,7 @@ Possesives - plural
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29920,7 +30028,7 @@ five three four
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29940,7 +30048,7 @@ five three four
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29949,7 +30057,7 @@ during between among
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29969,7 +30077,7 @@ Prepositions
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29978,7 +30086,7 @@ once least
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -29998,7 +30106,7 @@ once least
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30007,7 +30115,7 @@ thus sometimes
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30027,7 +30135,7 @@ Deduction
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30036,7 +30144,7 @@ therefore indeed
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30056,7 +30164,7 @@ Deduction
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30065,7 +30173,7 @@ is was
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30085,7 +30193,7 @@ to be - Singular
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30094,7 +30202,7 @@ are were
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30114,7 +30222,7 @@ to be - Plural
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30123,7 +30231,7 @@ to be - Plural
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30143,7 +30251,7 @@ Sentence end
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30152,7 +30260,7 @@ Sentence end
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30172,7 +30280,7 @@ Punct
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30181,7 +30289,7 @@ And The
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30201,7 +30309,7 @@ Sentence start
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30210,7 +30318,7 @@ they we
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30230,7 +30338,7 @@ Anaphora
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30239,7 +30347,7 @@ cannot shall
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30259,7 +30367,7 @@ Imperatives
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30268,7 +30376,7 @@ mother father
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30288,7 +30396,7 @@ mother father
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30297,7 +30405,7 @@ sort number
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30317,7 +30425,7 @@ sort number
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30326,7 +30434,7 @@ France England
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -30348,6 +30456,9 @@ France England
 \end_inset
 
 Here's a graph of the above distribution.
+ Its on a log-log scale.
+ It looks to be approximately Zipfian.
+ That's no surprise.
 \end_layout
 
 \begin_layout Standard
@@ -30359,11 +30470,6 @@ Here's a graph of the above distribution.
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-Looks to be approximately Zipfian.
- No surprise.
 \end_layout
 
 \begin_layout Section*
