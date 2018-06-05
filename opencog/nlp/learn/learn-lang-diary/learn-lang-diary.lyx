@@ -30459,6 +30459,7 @@ Here's a graph of the above distribution.
  Its on a log-log scale.
  It looks to be approximately Zipfian.
  That's no surprise.
+ Total of 38 classes shown.
 \end_layout
 
 \begin_layout Standard
@@ -30470,6 +30471,10 @@ Here's a graph of the above distribution.
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The 
 \end_layout
 
 \begin_layout Section*

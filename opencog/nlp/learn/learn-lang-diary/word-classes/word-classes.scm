@@ -17,6 +17,12 @@
 ; Show them all
 (cog-get-atoms 'WordClassNode)
 
+; How many words have been classified?
+(define (num-classified-words)
+	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
+	(fold (lambda (CLS cnt) (+ cnt (nmemb CLS))) 0
+		(cog-get-atoms 'WordClassNode)))
+
 ; Print the members of one class.
 (define (prt-members-of-class CLS)
 	(define membs (cog-incoming-by-type CLS 'MemberLink))
@@ -37,16 +43,33 @@
 			(lambda (CLS-A CLS-B) (> (nmemb CLS-A) (nmemb CLS-B)))))
 	(for-each prt-members-of-class by-size))
 
-; Print size distribution
-(define (prt-distribution)
-	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
+; Print distribution, viz, Some statistic, vs. the class.
+; First column: numerical ID for the class.
+; Second column: The statistic.
+; The FUNC  should be a function taking the class, returning a number.
+(define (prt-distribution FUNC)
 	(define all-classes (cog-get-atoms 'WordClassNode))
 	(define by-size
 		(sort! all-classes
-			(lambda (CLS-A CLS-B) (> (nmemb CLS-A) (nmemb CLS-B)))))
+			(lambda (CLS-A CLS-B) (> (FUNC CLS-A) (FUNC CLS-B)))))
 	(define cnt 1)
 	(for-each
 		(lambda (CLS)
-			(format #t "~A	~A\n" cnt (nmemb CLS))
+			(format #t "~A	~A\n" cnt (FUNC CLS))
 			(set! cnt (+ cnt 1)))
 		by-size))
+
+; Print size distribution, viz, number of member-words.
+; First column: numerical ID for the class.
+; Second column: number of words in that class.
+(define (prt-word-distribution)
+	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
+	(prt-distribution nmemb))
+
+; Print disjunct distribution, viz, number of disjuncts on each class
+; First column: numerical ID for the class.
+; Second column: number of disjuncts in that class.
+(define (prt-disjunct-distribution)
+	(define (nmemb CLS) (length (cog-incoming-by-type CLS 'Section)))
+	(prt-distribution nmemb))
+; 
