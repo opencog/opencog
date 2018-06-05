@@ -8,7 +8,10 @@
   #:use-module (opencog exec)
   #:use-module (opencog openpsi)
   #:export (
-    ; Sensory input
+    ; Perception switches
+    perception-start!
+    perception-stop!
+    ; Perception input apis
     perceive-face
     perceive-emotion
     perceive-word
@@ -194,14 +197,39 @@
 ;    (List (Number x) (Number y) (Number z)))
 (define default-stimulus 150)
 
+
+(define percep #f)
+(define (perception-start!)
+"
+  perception-start
+
+  This declares that all perception apis should start recording changes
+  when called.
+"
+  (set! percep #t)
+)
+
+(define (perception-stop!)
+"
+  perception-stop
+
+  This declares that all perception apis should stop recording changes
+  when called.
+"
+  (set! percep #f)
+)
+
 (define (record-perception model new-conf)
   (let ((old-conf (tv-conf (cog-tv model)))
     (time (FloatValue (current-time-us))))
 
-    (set-time-perceived! model (FloatValue (current-time-us)))
-    (set-event-times! model old-conf new-conf time)
-    (cog-set-tv! model (stv 1 new-conf))
-    (cog-stimulate model default-stimulus)
+    (if percep (begin
+      (set-time-perceived! model (FloatValue (current-time-us)))
+      (set-event-times! model old-conf new-conf time)
+      (cog-set-tv! model (stv 1 new-conf))
+      (cog-stimulate model default-stimulus)))
+
+    model
   )
 )
 
@@ -274,16 +302,18 @@
 
   If FACE-ID = \"\" then an unidentified source is talking.
 
-  Returns WORD after increasing its sti.
+  Returns (WordNode WORD) after increasing its sti.
 "
   ;TODO: How to represent word said by face-id without having an
   ; explosion of atoms.
   (define wn (Word word))
   (define cn (Concept word))
-  (set-time-perceived! wn (FloatValue (current-time-us)))
-  (run-hook hook-perceive-word)
-  (perception-stimulate wn)
-  (perception-stimulate cn)
+  (if percep (begin
+    (set-time-perceived! wn (FloatValue (current-time-us)))
+    (run-hook hook-perceive-word)
+    (perception-stimulate wn)
+    (perception-stimulate cn)))
+  wn
 )
 
 ; --------------------------------------------------------------
