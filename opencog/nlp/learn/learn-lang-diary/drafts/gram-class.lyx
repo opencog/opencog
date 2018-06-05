@@ -1359,7 +1359,7 @@ Here's a graph of the above distribution.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename ../word-classes/class-sizes.eps
+	filename /home/linas/src/novamente/src/opencog-git/opencog/nlp/learn/learn-lang-diary/word-classes/class-words.eps
 	width 60page%
 
 \end_inset
