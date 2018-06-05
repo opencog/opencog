@@ -201,7 +201,7 @@
 (define percep #f)
 (define (perception-start!)
 "
-  perception-start
+  perception-start!
 
   This declares that all perception apis should start recording changes
   when called.
@@ -211,7 +211,7 @@
 
 (define (perception-stop!)
 "
-  perception-stop
+  perception-stop!
 
   This declares that all perception apis should stop recording changes
   when called.
