@@ -13435,6 +13435,13 @@ alt: 2-threads:
 Clearly pretty loosing -- execution takes much longer.
 but since in parallel... 1.x speedup!?
 
+ wtf...
+
+Baseline: 328
+355 elapsed for 1 thread.  again: 347  -- 93%  makes snese due to sched sleep.
+232 elapsed for 2 threads. --  141%
+217 elapsed for 3 threads. again: 219 -- 150%
+210 elapsed for 4 threads. -- 156%
 
 =================================================================
  (define pca (make-pseudo-cset-api))
@@ -13447,6 +13454,7 @@ but since in parallel... 1.x speedup!?
 (define supp-obj (add-support-compute wild-obj))
    (define central-obj (make-central-compute wild-obj))
    (define store-obj (make-store wild-obj))
+
 
 
 

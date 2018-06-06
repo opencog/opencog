@@ -32,7 +32,7 @@
 	; If the number of threads was just 1, then do exactly this:
 	; (find PRED LST)
 
-	(define NTHREADS 2)
+	(define NTHREADS 4)
 	(define SLEEP-TIME 1)
 
 	; Design issues:
@@ -96,7 +96,7 @@
 		; Else, launch some threads and wait.
 		(if found found
 			(if done #f
-				(let ((thrd-lst (append (launch ITEMS num-to-launch) running)))
+				(let ((thrd-lst (append! (launch ITEMS num-to-launch) running)))
 					(if (= 0 num-to-launch) (sleep SLEEP-TIME))
 					(check-threads thrd-lst (drop ITEMS num-to-launch)))))
 	)
