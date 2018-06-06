@@ -59,7 +59,7 @@
 ;   it. This scanning order makes it 'almost' hierarchical.  It behaves
 ;   a bit pathologically when the length of the word-list is long.
 ;
-; * `chunk-over-words`, which is similar to `classify-pair-wise`,
+; * `diag-over-words`, which is similar to `classify-pair-wise`,
 ;   except that it explores only a sequence of block diagonals down
 ;   the middle. Specifically, it examines the block of 20x20 pairs
 ;   of the most common words, followed by the block 40x40 of the
@@ -72,7 +72,7 @@
 ;   can be forced by restarting the algo.
 ;
 ; Its hard to say which of these strategies is the "best". Both
-; `agglo-over-words` and `chunk-over-words` have desirable behaviors.
+; `agglo-over-words` and `diag-over-words` have desirable behaviors.
 ;
 ; One restart, all three algos suffer from a common problem: they create
 ; an ordered list of words by frequency; however, this is computed from
@@ -432,11 +432,11 @@
 ;
 ; XXX There are two user-adjustable parameters used below, to
 ; control the ranking. They should be exposed in the API or
-; something like that! min-obs-cutoff, chunk-block-size
+; something like that! min-obs-cutoff, diag-block-size
 ;
-(define (chunk-over-words LLOBJ FRAC WRD-LST CLS-LST)
+(define (diag-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define (chunk-blocks wlist size clist)
+	(define (diag-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
 					; the smaller of word-list and requested size.
@@ -450,19 +450,19 @@
 				; Recurse and do the next block.
 				; XXX the block sizes are by powers of 2...
 				; perhaps they should be something else?
-				(chunk-blocks rest (* 2 size) new-clist)
+				(diag-blocks rest (* 2 size) new-clist)
 			)
 		)
 	)
 
 	; The initial chunk block-size.  This is a tunable parameter.
 	; Perhaps it should be a random number, altered between runs?
-	(define chunk-block-size 20)
+	(define diag-block-size 20)
 
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
-	(format #t "Start classification of ~A (of ~A) words, chunksz=~A\n"
-		(length ranked-words) (length WRD-LST) chunk-block-size)
-	(chunk-blocks ranked-words chunk-block-size CLS-LST)
+	(format #t "Start diag-block of ~A (of ~A) words, chunksz=~A\n"
+		(length ranked-words) (length WRD-LST) diag-block-size)
+	(diag-blocks ranked-words chunk-block-size CLS-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -512,8 +512,8 @@
 )
 
 ; Attempt to merge words into word-classes.
-(define-public (gram-classify-chunks)
-	(gram-classify chunk-over-words 0.3)
+(define-public (gram-classify-diag-blocks)
+	(gram-classify diag-over-words 0.3)
 )
 
 ; Attempt to merge words into word-classes.
