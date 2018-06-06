@@ -254,6 +254,21 @@
 )
 
 ; ---------------------------------------------------------------
+; Utilities used by several of the functions
+
+; Return true if WRD is in word-class CLS
+(define (is-in-cls? WRD CLS)
+	(not (null? (cog-link 'MemberLink WRD CLS))))
+
+; Return a list of words that got placed into the class.
+(define (got-done WRDS CLS)
+	(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; Return a list of words NOT in the class.
+(define (still-to-do WRDS CLS)
+	(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; ---------------------------------------------------------------
 ;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
@@ -283,6 +298,7 @@
 ; 0.5*500*500 = 35 hours for 500 words. This is NOT fast.
 ;
 (define (assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
+
 	(format #t "--- To-do=~A num-classes=~A num-done=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(strftime "%c" (localtime (current-time))))
@@ -310,7 +326,9 @@
 								TRUE-CLS-LST))
 						(new-fake
 							(if is-new-cls
-								FAKE-CLS-LST
+								; The new fake-list is now shorter
+								(still-to-do FAKE-CLS-LST new-cls)
+
 								; If its just a word, append it to the
 								; fake list.  Use append, not cons, so as
 								; to preferentially choose the older words,
@@ -359,18 +377,6 @@
 	; Tunable parameters
 	(define min-greedy 200)
 	(define scan-multiplier 10)
-
-	; Return true if WRD is in word-class CLS
-	(define (is-in-cls? WRD CLS)
-		(not (null? (cog-link 'MemberLink WRD CLS))))
-
-	; Return a list of words that got placed into the class.
-	(define (got-done WRDS CLS)
-		(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
-
-	; Return a list of words NOT in the class.
-	(define (still-to-do WRDS CLS)
-		(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 	(format #t "--- To-do=~A ncls=~A nsol=~A nredo=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
