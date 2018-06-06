@@ -710,17 +710,26 @@
 ; of all of the classes, the ones that were given plus the ones
 ; that were created.
 ;
-; A common use is to call this with an empty class-list, initially.
-; In this case, words are compared pair-wise to see if they can be
-; merged together, for a run-time of O(N^2) in the length N of WRD-LST.
+; WRD-LST is the list of words to be assigned to classes.
 ;
-; If CLS-LST is not empty, and is of length M, then the runtime will
-; be roughly O(MN) + O(K^2) where K is what's left of the initial N
-; words that have not been assigned to classes.
+; TRUE-CLS-LST is a list of word-classes that words might possibley
+;     get assigned to. This list should consist of WordClassNodes.
+;     It can be initially empty; pairs of words than can be merged,
+;     will be, to start a new class.
 ;
-; If the class-list contains WordNodes (instead of the expected
-; WordClassNodes) and a merge is possible, then that WordNode will
-; be merged to create a class.
+; FAKE-CLS-LIST is a list of singleton word-classes: pseudo-classes
+;     that have only a single word in them. The list itself must
+;     consist of WordNodes. It can be initially empty; if a word
+;     cannot be merged into any existing class, then it will start
+;     a new singleton class.
+;
+; The runtime is approximately O(N^2) + O(TN) + O(FN) where
+;     N == (length WRD-LST)
+;     T == (length TRUE-CLS-LST)
+;     F == (length FAKE-CLS-LST)
+;
+; Currently, typical runtimes are about 1 second per pair, or about
+; 0.5*500*500 = 35 hours for 500 words. This is NOT fast.
 ;
 (define (assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
 	(format #t "----  To-do =~A num-clases=~A num-done=~A ~A ----\n"
@@ -778,7 +787,7 @@
 ; WordClassNodes) and a merge is possible, then that WordNode will
 ; be merged to create a class.
 ;
-(define (bogus-assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
+(define (block-assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
 	(format #t "-------  Words remaining=~A Classes=~A ~A ------\n"
 		(length WRD-LST) (length CLS-LST)
 		(strftime "%c" (localtime (current-time))))
@@ -792,7 +801,7 @@
 
 			; If the word was merged into an existing class, then recurse
 			(if (eq? 'WordClassNode (cog-type cls))
-				(bogus-assign-to-classes LLOBJ FRAC rest CLS-LST)
+				(block-assign-to-classes LLOBJ FRAC rest CLS-LST)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the other words
@@ -807,7 +816,7 @@
 								(append! CLS-LST (list new-cls))
 								; else the old class-list
 								CLS-LST)))
-					(bogus-assign-to-classes LLOBJ FRAC rest new-lst)))))
+					(block-assign-to-classes LLOBJ FRAC rest new-lst)))))
 )
 
 ; ---------------------------------------------------------------
@@ -904,7 +913,7 @@
 					; the remainder
 					(rest (drop wlist minsz))
 					; perform clustering
-					(new-clist (bogus-assign-to-classes LLOBJ FRAC chunk clist)))
+					(new-clist (block-assign-to-classes LLOBJ FRAC chunk clist)))
 				; Recurse and do the next block.
 				; XXX the block sizes are by powers of 2...
 				; perhaps they should be something else?
