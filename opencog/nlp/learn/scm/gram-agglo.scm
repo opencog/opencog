@@ -257,7 +257,7 @@
 ; 0.5*500*500 = 35 hours for 500 words. This is NOT fast.
 ;
 (define (assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
-	(format #t "----  To-do =~A num-clases=~A num-done=~A ~A ----\n"
+	(format #t "--- To-do=~A num-classes=~A num-done=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(strftime "%c" (localtime (current-time))))
 
@@ -291,6 +291,88 @@
 								; if its just a word, append it to the fake list
 								(append! FAKE-CLS-LST (list new-cls)))))
 					(assign-to-classes LLOBJ FRAC new-true new-fake rest)))))
+)
+
+; ---------------------------------------------------------------
+;
+; Given a word-list and a list of grammatical classes, assign
+; each word to one of the classes, or, if the word cannot be
+; assigned, treat it as if it were a new class. Return a list
+; of all of the classes, the ones that were given plus the ones
+; that were created.
+;
+; Similar to `assign-to-classes`, except that this attempts to
+; maximally grow a newly-created class. It also attempts to manage
+; the word-list better, defering reconsideration of recently-assigned
+; words for a later pass.
+;
+; WRD-LST is the list of words to be assigned to classes.
+;
+; TRUE-CLS-LST is a list of word-classes that words might possibly
+;     get assigned to. This list should consist of WordClassNodes.
+;     It can be initially empty; pairs of words than can be merged,
+;     will be, to start a new class.
+;
+; FAKE-CLS-LIST is a list of singleton word-classes: pseudo-classes
+;     that have only a single word in them. The list itself must
+;     consist of WordNodes. It can be initially empty; if a word
+;     cannot be merged into any existing class, then it will start
+;     a new singleton class.
+;
+; DONE-LST is a list of words that have been placed into at least one
+;     cluster; they will be passed over a second time, to see where
+;     else they might fit. Viz, many words have both noun and verb
+;     forms, and thus need to go into multiple classes.
+;
+(define (greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
+
+	; Tunable parameters
+	(define min-greedy 200)
+	(define scan-multiplier 10)
+
+	(format #t "--- To-do=~A ncls=~A nsol=~A nredo=~A ~A ---\n"
+		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
+		(length DONE-LST)
+		(strftime "%c" (localtime (current-time))))
+
+	; If the WRD-LST is empty, we are done; otherwise compute.
+	(if (null? WRD-LST) TRUE-CLS-LST
+		(let* ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST))
+				; Can we assign the word to a class?
+				(cls (assign-word-to-class LLOBJ FRAC wrd TRUE-CLS-LST)))
+
+			; If the word was merged into an existing class, then
+			; recurse.  Make not of the word in the done-list.
+			(if (eq? 'WordClassNode (cog-type cls))
+				(greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST
+					(append! DONE-LIST (list wrd)) rest)
+
+				; If the word was not assigned to an existing class,
+				; see if it can be merged with any of the singleton
+				; words in the "fake-class" list.
+				(let ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST)))
+
+					; If we failed to creae a new class, then just
+					; append the word to the fake list, and recurse.
+					(if (eq? 'WordNode (cog-type new-cls))
+						(greedy-grow LLOBJ FRAC TRUE-CLS-LST
+							(append! FAKE-CLS-LST (list new-cls))
+							DONE-LIST rest)
+
+						; If the result is a new class, then greedy-grow it.
+						; But only consider a limited subset of the word list,
+						; so as to keep things under control.
+						(let* (
+								(num-greedy (max min-greedy (* scan-multiplier
+											 (length DONE-LST))))
+								(short-list (take WRD-LST num-greedy))
+							)
+							(assign-expand-class LLOBJ FRAC new-cls short-list)
+							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
+;; trims stuff.
+						)
+xxxxxxxxx
 )
 
 ; ---------------------------------------------------------------
@@ -464,7 +546,7 @@
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
 	(format #t "Start diag-block of ~A words, chunksz=~A\n"
 		(length ranked-words) diag-block-size)
-	(diag-blocks ranked-words chunk-block-size CLS-LST)
+	(diag-blocks ranked-words diag-block-size CLS-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -482,8 +564,9 @@
 (define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
-	(format #t "Start greedy-agglom of ~A (of ~A) words, chunksz=~A\n"
-		(length ranked-words) (length WRD-LST) diag-block-size)
+	(format #t "Start greedy-agglom of ~A words\n"
+		(length ranked-words))
+	(greedy-grow FRAC CLS-LST '() '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
