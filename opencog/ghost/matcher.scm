@@ -247,41 +247,42 @@
         (format #f "Catched Error at ~a\nError details =\"~a ~a\"\n"
           (current-source-location) key args) #f)))
 
-  (define candidate-rules
-    (if ghost-af-only?
-      (filter is-psi-rule? (cog-af))
-      (psi-get-rules ghost-component)))
-  (define rule-selected (eval-and-select candidate-rules))
+  (process-ghost-buffer)
 
-  ; Stimulate the timer predicate
-  (ghost-stimulate-timer)
+  (let* ((candidate-rules
+           (if ghost-af-only?
+             (filter is-psi-rule? (cog-af))
+             (psi-get-rules ghost-component)))
+         (rule-selected (eval-and-select candidate-rules)))
+    ; Stimulate the timer predicate
+    (ghost-stimulate-timer)
 
-  (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
-  (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
+    (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
+    (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
-  ; Keep a record of which rule got executed, just for rejoinders
-  (if (not (null? rule-selected))
-    (let ((next-responder (cog-value rule-selected ghost-next-responder))
-          (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
-          (av-alist (cog-av->alist (cog-av rule-selected))))
-      ; Stimulate the next rules in the sequence and lower the STI of
-      ; the current one
-      ; Rejoinders will have a bigger boost than responders by default
-      (if (not (null? next-responder))
-        (for-each
-          (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
-          (cog-value->list next-responder)))
-      (if (not (null? next-rejoinder))
-        (for-each
-          (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
-          (cog-value->list next-rejoinder)))
-      ; Lower the STI of the selected one
-      (cog-set-av!
-        rule-selected
-        (cog-new-av 0
-          (cdr (assoc 'lti av-alist)) (cdr (assoc 'vlti av-alist))))))
+    ; Keep a record of which rule got executed, just for rejoinders
+    (if (not (null? rule-selected))
+      (let ((next-responder (cog-value rule-selected ghost-next-responder))
+            (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
+            (av-alist (cog-av->alist (cog-av rule-selected))))
+        ; Stimulate the next rules in the sequence and lower the STI of
+        ; the current one
+        ; Rejoinders will have a bigger boost than responders by default
+        (if (not (null? next-responder))
+          (for-each
+            (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
+            (cog-value->list next-responder)))
+        (if (not (null? next-rejoinder))
+          (for-each
+            (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
+            (cog-value->list next-rejoinder)))
+        ; Lower the STI of the selected one
+        (cog-set-av!
+          rule-selected
+          (cog-new-av 0
+            (cdr (assoc 'lti av-alist)) (cdr (assoc 'vlti av-alist))))))
 
-  (List rule-selected))
+    (List rule-selected)))
 
 ; ----------
 ; The action selector for OpenPsi
