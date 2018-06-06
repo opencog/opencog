@@ -498,8 +498,8 @@
 )
 
 
-; Tunable parameter and restart hack
-(define (restart-hack LLOBJ WRD-LST CLS-LST)
+; Tunable parameter
+(define (cutoff-hack LLOBJ WRD-LST)
 
 	; XXX Adjust the minimum cutoff as desired!!!
 	; This is a tunable parameter!
@@ -508,14 +508,22 @@
 	(define min-obs-cutoff 20)
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
+	(format #t "After cutoff, ~A words left, out of ~A\n"
+		(length WRD-LST) (length all-ranked-words))
+
+	all-ranked-words
+)
+
+; Restart hack
+(define (restart-hack LLOBJ WRD-LST CLS-LST)
+
+	(define all-ranked-words (cutoff-hack LLOBJ WRD-LST))
+
 	; Ad hoc restart point. If we already have N classes, we've
 	; surely pounded the cosines of the first 2N or so words into
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
 	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
 	(define ranked-words (drop all-ranked-words num-to-drop))
-
-	(format #t "After cutoff, ~A words left, out of ~A\n"
-		(length WRD-LST) (length all-ranked-words))
 
 	(format #t "Drop first ~A words from consideration, leaving ~A\n"
 		num-to-drop (length ranked-words))
@@ -550,7 +558,7 @@
 				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST GLST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length ranked-words))
@@ -563,7 +571,7 @@
 ;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
@@ -632,7 +640,7 @@
 ;
 (define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
 	(greedy-grow LLOBJ FRAC CLS-LST '() '() ranked-words)
