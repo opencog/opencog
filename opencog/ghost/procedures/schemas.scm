@@ -209,6 +209,66 @@
 )
 
 ; --------------------------------------------------------------
+(DefineLink
+  (DefinedSchema "saccade")
+  (LambdaLink
+    (VariableList
+      (Variable "mean")
+      (Variable "variation")
+      (Variable "paint_scale")
+      (Variable "eye_size")
+      (Variable "eye_distance")
+      (Variable "mouth_width")
+      (Variable "mouth_height")
+      (Variable "weight_eyes")
+      (Variable "weight_mouth"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "saccade")
+        (Variable "mean")
+        (Variable "variation")
+        (Variable "paint_scale")
+        (Variable "eye_size")
+        (Variable "eye_distance")
+        (Variable "mouth_width")
+        (Variable "mouth_height")
+        (Variable "weight_eyes")
+        (Variable "weight_mouth")))
+  )
+)
+
+(define (saccade-args . nums)
+  (List (map (lambda (x) (Number x)) nums ))
+)
+
+(define (saccade_explore)
+  (cog-execute! (Put (DefinedSchema "saccade")
+    (saccade-args 0.8 0.3 1.0 15.0 100.0 90.0 27.0 0.8 0.2))
+  )
+)
+
+(define (saccade_listen)
+  (cog-execute! (Put (DefinedSchema "saccade")
+    (saccade-args 1.0 0.6 0.3 11.0 80.0 50.0 13.0 0.8 0.2))
+  )
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "saccade-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "saccade-cancel")))
+  )
+)
+
+(define (saccade_cancel)
+  (cog-execute! (Put (DefinedSchema "saccade-cancel") (List)))
+)
+
+; --------------------------------------------------------------
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
   start_timer TIMER-ID (optional)
