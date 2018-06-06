@@ -46,8 +46,8 @@
 ; There are three variants of agglomerative clustering implemented in
 ; the code:
 ;
-; * `loop-over-words` / `assign-to-classes`, which performs a basic
-;   sieving-style aglo: Each word is compared to each of the existing
+; * `agglo-over-words` / `assign-to-classes`, which performs a basic
+;   sieving-style agglo: Each word is compared to each of the existing
 ;   clusters, and if it is close enough, it is merged in.  If a word
 ;   cannot be assigned to a cluster, it is treated as a new cluster-
 ;   point, and is tacked onto the list of existing clusters. That is,
@@ -72,7 +72,7 @@
 ;   can be forced by restarting the algo.
 ;
 ; Its hard to say which of these strategies is the "best". Both
-; `loop-over-words` and `chunck-over-words` have desirable behaviors.
+; `agglo-over-words` and `chunk-over-words` have desirable behaviors.
 ;
 ; One restart, all three algos suffer from a common problem: they create
 ; an ordered list of words by frequency; however, this is computed from
@@ -80,10 +80,11 @@
 ; marginals (holding frequencies) should be recomputed before each
 ; restart.  This is not done automatically.
 ;
+;
 ; Proposed best strategy (not implemented)
 ; ----------------------------------------
 ; Based on experience, this seems like the best way to do it:
-; * Main loop runs like `loop-over-words` / `assign-to-classes`
+; * Main loop runs like `agglo-over-words` / `assign-to-classes`
 ; * When a new cluster is formed, then perform the "greedy"/maximal
 ;   cluster expansion, scanning much of the word list to try to grow
 ;   the cluster further. Key here is the phrase "much of": instead
@@ -448,7 +449,7 @@
 ; control the ranking. It should be exposed in the API or
 ; something like that! min-obs-cutoff
 ;
-(define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
+(define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 	; XXX Adjust the minimum cutoff as desired!!!
 	; This is a tunable paramter!
 	; Right now, set to 20 observations, minimum. Less
@@ -468,44 +469,58 @@
 )
 
 ; ---------------------------------------------------------------
+; Main entry-pint helpers.
+;
+(define (make-cosine-llobj)
+	(define pca (make-pseudo-cset-api))
+	(define psa (add-dynamic-stars pca))
+	(add-pair-cosine-compute psa)
+)
+
+(define (load-stuff)
+	(define start-time (get-internal-real-time))
+
+	(display "Start loading words and word-classes\n")
+	(load-atoms-of-type 'WordNode)
+	(load-atoms-of-type 'WordClassNode)
+
+	; Verify that words have been loaded
+	;  (define all-words (get-all-cset-words))
+	; (define all-words (cog-get-atoms 'WordNode))
+	(format #t "Finished loading ~A words in ~5f seconds\n"
+		(length (cog-get-atoms 'WordNode))
+		(* 1.0e-9 (- (get-internal-real-time) start-time)))
+)
+
+; Attempt to merge words into word-classes.
+(define (gram-classify ALGO FRAC)
+
+	(load-stuff)
+	(ALGO
+		(make-cosine-llobj)
+		FRAC
+		(cog-get-atoms 'WordNode)
+		(cog-get-atoms 'WordClassNode))
+)
+
+; ---------------------------------------------------------------
 ;
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
-(define-public (gram-classify)
-	(let* ((pca (make-pseudo-cset-api))
-			(psa (add-dynamic-stars pca))
-			(pcos (add-pair-cosine-compute psa))
-			(start-time (get-internal-real-time))
-		)
 
-		(display "Start loading words and word-classes\n")
-		(load-atoms-of-type 'WordNode)
-		(load-atoms-of-type 'WordClassNode)
-		; Verify that words have been loaded
-		;  (define all-words (get-all-cset-words))
-		; (define all-words (cog-get-atoms 'WordNode))
-		(format #t "Finished loading ~A words in ~5f seconds\n"
-			(length (cog-get-atoms 'WordNode))
-			(* 1.0e-9 (- (get-internal-real-time) start-time)))
+; Attempt to merge words into word-classes.
+(define-public (gram-classify-pair-wise)
+	(gram-classify classify-pair-wise 0.3)
+)
 
-		; Attempt to merge words into wor-classes.
-		; Stubbed out, because it has a poor performance profile.
-		; Also, fails to make use of existing classes.
-		; (classify-pair-wise pcos 0.3
-		;	(cog-get-atoms 'WordNode)
-		;	(cog-get-atoms 'WordClassNode))
+; Attempt to merge words into word-classes.
+(define-public (gram-classify-chunks)
+	(gram-classify chunk-over-words 0.3)
+)
 
-		; Chunk over words might be faster, but is probably less
-		; accurate. Use loop-ver-words in production.
-		; (chunk-over-words pcos 0.3
-		; 	(cog-get-atoms 'WordNode)
-		; 	(cog-get-atoms 'WordClassNode))
-
-		; Use this one.
-		(loop-over-words pcos 0.3
-			(cog-get-atoms 'WordNode)
-			(cog-get-atoms 'WordClassNode))
-	)
+; Attempt to merge words into word-classes.
+(define-public (gram-classify-agglo)
+	(gram-classify agglo-over-words 0.3)
 )
 
 ; ---------------------------------------------------------------
