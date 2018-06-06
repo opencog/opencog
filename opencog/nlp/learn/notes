@@ -13453,6 +13453,9 @@ Baseline: 328
 todo- make sure the FAKE list is shortened  DONE
 sort the class list sort-class-list   done
 
+dropdb mrg_tst
+createdb mrg_tst -T en_pairs_rfive_mtwo
+
 
 =================================================================
  (define pca (make-pseudo-cset-api))
