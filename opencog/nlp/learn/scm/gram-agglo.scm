@@ -227,102 +227,6 @@
 					(block-assign-to-classes LLOBJ FRAC rest new-lst)))))
 )
 
-
-; ---------------------------------------------------------------
-; Loop over blocks of words, attempting to place them into grammatical
-; classes. This is an O(N^2) algorithm, and so several "cheats" are
-; employed to maintain some reasonable amount of forward progress. So,
-;
-; A) The list of words is ranked by order of the number of observations;
-;    thus punctuation and words like "the", "a" come first.
-; B) The ranked list is divided into power-of-two ranges, and only
-;    the words in a given range are compared to one-another.
-;
-; The idea is that it is unlikely that words with very different
-; observational counts will be similar.  NOTE: this idea has NOT
-; been empirically tested, yet.
-;
-; TODO - the word-class list should probably also be ranked, so
-; we preferentially add to the largest existing classes.
-;
-; XXX There are two user-adjustable parameters used below, to
-; control the ranking. They should be exposed in the API or
-; something like that! min-obs-cutoff, chunk-block-size
-;
-(define (chunk-over-words LLOBJ FRAC WRD-LST CLS-LST)
-	; XXX Adjust the minimum cutoff as desired!!!
-	; This is a tunable paramter!
-	; Right now, set to 20 observations, minimum. Less
-	; than this and weird typos and stuff get in.
-	(define min-obs-cutoff 20)
-	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
-
-	; Been there, done that; drop the top-20.
-	; (define ranked-words (drop all-ranked-words 20))
-	; (define ranked-words all-ranked-words)
-	; Ad hoc restart point. If we already have N classes, we've
-	; probably pounded the cosines of the first 2N words or so into
-	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(define ranked-words (drop all-ranked-words
-			(inexact->exact (round (* 1.6 (length CLS-LST))))))
-
-	(define (chunk-blocks wlist size clist)
-		(if (null? wlist) '()
-			(let* ((wsz (length wlist))
-					; the smaller of word-list and requested size.
-					(minsz (if (< wsz size) wsz size))
-					; the first block
-					(chunk (take wlist minsz))
-					; the remainder
-					(rest (drop wlist minsz))
-					; perform clustering
-					(new-clist (block-assign-to-classes LLOBJ FRAC chunk clist)))
-				; Recurse and do the next block.
-				; XXX the block sizes are by powers of 2...
-				; perhaps they should be something else?
-				(chunk-blocks rest (* 2 size) new-clist)
-			)
-		)
-	)
-
-	; The initial chunk block-size.  This is a tunable parameter.
-	; Perhaps it should be a random number, altered between runs?
-	(define chunk-block-size 20)
-	(format #t "Start classification of ~A (of ~A) words, chunksz=~A\n"
-		(length ranked-words) (length WRD-LST) chunk-block-size)
-	(chunk-blocks ranked-words chunk-block-size CLS-LST)
-)
-
-; ---------------------------------------------------------------
-; Given a list of words, compare them pair-wise to find a similar
-; pair. Merge these to form a grammatical class, and then try to
-; expand that class as much as possible. Repeat until all pairs
-; have been explored.  This is an O(N^2) algo in the length of the
-; word-list!
-;
-; WRD-LST is the list of words to classify.
-; GLST is a list of previously-determined classes.
-;
-; This returns a list of the classes that were created.
-;
-; This is a simpler version of `assign-to-classes`. It behaves
-; differently; the attempt to "maximally expand" a new-found class
-; means it will try to scan the entire word list, which is undesirable
-; if the word-list is long.  Thus, this subroutine is currently not
-; recommended, although its simple and easy, thus good for sanity
-; checking.
-;
-(define (classify-pair-wise LLOBJ FRAC WRD-LST GLST)
-
-	(define (check-pair WORD-A WORD-B CLS-LST)
-		(if (ok-to-merge LLOBJ WORD-A WORD-B)
-			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
-				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
-				(cons grm-class CLS-LST))))
-
-	(fold-unordered-pairs GLST check-pair WRD-LST)
-)
-;
 ; ---------------------------------------------------------------
 ;
 ; Given a word-list and a list of grammatical classes, assign
@@ -390,6 +294,8 @@
 )
 
 ; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
 ; Given the list LST of atoms, trim it, discarding atoms with
 ; low observation counts, and then sort it, returning the sorted
 ; list, ranked in order of the observed number of sections on the
@@ -435,6 +341,56 @@
 		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
 )
 
+; Tunable parameter and restart hack
+(define (restart-hack LLOBJ WRD-LST)
+
+	; XXX Adjust the minimum cutoff as desired!!!
+	; This is a tunable paramter!
+	; Right now, set to 20 observations, minimum. Less
+	; than this and weird typos and stuff get in.
+	(define min-obs-cutoff 20)
+	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
+
+	; Ad hoc restart point. If we already have N classes, we've
+	; surely pounded the cosines of the first 2N or so words into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(drop all-ranked-words
+		(inexact->exact (round (* 1.6 (length CLS-LST)))))
+)
+
+; ---------------------------------------------------------------
+; Given a list of words, compare them pair-wise to find a similar
+; pair. Merge these to form a grammatical class, and then try to
+; expand that class as much as possible. Repeat until all pairs
+; have been explored.  This is an O(N^2) algo in the length of the
+; word-list!
+;
+; WRD-LST is the list of words to classify.
+; GLST is a list of previously-determined classes.
+;
+; This returns a list of the classes that were created.
+;
+; This is a simpler version of `assign-to-classes`. It behaves
+; differently; the attempt to "maximally expand" a new-found class
+; means it will try to scan the entire word list, which is undesirable
+; if the word-list is long.  Thus, this subroutine is currently not
+; recommended, although its simple and easy, thus good for sanity
+; checking.
+;
+(define (classify-pair-wise LLOBJ FRAC WRD-LST GLST)
+
+	(define (check-pair WORD-A WORD-B CLS-LST)
+		(if (ok-to-merge LLOBJ WORD-A WORD-B)
+			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
+				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
+				(cons grm-class CLS-LST))))
+
+	(define ranked-words (restart-hack WRD-LST))
+	(format #t "Start pair-wise classification of ~A words\n"
+		(length ranked-words))
+	(fold-unordered-pairs GLST check-pair ranked-words)
+)
+
 ; ---------------------------------------------------------------
 ; Loop over all words, attempting to place them into grammatical
 ; classes. This is an O(N^2) algorithm.
@@ -450,26 +406,67 @@
 ; something like that! min-obs-cutoff
 ;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
-	; XXX Adjust the minimum cutoff as desired!!!
-	; This is a tunable paramter!
-	; Right now, set to 20 observations, minimum. Less
-	; than this and weird typos and stuff get in.
-	(define min-obs-cutoff 20)
-	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
-	; Ad hoc restart point. If we already have N classes, we've
-	; surely pounded the cosines of the first 2N or so words into
-	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(define ranked-words (drop all-ranked-words
-			(inexact->exact (round (* 1.6 (length CLS-LST))))))
-
-	(format #t "Start classification of ~A words\n"
+	(define ranked-words (restart-hack WRD-LST))
+	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
 	(assign-to-classes LLOBJ FRAC CLS-LST '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
-; Main entry-pint helpers.
+; Loop over blocks of words, attempting to place them into grammatical
+; classes. This is an O(N^2) algorithm, and so several "cheats" are
+; employed to maintain some reasonable amount of forward progress. So,
+;
+; A) The list of words is ranked by order of the number of observations;
+;    thus punctuation and words like "the", "a" come first.
+; B) The ranked list is divided into power-of-two ranges, and only
+;    the words in a given range are compared to one-another.
+;
+; The idea is that it is unlikely that words with very different
+; observational counts will be similar.  NOTE: this idea has NOT
+; been empirically tested, yet.
+;
+; TODO - the word-class list should probably also be ranked, so
+; we preferentially add to the largest existing classes.
+;
+; XXX There are two user-adjustable parameters used below, to
+; control the ranking. They should be exposed in the API or
+; something like that! min-obs-cutoff, chunk-block-size
+;
+(define (chunk-over-words LLOBJ FRAC WRD-LST CLS-LST)
+
+	(define (chunk-blocks wlist size clist)
+		(if (null? wlist) '()
+			(let* ((wsz (length wlist))
+					; the smaller of word-list and requested size.
+					(minsz (if (< wsz size) wsz size))
+					; the first block
+					(chunk (take wlist minsz))
+					; the remainder
+					(rest (drop wlist minsz))
+					; perform clustering
+					(new-clist (block-assign-to-classes LLOBJ FRAC chunk clist)))
+				; Recurse and do the next block.
+				; XXX the block sizes are by powers of 2...
+				; perhaps they should be something else?
+				(chunk-blocks rest (* 2 size) new-clist)
+			)
+		)
+	)
+
+	; The initial chunk block-size.  This is a tunable parameter.
+	; Perhaps it should be a random number, altered between runs?
+	(define chunk-block-size 20)
+
+	(define ranked-words (restart-hack WRD-LST))
+	(format #t "Start classification of ~A (of ~A) words, chunksz=~A\n"
+		(length ranked-words) (length WRD-LST) chunk-block-size)
+	(chunk-blocks ranked-words chunk-block-size CLS-LST)
+)
+
+; ---------------------------------------------------------------
+; Main entry-point helpers.
 ;
 (define (make-cosine-llobj)
 	(define pca (make-pseudo-cset-api))
