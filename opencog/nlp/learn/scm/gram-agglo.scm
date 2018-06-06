@@ -183,7 +183,7 @@
 
 ; ---------------------------------------------------------------
 ; Sort the class list, returning a list of classes from the largest,
-; to the smalllest.
+; to the smallest.
 ;
 (define (sort-class-list CLS-LST)
 
@@ -305,16 +305,16 @@
 						(is-new-cls (eq? 'WordClassNode (cog-type new-cls)))
 						(new-true
 							(if is-new-cls
-								; Use append, not cons, so as to preferentially
-								; choose the older classes, as opposed to the
-								; newer ones.
-								(append! TRUE-CLS-LST (list new-cls))
+								(sort-class-list (cons new-cls TRUE-CLS-LST))
 								; else the true class list doesn't change
 								TRUE-CLS-LST))
 						(new-fake
 							(if is-new-cls
 								FAKE-CLS-LST
-								; if its just a word, append it to the fake list
+								; If its just a word, append it to the
+								; fake list.  Use append, not cons, so as
+								; to preferentially choose the older words,
+								; as opposed to the newer ones.
 								(append! FAKE-CLS-LST (list new-cls)))))
 					(assign-to-classes LLOBJ FRAC new-true new-fake rest)))))
 )
@@ -415,7 +415,7 @@
 							(assign-expand-class LLOBJ FRAC new-cls short-list)
 							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
 							(greedy-grow LLOBJ FRAC
-								(append! TRUE-CLS-LST (list new-cls))
+								(sort-class-list (cons new-cls TRUE-CLS-LST))
 								FAKE-CLS-LST
 								(append! DONE-LST (got-done short-list new-cls))
 								(still-to-do rest new-cls))
