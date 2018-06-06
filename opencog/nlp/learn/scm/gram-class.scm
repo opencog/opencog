@@ -1,7 +1,7 @@
 ;
 ; gram-class.scm
 ;
-; Compare words and word-classes by grammatical similarites.
+; Compare words and word-classes by grammatical similarities.
 ;
 ; Copyright (c) 2017, 2018 Linas Vepstas
 ;
@@ -205,8 +205,8 @@
 ;
 ; Alternative Merge Strategies
 ; ----------------------------
-; Insofar as the above "semantic merge" aglorithm describes "hidden"
-; meanings infered from observation probabilities, it is plausible to
+; Insofar as the above "semantic merge" algorithm describes "hidden"
+; meanings inferred from observation probabilities, it is plausible to
 ; assume that perhaps a Hidden Markov Model (HMM) style approach might
 ; provide better results, or that alternately, an Artificial Neural
 ; Net (ANN), possibly with deep-learning, might provide a better
@@ -220,7 +220,7 @@
 ; might be merged into a word-class, or a word added to a word-class.
 ; These are described below. Compared to the above, the gut sense is
 ; that they are "less correct"; however, there is so far no data
-; analysis by which to judge thier utility.
+; analysis by which to judge their utility.
 ;
 ;
 ; Union word-pair merging
@@ -324,7 +324,7 @@
 
   WA should be a WordNode or a WordClassNode.
   WB is expected to be a WordNode.
-  FRAC should be a floating point nummber between zero and one,
+  FRAC should be a floating point number between zero and one,
      indicating the fraction of the non-shared count of WB to be
      merged into WA. Setting this to a non-zero value broadens
      the class. Setting this to 1.0 gives the \"pure\" semantic merge
@@ -357,7 +357,7 @@
 
   WA should be a WordNode or a WordClassNode.
   WB is expected to be a WordNode.
-  FRAC should be a floating point nummber between zero and one,
+  FRAC should be a floating point number between zero and one,
      indicating the fraction of a non-shared count to be used.
      Setting this to 1.0 gives the sum of the union of supports;
      setting this to 0.0 gives the sum of the intersection of supports.
@@ -374,7 +374,7 @@
   any non-positive components are erased.
 
   The counts are summed only if both counts are non-zero. Otherwise,
-  only a FRAC fraction of a single, unmatched count is transfered.
+  only a FRAC fraction of a single, unmatched count is transferred.
 
   If WA is a WordClassNode, and WB is not, then WB is merged into
   WA.
@@ -483,7 +483,7 @@
 		;      WRD dot-prod lensq unit-prod)
 
 		; Alter the counts on the word so that they are orthogonal
-		; to the class. Assumes that the dot-prduct was previously
+		; to the class. Assumes that the dot-product was previously
 		; computed, and also that the mean-square length of the
 		; class was also previously computed.
 		(define (ortho CLAPR)
@@ -499,8 +499,8 @@
 			(define orth (if (null? wrd) -999
 					(- wc (* cc unit-prod))))
 
-			; Update count on postive sections;
-			; Delete non-postive sections. The deletion is not just
+			; Update count on positive sections;
+			; Delete non-positive sections. The deletion is not just
 			; from the atomspace, but also the database backend!
 			(if (< 0 orth)
 				(set-count wrd orth)
@@ -587,7 +587,7 @@
 ; ---------------------------------------------------------------
 ; Example usage
 ;
-; (load-atoms-of-type 'WordNode)          ; Typicaly about 80 seconds
+; (load-atoms-of-type 'WordNode)          ; Typically about 80 seconds
 ; (define pca (make-pseudo-cset-api))
 ; (define psa (add-dynamic-stars pca))
 ;

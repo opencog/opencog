@@ -35,7 +35,7 @@
 ; they scan the word-lists to be clustered.
 ;
 ;
-; All three algorithms implemented in this file are efectively O(N^2)
+; All three algorithms implemented in this file are effectively O(N^2)
 ; algorithms, in the length N of the list of words.  It seems possible
 ; that one might get better run-times, say about O(N log N) using
 ; hierarchical clustering (i.e. by only assigning words to existing
@@ -62,7 +62,7 @@
 ; * `chunk-over-words`, which is similar to `classify-pair-wise`,
 ;   except that it explores only a sequence of block diagonals down
 ;   the middle. Specifically, it examines the block of 20x20 pairs
-;   of the most common words, follwed by the block 40x40 of the
+;   of the most common words, followed by the block 40x40 of the
 ;   pairs of the next-most-common 40 words, and then an 80x80 block...
 ;   The idea here is that similar words occur with similar frequencies,
 ;   e.g. punctuation (very high frequency) will get merged with other
@@ -93,7 +93,7 @@
 ;   words scanned so far. Thus, excessive searching down into the
 ;   low-frequency boon-docks is avoided.
 ; * Once a word has been assigned to a cluster, the marginal count
-;   on the word should be remoputed, and the word re-ranked in the list.
+;   on the word should be recomputed, and the word re-ranked in the list.
 ;   That is, words can have multiple meanings, and thus can be assigned
 ;   to multiple clusters. However, if there's not much left (e.g. most
 ;   common nouns have a single meaning), there's not much point
@@ -237,7 +237,7 @@
 ;
 ; WRD-LST is the list of words to be assigned to classes.
 ;
-; TRUE-CLS-LST is a list of word-classes that words might possibley
+; TRUE-CLS-LST is a list of word-classes that words might possibly
 ;     get assigned to. This list should consist of WordClassNodes.
 ;     It can be initially empty; pairs of words than can be merged,
 ;     will be, to start a new class.
@@ -273,7 +273,7 @@
 				(assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST rest)
 
 				; If the word was not assigned to an existing class,
-				; see if it can be merged with any of the singlton
+				; see if it can be merged with any of the singleton
 				; words in the "fake-class" list.
 				(let* ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST))
 						(is-new-cls (eq? 'WordClassNode (cog-type new-cls)))
@@ -345,7 +345,7 @@
 (define (restart-hack LLOBJ WRD-LST)
 
 	; XXX Adjust the minimum cutoff as desired!!!
-	; This is a tunable paramter!
+	; This is a tunable parameter!
 	; Right now, set to 20 observations, minimum. Less
 	; than this and weird typos and stuff get in.
 	(define min-obs-cutoff 20)
@@ -523,7 +523,7 @@
 ; ---------------------------------------------------------------
 ; Example usage
 ;
-; (load-atoms-of-type 'WordNode)          ; Typicaly about 80 seconds
+; (load-atoms-of-type 'WordNode)          ; Typically about 80 seconds
 ; (define pca (make-pseudo-cset-api))
 ; (define psa (add-dynamic-stars pca))
 ;
