@@ -341,8 +341,6 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (ice-9 threads))
-(use-modules (ice-9 receive))   ; for partition
 (use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------------
@@ -724,7 +722,63 @@
 ; WordClassNodes) and a merge is possible, then that WordNode will
 ; be merged to create a class.
 ;
-(define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
+(define (assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
+	(format #t "----  To-do =~A num-clases=~A num-done=~A ~A ----\n"
+		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
+		(strftime "%c" (localtime (current-time))))
+
+	; If the WRD-LST is empty, we are done; otherwise compute.
+	(if (null? WRD-LST) TRUE-CLS-LST
+		(let* ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST))
+				; Can we assign the word to a class?
+				(cls (assign-word-to-class LLOBJ FRAC wrd TRUE-CLS-LST)))
+
+			; If the word was merged into an existing class, then recurse
+			(if (eq? 'WordClassNode (cog-type cls))
+				(assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST rest)
+
+				; If the word was not assigned to an existing class,
+				; see if it can be merged with any of the singlton
+				; words in the "fake-class" list.
+				(let* ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST))
+						(is-new-cls (eq? 'WordClassNode (cog-type new-cls)))
+						(new-true
+							(if is-new-cls
+								; Use append, not cons, so as to preferentially
+								; choose the older classes, as opposed to the
+								; newer ones.
+								(append! TRUE-CLS-LST (list new-cls))
+								; else the true class list doesn't change
+								TRUE-CLS-LST))
+						(new-fake
+							(if is-new-cls
+								FAKE-CLS-LST
+								; if its just a word, append it to the fake list
+								(append! FAKE-CLS-LST (list new-cls)))))
+					(assign-to-classes LLOBJ FRAC new-true new-fake rest)))))
+)
+
+; ---------------------------------------------------------------
+; Given a word-list and a list of grammatical classes, assign
+; each word to one of the classes, or, if the word cannot be
+; assigned, treat it as if it were a new class. Return a list
+; of all of the classes, the ones that were given plus the ones
+; that were created.
+;
+; A common use is to call this with an empty class-list, initially.
+; In this case, words are compared pair-wise to see if they can be
+; merged together, for a run-time of O(N^2) in the length N of WRD-LST.
+;
+; If CLS-LST is not empty, and is of length M, then the runtime will
+; be roughly O(MN) + O(K^2) where K is what's left of the initial N
+; words that have not been assigned to classes.
+;
+; If the class-list contains WordNodes (instead of the expected
+; WordClassNodes) and a merge is possible, then that WordNode will
+; be merged to create a class.
+;
+(define (bogus-assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
 	(format #t "-------  Words remaining=~A Classes=~A ~A ------\n"
 		(length WRD-LST) (length CLS-LST)
 		(strftime "%c" (localtime (current-time))))
@@ -738,7 +792,7 @@
 
 			; If the word was merged into an existing class, then recurse
 			(if (eq? 'WordClassNode (cog-type cls))
-				(assign-to-classes LLOBJ FRAC rest CLS-LST)
+				(bogus-assign-to-classes LLOBJ FRAC rest CLS-LST)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the other words
@@ -753,7 +807,7 @@
 								(append! CLS-LST (list new-cls))
 								; else the old class-list
 								CLS-LST)))
-					(assign-to-classes LLOBJ FRAC rest new-lst)))))
+					(bogus-assign-to-classes LLOBJ FRAC rest new-lst)))))
 )
 
 ; ---------------------------------------------------------------
@@ -850,7 +904,7 @@
 					; the remainder
 					(rest (drop wlist minsz))
 					; perform clustering
-					(new-clist (assign-to-classes LLOBJ FRAC chunk clist)))
+					(new-clist (bogus-assign-to-classes LLOBJ FRAC chunk clist)))
 				; Recurse and do the next block.
 				; XXX the block sizes are by powers of 2...
 				; perhaps they should be something else?

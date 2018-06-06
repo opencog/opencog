@@ -13436,6 +13436,20 @@ Clearly pretty loosing -- execution takes much longer.
 but since in parallel... 1.x speedup!?
 
 
+=================================================================
+ (define pca (make-pseudo-cset-api))
+  (define psa (add-pair-stars pca))
+(batch-all-pair-mi psa)
+
+(define wild-obj psa)
+(define count-obj (make-compute-count wild-obj))
+(define freq-obj (make-compute-freq wild-obj))
+(define supp-obj (add-support-compute wild-obj))
+   (define central-obj (make-central-compute wild-obj))
+   (define store-obj (make-store wild-obj))
+
+
+
 
 
 =========================================================================
