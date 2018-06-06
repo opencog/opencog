@@ -83,10 +83,12 @@
   ; ----------
   (for-each
     (lambda (r)
-      ; Skip the rule if its STI or strength is zero, or if it's
-      ; still with the refractory period
+      ; Skip the rule if its STI or strength is zero,
+      ; unless we choose to ignore their weights,
+      ; or if it's still with the refractory period
       (if (or SKIP-STI
-              (and (> (cog-av-sti r) 0) (> (cog-stv-strength r) 0)
+              (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
+                   (or (= strength-weight 0) (> (cog-stv-strength r) 0))
                    (or (null? (cog-value r ghost-time-last-executed))
                        (> (- (current-time)
                              (car (cog-value->list
