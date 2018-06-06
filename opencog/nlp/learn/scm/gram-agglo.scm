@@ -357,8 +357,16 @@
 	; Ad hoc restart point. If we already have N classes, we've
 	; surely pounded the cosines of the first 2N or so words into
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(drop all-ranked-words
-		(inexact->exact (round (* 1.6 (length CLS-LST)))))
+	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
+	(define ranked-words (drop all-ranked-words num-to-drop))
+
+	(format #t "After cutoff, ~A words left, out of ~A\n"
+		(length WRD-LST) (length all-ranked-words))
+
+	(format #t "Drop first ~A words from consideration, leaving ~A\n"
+		num-to-drop (length ranked-words))
+
+	ranked-words
 )
 
 ; ---------------------------------------------------------------
@@ -454,8 +462,8 @@
 	(define diag-block-size 20)
 
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
-	(format #t "Start diag-block of ~A (of ~A) words, chunksz=~A\n"
-		(length ranked-words) (length WRD-LST) diag-block-size)
+	(format #t "Start diag-block of ~A words, chunksz=~A\n"
+		(length ranked-words) diag-block-size)
 	(diag-blocks ranked-words chunk-block-size CLS-LST)
 )
 
@@ -473,6 +481,9 @@
 ;
 (define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
+	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(format #t "Start greedy-agglom of ~A (of ~A) words, chunksz=~A\n"
+		(length ranked-words) (length WRD-LST) diag-block-size)
 )
 
 ; ---------------------------------------------------------------
