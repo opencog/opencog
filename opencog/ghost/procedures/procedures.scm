@@ -60,10 +60,16 @@
     fallback_on
     shutup
     gaze_at
+    gaze_at_cancel
     blink
+    blink_cancel
     emote
     gesture
     soma
+    soma_cancel
+    saccade_explore
+    saccade_listen
+    saccade_cancel
 
     ; Utilities
     set-dti!
@@ -733,7 +739,8 @@
 "
   Return the logger for actions.
 "
-  schema-logger)
+  schema-logger
+)
 
 (define (print-by-action-logger action-node . str-nodes)
 "

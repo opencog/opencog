@@ -39,10 +39,10 @@
 ; --------------------------------------------------------------
 (Define
   (DefinedSchema "say-cancel")
-  (ExecutionOutput
-    (GroundedSchema "scm: print-by-action-logger")
-    (List
-      (Concept "say-cancel"))
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+       (List (Concept "shutup")))
   )
 )
 
@@ -73,6 +73,20 @@
 
 ; --------------------------------------------------------------
 (Define
+  (DefinedSchema "gaze-at-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "gaze-at-cancel")))
+  )
+)
+
+(define (gaze_at_cancel)
+  (cog-execute! (Put (DefinedSchema "gaze-at-cancel") (List)))
+)
+
+; --------------------------------------------------------------
+(Define
   (DefinedSchema "blink")
   (LambdaLink
     (VariableList
@@ -89,6 +103,20 @@
 
 (define (blink mean variation)
   (cog-execute! (Put (DefinedSchema "blink") (List mean variation)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "blink-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "blink-cancel")))
+  )
+)
+
+(define (blink_cancel)
+  (cog-execute! (Put (DefinedSchema "blink-cancel") (List)))
 )
 
 ; --------------------------------------------------------------
@@ -164,6 +192,80 @@
 (define (soma name magni rate ease-in)
   (cog-execute!
     (Put (DefinedSchema "soma") (List name magni rate ease-in)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "soma-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "soma-cancel")))
+  )
+)
+
+(define (soma_cancel)
+  (cog-execute! (Put (DefinedSchema "soma-cancel") (List)))
+)
+
+; --------------------------------------------------------------
+(DefineLink
+  (DefinedSchema "saccade")
+  (LambdaLink
+    (VariableList
+      (Variable "mean")
+      (Variable "variation")
+      (Variable "paint_scale")
+      (Variable "eye_size")
+      (Variable "eye_distance")
+      (Variable "mouth_width")
+      (Variable "mouth_height")
+      (Variable "weight_eyes")
+      (Variable "weight_mouth"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "saccade")
+        (Variable "mean")
+        (Variable "variation")
+        (Variable "paint_scale")
+        (Variable "eye_size")
+        (Variable "eye_distance")
+        (Variable "mouth_width")
+        (Variable "mouth_height")
+        (Variable "weight_eyes")
+        (Variable "weight_mouth")))
+  )
+)
+
+(define (saccade-args . nums)
+  (List (map (lambda (x) (Number x)) nums ))
+)
+
+(define (saccade_explore)
+  (cog-execute! (Put (DefinedSchema "saccade")
+    (saccade-args 0.8 0.3 1.0 15.0 100.0 90.0 27.0 0.8 0.2))
+  )
+)
+
+(define (saccade_listen)
+  (cog-execute! (Put (DefinedSchema "saccade")
+    (saccade-args 1.0 0.6 0.3 11.0 80.0 50.0 13.0 0.8 0.2))
+  )
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "saccade-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "saccade-cancel")))
+  )
+)
+
+(define (saccade_cancel)
+  (cog-execute! (Put (DefinedSchema "saccade-cancel") (List)))
 )
 
 ; --------------------------------------------------------------
