@@ -5,16 +5,24 @@
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
 
-(define (any-check proc sign)
+(define* (any-check proc sign #:optional (proc-type #t))
 "
-  any-check PROC SIGN
+  any-check PROC SIGN [PROC-TYPE]
 
   Check if any of the models that can be fetched by the SignatureLink SIGN
-  returns (stv 1 1) when checked against the procedure PROC.
+  returns (stv 1 1) when checked against the procedure PROC. The procedure
+  type is assumed to be true-state related unless PROC-TYPE is set to '#f'
+  during which the procedure is assumed to be related with false-state.
 "
-  (if (any (lambda (x) (equal? (stv 1 1) (proc x))) (get-models sign))
-    (stv 1 1)
-    (stv 0 1)
+  ; NOTE: The proc-type is added to deal with the case when there hasn't
+  ; been any models in the atomspace. In such a scenario every thing
+  ; is assumed to be as false state, as we don't yet have a don't know state.
+  (let ((models (get-models sign)))
+    (cond
+      ((and (not proc-type) (null? models)) (stv 1 1))
+      ((any (lambda (x) (equal? (stv 1 1) (proc x))) models) (stv 1 1))
+      (else (stv 0 1))
+    )
   )
 )
 
@@ -145,7 +153,7 @@
       (define (not-occuring? faceid) (negate-stv! (t-occuring? faceid)))
       (if face-id
         (not-occuring? face-id)
-        (any-check not-occuring? signature-link)
+        (any-check not-occuring? signature-link #f)
       )
     )
     (Implication
