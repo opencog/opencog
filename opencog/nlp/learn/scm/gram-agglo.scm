@@ -378,7 +378,7 @@
 	(define min-greedy 200)
 	(define scan-multiplier 10)
 
-	(format #t "--- To-do=~A ncls=~A nsol=~A nredo=~A ~A ---\n"
+	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(length DONE-LST)
 		(strftime "%c" (localtime (current-time))))

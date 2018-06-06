@@ -13450,7 +13450,7 @@ Baseline: 328
    (fold (lambda (CLS cnt) (+ cnt (nmemb CLS))) 0
       (cog-get-atoms 'WordClassNode)))
 
-tod- make sure the FAKE list is shortedm
+todo- make sure the FAKE list is shortened  DONE
 sort the class list sort-class-list   done
 
 
