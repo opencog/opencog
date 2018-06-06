@@ -185,26 +185,26 @@
 )
 (StateLink 
   TARGET_STI_FUNDS
-  (NumberNode "10000")
+  (NumberNode "100000")
 )
 
 (StateLink 
   TARGET_LTI_FUNDS
-  (NumberNode "10000")
+  (NumberNode "100000")
 )
 
 (StateLink
   STI_FUNDS_BUFFER
-  (NumberNode "10000")
+  (NumberNode "100000")
 )
 
 (StateLink 
   LTI_FUNDS_BUFFER
-  (NumberNode "10000")
+  (NumberNode "100000")
 )
 (StateLink 
   TARGET_LTI_FUNDS_BUFFER
-  (NumberNode "10000")
+  (NumberNode "100000")
 )
 (StateLink
   RENT_TOURNAMENT_SIZE
