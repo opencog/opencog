@@ -191,7 +191,7 @@
 	(define (nwords-in-cls CLS)
 		(fold
 			(lambda (MEMB sum)
-				(if (eq? (cog-type (gar MEMB) 'WordNode)) (+ sum 1) sum))
+				(if (eq? (cog-type (gar MEMB)) 'WordNode) (+ sum 1) sum))
 			0
 			(cog-incoming-by-type CLS 'MemberLink)))
 
