@@ -416,7 +416,7 @@
 						(let* (
 								(num-greedy (max min-greedy (* scan-multiplier
 										 (length DONE-LST))))
-								(short-list (take WRD-LST num-greedy))
+								(short-list (take rest num-greedy))
 							)
 							(assign-expand-class LLOBJ FRAC new-cls short-list)
 							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
