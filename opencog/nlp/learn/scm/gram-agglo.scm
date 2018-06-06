@@ -30,21 +30,16 @@
 ;
 ; Agglomerative clustering
 ; ------------------------
-; This file implements three different variants of agglomerative
+; This file implements four different variants of agglomerative
 ; clustering. The variants differ according to the order in which
-; they scan the word-lists to be clustered.
+; they scan the word-lists to be clustered. Different scan policies
+; can make a huge difference in performance.
 ;
+; Two of the algorithms implemented in this file are effectively O(N^2)
+; algorithms, in the length N of the list of words. One does a bit
+; better, and one might(?) approach O(N log N) performance.
 ;
-; All three algorithms implemented in this file are effectively O(N^2)
-; algorithms, in the length N of the list of words.  It seems possible
-; that one might get better run-times, say about O(N log N) using
-; hierarchical clustering (i.e. by only assigning words to existing
-; classes, and only rarely creating new classes).  Such hierarchical
-; algos are not implemented here, although some of them "come close"
-; to this ideal.
-;
-; There are three variants of agglomerative clustering implemented in
-; the code:
+; The first three variants are these:
 ;
 ; * `agglo-over-words` / `assign-to-classes`, which performs a basic
 ;   sieving-style agglo: Each word is compared to each of the existing
@@ -71,33 +66,43 @@
 ;   many word-pairs are not explored, although cross-frequency compares
 ;   can be forced by restarting the algo.
 ;
-; Its hard to say which of these strategies is the "best". Both
-; `agglo-over-words` and `diag-over-words` have desirable behaviors.
-;
-; One restart, all three algos suffer from a common problem: they create
+; One restart, all of the algos suffer from a common problem: they create
 ; an ordered list of words by frequency; however, this is computed from
 ; the marginals for the words, which are no longer accurate.  Thus, the
 ; marginals (holding frequencies) should be recomputed before each
 ; restart.  This is not done automatically.
 ;
 ;
-; Proposed best strategy (not implemented)
-; ----------------------------------------
-; Based on experience, this seems like the best way to do it:
-; * Main loop runs like `agglo-over-words` / `assign-to-classes`
+; Current best strategy: `greedy-grow`
+; ------------------------------------
+; The current best merge strategy is implemented in `greedy-grow` and
+; makes use of several tricks, based on paractical experience:
+;
+; * Words are sorted into frequency order, thus giving a rough-cut of
+;   having grammatically-similar words relatively near one-another in
+;   the list.
+; * Main loop is agglomerative: if a word can be assigned to an existing
+;   word class, then it will be, and then processing moves to the next
+;   word.
+; * If a word cannot be assigned to an existing word-class, it is
+;   designated to start a new 'singleton' class, of which it is the
+;   only member. For assignment of of words to classes, the most populus
+;   classes are considered first, and the singleton classes are
+;   considered last.
 ; * When a new cluster is formed, then perform the "greedy"/maximal
 ;   cluster expansion, scanning much of the word list to try to grow
 ;   the cluster further. Key here is the phrase "much of": instead
 ;   of scanning the entire list (which has a lot of dregs at the end)
-;   only scan the top M words, with M=max(30,6D) where D = number of
+;   only scan the top M words, with M=max(200,9D) where D = number of
 ;   words scanned so far. Thus, excessive searching down into the
 ;   low-frequency boon-docks is avoided.
-; * Once a word has been assigned to a cluster, the marginal count
-;   on the word should be recomputed, and the word re-ranked in the list.
-;   That is, words can have multiple meanings, and thus can be assigned
-;   to multiple clusters. However, if there's not much left (e.g. most
-;   common nouns have a single meaning), there's not much point
-;   attempting to jam what's left into other classes.
+; * Once a word has been assigned to a cluster, its added to the 'done'
+;   list.  Words in the 'done' list are re-scanned, every time that
+;   a new cluster is created, to see if they might also fit into the
+;   new cluster.  This is to allow words to have multiple meanings,
+;   e.g. to be classified as both nouns and verbs. Just because a word
+;   got classified as a noun in the first pass, does not mean that
+;   it should be forgotten - it might also be a verb.
 ;
 ; ---------------------------------------------------------------------
 
@@ -324,6 +329,10 @@
 ;     else they might fit. Viz, many words have both noun and verb
 ;     forms, and thus need to go into multiple classes.
 ;
+; XXX FIXME: The DONE-LIST should be scrubbed for short junk. That is,
+; words in the DONE-LIST have a good chance of being completely
+; neutered, with almost nothing left in them. They should get dropped.
+;
 (define (greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
 
 	; Tunable parameters
@@ -358,7 +367,7 @@
 			; recurse.  Make not of the word in the done-list.
 			(if (eq? 'WordClassNode (cog-type cls))
 				(greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST
-					(append! DONE-LIST (list wrd)) rest)
+					(append! DONE-LST (list wrd)) rest)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the singleton
@@ -370,7 +379,7 @@
 					(if (eq? 'WordNode (cog-type new-cls))
 						(greedy-grow LLOBJ FRAC TRUE-CLS-LST
 							(append! FAKE-CLS-LST (list new-cls))
-							DONE-LIST rest)
+							DONE-LST rest)
 
 						; If the result is a new class, then greedy-grow it.
 						; But only consider a limited subset of the word list,
@@ -387,7 +396,7 @@
 							(greedy-grow LLOBJ FRAC
 								(append! TRUE-CLS-LST (list new-cls))
 								FAKE-CLS-LST
-								(append! DONE-LIST (got-done short-list new-cls))
+								(append! DONE-LST (got-done short-list new-cls))
 								(still-to-do rest new-cls))
 						))))))
 )
@@ -583,7 +592,7 @@
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
-	(greedy-grow FRAC CLS-LST '() '() ranked-words)
+	(greedy-grow LLOBJ FRAC CLS-LST '() '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
