@@ -13456,6 +13456,8 @@ sort the class list sort-class-list   done
 dropdb mrg_tst
 createdb mrg_tst -T en_pairs_rfive_mtwo
 
+If cosine is zero, can only do 8 cosines/second apparently.
+
 
 =================================================================
  (define pca (make-pseudo-cset-api))

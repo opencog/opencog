@@ -353,7 +353,52 @@
 				(walen (COSOBJ 'right-length WA))
 				(wblen (COSOBJ 'right-length WB))
 				(llel-frac (/ (* cosi wblen) walen))
+	; Perform a disambiguation-merge of two sections.
+	; The first section should be for the (existing) grammatical class,
+	; the second section should be for the word to be merged.
+	; The counts on these two sections are modified, according to the
+	; described linear algebra; the updated counts on each are then
+	; pushed to the database.
+	;
+	; One or the other sections can be null. If both sections are not
+	; null, then both are assumed to have exactly the same disjunct.
+	;
+	(define (dab-merge-sections SECT-PAIR LLEL-FRAC)
+		; The two word-sections to merge
+		(define csec (first SECT-PAIR))
+		(define wsec (second SECT-PAIR))
+
+		; The counts on each, or zero.
+		(define ccnt (if (null? lsec) 0 (LLOBJ 'pair-count csec)))
+		(define wcnt (if (null? rsec) 0 (LLOBJ 'pair-count wsec)))
+
+		(define llel (* LLEL-FRAC ccnt))
+		(define perp (- wcnt llel))
+		(define clamp (max 0 perp))
+
+		(define cnew (+ ccnt llel (* FRAC (- wcnt clamp))))
+		(define wnew clamp)
 xxxxxx
+
+		; The cnt can be zero, if FRAC is zero.  Do nothing in this case.
+		(if (< 0 cnt)
+			(let* (
+					; The disjunct. Both lsec and rsec have the same disjunct.
+					(seq (if (null? lsec) (cog-outgoing-atom rsec 1)
+							(cog-outgoing-atom lsec 1)))
+					; The merged word-class
+					(mrg (Section wrd-class seq))
+				)
+
+				; The summed counts
+				(set-count mrg cnt)
+				(store-atom mrg) ; save to the database.
+			))
+
+		; Return the accumulated sum-square length
+		(+ LENSQ (* cnt cnt))
+	)
+
 )
 
 ; ---------------------------------------------------------------------
