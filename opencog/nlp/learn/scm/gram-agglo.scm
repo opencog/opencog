@@ -372,6 +372,17 @@
 ; words in the DONE-LIST have a good chance of being completely
 ; neutered, with almost nothing left in them. They should get dropped.
 ;
+; XXX Maybe-FIXME: There's some amount of poointless recomputation of
+; cosines between the word-list, and the existing grammatical classes.
+; During the construction of the classes, a greedy search was formed
+; part-way down the word-list. Thus, when resuming the search, its
+; (mostly) pointless to compute the cosines between the uncategorized
+; words, and the existing categories. Fixing this wastefulness is hard,
+; because its hard to track how far down the list we went for each
+; category. I just don't see anything except a super-complicated
+; solution that does not seem worth the effort. So we'll let the
+; CPU work harder than it might otherwise need to.
+;
 (define (greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
 
 	; Tunable parameters
