@@ -3,6 +3,7 @@
 ; Display stats and stuff, about the various word classes.
 ;
 ; -------------------------------------------------------
+(use-modules (srfi srfi-1))
 ;
 ; Load all grammatical classes from storage
 (define (fetch-all-gram-classes)

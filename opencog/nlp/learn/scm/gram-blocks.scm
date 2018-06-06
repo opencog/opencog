@@ -141,7 +141,8 @@
 	; Ad hoc restart point. If we already have N classes, we've
 	; probably pounded the cosines of the first 2N words or so into
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(define ranked-words (drop all-ranked-words (* 1.6 (length CLS-LST))))
+	(define ranked-words (drop all-ranked-words
+			(inexact->exact (round (* 1.6 (length CLS-LST))))))
 
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
