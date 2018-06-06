@@ -330,6 +330,18 @@
 	(define min-greedy 200)
 	(define scan-multiplier 10)
 
+	; Return true if WRD is in word-class CLS
+	(define (is-in-cls? WRD CLS)
+		(not (null? (cog-link 'MemberLink WRD CLS))))
+
+	; Return a list of words that got placed into the class.
+	(define (got-done WRDS CLS)
+		(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+	; Return a list of words NOT in the class.
+	(define (still-to-do WRDS CLS)
+		(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
+
 	(format #t "--- To-do=~A ncls=~A nsol=~A nredo=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(length DONE-LST)
@@ -362,17 +374,22 @@
 
 						; If the result is a new class, then greedy-grow it.
 						; But only consider a limited subset of the word list,
-						; so as to keep things under control.
+						; so as to not blow out performance. See if any of
+						; the previously-assigned words might also go into the
+						; new class. And then recurse.
 						(let* (
 								(num-greedy (max min-greedy (* scan-multiplier
-											 (length DONE-LST))))
+										 (length DONE-LST))))
 								(short-list (take WRD-LST num-greedy))
 							)
 							(assign-expand-class LLOBJ FRAC new-cls short-list)
 							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
-;; trims stuff.
-						)
-xxxxxxxxx
+							(greedy-grow LLOBJ FRAC
+								(append! TRUE-CLS-LST (list new-cls))
+								FAKE-CLS-LST
+								(append! DONE-LIST (got-done short-list new-cls))
+								(still-to-do rest new-cls))
+						))))))
 )
 
 ; ---------------------------------------------------------------
