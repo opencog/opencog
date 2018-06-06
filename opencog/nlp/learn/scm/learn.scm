@@ -15,3 +15,4 @@
 (load "learn/mst-parser.scm")
 (load "learn/pseudo-csets.scm")
 (load "learn/summary.scm")
+(load "learn/gram-class.scm")
