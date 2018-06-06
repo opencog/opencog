@@ -514,23 +514,6 @@
 	all-ranked-words
 )
 
-; Restart hack
-(define (restart-hack LLOBJ WRD-LST CLS-LST)
-
-	(define all-ranked-words (cutoff-hack LLOBJ WRD-LST))
-
-	; Ad hoc restart point. If we already have N classes, we've
-	; surely pounded the cosines of the first 2N or so words into
-	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
-	(define ranked-words (drop all-ranked-words num-to-drop))
-
-	(format #t "Drop first ~A words from consideration, leaving ~A\n"
-		num-to-drop (length ranked-words))
-
-	ranked-words
-)
-
 ; ---------------------------------------------------------------
 ; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
@@ -619,8 +602,18 @@
 	; Perhaps it should be a random number, altered between runs?
 	(define diag-block-size 20)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define all-ranked-words (cutoff-hack LLOBJ WRD-LST))
+
+	; Ad hoc restart point. If we already have N classes, we've
+	; surely pounded the cosines of the first 2N or so words into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
+	(define ranked-words (drop all-ranked-words num-to-drop))
+
 	(define sorted-cls (sort-class-list CLS-LST))
+
+	(format #t "Drop first ~A words from consideration, leaving ~A\n"
+		num-to-drop (length ranked-words))
 	(format #t "Start diag-block of ~A words, chunksz=~A\n"
 		(length ranked-words) diag-block-size)
 	(diag-blocks ranked-words diag-block-size sorted-cls)
