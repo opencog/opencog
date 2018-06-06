@@ -385,7 +385,7 @@
 				(cls (assign-word-to-class LLOBJ FRAC wrd TRUE-CLS-LST)))
 
 			; If the word was merged into an existing class, then
-			; recurse.  Make not of the word in the done-list.
+			; recurse.  Place the word onto the done-list.
 			(if (eq? 'WordClassNode (cog-type cls))
 				(greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST
 					(append! DONE-LST (list wrd)) rest)
@@ -395,7 +395,7 @@
 				; words in the "fake-class" list.
 				(let ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST)))
 
-					; If we failed to creae a new class, then just
+					; If we failed to create a new class, then just
 					; append the word to the fake list, and recurse.
 					(if (eq? 'WordNode (cog-type new-cls))
 						(greedy-grow LLOBJ FRAC TRUE-CLS-LST
@@ -415,9 +415,17 @@
 							(assign-expand-class LLOBJ FRAC new-cls short-list)
 							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
 							(greedy-grow LLOBJ FRAC
+								; The new true-list is now longer.
 								(sort-class-list (cons new-cls TRUE-CLS-LST))
-								FAKE-CLS-LST
-								(append! DONE-LST (got-done short-list new-cls))
+
+								; The new fake-list is now shorter
+								(still-to-do FAKE-CLS-LST new-cls)
+
+								; The new done-list is probably a lot longer
+								(append! DONE-LST (list wrd)
+									(got-done short-list new-cls))
+
+								; The new todo list is probably a lot shorter
 								(still-to-do rest new-cls))
 						))))))
 )
