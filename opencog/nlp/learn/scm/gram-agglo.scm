@@ -636,7 +636,8 @@
 (define (make-cosine-llobj)
 	(define pca (make-pseudo-cset-api))
 	(define psa (add-dynamic-stars pca))
-	(add-pair-cosine-compute psa)
+	(define pla (add-support-compute psa))
+	(add-pair-cosine-compute pla)
 )
 
 (define (load-stuff)
