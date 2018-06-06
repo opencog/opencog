@@ -819,9 +819,9 @@
 ; ---------------------------------------------------------------
 (load "learn/gram-blocks.scm")
 
-; XXX FIXME the 0.3 is a user-tunable paramter, for how much of the
+; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
-(define (do-it)
+(define-public (gram-classify)
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pcos (add-pair-cosine-compute psa))
