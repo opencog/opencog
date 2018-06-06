@@ -60,10 +60,13 @@
     fallback_on
     shutup
     gaze_at
+    gaze_at_cancel
     blink
+    blink_cancel
     emote
     gesture
     soma
+    soma_cancel
 
     ; Utilities
     set-dti!

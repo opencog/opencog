@@ -39,10 +39,10 @@
 ; --------------------------------------------------------------
 (Define
   (DefinedSchema "say-cancel")
-  (ExecutionOutput
-    (GroundedSchema "scm: print-by-action-logger")
-    (List
-      (Concept "say-cancel"))
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+       (List (Concept "say-cancel")))
   )
 )
 
@@ -73,6 +73,20 @@
 
 ; --------------------------------------------------------------
 (Define
+  (DefinedSchema "gaze-at-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "gaze-at-cancel")))
+  )
+)
+
+(define (gaze_at_cancel)
+  (cog-execute! (Put (DefinedSchema "gaze-at-cancel") (List)))
+)
+
+; --------------------------------------------------------------
+(Define
   (DefinedSchema "blink")
   (LambdaLink
     (VariableList
@@ -89,6 +103,20 @@
 
 (define (blink mean variation)
   (cog-execute! (Put (DefinedSchema "blink") (List mean variation)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "blink-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "blink-cancel")))
+  )
+)
+
+(define (blink_cancel)
+  (cog-execute! (Put (DefinedSchema "blink-cancel") (List)))
 )
 
 ; --------------------------------------------------------------
@@ -164,6 +192,20 @@
 (define (soma name magni rate ease-in)
   (cog-execute!
     (Put (DefinedSchema "soma") (List name magni rate ease-in)))
+)
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "soma-cancel")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "soma-cancel")))
+  )
+)
+
+(define (soma_cancel)
+  (cog-execute! (Put (DefinedSchema "soma-cancel") (List)))
 )
 
 ; --------------------------------------------------------------
