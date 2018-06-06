@@ -13443,6 +13443,14 @@ Baseline: 328
 217 elapsed for 3 threads. again: 219 -- 150%
 210 elapsed for 4 threads. -- 156%
 
+(for-each cog-delete-recursive (cog-get-atoms 'WordClassNode))
+
+(define (num-s)
+   (define (nmemb CLS) (length (cog-incoming-set CLS )))
+   (fold (lambda (CLS cnt) (+ cnt (nmemb CLS))) 0
+      (cog-get-atoms 'WordClassNode)))
+
+
 =================================================================
  (define pca (make-pseudo-cset-api))
   (define psa (add-pair-stars pca))

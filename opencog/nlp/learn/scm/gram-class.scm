@@ -310,8 +310,39 @@
 ; That is, the existing clusters act as a sieve: new words either fall
 ; into one of the existing "holes", or start a new "hole".
 ;
-; XXX Except this is not what the code actually does, as written. It
-; deviates a bit from this, in a slightly wacky fashion. XXX FIXME.
+; Note that clustering is an O(N^2) algrothm in the length N of the list
+; of words: sooner or later, each word is effectively compared to every
+; other word.  This has a disasterous impact on run-times, for large
+; word lists.
+;
+; There are three variants of agglomerative clustering implemented in
+; the code:
+; * `loop-over-words` / `assign-to-classes`, which performs the above
+;   algo, just as described.
+; * `classify-pair-wise`, which is similar, except that, upon creating
+;   a new cluster, it scans the entire word-list, attempting to add to
+;   it. It is a very effective algorithm, but perhaps a bit
+;   pathological, when the length of the word-list is long.
+; * `chunck-over-words`, which is similar to `classify-pair-wise`,
+;   except that it explores only a sequence of block diagonals down
+;   the middle. Specifically, it examines the block of 20x20 pairs
+;   of the most common words, follwed by the block 40x40 of the
+;   pairs of the next-most-common 40 words, and then an 80x80 block...
+;   The idea here is that similar words occur with similar frequencies,
+;   e.g. punctuation (very high frequency) will get merged with other
+;   punctuation, while common nouns (low frequency) get merged with
+;   other common nouns.  An important issue with this variant is that
+;   many word-pairs are not explored, although cross-frequency compares
+;   can be forced by restarting the algo.
+;
+; Its hard to say which of these strategies is the "best". Both
+; `loop-over-words` and `chunck-over-words` have desirable behaviors.
+;
+; One restart, all three algos suffer from a common problem: they create
+; an ordered list of words by frequency; however, this is computed from
+; the marginals for the words, which are no longer accurate.  Thus, the
+; marginals (holding frequencies) should be recomputed before each
+; restart.  This is not done automatically.
 ;
 ;
 ; Broadening
@@ -826,14 +857,14 @@
 
 		; Chunk over words might be faster, but is probably less
 		; accurate. Use loop-ver-words in production.
-		(chunk-over-words pcos 0.3
-			(cog-get-atoms 'WordNode)
-			(cog-get-atoms 'WordClassNode))
+		; (chunk-over-words pcos 0.3
+		; 	(cog-get-atoms 'WordNode)
+		; 	(cog-get-atoms 'WordClassNode))
 
 		; Use this one.
-		; (loop-over-words pcos 0.3
-		;	(cog-get-atoms 'WordNode)
-		;	(cog-get-atoms 'WordClassNode))
+		(loop-over-words pcos 0.3
+			(cog-get-atoms 'WordNode)
+			(cog-get-atoms 'WordClassNode))
 	)
 )
 
