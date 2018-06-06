@@ -342,7 +342,7 @@
 )
 
 ; Tunable parameter and restart hack
-(define (restart-hack LLOBJ WRD-LST)
+(define (restart-hack LLOBJ WRD-LST CLS-LST)
 
 	; XXX Adjust the minimum cutoff as desired!!!
 	; This is a tunable parameter!
@@ -385,7 +385,7 @@
 				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (restart-hack WRD-LST))
+	(define ranked-words (restart-hack LLOBJ WRD-LST GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length ranked-words))
 	(fold-unordered-pairs GLST check-pair ranked-words)
@@ -407,7 +407,7 @@
 ;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define ranked-words (restart-hack WRD-LST))
+	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
 	(assign-to-classes LLOBJ FRAC CLS-LST '() ranked-words)
@@ -459,7 +459,7 @@
 	; Perhaps it should be a random number, altered between runs?
 	(define chunk-block-size 20)
 
-	(define ranked-words (restart-hack WRD-LST))
+	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
 	(format #t "Start classification of ~A (of ~A) words, chunksz=~A\n"
 		(length ranked-words) (length WRD-LST) chunk-block-size)
 	(chunk-blocks ranked-words chunk-block-size CLS-LST)
@@ -501,6 +501,7 @@
 )
 
 ; ---------------------------------------------------------------
+; Main entry points for word-classification,
 ;
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
