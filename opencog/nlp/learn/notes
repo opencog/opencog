@@ -13435,6 +13435,36 @@ alt: 2-threads:
 Clearly pretty loosing -- execution takes much longer.
 but since in parallel... 1.x speedup!?
 
+ wtf...
+
+Baseline: 328
+355 elapsed for 1 thread.  again: 347  -- 93%  makes snese due to sched sleep.
+232 elapsed for 2 threads. --  141%
+217 elapsed for 3 threads. again: 219 -- 150%
+210 elapsed for 4 threads. -- 156%
+
+(for-each cog-delete-recursive (cog-get-atoms 'WordClassNode))
+
+(define (num-s)
+   (define (nmemb CLS) (length (cog-incoming-set CLS )))
+   (fold (lambda (CLS cnt) (+ cnt (nmemb CLS))) 0
+      (cog-get-atoms 'WordClassNode)))
+
+
+=================================================================
+ (define pca (make-pseudo-cset-api))
+  (define psa (add-pair-stars pca))
+(batch-all-pair-mi psa)
+
+(define wild-obj psa)
+(define count-obj (make-compute-count wild-obj))
+(define freq-obj (make-compute-freq wild-obj))
+(define supp-obj (add-support-compute wild-obj))
+   (define central-obj (make-central-compute wild-obj))
+   (define store-obj (make-store wild-obj))
+
+
+
 
 
 

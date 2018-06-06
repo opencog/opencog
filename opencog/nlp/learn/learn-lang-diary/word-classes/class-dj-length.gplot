@@ -1,0 +1,23 @@
+
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'class-dj-length.eps'
+# set term png
+# set out 'class-dj-length.png'
+set logscale y
+set logscale x
+set xrange [1:50]
+set yrange [1e3:3e5]
+set format y "10^{%4T}"
+set title "Ranked length of word-class vector"
+set xlabel "Rank"
+set ylabel "Length of word-class vector"
+plot "class-dj-length.dat" using 1:2 with lines linewidth 5 title "", \
+     "class-dj-length.dat" using  1:(2e5/($1)** 1.0) with lines linewidth 2 \
+      title "2x10^5 / N^{1.0}", \
+     "class-dj-length.dat" using  1:(2e5/($1)** 1.3) with lines linewidth 2 \
+      title "2x10^5 / N^{1.3}"
+
+#################################################
