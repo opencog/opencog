@@ -302,6 +302,8 @@
 ; word. (i.e. the sum of the counts on each of the sections).
 ;
 ; Words with fewer than MIN-CNT observations on them are discarded.
+; Sorting is important, because of locality: words in similar
+; grammatical classes also have similar frequency counts.
 ;
 ; Note: an earlier version of this ranked by the number of times
 ; each word was observed: viz:
@@ -340,6 +342,7 @@
 		; Rank so that the highest support words are first in the list.
 		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
 )
+
 
 ; Tunable parameter and restart hack
 (define (restart-hack LLOBJ WRD-LST CLS-LST)
@@ -395,15 +398,8 @@
 ; Loop over all words, attempting to place them into grammatical
 ; classes. This is an O(N^2) algorithm.
 ;
-; The list of words is ranked by order of the number of observations;
-; thus punctuation and words like "the", "a" come first.
-;
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
-;
-; XXX There is a user-adjustable parameter used below, to
-; control the ranking. It should be exposed in the API or
-; something like that! min-obs-cutoff
 ;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
@@ -415,24 +411,22 @@
 
 ; ---------------------------------------------------------------
 ; Loop over blocks of words, attempting to place them into grammatical
-; classes. This is an O(N^2) algorithm, and so several "cheats" are
-; employed to maintain some reasonable amount of forward progress. So,
+; classes. This tries to be faster than an O(N^2) algorithm, by
+; employing a cheat to get reasonable forward progress. Specifically:
 ;
-; A) The list of words is ranked by order of the number of observations;
-;    thus punctuation and words like "the", "a" come first.
-; B) The ranked list is divided into power-of-two ranges, and only
-;    the words in a given range are compared to one-another.
-;
-; The idea is that it is unlikely that words with very different
-; observational counts will be similar.  NOTE: this idea has NOT
-; been empirically tested, yet.
+; The ranked list is divided into power-of-two ranges, and only the
+; words in a given range are compared to one-another.  The idea is
+; that it is unlikely that words with very different observational
+; counts will be similar.  NOTE: This idea has NOT been empirically
+; measured, confirmed, tested, yet. It seems to be the case, but
+; actual measurements have not been made.
 ;
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
 ;
-; XXX There are two user-adjustable parameters used below, to
-; control the ranking. They should be exposed in the API or
-; something like that! min-obs-cutoff, diag-block-size
+; XXX There is a user-adjustable parameter used below, to specify
+; the initial block size.  This could be exposed in the API, maybe.
+; probably not urgent.
 ;
 (define (diag-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
@@ -465,6 +459,25 @@
 	(diag-blocks ranked-words chunk-block-size CLS-LST)
 )
 
+; ---------------------------------------------------------------
+; Loop over blocks of words, attempting to place them into grammatical
+; classes. This attempts to be an O(N log N) algorithm, and so employs
+; several tricks to try to get better than the naive O(N^2) perf.
+;
+; The idea is that it is unlikely that words with very different
+; observational counts will be similar.  NOTE: this idea has NOT
+; been empirically tested, yet.
+;
+; TODO - the word-class list should probably also be ranked, so
+; we preferentially add to the largest existing classes.
+;
+(define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
+
+)
+
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; Main entry-point helpers.
 ;
@@ -506,19 +519,50 @@
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
 
-; Attempt to merge words into word-classes.
 (define-public (gram-classify-pair-wise)
+"
+  gram-classify-pair-wise - Merge words into word-classes.
+
+  Very slow, exhaustive O(N^2) algorithm. Suggest using instead
+  `gram-classify-agglo`, `gram-classify-diag-blocks` or
+  `gram-classify-greedy` for better performance.
+"
 	(gram-classify classify-pair-wise 0.3)
 )
 
-; Attempt to merge words into word-classes.
+(define-public (gram-classify-agglo)
+"
+  gram-classify-agglo - Merge words into word-classes.
+
+  Conservative O(N^2) algorithm.  Faster than `gram-classify-pair-wise`
+  but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
+  or `gram-classify-greedy` for better performance.
+"
+	(gram-classify agglo-over-words 0.3)
+)
+
 (define-public (gram-classify-diag-blocks)
+"
+  gram-classify-diag-blocks - Merge words into word-classes.
+
+  Uses a diagonal-block merge strategy. Reasonably fast, better than
+  O(N^2) performance, but may miss optimal clusters. Faster than
+  `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
+  `gram-classify-greedy` variant is both faster and more accurate.
+"
 	(gram-classify diag-over-words 0.3)
 )
 
-; Attempt to merge words into word-classes.
-(define-public (gram-classify-agglo)
-	(gram-classify agglo-over-words 0.3)
+(define-public (gram-classify-greedy)
+"
+  gram-classify-greedy - Merge words into word-classes.
+
+  Uses several tricks to try to get close to O(N log N) performance,
+  while retaining high accuracy.  Faster than the exhaustive-search
+  `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
+  be faster and more accurate than `gram-classify-diag-blocks`.
+"
+	(gram-classify greedy-over-words 0.3)
 )
 
 ; ---------------------------------------------------------------
