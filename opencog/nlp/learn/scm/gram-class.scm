@@ -867,24 +867,17 @@
 
 ; ---------------------------------------------------------------
 ; Loop over all words, attempting to place them into grammatical
-; classes. This is an O(N^2) algorithm, and so several "cheats" are
-; employed to maintain some reasonable amount of forward progress. So,
+; classes. This is an O(N^2) algorithm.
 ;
-; A) The list of words is ranked by order of the number of
-;    observations; thus punctuation and "the, "a" come first.
-; B) The ranked list is divided into power-of-two ranges, and only
-;    the words in a given range are compared to one-another.
-;
-; The idea is that it is unlikely that words with very different
-; observational counts will be similar.  NOTE: this idea has NOT
-; been empirically tested, yet.
+; The list of words is ranked by order of the number of observations;
+; thus punctuation and words like "the", "a" come first.
 ;
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
 ;
 ; XXX There is a user-adjustable parameter used below, to
 ; control the ranking. It should be exposed in the API or
-; something like that! min-obs-cutoff, chunk-block-size
+; something like that! min-obs-cutoff
 ;
 (define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
 	; XXX Adjust the minimum cutoff as desired!!!
@@ -902,6 +895,48 @@
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
 	(define ncl (length CLS-LST))
 	(define ranked-words (drop all-ranked-words (* 0.35 ncl cnl)))
+
+	(format #t "Start classification of ~A words\n"
+		(length ranked-words))
+	(assign-to-classes LLOBJ FRAC CLS-LST '() ranked-words)
+)
+
+; ---------------------------------------------------------------
+; Loop over all words, attempting to place them into grammatical
+; classes. This is an O(N^2) algorithm, and so several "cheats" are
+; employed to maintain some reasonable amount of forward progress. So,
+;
+; A) The list of words is ranked by order of the number of observations;
+;    thus punctuation and words like "the", "a" come first.
+; B) The ranked list is divided into power-of-two ranges, and only
+;    the words in a given range are compared to one-another.
+;
+; The idea is that it is unlikely that words with very different
+; observational counts will be similar.  NOTE: this idea has NOT
+; been empirically tested, yet.
+;
+; TODO - the word-class list should probably also be ranked, so
+; we preferentially add to the largest existing classes.
+;
+; XXX There is a user-adjustable parameter used below, to
+; control the ranking. It should be exposed in the API or
+; something like that! min-obs-cutoff, chunk-block-size
+;
+(define (chunk-over-words LLOBJ FRAC WRD-LST CLS-LST)
+	; XXX Adjust the minimum cutoff as desired!!!
+	; This is a tunable paramter!
+	; Right now, set to 20 observations, minimum. Less
+	; than this and weird typos and stuff get in.
+	(define min-obs-cutoff 20)
+	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
+
+	; Been there, done that; drop the top-20.
+	; (define ranked-words (drop all-ranked-words 20))
+	; (define ranked-words all-ranked-words)
+	; Ad hoc restart point. If we already have N classes, we've
+	; probably pounded the cosines of the first 2N words or so into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(define ranked-words (drop all-ranked-words (* 1.6 (length CLS-LST))))
 
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
@@ -950,7 +985,7 @@
 		(format #t "Finished loading ~A words in ~5f seconds\n"
 			(length (cog-get-atoms 'WordNode))
 			(* 1.0e-9 (- (get-internal-real-time) start-time)))
-		(loop-over-words pcos 0.3
+		(chunk-over-words pcos 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))
 	)
