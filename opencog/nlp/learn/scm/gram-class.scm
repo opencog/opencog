@@ -356,7 +356,7 @@
   FRAC should be a floating point nummber between zero and one,
      indicating the fraction of the non-shared count of WB to be
      merged into WA. Setting this to a non-zero value broadens
-     the class. Setting this to 1.0 gives the "pure" semantic merge
+     the class. Setting this to 1.0 gives the \"pure\" semantic merge
      (described in the primary docs).
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
@@ -652,24 +652,6 @@
 )
 
 ; ---------------------------------------------------------------
-; Given a list of words, compare them pair-wise to find a similar
-; pair. Merge these to form a grammatical class, and then try to
-; expand that class as much as possible. Repeat until all pairs
-; have been explored.  This is an O(N^2) algo in the length of the
-; word-list!
-; This returns a list of the classes that were created.
-(define (classify-pair-wise LLOBJ FRAC WRD-LST)
-
-	(define (check-pair WORD-A WORD-B CLS-LST)
-		(if (ok-to-merge LLOBJ WORD-A WORD-B)
-			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
-				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
-				(cons grm-class CLS-LST))))
-
-	(fold-unordered-pairs '() check-pair WRD-LST)
-)
-
-; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -802,14 +784,10 @@
 	(define min-obs-cutoff 20)
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
-	; Been there, done that; drop the top-20.
-	; (define ranked-words (drop all-ranked-words 20))
-	; (define ranked-words all-ranked-words)
 	; Ad hoc restart point. If we already have N classes, we've
-	; surely pounded the cosines of the first N(N-1)/2 words into
+	; surely pounded the cosines of the first 2N or so words into
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(define ncl (length CLS-LST))
-	(define ranked-words (drop all-ranked-words (* 0.35 ncl cnl)))
+	(define ranked-words (drop all-ranked-words (* 1.6 (length CLS-LST))))
 
 	(format #t "Start classification of ~A words\n"
 		(length ranked-words))
@@ -817,7 +795,7 @@
 )
 
 ; ---------------------------------------------------------------
-(load "learn/gram-blocks.scm")
+(load "gram-blocks.scm")
 
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
@@ -838,14 +816,23 @@
 			(length (cog-get-atoms 'WordNode))
 			(* 1.0e-9 (- (get-internal-real-time) start-time)))
 
-		; Chunk over words might be faster, but is probably less
-		; accurate. Use loop-ver-words in production.
-		; (chunk-over-words pcos 0.3
+		; Attempt to merge words into wor-classes.
+		; Stubbed out, because it has a poor performance profile.
+		; Also, fails to make use of existing classes.
+		; (classify-pair-wise pcos 0.3
 		;	(cog-get-atoms 'WordNode)
 		;	(cog-get-atoms 'WordClassNode))
-		(loop-over-words pcos 0.3
+
+		; Chunk over words might be faster, but is probably less
+		; accurate. Use loop-ver-words in production.
+		(chunk-over-words pcos 0.3
 			(cog-get-atoms 'WordNode)
 			(cog-get-atoms 'WordClassNode))
+
+		; Use this one.
+		; (loop-over-words pcos 0.3
+		;	(cog-get-atoms 'WordNode)
+		;	(cog-get-atoms 'WordClassNode))
 	)
 )
 

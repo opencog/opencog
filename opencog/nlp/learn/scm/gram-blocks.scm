@@ -171,3 +171,32 @@
 )
 
 ; ---------------------------------------------------------------
+; Given a list of words, compare them pair-wise to find a similar
+; pair. Merge these to form a grammatical class, and then try to
+; expand that class as much as possible. Repeat until all pairs
+; have been explored.  This is an O(N^2) algo in the length of the
+; word-list!
+;
+; WRD-LST is the list of words to classify.
+; GLST is a list of previously-determined classes.
+;
+; This returns a list of the classes that were created.
+;
+; This is a simpler version of `assign-to-classes`. It behaves
+; differently; the attempt to "maximally expand" a new-found class
+; means it will try to scan the entire word list, which is undesirable
+; if the word-list is long.  Thus, this subroutine is currently not
+; recommended, although its simple and easy, thus good for sanity
+; checking.
+;
+(define (classify-pair-wise LLOBJ FRAC WRD-LST GLST)
+
+	(define (check-pair WORD-A WORD-B CLS-LST)
+		(if (ok-to-merge LLOBJ WORD-A WORD-B)
+			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
+				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
+				(cons grm-class CLS-LST))))
+
+	(fold-unordered-pairs GLST check-pair WRD-LST)
+)
+; ---------------------------------------------------------------
