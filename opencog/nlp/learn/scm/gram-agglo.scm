@@ -182,6 +182,27 @@
 )
 
 ; ---------------------------------------------------------------
+; Sort the class list, returning a list of classes from the largest,
+; to the smalllest.
+;
+(define (sort-class-list CLS-LST)
+
+	; Return an integer, the number of words in the class
+	(define (nwords-in-cls CLS)
+		(fold
+			(lambda (MEMB sum)
+				(if (eq? (cog-type (gar MEMB) 'WordNode)) (+ sum 1) sum))
+			0
+			(cog-incoming-by-type CLS 'MemberLink)))
+
+	; Sort the class-list according to size.
+	(sort! CLS-LST
+		; Rank so that the highest counts are first in the list.
+		(lambda (ATOM-A ATOM-B)
+			(> (nwords-in-cls ATOM-A) (nwords-in-cls ATOM-B))))
+)
+
+; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -505,24 +526,23 @@
 				(cons grm-class CLS-LST))))
 
 	(define ranked-words (restart-hack LLOBJ WRD-LST GLST))
+	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length ranked-words))
-	(fold-unordered-pairs GLST check-pair ranked-words)
+	(fold-unordered-pairs sorted-cls check-pair ranked-words)
 )
 
 ; ---------------------------------------------------------------
 ; Loop over all words, attempting to place them into grammatical
 ; classes. This is an O(N^2) algorithm.
 ;
-; TODO - the word-class list should probably also be ranked, so
-; we preferentially add to the largest existing classes.
-;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
-	(assign-to-classes LLOBJ FRAC CLS-LST '() ranked-words)
+	(assign-to-classes LLOBJ FRAC sorted-cls '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
@@ -536,9 +556,6 @@
 ; counts will be similar.  NOTE: This idea has NOT been empirically
 ; measured, confirmed, tested, yet. It seems to be the case, but
 ; actual measurements have not been made.
-;
-; TODO - the word-class list should probably also be ranked, so
-; we preferentially add to the largest existing classes.
 ;
 ; XXX There is a user-adjustable parameter used below, to specify
 ; the initial block size.  This could be exposed in the API, maybe.
@@ -570,9 +587,10 @@
 	(define diag-block-size 20)
 
 	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start diag-block of ~A words, chunksz=~A\n"
 		(length ranked-words) diag-block-size)
-	(diag-blocks ranked-words diag-block-size CLS-LST)
+	(diag-blocks ranked-words diag-block-size sorted-cls)
 )
 
 ; ---------------------------------------------------------------
