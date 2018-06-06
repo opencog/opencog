@@ -34,13 +34,6 @@
 ; clustering. The variants differ according to the order in which
 ; they scan the word-lists to be clustered.
 ;
-; In agglomerative clustering, each word is compared to each of the
-; existing clusters, and if it is close enough, it is merged in.  If a
-; word cannot be assigned to a cluster, it is treated as a new
-; cluster-point, and is tacked onto the list of existing clusters.
-;
-; That is, the existing clusters act as a sieve: new words either fall
-; into one of the existing "holes", or start a new "hole".
 ;
 ; All three algorithms implemented in this file are efectively O(N^2)
 ; algorithms, in the length N of the list of words.  It seems possible
@@ -52,13 +45,21 @@
 ;
 ; There are three variants of agglomerative clustering implemented in
 ; the code:
-; * `loop-over-words` / `assign-to-classes`, which performs the above
-;   algo, just as described.
+;
+; * `loop-over-words` / `assign-to-classes`, which performs a basic
+;   sieving-style aglo: Each word is compared to each of the existing
+;   clusters, and if it is close enough, it is merged in.  If a word
+;   cannot be assigned to a cluster, it is treated as a new cluster-
+;   point, and is tacked onto the list of existing clusters. That is,
+;   the existing clusters act as a sieve: new words either fall into
+;   one of the existing "holes", or start a new "hole".
+;
 ; * `classify-pair-wise`, which is similar, except that, upon creating
 ;   a new cluster, it scans the entire word-list, attempting to add to
-;   it. It is a very effective algorithm, but perhaps a bit
-;   pathological, when the length of the word-list is long.
-; * `chunck-over-words`, which is similar to `classify-pair-wise`,
+;   it. This scanning order makes it 'almost' hierarchical.  It behaves
+;   a bit pathologically when the length of the word-list is long.
+;
+; * `chunk-over-words`, which is similar to `classify-pair-wise`,
 ;   except that it explores only a sequence of block diagonals down
 ;   the middle. Specifically, it examines the block of 20x20 pairs
 ;   of the most common words, follwed by the block 40x40 of the
@@ -79,6 +80,23 @@
 ; marginals (holding frequencies) should be recomputed before each
 ; restart.  This is not done automatically.
 ;
+; Proposed best strategy (not implemented)
+; ----------------------------------------
+; Based on experience, this seems like the best way to do it:
+; * Main loop runs like `loop-over-words` / `assign-to-classes`
+; * When a new cluster is formed, then perform the "greedy"/maximal
+;   cluster expansion, scanning much of the word list to try to grow
+;   the cluster further. Key here is the phrase "much of": instead
+;   of scanning the entire list (which has a lot of dregs at the end)
+;   only scan the top M words, with M=max(30,6D) where D = number of
+;   words scanned so far. Thus, excessive searching down into the
+;   low-frequency boon-docks is avoided.
+; * Once a word has been assigned to a cluster, the marginal count
+;   on the word should be remoputed, and the word re-ranked in the list.
+;   That is, words can have multiple meanings, and thus can be assigned
+;   to multiple clusters. However, if there's not much left (e.g. most
+;   common nouns have a single meaning), there's not much point
+;   attempting to jam what's left into other classes.
 ;
 ; ---------------------------------------------------------------------
 
