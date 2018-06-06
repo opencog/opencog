@@ -1,52 +1,54 @@
 ;
-; gram-blocks.scm
+; gram-agglo.scm
 ;
-; Merge words into grammatical categories. Diagonal-block algo.
-;
-; Copyright (c) 2017, 2018 Linas Vepstas
-;
-; ---------------------------------------------------------------------
-; OVERVIEW
-; --------
-; See `gram-class.scm` for most of the documentation.  This performs
-; classification (agglomerative clustering) of words into classes, but 
-; using a block-diagonal algorithm that explores fewer words, in the
-; hope of making more progress at the expense of lower accuracy.
-;
-; The main entry point here is the `chunk-over-words` routine.
-;
-; ---------------------------------------------------------------------
-
-(use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog matrix) (opencog persist))
-
-;
-; gram-class.scm
-;
-; Merge words into grammatical categories.
+; Merge words into grammatical categories. Agglomerative clustering.
 ;
 ; Copyright (c) 2017, 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
+; When a pair of words are judged to be grammatically similar, they
+; can be used to create a "grammatical class", containing both the
+; words, and behaving as their average.  When a word is judged to
+; belong to an existing grammatical-class, then some mechanism must
+; be provided to add that word to the class.  This file implements
+; the tools for creating and managing such classes.  It does not
+; dictate how to judge when words belong to a class; this is done
+; independently of the structure of the classes themselves.
+;
+; The above describes the general concept of "agglomerative clustering",
+; which is what is effectively implemented in this file.  Note, however,
+; that the general problem is not quite this simple: in addition to
+; assigning words to grammatical classes, one must also cluster the
+; connectors, which in turn alters the notion of similarity. That is,
+; words are not isolated points to be clustered; the location of those
+; "points" depend on the connectors and sections ("disjuncts") which
+; must also be clustered in a consistent manner: these two clustering
+; steps form a feedback loop.
 ;
 ;
 ; Agglomerative clustering
 ; ------------------------
-; The de facto algorithm implemented here is agglomerative clustering.
-; That is, each word is compared to each of the existing clusters, and
-; if it is close enough, it is merged in.  If a word cannot be assigned
-; to a cluster, it is treated as a new cluster-point, and is tacked onto
-; the list of existing clusters.
+; This file implements three different variants of agglomerative
+; clustering. The variants differ according to the order in which
+; they scan the word-lists to be clustered.
+;
+; In agglomerative clustering, each word is compared to each of the
+; existing clusters, and if it is close enough, it is merged in.  If a
+; word cannot be assigned to a cluster, it is treated as a new
+; cluster-point, and is tacked onto the list of existing clusters.
 ;
 ; That is, the existing clusters act as a sieve: new words either fall
 ; into one of the existing "holes", or start a new "hole".
 ;
-; Note that clustering is an O(N^2) algrothm in the length N of the list
-; of words: sooner or later, each word is effectively compared to every
-; other word.  This has a disasterous impact on run-times, for large
-; word lists.
+; All three algorithms implemented in this file are efectively O(N^2)
+; algorithms, in the length N of the list of words.  It seems possible
+; that one might get better run-times, say about O(N log N) using
+; hierarchical clustering (i.e. by only assigning words to existing
+; classes, and only rarely creating new classes).  Such hierarchical
+; algos are not implemented here, although some of them "come close"
+; to this ideal.
 ;
 ; There are three variants of agglomerative clustering implemented in
 ; the code:
@@ -78,6 +80,11 @@
 ; restart.  This is not done automatically.
 ;
 ;
+; ---------------------------------------------------------------------
+
+(use-modules (srfi srfi-1))
+(use-modules (opencog) (opencog matrix) (opencog persist))
+
 ; ---------------------------------------------------------------
 ; Given a single word and a list of grammatical classes, attempt to
 ; assign the the word to one of the classes.

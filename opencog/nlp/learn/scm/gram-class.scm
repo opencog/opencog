@@ -1,7 +1,7 @@
 ;
 ; gram-class.scm
 ;
-; Merge words into grammatical categories.
+; Compare words and word-classes by grammatical similarites.
 ;
 ; Copyright (c) 2017, 2018 Linas Vepstas
 ;
@@ -10,23 +10,10 @@
 ; --------
 ; When a pair of words are judged to be grammatically similar, they
 ; can be used to create a "grammatical class", containing both the
-; words, and behaving as their union/sum.  When a word is judged to
-; belong to an existing grammatical-class, then some mechanism must
-; be provided to add that word to the class.  This file implements
-; the tools for creating and managing such classes.  It does not
-; dictate how to judge when words belong to a class; this is done
-; independently of the structure of the classes themselves.
-;
-; The above describes the general concept of "agglomerative clustering",
-; which is what is effectively implemented in this file.  Note, however,
-; that the general problem is not quite this simple: in addition to
-; assigning words to grammatical classes, one must also cluster the
-; connectors, which in turn alters the notion of similarity. That is,
-; words are not isolated points to be clustered; the location of those
-; "points" depend on the connectors and sections ("disjuncts") which
-; must also be clustered in a consistent manner: these two clustering
-; steps form a feedback loop.
-;
+; words, and behaving as their average.  Similarly, a word can be
+; compared to an existing grammatical class, to see if it belongs to
+; that class.  This file implements several different systems for
+; comparing the grammatical similarity of words and word-classes.
 ;
 ; Representation
 ; --------------
@@ -297,15 +284,6 @@
 ;
 ; In the code below, this is currently a hard-coded parameter, set to
 ; the ad hoc value of 0.3.  Behavior with different values is unexplored.
-;
-;
-; Agglomerative clustering
-; ------------------------
-; The de facto algorithm implemented here is agglomerative clustering.
-; That is, each word is compared to each of the existing clusters, and
-; if it is close enough, it is merged in.  If a word cannot be assigned
-; to a cluster, it is treated as a new cluster-point, and is tacked onto
-; the list of existing clusters.
 ;
 ; Broadening
 ; ----------
