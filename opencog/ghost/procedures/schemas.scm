@@ -42,7 +42,7 @@
   (Lambda
     (ExecutionOutput
       (GroundedSchema "scm: print-by-action-logger")
-       (List (Concept "say-cancel")))
+       (List (Concept "shutup")))
   )
 )
 
