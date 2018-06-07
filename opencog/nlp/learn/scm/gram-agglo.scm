@@ -435,6 +435,12 @@
 							(assign-expand-class MERGER new-cls short-list)
 							(display "--- Checking the done-list\n")
 							(assign-expand-class MERGER new-cls DONE-LST)
+
+							; If anything from the done-list was merged, then
+							; what is left might be either a tiny piece of
+							; crud, or it might be a something that can now
+							; be merged into an existing class.  We should
+							; handle this. XXX TODO.
 							(greedy-grow MERGER
 								; The new true-list is now longer.
 								(sort-class-list (cons new-cls TRUE-CLS-LST))
