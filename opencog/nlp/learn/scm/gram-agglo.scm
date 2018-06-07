@@ -639,7 +639,7 @@
 ;
 (define (greedy-over-words MERGER WRD-LST CLS-LST)
 
-	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
 	(greedy-grow MERGER CLS-LST '() '() ranked-words)
@@ -671,8 +671,8 @@
 
 ; Attempt to merge words into word-classes.
 (define (gram-classify ALGO)
-	(define merger (make-fuzz))
-	; (define merger (make-discrim)) ; Try this later ...
+	; (define merger (make-fuzz))
+	(define merger (make-discrim))
 
 	(load-stuff)
 	(ALGO
