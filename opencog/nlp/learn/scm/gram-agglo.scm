@@ -657,6 +657,9 @@
 	(display "Start loading words and word-classes\n")
 	(load-atoms-of-type 'WordNode)
 	(load-atoms-of-type 'WordClassNode)
+	(for-each
+		(lambda (cls) (fetch-incoming-by-type cls 'MemberLink))
+		(cog-get-atoms 'WordClassNode))
 
 	; Verify that words have been loaded
 	;  (define all-words (get-all-cset-words))
