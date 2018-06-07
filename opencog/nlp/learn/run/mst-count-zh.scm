@@ -28,7 +28,7 @@
 ;;;   (run-server (make-tcp-server-socket #:port 19005)))
 ;;;)
 
-(start-cogserver "opencog-mst-zh.conf")
+(start-cogserver "config/opencog-mst-zh.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.

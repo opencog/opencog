@@ -27,7 +27,7 @@
 (define language (get-lang))
 
 ; Start the cogserver with configs for the given language
-(start-cogserver (string-append "opencog-" language ".conf"))
+(start-cogserver (string-append "config/opencog-pairs-" language ".conf"))
 
 ; Open the database.
 (sql-open database-uri)

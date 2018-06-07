@@ -25,7 +25,7 @@
     language "-mst)> "))
 
 ; Start the cogserver with configs for the given language
-(start-cogserver (string-append "opencog-mst-" language ".conf"))
+(start-cogserver (string-append "config/opencog-mst-" language ".conf"))
 
 ; Open the database.
 (sql-open database-uri)
