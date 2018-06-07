@@ -29225,7 +29225,8 @@ gram-class.scm
 en_pairs_cfive_class
 \family default
 '.
- 
+ The merge paramters are: cosine-similarity-accept cutoff = 0.65; iniopn-merg-fra
+ction = 0.3.
 \end_layout
 
 \begin_layout Standard
@@ -30610,7 +30611,79 @@ length
 \end_layout
 
 \begin_layout Standard
-Soooo....
+Conclusion: Looks good, more proccessing needed; comparison of experiments
+ needed.
+\end_layout
+
+\begin_layout Section*
+Merge Experiments
+\end_layout
+
+\begin_layout Standard
+Three different merge experiments are being run.
+ These are reported below.
+ The summary is here:
+\end_layout
+
+\begin_layout Description
+Block-5x5 Same as above, pushed out farther.
+ This is run on a copy of the 
+\family typewriter
+en_pairs_cfive_mst
+\family default
+ dataset (all five MST tranches) on the LXC container.
+ Using a cutoff of 20 observations minimum per word, this contains 62607
+ words to be classified.
+ The classifier is the 
+\family typewriter
+merge-ortho
+\family default
+ classifier, using a minimum cosine of 0.65 to propose a merge, and a fixed
+ fraction of 0.3 for the union-merge.
+ The agglomeration algorithm is the block-diagonal algorithm.
+\end_layout
+
+\begin_layout Description
+Fuzz-5x2 This is run on a copy of the 
+\family typewriter
+en_pairs_cfive_mtwo
+\family default
+ dataset (only two MST tranches) and thus has fewer words: a total of 25505
+ words with more than 20 observations.
+ As above, this uses the 
+\family typewriter
+merge-ortho
+\family default
+ classifier, using a minimum cosine of 0.65 to propose a merge, and a fixed
+ fraction of 0.3 for the union-merge.
+ The agglomeration algorithm is the greedy algorithm.
+\end_layout
+
+\begin_layout Description
+Discrim-5x2 This is run on a copy of the 
+\family typewriter
+en_pairs_cfive_mtwo
+\family default
+ dataset, as above: a total of 25505 words with more than 20 observations.
+ This uses the 
+\family typewriter
+merge-discrim
+\family default
+ classifier, which is like the 
+\family typewriter
+merge-ortho
+\family default
+ classifier, but uses a variable fraction for union-merge.
+ Because the variable fraction should behave nicely, the minimum cosine
+ is set to 0.50.
+ The agglomeration algorithm is the greedy algorithm.
+\end_layout
+
+\begin_layout Standard
+Basically, the last two are directly comparable: they differ only in the
+ merge strategy.
+ The first two are harder to compare: they use different datasets and different
+ agglomeration algos.
 \end_layout
 
 \begin_layout Section*
