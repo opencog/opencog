@@ -521,7 +521,7 @@
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
 	(format #t "After cutoff, ~A words left, out of ~A\n"
-		(length WRD-LST) (length all-ranked-words))
+		(length all-ranked-words) (length WRD-LST))
 
 	all-ranked-words
 )
