@@ -645,13 +645,23 @@
 				(append! LST (cog-incoming-by-type CLS 'MemberLink)))
 				'() CLS-LST))
 
-	; Make sure that they really are words.
+	; Make sure that they really are words. (This should be a no-op...)
 	(define done-list
-		(filter! (lambda (x) (eq? 'WordNode (cog-type w))) mdone-list))
+		(filter! (lambda (w) (eq? 'WordNode (cog-type w))) mdone-list))
+
+	(define (not-done? w)
+		(eq? '() (find (lambda (x) (eq? x w)) done-list)))
+
+	; Trim the word-list, keeping only the not-done words.
+	(define remain-words (filter! not-done? ranked-words))
 
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
-	(greedy-grow MERGER sorted-cls '() done-list ranked-words)
+	(greedy-grow MERGER sorted-cls '() done-list remain-words)
+
+	; XXX FIXME ... at the conclusion of this, we havea done list,
+	; which, because of repeated merging, might possibly have been
+	; reduced to single senses, which can now be classified.
 )
 
 ; ---------------------------------------------------------------
