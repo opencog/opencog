@@ -126,13 +126,14 @@
 ; v_perp had many negative components. One cannot reasonably expect
 ; v_perp to identify "some other meaning" for v_b. Instead, it would
 ; seem that v_perp just consists of grunge that "should have been" in
-; v_a, but wasn't.
+; v_b, but wasn't.
 ;
 ; That is, due to a limited (small) number of observations, the negative
-; coefficients in v_perp correspond to ways in which the word w_b was
-; (observed to have been) used in a sentence, and a way that word w_a
+; coefficients in v_perp correspond to ways in which the word w_a was
+; (observed to have been) used in a sentence, and a way that word w_b
 ; might have been used in a sentence, but wasn't (hadn't been observed).
-; At least, this is the operational hypothesis, here.
+; The negative parts of v_perp are parts of w_a that should have been
+; in w_b (at least, if w_b has the "same meaning as" w_a).
 ;
 ; Thus, correct merge algo would seem to be:
 ;
