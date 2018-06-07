@@ -41,26 +41,8 @@ sleep 2;
 # Not using relex any longer.
 # tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
 
-# Assign port value according to language
-if [ "$1" = "en" ]
-then
-  PORT=17005
-elif [ "$1" = "fr" ]
-then
-  PORT=17003
-elif [ "$1" = "lt" ]
-then
-  PORT=17002
-elif [ "$1" = "pl" ]
-then
-  PORT=17004
-elif [ "$1" = "yue" ]
-then
-  PORT=17006
-elif [ "$1" = "zh" ]
-then
-  PORT=17007
-fi
+# Get port number according to mode and language
+source ./config/det-port-num.sh pairs $1
 
 # Telnet window
 tmux new-window -n 'telnet' "rlwrap telnet localhost $PORT; $SHELL"

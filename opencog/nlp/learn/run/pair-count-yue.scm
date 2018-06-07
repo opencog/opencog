@@ -33,7 +33,7 @@
 ;;;)
 
 ; Start the cogserver on port 17006
-(start-cogserver "opencog-yue.conf")
+(start-cogserver "config/opencog-pairs-yue.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
