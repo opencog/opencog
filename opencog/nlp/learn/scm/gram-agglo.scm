@@ -751,7 +751,7 @@
   `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
   be faster and more accurate than `gram-classify-diag-blocks`.
 
-  Uses the "fuzz" merge algo: cosine=0.65, frac=0.3
+  Uses the \"fuzz\" merge algo: cosine=0.65, frac=0.3
 "
 	(gram-classify greedy-over-words (make-fuzz))
 )
@@ -765,7 +765,7 @@
   `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
   be faster and more accurate than `gram-classify-diag-blocks`.
 
-  Uses the "discrim" merge algo: cosine=0.50, frac=variable
+  Uses the \"discrim\" merge algo: cosine=0.50, frac=variable
 "
 	(gram-classify greedy-over-words (make-discrim))
 )
