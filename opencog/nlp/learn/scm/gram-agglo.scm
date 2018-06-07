@@ -430,6 +430,7 @@
 								(short-list (take rest num-greedy))
 							)
 							(assign-expand-class LLOBJ FRAC new-cls short-list)
+							(display "--- Checking the done-list\n")
 							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
 							(greedy-grow LLOBJ FRAC
 								; The new true-list is now longer.
@@ -439,7 +440,9 @@
 								(still-to-do FAKE-CLS-LST new-cls)
 
 								; The new done-list is probably a lot longer
-								(append! DONE-LST (list wrd)
+								(append! DONE-LST
+									(got-done FAKE-CLS-LST new-cls)
+									(list wrd)
 									(got-done short-list new-cls))
 
 								; The new todo list is probably a lot shorter
@@ -648,7 +651,7 @@
 (define (make-cosine-llobj)
 	(define pca (make-pseudo-cset-api))
 	(define psa (add-dynamic-stars pca))
-	(define pla (add-support-compute psa))
+	; (define pla (add-support-compute psa))
 	(add-pair-cosine-compute pla)
 )
 
