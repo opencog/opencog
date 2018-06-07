@@ -670,13 +670,9 @@
 )
 
 ; Attempt to merge words into word-classes.
-(define (gram-classify ALGO)
-	; (define merger (make-fuzz))
-	(define merger (make-discrim))
-
+(define (gram-classify ALGO MERGER)
 	(load-stuff)
-	(ALGO
-		merger
+	(ALGO MERGER
 		(cog-get-atoms 'WordNode)
 		(cog-get-atoms 'WordClassNode))
 )
@@ -695,7 +691,7 @@
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
 "
-	(gram-classify classify-pair-wise)
+	(gram-classify classify-pair-wise (make-fuzz))
 )
 
 (define-public (gram-classify-agglo)
@@ -706,7 +702,7 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words)
+	(gram-classify agglo-over-words (make-fuzz))
 )
 
 (define-public (gram-classify-diag-blocks)
@@ -718,19 +714,35 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words)
+	(gram-classify diag-over-words (make-fuzz))
 )
 
-(define-public (gram-classify-greedy)
+(define-public (gram-classify-greedy-fuzz)
 "
-  gram-classify-greedy - Merge words into word-classes.
+  gram-classify-greedy-fuzz - Merge words into word-classes.
 
   Uses several tricks to try to get close to O(N log N) performance,
   while retaining high accuracy.  Faster than the exhaustive-search
   `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
   be faster and more accurate than `gram-classify-diag-blocks`.
+
+  Uses the "fuzz" merge algo: cosine=0.65, frac=0.3
 "
-	(gram-classify greedy-over-words)
+	(gram-classify greedy-over-words (make-fuzz))
+)
+
+(define-public (gram-classify-greedy-discrim)
+"
+  gram-classify-greedy-discrim - Merge words into word-classes.
+
+  Uses several tricks to try to get close to O(N log N) performance,
+  while retaining high accuracy.  Faster than the exhaustive-search
+  `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
+  be faster and more accurate than `gram-classify-diag-blocks`.
+
+  Uses the "discrim" merge algo: cosine=0.50, frac=variable
+"
+	(gram-classify greedy-over-words (make-discrim))
 )
 
 ; ---------------------------------------------------------------
