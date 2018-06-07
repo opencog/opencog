@@ -207,10 +207,16 @@
 ;   v_merged = v_overlap + FRAC * (v_union - v_overlap)
 ;
 ;
-; merge-similar
+; merge-discrim
 ; -------------
-; Built on the merge-ortho method, the FRAC is a sigmod function,
+; Built on the merge-ortho method, the FRAC is a sigmoid function,
 ; ranging from 0.0 to 1.0, depending on the cosine between the vectors.
+; The idea is that, if two words are already extremely similar, we may
+; as well assum they really are in the same class, and so do a union
+; merge. But if the words are only kind-of similar, but not a lot, then
+; assume that the are both linear combinations of several word senses,
+; and do only the minimal overlap merge, so as to avoid damaging the
+; other senses.
 ;
 ; A reasonable strategy would seem to bee to take
 ;
@@ -218,6 +224,16 @@
 ;
 ; where cos_min is the minimum cosine acceptable, for any kind of
 ; merging to be performed.
+;
+;
+; Parameter choices
+; -----------------
+; Gut-sense intuition suggests these possible experiments:
+;
+; * Fuzz: use `merge-ortho` with hard-coded frac=0.3 and min acceptable
+;   cosine=0.65
+;
+; * Discrim: use `merge-discrim` with min acceptable cosine = 0.5
 ;
 ;
 ; Broadening
@@ -258,93 +274,6 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog matrix) (opencog persist))
-
-; ---------------------------------------------------------------------
-
-(define (merge-disambig COSOBJ FRAC WA WB)
-"
-  merge-semantic FRAC WA WB - merge WB into WA, returning the merged
-  class.  If WA is a word, and not a class, then a new class is created
-  and returned. The counts on both WA and WB are altered.
-
-  WA should be a WordNode or a WordClassNode.
-  WB is expected to be a WordNode.
-  FRAC should be a floating point number between zero and one,
-     indicating the fraction of the non-shared count of WB to be
-     merged into WA. Setting this to a non-zero value broadens
-     the class. Setting this to 1.0 gives the \"pure\" semantic merge
-     (described in the primary docs).
-  COSOBJ is used to access counts on pairs.  Pairs are SectionLinks,
-     that is, are (word,disjunct) pairs wrapped in a SectionLink.
-
-  The merger of WB into WA is performed, using the 'semantic merge'
-  (disambiguation) strategy. This is done like so. If WA and WB are
-  both WordNodes, then a WordClass is created, having both WA and WB
-  as members.  The counts on that word-class are the sum of the counts
-  on the subspace defined by the intersection of WA and WB. (See main
-  docs on the definition of this intersection/projection). Next, the
-  counts on WA and WB are adjusted, so that the projected components
-  are removed, leaving only the orthogonal components that are
-  orthogonal to the new cluster.
-
-  If WA is a WordClassNode, and WB is a WordNode, then WB is merged
-  into WA. Counts are adjusted according to the 'semantic merge' policy
-  described in the main docs.
-"
-	; If WA is a plain-old word, then just do an overlap merge...
-
-	(if (eq? 'WordClassNode (cog-type WA))
-		(let* ((cosi (COSOBJ 'right-cosine WA WB))
-				(walen (COSOBJ 'right-length WA))
-				(wblen (COSOBJ 'right-length WB))
-				(llel-frac (/ (* cosi wblen) walen))
-	; Perform a disambiguation-merge of two sections.
-	; The first section should be for the (existing) grammatical class,
-	; the second section should be for the word to be merged.
-	; The counts on these two sections are modified, according to the
-	; described linear algebra; the updated counts on each are then
-	; pushed to the database.
-	;
-	; One or the other sections can be null. If both sections are not
-	; null, then both are assumed to have exactly the same disjunct.
-	;
-	(define (dab-merge-sections SECT-PAIR LLEL-FRAC)
-		; The two word-sections to merge
-		(define csec (first SECT-PAIR))
-		(define wsec (second SECT-PAIR))
-
-		; The counts on each, or zero.
-		(define ccnt (if (null? lsec) 0 (LLOBJ 'pair-count csec)))
-		(define wcnt (if (null? rsec) 0 (LLOBJ 'pair-count wsec)))
-
-		(define llel (* LLEL-FRAC ccnt))
-		(define perp (- wcnt llel))
-		(define clamp (max 0 perp))
-
-		(define cnew (+ ccnt llel (* FRAC (- wcnt clamp))))
-		(define wnew clamp)
-xxxxxx
-
-		; The cnt can be zero, if FRAC is zero.  Do nothing in this case.
-		(if (< 0 cnt)
-			(let* (
-					; The disjunct. Both lsec and rsec have the same disjunct.
-					(seq (if (null? lsec) (cog-outgoing-atom rsec 1)
-							(cog-outgoing-atom lsec 1)))
-					; The merged word-class
-					(mrg (Section wrd-class seq))
-				)
-
-				; The summed counts
-				(set-count mrg cnt)
-				(store-atom mrg) ; save to the database.
-			))
-
-		; Return the accumulated sum-square length
-		(+ LENSQ (* cnt cnt))
-	)
-
-)
 
 ; ---------------------------------------------------------------------
 
@@ -544,6 +473,24 @@ xxxxxx
 			(orthogonalize wrd-class WB))
 	)
 	wrd-class
+)
+
+; ---------------------------------------------------------------------
+
+(define (merge-disambig COSOBJ COS-MIN WA WB)
+"
+  merge-disambig COS-MIN WA WB - merge WB into WA, returning the merged
+  class.  If WA is a word, and not a class, then a new class is created
+  and returned. The counts on both WA and WB are altered.
+
+  COSOBJ is used to compute the cosine between WA and WB, and thus
+     in needs to provide the 'right-cosine method.
+
+  This is build on `merge-ortho`. See documentation for that.
+"
+	(define cosi (COSOBJ 'right-cosine WA WB))
+	(define frac (/ (- cosi COS-MIN)  (- 1.0 COS-MIN)))
+	(merge-ortho COSOBJ frac WA WB)
 )
 
 ; ---------------------------------------------------------------
