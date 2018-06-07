@@ -501,13 +501,7 @@
 ;
 ; COSOBJ must offer the 'right-cosine method
 ;
-(define (ok-to-merge COSOBJ WORD-A WORD-B)
-	; (define pca (make-pseudo-cset-api))
-	; (define psa (add-dynamic-stars pca))
-	; (define pcos (add-pair-cosine-compute psa))
-
-	; Merge them if the cosine is greater than this
-	(define cut 0.65)
+(define (ok-to-merge COSOBJ CUTOFF WORD-A WORD-B)
 
 	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
 
@@ -529,8 +523,8 @@
 			(if (< cut sim) (display "------------------------------ Bingo!\n"))
 			sim))
 
-	; True, if sim is more than 0.9
-	(< cut (report-cosine))
+	; True, if cosine similarity is larger than the cutoff.
+	(< CUTOFF (report-cosine))
 )
 
 ; ---------------------------------------------------------------
@@ -542,15 +536,18 @@
   use `merge-ortho` with hard-coded frac=0.3 and min acceptable
   cosine=0.65
 "
+	(define cutoff 0.65)
+	(define union-frac 0.3)
+
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pca (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pca WORD-A WORD-B))
+			(ok-to-merge pca cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-ortho pca 0.3 WORD-A WORD-B))
+			(merge-ortho pca union-frac WORD-A WORD-B))
 
 		; ------------------
 		; Methods on this class.
@@ -558,10 +555,8 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				(else (throw
-					'no-such-method 'make-fuzz
-					"No such method on the Fuzz merge class!\n"))))
-	)
+				(else               (apply pca (cons message args)))
+			)))
 )
 
 ; ---------------------------------------------------------------
