@@ -372,6 +372,17 @@
 ; words in the DONE-LIST have a good chance of being completely
 ; neutered, with almost nothing left in them. They should get dropped.
 ;
+; XXX Maybe-FIXME: There's some amount of poointless recomputation of
+; cosines between the word-list, and the existing grammatical classes.
+; During the construction of the classes, a greedy search was formed
+; part-way down the word-list. Thus, when resuming the search, its
+; (mostly) pointless to compute the cosines between the uncategorized
+; words, and the existing categories. Fixing this wastefulness is hard,
+; because its hard to track how far down the list we went for each
+; category. I just don't see anything except a super-complicated
+; solution that does not seem worth the effort. So we'll let the
+; CPU work harder than it might otherwise need to.
+;
 (define (greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
 
 	; Tunable parameters
@@ -487,8 +498,8 @@
 )
 
 
-; Tunable parameter and restart hack
-(define (restart-hack LLOBJ WRD-LST CLS-LST)
+; Tunable parameter
+(define (cutoff-hack LLOBJ WRD-LST)
 
 	; XXX Adjust the minimum cutoff as desired!!!
 	; This is a tunable parameter!
@@ -497,19 +508,10 @@
 	(define min-obs-cutoff 20)
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
-	; Ad hoc restart point. If we already have N classes, we've
-	; surely pounded the cosines of the first 2N or so words into
-	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
-	(define ranked-words (drop all-ranked-words num-to-drop))
-
 	(format #t "After cutoff, ~A words left, out of ~A\n"
 		(length WRD-LST) (length all-ranked-words))
 
-	(format #t "Drop first ~A words from consideration, leaving ~A\n"
-		num-to-drop (length ranked-words))
-
-	ranked-words
+	all-ranked-words
 )
 
 ; ---------------------------------------------------------------
@@ -539,7 +541,7 @@
 				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST GLST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length ranked-words))
@@ -552,7 +554,7 @@
 ;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
@@ -600,8 +602,18 @@
 	; Perhaps it should be a random number, altered between runs?
 	(define diag-block-size 20)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define all-ranked-words (cutoff-hack LLOBJ WRD-LST))
+
+	; Ad hoc restart point. If we already have N classes, we've
+	; surely pounded the cosines of the first 2N or so words into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
+	(define ranked-words (drop all-ranked-words num-to-drop))
+
 	(define sorted-cls (sort-class-list CLS-LST))
+
+	(format #t "Drop first ~A words from consideration, leaving ~A\n"
+		num-to-drop (length ranked-words))
 	(format #t "Start diag-block of ~A words, chunksz=~A\n"
 		(length ranked-words) diag-block-size)
 	(diag-blocks ranked-words diag-block-size sorted-cls)
@@ -621,7 +633,7 @@
 ;
 (define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
 	(greedy-grow LLOBJ FRAC CLS-LST '() '() ranked-words)
@@ -646,6 +658,9 @@
 	(display "Start loading words and word-classes\n")
 	(load-atoms-of-type 'WordNode)
 	(load-atoms-of-type 'WordClassNode)
+	(for-each
+		(lambda (cls) (fetch-incoming-by-type cls 'MemberLink))
+		(cog-get-atoms 'WordClassNode))
 
 	; Verify that words have been loaded
 	;  (define all-words (get-all-cset-words))
