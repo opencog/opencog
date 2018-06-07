@@ -534,6 +534,37 @@
 )
 
 ; ---------------------------------------------------------------
+
+(define (make-fuzz)
+"
+  make-fuzz -- Do fuzzy hard-coded merge.
+
+  use `merge-ortho` with hard-coded frac=0.3 and min acceptable
+  cosine=0.65
+"
+	(let* ((pca (make-pseudo-cset-api))
+			(psa (add-dynamic-stars pca))
+			(pca (add-pair-cosine-compute psa))
+		)
+		(define (mpred WORD-A WORD-B)
+			(ok-to-merge pca WORD-A WORD-B))
+
+		(define (merge WORD-A WORD-B)
+			(merge-ortho pca 0.3 WORD-A WORD-B))
+
+		; ------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((merge-predicate)  (apply mpred args))
+				((merge-function)   (apply merge args))
+				(else (throw
+					'no-such-method 'make-fuzz
+					"No such method on the Fuzz merge class!\n"))))
+	)
+)
+
+; ---------------------------------------------------------------
 ; Example usage
 ;
 ; (load-atoms-of-type 'WordNode)          ; Typically about 80 seconds
