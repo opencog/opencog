@@ -634,15 +634,14 @@
 ; observational counts will be similar.  NOTE: this idea has NOT
 ; been empirically tested, yet.
 ;
-; TODO - the word-class list should probably also be ranked, so
-; we preferentially add to the largest existing classes.
-;
 (define (greedy-over-words MERGER WRD-LST CLS-LST)
 
 	(define ranked-words (cutoff-hack MERGER WRD-LST))
+	(define sorted-cls (sort-class-list CLS-LST))
+
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
-	(greedy-grow MERGER CLS-LST '() '() ranked-words)
+	(greedy-grow MERGER sorted-cls '() '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
