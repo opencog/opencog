@@ -656,13 +656,13 @@
 		(filter! (lambda (w) (eq? 'WordNode (cog-type w))) mdone-list))
 
 	(define (not-done? w)
-		(eq? '() (find (lambda (x) (eq? x w)) done-list)))
+		(eq? '() (find (lambda (x) (equal? x w)) done-list)))
 
 	; Trim the word-list, keeping only the not-done words.
 	(define remain-words (filter! not-done? ranked-words))
 
-	(format #t "Start greedy-agglom of ~A words\n"
-		(length ranked-words))
+	(format #t "Start greedy-agglomeration of ~A words\n"
+		(length remain-words))
 	(greedy-grow MERGER sorted-cls '() done-list remain-words)
 
 	; XXX FIXME ... at the conclusion of this, we havea done list,
