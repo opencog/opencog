@@ -649,7 +649,7 @@
 	(define mdone-list
 		(fold (lambda (CLS LST)
 			(append! LST (map gar (cog-incoming-by-type CLS 'MemberLink))))
-			'() CLS-LST))
+			'() sorted-cls))
 
 	; Make sure that they really are words. (This should be a no-op...)
 	(define done-list
