@@ -560,6 +560,37 @@
 )
 
 ; ---------------------------------------------------------------
+
+(define (make-discrim)
+"
+  make-discrim -- Do a "discriminating" merge.
+
+  use `merge-ortho` with sigmoid taper and
+  hard-coded min acceptable cosine=0.50
+"
+	(define cutoff 0.5)
+
+	(let* ((pca (make-pseudo-cset-api))
+			(psa (add-dynamic-stars pca))
+			(pca (add-pair-cosine-compute psa))
+		)
+		(define (mpred WORD-A WORD-B)
+			(ok-to-merge pca cutoff WORD-A WORD-B))
+
+		(define (merge WORD-A WORD-B)
+			(merge-disambig pca cutoff WORD-A WORD-B))
+
+		; ------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((merge-predicate)  (apply mpred args))
+				((merge-function)   (apply merge args))
+				(else               (apply pca (cons message args)))
+			)))
+)
+
+; ---------------------------------------------------------------
 ; Example usage
 ;
 ; (load-atoms-of-type 'WordNode)          ; Typically about 80 seconds

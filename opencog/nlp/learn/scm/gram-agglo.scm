@@ -665,6 +665,7 @@
 ; Attempt to merge words into word-classes.
 (define (gram-classify ALGO)
 	(define merger (make-fuzz))
+	; (define merger (make-discrim)) ; Try this later ...
 
 	(load-stuff)
 	(ALGO
