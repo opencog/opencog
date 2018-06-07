@@ -520,7 +520,7 @@
 				(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 				(cog-name WORD-A) (cog-name WORD-B)
 				elapsed-time)
-			(if (< cut sim) (display "------------------------------ Bingo!\n"))
+			(if (< CUTOFF sim) (display "------------------------------ Bingo!\n"))
 			sim))
 
 	; True, if cosine similarity is larger than the cutoff.
@@ -563,12 +563,12 @@
 
 (define (make-discrim)
 "
-  make-discrim -- Do a "discriminating" merge.
+  make-discrim -- Do a \"discriminating\" merge.
 
   use `merge-ortho` with sigmoid taper and
   hard-coded min acceptable cosine=0.50
 "
-	(define cutoff 0.5)
+	(define cutoff 0.50)
 
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
