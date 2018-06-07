@@ -64,19 +64,6 @@
 ; grammatical classes are not orthogonal, in general.
 ;
 ;
-; Word Similarity
-; ---------------
-; There are several different means of comparing similarity between
-; two words.  The simplest is cosine distance: if the cosine of two
-; word-vectors is greater than a threshold, they should be merged.
-;
-; The cosine-distance is a user tunable parameter in the code below;
-; it is currently hard-coded to 0.65.
-;
-; Other similarity measures are possible, but have not yet been
-; explored.
-;
-;
 ; Semantic disambiguation
 ; -----------------------
 ; The correct notion of a grammatical class is not so much as a
@@ -96,132 +83,32 @@
 ; can be used to distinguish between these different forms, how to
 ; factor the vector of observation counts into distinct classes.
 ;
+;
+; Word Similarity
+; ---------------
+; There are several different means of comparing similarity between
+; two words.  The simplest is cosine distance: if the cosine of two
+; word-vectors is greater than a threshold, they should be merged.
+;
 ; The cosine distance between the two words w_a, w_b is
 ;
 ;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
 ;
 ; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
-; The vector v_b can be decomposed into parallel and perpendicular parts:
 ;
-;   v_b = v_llel + v_perp
+; The minimum-allowed cosine-distance is a user-tunable parameter in
+; the code below; it is currently hard-coded to 0.65.
 ;
-;   v_llel = v_a |v_b| cos() / |v_a|
-;   v_perp = v_b - v_llel
-;
-; which has the properties that v_llel points in the same direction as
-; v_a and v_perp is perpendicular to v_a.  Now, because v_perp involves
-; a subtraction, there will be, in general, vector components in v_perp
-; that are negative (as mentioned above). However, if all vector
-; components of v_perp are positive, then we can conclude that v_b can
-; be decomposed into "two meanings" (or more).  One "meaning" is indeed
-; v_a (i.e. is v_llel), the second meaning is v_perp.
-;
-; It seems reasonable to expect that "saw" would obey this relationship,
-; with w_a == observe, w_b == saw, w_perp == cut. (This example ignores
-; "saw == cutting tool").
-;
-; However, if v_perp has lots of negative components, then such an
-; orthogonalization seems incorrect. That is, suppose that some other
-; v_a and v_b had a small cosine distance (viz are almost collinear) but
-; v_perp had many negative components. One cannot reasonably expect
-; v_perp to identify "some other meaning" for v_b. Instead, it would
-; seem that v_perp just consists of grunge that "should have been" in
-; v_b, but wasn't.
-;
-; That is, due to a limited (small) number of observations, the negative
-; coefficients in v_perp correspond to ways in which the word w_a was
-; (observed to have been) used in a sentence, and a way that word w_b
-; might have been used in a sentence, but wasn't (hadn't been observed).
-; The negative parts of v_perp are parts of w_a that should have been
-; in w_b (at least, if w_b has the "same meaning as" w_a).
-;
-; Thus, correct merge algo would seem to be:
-;
-;   Let w_a be an existing cluster
-;   Let w_b be a candidate word to be merged into the cluster.
-;   Compute v_llel and v_perp.
-;   Let v_clamp = v_perp with negative components set to zero.
-;   Let v_a^new = v_a + v_llel + (v_b - v_clamp)
-;   Let v_b^new = v_clamp
-;
-; This would seem to have the effect of "broadening" v_a with missing
-; vector components, while cleanly extracting the semantically different
-; parts of v_b and sticking them into v_bnew.
-;
-; It seems reasonable to parameterize the above with a tunable parameter
-; 0 <= alpha <= 1 so that
-;
-;   Let v_a^new = v_a + v_llel + alpha (v_b - v_clamp)
-;
-; It might also be useful replace `alpha (v_b - v_clamp)` by a sigmoid
-; function `sigmoid(v_b - v_clamp)`, possibly incorporating the absolute
-; values |v_b| and |v_clamp| into the sigmoid.
-;
-; The above "semantic merge" vector merge algorithm should be taken
-; as a rough argument or hypothesis for extracting "hidden" word-senses
-; from observation probabilities. There is currently no formal data
-; analysis to support or reject this hypothesis, or to measure the
-; quality the results it generates.
+; Other similarity measures are possible, but have not yet been
+; explored.
 ;
 ;
-; merge-disambig
-; --------------
-; The above-described "semantic disambiguation" merge algorithm is
-; implemented below, in the `merge-disambig` function.
-;
-; The above seems adequate when w_a is an existing cluster that is
-; already well-aligned with a single word-sense. However, there is
-; a boot-strapping problem: when two words are merged for the first
-; time to create a new cluster, how can one be assured that this new
-; seed-cluster is limited to only one word-sense?
-;
-; The solution to this would seem to be to perform an "overlap merge":
-; that is, to compute the intersection of basis elements (the
-; intersection of "disjuncts" aka "sections") of the two words, and
-; then sum the counts only on this intersected set.  That is, let
-;
-;   {e_a} = set of basis elements in v_a with non-zero coefficients
-;   {e_b} = set of basis elements in v_b with non-zero coefficients
-;   {e_overlap} = {e_a} set-intersection {e_b}
-;   v_o = vector of {e_overlap} i.e. having unit coeffs for each basis.
-;   pi_overlap = v_o v_o^transpose
-;              == projection matrix onto the subspace {e_overlap}
-;   v_a^pi = pi_overlap . v_a == projection of v_a onto {e_overlap}
-;   v_b^pi = pi_overlap . v_b == projection of v_b onto {e_overlap}
-;
-;   v_cluster = v_a^pi + v_b^pi
-;   v_a^new = v_a - v_a^pi
-;   v_b^new = v_b - v_b^pi
-;
-; The idea here is that the vector subspace {e_overlap} consists of
-; those grammatical usages that are common for both words a and b,
-; and thus hopefully correspond to how words a and b are used in a
-; common sense. Thus v_cluster is the common word-sense, while v_a^new
-; and v_b^new are everything else, everything left-over.  Note that
-; v_a^new and v_b^new are orthogonal to v_cluster.
-;
-; Of course, this is not quite correct, if v_a and v_b have several
-; word-senses in common; then v_cluster will be an amalgam of both.
-;
-;
-; Alternative Merge Strategies
-; ----------------------------
-; Insofar as the above "semantic merge" algorithm describes "hidden"
-; meanings inferred from observation probabilities, it is plausible to
-; assume that perhaps a Hidden Markov Model (HMM) style approach might
-; provide better results, or that alternately, an Artificial Neural
-; Net (ANN), possibly with deep-learning, might provide a better
-; factorization. At this time, these remain unexplored.
-;
-;
-; Simpler Merge Algos
-; -------------------
-; Besides the above "semantic disambiguation" merge algorithm, there
-; are several other, very slightly simpler ways in which two words
-; might be merged into a word-class, or a word added to a word-class.
-; These are described below. Compared to the above, the gut sense is
-; that they are "less correct"; however, there is so far no data
-; analysis by which to judge their utility.
+; Merge Algos
+; -----------
+; There are several ways in which two words might be merged into a
+; word-class, or a word added to a word-class.  Some of these are
+; described below.  Additional kind of merges can be imagined; how to
+; accurately judge the quality of different approaches is unclear.
 ;
 ;
 ; Union word-pair merging
@@ -270,7 +157,39 @@
 ;
 ; Overlap merging appears to solve the problem a) above (the SUPPORT
 ; issue), but, on the flip side, it also seems to prevent the discovery
-; and broadening of the ways in which a word might be used.
+; and broadening of the ways in which a word might be used. (Broadening
+; is duscuseed in greater detail below.)
+;
+; A formal (equational, algorithmic) description of overlap merging:
+; One wishes to compute the intersection of basis elements (the
+; intersection of "disjuncts" aka "sections") of the two words, and
+; then sum the counts only on this intersected set.  That is, let
+;
+;   {e_a} = set of basis elements in v_a with non-zero coefficients
+;   {e_b} = set of basis elements in v_b with non-zero coefficients
+;   {e_overlap} = {e_a} set-intersection {e_b}
+;   v_o = vector of {e_overlap} i.e. having unit coeffs for each basis.
+;   pi_overlap = v_o v_o^transpose
+;              == projection matrix onto the subspace {e_overlap}
+;   v_a^pi = pi_overlap . v_a == projection of v_a onto {e_overlap}
+;   v_b^pi = pi_overlap . v_b == projection of v_b onto {e_overlap}
+;
+;   v_cluster = v_a^pi + v_b^pi
+;   v_a^new = v_a - v_a^pi
+;   v_b^new = v_b - v_b^pi
+;
+; The idea here is that the vector subspace {e_overlap} consists of
+; those grammatical usages that are common for both words a and b,
+; and thus hopefully correspond to how words a and b are used in a
+; common sense. Thus v_cluster is the common word-sense, while v_a^new
+; and v_b^new are everything else, everything left-over.  Note that
+; v_a^new and v_b^new are orthogonal to v_cluster.
+;
+; If v_a and v_b have several word-senses in common; then so will
+; v_cluster.  Sinve there is no a priori way to force v_a and v_b to
+; encode only one common word sense, there needs to be some distinct
+; machanism to split v_cluster ino multiple word senses, if that is
+; needed.
 ;
 ;
 ; merge-ortho
@@ -283,8 +202,23 @@
 ; that is intermediate between the two: an overlap, plus a bit more,
 ; viz some of the union.
 ;
-; In the code below, this is currently a hard-coded parameter, set to
-; the ad hoc value of 0.3.  Behavior with different values is unexplored.
+; That is, the merged vector is
+;
+;   v_merged = v_overlap + FRAC * (v_union - v_overlap)
+;
+;
+; merge-similar
+; -------------
+; Built on the merge-ortho method, the FRAC is a sigmod function,
+; ranging from 0.0 to 1.0, depending on the cosine between the vectors.
+;
+; A reasonable strategy would seem to bee to take
+;
+;   FRAC = (cos - cos_min) / (1.0 = cos_min)
+;
+; where cos_min is the minimum cosine acceptable, for any kind of
+; merging to be performed.
+;
 ;
 ; Broadening
 ; ----------
@@ -301,6 +235,16 @@
 ; been done, then when a connector-word is replaced by a connector
 ; word-class, that class may be larger than the number of connectors
 ; originally witnessed. Again, the known usage of the word is broadened.
+;
+;
+; Other Merge Strategies
+; ----------------------
+; Insofar as the the "hidden" meanings of words control they way they
+; are used in sentences, it is plausible to assume that perhaps a Hidden
+; Markov Model (HMM) style approach might provide an alternative way of
+; splitting vectors into distinct parts.  Alternately, an Artificial
+; Neural Nets (ANN), possibly with deep-learning, might provide a better
+; factorization. At this time, these remain unexplored.
 ;
 ;
 ; Disjunct merging
