@@ -585,9 +585,10 @@
 ; measured, confirmed, tested, yet. It seems to be the case, but
 ; actual measurements have not been made.
 ;
-; XXX There is a user-adjustable parameter used below, to specify
-; the initial block size.  This could be exposed in the API, maybe.
-; probably not urgent.
+; XXX There is a user-adjustable parameter used below, `diag-block-size`,
+; to specify the initial block size.  This could be exposed in the API,
+; maybe.  On the other hannd, it could stay hardcoded forever, for all
+; practical purposes.
 ;
 (define (diag-over-words MERGER WRD-LST CLS-LST)
 

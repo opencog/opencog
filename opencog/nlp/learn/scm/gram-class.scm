@@ -541,13 +541,13 @@
 
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
-			(pca (add-pair-cosine-compute psa))
+			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pca cutoff WORD-A WORD-B))
+			(ok-to-merge pcos cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-ortho pca union-frac WORD-A WORD-B))
+			(merge-ortho pcos union-frac WORD-A WORD-B))
 
 		; ------------------
 		; Methods on this class.
@@ -572,13 +572,13 @@
 
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
-			(pca (add-pair-cosine-compute psa))
+			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pca cutoff WORD-A WORD-B))
+			(ok-to-merge pcos cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-disambig pca cutoff WORD-A WORD-B))
+			(merge-disambig pcos cutoff WORD-A WORD-B))
 
 		; ------------------
 		; Methods on this class.
