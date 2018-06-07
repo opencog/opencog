@@ -432,8 +432,11 @@
 						; new class. And then recurse.
 						(let* ((short-list (take rest
 									(min (num-to-scan) (length rest)))))
+							(format #t "--- Greedy-checking next ~A items\n"
+								(min (num-to-scan) (length rest)))
 							(assign-expand-class MERGER new-cls short-list)
-							(display "--- Checking the done-list\n")
+							(format #t "--- Checking the done-list len=~A\n"
+								(length DONE-LST))
 							(assign-expand-class MERGER new-cls DONE-LST)
 
 							; If anything from the done-list was merged, then
