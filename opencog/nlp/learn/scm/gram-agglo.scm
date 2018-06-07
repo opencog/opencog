@@ -639,9 +639,19 @@
 	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(define sorted-cls (sort-class-list CLS-LST))
 
+	; Get the list of words that have been classified already.
+	(define mdone-list
+			(fold (lambda (CLS LST)
+				(append! LST (cog-incoming-by-type CLS 'MemberLink)))
+				'() CLS-LST))
+
+	; Make sure that they really are words.
+	(define done-list
+		(filter! (lambda (x) (eq? 'WordNode (cog-type w))) mdone-list))
+
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
-	(greedy-grow MERGER sorted-cls '() '() ranked-words)
+	(greedy-grow MERGER sorted-cls '() done-list ranked-words)
 )
 
 ; ---------------------------------------------------------------
