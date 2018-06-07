@@ -30,21 +30,16 @@
 ;
 ; Agglomerative clustering
 ; ------------------------
-; This file implements three different variants of agglomerative
+; This file implements four different variants of agglomerative
 ; clustering. The variants differ according to the order in which
-; they scan the word-lists to be clustered.
+; they scan the word-lists to be clustered. Different scan policies
+; can make a huge difference in performance.
 ;
+; Two of the algorithms implemented in this file are effectively O(N^2)
+; algorithms, in the length N of the list of words. One does a bit
+; better, and one might(?) approach O(N log N) performance.
 ;
-; All three algorithms implemented in this file are effectively O(N^2)
-; algorithms, in the length N of the list of words.  It seems possible
-; that one might get better run-times, say about O(N log N) using
-; hierarchical clustering (i.e. by only assigning words to existing
-; classes, and only rarely creating new classes).  Such hierarchical
-; algos are not implemented here, although some of them "come close"
-; to this ideal.
-;
-; There are three variants of agglomerative clustering implemented in
-; the code:
+; The first three variants are these:
 ;
 ; * `agglo-over-words` / `assign-to-classes`, which performs a basic
 ;   sieving-style agglo: Each word is compared to each of the existing
@@ -59,7 +54,7 @@
 ;   it. This scanning order makes it 'almost' hierarchical.  It behaves
 ;   a bit pathologically when the length of the word-list is long.
 ;
-; * `chunk-over-words`, which is similar to `classify-pair-wise`,
+; * `diag-over-words`, which is similar to `classify-pair-wise`,
 ;   except that it explores only a sequence of block diagonals down
 ;   the middle. Specifically, it examines the block of 20x20 pairs
 ;   of the most common words, followed by the block 40x40 of the
@@ -71,33 +66,43 @@
 ;   many word-pairs are not explored, although cross-frequency compares
 ;   can be forced by restarting the algo.
 ;
-; Its hard to say which of these strategies is the "best". Both
-; `agglo-over-words` and `chunk-over-words` have desirable behaviors.
-;
-; One restart, all three algos suffer from a common problem: they create
+; One restart, all of the algos suffer from a common problem: they create
 ; an ordered list of words by frequency; however, this is computed from
 ; the marginals for the words, which are no longer accurate.  Thus, the
 ; marginals (holding frequencies) should be recomputed before each
 ; restart.  This is not done automatically.
 ;
 ;
-; Proposed best strategy (not implemented)
-; ----------------------------------------
-; Based on experience, this seems like the best way to do it:
-; * Main loop runs like `agglo-over-words` / `assign-to-classes`
+; Current best strategy: `greedy-grow`
+; ------------------------------------
+; The current best merge strategy is implemented in `greedy-grow` and
+; makes use of several tricks, based on paractical experience:
+;
+; * Words are sorted into frequency order, thus giving a rough-cut of
+;   having grammatically-similar words relatively near one-another in
+;   the list.
+; * Main loop is agglomerative: if a word can be assigned to an existing
+;   word class, then it will be, and then processing moves to the next
+;   word.
+; * If a word cannot be assigned to an existing word-class, it is
+;   designated to start a new 'singleton' class, of which it is the
+;   only member. For assignment of of words to classes, the most populus
+;   classes are considered first, and the singleton classes are
+;   considered last.
 ; * When a new cluster is formed, then perform the "greedy"/maximal
 ;   cluster expansion, scanning much of the word list to try to grow
 ;   the cluster further. Key here is the phrase "much of": instead
 ;   of scanning the entire list (which has a lot of dregs at the end)
-;   only scan the top M words, with M=max(30,6D) where D = number of
+;   only scan the top M words, with M=max(200,9D) where D = number of
 ;   words scanned so far. Thus, excessive searching down into the
 ;   low-frequency boon-docks is avoided.
-; * Once a word has been assigned to a cluster, the marginal count
-;   on the word should be recomputed, and the word re-ranked in the list.
-;   That is, words can have multiple meanings, and thus can be assigned
-;   to multiple clusters. However, if there's not much left (e.g. most
-;   common nouns have a single meaning), there's not much point
-;   attempting to jam what's left into other classes.
+; * Once a word has been assigned to a cluster, its added to the 'done'
+;   list.  Words in the 'done' list are re-scanned, every time that
+;   a new cluster is created, to see if they might also fit into the
+;   new cluster.  This is to allow words to have multiple meanings,
+;   e.g. to be classified as both nouns and verbs. Just because a word
+;   got classified as a noun in the first pass, does not mean that
+;   it should be forgotten - it might also be a verb.
 ;
 ; ---------------------------------------------------------------------
 
@@ -177,6 +182,27 @@
 )
 
 ; ---------------------------------------------------------------
+; Sort the class list, returning a list of classes from the largest,
+; to the smallest.
+;
+(define (sort-class-list CLS-LST)
+
+	; Return an integer, the number of words in the class
+	(define (nwords-in-cls CLS)
+		(fold
+			(lambda (MEMB sum)
+				(if (eq? (cog-type (gar MEMB)) 'WordNode) (+ sum 1) sum))
+			0
+			(cog-incoming-by-type CLS 'MemberLink)))
+
+	; Sort the class-list according to size.
+	(sort! CLS-LST
+		; Rank so that the highest counts are first in the list.
+		(lambda (ATOM-A ATOM-B)
+			(> (nwords-in-cls ATOM-A) (nwords-in-cls ATOM-B))))
+)
+
+; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -228,6 +254,21 @@
 )
 
 ; ---------------------------------------------------------------
+; Utilities used by several of the functions
+
+; Return true if WRD is in word-class CLS
+(define (is-in-cls? WRD CLS)
+	(not (null? (cog-link 'MemberLink WRD CLS))))
+
+; Return a list of words that got placed into the class.
+(define (got-done WRDS CLS)
+	(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; Return a list of words NOT in the class.
+(define (still-to-do WRDS CLS)
+	(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; ---------------------------------------------------------------
 ;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
@@ -257,7 +298,8 @@
 ; 0.5*500*500 = 35 hours for 500 words. This is NOT fast.
 ;
 (define (assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
-	(format #t "----  To-do =~A num-clases=~A num-done=~A ~A ----\n"
+
+	(format #t "--- To-do=~A num-classes=~A num-done=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(strftime "%c" (localtime (current-time))))
 
@@ -279,18 +321,130 @@
 						(is-new-cls (eq? 'WordClassNode (cog-type new-cls)))
 						(new-true
 							(if is-new-cls
-								; Use append, not cons, so as to preferentially
-								; choose the older classes, as opposed to the
-								; newer ones.
-								(append! TRUE-CLS-LST (list new-cls))
+								(sort-class-list (cons new-cls TRUE-CLS-LST))
 								; else the true class list doesn't change
 								TRUE-CLS-LST))
 						(new-fake
 							(if is-new-cls
-								FAKE-CLS-LST
-								; if its just a word, append it to the fake list
+								; The new fake-list is now shorter
+								(still-to-do FAKE-CLS-LST new-cls)
+
+								; If its just a word, append it to the
+								; fake list.  Use append, not cons, so as
+								; to preferentially choose the older words,
+								; as opposed to the newer ones.
 								(append! FAKE-CLS-LST (list new-cls)))))
 					(assign-to-classes LLOBJ FRAC new-true new-fake rest)))))
+)
+
+; ---------------------------------------------------------------
+;
+; Given a word-list and a list of grammatical classes, assign
+; each word to one of the classes, or, if the word cannot be
+; assigned, treat it as if it were a new class. Return a list
+; of all of the classes, the ones that were given plus the ones
+; that were created.
+;
+; Similar to `assign-to-classes`, except that this attempts to
+; maximally grow a newly-created class. It also attempts to manage
+; the word-list better, defering reconsideration of recently-assigned
+; words for a later pass.
+;
+; WRD-LST is the list of words to be assigned to classes.
+;
+; TRUE-CLS-LST is a list of word-classes that words might possibly
+;     get assigned to. This list should consist of WordClassNodes.
+;     It can be initially empty; pairs of words than can be merged,
+;     will be, to start a new class.
+;
+; FAKE-CLS-LIST is a list of singleton word-classes: pseudo-classes
+;     that have only a single word in them. The list itself must
+;     consist of WordNodes. It can be initially empty; if a word
+;     cannot be merged into any existing class, then it will start
+;     a new singleton class.
+;
+; DONE-LST is a list of words that have been placed into at least one
+;     cluster; they will be passed over a second time, to see where
+;     else they might fit. Viz, many words have both noun and verb
+;     forms, and thus need to go into multiple classes.
+;
+; XXX FIXME: The DONE-LIST should be scrubbed for short junk. That is,
+; words in the DONE-LIST have a good chance of being completely
+; neutered, with almost nothing left in them. They should get dropped.
+;
+; XXX Maybe-FIXME: There's some amount of poointless recomputation of
+; cosines between the word-list, and the existing grammatical classes.
+; During the construction of the classes, a greedy search was formed
+; part-way down the word-list. Thus, when resuming the search, its
+; (mostly) pointless to compute the cosines between the uncategorized
+; words, and the existing categories. Fixing this wastefulness is hard,
+; because its hard to track how far down the list we went for each
+; category. I just don't see anything except a super-complicated
+; solution that does not seem worth the effort. So we'll let the
+; CPU work harder than it might otherwise need to.
+;
+(define (greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
+
+	; Tunable parameters
+	(define min-greedy 200)
+	(define scan-multiplier 10)
+
+	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A ---\n"
+		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
+		(length DONE-LST)
+		(strftime "%c" (localtime (current-time))))
+
+	; If the WRD-LST is empty, we are done; otherwise compute.
+	(if (null? WRD-LST) TRUE-CLS-LST
+		(let* ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST))
+				; Can we assign the word to a class?
+				(cls (assign-word-to-class LLOBJ FRAC wrd TRUE-CLS-LST)))
+
+			; If the word was merged into an existing class, then
+			; recurse.  Place the word onto the done-list.
+			(if (eq? 'WordClassNode (cog-type cls))
+				(greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST
+					(append! DONE-LST (list wrd)) rest)
+
+				; If the word was not assigned to an existing class,
+				; see if it can be merged with any of the singleton
+				; words in the "fake-class" list.
+				(let ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST)))
+
+					; If we failed to create a new class, then just
+					; append the word to the fake list, and recurse.
+					(if (eq? 'WordNode (cog-type new-cls))
+						(greedy-grow LLOBJ FRAC TRUE-CLS-LST
+							(append! FAKE-CLS-LST (list new-cls))
+							DONE-LST rest)
+
+						; If the result is a new class, then greedy-grow it.
+						; But only consider a limited subset of the word list,
+						; so as to not blow out performance. See if any of
+						; the previously-assigned words might also go into the
+						; new class. And then recurse.
+						(let* (
+								(num-greedy (max min-greedy (* scan-multiplier
+										 (length DONE-LST))))
+								(short-list (take rest num-greedy))
+							)
+							(assign-expand-class LLOBJ FRAC new-cls short-list)
+							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
+							(greedy-grow LLOBJ FRAC
+								; The new true-list is now longer.
+								(sort-class-list (cons new-cls TRUE-CLS-LST))
+
+								; The new fake-list is now shorter
+								(still-to-do FAKE-CLS-LST new-cls)
+
+								; The new done-list is probably a lot longer
+								(append! DONE-LST (list wrd)
+									(got-done short-list new-cls))
+
+								; The new todo list is probably a lot shorter
+								(still-to-do rest new-cls))
+						))))))
 )
 
 ; ---------------------------------------------------------------
@@ -302,6 +456,8 @@
 ; word. (i.e. the sum of the counts on each of the sections).
 ;
 ; Words with fewer than MIN-CNT observations on them are discarded.
+; Sorting is important, because of locality: words in similar
+; grammatical classes also have similar frequency counts.
 ;
 ; Note: an earlier version of this ranked by the number of times
 ; each word was observed: viz:
@@ -341,8 +497,9 @@
 		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
 )
 
-; Tunable parameter and restart hack
-(define (restart-hack LLOBJ WRD-LST CLS-LST)
+
+; Tunable parameter
+(define (cutoff-hack LLOBJ WRD-LST)
 
 	; XXX Adjust the minimum cutoff as desired!!!
 	; This is a tunable parameter!
@@ -351,11 +508,10 @@
 	(define min-obs-cutoff 20)
 	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
-	; Ad hoc restart point. If we already have N classes, we've
-	; surely pounded the cosines of the first 2N or so words into
-	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
-	(drop all-ranked-words
-		(inexact->exact (round (* 1.6 (length CLS-LST)))))
+	(format #t "After cutoff, ~A words left, out of ~A\n"
+		(length WRD-LST) (length all-ranked-words))
+
+	all-ranked-words
 )
 
 ; ---------------------------------------------------------------
@@ -385,58 +541,45 @@
 				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST GLST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length ranked-words))
-	(fold-unordered-pairs GLST check-pair ranked-words)
+	(fold-unordered-pairs sorted-cls check-pair ranked-words)
 )
 
 ; ---------------------------------------------------------------
 ; Loop over all words, attempting to place them into grammatical
 ; classes. This is an O(N^2) algorithm.
 ;
-; The list of words is ranked by order of the number of observations;
-; thus punctuation and words like "the", "a" come first.
-;
-; TODO - the word-class list should probably also be ranked, so
-; we preferentially add to the largest existing classes.
-;
-; XXX There is a user-adjustable parameter used below, to
-; control the ranking. It should be exposed in the API or
-; something like that! min-obs-cutoff
-;
 (define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
-	(assign-to-classes LLOBJ FRAC CLS-LST '() ranked-words)
+	(assign-to-classes LLOBJ FRAC sorted-cls '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
 ; Loop over blocks of words, attempting to place them into grammatical
-; classes. This is an O(N^2) algorithm, and so several "cheats" are
-; employed to maintain some reasonable amount of forward progress. So,
+; classes. This tries to be faster than an O(N^2) algorithm, by
+; employing a cheat to get reasonable forward progress. Specifically:
 ;
-; A) The list of words is ranked by order of the number of observations;
-;    thus punctuation and words like "the", "a" come first.
-; B) The ranked list is divided into power-of-two ranges, and only
-;    the words in a given range are compared to one-another.
+; The ranked list is divided into power-of-two ranges, and only the
+; words in a given range are compared to one-another.  The idea is
+; that it is unlikely that words with very different observational
+; counts will be similar.  NOTE: This idea has NOT been empirically
+; measured, confirmed, tested, yet. It seems to be the case, but
+; actual measurements have not been made.
 ;
-; The idea is that it is unlikely that words with very different
-; observational counts will be similar.  NOTE: this idea has NOT
-; been empirically tested, yet.
+; XXX There is a user-adjustable parameter used below, to specify
+; the initial block size.  This could be exposed in the API, maybe.
+; probably not urgent.
 ;
-; TODO - the word-class list should probably also be ranked, so
-; we preferentially add to the largest existing classes.
-;
-; XXX There are two user-adjustable parameters used below, to
-; control the ranking. They should be exposed in the API or
-; something like that! min-obs-cutoff, chunk-block-size
-;
-(define (chunk-over-words LLOBJ FRAC WRD-LST CLS-LST)
+(define (diag-over-words LLOBJ FRAC WRD-LST CLS-LST)
 
-	(define (chunk-blocks wlist size clist)
+	(define (diag-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
 					; the smaller of word-list and requested size.
@@ -450,21 +593,55 @@
 				; Recurse and do the next block.
 				; XXX the block sizes are by powers of 2...
 				; perhaps they should be something else?
-				(chunk-blocks rest (* 2 size) new-clist)
+				(diag-blocks rest (* 2 size) new-clist)
 			)
 		)
 	)
 
 	; The initial chunk block-size.  This is a tunable parameter.
 	; Perhaps it should be a random number, altered between runs?
-	(define chunk-block-size 20)
+	(define diag-block-size 20)
 
-	(define ranked-words (restart-hack LLOBJ WRD-LST CLS-LST))
-	(format #t "Start classification of ~A (of ~A) words, chunksz=~A\n"
-		(length ranked-words) (length WRD-LST) chunk-block-size)
-	(chunk-blocks ranked-words chunk-block-size CLS-LST)
+	(define all-ranked-words (cutoff-hack LLOBJ WRD-LST))
+
+	; Ad hoc restart point. If we already have N classes, we've
+	; surely pounded the cosines of the first 2N or so words into
+	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
+	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
+	(define ranked-words (drop all-ranked-words num-to-drop))
+
+	(define sorted-cls (sort-class-list CLS-LST))
+
+	(format #t "Drop first ~A words from consideration, leaving ~A\n"
+		num-to-drop (length ranked-words))
+	(format #t "Start diag-block of ~A words, chunksz=~A\n"
+		(length ranked-words) diag-block-size)
+	(diag-blocks ranked-words diag-block-size sorted-cls)
 )
 
+; ---------------------------------------------------------------
+; Loop over blocks of words, attempting to place them into grammatical
+; classes. This attempts to be an O(N log N) algorithm, and so employs
+; several tricks to try to get better than the naive O(N^2) perf.
+;
+; The idea is that it is unlikely that words with very different
+; observational counts will be similar.  NOTE: this idea has NOT
+; been empirically tested, yet.
+;
+; TODO - the word-class list should probably also be ranked, so
+; we preferentially add to the largest existing classes.
+;
+(define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
+
+	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(format #t "Start greedy-agglom of ~A words\n"
+		(length ranked-words))
+	(greedy-grow LLOBJ FRAC CLS-LST '() '() ranked-words)
+)
+
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; Main entry-point helpers.
 ;
@@ -480,6 +657,9 @@
 	(display "Start loading words and word-classes\n")
 	(load-atoms-of-type 'WordNode)
 	(load-atoms-of-type 'WordClassNode)
+	(for-each
+		(lambda (cls) (fetch-incoming-by-type cls 'MemberLink))
+		(cog-get-atoms 'WordClassNode))
 
 	; Verify that words have been loaded
 	;  (define all-words (get-all-cset-words))
@@ -506,19 +686,50 @@
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
 
-; Attempt to merge words into word-classes.
 (define-public (gram-classify-pair-wise)
+"
+  gram-classify-pair-wise - Merge words into word-classes.
+
+  Very slow, exhaustive O(N^2) algorithm. Suggest using instead
+  `gram-classify-agglo`, `gram-classify-diag-blocks` or
+  `gram-classify-greedy` for better performance.
+"
 	(gram-classify classify-pair-wise 0.3)
 )
 
-; Attempt to merge words into word-classes.
-(define-public (gram-classify-chunks)
-	(gram-classify chunk-over-words 0.3)
+(define-public (gram-classify-agglo)
+"
+  gram-classify-agglo - Merge words into word-classes.
+
+  Conservative O(N^2) algorithm.  Faster than `gram-classify-pair-wise`
+  but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
+  or `gram-classify-greedy` for better performance.
+"
+	(gram-classify agglo-over-words 0.3)
 )
 
-; Attempt to merge words into word-classes.
-(define-public (gram-classify-agglo)
-	(gram-classify agglo-over-words 0.3)
+(define-public (gram-classify-diag-blocks)
+"
+  gram-classify-diag-blocks - Merge words into word-classes.
+
+  Uses a diagonal-block merge strategy. Reasonably fast, better than
+  O(N^2) performance, but may miss optimal clusters. Faster than
+  `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
+  `gram-classify-greedy` variant is both faster and more accurate.
+"
+	(gram-classify diag-over-words 0.3)
+)
+
+(define-public (gram-classify-greedy)
+"
+  gram-classify-greedy - Merge words into word-classes.
+
+  Uses several tricks to try to get close to O(N log N) performance,
+  while retaining high accuracy.  Faster than the exhaustive-search
+  `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
+  be faster and more accurate than `gram-classify-diag-blocks`.
+"
+	(gram-classify greedy-over-words 0.3)
 )
 
 ; ---------------------------------------------------------------

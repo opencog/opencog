@@ -13450,6 +13450,9 @@ Baseline: 328
    (fold (lambda (CLS cnt) (+ cnt (nmemb CLS))) 0
       (cog-get-atoms 'WordClassNode)))
 
+todo- make sure the FAKE list is shortened  DONE
+sort the class list sort-class-list   done
+
 
 =================================================================
  (define pca (make-pseudo-cset-api))
