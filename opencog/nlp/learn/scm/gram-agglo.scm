@@ -130,21 +130,19 @@
 ; WORD should be the WordNode to test.
 ; CLS-LST should be list of WordNodes or WordClassNodes to compare
 ;          to the WORD.
-; LLOBJ is the object to use for obtaining counts.
-; FRAC is the fraction of union vs. intersection during merge.
-; (These last two are passed blindly to the merge function).
+; MERGER is the object tht provides the merge predicate and function
 ;
-(define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
+(define (assign-word-to-class MERGER WRD CLS-LST)
 
 	; Return #t if cls can be merged with WRD
-	(define (merge-pred cls) (ok-to-merge LLOBJ cls WRD))
+	(define (merge-pred cls) (MERGER 'merge-predicate cls WRD))
 
 	(let (; (cls (find merge-pred CLS-LST))
 			(cls (par-find merge-pred CLS-LST))
 		)
 		(if (not cls)
 			WRD
-			(merge-ortho LLOBJ FRAC cls WRD)))
+			(MERGER 'merge-function cls WRD)))
 )
 
 ; ---------------------------------------------------------------
@@ -163,22 +161,20 @@
 ;
 ; WRD-OR-CLS should be the WordNode or WordClassNode to merge into.
 ; WRD-LST should be list of WordNodes to merge into WRD-OR-CLS.
-; LLOBJ is the object to use for obtaining counts.
-; FRAC is the fraction of union vs. intersection during merge.
-; (These last two are passed blindly to the merge function).
+; MERGER is the object that provides the merge predicate and function.
 ;
-(define (assign-expand-class LLOBJ FRAC WRD-OR-CLS WRD-LST)
+(define (assign-expand-class MERGER WRD-OR-CLS WRD-LST)
 	(if (null? WRD-LST) WRD-OR-CLS
 		(let ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST)))
 			; If the word can be merged into a class, then do it,
 			; and then expand the class. Else try again.
-			(if (ok-to-merge LLOBJ WRD-OR-CLS wrd)
+			(if (MERGER 'merge-predicate WRD-OR-CLS wrd)
 				; Merge, and try to expand.
-				(assign-expand-class LLOBJ FRAC
-					(merge-ortho LLOBJ FRAC WRD-OR-CLS wrd) rest)
+				(assign-expand-class MERGER
+					(MERGER 'merge-function WRD-OR-CLS wrd) rest)
 				; Else keep trying.
-				(assign-expand-class LLOBJ FRAC WRD-OR-CLS rest))))
+				(assign-expand-class MERGER WRD-OR-CLS rest))))
 )
 
 ; ---------------------------------------------------------------
@@ -221,7 +217,7 @@
 ; WordClassNodes) and a merge is possible, then that WordNode will
 ; be merged to create a class.
 ;
-(define (block-assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
+(define (block-assign-to-classes MERGER WRD-LST CLS-LST)
 	(format #t "-------  Words remaining=~A Classes=~A ~A ------\n"
 		(length WRD-LST) (length CLS-LST)
 		(strftime "%c" (localtime (current-time))))
@@ -231,16 +227,16 @@
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
 				; Can we assign the word to a class?
-				(cls (assign-word-to-class LLOBJ FRAC wrd CLS-LST)))
+				(cls (assign-word-to-class MERGER wrd CLS-LST)))
 
 			; If the word was merged into an existing class, then recurse
 			(if (eq? 'WordClassNode (cog-type cls))
-				(block-assign-to-classes LLOBJ FRAC rest CLS-LST)
+				(block-assign-to-classes MERGER rest CLS-LST)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the other words
 				; in the word-list.
-				(let* ((new-cls (assign-expand-class LLOBJ FRAC wrd rest))
+				(let* ((new-cls (assign-expand-class MERGER wrd rest))
 						(new-lst
 							(if (eq? 'WordClassNode (cog-type new-cls))
 								; Use append, not cons, so as to preferentially
@@ -250,7 +246,7 @@
 								(append! CLS-LST (list new-cls))
 								; else the old class-list
 								CLS-LST)))
-					(block-assign-to-classes LLOBJ FRAC rest new-lst)))))
+					(block-assign-to-classes MERGER rest new-lst)))))
 )
 
 ; ---------------------------------------------------------------
@@ -297,7 +293,7 @@
 ; Currently, typical runtimes are about 1 second per pair, or about
 ; 0.5*500*500 = 35 hours for 500 words. This is NOT fast.
 ;
-(define (assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
+(define (assign-to-classes MERGER TRUE-CLS-LST FAKE-CLS-LST WRD-LST)
 
 	(format #t "--- To-do=~A num-classes=~A num-done=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
@@ -308,16 +304,16 @@
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
 				; Can we assign the word to a class?
-				(cls (assign-word-to-class LLOBJ FRAC wrd TRUE-CLS-LST)))
+				(cls (assign-word-to-class MERGER wrd TRUE-CLS-LST)))
 
 			; If the word was merged into an existing class, then recurse
 			(if (eq? 'WordClassNode (cog-type cls))
-				(assign-to-classes LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST rest)
+				(assign-to-classes MERGER TRUE-CLS-LST FAKE-CLS-LST rest)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the singleton
 				; words in the "fake-class" list.
-				(let* ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST))
+				(let* ((new-cls (assign-word-to-class MERGER wrd FAKE-CLS-LST))
 						(is-new-cls (eq? 'WordClassNode (cog-type new-cls)))
 						(new-true
 							(if is-new-cls
@@ -334,7 +330,7 @@
 								; to preferentially choose the older words,
 								; as opposed to the newer ones.
 								(append! FAKE-CLS-LST (list new-cls)))))
-					(assign-to-classes LLOBJ FRAC new-true new-fake rest)))))
+					(assign-to-classes MERGER new-true new-fake rest)))))
 )
 
 ; ---------------------------------------------------------------
@@ -383,7 +379,7 @@
 ; solution that does not seem worth the effort. So we'll let the
 ; CPU work harder than it might otherwise need to.
 ;
-(define (greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
+(define (greedy-grow MERGER TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
 
 	; Tunable parameters
 	(define min-greedy 200)
@@ -399,23 +395,23 @@
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
 				; Can we assign the word to a class?
-				(cls (assign-word-to-class LLOBJ FRAC wrd TRUE-CLS-LST)))
+				(cls (assign-word-to-class MERGER wrd TRUE-CLS-LST)))
 
 			; If the word was merged into an existing class, then
 			; recurse.  Place the word onto the done-list.
 			(if (eq? 'WordClassNode (cog-type cls))
-				(greedy-grow LLOBJ FRAC TRUE-CLS-LST FAKE-CLS-LST
+				(greedy-grow MERGER TRUE-CLS-LST FAKE-CLS-LST
 					(append! DONE-LST (list wrd)) rest)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the singleton
 				; words in the "fake-class" list.
-				(let ((new-cls (assign-word-to-class LLOBJ FRAC wrd FAKE-CLS-LST)))
+				(let ((new-cls (assign-word-to-class MERGER wrd FAKE-CLS-LST)))
 
 					; If we failed to create a new class, then just
 					; append the word to the fake list, and recurse.
 					(if (eq? 'WordNode (cog-type new-cls))
-						(greedy-grow LLOBJ FRAC TRUE-CLS-LST
+						(greedy-grow MERGER TRUE-CLS-LST
 							(append! FAKE-CLS-LST (list new-cls))
 							DONE-LST rest)
 
@@ -429,10 +425,10 @@
 										 (length DONE-LST))))
 								(short-list (take rest num-greedy))
 							)
-							(assign-expand-class LLOBJ FRAC new-cls short-list)
+							(assign-expand-class MERGER new-cls short-list)
 							(display "--- Checking the done-list\n")
-							(assign-expand-class LLOBJ FRAC new-cls DONE-LST)
-							(greedy-grow LLOBJ FRAC
+							(assign-expand-class MERGER new-cls DONE-LST)
+							(greedy-grow MERGER
 								; The new true-list is now longer.
 								(sort-class-list (cons new-cls TRUE-CLS-LST))
 
@@ -536,15 +532,15 @@
 ; recommended, although its simple and easy, thus good for sanity
 ; checking.
 ;
-(define (classify-pair-wise LLOBJ FRAC WRD-LST GLST)
+(define (classify-pair-wise MERGER WRD-LST GLST)
 
 	(define (check-pair WORD-A WORD-B CLS-LST)
-		(if (ok-to-merge LLOBJ WORD-A WORD-B)
-			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
-				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
+		(if (MERGER 'merge-predicate WORD-A WORD-B)
+			(let ((grm-class (MERGER 'merge-function WORD-A WORD-B)))
+				(assign-expand-class MERGER grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length ranked-words))
@@ -555,13 +551,13 @@
 ; Loop over all words, attempting to place them into grammatical
 ; classes. This is an O(N^2) algorithm.
 ;
-(define (agglo-over-words LLOBJ FRAC WRD-LST CLS-LST)
+(define (agglo-over-words MERGER WRD-LST CLS-LST)
 
-	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length ranked-words))
-	(assign-to-classes LLOBJ FRAC sorted-cls '() ranked-words)
+	(assign-to-classes MERGER sorted-cls '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
@@ -580,7 +576,7 @@
 ; the initial block size.  This could be exposed in the API, maybe.
 ; probably not urgent.
 ;
-(define (diag-over-words LLOBJ FRAC WRD-LST CLS-LST)
+(define (diag-over-words MERGER WRD-LST CLS-LST)
 
 	(define (diag-blocks wlist size clist)
 		(if (null? wlist) '()
@@ -592,7 +588,7 @@
 					; the remainder
 					(rest (drop wlist minsz))
 					; perform clustering
-					(new-clist (block-assign-to-classes LLOBJ FRAC chunk clist)))
+					(new-clist (block-assign-to-classes MERGER chunk clist)))
 				; Recurse and do the next block.
 				; XXX the block sizes are by powers of 2...
 				; perhaps they should be something else?
@@ -605,7 +601,7 @@
 	; Perhaps it should be a random number, altered between runs?
 	(define diag-block-size 20)
 
-	(define all-ranked-words (cutoff-hack LLOBJ WRD-LST))
+	(define all-ranked-words (cutoff-hack MERGER WRD-LST))
 
 	; Ad hoc restart point. If we already have N classes, we've
 	; surely pounded the cosines of the first 2N or so words into
@@ -634,12 +630,12 @@
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
 ;
-(define (greedy-over-words LLOBJ FRAC WRD-LST CLS-LST)
+(define (greedy-over-words MERGER WRD-LST CLS-LST)
 
 	(define ranked-words (cutoff-hack LLOBJ WRD-LST))
 	(format #t "Start greedy-agglom of ~A words\n"
 		(length ranked-words))
-	(greedy-grow LLOBJ FRAC CLS-LST '() '() ranked-words)
+	(greedy-grow MERGER CLS-LST '() '() ranked-words)
 )
 
 ; ---------------------------------------------------------------
@@ -648,13 +644,6 @@
 ; ---------------------------------------------------------------
 ; Main entry-point helpers.
 ;
-(define (make-cosine-llobj)
-	(define pca (make-pseudo-cset-api))
-	(define psa (add-dynamic-stars pca))
-	; (define pla (add-support-compute psa))
-	(add-pair-cosine-compute pla)
-)
-
 (define (load-stuff)
 	(define start-time (get-internal-real-time))
 
@@ -674,12 +663,12 @@
 )
 
 ; Attempt to merge words into word-classes.
-(define (gram-classify ALGO FRAC)
+(define (gram-classify ALGO)
+	(define merger (make-fuzz))
 
 	(load-stuff)
 	(ALGO
-		(make-cosine-llobj)
-		FRAC
+		merger
 		(cog-get-atoms 'WordNode)
 		(cog-get-atoms 'WordClassNode))
 )
@@ -698,7 +687,7 @@
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
 "
-	(gram-classify classify-pair-wise 0.3)
+	(gram-classify classify-pair-wise)
 )
 
 (define-public (gram-classify-agglo)
@@ -709,7 +698,7 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words 0.3)
+	(gram-classify agglo-over-words)
 )
 
 (define-public (gram-classify-diag-blocks)
@@ -721,7 +710,7 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words 0.3)
+	(gram-classify diag-over-words)
 )
 
 (define-public (gram-classify-greedy)
@@ -733,7 +722,7 @@
   `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
   be faster and more accurate than `gram-classify-diag-blocks`.
 "
-	(gram-classify greedy-over-words 0.3)
+	(gram-classify greedy-over-words)
 )
 
 ; ---------------------------------------------------------------
