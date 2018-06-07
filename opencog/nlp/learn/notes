@@ -13458,6 +13458,9 @@ createdb mrg_tst -T en_pairs_rfive_mtwo
 
 If cosine is zero, can only do 8 cosines/second apparently.
 
+lxc -- block on 5x5 db. hard code 0.65 0.3
+mrg_tst -5x2 with hard-code 0.65, 0.3
+
 
 =================================================================
  (define pca (make-pseudo-cset-api))

@@ -383,7 +383,17 @@
 
 	; Tunable parameters
 	(define min-greedy 200)
-	(define scan-multiplier 10)
+	(define scan-multiplier 4)
+
+	; How many words have been classified?
+	(define (num-classified-words)
+		(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
+			(fold (lambda (CLS cnt) (+ cnt (nmemb CLS))) 0 TRUE-CLS-LST))
+
+	; How far to scan ahead?
+	(define (num-to-scan)
+		(max min-greedy (* scan-multiplier
+			(+ (num-classified-words) (length FAKE-CLS-LST)))))
 
 	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
@@ -420,11 +430,8 @@
 						; so as to not blow out performance. See if any of
 						; the previously-assigned words might also go into the
 						; new class. And then recurse.
-						(let* (
-								(num-greedy (max min-greedy (* scan-multiplier
-										 (length DONE-LST))))
-								(short-list (take rest num-greedy))
-							)
+						(let* ((short-list (take rest
+									(min (num-to-scan) (length rest)))))
 							(assign-expand-class MERGER new-cls short-list)
 							(display "--- Checking the done-list\n")
 							(assign-expand-class MERGER new-cls DONE-LST)
