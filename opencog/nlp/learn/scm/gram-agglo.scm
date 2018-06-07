@@ -647,13 +647,13 @@
 
 	; Get the list of words that have been classified already.
 	(define mdone-list
-			(fold (lambda (CLS LST)
-				(append! LST (cog-incoming-by-type CLS 'MemberLink)))
-				'() CLS-LST))
+		(fold (lambda (CLS LST)
+			(append! LST (map gar (cog-incoming-by-type CLS 'MemberLink))))
+			'() CLS-LST))
 
 	; Make sure that they really are words. (This should be a no-op...)
 	(define done-list
-		(filter! (lambda (w) (eq? 'WordNode (cog-type (gar w)))) mdone-list))
+		(filter! (lambda (w) (eq? 'WordNode (cog-type w))) mdone-list))
 
 	(define (is-done? w)
 		(find (lambda (x) (equal? x w)) done-list))
