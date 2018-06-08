@@ -433,6 +433,8 @@
 
 (define (merge-ortho LLOBJ FRAC WA WB)
 "
+  DEPRECATED! Use merge-project instead!
+
   merge-ortho FRAC WA WB - merge WA and WB into a grammatical class.
   Return the merged class.
 
@@ -639,11 +641,11 @@
   COSOBJ is used to compute the cosine between WA and WB, and thus
      in needs to provide the 'right-cosine method.
 
-  This is build on `merge-ortho`. See documentation for that.
+  This is built on `merge-project`. See documentation for that.
 "
 	(define cosi (COSOBJ 'right-cosine WA WB))
 	(define frac (/ (- cosi COS-MIN)  (- 1.0 COS-MIN)))
-	(merge-ortho COSOBJ frac WA WB)
+	(merge-project COSOBJ frac WA WB)
 )
 
 ; ---------------------------------------------------------------
@@ -686,7 +688,7 @@
 "
   make-fuzz -- Do fuzzy hard-coded merge.
 
-  use `merge-ortho` with hard-coded frac=0.3 and min acceptable
+  use `merge-project` with hard-coded frac=0.3 and min acceptable
   cosine=0.65
 "
 	(define cutoff 0.65)
@@ -700,7 +702,7 @@
 			(ok-to-merge pcos cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-ortho pcos union-frac WORD-A WORD-B))
+			(merge-project pcos union-frac WORD-A WORD-B))
 
 		; ------------------
 		; Methods on this class.
@@ -718,7 +720,7 @@
 "
   make-discrim -- Do a \"discriminating\" merge.
 
-  use `merge-ortho` with sigmoid taper and
+  use `merge-project` with sigmoid taper and
   hard-coded min acceptable cosine=0.50
 "
 	(define cutoff 0.50)
@@ -773,7 +775,7 @@
 ; (ok-to-merge pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
-; (merge-ortho pcos 0.3 (Word "city") (Word "village"))
+; (merge-project pcos 0.3 (Word "city") (Word "village"))
 ;
 ; Verify presence in the database:
 ; select count(*) from atoms where type=22;
