@@ -426,6 +426,20 @@
 
 	(for-each merge-section-pair (ptu 'right-stars (list WA WB)))
 
+	(if (eq? 'WordNode (cog-type WA))
+		(begin
+			; Put the two words into the new word-class.
+			(store-atom (MemberLink WA wrd-class))
+			(store-atom (MemberLink WB wrd-class)))
+
+		; If WA is not a WordNode, assume its a WordClassNode.
+		; The process is similar, but slightly altered.
+		; We assume that WB is a WordNode, but perform no safety
+		; checking to verify this.
+		(begin
+			; Add WB to the mrg-class (which is WA already)
+			(store-atom (MemberLink WB wrd-class)))
+	)
 	wrd-class
 )
 
