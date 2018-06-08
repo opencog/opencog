@@ -54,6 +54,38 @@
 		(num-classified-words) (cog-count-atoms 'WordClassNode))
 	(for-each prt-members-of-class by-size))
 
+; Print all of the classes that a word belongs to.
+(define (prt-class-mebership WRD)
+	(define membs (cog-incoming-by-type WRD 'MemberLink))
+	(define classes (map gdr membs))
+	(format #t "Word '~A' belongs to ~A classes:\n   "
+		(cog-name WRD) (length classes))
+	(for-each
+		(lambda (cls) (format #t "<~A> " (cog-name cls)))
+		classes)
+	(newline))
+
+; Print words that belong to more than one class
+(define (prt-multi-members)
+	(define nwrds 0)
+	(define ducls '())
+	(define (summer WRD)
+		(define membs (cog-incoming-by-type WRD 'MemberLink))
+		(if (< 1 (length membs))
+			(begin
+				(prt-class-mebership WRD)
+				(set! nwrds (+ nwrds 1))
+				(set! ducls (append ducls membs))))
+	)
+	(for-each summer (cog-get-atoms 'WordNode))
+	(format #t "total words=~A total classes=~A unique classes=~A\n"
+		nwrds (length ducls)
+		(length (remove-duplicate-atoms (map gdr ducls))))
+)
+
+; -----------------------------------------------------------------
+; -----------------------------------------------------------------
+; -----------------------------------------------------------------
 ; Print distribution, viz, Some statistic, vs. the class.
 ; First column: numerical ID for the class.
 ; Second column: The statistic.

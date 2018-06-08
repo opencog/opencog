@@ -13462,6 +13462,25 @@ lxc -- block on 5x5 db. hard code 0.65 0.3
 mrg_tst -5x2 with hard-code 0.65, 0.3
 
 
+WTF:
+In opencog/matrix/cosine.scm:
+   106:24  7 (compute-right-cosine (WordClassNode "of in")
+ #)
+In srfi/srfi-1.scm:
+   466:18  6 (fold #<procedure 55b602fc1060 at opencog/matrix/support.scm:1…> …)
+In opencog/matrix/support.scm:
+   145:45  5 (_ (# #<Invalid handle>) 39072.43937140673)
+In opencog/matrix/fold-api.scm:
+   247:32  4 (get-func-count _)
+In srfi/srfi-1.scm:
+   592:29  3 (map1 (# #<Invalid handle>))
+   592:17  2 (map1 (#<Invalid handle>))
+In opencog/nlp/learn/pseudo-csets.scm:
+    93:55  1 (get-pair-count _)
+In unknown file:
+           0 (cog-tv #<Invalid handle>)
+
+
 =================================================================
  (define pca (make-pseudo-cset-api))
   (define psa (add-pair-stars pca))

@@ -3,16 +3,18 @@
 ;
 ; Merge connectors into classes of connectors -  merge connector sets.
 ;
+; Copyright (c) 2017, 2018 Linas Vepstas
+;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
 ; The merging of words into word-classes proceeds in two parts. The
-; first part is reviewed in `gram-class.scm` and consists on comparing
+; first part is reviewed in `gram-class.scm` and proceeds by comparing
 ; words to see if they share similar sets of sections. If they do,
 ; then the words can be judged to be similar, and merged into a word
 ; class.  The second part, reviewed here, is to merge connector
-; sequences, so that connectors become word classes, instead of just
-; being individual words.
+; sequences, so that connectors are made from word classes, instead of
+; of individual words.
 ;
 ; Before any merging, a single section on a single word has the
 ; general form
