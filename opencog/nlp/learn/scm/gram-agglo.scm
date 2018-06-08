@@ -76,7 +76,7 @@
 ; Current best strategy: `greedy-grow`
 ; ------------------------------------
 ; The current best merge strategy is implemented in `greedy-grow` and
-; makes use of several tricks, based on paractical experience:
+; makes use of several tricks, based on practical experience:
 ;
 ; * Words are sorted into frequency order, thus giving a rough-cut of
 ;   having grammatically-similar words relatively near one-another in
@@ -86,7 +86,7 @@
 ;   word.
 ; * If a word cannot be assigned to an existing word-class, it is
 ;   designated to start a new 'singleton' class, of which it is the
-;   only member. For assignment of of words to classes, the most populus
+;   only member. For assignment of of words to classes, the most populous
 ;   classes are considered first, and the singleton classes are
 ;   considered last.
 ; * When a new cluster is formed, then perform the "greedy"/maximal
@@ -130,7 +130,7 @@
 ; WORD should be the WordNode to test.
 ; CLS-LST should be list of WordNodes or WordClassNodes to compare
 ;          to the WORD.
-; MERGER is the object tht provides the merge predicate and function
+; MERGER is the object that provides the merge predicate and function
 ;
 (define (assign-word-to-class MERGER WRD CLS-LST)
 
@@ -343,7 +343,7 @@
 ;
 ; Similar to `assign-to-classes`, except that this attempts to
 ; maximally grow a newly-created class. It also attempts to manage
-; the word-list better, defering reconsideration of recently-assigned
+; the word-list better, deferring reconsideration of recently-assigned
 ; words for a later pass.
 ;
 ; WRD-LST is the list of words to be assigned to classes.
@@ -368,7 +368,7 @@
 ; words in the DONE-LIST have a good chance of being completely
 ; neutered, with almost nothing left in them. They should get dropped.
 ;
-; XXX Maybe-FIXME: There's some amount of poointless recomputation of
+; XXX Maybe-FIXME: There's some amount of pointless recomputation of
 ; cosines between the word-list, and the existing grammatical classes.
 ; During the construction of the classes, a greedy search was formed
 ; part-way down the word-list. Thus, when resuming the search, its
@@ -501,7 +501,7 @@
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
 		LST)
 
-	(format #t "Finished fetching wildcards in ~5F sconds\n"
+	(format #t "Finished fetching wildcards in ~5F seconds\n"
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
 	(sort!
@@ -590,7 +590,7 @@
 ;
 ; XXX There is a user-adjustable parameter used below, `diag-block-size`,
 ; to specify the initial block size.  This could be exposed in the API,
-; maybe.  On the other hannd, it could stay hardcoded forever, for all
+; maybe.  On the other hand, it could stay hard-coded forever, for all
 ; practical purposes.
 ;
 (define (diag-over-words MERGER WRD-LST CLS-LST)
@@ -669,7 +669,7 @@
 		(length remain-words))
 	(greedy-grow MERGER sorted-cls '() done-list remain-words)
 
-	; XXX FIXME ... at the conclusion of this, we havea done list,
+	; XXX FIXME ... at the conclusion of this, we have a done list,
 	; which, because of repeated merging, might possibly have been
 	; reduced to single senses, which can now be classified.
 )

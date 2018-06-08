@@ -80,7 +80,7 @@
 ; This merge style overcomes the objection in c), in that the merged
 ; class is already participating in many sections. Note, though, it
 ; is no longer conservative: the existing grammatical class will
-; typically be larger than the merged class, and so will signficantly
+; typically be larger than the merged class, and so will significantly
 ; broaden the grammatical reach.
 ;
 ; Generous merging
@@ -92,7 +92,7 @@
 ;
 ; d) The grammatical usage of that particular connector sequence
 ;    is immediately broadened to the new WordClass.
-; e) The proceedure is questionable if the word belongs to more
+; e) The procedure is questionable if the word belongs to more
 ;    than one WordClass.
 ; f) This algorithm is O(N) in the number N of sections, as opposed
 ;    to O(N^2) or worse for the others.  That is, one need only loop
@@ -129,7 +129,7 @@
 (define-public (in-gram-class? WORD GCLS)
 "
   in-gram-class? WORD GRAM-CLASS - is the WORD a member of the
-  grammatical class CRAM-CLASS? Returns ither #t or #f.
+  grammatical class CRAM-CLASS? Returns either #t or #f.
 "
 	(define memlnk (cog-link 'MemberLink WORD GCLS))
 	(if (null? memlnk) #f #t)

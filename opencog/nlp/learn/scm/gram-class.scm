@@ -38,7 +38,7 @@
 ;                ....
 ;
 ; The TV on the MemberLink holds a count value; that count equals the
-; total number of section-counts that were transfered from the word, to
+; total number of section-counts that were transferred from the word, to
 ; the word-class, when the word was merged into the class. The sum over
 ; all of these counts (on the MemberLinks) should exactly equal the sum
 ; over the counts on all Sections for that WordClassNode.  Thus, it can
@@ -165,7 +165,7 @@
 ; Overlap merging appears to solve the problem a) above (the SUPPORT
 ; issue), but, on the flip side, it also seems to prevent the discovery
 ; and broadening of the ways in which a word might be used. (Broadening
-; is duscuseed in greater detail below.)
+; is discussed in greater detail below.)
 ;
 ; Formal definition
 ; -----------------
@@ -193,20 +193,20 @@
 ; and v_b^new are everything else, everything left-over.  Note that
 ; v_a^new and v_b^new are orthogonal to v_cluster. Note that v_a^new
 ; and v_b^new are both exactly zero on {e_overlap} -- the subtraction
-; wipes out those coefficents. Note that the total number of counts
+; wipes out those coefficients. Note that the total number of counts
 ; is preserved.  That is,
 ;
 ;   ||v_a|| + ||v_b|| = ||v_cluster|| + ||v_a^new|| + ||v_b^new||
 ;
-; where ||v|| == ||v||_1 the l_1 norm aka count aka manhattan-distance.
+; where ||v|| == ||v||_1 the l_1 norm aka count aka Manhattan-distance.
 ;
 ; If v_a and v_b have several word-senses in common; then so will
 ; v_cluster.  Since there is no a priori way to force v_a and v_b to
 ; encode only one common word sense, there needs to be some distinct
-; machanism to split v_cluster ino multiple word senses, if that is
+; mechanism to split v_cluster into multiple word senses, if that is
 ; needed.
 ;
-; Union merging can be descrbied using almost the same formulas, except
+; Union merging can be described using almost the same formulas, except
 ; that one takes
 ;
 ;   {e_union} = {e_a} set-union {e_b}
@@ -248,10 +248,10 @@
 ;
 ; merge-discrim
 ; -------------
-; Built on the merge-prject method, the FRAC is a sigmoid function,
+; Built on the merge-project method, the FRAC is a sigmoid function,
 ; ranging from 0.0 to 1.0, depending on the cosine between the vectors.
 ; The idea is that, if two words are already extremely similar, we may
-; as well assum they really are in the same class, and so do a union
+; as well assume they really are in the same class, and so do a union
 ; merge. But if the words are only kind-of similar, but not a lot, then
 ; assume that the are both linear combinations of several word senses,
 ; and do only the minimal overlap merge, so as to avoid damaging the
@@ -333,7 +333,7 @@
   The merger of WA and WB are performed, using the 'projection
   merge' strategy. This is done like so. If WA and WB are both
   WordNodes, then a WordClass is created, having both WA and WB as
-  members.  Counts are then transfered from WA and WB to the class.
+  members.  Counts are then transferred from WA and WB to the class.
 
   The counts are summed only if both counts are non-zero. Otherwise,
   only a FRAC fraction of a single, unmatched count is transferred.
