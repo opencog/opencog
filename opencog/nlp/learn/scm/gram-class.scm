@@ -184,21 +184,29 @@
 ; and thus hopefully correspond to how words a and b are used in a
 ; common sense. Thus v_cluster is the common word-sense, while v_a^new
 ; and v_b^new are everything else, everything left-over.  Note that
-; v_a^new and v_b^new are orthogonal to v_cluster.
+; v_a^new and v_b^new are orthogonal to v_cluster. Note that v_a^new
+; and v_b^new are both exactly zero on {e_overlap} -- the subtraction
+; wipes out those coefficents. Note that the total number of counts
+; is preserved.  That is,
+;
+;   ||v_a|| + ||v_b|| = ||v_cluster|| + ||v_a^new|| + ||v_b^new||
+;
+; where ||v|| == ||v||_1 the l_1 norm aka count aka manhattan-distance.
 ;
 ; If v_a and v_b have several word-senses in common; then so will
-; v_cluster.  Sinve there is no a priori way to force v_a and v_b to
+; v_cluster.  Since there is no a priori way to force v_a and v_b to
 ; encode only one common word sense, there needs to be some distinct
 ; machanism to split v_cluster ino multiple word senses, if that is
 ; needed.
 ;
-; Merging and orthogonalization
-; -----------------------------
+; Union merging can be descrbied using almost the same formulas, except
+; that one takes
 ;
+;   {e_union} = {e_a} set-union {e_b}
 ;
-; merge-ortho
-; -----------
-; The above two merge methods are implemented in the `merge-ortho`
+; merge-project
+; -------------
+; The above two merge methods are implemented in the `merge-project`
 ; function. It takes, as an argument, a fractional weight which is
 ; used when the disjunct isn't shared between both words. Setting
 ; the weight to zero gives overlap merging; setting it to one gives
@@ -206,14 +214,34 @@
 ; that is intermediate between the two: an overlap, plus a bit more,
 ; viz some of the union.
 ;
-; That is, the merged vector is
+; That is, the merger is given by the vector
 ;
 ;   v_merged = v_overlap + FRAC * (v_union - v_overlap)
+;
+; If v_a and v_b are both words, then the counts on v_a and v_b are
+; adjusted to remove the counts that were added into v_merged. If one
+; of the two is already a word-class, then the counts are simply moved
+; from the word to the class.
+;
+; merge-ortho
+; -----------
+; The `merge-ortho` function computes the merged vector the same way as
+; the `merge-project` function; however, it adjusts counts on v_a and
+; v_b in a different way. What it does is to explicitly orthogonalize
+; so that the final v_a and v_b are orthogonal to v_merged.  The result
+; is probably very similar to `merge-project`, but not the same.  In
+; particular, the total number of counts in the system is not preserved
+; (which is maybe a bad thing?)
+;
+; There's no good reason for choosing `merge-ortho` over `merge-project`,
+; and there's a good theoretical reason to not use `merge-ortho`. Its
+; here for historical reasons -- it got coded funky, and that's that.
+; It should probably be eventually removed.
 ;
 ;
 ; merge-discrim
 ; -------------
-; Built on the merge-ortho method, the FRAC is a sigmoid function,
+; Built on the merge-prject method, the FRAC is a sigmoid function,
 ; ranging from 0.0 to 1.0, depending on the cosine between the vectors.
 ; The idea is that, if two words are already extremely similar, we may
 ; as well assum they really are in the same class, and so do a union
