@@ -30684,6 +30684,14 @@ Basically, the last two are directly comparable: they differ only in the
  merge strategy.
  The first two are harder to compare: they use different datasets and different
  agglomeration algos.
+ All three are using the screwy 
+\family typewriter
+merge-ortho
+\family default
+ classifier, which is almost right, but altered counts in a somewhat screwy
+ way.
+ Thus, these experiments need to be repeated ...
+ again.
 \end_layout
 
 \begin_layout Section*
@@ -30697,26 +30705,7 @@ Here's the plan.
 \end_layout
 
 \begin_layout Itemize
-Collect more zh stats.
-\end_layout
-
-\begin_layout Itemize
-Write code to extract zh words, per discussion above.
-\end_layout
-
-\begin_layout Itemize
-Write code to create 
-\begin_inset Quotes eld
-\end_inset
-
-grammatical classes
-\begin_inset Quotes erd
-\end_inset
-
-, by merging similar words, and decomposing the remainders into orthogonal
- components.
- This requires definingthe types, doing the merging, documenting, and setting
- up the export code to handle this.
+Collect more zh stats; write code to extract zh words, per discussion above.
 \end_layout
 
 \begin_layout Itemize

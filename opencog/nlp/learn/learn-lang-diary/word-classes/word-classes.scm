@@ -26,6 +26,9 @@
 
 ; Print the members of one class.
 ; Print most frequent words first.
+; (Roughly. The get-count is not really acccurate; it includes totals
+; from pair counting, not MST counting.  And the MST counts get trashed
+; during classification, so we don't have any good counts left...)
 (define (prt-members-of-class CLS)
 	(define membs (cog-incoming-by-type CLS 'MemberLink))
 	(define words (map gar membs))
