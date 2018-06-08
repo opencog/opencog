@@ -25,14 +25,19 @@
 		(cog-get-atoms 'WordClassNode)))
 
 ; Print the members of one class.
+; Print most frequent words first.
 (define (prt-members-of-class CLS)
 	(define membs (cog-incoming-by-type CLS 'MemberLink))
+	(define words (map gar membs))
+	(define words-by-freq
+		(sort! words
+			(lambda (WRD-A WRD-B) (> (get-count WRD-A) (get-count WRD-B)))))
 	(format #t "Class <~A> has ~A members:\n   "
-		(cog-name CLS) (length membs))
+		(cog-name CLS) (length words-by-freq))
 	(for-each
-		(lambda (memb)
-			(format #t "~A " (cog-name (gar memb))))
-		membs)
+		(lambda (wrd)
+			(format #t "~A " (cog-name wrd)))
+		words-by-freq)
 	(newline))
 
 ; Print all classes and members
@@ -42,6 +47,8 @@
 	(define by-size
 		(sort! all-classes
 			(lambda (CLS-A CLS-B) (> (nmemb CLS-A) (nmemb CLS-B)))))
+	(format #t "There are ~A words placed into ~A classes\n"
+		(num-classified-words) (cog-count-atoms 'WordClassNode))
 	(for-each prt-members-of-class by-size))
 
 ; Print distribution, viz, Some statistic, vs. the class.
