@@ -85,7 +85,7 @@
 ;
 ; Generous merging
 ; ----------------
-; Another possibility is a generaous merge, where, whenever a word
+; Another possibility is a generous merge, where, whenever a word
 ; appears in a ConnectorSeq, and that word is also in a WordClass,
 ; then the word is immediately replaced by the WordClass it is in.
 ; This has the properties:
@@ -105,6 +105,19 @@
 ; above: in the connected-merge, a search is made for at least two
 ; words belonging to the same class, to confirm (disambiguate) the
 ; class membership.
+;
+;
+; Stingy merging
+; --------------
+; Some of the word-merging results in word classes that are too broad.
+; Can some form of stingy connector merging be used to narrow down those
+; overly-broad classes?  So, for example, if a `single-difference merge`
+; as described above differs too much from an existing word-class, then
+; perhaps the existing word class was formed too broadly?
+;
+; Two problems here: (1) its not clear if the above hypothesis is true
+; (viz, that the original mere was too broad), and (2) there is no
+; effective mechanism to un-merge.
 ;
 ; ---------------------------------------------------------------------
 
