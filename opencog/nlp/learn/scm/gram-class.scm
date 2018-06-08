@@ -160,16 +160,17 @@
 ; and broadening of the ways in which a word might be used. (Broadening
 ; is duscuseed in greater detail below.)
 ;
-; A formal (equational, algorithmic) description of overlap merging:
-; One wishes to compute the intersection of basis elements (the
-; intersection of "disjuncts" aka "sections") of the two words, and
-; then sum the counts only on this intersected set.  That is, let
+; Formal definition
+; -----------------
+; A formal (equational, algorithmic) description of overlap merging is
+; given here. One wishes to compute the intersection of basis elements
+; (the intersection of "disjuncts" aka "sections") of the two words, and
+; then sum the counts only on this intersected set. Let
 ;
 ;   {e_a} = set of basis elements in v_a with non-zero coefficients
 ;   {e_b} = set of basis elements in v_b with non-zero coefficients
 ;   {e_overlap} = {e_a} set-intersection {e_b}
-;   v_o = vector of {e_overlap} i.e. having unit coeffs for each basis.
-;   pi_overlap = v_o v_o^transpose
+;   pi_overlap = unit on diagonal for each e in {e_overlap}
 ;              == projection matrix onto the subspace {e_overlap}
 ;   v_a^pi = pi_overlap . v_a == projection of v_a onto {e_overlap}
 ;   v_b^pi = pi_overlap . v_b == projection of v_b onto {e_overlap}
@@ -183,18 +184,29 @@
 ; and thus hopefully correspond to how words a and b are used in a
 ; common sense. Thus v_cluster is the common word-sense, while v_a^new
 ; and v_b^new are everything else, everything left-over.  Note that
-; v_a^new and v_b^new are orthogonal to v_cluster.
+; v_a^new and v_b^new are orthogonal to v_cluster. Note that v_a^new
+; and v_b^new are both exactly zero on {e_overlap} -- the subtraction
+; wipes out those coefficents. Note that the total number of counts
+; is preserved.  That is,
+;
+;   ||v_a|| + ||v_b|| = ||v_cluster|| + ||v_a^new|| + ||v_b^new||
+;
+; where ||v|| == ||v||_1 the l_1 norm aka count aka manhattan-distance.
 ;
 ; If v_a and v_b have several word-senses in common; then so will
-; v_cluster.  Sinve there is no a priori way to force v_a and v_b to
+; v_cluster.  Since there is no a priori way to force v_a and v_b to
 ; encode only one common word sense, there needs to be some distinct
 ; machanism to split v_cluster ino multiple word senses, if that is
 ; needed.
 ;
+; Union merging can be descrbied using almost the same formulas, except
+; that one takes
 ;
-; merge-ortho
-; -----------
-; The above two merge methods are implemented in the `merge-ortho`
+;   {e_union} = {e_a} set-union {e_b}
+;
+; merge-project
+; -------------
+; The above two merge methods are implemented in the `merge-project`
 ; function. It takes, as an argument, a fractional weight which is
 ; used when the disjunct isn't shared between both words. Setting
 ; the weight to zero gives overlap merging; setting it to one gives
@@ -202,14 +214,34 @@
 ; that is intermediate between the two: an overlap, plus a bit more,
 ; viz some of the union.
 ;
-; That is, the merged vector is
+; That is, the merger is given by the vector
 ;
 ;   v_merged = v_overlap + FRAC * (v_union - v_overlap)
+;
+; If v_a and v_b are both words, then the counts on v_a and v_b are
+; adjusted to remove the counts that were added into v_merged. If one
+; of the two is already a word-class, then the counts are simply moved
+; from the word to the class.
+;
+; merge-ortho
+; -----------
+; The `merge-ortho` function computes the merged vector the same way as
+; the `merge-project` function; however, it adjusts counts on v_a and
+; v_b in a different way. What it does is to explicitly orthogonalize
+; so that the final v_a and v_b are orthogonal to v_merged.  The result
+; is probably very similar to `merge-project`, but not the same.  In
+; particular, the total number of counts in the system is not preserved
+; (which is maybe a bad thing?)
+;
+; There's no good reason for choosing `merge-ortho` over `merge-project`,
+; and there's a good theoretical reason to not use `merge-ortho`. Its
+; here for historical reasons -- it got coded funky, and that's that.
+; It should probably be eventually removed.
 ;
 ;
 ; merge-discrim
 ; -------------
-; Built on the merge-ortho method, the FRAC is a sigmoid function,
+; Built on the merge-prject method, the FRAC is a sigmoid function,
 ; ranging from 0.0 to 1.0, depending on the cosine between the vectors.
 ; The idea is that, if two words are already extremely similar, we may
 ; as well assum they really are in the same class, and so do a union
@@ -230,7 +262,7 @@
 ; -----------------
 ; Gut-sense intuition suggests these possible experiments:
 ;
-; * Fuzz: use `merge-ortho` with hard-coded frac=0.3 and min acceptable
+; * Fuzz: use `merge-project` with hard-coded frac=0.3 and min acceptable
 ;   cosine=0.65
 ;
 ; * Discrim: use `merge-discrim` with min acceptable cosine = 0.5
@@ -277,8 +309,132 @@
 
 ; ---------------------------------------------------------------------
 
+(define (merge-project LLOBJ FRAC WA WB)
+"
+  merge-project FRAC WA WB - merge WA and WB into a grammatical class.
+  Return the merged class.
+
+  WA should be a WordNode or a WordClassNode.
+  WB is expected to be a WordNode.
+  FRAC should be a floating point number between zero and one,
+     indicating the fraction of a non-shared count to be used.
+     Setting this to 1.0 gives the sum of the union of supports;
+     setting this to 0.0 gives the sum of the intersection of supports.
+  LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
+     that is, are (word,disjunct) pairs wrapped in a SectionLink.
+
+  The merger of WA and WB are performed, using the 'projection
+  merge' strategy. This is done like so. If WA and WB are both
+  WordNodes, then a WordClass is created, having both WA and WB as
+  members.  Counts are then transfered from WA and WB to the class.
+
+  The counts are summed only if both counts are non-zero. Otherwise,
+  only a FRAC fraction of a single, unmatched count is transferred.
+
+  If WA is a WordClassNode, and WB is not, then WB is merged into
+  WA. That is, the counts on QA are adjusted only upwards, and those
+  on WB only downwards.
+"
+	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+	(define ptu (add-tuple-math LLOBJ bogus))
+
+	; set-count ATOM CNT - Set the raw observational count on ATOM.
+	(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
+
+	; Create a new word-class out of the two words.
+	; Concatenate the string names to get the class name.
+	; If WA is already a word-class, just use it as-is.
+	(define wrd-class
+		(if (eq? 'WordClassNode (cog-type WA)) WA
+			(WordClassNode (string-concatenate
+					(list (cog-name WA) " " (cog-name WB))))))
+
+	; Merge two sections into one, placing the result on the word-class.
+	; Given, given a pair of sections, sum the counts from each, and
+	; then place that count on a corresponding section on the word-class.
+	; Store the updated section to the database.
+	;
+	; One or the other sections can be null. If both sections are not
+	; null, then both are assumed to have exactly the same disjunct.
+	;
+	; This works fine for merging two words, or for merging
+	; a word and a word-class.  It even works for merging
+	; two word-classes.
+	;
+	(define (merge-section-pair SECT-PAIR)
+		; The two word-sections to merge
+		(define lsec (first SECT-PAIR))
+		(define rsec (second SECT-PAIR))
+
+		; The counts on each, or zero.
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
+
+		; Return #t if sect is a Word section, not a word-class section.
+		(define (is-word-sect? sect)
+			(eq? 'WordNode (cog-type (cog-outgoing-atom sect 0))))
+
+		; If the other count is zero, take only a FRAC of the count.
+		; But only if we are merging in a word, not a word-class;
+		; we never want to shrink the support of a word-class, here.
+		(define wlc (if
+				(and (null? rsec) (is-word-sect? lsec))
+				(* FRAC lcnt) lcnt))
+		(define wrc (if
+				(and (null? lsec) (is-word-sect? rsec))
+				(* FRAC rcnt) rcnt))
+
+		; Sum them.
+		(define cnt (+ wlc wrc))
+
+		; Compute what's left on each.
+		(define lrem (- lcnt wlc))
+
+		; Update the count on the section.
+		; If the count is zero or less, delete the section.
+		(define (update-section-count SECT CNT)
+			(if (< 1.0e-10 CNT)
+				(begin (set-count SECT CNT) (store-atom SECT))
+				(begin (set-count SECT 0) (cog-delete SECT))))
+
+		; The cnt can be zero, if FRAC is zero.  Do nothing in this case.
+		(if (< 1.0e-10 cnt)
+			(let* (
+					; The disjunct. Both lsec and rsec have the same disjunct.
+					(seq (if (null? lsec) (cog-outgoing-atom rsec 1)
+							(cog-outgoing-atom lsec 1)))
+					; The merged word-class
+					(mrg (Section wrd-class seq))
+				)
+
+				; The summed counts
+				(set-count mrg cnt)
+				(store-atom mrg) ; save to the database.
+
+				; Now subtract the counts from the words.
+				; Left side is either a word or a word-class.
+				; If its a word-class, we've already updated
+				; the count.
+				(if (and (not (null? lsec)) (is-word-sect? lsec))
+					(update-section-count lsec (- lcnt wlc)))
+
+				; Right side is WB and is always a WordNode
+				(if (not (null? rsec))
+					(update-section-count rsec (- rcnt wrc)))
+			))
+	)
+
+	(for-each merge-section-pair (ptu 'right-stars (list WA WB)))
+
+	wrd-class
+)
+
+; ---------------------------------------------------------------------
+
 (define (merge-ortho LLOBJ FRAC WA WB)
 "
+  DEPRECATED! Use merge-project instead!
+
   merge-ortho FRAC WA WB - merge WA and WB into a grammatical class.
   Return the merged class.
 
@@ -306,7 +462,6 @@
   If WA is a WordClassNode, and WB is not, then WB is merged into
   WA.
 "
-	(define psa (add-dynamic-stars LLOBJ))
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
 	(define ptu (add-tuple-math LLOBJ bogus))
 
@@ -486,11 +641,11 @@
   COSOBJ is used to compute the cosine between WA and WB, and thus
      in needs to provide the 'right-cosine method.
 
-  This is build on `merge-ortho`. See documentation for that.
+  This is built on `merge-project`. See documentation for that.
 "
 	(define cosi (COSOBJ 'right-cosine WA WB))
 	(define frac (/ (- cosi COS-MIN)  (- 1.0 COS-MIN)))
-	(merge-ortho COSOBJ frac WA WB)
+	(merge-project COSOBJ frac WA WB)
 )
 
 ; ---------------------------------------------------------------
@@ -533,7 +688,7 @@
 "
   make-fuzz -- Do fuzzy hard-coded merge.
 
-  use `merge-ortho` with hard-coded frac=0.3 and min acceptable
+  use `merge-project` with hard-coded frac=0.3 and min acceptable
   cosine=0.65
 "
 	(define cutoff 0.65)
@@ -547,7 +702,7 @@
 			(ok-to-merge pcos cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-ortho pcos union-frac WORD-A WORD-B))
+			(merge-project pcos union-frac WORD-A WORD-B))
 
 		; ------------------
 		; Methods on this class.
@@ -565,7 +720,7 @@
 "
   make-discrim -- Do a \"discriminating\" merge.
 
-  use `merge-ortho` with sigmoid taper and
+  use `merge-project` with sigmoid taper and
   hard-coded min acceptable cosine=0.50
 "
 	(define cutoff 0.50)
@@ -620,7 +775,7 @@
 ; (ok-to-merge pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
-; (merge-ortho pcos 0.3 (Word "city") (Word "village"))
+; (merge-project pcos 0.3 (Word "city") (Word "village"))
 ;
 ; Verify presence in the database:
 ; select count(*) from atoms where type=22;

@@ -432,8 +432,11 @@
 						; new class. And then recurse.
 						(let* ((short-list (take rest
 									(min (num-to-scan) (length rest)))))
+							(format #t "--- Greedy-checking next ~A items\n"
+								(min (num-to-scan) (length rest)))
 							(assign-expand-class MERGER new-cls short-list)
-							(display "--- Checking the done-list\n")
+							(format #t "--- Checking the done-list len=~A\n"
+								(length DONE-LST))
 							(assign-expand-class MERGER new-cls DONE-LST)
 
 							; If anything from the done-list was merged, then
@@ -774,34 +777,5 @@
 ; ---------------------------------------------------------------
 ; Example usage
 ;
-; (load-atoms-of-type 'WordNode)          ; Typically about 80 seconds
-; (define pca (make-pseudo-cset-api))
-; (define psa (add-dynamic-stars pca))
-;
-; Verify that support is correctly computed.
-; cit-vil is a vector of pairs for matching sections for "city" "village".
-; Note that the null list '() means 'no such section'
-;
-; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
-; (define ptu (add-tuple-math psa bogus))
-; (define cit-vil (ptu 'right-stars (list (Word "city") (Word "village"))))
-; (length cit-vil)
-;
-; Show the first three values of the vector:
-; (ptu 'pair-count (car cit-vil))
-; (ptu 'pair-count (cadr cit-vil))
-; (ptu 'pair-count (caddr cit-vil))
-;
-; print the whole vector:
-; (for-each (lambda (pr) (ptu 'pair-count pr)) cit-vil)
-;
-; Is it OK to merge?
-; (define pcos (add-pair-cosine-compute psa))
-; (ok-to-merge pcos (Word "run") (Word "jump"))
-; (ok-to-merge pcos (Word "city") (Word "village"))
-;
-; Perform the actual merge
-; (merge-ortho pcos 0.3 (Word "city") (Word "village"))
-;
-; Verify presence in the database:
-; select count(*) from atoms where type=22;
+; (sql-open "postgres:///en_mst_sections?user=linas&password=asdf")
+; (gram-classify-greedy-fuzz)
