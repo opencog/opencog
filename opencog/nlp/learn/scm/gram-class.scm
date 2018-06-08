@@ -37,6 +37,13 @@
 ;             Connector
 ;                ....
 ;
+; The TV on the MemberLink holds a count value; that count equals the
+; total number of section-counts that were transfered from the word, to
+; the word-class, when the word was merged into the class. The sum over
+; all of these counts (on the MemberLinks) should exactly equal the sum
+; over the counts on all Sections for that WordClassNode.  Thus, it can
+; be used to determine what fraction the word contributed to the class.
+;
 ; Basic assumptions
 ; -----------------
 ; It is assumed that grammatical classes are stepping stones to word
@@ -349,6 +356,10 @@
 			(WordClassNode (string-concatenate
 					(list (cog-name WA) " " (cog-name WB))))))
 
+	; Accumulated counts for the two.
+	(define accum-lcnt 0)
+	(define accum-rcnt 0)
+
 	; Merge two sections into one, placing the result on the word-class.
 	; Given, given a pair of sections, sum the counts from each, and
 	; then place that count on a corresponding section on the word-class.
@@ -422,23 +433,34 @@
 				(if (not (null? rsec))
 					(update-section-count rsec (- rcnt wrc)))
 			))
+
+		; Accumulate the counts, handy for tracking membership fraction
+		(set! accum-lcnt (+ accum-lcnt wlc))
+		(set! accum-rcnt (+ accum-rcnt wrc))
 	)
 
 	(for-each merge-section-pair (ptu 'right-stars (list WA WB)))
 
 	(if (eq? 'WordNode (cog-type WA))
-		(begin
+		(let ((ma (MemberLink WA wrd-class))
+				(mb (MemberLink WB wrd-class)))
+			; Track the number of word-observations moved from
+			; the words, the the class. This is how much the words
+			; contributed to the class.
+			(set-count ma accum-lcnt)
+			(set-count mb accum-rcnt)
 			; Put the two words into the new word-class.
-			(store-atom (MemberLink WA wrd-class))
-			(store-atom (MemberLink WB wrd-class)))
+			(store-atom ma)
+			(store-atom mb))
 
 		; If WA is not a WordNode, assume its a WordClassNode.
 		; The process is similar, but slightly altered.
 		; We assume that WB is a WordNode, but perform no safety
 		; checking to verify this.
-		(begin
+		(let ((mb (MemberLink WB wrd-class)))
+			(set-count mb accum-rcnt)
 			; Add WB to the mrg-class (which is WA already)
-			(store-atom (MemberLink WB wrd-class)))
+			(store-atom mb))
 	)
 	wrd-class
 )
