@@ -22,7 +22,9 @@ ADD_LIBRARY(attention-types SHARED
 ADD_DEPENDENCIES(attention-types attention_atom_types)
 
 TARGET_LINK_LIBRARIES(attention-types
+	${ATOMSPACE_atomcore_LIBRARY}
 	${ATOMSPACE_atombase_LIBRARY}
+	${ATOMSPACE_atomproto_LIBRARY}
 )
 
 # --------------------------------------------------
