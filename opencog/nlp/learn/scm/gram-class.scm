@@ -262,7 +262,7 @@
 ; -----------------
 ; Gut-sense intuition suggests these possible experiments:
 ;
-; * Fuzz: use `merge-ortho` with hard-coded frac=0.3 and min acceptable
+; * Fuzz: use `merge-project` with hard-coded frac=0.3 and min acceptable
 ;   cosine=0.65
 ;
 ; * Discrim: use `merge-discrim` with min acceptable cosine = 0.5
@@ -309,6 +309,128 @@
 
 ; ---------------------------------------------------------------------
 
+(define (merge-project LLOBJ FRAC WA WB)
+"
+  merge-project FRAC WA WB - merge WA and WB into a grammatical class.
+  Return the merged class.
+
+  WA should be a WordNode or a WordClassNode.
+  WB is expected to be a WordNode.
+  FRAC should be a floating point number between zero and one,
+     indicating the fraction of a non-shared count to be used.
+     Setting this to 1.0 gives the sum of the union of supports;
+     setting this to 0.0 gives the sum of the intersection of supports.
+  LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
+     that is, are (word,disjunct) pairs wrapped in a SectionLink.
+
+  The merger of WA and WB are performed, using the 'projection
+  merge' strategy. This is done like so. If WA and WB are both
+  WordNodes, then a WordClass is created, having both WA and WB as
+  members.  Counts are then transfered from WA and WB to the class.
+
+  The counts are summed only if both counts are non-zero. Otherwise,
+  only a FRAC fraction of a single, unmatched count is transferred.
+
+  If WA is a WordClassNode, and WB is not, then WB is merged into
+  WA. That is, the counts on QA are adjusted only upwards, and those
+  on WB only downwards.
+"
+	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+	(define ptu (add-tuple-math LLOBJ bogus))
+
+	; set-count ATOM CNT - Set the raw observational count on ATOM.
+	(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
+
+	; Create a new word-class out of the two words.
+	; Concatenate the string names to get the class name.
+	; If WA is already a word-class, just use it as-is.
+	(define wrd-class
+		(if (eq? 'WordClassNode (cog-type WA)) WA
+			(WordClassNode (string-concatenate
+					(list (cog-name WA) " " (cog-name WB))))))
+
+	; Merge two sections into one, placing the result on the word-class.
+	; Given, given a pair of sections, sum the counts from each, and
+	; then place that count on a corresponding section on the word-class.
+	; Store the updated section to the database.
+	;
+	; One or the other sections can be null. If both sections are not
+	; null, then both are assumed to have exactly the same disjunct.
+	;
+	; This works fine for merging two words, or for merging
+	; a word and a word-class.  It even works for merging
+	; two word-classes.
+	;
+	(define (merge-section-pair SECT-PAIR)
+		; The two word-sections to merge
+		(define lsec (first SECT-PAIR))
+		(define rsec (second SECT-PAIR))
+
+		; The counts on each, or zero.
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
+
+		; Return #t if sect is a Word section, not a word-class section.
+		(define (is-word-sect? sect)
+			(eq? 'WordNode (cog-type (cog-outgoing-atom sect 0))))
+
+		; If the other count is zero, take only a FRAC of the count.
+		; But only if we are merging in a word, not a word-class;
+		; we never want to shrink the support of a word-class, here.
+		(define wlc (if
+				(and (null? rsec) (is-word-sect? lsec))
+				(* FRAC lcnt) lcnt))
+		(define wrc (if
+				(and (null? lsec) (is-word-sect? rsec))
+				(* FRAC rcnt) rcnt))
+
+		; Sum them.
+		(define cnt (+ wlc wrc))
+
+		; Compute what's left on each.
+		(define lrem (- lcnt wlc))
+
+		; Update the count on the section.
+		; If the count is zero or less, delete the section.
+		(define (update-section-count SECT CNT)
+			(if (< 1.0e-10 CNT)
+				(begin (set-count SECT CNT) (store-atom SECT))
+				(begin (set-count SECT 0) (cog-delete SECT))))
+
+		; The cnt can be zero, if FRAC is zero.  Do nothing in this case.
+		(if (< 1.0e-10 cnt)
+			(let* (
+					; The disjunct. Both lsec and rsec have the same disjunct.
+					(seq (if (null? lsec) (cog-outgoing-atom rsec 1)
+							(cog-outgoing-atom lsec 1)))
+					; The merged word-class
+					(mrg (Section wrd-class seq))
+				)
+
+				; The summed counts
+				(set-count mrg cnt)
+				(store-atom mrg) ; save to the database.
+
+				; Now subtract the counts from the words.
+				; Left side is either a word or a word-class.
+				; If its a word-class, we've already updated
+				; the count.
+				(if (and (not (null? lsec) (is-word-sec? lsec)))
+					(update-section-count lsec (- lcnt wlc)))
+
+				; Right side is WB and is always a WordNode
+				(if (not (null? rsec))
+					(update-section-count rsec (- rcnt wrc)))
+			))
+	)
+
+	(for-each merge-section-pair (ptu 'right-stars (list WA WB)))
+
+	wrd-class
+)
+
+; ---------------------------------------------------------------------
+
 (define (merge-ortho LLOBJ FRAC WA WB)
 "
   merge-ortho FRAC WA WB - merge WA and WB into a grammatical class.
@@ -338,7 +460,6 @@
   If WA is a WordClassNode, and WB is not, then WB is merged into
   WA.
 "
-	(define psa (add-dynamic-stars LLOBJ))
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
 	(define ptu (add-tuple-math LLOBJ bogus))
 
