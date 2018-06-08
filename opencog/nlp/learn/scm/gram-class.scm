@@ -415,7 +415,7 @@
 				; Left side is either a word or a word-class.
 				; If its a word-class, we've already updated
 				; the count.
-				(if (and (not (null? lsec) (is-word-sec? lsec)))
+				(if (and (not (null? lsec)) (is-word-sect? lsec))
 					(update-section-count lsec (- lcnt wlc)))
 
 				; Right side is WB and is always a WordNode
