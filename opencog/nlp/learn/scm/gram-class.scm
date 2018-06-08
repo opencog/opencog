@@ -160,16 +160,17 @@
 ; and broadening of the ways in which a word might be used. (Broadening
 ; is duscuseed in greater detail below.)
 ;
-; A formal (equational, algorithmic) description of overlap merging:
-; One wishes to compute the intersection of basis elements (the
-; intersection of "disjuncts" aka "sections") of the two words, and
-; then sum the counts only on this intersected set.  That is, let
+; Formal definition
+; -----------------
+; A formal (equational, algorithmic) description of overlap merging is
+; given here. One wishes to compute the intersection of basis elements
+; (the intersection of "disjuncts" aka "sections") of the two words, and
+; then sum the counts only on this intersected set. Let
 ;
 ;   {e_a} = set of basis elements in v_a with non-zero coefficients
 ;   {e_b} = set of basis elements in v_b with non-zero coefficients
 ;   {e_overlap} = {e_a} set-intersection {e_b}
-;   v_o = vector of {e_overlap} i.e. having unit coeffs for each basis.
-;   pi_overlap = v_o v_o^transpose
+;   pi_overlap = unit on diagonal for each e in {e_overlap}
 ;              == projection matrix onto the subspace {e_overlap}
 ;   v_a^pi = pi_overlap . v_a == projection of v_a onto {e_overlap}
 ;   v_b^pi = pi_overlap . v_b == projection of v_b onto {e_overlap}
@@ -190,6 +191,9 @@
 ; encode only one common word sense, there needs to be some distinct
 ; machanism to split v_cluster ino multiple word senses, if that is
 ; needed.
+;
+; Merging and orthogonalization
+; -----------------------------
 ;
 ;
 ; merge-ortho
