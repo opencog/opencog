@@ -126,6 +126,35 @@
 
 ; ---------------------------------------------------------------
 
+; Given a word, return a list of all sections that are potentially
+; mergable; that is, have a connector that belongs to an existing
+; WordClass.  The goal is to trim the list of sections to something
+; smaller.
+;
+; XXX FIXME this might be pointless and useless?
+(define (get-all-sections-in-classes WRD)
+
+	; Return not-#f if the connector is in any class.
+	(define (connector-in-any-class? CTR)
+		(define wrd-of-ctr (gar CTR)) ; Word of the connector
+		(find (lambda (MEMB)
+				(eq? 'WordClassNode (cog-type (gdr MEMB))))
+			(cog-incoming-by-type wrd-of-ctr 'MemberLink)))
+
+	; Return not-#f if section SEC has connectors that
+	; are in some WordClass, any WordClass
+	(define (cons-section SEC)
+		; list of connectors in the section
+		(define con-seq (cog-outgoing-set (gdr SEC)))
+		(find connector-in-any-class? con-seq))
+
+	; Return list of all sections that have connectors that are
+	; in some (any) WordClass.
+	(filter cons-section (cog-incoming-by-type WRD 'Section))
+)
+
+; ---------------------------------------------------------------
+
 (define-public (in-gram-class? WORD GCLS)
 "
   in-gram-class? WORD GRAM-CLASS - is the WORD a member of the
@@ -172,6 +201,9 @@
 ;
 ; CLS-LST should be a list of word-classes.
 ;
+; In most cases, this is not strictly necessary, as the usual case is
+; that all words and word-classes are already in RAM.
+;
 (define (fetch-class-words CLS-LST)
 
 	; Return a list without duplicates.
@@ -180,14 +212,14 @@
 			; Loop over all WordClassNodes
 			(map
 				; This lambda returns a list of words.
-				(lambda (WRDCLS)  ; WRDCLS is a WordClasNode
-					(fetch-incoming-by-type WRDCLS 'MemberLink)
+				(lambda (CLS)  ; CLS is a WordClasNode
+					(fetch-incoming-by-type CLS 'MemberLink)
 					; map converts list of MemberLinks into list of words.
 					(map
 						; MEMB is a MemberLink; the zeroth atom in
 						; the MemberLink is the WordNode.
 						(lambda (MEMB) (cog-outgoing-atom MEMB 0))
-						(cog-incoming-by-type WRDCLS 'MemberLink)))
+						(cog-incoming-by-type CLS 'MemberLink)))
 				CLS-LST)))
 )
 
@@ -211,8 +243,9 @@
 ; ---------------------------------------------------------------
 ; Example usage
 ;
-; (define pca (make-pseudo-cset-api))
-; (define psa (add-dynamic-stars pca))
-;
 ; (define cls-lst (cog-get-atoms 'WordClassNode))
 ; (fetch-mergable-sections cls-lst)
+;
+; (define wrd (Word "chance"))
+; (define secs (cog-incoming-by-type wrd 'Section))
+; (define maybe (get-all-sections-in-classes wrd))
