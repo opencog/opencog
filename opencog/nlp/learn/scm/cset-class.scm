@@ -125,7 +125,7 @@
 (use-modules (opencog) (opencog sheaf) (opencog persist))
 
 ; ---------------------------------------------------------------
-
+;
 ; Given a word, return a list of all sections that are potentially
 ; mergable; that is, have a connector that belongs to an existing
 ; WordClass.  The goal is to trim the list of sections to something
@@ -143,14 +143,31 @@
 
 	; Return not-#f if section SEC has connectors that
 	; are in some WordClass, any WordClass
-	(define (cons-section SEC)
+	(define (classifiable-section? SEC)
 		; list of connectors in the section
 		(define con-seq (cog-outgoing-set (gdr SEC)))
 		(find connector-in-any-class? con-seq))
 
 	; Return list of all sections that have connectors that are
 	; in some (any) WordClass.
-	(filter cons-section (cog-incoming-by-type WRD 'Section))
+	(filter classifiable-section? (cog-incoming-by-type WRD 'Section))
+)
+
+; ---------------------------------------------------------------
+;
+; Given a word, return a list of all sections that have disjuncts
+; with N connectors.
+;
+(define (get-sections-by-size WRD SIZ)
+
+	(define sects (get-all-sections-in-classes WRD))
+
+	; Return not-#f if section SEC has SIZ connectors
+	(define (size-section? SEC)
+		(eq? SIZ (length (cog-outgoing-set (gdr SEC)))))
+
+	; Return list of all sections that are of the given size
+	(filter size-section? sects)
 )
 
 ; ---------------------------------------------------------------
