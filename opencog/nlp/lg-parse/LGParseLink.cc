@@ -137,7 +137,7 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-Handle LGParseLink::execute() const
+ProtoAtomPtr LGParseLink::execute() const
 {
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
@@ -213,13 +213,17 @@ Handle LGParseLink::execute() const
 	}
 
 	// The number of linkages to process.
-	int max_linkages = 4;
+	int max_linkages = 0;
 	if (3 == _outgoing.size())
 	{
 		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
 		max_linkages = nnp->get_value() + 0.5;
 	}
-	if (max_linkages < num_linkages) num_linkages = max_linkages;
+	// Takes limit from parameter only if it's positive and smaller
+	if ((max_linkages > 0) && (max_linkages < num_linkages))
+	{
+		num_linkages = max_linkages;
+	}
 
 	// Hmm. I hope that uuid_generate() won't block if there is not
 	// enough entropy in the entropy pool....

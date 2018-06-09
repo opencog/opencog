@@ -85,7 +85,7 @@
   make-pseudo-cset-api -- connector-set access methods. Pseudo-
   connector sets are pairs consisting of a word on the left, and
   a pseudo-disjunct on the right. These are observed during MST parsing.
-  A more detailed scription is at the top of this fie.
+  A more detailed scription is at the top of this file.
 "
 	(let ((all-csets '()))
 

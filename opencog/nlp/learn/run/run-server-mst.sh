@@ -37,26 +37,8 @@ then
 fi
 sleep 2;
 
-# Assign port value according to language
-if [ "$1" = "en" ]
-then
-  PORT=19005
-elif [ "$1" = "fr" ]
-then
-  PORT=19003
-elif [ "$1" = "lt" ]
-then
-  PORT=19002
-elif [ "$1" = "pl" ]
-then
-  PORT=19004
-elif [ "$1" = "yue" ]
-then
-  PORT=19006
-elif [ "$1" = "zh" ]
-then
-  PORT=19007
-fi
+# Get port number according to mode and language
+source ./config/det-port-num.sh mst $1
 
 # Telnet window
 tmux new-window -n 'telnet' "rlwrap telnet localhost $PORT; $SHELL"

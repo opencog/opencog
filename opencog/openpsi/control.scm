@@ -126,7 +126,7 @@
 "
     (MemberLink psi-rule psi-controller-demand)
 
-    (psi-rule-set-atomese-weight psi-rule (tv-mean (cog-tv psi-rule)))
+    (psi-rule-set-atomese-weight psi-rule (cog-tv-mean (cog-tv psi-rule)))
 
     (psi-rule-set-alias! psi-rule name)
 
@@ -191,7 +191,7 @@
             (if (not (null? result))
                 (cog-set-tv! rule
                     (stv (string->number (cog-name (car result)))
-                         (tv-conf (cog-tv rule))))
+                         (cog-tv-conf (cog-tv rule))))
             )
         ))
 

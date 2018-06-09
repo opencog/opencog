@@ -389,11 +389,14 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Stupid monitoring utility that can be used to monitor how processing
-; is going so far. It counts how many sentences have been processed so
-; far. If called with a null argument, it increments the count; else it
-; just prints the count.
-(define-public monitor-rate
+; Simplistic parse-rate monitoring utility.
+;
+; Used to monitor how many sentences have been processed.  It counts
+; how many sentences have been processed so far. If called with a null
+; argument, it increments the count; else it prints the argument as
+; a string, followed by the count and rate.
+;
+(define-public monitor-parse-rate
 	(let ((mtx (make-mutex))
 			(cnt 0)
 			(start-time (- (current-time) 0.000001)))
@@ -406,6 +409,37 @@
 				(format #t "~A cnt=~A rate=~A\n" msg cnt
 					(/ cnt (- (current-time) start-time))))
 		)))
+
+; ---------------------------------------------------------------------
+;
+; Report the average amount of time spent in GC
+;
+; Print statistics about how much time has been spent in GC.
+; Resets the stats after each call, so it only prints the stats
+; since the previous call.
+;
+(define-public report-avg-gc-cpu-time
+	(let ((last-gc (gc-stats))
+			(start-time (get-internal-real-time))
+			(run-time (get-internal-run-time)))
+		(lambda ()
+			(define now (get-internal-real-time))
+			(define run (get-internal-run-time))
+			(define cur (gc-stats))
+			(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
+			(define elapsed-time (* 1.0e-9 (- now start-time)))
+			(define cpu-time (* 1.0e-9 (- run run-time)))
+			(define ngc (- (assoc-ref cur 'gc-times)
+				(assoc-ref last-gc 'gc-times)))
+			(format #t "Elapsed: ~6f secs. Rate: ~5f gc/min %cpu-GC: ~5f%  %cpu-use: ~5f%\n"
+				elapsed-time
+				(/ (* ngc 60) elapsed-time)
+				(* 100 (/ gc-time-taken elapsed-time))
+				(* 100 (/ cpu-time elapsed-time))
+			)
+			(set! last-gc cur)
+			(set! start-time now)
+			(set! run-time run))))
 
 ; ---------------------------------------------------------------------
 (define-public (observe-text plain-text)
@@ -444,7 +478,7 @@
 	(define (process-sent SENT)
 		(update-counts SENT)
 		(delete-sentence SENT)
-		(monitor-rate '()))
+		(monitor-parse-rate '()))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -458,30 +492,6 @@
 				(set! cnt (+ cnt 1))
 				(if (eqv? 0 (modulo cnt how-often)) (gc)))))
 
-	; Report the average amount of time spent in GC
-	(define avg-gc-cpu-time
-		(let ((last-gc (gc-stats))
-				(start-time (get-internal-real-time))
-				(run-time (get-internal-run-time)))
-			(lambda ()
-				(define now (get-internal-real-time))
-				(define run (get-internal-run-time))
-				(define cur (gc-stats))
-				(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
-				(define elapsed-time (* 1.0e-9 (- now start-time)))
-				(define cpu-time (* 1.0e-9 (- run run-time)))
-				(define ngc (- (assoc-ref cur 'gc-times)
-					(assoc-ref last-gc 'gc-times)))
-				(format #t "Elapsed: ~5f secs. Rate: ~5f gc/min %cpu-GC: ~5f%  %cpu-use: ~5f%\n"
-					elapsed-time
-					(/ (* ngc 60) elapsed-time)
-					(* 100 (/ gc-time-taken elapsed-time))
-					(* 100 (/ cpu-time elapsed-time))
-				)
-				(set! last-gc cur)
-				(set! start-time now)
-				(set! run-time run))))
-
 	; Perform GC whenever it gets larger than a fixed limit.
 	; Less than one GB should be enough, but the huge strings
 	; from relex seem to cause bad memory fragmentation.
@@ -494,9 +504,19 @@
 					(begin
 						(gc)
 						(set! cnt (+ cnt 1))
-						;(avg-gc-cpu-time)
+						;(report-avg-gc-cpu-time)
 					)))))
 
+	; Caution: RelEx-bassed parsing is deprecated, for three reasons:
+	; 1) Its slower, because it has to go to the relex server;
+	; 2) The RelEx server returns long strings containing scheme,
+	;    (often up to 8MBytes long) which cause HUGE GC issues for
+	;    guile - blowing up RAM usage.
+	; 3) The current guile-2.2 compiler has a bug compiling code
+	;    obtained from strings, and intermittently crashes. (A bug
+	;    report has been submitted, but is missing code to reproduce
+	;    it, and so is not getting fixed...)
+	;
 	; Use the RelEx server to parse the text via Link Grammar.
 	; Return a SentenceNode. Attention: when run in parallel,
 	; the returned SentenceNode is not necessarily that of the
@@ -513,7 +533,7 @@
 		(maybe-gc) ;; need agressive gc to keep RAM under control.
 	)
 
-	; Process the text locally, using the LG API link.
+	; Process the text locally (in RAM), using the LG API link.
 	(define (local-process TXT)
 		; try-catch wrapper for duplicated text. Here's the problem:
 		; If this routine is called in rapid succession with the same

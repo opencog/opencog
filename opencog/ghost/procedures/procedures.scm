@@ -1,5 +1,6 @@
 (define-module (opencog ghost procedures)
   #:use-module (ice-9 optargs)
+  #:use-module (srfi srfi-1)
   #:use-module (opencog)
   #:use-module (opencog atom-types)
   #:use-module (opencog attention)
@@ -7,7 +8,10 @@
   #:use-module (opencog exec)
   #:use-module (opencog openpsi)
   #:export (
-    ; Sensory input
+    ; Perception switches
+    perception-start!
+    perception-stop!
+    ; Perception input apis
     perceive-face
     perceive-emotion
     perceive-word
@@ -18,17 +22,23 @@
     perceive-word-hook
 
     ; Perceptual predicates
-    person_appears
-    person_smiles
-    person_angry
-    person_talking
-    person_not_talking
     word_perceived
+    ;; Perceptual predicates for a talking face
+    new_talking
+    talking
+    end_talking
+    not_talking
+    ;; Perceptual predicates for visibility of a face
+    new_face
+    face
+    end_face
+    ;; Perceptual predicates for emotion of a face
+    new_emotion
+    emotion
+    end_emotion
 
     ; Time related predicates
     after_min
-    after_user_started_talking
-    after_user_stopped_talking
 
     ; schemas
     animation
@@ -47,6 +57,19 @@
     min_sti_concepts
     min_sti_rules
     print-by-action-logger
+    fallback_on
+    shutup
+    gaze_at
+    gaze_at_cancel
+    blink
+    blink_cancel
+    emote
+    gesture
+    soma
+    soma_cancel
+    saccade_explore
+    saccade_listen
+    saccade_cancel
 
     ; Utilities
     set-dti!
@@ -58,74 +81,19 @@
     was-perceived?
     ghost-stimulate-timer
     action-logger
+    percep-refractory-period
+    set-percep-refractory-period!
   )
 )
-
-(load "procedures/predicates.scm")
-(load "procedures/schemas.scm")
-
-; --------------------------------------------------------------
-; There is a spacemap in eva-model module called faces. Thus the rename.
-; (define facemap (SpaceMapNode "perceived-faces"))
 
 ; --------------------------------------------------------------
 ; APIs used to create the atoms used to represent the world, aka
 ; world-model. These are not exported.
 ; --------------------------------------------------------------
-(define (see-face face-id)
-"
-  Define the atom used to represent that the face represented by FACE-ID
-  is being seen.
-"
-  (Evaluation
-    (Predicate "see")
-    (List
-      (Concept "I")
-      (Concept face-id)))
-)
-
-(define (face-emotion face-id emotion-type)
-"
-  Define the atom used to represent EMOTION-TYPE of the face with
-  id FACE-ID.
-"
-  (Evaluation
-    (Predicate emotion-type)
-    (List
-      (Concept face-id)))
-)
-
-(define (face-talking face-id)
-"
-  Define the atom used to represent that the face represented by FACE-ID
-  is talking.
-"
-  (Evaluation
-    (Predicate "talking")
-    (List
-      (Concept face-id)))
-)
-
-(define face-talking-sign
-  (Signature
-    (Evaluation
-      (Predicate "talking")
-      (List
-        (Type "ConceptNode"))))
-)
-
-(define (eye-open face-id eye-id)
-"
-  eye-open FACE-ID EYE-ID
-
-  Define the atom used to represent whether FACE-ID face's EYE-ID eye is open.
-"
-  (Evaluation
-    (Predicate "eye-open")
-    (List
-      (Concept face-id)
-      (Concept eye-id)))
-)
+; Identifier used for an unidentified source of perceptual stimulus.
+(define any-id "")
+; Node used to represent an unidentified source of perceptual stimulus.
+(define any-node (Concept ""))
 
 (define (get-models sign)
 "
@@ -139,8 +107,92 @@
       (TypedVariable
         (Variable "model")
         sign)
-      (Variable "face-talking"))
+      (Variable "model"))
   ))
+)
+
+; --------------------------------------------------------------
+(define see-face-predicate (Predicate "see"))
+
+(define see-face-sign
+  (Signature
+    (Evaluation
+      see-face-predicate
+      (List
+        (Concept "I")
+        (Type "ConceptNode"))))
+)
+
+(define (see-face face-id)
+"
+  Define the atom used to represent that the face represented by FACE-ID
+  is being seen.
+"
+  (Evaluation
+    see-face-predicate
+    (List
+      (Concept "I")
+      (Concept face-id)))
+)
+
+; --------------------------------------------------------------
+(define face-emotion-predicate (Predicate "is"))
+
+(define face-emotion-sign
+  (Signature
+    (Evaluation
+      face-emotion-predicate
+      (List
+        (Type "ConceptNode")
+        (Type "ConceptNode"))))
+)
+
+(define (face-emotion face-id emotion-type)
+"
+  Define the atom used to represent EMOTION-TYPE of the face with
+  id FACE-ID.
+"
+  (Evaluation
+    face-emotion-predicate
+    (List
+      (Concept face-id)
+      (Concept emotion-type)))
+)
+
+; --------------------------------------------------------------
+(define face-talking-predicate (Predicate "talking"))
+
+(define face-talking-sign
+  (Signature
+    (Evaluation
+      face-talking-predicate
+      (List
+        (Type "ConceptNode"))))
+)
+
+(define (face-talking face-id)
+"
+  Define the atom used to represent that the face represented by FACE-ID
+  is talking.
+"
+  (Evaluation
+     face-talking-predicate
+    (List
+      (Concept face-id)))
+)
+
+; --------------------------------------------------------------
+(define (eye-open face-id eye-id)
+"
+  eye-open FACE-ID EYE-ID
+
+  Define the atom used to represent whether FACE-ID face's EYE-ID eye is open.
+"
+  (Evaluation
+    (Predicate "eye-open")
+    (List
+      (Concept face-id)
+      (Concept eye-id)))
 )
 
 ; --------------------------------------------------------------
@@ -151,6 +203,42 @@
 ;    (List (Number x) (Number y) (Number z)))
 (define default-stimulus 150)
 
+
+(define percep #f)
+(define (perception-start!)
+"
+  perception-start!
+
+  This declares that all perception apis should start recording changes
+  when called.
+"
+  (set! percep #t)
+)
+
+(define (perception-stop!)
+"
+  perception-stop!
+
+  This declares that all perception apis should stop recording changes
+  when called.
+"
+  (set! percep #f)
+)
+
+(define (record-perception model new-conf)
+  (let ((old-conf (cog-tv-conf (cog-tv model)))
+    (time (FloatValue (current-time-us))))
+
+    (if percep (begin
+      (set-time-perceived! model (FloatValue (current-time-us)))
+      (set-event-times! model old-conf new-conf time)
+      (cog-set-tv! model (stv 1 new-conf))
+      (cog-stimulate model default-stimulus)))
+
+    model
+  )
+)
+
 (define (perceive-face face-id confidence)
 "
   perceive-face FACE-ID CONFIDENCE
@@ -159,11 +247,7 @@
   seen, after setting its truth-value to (stv 1 CONFIDENCE) and increasing
   its sti.
 "
-  (let ((model (see-face face-id)))
-    (set-time-perceived! model)
-    (cog-stimulate model default-stimulus)
-    (cog-set-tv! model (stv 1 confidence))
-  )
+  (record-perception (see-face face-id) confidence)
 )
 
 (define (perceive-emotion face-id emotion-type confidence)
@@ -174,13 +258,40 @@
   emotional-state EMOTION-TYPE, after increasing its sti and setting its
   truth-value to (stv 1 CONFIDENCE).
 "
-  (let ((model (face-emotion face-id emotion-type)))
-    (set-time-perceived! model)
-    (cog-stimulate model default-stimulus)
-    (cog-set-tv! model (stv 1 confidence))
-  )
+  (record-perception (face-emotion face-id emotion-type) confidence)
 )
 
+
+(define (perceive-face-talking face-id confidence)
+"
+  perceive-face-talking FACE-ID CONFIDENCE
+
+  Returns the atom representing that the face with id FACE-ID is talking,
+  after increasing its sti, setting its truth-value to (stv 1 NEW-CONF),
+  and recording the start/stop time of the face starting/stoping talking.
+
+  When NEW-CONF increases past 0.5 then the time is recorded as
+  the start time for the event of the person starting talking, and when
+  NEW-CONF decreases past 0.5 the time is recorded as the stop time for
+  event of the person stopped talking.
+
+  If FACE-ID = \"\" then an unidentified source is talking.
+"
+  (record-perception (face-talking face-id) confidence)
+)
+
+(define (perceive-eye-state face-id eye-id confidence)
+"
+  perceive-eye-state FACE-ID EYE-ID
+
+  Return the atom used to represent whether FACE-ID face's EYE-ID eye is open,
+  after updating its stv and recording perception time and giving it an
+  ecan stimulation.
+"
+  (record-perception (eye-open face-id eye-id) confidence)
+)
+
+; --------------------------------------------------------------
 (define hook-perceive-word (make-hook 0))
 (define (perceive-word-hook)
 "
@@ -197,56 +308,18 @@
 
   If FACE-ID = \"\" then an unidentified source is talking.
 
-  Returns WORD after increasing its sti.
+  Returns (WordNode WORD) after increasing its sti.
 "
   ;TODO: How to represent word said by face-id without having an
   ; explosion of atoms.
   (define wn (Word word))
   (define cn (Concept word))
-  (set-time-perceived! wn)
-  (run-hook hook-perceive-word)
-  (perception-stimulate wn)
-  (perception-stimulate cn)
-)
-
-(define (perceive-face-talking face-id new-conf)
-"
-  perceive-face-talking FACE-ID NEW-CONF
-
-  Returns the atom representing that the face with id FACE-ID is talking,
-  after increasing its sti, setting its truth-value to (stv 1 NEW-CONF),
-  and recording the start/stop time of the face starting/stoping talking.
-
-  When NEW-CONF increases past 0.5 then the time is recorded as
-  the start time for the event of the person starting talking, and when
-  NEW-CONF decreases past 0.5 the time is recorded as the stop time for
-  event of the person stopped talking.
-
-  If FACE-ID = \"\" then an unidentified source is talking.
-"
-  (let* ((model
-           (if (equal? "" face-id) face-talking-sign (face-talking face-id)))
-    (old-conf (tv-conf (cog-tv model))))
-
-    (cog-set-tv! model (stv 1 new-conf))
-    (cog-stimulate model default-stimulus)
-    (set-event-times! face-talking-sign model old-conf new-conf)
-  )
-)
-
-(define (perceive-eye-state face-id eye-id confidence)
-"
-  perceive-eye-state FACE-ID EYE-ID
-
-  Return the atom used to represent whether FACE-ID face's EYE-ID eye is open,
-  after updating its stv and recording perception time and giving it an
-  ecan stimulation.
-"
-  (let ((model (eye-open face-id eye-id)))
-    (set-time-perceived! model)
-    (cog-stimulate model default-stimulus)
-    (cog-set-tv! model (stv 1 confidence))
-  )
+  (if percep (begin
+    (set-time-perceived! wn (FloatValue (current-time-us)))
+    (run-hook hook-perceive-word)
+    (perception-stimulate wn)
+    (perception-stimulate cn)))
+  wn
 )
 
 ; --------------------------------------------------------------
@@ -262,6 +335,33 @@
 (define event-start (Predicate "event-start-time"))
 ; Key used to record the time an event stopped occuring at.
 (define event-stop (Predicate "event-stop-time"))
+; The refractory period in seconds. This is the period in which certain
+; predicates will not be returning true after an event transition was made.
+(define refractory-period 1)
+; This is the window within which a transition is occuring.
+(define event-period (/ refractory-period 2))
+(define (set-activation-period!)
+  (set! event-period (/ refractory-period 2))
+)
+
+(define (percep-refractory-period)
+"
+  percep-refractory-period
+
+  Returns the refractory-period used by the perception module.
+"
+  refractory-period
+)
+
+(define (set-percep-refractory-period! secs)
+"
+  set-percep-refractory-period! SECS
+
+  Sets the refractory-period of the perception module to SECS.
+"
+  (set! refractory-period secs)
+  (set-activation-period!)
+)
 
 (define (true-transition-occurs? old-value new-value)
 "
@@ -293,22 +393,17 @@
 
 ; TODO Move the time related helpers to the time-server. Some of this
 ; utilities should have been provided by it.
-(define (set-event-times! sign model old-value new-value)
+(define (set-event-times! model old-value new-value time)
 "
-  set-event-times! SIGN MODEL OLD-VALUE NEW-VALUE
+  set-event-times! MODEL OLD-VALUE NEW-VALUE TIME
 
-  Record the time that MODEL transitions to true or false. Also, records
-  the time of the recent transition for the set of models having the same
-  pattern as MODEL and represented in SIGN, a SignatureLink representing
-  the patterns.
+  Record the time TIME that MODEL transitions to true or false.
 "
   (cond
     ((true-transition-occurs? old-value new-value)
-      (cog-set-value! sign event-start (FloatValue (current-time-us)))
-      (cog-set-value! model event-start (FloatValue (current-time-us))))
+      (cog-set-value! model event-start time))
     ((false-transition-occurs? old-value new-value)
-      (cog-set-value! sign event-stop (FloatValue (current-time-us)))
-      (cog-set-value! model event-stop (FloatValue (current-time-us))))
+      (cog-set-value! model event-stop time))
     (else model)
   )
 )
@@ -319,10 +414,6 @@
 
   Returns the time in seconds of the last time the MODEL transitioned
   into a true state. If no time had been recorded then nil is returned.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would give the time for the recent
-  true transition for the set of models which have the same pattern as
-  MODEL.
 "
   (let ((time (cog-value model event-start)))
     (if (null? time)
@@ -338,10 +429,6 @@
 
   Returns the time in seconds of the last time the MODEL transitioned
   into a false state. If no time had been recorded then nil is returned.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would give the time for the recent
-  false transition for the set of models which have the same pattern as
-  MODEL.
 "
   (let ((time (cog-value model event-stop)))
     (if (null? time)
@@ -356,10 +443,6 @@
   is-recent-transition-true? MODEL
 
   Return #t if the recent state transition of MODEL is a true-transition.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would return #t if the recent transition
-  for any member of the set of models which have the same pattern as MODEL
-  had a true-transition.
 "
   (let ((true-t (time-true-transition model))
     (false-t (time-false-transition model)))
@@ -375,10 +458,6 @@
   is-recent-transition-false? MODEL
 
   Return #t if the recent state transition of MODEL is a false-transition.
-  MODEL could be a SignatureLink representing the patterns of the models.
-  If a SignatureLink is used then it would return #t if the recent transition
-  for any member of the set of models which have the same pattern as MODEL
-  had a false-transition.
 "
   (let ((true-t (time-true-transition model))
     (false-t (time-false-transition model)))
@@ -395,13 +474,10 @@
 
   Return #t if the time passed since the MODEL had a true transition is
   greater than SECS, and there hasn't been a false transition. If not,
-  returns #f. MODEL could be a SignatureLink representing the patterns of
-  the models. If a SignatureLink is used then it would return #t if the check
-  is #t for any member of the set of models which have the same pattern
-  as MODEL.
+  returns #f.
 "
   (if (is-recent-transition-true? model)
-    (>= (- (current-time-us) (time-true-transition model)) secs)
+    (> (- (current-time-us) (time-true-transition model)) secs)
     #f
   )
 )
@@ -412,17 +488,43 @@
 
   Return #t if the time passed since the MODEL had a false transition is
   greater than SECS, and there hasn't been a true transition. If not,
-  returns #f. MODEL could be a SignatureLink representing the patterns of
-  the models. If a SignatureLink is used then it would return #t if the check
-  is #t  for any member of the set of models which have the same pattern
-  as MODEL.
+  returns #f.
 "
   (if (is-recent-transition-false? model)
-    (>= (- (current-time-us) (time-false-transition model)) secs)
+    (> (- (current-time-us) (time-false-transition model)) secs)
     #f
   )
 )
 
+(define (true-transition-occurring? model secs)
+"
+  true-transition-occurring? MODEL SECS
+
+  Return #t if the time passed since the MODEL had a true transition is
+  less than SECS, and there hasn't been a false transition. If not,
+  returns #f.
+"
+  (if (is-recent-transition-true? model)
+    (< (- (current-time-us) (time-true-transition model)) secs)
+    #f
+  )
+)
+
+(define (false-transition-occurring? model secs)
+"
+  false-transition-occurring? MODEL SECS
+
+  Return #t if the time passed since the MODEL had a false transition is
+  less than SECS, and there hasn't been a true transition. If not,
+  returns #f.
+"
+  (if (is-recent-transition-false? model)
+    (< (- (current-time-us) (time-false-transition model)) secs)
+    #f
+  )
+)
+
+; --------------------------------------------------------------
 (define (true-value? value)
 "
   true-value? VALUE
@@ -440,7 +542,7 @@
 ; It is better to find the product of the strength and confidence but for now
 ; confidence is used as the default stv for new atoms is (stv 1 0), so
 ; need to waste cpu cycles.
-  (let ((conf (tv-conf (cog-tv model))))
+  (let ((conf (cog-tv-conf (cog-tv model))))
     (if (true-value? conf)
       (stv 1 1)
       (stv 0 1)
@@ -457,15 +559,15 @@
   )
 )
 
-(define (negate-stv! stv)
+(define (negate-stv! tv)
 "
-  negate-stv! STV
+  negate-stv! TV
 
-  Returns (stv 1 1) if STV is (stv 0 1) and vice-versa.
+  Returns (stv 1 1) if TV is (stv 0 1) and vice-versa.
 "
   (cond
-    ((equal? (stv 1 1) stv) (stv 0 1))
-    ((equal? (stv 0 1) stv) (stv 1 1))
+    ((equal? (stv 1 1) tv) (stv 0 1))
+    ((equal? (stv 0 1) tv) (stv 1 1))
     (else (error "negate-stv! expected (stv 1 1)/(stv 0 1) got=~a\n" stv))
   )
 )
@@ -514,13 +616,13 @@
   )
 )
 
-(define (set-time-perceived! atom)
+(define (set-time-perceived! atom time)
 "
-  set-time-perceived! ATOM
+  set-time-perceived! ATOM TIME
 
-  Record the current time as the time of perception of ATOM, and return ATOM.
+  Record TIME as the time of perception of ATOM, and return ATOM.
 "
-  (cog-set-value! atom time-key (FloatValue (current-time-us)))
+  (cog-set-value! atom time-key time)
 )
 
 (define (time-perceived atom)
@@ -582,7 +684,9 @@
 )
 
 ; --------------------------------------------------------------
+(define timer-predicate (Predicate "timer-predicate"))
 (define timer-last-stimulated 0)
+
 (define (ghost-stimulate-timer)
 "
   Stimulate the timer predicate, so that the rules having time-related
@@ -592,7 +696,7 @@
   since last time it's called.
 "
   (if (> timer-last-stimulated 0)
-    (cog-stimulate (Concept "timer-predicate")
+    (cog-stimulate timer-predicate
       (* 10 (- (current-time) timer-last-stimulated))))
 
   (set! timer-last-stimulated (current-time))
@@ -600,7 +704,7 @@
 
 ; --------------------------------------------------------------
 (define perception-stimulus 150)
-(define-public (perception-stimulate . atoms)
+(define (perception-stimulate . atoms)
 "
   perception-stimulate ATOMS
 
@@ -635,16 +739,23 @@
 "
   Return the logger for actions.
 "
-  schema-logger)
+  schema-logger
+)
 
-(define (print-by-action-logger action-node str-node)
+(define (print-by-action-logger action-node . str-nodes)
 "
-  say ACTION-NODE STR-NODE
+  say ACTION-NODE . STR-NODES
 
   Display the string that forms the name of the nodes ACTION-NODE and
   STR-NODE to stdout with the format of \"ACTION-NODE-name: STR-NODE-name\".
 "
   (cog-logger-set-component! schema-logger (cog-name action-node))
-  (cog-logger-info schema-logger (cog-name str-node))
+  (cog-logger-info schema-logger "~a" (map cog-name str-nodes))
   fini
 )
+
+; --------------------------------------------------------------
+; Because macros require all the bindings used before expansion load
+; the files last.
+(load "procedures/predicates.scm")
+(load "procedures/schemas.scm")

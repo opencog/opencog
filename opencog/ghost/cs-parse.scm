@@ -467,6 +467,9 @@
       (action-pattern) : $1
       (action-patterns action-pattern) : (format #f "~a ~a" $1 $2)
       (action-patterns enter) : $1
+      (action-patterns TRAILSPACE) : $1
+      (action-patterns COMMENT) : $1
+      (COMMENT action-patterns) : $2
     )
 
     (action-pattern
@@ -625,6 +628,7 @@
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL_APOS) : (format #f "(cons 'arg \"~a\")" $1)
+      (LITERAL NUM) : (format #f "(cons 'arg \"~a~a\")" $1 $2)
       (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1

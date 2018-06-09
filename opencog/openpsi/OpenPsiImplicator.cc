@@ -127,8 +127,8 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
   {
     Instantiator inst(_as);
 
-    Handle result = \
-      inst.instantiate(opr.get_action(rule), it->second, true);
+    Handle result =
+      HandleCast(inst.instantiate(opr.get_action(rule), it->second, true));
     rule->setValue(_action_executed, ProtoAtomCast(TruthValue::TRUE_TV()));
 
     return result;

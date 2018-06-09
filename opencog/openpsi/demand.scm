@@ -122,7 +122,7 @@
   The DEMAND must be a demand node that was previously declared to
   the system. The VALUE must be a floating-point number between [0, 1].
 "
-    (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
+    (cog-set-tv! demand-node (stv demand-value (cog-tv-conf (cog-tv demand-node))))
 )
 
 ; --------------------------------------------------------------
@@ -137,7 +137,7 @@
   RATE must be a NumberNode, holding the percentage change by which
   the demand-value will be updated with, on each step.
 "
-    (let* ((strength (tv-mean (cog-tv  demand-node)))
+    (let* ((strength (cog-tv-mean (cog-tv  demand-node)))
            (rate (/ (string->number (cog-name rate-node)) 100))
            (demand-value (+ strength (* strength rate))))
         (psi-set-demand-value demand-node demand-value)
@@ -155,7 +155,7 @@
   RATE must be a NumberNode holding the percentage change by which
   the demand-value will be updated with, on each step.
 "
-    (let* ((strength (tv-mean (cog-tv  demand-node)))
+    (let* ((strength (cog-tv-mean (cog-tv  demand-node)))
            (rate (/ (string->number (cog-name rate-node)) 100))
            (demand-value (- strength (* strength rate))))
         (psi-set-demand-value demand-node demand-value)

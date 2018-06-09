@@ -104,6 +104,9 @@
 ; The initial urge of goals
 (define initial-urges '())
 
+; The default urge is 0
+(define default-urge 0)
+
 ; A list of top level goals that will be shared with all the rules
 ; defined under it
 (define top-lv-goals '())
@@ -121,6 +124,10 @@
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
+; An association list of the types (responders, rejoinders etc)
+; of the rules
+(define rule-type-alist '())
+
 ; An association list that contains all the terms needed to create
 ; the actual rules
 ; The key of this list is the labels of the rules
@@ -132,6 +139,12 @@
 
 ;; --------------------
 ;; For rule matching
+
+; The buffer for input being sent to GHOST,
+; and the other one is to record the one that has been processed
+; They are needed to sync with the action selection cycle
+(define ghost-buffer "")
+(define ghost-processed "")
 
 ; Keep a record of the lemmas we have seen, and it serves as a cache as well
 (define lemma-alist '())
@@ -215,6 +228,18 @@
   (cog-value sent next-sent-key))
 
 ;; --------------------
+(define (process-ghost-buffer)
+  (if (and (not (equal? ghost-buffer ghost-processed))
+           (cog-atom? ghost-buffer)
+           (equal? (cog-type ghost-buffer) 'SentenceNode))
+    (begin
+      (set! ghost-processed ghost-buffer)
+      (generate-word-seqs ghost-buffer)
+      (append-to-sent-seq ghost-buffer)
+      (State ghost-curr-proc ghost-buffer)))
+)
+
+;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
 
 (define-public (ghost-parse TXT)
@@ -240,11 +265,9 @@
   Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
   Should run this with the main OpenPsi loop.
 "
-  (define sent (car (nlp-parse TXT)))
-  (generate-word-seqs sent)
-  (append-to-sent-seq sent)
-  (State ghost-curr-proc sent)
-  sent)
+  (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
+  ghost-buffer
+)
 
 ; ----------
 (define-public (ghost-run)

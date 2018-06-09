@@ -31,7 +31,7 @@
 ;;;)
 
 ; Start the cogserver on port 17005
-(start-cogserver "opencog-en.conf")
+(start-cogserver "config/opencog-pairs-en.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
