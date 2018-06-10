@@ -44,7 +44,7 @@
 (use-modules (opencog persist))
 (use-modules (opencog matrix))
 
-(define-public (make-cross-api K N)
+(define-public (make-cross-section-api K N)
 "
   make-cross-api K N -- API for cross-section word-pairs.
 
@@ -55,23 +55,26 @@
 
   A more detailed description is at the top of this file.
 "
-	(let ((all-csets '()))
+	(let ((all-csets '())
+			(Kay K)   ; Cache K and N for later use.
+			(Nnn N))
 
-xxxxxxxxxxx
-		; Get the observational count on ATOM
-		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+		; Get the observational count on Section SECT
+		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
 
 		(define any-left (AnyNode "cset-word"))
-		(define any-right (AnyNode "cset-disjunct"))
+		(define any-right (AnyNode
+			(format #f "cset-cross-connector-~D-~D" K N)))
 
 		(define (get-left-type) 'WordNode)
-		(define (get-right-type) 'ConnectorSeq)
+		(define (get-right-type) 'WordNode)
 		(define (get-pair-type) 'Section)
 
-		; Getting the pair is trivial: we already got it.
+xxxxxxxxx
+		; Getting the pair is non-trivial....
 		(define (get-pair PAIR) PAIR)
 
-		; Getting the count is trivial, we already got the needed pair.
+		; Getting the count is .... XXX fixme
 		(define (get-pair-count PAIR) (get-count PAIR))
 
 		(define (get-left-wildcard DJ)
@@ -96,8 +99,8 @@ xxxxxxxxxxx
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
-				((name) (lambda () "Word-Disjunct Pairs (Connector Sets)"))
-				((id)   (lambda () "cset"))
+				((name) (lambda () "Word, Cross-section-Word Pairs"))
+				((id)   (lambda () "cross-section"))
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
@@ -110,7 +113,7 @@ xxxxxxxxxxx
 				((fetch-pairs) fetch-pseudo-csets)
 				((provides) (lambda (symb) #f))
 				((filters?) (lambda () #f))
-				(else (error "Bad method call on pseudo-cset:" message)))
+				(else (error "Bad method call on cross-section:" message)))
 			args)))
 )
 
