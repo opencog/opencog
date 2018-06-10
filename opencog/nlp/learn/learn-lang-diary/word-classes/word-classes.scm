@@ -86,9 +86,9 @@
 ; -----------------------------------------------------------------
 ; -----------------------------------------------------------------
 ; -----------------------------------------------------------------
-; Print distribution, viz, Some statistic, vs. the class.
-; First column: numerical ID for the class.
-; Second column: The statistic.
+; Print a distribution of some statistic, vs. the class.
+; First printed column: numerical ID for the class.
+; Second printed column: The statistic.
 ; The FUNC  should be a function taking the class, returning a number.
 (define (prt-distribution FUNC)
 	(define all-classes (cog-get-atoms 'WordClassNode))
@@ -136,8 +136,28 @@
 ; Second column: mean-square number of observations of disjuncts in that class.
 (define (prt-disjunct-length-distribution)
 	(define (nmemb CLS) (sqrt
-		(fold (lambda (SECT cnt) (+ cnt 
+		(fold (lambda (SECT cnt) (+ cnt
 			(* (cog-tv-count(cog-tv SECT)) (cog-tv-count(cog-tv SECT))))) 0
  			(cog-incoming-by-type CLS 'Section))))
 	(prt-distribution nmemb))
-; 
+;
+; -----------------------------------------------------------------
+;
+
+; Print the distribution of disjuncts by disjunct-size.
+; The disjunct-size is the number of connectors in a disjunct.
+; Every section has exactly one disjunct in it.
+; Loop over all sections on all word-classes, and
+(define (prt-dj-size-distribution)
+	(define (num-sections SIZ)
+		(fold (lambda (CLS SUM)
+				(+ SUM (length (get-sections-by-size CLS SIZ))))
+			0
+			(cog-get-atoms 'WordClassNode)))
+
+	(define (prt-dist SIZ)
+		(format #t "~A	~A\n" SIZ (num-sections SIZ)))
+
+	(format #t "disjunct-size vs num-disjuncts\n")
+	(list-tabulate 15 prt-dist)
+)

@@ -125,14 +125,28 @@
 (use-modules (opencog) (opencog sheaf) (opencog persist))
 
 ; ---------------------------------------------------------------
+; Return a list of all words that belong to some grammatical class.
+
+(define (get-classified-words)
+	; Trace the MemberLink
+	(define (memb CLS) (map gar (cog-incoming-by-type CLS 'MemberLink)))
+	; Discard everything that is not a word.
+	(define (wmemb CLS)
+		(filter (lambda (w) (eq? 'WordNode (cog-type w))) (memb CLS)))
+	; concqatenate them all together.
+	(fold (lambda (CLS lst) (append! (memb CLS) lst)) '()
+		(cog-get-atoms 'WordClassNode))
+)
+
+; ---------------------------------------------------------------
 ;
-; Given a word, return a list of all sections that are potentially
-; mergable; that is, have a connector that belongs to an existing
-; WordClass.  The goal is to trim the list of sections to something
-; smaller.
+; Given a word or word-class, return a list of all sections attached to
+; that word or word-class that are potentially mergable; that is, have
+; a disjunct with a connector that belongs to an existing WordClass.
+; The goal is to trim the list of sections to something smaller.
 ;
 ; XXX FIXME this might be pointless and useless?
-(define (get-all-sections-in-classes WRD)
+(define (get-all-sections-in-classes WCL)
 
 	; Return not-#f if the connector is in any class.
 	(define (connector-in-any-class? CTR)
@@ -150,17 +164,17 @@
 
 	; Return list of all sections that have connectors that are
 	; in some (any) WordClass.
-	(filter classifiable-section? (cog-incoming-by-type WRD 'Section))
+	(filter classifiable-section? (cog-incoming-by-type WCL 'Section))
 )
 
 ; ---------------------------------------------------------------
 ;
-; Given a word, return a list of all sections that have disjuncts
-; with N connectors.
+; Given a word or a word-class, return a list of all sections that
+; have disjuncts with N connectors.
 ;
-(define (get-sections-by-size WRD SIZ)
+(define (get-sections-by-size WCL SIZ)
 
-	(define sects (get-all-sections-in-classes WRD))
+	(define sects (get-all-sections-in-classes WCL))
 
 	; Return not-#f if section SEC has SIZ connectors
 	(define (size-section? SEC)
