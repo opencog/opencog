@@ -685,14 +685,21 @@
 )
 
 ; ---------------------------------------------------------------
-; stub wrapper for word-similarity.
+; Is it OK to merge WORD-A and WORD-B into a common vector?
+;
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
-; XXX do something fancy here.
 ;
 ; COSOBJ must offer the 'right-cosine method
 ;
-(define (ok-to-merge COSOBJ CUTOFF WORD-A WORD-B)
+; This uses cosine-similarity and a cutoff to make the ok-to-merge
+; decision. (Other forms of similarity measure might also be
+; interesting to explore.) The code is glommed up with print statements
+; in order to show forward progress; this is because the current
+; infrastructure is sufficiently slow, that the prints are reassuring
+; that the system is not hung.
+;
+(define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
 
 	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
 
@@ -735,7 +742,7 @@
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pcos cutoff WORD-A WORD-B))
+			(is-cosine-similar? pcos cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
 			(merge-project pcos union-frac WORD-A WORD-B))
@@ -766,7 +773,7 @@
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pcos cutoff WORD-A WORD-B))
+			(is-cosine-similar? pcos cutoff WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
 			(merge-disambig pcos cutoff WORD-A WORD-B))
@@ -807,8 +814,8 @@
 ;
 ; Is it OK to merge?
 ; (define pcos (add-pair-cosine-compute psa))
-; (ok-to-merge pcos (Word "run") (Word "jump"))
-; (ok-to-merge pcos (Word "city") (Word "village"))
+; (is-cosine-similar? pcos (Word "run") (Word "jump"))
+; (is-cosine-similar? pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
 ; (merge-project pcos 0.3 (Word "city") (Word "village"))
