@@ -32,7 +32,18 @@
 ; where each a_k is a (real) number, and the e_k are the "basis
 ; elements".  Here, each distinct e_k corresponds to each distinct
 ; ConnectorSeq atom.  Each number a_k corresponds to the observational
-; frequency, stored as a Value on the Section atom.
+; frequency, stored as a Value on the Section atom.  There is one
+; such vector for each word, and thus, the set of all words can be
+; treated as a matrix: each column of the matrix is a word-vector.
+; Alternately, one can think of this as a collection of pairs, of
+; the form (word, cset), and a count/frequency for each pair. The
+; left side of the pair are WordNodes; the right side are ConnectorSeq's
+; and the pair itself is a Section (which is why the counts are stored
+; on the Section).  That is, each pair is of the form:
+;
+;    (Section
+;       (WordNode "foobar")
+;       (ConnectorSeq ... )
 ;
 ; An example connector-set, for the word "playing", illustrating
 ; that it can connect to the word "level" on the left, and "field"
