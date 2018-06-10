@@ -379,13 +379,12 @@
 ; solution that does not seem worth the effort. So we'll let the
 ; CPU work harder than it might otherwise need to.
 ;
+(define *-greedy-anchor-* (AnchorNode "*-greedy-singleton-words-*"))
 (define (greedy-grow MERGER TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
 
 	; Tunable parameters
 	(define min-greedy 200)
 	(define scan-multiplier 4)
-
-	(define anchor (AnchorNode "*-greedy-singleton-words-*"))
 
 	; How many words have been classified?
 	(define (num-classified-words)
@@ -427,7 +426,7 @@
 					; tracking progress statistics.
 					(if (eq? 'WordNode (cog-type new-cls))
 						(begin
-							(store-atom (Member new-cls anchor))
+							(store-atom (Member new-cls *-greedy-anchor-*))
 							(greedy-grow MERGER TRUE-CLS-LST
 								(append! FAKE-CLS-LST (list new-cls))
 								DONE-LST rest))
@@ -448,10 +447,10 @@
 
 							; If anything was merged from the fake-list,
 							; then remove it from the anchor as well.
-							; (thie is a database-delete).
+							; (this is a database-delete).
 							(for-each
 								(lambda (unfake)
-									(cog-delete (Member unfake anchor)))
+									(cog-delete (Member unfake *-greedy-anchor-*)))
 								(got-done FAKE-CLS-LST new-cls))
 
 							; If anything from the done-list was merged, then
@@ -680,9 +679,14 @@
 	; Trim the word-list, keeping only the not-done words.
 	(define remain-words (remove! is-done? ranked-words))
 
+	; Fetch all of the singletons
+	(fetch-incoming-by-type *-greedy-anchor-* 'MemberLink)
+
 	(format #t "Start greedy-agglomeration of ~A words\n"
 		(length remain-words))
-	(greedy-grow MERGER sorted-cls '() done-list remain-words)
+	(greedy-grow MERGER sorted-cls
+		(map gar (cog-incoming-by-type *-greedy-anchor-* 'MemberLink))
+		done-list remain-words)
 
 	; XXX FIXME ... at the conclusion of this, we have a done list,
 	; which, because of repeated merging, might possibly have been
