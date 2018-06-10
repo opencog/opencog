@@ -385,6 +385,8 @@
 	(define min-greedy 200)
 	(define scan-multiplier 4)
 
+	(define anchor (AnchorNode "*-greedy-singleton-words-*"))
+
 	; How many words have been classified?
 	(define (num-classified-words)
 		(define (nmemb CLS) (length (cog-incoming-by-type CLS 'MemberLink)))
@@ -420,10 +422,15 @@
 
 					; If we failed to create a new class, then just
 					; append the word to the fake list, and recurse.
+					; Store the fake list in the database, as well.
+					; This is used in case of restart, and also for
+					; tracking progress statistics.
 					(if (eq? 'WordNode (cog-type new-cls))
-						(greedy-grow MERGER TRUE-CLS-LST
-							(append! FAKE-CLS-LST (list new-cls))
-							DONE-LST rest)
+						(begin
+							(store-atom (Member new-cls anchor))
+							(greedy-grow MERGER TRUE-CLS-LST
+								(append! FAKE-CLS-LST (list new-cls))
+								DONE-LST rest))
 
 						; If the result is a new class, then greedy-grow it.
 						; But only consider a limited subset of the word list,
@@ -438,6 +445,14 @@
 							(format #t "--- Checking the done-list len=~A\n"
 								(length DONE-LST))
 							(assign-expand-class MERGER new-cls DONE-LST)
+
+							; If anything was merged from the fake-list,
+							; then remove it from the anchor as well.
+							; (thie is a database-delete).
+							(for-each
+								(lambda (unfake)
+									(cog-delete (Member unfake anchor)))
+								(got-done FAKE-CLS-LST new-cls))
 
 							; If anything from the done-list was merged, then
 							; what is left might be either a tiny piece of
