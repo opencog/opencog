@@ -3,9 +3,9 @@
 # Second col: number of disjuncts that have this number of connectors.
 # Third col: weighted number of disjuncts that have this number of connectors.
 #
-1	28147
-2	1089538
-3	1415288
+1	28147		1596434.0890089532
+2	1089538	1788858.9592017196
+3	1415288	799625.001153049
 4	816662	422968.1729401066
 5	403798	259782.0377166538
 6	208070	172488.72716739637
