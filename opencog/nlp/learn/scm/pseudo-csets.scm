@@ -66,8 +66,8 @@
 ;
 ;     playing:  level- & field+;
 ;
-; The `ConnectorSeq` part of this structure is refered to as the
-; pseudo-disjunct, in that it resembles a normal linkgrammar
+; The `ConnectorSeq` part of this structure is referred to as the
+; pseudo-disjunct, in that it resembles a normal link-grammar
 ; disjunct, but has words appearing where connectors should be.
 ;
 ; Any given word may have dozens or hundreds or thousands of these
@@ -94,7 +94,7 @@
   make-pseudo-cset-api -- connector-set access methods. Pseudo-
   connector sets are pairs consisting of a word on the left, and
   a pseudo-disjunct on the right. These are observed during MST parsing.
-  A more detailed scription is at the top of this file.
+  A more detailed description is at the top of this file.
 "
 	(let ((all-csets '()))
 
