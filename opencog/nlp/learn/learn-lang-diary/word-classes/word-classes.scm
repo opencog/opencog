@@ -143,11 +143,11 @@
 ;
 ; -----------------------------------------------------------------
 ;
-
 ; Print the distribution of disjuncts by disjunct-size.
 ; The disjunct-size is the number of connectors in a disjunct.
 ; Every section has exactly one disjunct in it.
-; Loop over all sections on all word-classes, and
+; Loop over all sections on all word-classes, and count how many
+; of these sections have the indicated size.
 (define (prt-dj-size-distribution)
 	(define (num-sections SIZ)
 		(fold (lambda (CLS SUM)
@@ -159,5 +159,27 @@
 		(format #t "~A	~A\n" SIZ (num-sections SIZ)))
 
 	(format #t "disjunct-size vs num-disjuncts\n")
+	(list-tabulate 15 prt-dist)
+)
+;
+; Print the distribution of disjuncts by disjunct-size.
+; The disjunct-size is the number of connectors in a disjunct.
+; Every section has exactly one disjunct in it.
+; Loop over all sections on all word-classes, and count how many
+; of these sections have the indicated size.
+(define (prt-dj-weighted-size-distribution)
+	(define (sum-section-weights SEC-LST)
+		(fold (lambda (SEC SUM) (+ SUM (get-count SEC))) 0 SEC-LST))
+
+	(define (weighted-num-sections SIZ)
+		(fold (lambda (CLS SUM)
+				(+ SUM (sum-section-weights (get-sections-by-size CLS SIZ))))
+			0
+			(cog-get-atoms 'WordClassNode)))
+
+	(define (prt-dist SIZ)
+		(format #t "~A	~A\n" SIZ (weighted-num-sections SIZ)))
+
+	(format #t "disjunct-size vs weighted-num-disjuncts\n")
 	(list-tabulate 15 prt-dist)
 )

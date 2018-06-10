@@ -31946,6 +31946,70 @@ Fuzz-5x2
 Quality evaluation
 \end_layout
 
+\begin_layout Standard
+Evaluating the quality is hard.
+ Quick looks suggest its all going as planned...
+ unclear how to be quantititive, except by tedious hand-scoring.
+\end_layout
+
+\begin_layout Section*
+Connector distribution from MST parses
+\end_layout
+
+\begin_layout Standard
+(9 June 2018) This is kind-of a repeat of earlier work reported in `connector-se
+ts-revised.lyx` but is (a) graphed differently and is (b) for a different
+ dataset.
+ Its actually a commentary on the quality of data comeing out of MST.
+ First graph: number of sections having N connectors.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/dj-size.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It shows how many sections there are that have the indicated number of connector
+s on them.
+ That is, each section has one and only one disjunct in it.
+ Each disjunct can have N connectors in it.
+ So, fixing N, how many sections are there that have N connectors? For 
+\begin_inset Quotes eld
+\end_inset
+
+real
+\begin_inset Quotes erd
+\end_inset
+
+ linnguistic data, we excpet a much much sharper falloff.
+ Determiners (the, a this, that ...) should have one connector.
+ Nouns should have 2 or 3 or 4: zero or one to a determiner, zero, one or
+ two (maybe rarely three) to adjectives, one to a verb.
+ Transitive verbs should have 3 or 4 connectors: one to the subject, one
+ to the object, one to LEFT-WALL, zero or on to adverbs, particles, prepositions
+, etc.
+ Thus, six or more connectors should be very very rare.
+ its not.
+ This suggests that the MST parser is not producing enitrely beleivable
+ data.
+ 
+\end_layout
+
+\begin_layout Standard
+Perhaps the high-connector count disjuncts are observed only infrequently?
+ The next graph shows the counts, weighted by the number of observations:
+ i.e.
+ how often that particular disjunct was observed.
+\end_layout
+
 \begin_layout Section*
 The Plan
 \end_layout
