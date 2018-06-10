@@ -1,15 +1,38 @@
 ;
 ; pseudo-csets.scm
 ;
-; Compute the cosine-similarity between two pseudo-connector-sets.
+; Representing words as vectors of (pseudo-)connector-sets.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below compute the cosine-similarity (and other similarity
-; measures) between pseudo-connector-set vectors.
+; This file provide the "matrix-object" API that allows words to be
+; treated as vectors of connector-sets (vectors of disjuncts; vectors
+; of Sections).  The vector representation is important, because vectors
+; are the core input to a number of important machine-learning
+; algorithms.  Most immediately and directly, one can take the cosine
+; product between vectors (see `word-cosine.scm` for examples).
+;
+; This just provides the vector API, and nothing more. Other objects,
+; as a part of the `(opencog matrix)` suite, do various things with the
+; vector (such as compute cosines, perform other similarity measures,
+; filter out unwanted/bad components, etc.)
+;
+; Here and below, "connector set", "connector sequence", "disjunct"
+; and "Section" all mean the same thing. They are synonyms. The
+; multiple names are a "historical accident".
+;
+; A vector can be decomposed into a sum over "basis elements", as
+; follows:
+;
+;     v = a_1 e_1 + a_2 e_2 + ... + a_n e_n
+;
+; where each a_k is a (real) number, and the e_k are the "basis
+; elements".  Here, each distinct e_k corresponds to each distinct
+; ConnectorSeq atom.  Each number a_k corresponds to the observational
+; frequency, stored as a Value on the Section atom.
 ;
 ; An example connector-set, for the word "playing", illustrating
 ; that it can connect to the word "level" on the left, and "field"
@@ -48,37 +71,12 @@
 ; tens-of-millions, while a "typical" English word might have a few
 ; thousand non-zero sections.
 ;
-; As vectors, dot-products can be taken. The most interesting of these
-; is the cosine similarity between two words. This quantity indicates how
-; similar two words are, grammatically-speaking. Other vector measures
-; are interesting, including lp-similarity, etc.
-;
-; Not implemented: the Pearson R.  There is both a theoretical and a
-; practical difficulty with it. The theoretical difficulty is that
-; we never expect connector sets to be correlated, with a
-; different mean offset!  This doesn't make sense, because when a
-; disjunct is not seen, it literally isn't there; it does NOT get
-; folded into a mean-value offset.  The practical difficulty is that
-; computing the vector mean requires knowning the total dimensionality
-; of the space, which can be gotten by computing
-;   (length (cset-support get-all-words))
-; but this can take hours to compute.  Its also huge: about 200K
-; for my "small" dataset; millions in the large one.
-;
-; Also not implemented: Tanimoto metric. The formula for this gives
-; an actual metric only when the vectors are bit-vectors, and we don't
-; have bit-vectors, so I am not implementing this. Note, however, that
-; the presence/absence of support can be viewed as a bit-vector.
-;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog persist))
 (use-modules (opencog matrix))
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
 
 (define-public (make-pseudo-cset-api)
 "
