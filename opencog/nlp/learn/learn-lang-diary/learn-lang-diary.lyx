@@ -29199,6 +29199,307 @@ Nida
 \end_layout
 
 \begin_layout Section*
+Meaning Redux
+\end_layout
+
+\begin_layout Standard
+(9 June 2018) I keep explaing, over and over, why K-means and SVD cannot
+ be used.
+ Here's a snapshot from a recent email, explaining it again:
+\end_layout
+
+\begin_layout Subsection*
+Why SVD and K-means don't work
+\end_layout
+
+\begin_layout Standard
+Here's WHY both SVD and K-means are fundamentally wrong, and are total failures
+ for this particular task.
+ Lets start with K-means.
+ One minor issue with K-means is that you have to pick K in advance, but
+ you don't know what K is.
+ But whatever, that's not important.
+ Its OK to guess that K=100 or so.
+ The big problem is that K-means then takes the 
+\emph on
+MEAN
+\emph default
+ (the 
+\emph on
+AVERAGE
+\emph default
+) of the vectors.
+ That's what the word "mean" in "K-means" means.
+ But we already know, a priori, that taking the average is wrong -- it wipes
+ out, erases the different word senses.
+\end_layout
+
+\begin_layout Standard
+For example: the word-token "saw" is going to have a vector that contains
+ disjuncts for both "cutting tool", "the verb cut" "the past tense of to
+ see".
+ With K-means, this word token can only be assigned to just one cluster:
+ it will be the cluster for nouns, or the cluster for past tenses, or the
+ cluster for cutting-manipulation-actions.
+ No matter which cluster its assigned to, when the average/sum of the vector
+ is merged into the cluster, the wrong disjuncts will be averaged in as
+ well.
+ 
+\end_layout
+
+\begin_layout Standard
+So, for example: lets assume k-means places "saw" into the "nouns cluster".
+ After averaging, the noun cluster will now contain disjuncts for both past-tens
+e verbs, and also disjuncts for present-tense manipulation-verbs.
+ Clearly, noun-clusters should not contain these.
+ Two bad things happen: (a) the noun cluster is polluted with verb-vector
+ components, and (b) the vector has not been factorized, and so "saw" cannot
+ also be placed into other clusters as well.
+ 
+\end_layout
+
+\begin_layout Standard
+Ergo -- K-means is fundamentally incorrect -- it cannot correctly cluster
+ linguistic data! 
+\end_layout
+
+\begin_layout Standard
+Lets write some formulas: let 
+\begin_inset Formula $v$
+\end_inset
+
+ be a vector.
+ The MST observation counts give us 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+.
+ We know that, a priori,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+v_{saw}=v_{tool}+v_{past-tense}+v_{cutting}
+\]
+
+\end_inset
+
+However, we do NOT know what these parts: 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+,
+\begin_inset Formula $v_{past-tense}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{cutting}$
+\end_inset
+
+ what they are.
+ We need to factorize them out.
+ K-means erases them, lumps them all into one.
+ It does not factorize.
+\end_layout
+
+\begin_layout Standard
+SVD is a little bit better, if you use it correctly.
+ I am not convinced that you are using it correctly.
+ So, for example, lets say we had only four words: 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{heard}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+.
+ Suppose that SVD was told to decompose into three dimensions, and that
+ the three that were picked were mostly pointing along the direction of
+ 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{heard}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+ -- these were the three principle components.
+\end_layout
+
+\begin_layout Standard
+Where should 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ go? In traditional SVD, the three principle components are used to define
+ three hyperplanes or classifiers, and so the single vector 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ would then be classified as to being either "on the same side of the hyperplane
+ as 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+, and thus a part of the 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+ singular value", or "on the same side of the hyperplane as 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+, and thus a part of the 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+ singular value", etc.
+\end_layout
+
+\begin_layout Standard
+But this is again wrong.
+ We want to factor or decompose 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ along these three different principle components, thereby automatically
+ discovering that some of the disjuncts on 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ are tool-like, that others are verb-like, etc.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+THIS
+\emph default
+ is where word-sense disambiguation comes from.
+ It is 
+\emph on
+NOT
+\emph default
+ done in some pre-cleaner, pre-disambiguator stage.
+ It is done at the clustering stage.
+\end_layout
+
+\begin_layout Standard
+But, as I hope is now clear, both SVD and K-means are fundamentally wrong
+ approaches, because both ERASE word-sense information from the dataset!
+\end_layout
+
+\begin_layout Standard
+Now, IF you are very careful, you might be able to modify SVD, and after
+ finding principle components, go back for a second pass, and perform the
+ factorization needed to extract the different word-senses.
+ Maybe.
+ I can see/guess at a way of doing this, but its hard.
+\end_layout
+
+\begin_layout Subsection*
+Dimensional reduction
+\end_layout
+
+\begin_layout Standard
+There's a completely different issue - "dimensional reduction" which must
+ not be ignored; its important, a big part of the task.
+\end_layout
+
+\begin_layout Standard
+So: My large dataset has 24 million disjuncts in it -- that's the dimension
+ of the vector space -- all vectors are 24M-dimensional.
+ How do you perform dimensional reduction? Well, its "easy" -- if two disjuncts
+ have connectors that belong to the same word-class, replace them by one
+ disjunct in that word-class.
+ (The vector space is now (24M minus one)-dimensional) Lets suppose that
+ one of the disjuncts is
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+bird: the- & saw-
+\end_layout
+
+\begin_layout Standard
+\noindent
+When doing the dimensional reduction, the saw- needs to be replaced by:
+ ??? either 
+\family typewriter
+TOOL-
+\family default
+ or 
+\family typewriter
+PASTTENSE-
+\family default
+ or by 
+\family typewriter
+CUTTING-.
+\family default
+Obviously, that disjunct was obtained from an MST parses of childrens-lit
+ sentences like "John saw the bird.
+ Susan saw the bird too.
+ Mary saw it also".
+ When you dimensionally reduce the saw- in this disjunct, which cluster
+ do you assign it to?
+\end_layout
+
+\begin_layout Standard
+Well, if the text has the sentences: "John knew the bird was there.
+ John heard the bird", and if clustering determined that "knew", "heard"
+ belongs to 
+\family typewriter
+PASTTENSE
+\family default
+ then the dim reduction is clear:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+bird: the- & PASTTENSE-
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
+and we know that the following is wrong:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+bird-: the- & TOOL-
+\end_layout
+
+\begin_layout Standard
+\noindent
+The problem here is that both K-means and SVD are completely ignorant of
+ the structure of the basis elements of the vector space.
+ Both assume that the basis elements of the vector space are irreducible,
+ atomic, indivisible.
+ Its a natural assumption for some machine-learning tasks, but completely
+ wrong for language-learning where we know, a priori, that the basis elements
+ have structure.
+ This is kind of a key idea from sheaves!
+\end_layout
+
+\begin_layout Section*
 Merge Results 5 June 2018
 \end_layout
 
@@ -29225,7 +29526,7 @@ gram-class.scm
 en_pairs_cfive_class
 \family default
 '.
- The merge paramters are: cosine-similarity-accept cutoff = 0.65; iniopn-merg-fra
+ The merge paramters are: cosine-similarity-accept cutoff = 0.65; union-merge-fra
 ction = 0.3.
 \end_layout
 
@@ -30466,8 +30767,8 @@ Here's a graph of the above distribution.
 status open
 
 \begin_layout Plain Layout
-This and the remaining graphs built with 'word-classes.scm'prt-disjunct-distribut
-ion, etc.
+This and the remaining graphs built with 'word-classes.scm' prt-disjunct-distribu
+tion, etc.
  
 \end_layout
 
@@ -30692,6 +30993,1055 @@ merge-ortho
  way.
  Thus, these experiments need to be repeated ...
  again.
+\end_layout
+
+\begin_layout Standard
+The table below is a 
+\begin_inset Quotes eld
+\end_inset
+
+progress report
+\begin_inset Quotes erd
+\end_inset
+
+ on 
+\series bold
+Fuzz-5x2
+\series default
+, as its being computed.
+ Each row represents a snapshot in a different point in time for the computation.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="8">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+num-classes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+num-words
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+doubles
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+singletons
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dupes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dup-cls
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+uniq-dup
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cpu
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+46
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+429
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+259
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+24
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3400
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+56
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+482
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+487
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+28
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6230
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+65
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+533
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+26
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+682
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+30
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8800
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+70
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+581
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+28
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+915
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+36
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11760
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+printed with `(prt-all-classes)` and `(prt-multi-members)`
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The columns are as follows:
+\end_layout
+
+\begin_layout Description
+num-classes Total number of grammatical categories (word classes).
+\end_layout
+
+\begin_layout Description
+num-words Total number of words assigned to grammatical classes, with two
+ or more words per class.
+\end_layout
+
+\begin_layout Description
+doubles Total number of classes having exactly two words in them.
+\end_layout
+
+\begin_layout Description
+singletons Total number of words examined, but could not be assigned to
+ any existing grammatical class.
+ These can be thought of as classes that have only one member; they may
+ eventually grow to more than one member.
+\end_layout
+
+\begin_layout Description
+dupes Total number of words belonging to more than one class.
+ These roughly correspond to words that have been found to have more than
+ one syntactic form (i.e.
+ more than one 
+\begin_inset Quotes eld
+\end_inset
+
+meaning
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Description
+dup-cls Total number of classes that the dupes belong to.
+ Thus, dupe-cls / dupes = average number of 
+\begin_inset Quotes eld
+\end_inset
+
+meanings
+\begin_inset Quotes erd
+\end_inset
+
+ that a multi-meaning word has.
+\end_layout
+
+\begin_layout Description
+uniq-dup Total number of unique classes that have multi-meaning words in
+ them.
+\end_layout
+
+\begin_layout Description
+cpu The CPU-minutes accumulated so far.
+ This is ad-hoc, it doesn't count for time spent in postgres, or inefficient
+ parallelism.
+ It just provides a scale for forward progress.
+\end_layout
+
+\begin_layout Standard
+Some examples of multi-category words: 
+\end_layout
+
+\begin_layout Description
+what belongs to <that as when if what before where because until> and also
+ <what how why whether> – propostional words and question words.
+\end_layout
+
+\begin_layout Description
+her belongs to <his her> and <her him me us> – possesives and determiners.
+\end_layout
+
+\begin_layout Description
+with belongs to <of in with for on by from into upon over through under
+ among> and also <with like such having> – prepositions and membership-property
+ words.
+\end_layout
+
+\begin_layout Standard
+Here's a progress report for 
+\series bold
+Discrim-5x2
+\series default
+.
+ A quick look-see shows that this is lower-quality; the cosine=0.50 seems
+ to accept too much, mixing nouns and verbs, although it is better at placing
+ given names into one category (for example)...
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="8">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+num-classes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+num-words
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+doubles
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+singletons
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dupes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dup-cls
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+uniq-dup
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cpu
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+31
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+427
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+67
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+34
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2370
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+47
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+715
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+89
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+62
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+127
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4130
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+63
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+946
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+169
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+87
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+182
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+30
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6375
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+82
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1145
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+343
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+106
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+222
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+41
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9700
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its clear that 
+\series bold
+Discrim-5x2
+\series default
+ is assigning more words into fewer classes than 
+\series bold
+Fuzz-5x2
+\series default
+ is.
+ Particularly notable is the much much smaller size of the 'doubles' classes
+ and the 'singletons' classes.
+\end_layout
+
+\begin_layout Subsection*
+Quality evaluation
+\end_layout
+
+\begin_layout Standard
+Evaluating the quality is hard.
+ Quick looks suggest its all going as planned...
+ unclear how to be quantititive, except by tedious hand-scoring.
+\end_layout
+
+\begin_layout Section*
+Connector distribution from MST parses
+\end_layout
+
+\begin_layout Standard
+(9 June 2018) This is kind-of a repeat of earlier work reported in `connector-se
+ts-revised.lyx` but is (a) graphed differently and is (b) for a different
+ dataset.
+ Its actually a commentary on the quality of data comeing out of MST.
+ First graph: number of sections having N connectors.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/dj-size.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It shows how many sections there are that have the indicated number of connector
+s on them.
+ That is, each section has one and only one disjunct in it.
+ Each disjunct can have N connectors in it.
+ So, fixing N, how many sections are there that have N connectors? For 
+\begin_inset Quotes eld
+\end_inset
+
+real
+\begin_inset Quotes erd
+\end_inset
+
+ linnguistic data, we excpet a much much sharper falloff.
+ Determiners (the, a this, that ...) should have one connector.
+ Nouns should have 2 or 3 or 4: zero or one to a determiner, zero, one or
+ two (maybe rarely three) to adjectives, one to a verb.
+ Transitive verbs should have 3 or 4 connectors: one to the subject, one
+ to the object, one to LEFT-WALL, zero or one to adverbs, particles, preposition
+s, etc.
+ Thus, six or more connectors should be very very rare.
+ its not.
+ This suggests that the MST parser is not producing enitrely beleivable
+ data.
+ 
+\end_layout
+
+\begin_layout Standard
+Perhaps the high-connector count disjuncts are observed only infrequently?
+ The next graph shows the counts, weighted by the number of observations:
+ i.e.
+ how often that particular disjunct was observed.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/dj-wsize.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hmm.
+ The good news: the observation counts for 1- and 2-connector disjuncts
+ are much higher, with 3-connector disjuncts seen a lot less often.
+ The number of 4-connector disjuncts remains dishearteningly high, and the
+ fall-off is slower than before.
+\end_layout
+
+\begin_layout Standard
+Both of the above graphs were generated by considering only the sections
+ on word-clusters.
+ This comes from the 
+\series bold
+Block-5x5
+\series default
+, when it had 700 words assigned to clusters.
+ Its not clear if this pattern is true, in general, for all words.
+ Note that, to obtain these 700 words, the top-most-frequent 1300 words
+ were examined: so the 700 words are among the most frequent.
+ Note that, due to the orthogonalization algorithm, not all of the counts
+ are transfered from the words to the clusters; only some are.
 \end_layout
 
 \begin_layout Section*
