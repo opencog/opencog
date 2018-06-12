@@ -137,8 +137,10 @@
 	; Return #t if cls can be merged with WRD
 	(define (merge-pred cls) (MERGER 'merge-predicate cls WRD))
 
-	(let (; (cls (find merge-pred CLS-LST))
-			(cls (par-find merge-pred CLS-LST))
+	(let ((cls (find merge-pred CLS-LST))
+			; Sigh. The parallel-find is actually slower than
+			; the serial find.
+			; (cls (par-find merge-pred CLS-LST))
 		)
 		(if (not cls)
 			WRD
