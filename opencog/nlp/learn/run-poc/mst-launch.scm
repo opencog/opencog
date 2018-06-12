@@ -17,6 +17,7 @@
 
 (add-to-load-path ".")
 (load "utilities.scm")
+(load "mst-tools.scm")
 
 ; Get the database connection and language details
 (define database-uri (get-connection-uri))
