@@ -74,7 +74,7 @@
   this particular pair are computed, they will be hung, as values,
   on the above EvaluationLink.
 
-  The 'item-pair method returns the above EvaluationLink, if it exists.
+  The 'get-pair method returns the above EvaluationLink, if it exists.
   The 'make-pair method will create it, if it does not exist.
 
   Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
@@ -464,7 +464,7 @@
 	(for-each
 		(lambda (PAIR)
 			(set! cnt (+ cnt 1))
-			(if (not (eqv? (cliq 'pair-count PAIR) (dist 'pair-count PAIR)))
+			(if (not (eqv? (cliq 'get-count PAIR) (dist 'get-count PAIR)))
 				(throw 'bad-count 'foobar PAIR)
 				(format #t "Its OK ~A\n" cnt)
 			))
