@@ -680,13 +680,19 @@
 	(define remain-words (remove! is-done? ranked-words))
 
 	; Fetch all of the singletons
-	(fetch-incoming-by-type *-greedy-anchor-* 'MemberLink)
+	(define junk (fetch-incoming-by-type *-greedy-anchor-* 'MemberLink))
+
+	(define singletons (map gar
+		(cog-incoming-by-type *-greedy-anchor-* 'MemberLink)))
+
+	(define (is-single? w)
+		(find (lambda (x) (equal? x w)) singletons))
+
+	(define todo-words (remove! is-single? remain-words))
 
 	(format #t "Start greedy-agglomeration of ~A words\n"
-		(length remain-words))
-	(greedy-grow MERGER sorted-cls
-		(map gar (cog-incoming-by-type *-greedy-anchor-* 'MemberLink))
-		done-list remain-words)
+		(length todo-words))
+	(greedy-grow MERGER sorted-cls singletons done-list todo-words)
 
 	; XXX FIXME ... at the conclusion of this, we have a done list,
 	; which, because of repeated merging, might possibly have been
