@@ -6,6 +6,7 @@
 ; then prints that word-pair's FMI to file.
 ; For research purposes only.
 ;
+; Written by glicerico, March 2018
 ;
 
 (use-modules (opencog sheaf))
