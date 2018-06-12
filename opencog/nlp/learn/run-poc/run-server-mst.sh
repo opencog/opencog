@@ -4,7 +4,7 @@
 #
 # Start cogserver on the local machine
 # This runs tmux with byobu to multiplex multiple terminals;
-# use F3 and F4 to swtich to the other terminals.
+# use F3 and F4 to switch to the other terminals.
 #
 
 # Work around an lxc-attach bug.

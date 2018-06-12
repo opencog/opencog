@@ -135,6 +135,7 @@ So, set up the text-ingestion pipeline:
    createdb learn-pairs
    cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
 ```
+
 3) Create/edit the `~/.guile` file and add the following content:
 ```
    (use-modules (ice-9 readline))
@@ -152,7 +153,7 @@ So, set up the text-ingestion pipeline:
    languages to be processed at the same time. 
    You need to pass the language and database credentials as arguments; 
    see next step.
-   `wiki-ss-en.scm` starts the process of observing the text files contained
+   `wiki-ss-en.sh` starts the process of observing the text files contained
    in the beta-pages folder, more on that later (see Bulk Text Parsing).
    The rest of the relevant files are explained later.
 
@@ -162,6 +163,9 @@ So, set up the text-ingestion pipeline:
    terminals, where you can keep an eye on them. However, the
    first time through, it is better to do all this by hand. 
    So, for now, start the REPL server in a terminal, as follows:
+
+XXX THIS is too complicated. Go back to the older, simpler way of doing
+this!  Lets try to keep things simple!
    ```
      guile -l observe-launch.scm  -- --lang en --db learn-pairs --user your_user --password asdf
    ```
@@ -249,7 +253,11 @@ So, set up the text-ingestion pipeline:
   "Archive of Our Own" fan-fiction website.
 
 11) The current pipeline for Chinese text requires word segmentation
-  to be performed outside of OpenCog. This can be done using jieba
+  to be performed outside of OpenCog.
+
+XXX Except that, no it doesn't these instructions are wrong!
+
+  This can be done using jieba
   https://github.com/fxsjy/jieba 
   If you are working with Chinese texts, install:
   `pip install jieba` and then segment text:
@@ -373,14 +381,14 @@ Mutual Information of Word Pairs
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.
 This is done by running
+
+XXX This is too complicated!  Go back to the old way of doing things.
+
 ```
 guile -l compute-mi.scm  -- --lang ?? --db ??-pairs --user your_user --password asdf
 ```
 (again, --user and --password are optional, as explained in step 5 above).
 It uses the `(opencog matrix)` subsystem to perform the core work.
-The system might not be robust enough at this stage yet, so if you find an
-error while executing this code, run each command separately
-to trace it.
 
 Batch-counting might take hours or longer, depending on your dataset
 size. The batching routine will print to stdout, giving a hint of
