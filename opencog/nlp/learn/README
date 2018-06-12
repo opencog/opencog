@@ -48,9 +48,9 @@ All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
 different hypergraphs.  The contents of the atomspace are saved to an
 SQL (Postgres) server for storage.  The system is fed with raw text
-using assorted ad-hoc scripts, which include link-grammar as a 
-central components of the processing pipeline. Most of the
-data analysis is performed with an assortment of scheme scripts.
+using assorted ad-hoc scripts, which include link-grammar as a central
+component of the processing pipeline. Most of the data analysis is
+performed with an assortment of scheme scripts.
 
 Thus, operating the system requires three basic steps:
 * Setting up the atomspace with the SQL backing store,
@@ -118,19 +118,6 @@ statistics.  Most of this revolves around setting up postgres.
 1) Set up and configure postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
 
-Obtaining word-pair counts requires digesting a lot of text, and
-counting the word-pairs that occur in the text.  The easiest way of
-doing this, at the moment, is to parse the text with link-grammar
-using the "any" language.  This pseudo-language will link any
-word to any other, and is simply a convenient way of extracting word
-pairs from text.  Although this might seem to be a very convoluted way
-of extracting word pairs, it actually "makes sense", for two reasons:
-a) it already works; little or no new code required. b) later processing
-steps will require passing text through the link-grammar parser anyway,
-so we may as well start using it right away. 
-
-So, set up the text-ingestion pipeline:
-
 2) Create and initialize a database. Pick any name you want;
    here it is `learn-pairs`.
 ```
@@ -148,14 +135,16 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path ".")
 ```
 4) Copy all files from the `opencog/opencog/nlp/learn/run` directory
-   to your working directory.
+   to your working directory. There are a variaty of different files,
+   here, organized by language. Here's a short overview:
 
-   `run-server-parse.sh` starts the cogserver and sets a default prompt: set 
+* `run-server-parse.sh` starts the cogserver and sets a default prompt: set 
    up by default to avoid conflicts and confusion, and to allow multiple 
    languages to be processed at the same time. 
    You need to pass the language and database credentials as arguments; 
    see next step.
-   `wiki-ss-en.sh` starts the process of observing the text files contained
+
+* `wiki-ss-en.sh` starts the process of observing the text files contained
    in the beta-pages folder, more on that later (see Bulk Text Parsing).
    The rest of the relevant files are explained later.
 
