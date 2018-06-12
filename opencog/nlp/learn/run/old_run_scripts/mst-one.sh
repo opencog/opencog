@@ -21,7 +21,7 @@ cogport=$4
 # Not using relex anymore
 #splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
 #splitter=/usr/local/bin/split-sentences.pl
-splitter=./split-sentences.pl
+splitter=../split-sentences.pl
 
 splitdir=split-articles
 subdir=mst-articles
@@ -54,7 +54,7 @@ mkdir -p $(dirname "$subdir/$rest")
 cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
 
 # Submit the split article
-cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
+cat "$splitdir/$rest" | ../submit-one.pl $coghost $cogport $observe
 
 # Punt if the cogserver has crashed (second test,
 # before doing the mv and rm below)
