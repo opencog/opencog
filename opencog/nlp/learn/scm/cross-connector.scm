@@ -71,11 +71,18 @@
 		(define (get-pair-type) 'Section)
 
 xxxxxxxxx
-		; Getting the pair is non-trivial....
-		(define (get-pair PAIR) PAIR)
+		(define (get-pair L-ATOM R-ATOM)
+			'())
+
+		(define (make-pair L-ATOM R-ATOM)
+			'())
+
+		(define (get-left-element PAIR) (gar PAIR))
+		(define (get-right-element PAIR) xxxx)
 
 		; Getting the count is .... XXX fixme
-		(define (get-pair-count PAIR) (get-count PAIR))
+		(define (get-pair-count L-ATOM R-ATOM)
+			(get-count PAIR))
 
 		(define (get-left-wildcard DJ)
 			(ListLink any-left DJ))
@@ -105,8 +112,10 @@ xxxxxxxxx
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
 				((pair-count) get-pair-count)
-				((item-pair) get-pair)
-				((make-pair) get-pair)
+				((get-pair) get-pair)
+				((make-pair) make-pair)
+				((left-element) get-left-element)
+				((right-element) get-right-element)
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)

@@ -108,11 +108,20 @@
 		(define (get-right-type) 'ConnectorSeq)
 		(define (get-pair-type) 'Section)
 
-		; Getting the pair is trivial: we already got it.
-		(define (get-pair PAIR) PAIR)
+		; Get the pair, if it exists.
+		(define (get-pair L-ATOM R-ATOM)
+			(cog-link 'Section L-ATOM R-ATOM))
 
-		; Getting the count is trivial, we already got the needed pair.
-		(define (get-pair-count PAIR) (get-count PAIR))
+		; Get the count, if the pair exists.
+		(define (get-pair-count L-ATOM R-ATOM)
+			(define stats-atom (get-pair L-ATOM R-ATOM))
+			(if (null? stats-atom) 0 (get-count stats-atom)))
+
+		(define (make-pair L-ATOM R-ATOM)
+			(Section L-ATOM R-ATOM))
+
+		(define (get-left-element PAIR) (gar PAIR))
+		(define (get-right-element PAIR) (gdr PAIR))
 
 		(define (get-left-wildcard DJ)
 			(ListLink any-left DJ))
@@ -142,8 +151,11 @@
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
 				((pair-count) get-pair-count)
-				((item-pair) get-pair)
-				((make-pair) get-pair)
+				((get-pair) get-pair)
+				((get-count) get-count)
+				((make-pair) make-pair)
+				((left-element) get-left-element)
+				((right-element) get-right-element)
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)
