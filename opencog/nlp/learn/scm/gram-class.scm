@@ -378,8 +378,8 @@
 		(define rsec (second SECT-PAIR))
 
 		; The counts on each, or zero.
-		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
-		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'get-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'get-count rsec)))
 
 		; Return #t if sect is a Word section, not a word-class section.
 		(define (is-word-sect? sect)
@@ -532,8 +532,8 @@
 		(define rsec (second SECT-PAIR))
 
 		; The counts on each, or zero.
-		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
-		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'get-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'get-count rsec)))
 
 		; Return #t if sect is a Word section, not a word-class section.
 		(define (is-word-sect? sect)
@@ -590,8 +590,8 @@
 			(define wrd (second CLAPR))
 
 			; The counts on each, or zero.
-			(define cc (if (null? cla) 0 (LLOBJ 'pair-count cla)))
-			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
+			(define cc (if (null? cla) 0 (LLOBJ 'get-count cla)))
+			(define wc (if (null? wrd) 0 (LLOBJ 'get-count wrd)))
 
 			(+ DOT-PROD (* cc wc))
 		)
@@ -614,8 +614,8 @@
 
 			; The counts on each, or zero.
 			; Both cla and wrd are actually Sections.
-			(define cc (if (null? cla) 0 (LLOBJ 'pair-count cla)))
-			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
+			(define cc (if (null? cla) 0 (LLOBJ 'get-count cla)))
+			(define wc (if (null? wrd) 0 (LLOBJ 'get-count wrd)))
 
 			; The orthogonal component.
 			(define orth (if (null? wrd) -999
@@ -805,12 +805,12 @@
 ; (length cit-vil)
 ;
 ; Show the first three values of the vector:
-; (ptu 'pair-count (car cit-vil))
-; (ptu 'pair-count (cadr cit-vil))
-; (ptu 'pair-count (caddr cit-vil))
+; (ptu 'get-count (car cit-vil))
+; (ptu 'get-count (cadr cit-vil))
+; (ptu 'get-count (caddr cit-vil))
 ;
 ; print the whole vector:
-; (for-each (lambda (pr) (ptu 'pair-count pr)) cit-vil)
+; (for-each (lambda (pr) (ptu 'get-count pr)) cit-vil)
 ;
 ; Is it OK to merge?
 ; (define pcos (add-pair-cosine-compute psa))
