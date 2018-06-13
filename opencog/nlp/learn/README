@@ -130,7 +130,14 @@ important for saving partial results.
      RAM (or less RAM), more disk, or less disk. Handy for load-
      balancing, and/or easily moving to a bigger system.
 
-0.2) Probably mandatory.  Chances are good that you'll work with large
+0.2) (Optional but strongly recommended) Install system shutdown scripts.
+   This will help protect your data in case of an unexpected power loss.
+   These scripts, and the instructions for them, are located in the
+   `run/rc.local.shutdown`, `run/rc-local-shutdown.service` and the
+   `run/rc.lxc.shutdown` files. You will need to alter these files, and
+   use your own login credentials in place of the generic ones.
+
+0.3) Probably mandatory.  Chances are good that you'll work with large
    datasets; in this case, you need to do the below. Skipping this
    step will lead to the error `Too many heap sections: Increase
    MAXHINCR or MAX_HEAP_SECTS`. So:
@@ -143,7 +150,7 @@ important for saving partial results.
    make; sudo make install
 ```
 
-0.3) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+0.4) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
 ```
    git clone git://git.sv.gnu.org/guile.git
@@ -157,7 +164,7 @@ important for saving partial results.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
-0.4) Create/edit the `~/.guile` file and add the content below.
+0.5) Create/edit the `~/.guile` file and add the content below.
    This makes the arrow keys work, and prints nicer stack traces.
 ```
    (use-modules (ice-9 readline))
@@ -168,7 +175,7 @@ important for saving partial results.
    (add-to-load-path ".")
 ```
 
-0.5) Opencog should be built with `link-grammar-5.5.0` or newer.
+0.6) Opencog should be built with `link-grammar-5.5.0` or newer.
    The currently installed version can be displayed by running
 ```
    link-parser --version
