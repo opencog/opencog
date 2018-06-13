@@ -43,24 +43,28 @@
 ; NOTE: This script assumes that compute-mi-launch.scm has
 ; already stored the mutual information for the pairs after
 ; an observe pass over the same sentences to be parsed.
+(define pair-obj '())
+(define star-obj '())
+
 (if (equal? "mst" cog-mode)
 
-	; Load up the word-pairs -- this can take over half an hour!
-	((display "Fetch all word-pairs. This may take a few minutes!\n")
+	(begin
+		; Load up the word-pairs -- this can take over half an hour!
+		(display "Fetch all word-pairs. This may take a few minutes!\n")
 
-	; The object which will be providing pair-counts for us.
-	; We can also do MST parsing with other kinds of pair-count objects,
-	; for example, the clique-pairs, or the distance-pairs.
-	(define pair-obj (make-any-link-api))
-	(define star-obj (add-pair-stars pair-obj))
-	(pair-obj 'fetch-pairs)
+		; The object which will be providing pair-counts for us.
+		; We can also do MST parsing with other kinds of pair-count objects,
+		; for example, the clique-pairs, or the distance-pairs.
+		(set! pair-obj (make-any-link-api))
+		(set! star-obj (add-pair-stars pair-obj))
+		(pair-obj 'fetch-pairs)
 
-	; Print the sql stats
-	(sql-stats)
+		; Print the sql stats
+		(sql-stats)
 
-	; Clear the sql cache and the stats counters
-	(sql-clear-cache)
-	(sql-clear-stats)
-	(print-matrix-summary-report star-obj)
+		; Clear the sql cache and the stats counters
+		(sql-clear-cache)
+		(sql-clear-stats)
+		(print-matrix-summary-report star-obj)
 
-	(display "Done fetching pairs.\n")))
+		(display "Done fetching pairs.\n")))
