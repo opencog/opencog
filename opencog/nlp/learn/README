@@ -758,10 +758,10 @@ are as follows:
   performance stats, and a matrix summary report. You're good to
   go once these appear.
 
-* Make a copy of the `wiki-mst-en.sh` file, and adjust the location
+* Make a copy of the `mst-submit-en.sh` file, and adjust the location
   of the  text files, and the port number, to match the above.  If
   you accept the defaults, no changes are needed.  In one of the tmux
-  terminals, run the `wiki-mst-en.sh` file.  This starts the MST
+  terminals, run the `mst-submit-en.sh` file.  This starts the MST
   processing stage.  As before, the text files will be moved to the
   `split-articles` directory while they are being processed, and then
   finally to the `mst-articles` directory, when processing is complete.
