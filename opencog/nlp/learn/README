@@ -1,11 +1,12 @@
 
-                   Language Learning
-                   -----------------
-             Linas Vepstas December 2013
-                 Updated May 2017
+Language Learning
+-----------------
+* Linas Vepstas December 2013
+* Updated May 2017
+* Updated June 2018
 
-Current project, under construction.  See the [language learning wiki]
-(http://wiki.opencog.org/w/Language_learning)
+Current project, under construction.  See the
+[language learning wiki](http://wiki.opencog.org/w/Language_learning)
 for an alternate overview.
 
 Summary
@@ -29,13 +30,22 @@ C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
    of sentences.  This requires ingesting a lot of raw text, again.
    (Independently of step A)
 D) Extract linkage disjuncts from the parses, and count their frequency.
-E) Use maximum-entropy principles to merge similar linkage disjuncts.
-   This will also result in sets of similar words. Presumably, the
-   sets will roughly correspond to nouns, verbs, adjectives, and so-on.
+E) Use agglomerative clustering to merge similar linkage disjuncts,
+   while simultaneously merging similar words.  This will result in
+   a set of word-classes (grammatical classes) with disjuncts on them
+   that use word-class connectors.
+F) Place word-classes and word-class connectors into a link-grammar
+   dictionary.
+G) Parse a large quantity of raw text, using the parser constructed in
+   the previous step. Using maximum-entropy-style techniques, attempt
+   to extract higher-ordder relations (resolve anaphora and other
+   referents, determine rheme+theme, learn "lexical functions")
 
-Currently, the software implements steps A, B, C and D. Step E is
-a topic of current research; its not entirely clear what the best
-merging algorithm might be, or how it will work.
+Currently, the software implements steps A, B, C, D, F and much of
+step E, although this step remains a topic of current research.
+Its quite unclear how to determine the quality of lexis that falls out
+of step F.  Some initial experiments on step G have been performed,
+and look promising.
 
 Steps A-C are "well-known" in the academic literature, with results
 reported by many researchers over the last two decades. The results
@@ -43,6 +53,27 @@ from Steps D & E are new, and have never been published before.
 (Results from Step D can be found in the file, in this directory
 `learn-lang-diary/drafts/connector-sets.lyx`, the PDF of which
 was posted to the mailing lists)
+
+It is very important to understand that Step E is VERY DIFFERENT from
+commonly-reported algorithms used in the published literature, such as
+using K-means clustering and dimensional reduction to obtain word
+classes (gramatical categories). The reason for this is that the
+disjuncts provide connectivity information, and one is NOT clustering
+over a vector space, one must instead cluster over a "sheaf".  That is,
+the basis-elements of the vector space themselves have non-trivial
+structure (which must not be ignored).  Sheaves resemble vector spaces,
+but are not the same.  They capture and describe the connectivity
+information in the "basis elements".
+
+As a result, NONE of the industry-standard classifiers and clustering
+algorithms can be applied to step E: they all assume that the input
+data can be structured as a vector space.  The axioms of algebraic
+linguistics can resemble the axioms of a vector space, which is why
+vector-space techniques can work pretty well in the machine-learning
+of linguistic structure. However, ultimately, the axioms of algebraic
+linguistics are NOT the axioms of a vector space.  In practical terms,
+this means that clustering/classification algorithm used in step E is
+completely different than anything else available in the industry.
 
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
@@ -340,6 +371,12 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    bullets are not needed. In particular, word counts are not needed;
    they are almost evil to collect, as they serve to confuse things.
 
+   Knowing th length of the pairs might be important for "understanding"
+   that adjectives, adverbs, determiners and possessives modify only
+   nearby words. They might be important in analyzing morphology.
+   Currently, no other code examines lengths; this is an open
+   experiment.
+
 11) (Optional) Review the `sometimes-gc` and `maybe-gc` settings in
    the file `link-pipeline.scm`.  These force garbage collection to
    occur more often than normal; they help keep the process size
@@ -350,13 +387,13 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    `link-pipeline.scm` file to suit your whims in RAM usage and time
    spent in GC.  The default should be adequate for almost all users.
 
-XXXXXXXXXXXXXXX
-everything below here is wrong or misleading or incomplete.
-Please wait.
 
-Play with pair countings, see link-pipeline.scm
+12) Its conenient to have lots of terminals open and ready for use;
+   the `byobu` terminal server provides this, without chewing up a
+   lot of screen real-estate.
 
-12)
+`run-all
+
  Eventually, you can use the
    `run-server-parse.sh` file in the `run` directory to do this;
    it creates a `byobu` session with different servers in different
@@ -364,6 +401,10 @@ Play with pair countings, see link-pipeline.scm
 * `wiki-ss-en.sh` starts the process of observing the text files contained
    in the beta-pages folder, more on that later (see Bulk Text Parsing).
    The rest of the relevant files are explained later.
+
+XXXXXXXXXXXXXXX
+everything below here is wrong or misleading or incomplete.
+Please wait.
 
 
 12) After doing at least several days worth of parsing  (i.e. at least
