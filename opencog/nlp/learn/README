@@ -591,16 +591,48 @@ Again, this is a key insight: the axioms of graph-theory are somewhat
 similar to the axioms of a vector space (but are not the same). This
 similarity can be used and abused: the `matrix` subsystem allows
 portions of a graph to be viewed as a collection of vectors.  The
-tools then allow probabilities, entropies and mutual invormation to
+tools then allow probabilities, entropies and mutual information to
 be computed for these vectors.
 
 
-XXXXXXXXXXXXXXX
-everything below here is wrong or misleading or incomplete.
-Please wait.
+Minimum Spanning Trees
+----------------------
+The next step of the processing pipeline is to determine some
+provisional, plausible disjuncts that can be associated with words.
+A disjunct can be thought of as "just like an N-gram" or "just like a
+skip-gram", except that (unlike N-grams/skip-grams) the disjunct
+contains additional connectivity information.  The disjunct indicates
+which words are allowed to "connect" to which other words, and in
+what order those connections can be performed.  It is the connectivity
+information between words that captures the grammar of a language.
 
-Minimum Spanning Tree parsing
--------------------------------
+To be clear: if one has explicit and accurate information about the
+connectivity between words, then it is straight-forward to convert
+that information into a natural-language grammar, in any one of a
+number of competing systems, such as Head-Phrase Structure Grammar
+(HPSG), or Categorial Grammar (CG), or Dependency Grammar (DG). The
+primary focus here is on Link Grammar (LG), which can be thought of
+as a kind of dependency grammar. All of these different systems are
+roughly equivalent, and grammars expressed in one of the systems can
+be transformed into grammars expressed in one of the others, in a
+fairly straight-forward, purely mechanical way.
+
+Thus, the goal is to obtain reasonably-accurate connectivity information
+between words, accumulating observation counts, so that, eventually,
+the most likely word-usages and word-connectivity emerge from the noise.
+This again requires crunchin a lot of raw text.
+
+Semi-accurate connectivity information can be obtined by MST parsing.
+The result of such parsing is OK, but falls short of being great; this
+has been demonstrated a number of times, most clearly and notably in
+Deniz Yuret's PhD thesis.  The goal of this processing step is to
+accumulate connectivity information from a very large number of MST
+parses, with the hope that the incorrect/conflicting parses will average
+each-other out (destructuve interference) while the correct parses will
+reinforce and become statistically clear (construictive interference).
+
+
+xxxxxxx
 The MST parser discovers the minimum spanning tree that connects the
 words together in a sentence.  The link-cost used is (minus) the mutual
 information between word-pairs (so we are maximizing MI). Thus, MST
@@ -664,6 +696,10 @@ To perform MST parsing in bulk:
 
 * If the process is stopped for any reason, you can just re-run these
   scripts; they will pick up where they left off.
+
+XXXXXXXXXXXXXXX
+everything below here is wrong or misleading or incomplete.
+Please wait.
 
 
 Exploring Connector-Sets
