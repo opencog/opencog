@@ -514,30 +514,90 @@ Some of the other files used in processing:
    sentences, and then calls `submit-one.pl` to send the sentences to the
    cogserver for parsing. None of these should need any modification.
 
-XXXXXXXXXXXXXXX
-everything below here is wrong or misleading or incomplete.
-Please wait.
-
 
 Mutual Information of Word Pairs
 --------------------------------
-After accumulating a few million word pairs, we're ready to compute
-the mutual entropy between them.
-This is done by running
+After observing word-pair counts, the mutual information (mutual
+entropy) between them needs to be computed.  This is a required step
+before disjunct observation can be started.
 
-XXX This is too complicated!  Go back to the old way of doing things.
+This is most-easily done manually, by cutting and pasting the scheme
+code below into a guile shell.  Adjust the database URL for the specific
+database that contains word-pairs.
 
 ```
-guile -l compute-mi.scm  -- --lang ?? --db ??-pairs --user your_user --password asdf
+   (use-modules (opencog) (opencog persist) (opencog persist-sql))
+   (use-modules (opencog matrix))
+   (use-modules (opencog nlp) (opencog nlp learn))
+   (sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
+   (define ala (make-any-link-api))
+   (define asa (add-pair-stars ala))
+   (batch-pairs asa)
+   (print-matrix-summary-report asa)
 ```
-(again, --user and --password are optional, as explained in step 5 above).
-It uses the `(opencog matrix)` subsystem to perform the core work.
 
-Batch-counting might take hours or longer, depending on your dataset
-size. The batching routine will print to stdout, giving a hint of
-the rate of progress.
+Batch-counting might take hours or longer (maybe over a day), depending
+on your dataset size. Small trial-run datasets should take no mmore than
+5-10 minutes.  The `batch-pairs` routine will print to stdout, giving a
+hint of the rate of progress.  The `print-matrix-summary-report` will
+print some technical stats about the result of the run.
+
+Note that any kind of pair `(x,y)` of things `x,y` that have a number
+`N(x,y)` associated with the pair can be though of as a matrix from
+linear algebra.  That is, `N` is a number, `x` is a row-index, and `y`
+is a column-index, for the `(x,y)`'th entry of the matrix `N`.
+
+In the current case, both `x` and `y` are `WordNode` Atoms, and `N(x,y)`
+is an observation count, for how often the word-pair `x,y` was observed.
+Note that this matrix is **extremely sparse**: if there are 10K words,
+there are in principle 10K x 10K = 100M entries; of these, fewer than
+a million will have been observed just once, and half of that twice.
+(following Zipf's law - a quarter of those observed 4 times, etc.).
+
+Given `N(x,y)`, one can compute the marginal sums `N(x,*)`, `N(*,y)`
+and `N(*,*)` (with `*` denoting the wild-card).  The observed frequency
+is then given by `p(x,y) = N(x,y)/N(*,*)` -- this is the so-called
+"frequentist probability" -- a probability obtained from counting how
+often something actually occured.
+
+Given the `p(x,y)`, one can go on to compute marginal entropies, such
+as `H(x,*) = -sum_y p(x,y) log_2 p(x,y)` and so on. Mutual information
+is defined similarly.  Please be aware that none of these quantities
+are symmetric: in general, `N(x,y)` does NOT equal `N(y,x)`, and that
+likewise, `N(x,y)` does NOT equal `N(y,x)`, and thus, in general, the
+mutual information will also not be symmetric: `MI(x,y)` does NOT equal
+`MI(y,x)`.  This is because the order of the words in a word-pair is
+important: words do not come randomly distributed. This can lead to a
+considerable amount of confusion, when comparing to the definition of
+mutual information given in textbooks, references and Wikipedia:
+usually, those references only provide a symmetric definition, suitable
+only when events are not sequentially ordered. That definition is **not
+the same** as that being used here, although it looks quite similar.
+Failure to make note of this can lead to a lot of confusion!
+
+Anyway ... the `batch-pairs` script computes all of these marginals.
+The `print-matrix-summary-report` reports on the resulting matrix.
+Note that both of these rouintes are generic: they will work for
+any collection of pairs of atoms, and not just `WordNode`s. What's
+more, the type of `x` and the type of `y` don't even have to be the
+same; these can be two different types of Atoms.  Nor do the two atoms
+have to be yoked by a single `Link`; they can exist as two distinct
+atoms embedded in more complex AtomSpace patterns of any kind.  The
+`matrix` subsystem slaps a two-D matrix API onto arbitrary patterns
+in the AtomSpace, allowing essentially any complex graphical shape
+to be viewed as a collection of vectors.
+
+Again, this is a key insight: the axioms of graph-theory are somewhat
+similar to the axioms of a vector space (but are not the same). This
+similarity can be used and abused: the `matrix` subsystem allows
+portions of a graph to be viewed as a collection of vectors.  The
+tools then allow probabilities, entropies and mutual invormation to
+be computed for these vectors.
 
 
+XXXXXXXXXXXXXXX
+everything below here is wrong or misleading or incomplete.
+Please wait.
 
 Minimum Spanning Tree parsing
 -------------------------------
