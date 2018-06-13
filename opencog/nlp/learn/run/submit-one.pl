@@ -20,7 +20,7 @@ die "Wrong number of args!" if ($#ARGV != 2);
 `nc -z $ARGV[0] $ARGV[1]`;
 die "Netcat failed! Bad host or port?" if (0 != $?);
 
-my $netcat = "|nc $ARGV[0] $ARGV[1]";
+my $netcat = "|nc -N $ARGV[0] $ARGV[1]";
 
 my $start_time = time();
 while (<STDIN>)
