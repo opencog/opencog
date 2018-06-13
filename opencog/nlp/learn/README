@@ -968,8 +968,35 @@ altered by the clustering code):
   Again, `(w,d)` is just a pair. Like other pairs, its a matrix, and
   has marginal probabilities associated with it.
 
+
 Next steps
 ----------
+The clustering code is in development, and the best/fastest algorithms
+are not yet known.  The best metrics are not known; currently, the code
+uses cosine distance, but the (symmetric) mutual information is surely
+better.
+
+It is not clear how to judge the quality of the results. Manual
+inspection looks pretty good. Manual inspection does not reveal that
+one or another variant with different parameters is qualitatively
+better.
+
+Given a set of grammatical classes derived in this way, together with
+disjuncts that are formed from the classes, these can be loaded into
+link-grammar dictionaries. Use the `export-disjuncts.scm` file to do
+this. The exported lexis is in `sqlite3` format, which the link-grammar
+parser understands.
+
+A reasonable next step is to run raw text through this parser,
+accumulate statistics on the individual disjuncts, and see how they
+stack up against the original stats. Are some disjuncts being used far
+more often? Far less often? If so, what does that mean?
+
+Can two different dictionaries be compared? Surely, some will give
+different parses than others; where do they differ? Why?
+
+Given a stable dictionary, an obvious next step is to attempt to
+perform reference resolution.
 
 
 Precomputed LXC containers
@@ -980,9 +1007,10 @@ The set of available containers will change over time.  The first one
 actually has a bunch of bugs and other problems with it, but it's
 enough to do some basic work. The steps are:
 
-* Make sure you have some relatively modern Linux system handy.
+* You'll still need to satisfy at least some of the hardware
+  requirements listed previously.
 
-* Install lxc on it. Like so:
+* Install lxc, Like so:
 ```
   sudo apt-get install lxc
 ```
@@ -1006,8 +1034,8 @@ simil-en       STOPPED 0         -      -         -
 
 * Start the container by saying `lxc-start -n simil-en`. Give it
   5 or 10 or 30 seconds to boot up. Then `lxc-ls -f` again. You
-  should see the below. It ay take a minute for the IPV4 address to
-  show up. You will proably get a different IP than the one shown.
+  should see the below. It may take a minute for the IPV4 address to
+  show up. You will probably get a different IP than the one shown.
 ```
 NAME           STATE   AUTOSTART GROUPS IPV4      IPV6
 simil-en       RUNNING 0         -      10.0.3.89 -
@@ -1037,9 +1065,6 @@ simil-en       RUNNING 0         -      10.0.3.89 -
 
 That's all for now!
 -------------------
-The next step is to cluster the pseudo-disjuncts into clusters, and
-thereby extract grammar. There is no code for this, so far. You're
-on your own.
 
 Everything below this point consists of personal notes, of work-items
 of stuff that still needs doing. You can ignore the rest of this file.
