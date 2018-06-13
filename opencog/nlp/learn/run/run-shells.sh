@@ -25,10 +25,10 @@ byobu new-window -n 'cogsrv' 'nice guile -l pair-count-en.scm; $SHELL'
 sleep 2;
 
 # Telnet window
-tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
+tmux new-window -n 'telnet' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
-tmux new-window -n 'process' \
+tmux new-window -n 'submit' \
 	'echo -e "\nYou might want to run ./pair-submit-en.sh here.\n"; $SHELL'
 
 # Spare

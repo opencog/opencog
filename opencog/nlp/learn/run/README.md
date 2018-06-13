@@ -23,7 +23,7 @@ A quick overview:
 * `pair-submit-??.sh`: language-specific word-pair-counting scripts.
   These pull text files, one by one, from the data directory, and
   submit them for word-pair counting. Pick one, and run it manually
-  the 'process' byobu window.  Be sure to open the database, first.
+  the 'submit' byobu window.  Be sure to open the database, first.
   The directory containing the text files needs to be manually adjusted
   here; its `beta-pages` by default, but you can use any directory
   that you wish.
@@ -31,7 +31,7 @@ A quick overview:
 * `mst-submit-??.sh`: language-specific MST processing scripts.
   These pull text files, one by one, from the data directory, and
   submit them for MST processing. Pick one, and run it manually
-  the 'process' byobu window.  Be sure to have performed the mutual
+  the 'submit' byobu window.  Be sure to have performed the mutual
   information step first. Be sure to make a copy of your database.
   Be sure to open the database, first.
 
