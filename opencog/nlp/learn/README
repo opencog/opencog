@@ -406,20 +406,28 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
 
 
 12) Its conenient to have lots of terminals open and ready for use;
-   the `byobu` terminal server provides this, without chewing up a
-   lot of screen real-estate.
+   the `byobu+tmux` terminal server provides this, without chewing up
+   a lot of screen real-estate.  The `run-shells.sh` script will run
+   a `byobu/tmux` session, start the cogserver in one of the terminals,
+   and leave open several other terminals for general use.
 
-`run-all
+   Make a copy this file, and manually alter it to start the cogserver
+   the way that you want it started.
 
-tmux
+   The `wiki-ss-en.sh` script starts the process of observing text
+   for pair-counting. It looks for files in the `beta-pages` directory,
+   performs sentence-splitting (ss) on each, and then passes these to
+   the pair-counting scripts.
 
- Eventually, you can use the
-   `run-server-parse.sh` file in the `run` directory to do this;
-   it creates a `byobu` session with different servers in different
-   terminals, where you can keep an eye on them. However, the
-* `wiki-ss-en.sh` starts the process of observing the text files contained
-   in the beta-pages folder, more on that later (see Bulk Text Parsing).
-   The rest of the relevant files are explained later.
+   Make a copy of this file, and edit it to change the location of your
+   text files (if not using the default `beta-pages`) and to change the
+   port number (if not using the default 17005 for English). For
+   convenience, there are other files `wiki-ss-??.sh`, set up for other
+   languages, using alternative default port numbers.
+
+   Run `wiki-ss-en.sh` in one of the byobu terminals.
+
+13)
 
 XXXXXXXXXXXXXXX
 everything below here is wrong or misleading or incomplete.
