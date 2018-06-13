@@ -595,7 +595,7 @@ tools then allow probabilities, entropies and mutual information to
 be computed for these vectors.
 
 
-Minimum Spanning Trees
+Maximum Spanning Trees
 ----------------------
 The next step of the processing pipeline is to determine some
 provisional, plausible disjuncts that can be associated with words.
@@ -629,15 +629,31 @@ Deniz Yuret's PhD thesis.  The goal of this processing step is to
 accumulate connectivity information from a very large number of MST
 parses, with the hope that the incorrect/conflicting parses will average
 each-other out (destructuve interference) while the correct parses will
-reinforce and become statistically clear (construictive interference).
+reinforce and become statistically clear (constructive interference).
+(And this is indeed what actually happens!)
 
+This is done by constructing a Maximum Spanning Tree (MST) between the
+words in a sentence.  The tree contains just enough edges to connect
+every word in the sentence.  The quantity being maximized is the sum of
+the mutual information between word-pairs.  There is exactly one such
+tree that maximizes the total MI.
+
+After obtaining such a tree, each edge is "cut in half", leaving behind
+a word, with dangling, disconnected half-edges attached to it. The
+collection of dangling half-edges is called a "disjunct"; each half-
+edge is called a "connector" (some parts of the code use the words
+"connector set", "connector sequence" and "section" as synonyms for
+"disjunct". Sometimes, they are called "pseudo-disjuncts" (and "pseudo-
+connectors"), to distinguish from "real" connectors and disjuncts,
+defined later.  This is a historical artifact.)
+
+The specific disjunct that remains behind depends very strongly on the
+word itself (of course) and on the MST tree for the sentence that the
+word was in. The code in this part of the pipeline accumulates
+observation counts on the large variety of possible disjuncts (that is,
+word-disjunct pairs) that can be observed.
 
 xxxxxxx
-The MST parser discovers the minimum spanning tree that connects the
-words together in a sentence.  The link-cost used is (minus) the mutual
-information between word-pairs (so we are maximizing MI). Thus, MST
-parsing cannot be started before the above steps to compute word-pair
-MI have been accomplished.
 
 Minimum spanning tree code is in `mst-parser.scm`. The current version
 works well.
