@@ -8,19 +8,25 @@ to any flat text files from any origin of your choice.  Some tools
 for downloading Wikipedia and Project Gutenberg texts can be found
 in the `../download` directory.
 
-You may want to tailor some of these scripts to fit your needs.
+You will typically want to make copies of these, and tailor them to
+your specific needs and proceedures. In particular, many of these
+files require database credentials to be set; the exact credentials
+to use will depend on which copy of which database you are using.
+You WILL be copying around a lot of databases!
 
 A quick overview:
 
-* `run-all-servers.sh`: the top-level shell script; opens multiple
-  terminal sessions with tmux/byobu, and starts both opencog and
-  the relex servers. Use F3 and F4 to switch to different terminals.
+* `run-shells.sh`: multi-tasking terminal server.  Opens multiple
+  terminal sessions with tmux/byobu, and starts the cogserver in one
+  of them.  Use F3 and F4 to switch to different terminals.
 
-* `wiki-ss-*.sh`: the top-level parser script. It pulls text files, one
-  by one, from the data directory, and submits them for parsing and
-  counting.  This script should be manually launched in the 'parse'
-  byobu window.  Be sure to open the database, first. The data directory
-  needs to be manually adjusted here, and also in the ss-one.sh script.
+* `wiki-ss-??.sh`: language-specific word-pair-counting scripts.
+  These pulls text files, one by one, from the data directory, and
+  submits them for word-pair counting. Pick one, and run it manually
+  the 'process' byobu window.  Be sure to open the database, first.
+  The directory containg the text files needs to be manually adjusted
+  here; its `beta-pages` by default, but you can use any directory
+  that you wish.
 
 * `ss-one.sh`: the actual sentence-splitting workhorse. It handles each
   text file, moving the file to a different directory when finished
@@ -30,7 +36,7 @@ A quick overview:
 * `ss-nosplit-one.sh`: similar to above, but assumes that the text-file
   contains one sentence per line - i.e. has been pre-split.
 
-* `submit-one.pl`: script to actually send sentences to the REPL server.
+* `submit-one.pl`: script to send sentences to the cogserver.
 
 * `split-sentences.pl`: split text into sentences. Accepts free-form text,
   and looks for likely end-of sentence locations, so that there is one

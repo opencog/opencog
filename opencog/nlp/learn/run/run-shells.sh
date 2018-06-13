@@ -28,7 +28,7 @@ sleep 2;
 tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
-tmux new-window -n 'parse' \
+tmux new-window -n 'process' \
 	'echo -e "\nYou might want to run ./wiki-ss-en.sh here.\n"; $SHELL'
 
 # Spare
