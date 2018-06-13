@@ -75,6 +75,16 @@ linguistics are NOT the axioms of a vector space.  In practical terms,
 this means that clustering/classification algorithm used in step E is
 completely different than anything else available in the industry.
 
+The complete novelty of step E, coupled to the need to perform
+experiments in earlier and later stages means that industry-standard,
+generic big-data, machine-learning tools are wholly inadequate for the
+task. It is for thus reason that all data processing is being done in
+the AtomSpace, and not in some other machine learning or big-data
+framework. Existing industry tools are not adequate for proper
+linguistic analysis. This is a very important reason for developing
+the AtomSpace, and other OpenCog infrastructure: to get past tool
+limitations.
+
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
 different hypergraphs.  The contents of the atomspace are saved to an
