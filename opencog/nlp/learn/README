@@ -354,6 +354,8 @@ XXXXXXXXXXXXXXX
 everything below here is wrong or misleading or incomplete.
 Please wait.
 
+Play with pair countings, see link-pipeline.scm
+
 12)
  Eventually, you can use the
    `run-server-parse.sh` file in the `run` directory to do this;
@@ -401,6 +403,8 @@ xxxxxx
 14) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
+
+
 
 
 Bulk Text Parsing
