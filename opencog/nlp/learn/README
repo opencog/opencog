@@ -751,7 +751,7 @@ are as follows:
 * Wait. And then wait a little bit longer. If you set up `run-shells.sh`
   to automatically start `guile -l mst-count-en.scm`, then it will
   stall. If you look at that file, you will notice the line
-  `(pair-obj 'fetch-pairs)` -- this load all word-pairs into the
+  `(pair-obj 'fetch-pairs)` -- this loads all word-pairs into the
   AtomSpace. This can ake anywhere from 10 minutes to several hours,
   depending on the size of your word-pair database. If you start this
   in byobu, you will need to wait until it prints, and the guile prompt
@@ -773,6 +773,85 @@ are as follows:
   up again, with the last unprocessed file.  You may want to empty out
   the `mst-articles` directory -- those files are no longer needed
   (assuming you still have the originals).
+
+  As before, it is reasonable to run this for at least several days,
+  if not a week or two, to accumulate a sufficient number of observation
+  counts for the disjuncts.  For a trial-run, a half-hour should be
+  sufficient.
+
+
+Determining Grammatical Classes
+-------------------------------
+The point of counting disjuncts is to obtain a good statistical sampling
+of what words connect to what words: a big collection of these "dangling
+cut-in-half edges" that make up a disjunct.  With this dataset, you now
+have a pretty good idea of which words typically attach to other words,
+and how many connectors they need to do this.  This dataset has captured
+the syntactic structure of the language, on a word-by-word basis,
+complete with statistical information about how often each disjunct
+occurs, relative to all the others.
+
+Unfortunately, its a huge dataset, and it still contains some fair
+amount of noise (although it contains less noise than a single MST
+tree -- all of those bad MST parses are begining to average out).
+Further averaging and noise reduction (and thus, higher accuracy)
+can be acheived by classifying individual words into grammatical
+categories. Doing so, however, also requires that the disjuncts also
+be classfied: disjuncts consist of connectors, each connector
+specifying just a single word. The words in the connectors **also**
+have to be merged into grammatical categories. What's more, these
+categories have to be consistent with the categories obtained from
+clustering the words.
+
+This requirement makes the algorithm for discovering grammatical
+classes fundamentally unique, and different than any other clustering
+algorithm employed before. This is not an exaggeration; however,
+many/most people struggle with this concept, so its sketched below.
+The paper on "Sheaf Theory", located at
+https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/sheaves.pdf
+explains this in greater detail.  There will also be an upcoming blog
+post on this.
+
+The collection of (word,disjunct) pairs can be thought of as a
+collection of vectors, one per word.  The observed frequency `p(w,d)`
+for word `w` and disjunct `d` can be thought of as the vector magnitude
+for the basis element `d`. That is, a word `w` can be represented as
+the vector
+```
+   v = p(w,d_1) e_1 + p(w,d_2) e_2 + ... p(w, d_n) e_n
+```
+The `e_k` are the basis elements of the vector space.  There is exactly
+one such basis element for each disjunct `d_k`, and so one can safely
+think of the `d_k` and the `e_k` as being the same thing. We use the
+notation `e_k` here because this is the textbook-standard way of writing
+the basis vector of a vector space.  Its the same thing. The `e_k` are
+basis vectors.
+
+There is one such vector per word. The probabilities `p(w,d)` are
+experimentally determined.  Since there is a vector per word, all of the
+industry-standard concepts can be applied: one can compute the cosine
+angle between two words. One can compute the jaccard distance.  One
+can compute the (symmetric!) mutual information between two words (the
+Kullbeck-Liebler divergence) because now, the word-order no longer
+matters; the two words are no longer embedded in a sentence.  All of
+these different metrics give a hint at how similar or different two
+words might be.
+
+It is now super-duper tempting to apply industry-standard big-data
+tools to obtain clusters. For example, one can do K-means clustering,
+if one wished.  One can take the famous, well-known Adagram or Word2Vec
+algorithms, and replace the n-grams/skip-grams in these algos by the
+disjuncts. That is, the disjunct-vector above is really very, very much
+like a traditional n-gram/skip-gram.  If one applies these, or other
+neural-net techniques to the disjunct vectors, one could get results
+that are very similar to what the current n-gram/skip-gram techniques
+are producing.  The results would be similar because the "statistical
+power" in the word-disjunct vectors is very similar to the statistical
+power in a skip-gram. They really are not all that different.
+
+***HOWEVER...***
+
+
 
 XXXXXXXXXXXXXXX
 everything below here is wrong or misleading or incomplete.
