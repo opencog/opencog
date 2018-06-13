@@ -427,52 +427,50 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
 
    Run `wiki-ss-en.sh` in one of the byobu terminals.
 
-13)
+13) Pair-counting can take days or weeks.  The `wiki-ss-en.sh` will run
+   until all of the text files have been processed, or until it is
+   interrupted.  If it is interrupted, it can be restarted; it will
+   resume with the previous unfinished text file. As text files are
+   being processed, they are moved to the `split-articles` directory
+   and then, to the `submitted-articles` directory.  The input directory
+   will gradually empty out, the `submitted-articles` directory will
+   gradually fill up.  Progress can be monitored by saying `find |wc`.
+
+   Although high-quality pair-counts require a minimum of several days
+   of processing, a half-hour or so is sufficient for a trial run.
+   Feel free to ctrl-C at this point, and move to the next step
+   (covered in the section **Mutual Information** below.)
+
+Notes:
+* Segmentation for Chinese. Currently, only some preliminary work has
+  been done for word segmentation in Chinese. It is incomplete. In the
+  meanwhile, if you want to just skip to the next step, you can use an
+  off-the-shelf segmenter.  Its got OK-but-not-great accuracy.
+
+  This can be done using jieba
+      https://github.com/fxsjy/jieba
+  If you are working with Chinese texts, install:
+  `pip install jieba` and then segment text:
+  `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
+  the `run` directory.  You will need to create modified versions of
+  the `run/ss-one.sh` and `run/mst-one.sh` scripts to invoke jieba.
+
+  To run this segmenter, you will also need to run the sentence-splitter
+  differently.  Use the `zh-pre` or `yue-pre` languages with the
+  sentence splitter -- these will split on sentence boundaries, only,
+  and do no other processing.  By contrast, the `zh` or `yue` languages
+  insert a blank space between hanzi characters.
+
+* Morphology. Some work on morphology has been done; but there are no
+  pre-written scripts for the processing pipeline to handle this. You
+  are on your own, for now.
+
 
 XXXXXXXXXXXXXXX
 everything below here is wrong or misleading or incomplete.
 Please wait.
 
-
-12) After doing at least several days worth of parsing  (i.e. at least
-   hundreds of articles, tens of thousands of sentences) the word-pair
-   mutual information can be extracted. Do the stuff in section "Mutual
-   Information" section below.
-
-   If the parsing is interrupted, you can restart the various scripts;
-   they will automatically pick up where they left off.
-
-11) The current pipeline for Chinese text requires word segmentation
-  to be performed outside of OpenCog.
-
-XXX Except that, no it doesn't these instructions are wrong!
-
-  This can be done using jieba
-  https://github.com/fxsjy/jieba
-  If you are working with Chinese texts, install:
-  `pip install jieba` and then segment text:
-  `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
-  the `run` directory.  It might be best to create modified versions
-  of the `run/ss-one.sh` and `run/mst-one.sh` scripts to invoke jieba;
-  I have not done this yet. Soon...
-
-  Instead of using the `zh` or `yue` languages for sentence splitting,
-  you will want to use `zh-pre` or `yue-pre` for the language; this
-  disables the addition of spaces between hanzi characters.
-
 xxxxxx
-13) Using the extracted mutual information for word-pairs, the MST
-   parsing step can be started. See the section "Minimum Spanning Tree
-   parsing" below. Run this for several days.
-   At the end of this, you will have a bunch of statistics on
-   "pseudo-connector sets": pairs which associate a word to a
-   disjunct of pseudo-connectors.
-
-14) Perform clustering research.  You're on your own, now.
-
-That's all for now, folks!
-
-
 
 
 Bulk Text Parsing
