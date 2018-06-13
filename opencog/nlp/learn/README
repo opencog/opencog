@@ -411,6 +411,8 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
 
 `run-all
 
+tmux
+
  Eventually, you can use the
    `run-server-parse.sh` file in the `run` directory to do this;
    it creates a `byobu` session with different servers in different

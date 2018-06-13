@@ -1,10 +1,12 @@
 #! /bin/bash
 #
-# run-all-servers.sh
+# run-shells.sh
 #
-# All-in-one script to start all servers on the local machine
-# This runs tmux with byobu to multiplex multiple terminals;
-# use F3 and F4 to swtich to the other terminals.
+# Run tmux with byobu to multiplex multiple terminals; start the
+# CogServer in one terminal, and suggest which processes to run
+# in others.
+#
+# Use F3 and F4 to switch to the other terminals.
 #
 
 # Work around an lxc-attach bug.
@@ -17,7 +19,8 @@ fi
 export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
 # Use byobu so that the scroll bars actually work
-byobu new-session -d -n 'cntl' '$SHELL'
+byobu new-session -d -n 'cntl' \
+	'echo -e "\nControl shell; you might want to run 'top' here.\n"; $SHELL'
 byobu new-window -n 'cogsrv' 'nice guile -l pair-count-en.scm; $SHELL'
 sleep 2;
 
@@ -29,15 +32,13 @@ sleep 2;
 tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
-# ./wiki-ss-en.sh
-tmux new-window -n 'parse' '$SHELL'
+tmux new-window -n 'parse' \
+	'echo -e "\nYou might want to run ./wiki-ss-en.sh here.\n"; $SHELL'
 
 # Spare
-tmux new-window -n 'spare' '$SHELL'
+tmux new-window -n 'spare' 'echo -e "\nSpare-use shell.\n"; $SHELL'
 
 # Fix the annoying byobu display
 echo "tmux_left=\"session\"" > $HOME/.byobu/status
 echo "tmux_right=\"load_average disk_io date time\"" >> $HOME/.byobu/status
 tmux attach
-
-echo "Started"
