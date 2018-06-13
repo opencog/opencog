@@ -38,7 +38,7 @@ F) Place word-classes and word-class connectors into a link-grammar
    dictionary.
 G) Parse a large quantity of raw text, using the parser constructed in
    the previous step. Using maximum-entropy-style techniques, attempt
-   to extract higher-ordder relations (resolve anaphora and other
+   to extract higher-order relations (resolve anaphora and other
    referents, determine rheme+theme, learn "lexical functions")
 
 Currently, the software implements steps A, B, C, D, F and much of
@@ -57,7 +57,7 @@ was posted to the mailing lists)
 It is very important to understand that Step E is VERY DIFFERENT from
 commonly-reported algorithms used in the published literature, such as
 using K-means clustering and dimensional reduction to obtain word
-classes (gramatical categories). The reason for this is that the
+classes (grammatical categories). The reason for this is that the
 disjuncts provide connectivity information, and one is NOT clustering
 over a vector space, one must instead cluster over a "sheaf".  That is,
 the basis-elements of the vector space themselves have non-trivial
@@ -87,14 +87,14 @@ limitations.
 
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
-different hypergraphs.  The contents of the atomspace are saved to an
+different hypergraphs.  The contents of the AtomSpace are saved to an
 SQL (Postgres) server for storage.  The system is fed with raw text
 using assorted ad-hoc scripts, which include link-grammar as a central
 component of the processing pipeline. Most of the data analysis is
 performed with an assortment of scheme scripts.
 
 Thus, operating the system requires three basic steps:
-* Setting up the atomspace with the SQL backing store,
+* Setting up the AtomSpace with the SQL backing store,
 * Setting up the misc scripts to feed in raw text, and
 * Processing the data after it has been collected.
 
@@ -116,7 +116,7 @@ unhappy, painful experience.
 0.1) Optional, but strongly recommended! Consider investing in an
    uninterruptible power supply (UPS) to avoid data loss/data
    corruption in the event of a power outage. The scripts below can
-   take weeks to run, and unexpceted power outages can corrupt
+   take weeks to run, and unexpected power outages can corrupt
    databases, resulting in weeks or months of lost work.
 
    You have been warned! This is not a joke!
@@ -127,34 +127,34 @@ unhappy, painful experience.
    observation statistics, as well as other data processing operations,
    is database intensive, and the writes to disk are often the main
    bottleneck to performance. In practice, 1TB (one terabyte) devoted
-   to just the postgres server is just barely enough to perform the
+   to just the Postgres server is just barely enough to perform the
    work described here. Database copies quickly chew up disk space.
    Individual databases are typically in the 10GB to 150GB in size,
    and the number of copies of a 150GB database that fit onto a
    1TB disk is not big.  2TB is a more comfortable size to work with.
 
-0.3) Get a machine with 4 or more CPU cores, and a minumum of 64GB RAM.
-   It will be less agonzing and infuriating if you have 128 GB RAM or
+0.3) Get a machine with 4 or more CPU cores, and a minimum of 64GB RAM.
+   It will be less agonizing and infuriating if you have 128 GB RAM or
    more.  The datasets do get large, and although many of the scripts
    are designed to only fetch from disk "on demand", the in-RAM sizes
    can get large. As I write this, my grammatical-clustering process
    is using 53GB resident-in-RAM working-set size (57GB virtual size).
-   You need additional RAM for the postgress server -- 24GB is
+   You need additional RAM for the Postgres server -- 24GB is
    reasonable -- and so 53+24=78GB is the current bare-minimum.  More,
    if you want to e.g. run a web-browser or something.
 
-   An alternative is to run postgres on one box, and the processing
+   An alternative is to run Postgres on one box, and the processing
    on another. This is a bit more complicated to deal with -- you will
-   want to have a high-speed ethernet between the two.  Two machines
+   want to have a high-speed Ethernet between the two.  Two machines
    are harder to monitor than one.
 
-0.4) Optional but recommmended. If you plan to run the pipeline on
+0.4) Optional but recommended. If you plan to run the pipeline on
    multiple different languages, it can be convenient, for various
    reasons, to run the processing in an LXC container. If you already
    know LXC, then do it. If not, or this is your first time, then don't
    bother right now. Come back to this later.
 
-   LXC containsers are nice because:
+   LXC containers are nice because:
    * Each container can have a different config, different datasets,
      and be executing different steps of the pipeline.  This is great,
      for juggling multiple jobs.
@@ -172,7 +172,7 @@ unhappy, painful experience.
    use your own login credentials in place of the generic ones.
 
 0.6) Mandatory.  You'll work with large datasets; default guile is
-   not equiped to deal wit the sizes encountered here.  Skipping this
+   not equipped to deal wit the sizes encountered here.  Skipping this
    step will lead to the error `Too many heap sections: Increase
    MAXHINCR or MAX_HEAP_SECTS`. So:
 ```
@@ -184,7 +184,7 @@ unhappy, painful experience.
    make; sudo make install
 ```
 
-0.7) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+0.7) The AtomSpace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
 ```
    git clone git://git.sv.gnu.org/guile.git
@@ -223,12 +223,12 @@ unhappy, painful experience.
 
 Setting up the AtomSpace
 ------------------------
-This section describes how to set up the atomspace to collect
+This section describes how to set up the AtomSpace to collect
 statistics.  The most time-consuming, difficult and error-prone step
-is the setup and configuration of postgres.  Postgres is centrally
+is the setup and configuration of Postgres.  Postgres is centrally
 important for saving partial results.
 
-1) Set up and configure postgres, as described in
+1) Set up and configure Postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
 
 2) Create and initialize a database. Pick any name you want; here it
@@ -241,7 +241,7 @@ important for saving partial results.
 
 3) Copy all files from the `opencog/opencog/nlp/learn/run` directory to
    a new directory; suggest the directory `run-practice`.  Its best to
-   try a few practice runs before commiting to serious data processing.
+   try a few practice runs before committing to serious data processing.
    The next number of steps describe how to do a practice run; a later
    section focuses on batch processing.
 
@@ -263,11 +263,11 @@ important for saving partial results.
 
    First, review the contents of `config/opencog-pairs-en.conf`. This
 	simply declares the prompts that the cogserver will use; most
-   importantly, it declares the port number for the cogserver. Its's
+   importantly, it declares the port number for the cogserver. It's
    currently coded to be 17005.
 
    Edit the `pair-count-en.scm` and hard-code your database credentials
-   into it. This sevaes you the trouble of having to remember them, and
+   into it. This saves you the trouble of having to remember them, and
    to type them in by hand.
 
    Finally, start the cogserver by
@@ -310,9 +310,9 @@ important for saving partial results.
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to back to step zero and try again.
 
-7) Halt the coserver by killing the guile process. In the next stage,
+7) Halt the cogserver by killing the guile process. In the next stage,
    it will be started in a different way, and having a running server
-   here will interfer with things.  Unless, of course, you are careful
+   here will interfere with things.  Unless, of course, you are careful
    to juggle the config files. There's nothing wrong with running
    multiple servers at the same time: you just have to be careful to
    avoid clashes, and for that, you can to be careful with config-file
@@ -326,14 +326,13 @@ stages: (I) collection of word-pair statistics (II) collection of
 disjunct statistics (III) clustering.  These are described next.
 
 Note Bene: Please do NOT spend any time at all trying to figure out
-what is stored in the SQL tables.  There are "no user-servicable parts
+what is stored in the SQL tables.  There are "no user-serviceable parts
 inside" and there is "risk of electrical shock". The SQL tables are a
 very twisted, distorted and awkward representation of the AtomSpace
 contents. Its kind-of like reading assembly code: you will not learn
 how the AtomSpace works by reading the SQL code.  In fact, doing this
 will probably make you anti-learn, by planting incorrect ideas in your
 head.  Don't look in there. You have been warned!
-dones revenging
 
 
 Bulk Pair Counting
@@ -374,7 +373,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    the default configurations look for files there. During processing,
    files are moved to the `split-pages` directory and finally to the
    `submitted-pages` directory. Processing continues until the scripts
-   are interupted, or until the `beta-pages` directory is empty.
+   are interrupted, or until the `beta-pages` directory is empty.
 
    Little or no pre-processing of the text files are needed. Mostly,
    one just needs to remove HTML markup or other binary crud. The
@@ -401,7 +400,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    The `observe-text` function in 'link-pipeline.scm` collects
    observation counts on four different kinds of structures:
 
-   * Lg "ANY" word pairs -- how often a word-pair is observed.
+   * LG "ANY" word pairs -- how often a word-pair is observed.
    * Word counts -- how often a word is seen.
    * Clique pairs, and pair-lengths -- This counts pairs using the "clique
                   pair" counting method.  The max length between words
@@ -416,7 +415,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
                   You almost surely do not need this.  This is for my
                   own personal curiosity.
 
-   Only the first bullet is needed: Lg "ANY" word pairs. The other
+   Only the first bullet is needed: LG "ANY" word pairs. The other
    bullets are not needed. In particular, word counts are not needed;
    they are almost evil to collect, as they serve to confuse things.
 
@@ -473,7 +472,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    (covered in the section **Mutual Information** below.)
 
    You may want to use the `renice.sh` script to lower the priority
-   of the postgres server.  This will help make your system more
+   of the Postgres server.  This will help make your system more
    responsive, if you are also doing other work on it.  You would
    need to run this script as root (i.e. as `sudo renice.sh`).
 
@@ -499,7 +498,7 @@ Notes:
   differently.  Use the `zh-pre` or `yue-pre` languages with the
   sentence splitter -- these will split on sentence boundaries, only,
   and do no other processing.  By contrast, the `zh` or `yue` languages
-  insert a blank space between hanzi characters.
+  insert a blank space between Hanzi characters.
 
 * Morphology. Some work on morphology has been done; but there are no
   pre-written scripts for the processing pipeline to handle this. You
@@ -508,8 +507,8 @@ Notes:
 
 Bulk Pair Counting - Quickstart/Cheat Sheet
 -------------------------------------------
-* Don't forget to perform the postgres tuning recommendations
-  found in various online postgres performance wikis, or in the
+* Don't forget to perform the Postgres tuning recommendations
+  found in various online Postgres performance wikis, or in the
   `atomspace/opencog/persist/sql/README.md` file.
 
 * Use LXC containers, one for each language. Buy SSD disks. Buy an UPS.
@@ -578,7 +577,7 @@ database that contains word-pairs.
 ```
 
 Batch-counting might take hours or longer (maybe over a day), depending
-on your dataset size. Small trial-run datasets should take no mmore than
+on your dataset size. Small trial-run datasets should take no more than
 5-10 minutes.  The `batch-pairs` routine will print to stdout, giving a
 hint of the rate of progress.  The `print-matrix-summary-report` will
 print some technical stats about the result of the run.
@@ -622,7 +621,7 @@ Given `N(x,y)`, one can compute the marginal sums `N(x,*)`, `N(*,y)`
 and `N(*,*)` (with `*` denoting the wild-card).  The observed frequency
 is then given by `p(x,y) = N(x,y)/N(*,*)` -- this is the so-called
 "frequentist probability" -- a probability obtained from counting how
-often something actually occured.
+often something actually occurred.
 
 Given the `p(x,y)`, one can go on to compute marginal entropies, such
 as `H(x,*) = -sum_y p(x,y) log_2 p(x,y)` and so on. Mutual information
@@ -641,7 +640,7 @@ Failure to make note of this can lead to a lot of confusion!
 
 Anyway ... the `batch-pairs` script computes all of these marginals.
 The `print-matrix-summary-report` reports on the resulting matrix.
-Note that both of these rouintes are generic: they will work for
+Note that both of these routines are generic: they will work for
 any collection of pairs of atoms, and not just `WordNode`s. What's
 more, the type of `x` and the type of `y` don't even have to be the
 same; these can be two different types of Atoms.  Nor do the two atoms
@@ -684,15 +683,15 @@ fairly straight-forward, purely mechanical way.
 Thus, the goal is to obtain reasonably-accurate connectivity information
 between words, accumulating observation counts, so that, eventually,
 the most likely word-usages and word-connectivity emerge from the noise.
-This again requires crunchin a lot of raw text.
+This again requires crunching a lot of raw text.
 
-Semi-accurate connectivity information can be obtined by MST parsing.
+Semi-accurate connectivity information can be obtained by MST parsing.
 The result of such parsing is OK, but falls short of being great; this
 has been demonstrated a number of times, most clearly and notably in
 Deniz Yuret's PhD thesis.  The goal of this processing step is to
 accumulate connectivity information from a very large number of MST
 parses, with the hope that the incorrect/conflicting parses will average
-each-other out (destructuve interference) while the correct parses will
+each-other out (destructive interference) while the correct parses will
 reinforce and become statistically clear (constructive interference).
 (And this is indeed what actually happens!)
 
@@ -752,7 +751,7 @@ are as follows:
   to automatically start `guile -l mst-count-en.scm`, then it will
   stall. If you look at that file, you will notice the line
   `(pair-obj 'fetch-pairs)` -- this loads all word-pairs into the
-  AtomSpace. This can ake anywhere from 10 minutes to several hours,
+  AtomSpace. This can take anywhere from 10 minutes to several hours,
   depending on the size of your word-pair database. If you start this
   in byobu, you will need to wait until it prints, and the guile prompt
   re-appears.  After it finishes loading, it will print some SQL
@@ -793,11 +792,11 @@ occurs, relative to all the others.
 
 Unfortunately, its a huge dataset, and it still contains some fair
 amount of noise (although it contains less noise than a single MST
-tree -- all of those bad MST parses are begining to average out).
+tree -- all of those bad MST parses are beginning to average out).
 Further averaging and noise reduction (and thus, higher accuracy)
-can be acheived by classifying individual words into grammatical
+can be achieved by classifying individual words into grammatical
 categories. Doing so, however, also requires that the disjuncts also
-be classfied: disjuncts consist of connectors, each connector
+be classified: disjuncts consist of connectors, each connector
 specifying just a single word. The words in the connectors **also**
 have to be merged into grammatical categories. What's more, these
 categories have to be consistent with the categories obtained from
@@ -852,14 +851,14 @@ power in a skip-gram. They really are not all that different.
 ***HOWEVER...***
 There is one hugely-important, critical difference.
 
-The basis elements `e_k` are not indivisable, opaque, meaningless
+The basis elements `e_k` are not indivisible, opaque, meaningless
 boxes.  The have a structure!  They consist of sequences of connectors!
-Those connectors are words! When the clusterin/classification step
+Those connectors are words! When the clustering/classification step
 is performed, one must **not only** classify according to
 word-similarity, as revealed by the vector, **but also** to classify
 in such a fashion that the basis elements are renumbered, restructured
 as well.  The vector space itself is not static: it is mutating and
-changing shape, as classification proceeeds, because the `e_k`
+changing shape, as classification proceeds, because the `e_k`
 themselves **are not constants**.
 
 This is the reason that applying K-means, PCA/SVM kernel methods on
@@ -873,7 +872,7 @@ way, will not provide break-out performance or results.
 The whole point of computing disjuncts is to get past these vector-based
 algorithms, and to enable graph-based, connectivity-based classification
 and clustering.  The point is to start with a network, and to extract
-the strcture of the network, accurately, by making explicit use of the
+the structure of the network, accurately, by making explicit use of the
 network connectivity.  Disjuncts do this.  The correct algorithm
 requires that both the words be clustered, and also, at the same time,
 for the connectors to be clustered, with both steps being done
@@ -1024,7 +1023,7 @@ enough to do some basic work. The steps are:
 * Go to the directory `/var/lib/lxc/lxc`.  You may need to create
   this directory.  Unpack the file you downloaded above, in this
   directory. Do this as root. Do NOT change the ownership of the
-  files!  Avoid changing the datestamps on the files.
+  files!  Avoid changing the date-stamps on the files.
 
 * Type in: `sudo lxc-ls -f` You should see a display similar to this:
 ```
