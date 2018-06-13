@@ -850,7 +850,43 @@ power" in the word-disjunct vectors is very similar to the statistical
 power in a skip-gram. They really are not all that different.
 
 ***HOWEVER...***
+There is one hugely-important, critical difference.
 
+The basis elements `e_k` are not indivisable, opaque, meaningless
+boxes.  The have a structure!  They consist of sequences of connectors!
+Those connectors are words! When the clusterin/classification step
+is performed, one must **not only** classify according to
+word-similarity, as revealed by the vector, **but also** to classify
+in such a fashion that the basis elements are renumbered, restructured
+as well.  The vector space itself is not static: it is mutating and
+changing shape, as classification proceeeds, because the `e_k`
+themselves **are not constants**.
+
+This is the reason that applying K-means, PCA/SVM kernel methods on
+the word-disjunct vectors is both boring and also counter-productive.
+Disjuncts behave a whole lot like skip-grams (well, they might be,
+maybe, a teeny-weeny bit more accurate. Maybe). Applying these
+traditional algos to the word-disjunct dataset will give traditional
+results, with traditional accuracies. Word-disjunct pairs, used in this
+way, will not provide break-out performance or results.
+
+The whole point of computing disjuncts is to get past these vector-based
+algorithms, and to enable graph-based, connectivity-based classification
+and clustering.  The point is to start with a network, and to extract
+the strcture of the network, accurately, by making explicit use of the
+network connectivity.  Disjuncts do this.  The correct algorithm
+requires that both the words be clustered, and also, at the same time,
+for the connectors to be clustered, with both steps being done
+simultaneously, in a coherent fashion.  During classification, portions
+of the dataset resemble vector spaces, and that's OK.  This can be
+leveraged and used. However, the vector spaces stitch together in a
+very non-linear kind of way.  The disjuncts/connectors show you
+exactly how they stitch together.
+
+The correct determination of grammatical classes requires that the
+stitching of this fabric be accounted for. The paper on 'sheaf theory'
+tries to explain this in greater detail. The code here tries to actually
+implement these ideas.
 
 
 XXXXXXXXXXXXXXX
