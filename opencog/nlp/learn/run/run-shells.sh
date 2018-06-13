@@ -24,10 +24,6 @@ byobu new-session -d -n 'cntl' \
 byobu new-window -n 'cogsrv' 'nice guile -l pair-count-en.scm; $SHELL'
 sleep 2;
 
-# Relex "any" language
-# Not using relex any longer.
-# tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
-
 # Telnet window
 tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 

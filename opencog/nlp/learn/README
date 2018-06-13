@@ -466,97 +466,57 @@ Notes:
   are on your own, for now.
 
 
-XXXXXXXXXXXXXXX
-everything below here is wrong or misleading or incomplete.
-Please wait.
+Bulk Pair Counting - Quickstart/Cheat Sheet
+-------------------------------------------
+* Don't forget to perform the postgres tuning recommendations
+  found in various online postgres performance wikis, or in the
+  `atomspace/opencog/persist/sql/README.md` file.
 
-xxxxxx
+* Use LXC containers, one for each language. Buy SSD disks. Buy an UPS.
+  Install the system shutdown scripts.
 
-
-Bulk Text Parsing
------------------
-Set up distinct databases, one for each language you will work with:
+* Set up distinct databases, one for each language:
 ```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
     cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
 ```
 
-The pair-counting scripts expect your text files to be stored in a directory
-called `beta-pages` in your working directory. If you used the provided
-download scripts, you should have your files in `alpha-pages`.
-Now, build some working directories (so that we don't mess up
-alpha-pages after all that work)
+* Copy input texts to the `beta-pages` directory (or another directory,
+  if you wish).
+
+* Select one of the cogserver config files in the config directory.
+  Possibly alter the port number, if desired (after making a copy).
+
+* Select one of the `pair-count-??.scm` files.  Copy it. Manually edit
+  it to indicate the cogserver config from the above. Change the
+  database credentials to match your database.
+
+* Copy `run-shells.sh`, edit it to specify the `pair-count-??.scm` file
+  from above. Run it.
+
+* Select one of the `wiki-ss-??.sh` files, copy it, and edit it to set
+  the location of the input texts (if not `beta-pages`) and to use a
+  port number that is consistent with the cogserver config file.
+  Then run it in one of the byobu terminals.
+
+If the above generates the error
 ```
-    cp -pr alpha-pages beta-pages
+   nc: invalid option -- 'N'
 ```
-If you got your texts in some other way, just copy the files you want to
-process into beta-pages (keep in mind they will be removed from there).
+then edit `ss-one.sh` and remove the `-N` option from the `nc` commands.
+Some versions of `nc` require the `-N` flag: the scripts will just hang
+without it. Other versions of `nc` are unaware of the `-N` option, and
+don't need it.  This is an `nc` design flaw.
 
-* Review the file `opencog/nlp/learn/run/README`, and then copy the
-  scripts into your working dir, if you didn't do it before.
-* Here's a brief description of the relevant files for Text Parsing.
-  They don't need modification by default, unless you want to do
-  something unusual.
+Some of the other files used in processing:
 
-  -- `run-server-parse.sh` creates a `byobu` session with different
-   terminals, where you can keep an eye on the processes. One terminal
-   calls `observe-launch.scm` to start the cogserver, and another one
-   telnets into it using a language-specific port.
-   You need to pass it the language of the text to process and the database
-   credentials (see next step).
+-- `ss-one.sh` calls `split-sentences.pl` to split the text file into
+   sentences, and then calls `submit-one.pl` to send the sentences to the
+   cogserver for parsing. None of these should need any modification.
 
-  -- `wiki-ss-??.sh` performs batch processing of input text files in
-     the specified language. This calls `ss-one.sh` to process one text file.
-
-  -- `ss-one.sh` calls `split-sentences.pl` to split the text file into
-     sentences, and then calls `submit-one.pl` to send the sentences to the
-     cogserver for parsing. None of these should need any modification.
-
-  -- `opencog-??.conf` contains configuration settings for the cogserver, 
-     including the language-specific port to use.
-
-  -- `observe-launch.scm` starts the cogserver and opens the database. 
-
-* Run `run-server-parse.sh` in your working directory.
-      ```
-        ./run-server-parse.sh lang ??-pairs your_user your_password
-      ```
-      (user and password are optional, as explained in step 5 above).
-
-* In the parse tab of byobu (you can navigate with the F3 and F4 keys),
-  run `./wiki-ss-??.sh`
-   If the above command shows the error
-   ```
-    nc: invalid option -- 'N'
-   ```
-   open ss-one.sh and remove the -N option from the nc commands.
-
-* Wait a few days.
-* When finished, stop the cogserver
-* This requires postgres 9.3 or newer, for multiple reasons. One reason
-  is that older postgres don't automatically VACUUM (see "performance"
-  below) The other is the list membership functions are needed.
-* Be sure to perform the postgres tuning recommendations found in
-  various online postgres performance wikis, or in the
-  `atomspace/opencog/persist/sql/README.md` file.  See also 'Performance' section
-  below.
-
-Some handy SQL commands:
-```
-SELECT count(uuid) FROM Atoms;
-select count(uuid) from atoms where type =123;
-```
-
-type 123 is `WordNode` for me; verify with
-```
-SELECT * FROM Typecodes;
-```
-
-The total count accumulated is
-```
-select sum(floatvalue[3]) from valuations where type=7;
-```
-where type 7 is `CountTruthValue`.
+XXXXXXXXXXXXXXX
+everything below here is wrong or misleading or incomplete.
+Please wait.
 
 
 Mutual Information of Word Pairs
