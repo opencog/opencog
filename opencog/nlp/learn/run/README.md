@@ -28,6 +28,17 @@ A quick overview:
   here; its `beta-pages` by default, but you can use any directory
   that you wish.
 
+* `mst-submit-??.sh`: language-specific MST processing scripts.
+  These pull text files, one by one, from the data directory, and
+  submit them for MST processing. Pick one, and run it manually
+  the 'process' byobu window.  Be sure to have performed the mutual
+  information step first. Be sure to make a copy of your database.
+  Be sure to open the database, first.
+
+  The directory containing the text files needs to be manually adjusted
+  here; its `gamma-pages` by default, but you can use any directory
+  that you wish.
+
 * `ss-one.sh`: the actual sentence-splitting workhorse. It handles each
   text file, moving the file to a different directory when finished
   with it.  Note that there are hard-coded paths in here, pointing to
