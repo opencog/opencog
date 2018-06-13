@@ -270,8 +270,41 @@ There are various scripts in the `download` directory for downloading
 and pre-processing texts from Project Gutenberg, Wikipedia, and the
 "Archive of Our Own" fan-fiction website.
 
-7) Explore the scripts in the `download` directory. Obtain a collection
-   of text to process.
+7) Explore the scripts in the `download` directory. Download or
+   otherwise obtain a collection of texts to process. Put them in
+   some master directory, and also copy them to the `beta-pages`
+   directory.  The name `beta-pages` is not mandatory, but some of
+   the default configurations look for files there. During processing,
+   files are moved to the `split-pages` directory and finally to the
+   `submitted-pages` directory. Processing continues until the scripts
+   are interupted, or until the `beta-pages` directory is empty.
+
+   Little or no pre-processing of the text files are needed. Mostly,
+   one just needs to remove HTML markup or other binary crud. The
+   pipeline expects all files to be in UTF-8 format.  The pipeline
+   does not support any other format; if you have other formats,
+   learn how to use the `iconv` command.
+
+   There is no need to perform sentence splitting or other normalization
+   (such as down-casing of initial words).  In fact, just about any
+   pre-processing will lower the quality of the input data;
+   pre-processing is strongly discouraged.
+
+   It is best to split texts into files containing a few hundred to
+   at most ten-thousand sentences each; larger files cause trouble
+   if the counting needs to be restarted.
+
+8) Consider investing in an uninterruptible power supply (UPS) to
+   avoid data loss/data corruption in the event of a power outage.
+   Unexpected power outages can result in weeks or a month of lost
+   work. You have been warned!
+
+   Consider investing in a pair of solid-state disk drives (SSD),
+   configured as RAID-1 (mirroring) to hold the postgres database.
+   Pair-counting is database intensive, and the writes to disk can
+   be a bottleneck to performance.
+
+9) Review the `observe-text` function in 'link-pipeline.scm`.
 
 8) Optionally reduce the amount of data that is collected. Currently,
   the `observe-text` function in 'link-pipeline.scm` collects counts
