@@ -477,6 +477,10 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    responsive, if you are also doing other work on it.  You would
    need to run this script as root (i.e. as `sudo renice.sh`).
 
+   You may want to empty out the `submitted-articles` directory upon
+   completion. The files there are no longer needed (assuming you kept
+   a copy of the originals).
+
 Notes:
 * Segmentation for Chinese. Currently, only some preliminary work has
   been done for word segmentation in Chinese. It is incomplete. In the
@@ -547,8 +551,9 @@ don't need it.  This is an `nc` design flaw.
 Some of the other files used in processing:
 
 -- `ss-one.sh` calls `split-sentences.pl` to split the text file into
-   sentences, and then calls `submit-one.pl` to send the sentences to the
-   cogserver for parsing. None of these should need any modification.
+   sentences, and then calls `submit-one.pl` to send the sentences,
+   one at a time, to the cogserver for processing. None of these
+   should need any modification.
 
 
 Mutual Information of Word Pairs
@@ -743,54 +748,31 @@ are as follows:
   to match (19005 instead of 17005). Then run it, to get the byobu/tmux
   session started.
 
+* Wait. And then wait a little bit longer. If you set up `run-shells.sh`
+  to automatically start `guile -l mst-count-en.scm`, then it will
+  stall. If you look at that file, you will notice the line
+  `(pair-obj 'fetch-pairs)` -- this load all word-pairs into the
+  AtomSpace. This can ake anywhere from 10 minutes to several hours,
+  depending on the size of your word-pair database. If you start this
+  in byobu, you will need to wait until it prints, and the guile prompt
+  re-appears.  After it finishes loading, it will print some SQL
+  performance stats, and a matrix summary report. You're good to
+  go once these appear.
+
 * Make a copy of the `wiki-mst-en.sh` file, and adjust the location
   of the  text files, and the port number, to match the above.  If
   you accept the defaults, no changes are needed.  In one of the tmux
-  terminals, run the `wiki-mst-en.sh` file.
+  terminals, run the `wiki-mst-en.sh` file.  This starts the MST
+  processing stage.  As before, the text files will be moved to the
+  `split-articles` directory while they are being processed, and then
+  finally to the `mst-articles` directory, when processing is complete.
 
-
-xxxxxxxx
-  `wiki-mst-??.scm` starts the process of observing the text files contained
-  in the gamma-pages folder, by calling `mst-one.sh`, which sends a sentence
-  to the cogserver with `submit-one.pl`, giving the correct opencog command.
-
-
-* Edit `wiki-mst-??.sh` and change the directory `gamma-pages` to
-  whatever directory holds your source text (or copy your text to
-  the `gamma-pages` directory). Be aware that, during processing,
-  text files are removed from this directory.
-
-* If you are interested in the actual sentence parses, open
-  `mst-one.sh` and change the observe variable from `observe-mst` to
-  `observe-mst-extra`. Parses will be written in `mst-parses.txt`.
-
-* Run `run-server-mst.sh` in your working directory.
-      ```
-        ./run-server-parse.sh lang new_dbname your_user your_password
-      ```
-      (user and password are optional, as explained before).
-
-  Wait 10 to 60+ minutes for the guile prompt to appear.  This script
-  opens a connection to the database, and then loads all word-pairs
-  into the atomspace.  This can take a long time, depending on the
-  size of the database. The word-pairs are needed to get the pair-costs
-  needed to perform the MST parse.
-
-* Once the above has finished loading, the parse script can be
-  started. Run `wiki-mst-??.sh` in one of the unused byob windos,
-  (navigate with F3, F4) and wait a few days for data to accumulate. 
-   If the above command shows the error
-   ```
-    nc: invalid option -- 'N'
-   ```
-   open mst-one.sh and remove the -N option from the nc commands.
-
-* When finished, stop the cogserver. Once this is done, you can move to 
-  the next step, which is exploring the resulting connector-set (disjunct)
-  database. You can also review the sentence parses in `mst-parses.txt`.
-
-* If the process is stopped for any reason, you can just re-run these
-  scripts; they will pick up where they left off.
+  The processing will stop automatically, when the `gamma-pages`
+  directory empties out.  You can monitor progress by saying `find|wc`.
+  If you interrupt processing, you can safely resume it -- it will pick
+  up again, with the last unprocessed file.  You may want to empty out
+  the `mst-articles` directory -- those files are no longer needed
+  (assuming you still have the originals).
 
 XXXXXXXXXXXXXXX
 everything below here is wrong or misleading or incomplete.
