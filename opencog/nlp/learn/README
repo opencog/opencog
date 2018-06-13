@@ -350,6 +350,10 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    `link-pipeline.scm` file to suit your whims in RAM usage and time
    spent in GC.  The default should be adequate for almost all users.
 
+XXXXXXXXXXXXXXX
+everything below here is wrong or misleading or incomplete.
+Please wait.
+
 12)
  Eventually, you can use the
    `run-server-parse.sh` file in the `run` directory to do this;
@@ -367,10 +371,6 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
 
    If the parsing is interrupted, you can restart the various scripts;
    they will automatically pick up where they left off.
-
-XXXXXXXXXXXXXXX
-everything below here is wrong or misleading or incomplete.
-Please wait.
 
 11) The current pipeline for Chinese text requires word segmentation
   to be performed outside of OpenCog.
