@@ -9,16 +9,17 @@ Connecting to Cogserver:
                     command-line arguments for getting processing mode,
                     language and database details.
 
+ -- `det-db-uri.sh` script used to determine the database name, postgres user
+                    and password according to the language given as input
+                      (inside config folder).
+
  -- `det-port-num.sh` script used to determine the port number for the cogserver,
-                      takes as language the processing mode and the language
+                      takes as input the processing mode and the language
                       (inside config folder).
 
  -- `opencog-pairs-??.conf` contains configuration settings for the cogserver, 
                       including the language-specific port to use (inside
                       config folder).
-
- -- `opencog-cmi-??.conf` same as above but with particular configurations
-                          for MI computing (inside config folder).
 
  -- `opencog-mst-??.conf` same as above but with particular configurations
                           for MST parsing (inside config folder).
@@ -40,11 +41,11 @@ Text Processing / Parsing:
                                 the processes. One terminal calls `launch-cogserver.scm`
                                 with guile to start the cogserver, and another one telnets 
                                 into it using a language-specific port. You need to pass
-                                it the parsing mode (pair, cmi or mst), the language
-                                of the texts to process and the database credentials as
-                                arguments. You can use spare terminals to process several
-                                corpora at the same time. Use F3 and F4 to switch between
-                                the different terminals.
+                                it the parsing mode (pair, cmi or mst) and the language
+                                of the texts to process. Optionally you can pass the database
+                                credentials as arguments. You can use spare terminals to 
+                                process several corpora at the same time. Use F3 and F4 to 
+                                switch between the different terminals.
 
  -- `text-process.sh` the top-level parser script; it performs batch processing of
                       input text files in the specified mode and language you pass as
