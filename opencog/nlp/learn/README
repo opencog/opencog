@@ -181,16 +181,17 @@ important for saving partial results.
    to type them in by hand.
 
    Finally, start the cogserver by
-   ```
-     guile -l pair-count-en.scm
-   ```
+```
+  guile -l pair-count-en.scm
+```
 
 5) Verify that the pair-counting pipeline works. In a second terminal,
    try this:
 ```
-   rlwrap telnet localhost 17005  # CogServer for English
+   rlwrap telnet localhost 17005
    opencog-en> (observe-text "this is a test")
 ```
+   The port number 17005 was from the above-mentioned config file.
 
    Better yet:
 ```
@@ -199,13 +200,15 @@ important for saving partial results.
    echo -e "(observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17005
 ```
 
-   This should result in activity on the cogserver 
-   and on the database: the "observe text" scheme code sends the text
-   for parsing, counts the returned word-pairs, and stores them in
-   the database.
+   This should result in activity in the cogserver and on the database:
+   the "observe text" scheme code sends the text for parsing, counts
+   the returned word-pairs, and stores them in the database.
 
-xxxxxxxxxxxxxxxx
-7) Verify that the above resulted in data sent to the SQL database.
+   If you are truly curious, type in `(sql-stats)` in the guile shell.
+   This will print some very technical stats about the Atomspace SQL
+   database backend.
+
+6) Verify that the above resulted in data sent to the SQL database.
    Log into the database, and check:
 ```
    psql learn-pairs
@@ -215,43 +218,31 @@ xxxxxxxxxxxxxxxx
 ```
    The above shows that the database now contains word-counts for
    pair-wise linkages for the above sentences. If the above are empty,
-   something is wrong. Go to step zero.
+   something is wrong. Go to back to step zero and try again.
 
-8) Optionally reduce the amount of data that is collected. Currently,
-  the `observe-text` function in 'link-pipeline.scm` collects counts
-  on four different kinds of structures:
 
-  * Word counts -- how often a word is seen.
-  * Clique pairs, and pair-lengths -- This counts pairs using the "clique
-                  pair" counting method.  The max length between words
-                  can be specified. Optionally, the lengths of the pairs
-                  can be recorded. Caution: enabling length recording
-                  will result in 6x or 20x more data to be collected,
-                  if you've set the length to 6 or 20.  That's because
-                  any given word pair will be observed at almost any
-                  length apart, each of these is an atom with a count.
-                  Watch out!
-  * Lg "ANY" word pairs -- how often a word-pair is observed.
-  * Disjunct counts -- how often the random ANY disjuncts are used.
-                You almost surely do not need this.  This is for my
-                own personal curiosity.
+That's for the practice run. If stuff is showing up in the database,
+then processing is proceeding as expected.
 
- Eventually, you can use the
-   `run-server-parse.sh` file in the `run` directory to do this;
-   it creates a `byobu` session with different servers in different
-   terminals, where you can keep an eye on them. However, the
-* `wiki-ss-en.sh` starts the process of observing the text files contained
-   in the beta-pages folder, more on that later (see Bulk Text Parsing).
-   The rest of the relevant files are explained later.
+The next step is to set up bulk test processing. There are three general
+stages: (I) collection of word-pair statistics (II) collection of
+disjunct statistics (III) clustering.  These are described next.
 
-9) Optionally tune the forced garbage collection parameters. Currently
-  garbage collection is forced whenever the guile heap exceeds 750
-  MBytes; this helps keep RAM usage down on small-RAM machines.  However,
-  it does cost CPU time.  Adjust the `max-size` parameter in
-  `observe-text` in the `link-pipeline.scm` file to suit your whims in
-  RAM usage and time spent in GC.
+Note Bene: Please do NOT spend any time at all trying to figure out
+what is stored in the SQL tables.  There are "no user-servicable parts
+inside" and there is "risk of electrical shock". The SQL tables are a
+very twisted, distorted and awkward representation of the AtomSpace
+contents. Its kind-of like reading assembly code: you will not learn
+how the AtomSpace works by reading the SQL code.  In fact, doing this
+will probably make you anti-learn, by planting incorrect ideas in your
+head.  Don't look in there. You have been warned!
+dones revenging
 
-10) Get ready to feed text to the pipeline (see Bulk Text Parsing 
+
+Bulk Text Parsing
+-----------------
+
+10) Get ready to feed text to the pipeline (see Bulk Text Parsing
   section below). It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
@@ -273,13 +264,48 @@ xxxxxxxxxxxxxxxx
   and pre-processing texts from Project Gutenberg, Wikipedia, and the
   "Archive of Our Own" fan-fiction website.
 
+8) Optionally reduce the amount of data that is collected. Currently,
+  the `observe-text` function in 'link-pipeline.scm` collects counts
+  on four different kinds of structures:
+
+  * Word counts -- how often a word is seen.
+  * Clique pairs, and pair-lengths -- This counts pairs using the "clique
+                  pair" counting method.  The max length between words
+                  can be specified. Optionally, the lengths of the pairs
+                  can be recorded. Caution: enabling length recording
+                  will result in 6x or 20x more data to be collected,
+                  if you've set the length to 6 or 20.  That's because
+                  any given word pair will be observed at almost any
+                  length apart, each of these is an atom with a count.
+                  Watch out!
+  * Lg "ANY" word pairs -- how often a word-pair is observed.
+  * Disjunct counts -- how often the random ANY disjuncts are used.
+                You almost surely do not need this.  This is for my
+                own personal curiosity.
+
+xxxxxx
+ Eventually, you can use the
+   `run-server-parse.sh` file in the `run` directory to do this;
+   it creates a `byobu` session with different servers in different
+   terminals, where you can keep an eye on them. However, the
+* `wiki-ss-en.sh` starts the process of observing the text files contained
+   in the beta-pages folder, more on that later (see Bulk Text Parsing).
+   The rest of the relevant files are explained later.
+
+9) Optionally tune the forced garbage collection parameters. Currently
+  garbage collection is forced whenever the guile heap exceeds 750
+  MBytes; this helps keep RAM usage down on small-RAM machines.  However,
+  it does cost CPU time.  Adjust the `max-size` parameter in
+  `observe-text` in the `link-pipeline.scm` file to suit your whims in
+  RAM usage and time spent in GC.
+
 11) The current pipeline for Chinese text requires word segmentation
   to be performed outside of OpenCog.
 
 XXX Except that, no it doesn't these instructions are wrong!
 
   This can be done using jieba
-  https://github.com/fxsjy/jieba 
+  https://github.com/fxsjy/jieba
   If you are working with Chinese texts, install:
   `pip install jieba` and then segment text:
   `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
@@ -300,7 +326,7 @@ XXX Except that, no it doesn't these instructions are wrong!
    they will automatically pick up where they left off.
 
 13) Using the extracted mutual information for word-pairs, the MST
-   parsing step can be started. See the section "Minimum Spanning Tree 
+   parsing step can be started. See the section "Minimum Spanning Tree
    parsing" below. Run this for several days.
    At the end of this, you will have a bunch of statistics on
    "pseudo-connector sets": pairs which associate a word to a
@@ -320,7 +346,7 @@ Set up distinct databases, one for each language you will work with:
 ```
 
 The pair-counting scripts expect your text files to be stored in a directory
-called `beta-pages` in your working directory. If you used the provided 
+called `beta-pages` in your working directory. If you used the provided
 download scripts, you should have your files in `alpha-pages`.
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
@@ -333,7 +359,7 @@ process into beta-pages (keep in mind they will be removed from there).
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
   scripts into your working dir, if you didn't do it before.
 * Here's a brief description of the relevant files for Text Parsing.
-  They don't need modification by default, unless you want to do 
+  They don't need modification by default, unless you want to do
   something unusual.
 
   -- `run-server-parse.sh` creates a `byobu` session with different
