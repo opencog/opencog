@@ -444,7 +444,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    Make a copy this file, and manually alter it to start the cogserver
    the way that you want it started.
 
-   The `wiki-ss-en.sh` script starts the process of observing text
+   The `pair-submit-en.sh` script starts the process of observing text
    for pair-counting. It looks for files in the `beta-pages` directory,
    performs sentence-splitting (ss) on each, and then passes these to
    the pair-counting scripts.
@@ -452,13 +452,13 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    Make a copy of this file, and edit it to change the location of your
    text files (if not using the default `beta-pages`) and to change the
    port number (if not using the default 17005 for English). For
-   convenience, there are other files `wiki-ss-??.sh`, set up for other
+   convenience, there are other files `pair-submit-??.sh`, set up for other
    languages, using alternative default port numbers.
 
-   Run `wiki-ss-en.sh` in one of the byobu terminals.
+   Run `pair-submit-en.sh` in one of the byobu terminals.
 
-12) Pair-counting can take days or weeks.  The `wiki-ss-en.sh` will run
-   until all of the text files have been processed, or until it is
+12) Pair-counting can take days or weeks.  The `pair-submit-en.sh` will
+   run until all of the text files have been processed, or until it is
    interrupted.  If it is interrupted, it can be restarted; it will
    resume with the previous unfinished text file. As text files are
    being processed, they are moved to the `split-articles` directory
@@ -533,7 +533,7 @@ Bulk Pair Counting - Quickstart/Cheat Sheet
 * Copy `run-shells.sh`, edit it to specify the `pair-count-??.scm` file
   from above. Run it.
 
-* Select one of the `wiki-ss-??.sh` files, copy it, and edit it to set
+* Select one of the `pair-submit-??.sh` files, copy it, and edit it to set
   the location of the input texts (if not `beta-pages`) and to use a
   port number that is consistent with the cogserver config file.
   Then run it in one of the byobu terminals.

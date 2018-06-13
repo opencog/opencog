@@ -20,11 +20,11 @@ A quick overview:
   terminal sessions with tmux/byobu, and starts the cogserver in one
   of them.  Use F3 and F4 to switch to different terminals.
 
-* `wiki-ss-??.sh`: language-specific word-pair-counting scripts.
-  These pulls text files, one by one, from the data directory, and
-  submits them for word-pair counting. Pick one, and run it manually
+* `pair-submit-??.sh`: language-specific word-pair-counting scripts.
+  These pull text files, one by one, from the data directory, and
+  submit them for word-pair counting. Pick one, and run it manually
   the 'process' byobu window.  Be sure to open the database, first.
-  The directory containg the text files needs to be manually adjusted
+  The directory containing the text files needs to be manually adjusted
   here; its `beta-pages` by default, but you can use any directory
   that you wish.
 

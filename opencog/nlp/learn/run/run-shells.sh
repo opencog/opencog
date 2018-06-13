@@ -29,7 +29,7 @@ tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
 tmux new-window -n 'process' \
-	'echo -e "\nYou might want to run ./wiki-ss-en.sh here.\n"; $SHELL'
+	'echo -e "\nYou might want to run ./pair-submit-en.sh here.\n"; $SHELL'
 
 # Spare
 tmux new-window -n 'spare' 'echo -e "\nSpare-use shell.\n"; $SHELL'
