@@ -107,17 +107,51 @@ to do with it, if you don't read the below. Its not a magic "get smart"
 pill. You've got a lot of RTFM in front of you.
 
 
-Setting up the AtomSpace
-------------------------
-This section describes how to set up the atomspace to collect
-statistics.  The most time-consuming, difficult and error-prone step
-is the setup and configuration of postgres.  Postgres is centrally
-important for saving partial results.
+Computational Pre-requisites
+----------------------------
+This section describes minimum mandatory hardware and software
+requirements. Failing to take these seriously will result in an
+unhappy, painful experience.
 
-0.1) Optional. If you plan to run the pipeline on multiple
-   different languages, it can be convenient, for various reasons,
-   to run the processing in an LXC container. If you already know
-   LXC, then do it. If not, or this is your first time, then don't
+0.1) Optional, but strongly recommended! Consider investing in an
+   uninterruptible power supply (UPS) to avoid data loss/data
+   corruption in the event of a power outage. The scripts below can
+   take weeks to run, and unexpceted power outages can corrupt
+   databases, resulting in weeks or months of lost work.
+
+   You have been warned! This is not a joke!
+
+0.2) Optional, but strongly recommended!  Consider investing in a
+   pair of solid-state disk drives (SSD), configured as a RAID-1
+   (mirroring) array, to hold the Postgres database.  Accumulating
+   observation statistics, as well as other data processing operations,
+   is database intensive, and the writes to disk are often the main
+   bottleneck to performance. In practice, 1TB (one terabyte) devoted
+   to just the postgres server is just barely enough to perform the
+   work described here. Database copies quickly chew up disk space.
+   Individual databases are typically in the 10GB to 150GB in size,
+   and the number of copies of a 150GB database that fit onto a
+   1TB disk is not big.  2TB is a more comfortable size to work with.
+
+0.3) Get a machine with 4 or more CPU cores, and a minumum of 64GB RAM.
+   It will be less agonzing and infuriating if you have 128 GB RAM or
+   more.  The datasets do get large, and although many of the scripts
+   are designed to only fetch from disk "on demand", the in-RAM sizes
+   can get large. As I write this, my grammatical-clustering process
+   is using 53GB resident-in-RAM working-set size (57GB virtual size).
+   You need additional RAM for the postgress server -- 24GB is
+   reasonable -- and so 53+24=78GB is the current bare-minimum.  More,
+   if you want to e.g. run a web-browser or something.
+
+   An alternative is to run postgres on one box, and the processing
+   on another. This is a bit more complicated to deal with -- you will
+   want to have a high-speed ethernet between the two.  Two machines
+   are harder to monitor than one.
+
+0.4) Optional but recommmended. If you plan to run the pipeline on
+   multiple different languages, it can be convenient, for various
+   reasons, to run the processing in an LXC container. If you already
+   know LXC, then do it. If not, or this is your first time, then don't
    bother right now. Come back to this later.
 
    LXC containsers are nice because:
@@ -130,15 +164,15 @@ important for saving partial results.
      RAM (or less RAM), more disk, or less disk. Handy for load-
      balancing, and/or easily moving to a bigger system.
 
-0.2) (Optional but strongly recommended) Install system shutdown scripts.
+0.5) Optional but strongly recommended. Install system shutdown scripts.
    This will help protect your data in case of an unexpected power loss.
    These scripts, and the instructions for them, are located in the
    `run/rc.local.shutdown`, `run/rc-local-shutdown.service` and the
    `run/rc.lxc.shutdown` files. You will need to alter these files, and
    use your own login credentials in place of the generic ones.
 
-0.3) Probably mandatory.  Chances are good that you'll work with large
-   datasets; in this case, you need to do the below. Skipping this
+0.6) Mandatory.  You'll work with large datasets; default guile is
+   not equiped to deal wit the sizes encountered here.  Skipping this
    step will lead to the error `Too many heap sections: Increase
    MAXHINCR or MAX_HEAP_SECTS`. So:
 ```
@@ -150,7 +184,7 @@ important for saving partial results.
    make; sudo make install
 ```
 
-0.4) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+0.7) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
 ```
    git clone git://git.sv.gnu.org/guile.git
@@ -164,7 +198,7 @@ important for saving partial results.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
-0.5) Create/edit the `~/.guile` file and add the content below.
+0.8) Create/edit the `~/.guile` file and add the content below.
    This makes the arrow keys work, and prints nicer stack traces.
 ```
    (use-modules (ice-9 readline))
@@ -175,7 +209,7 @@ important for saving partial results.
    (add-to-load-path ".")
 ```
 
-0.6) Opencog should be built with `link-grammar-5.5.0` or newer.
+0.9) Opencog should be built with `link-grammar-5.5.0` or newer.
    The currently installed version can be displayed by running
 ```
    link-parser --version
@@ -185,6 +219,14 @@ important for saving partial results.
 
    The main link-grammar project page is here:
    https://www.abisource.com/projects/link-grammar/
+
+
+Setting up the AtomSpace
+------------------------
+This section describes how to set up the atomspace to collect
+statistics.  The most time-consuming, difficult and error-prone step
+is the setup and configuration of postgres.  Postgres is centrally
+important for saving partial results.
 
 1) Set up and configure postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
@@ -349,17 +391,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    at most ten-thousand sentences each; larger files cause trouble
    if the counting needs to be restarted.
 
-9) Consider investing in an uninterruptible power supply (UPS) to
-   avoid data loss/data corruption in the event of a power outage.
-   Unexpected power outages can result in weeks or a month of lost
-   work. You have been warned!
-
-   Consider investing in a pair of solid-state disk drives (SSD),
-   configured as RAID-1 (mirroring) to hold the postgres database.
-   Pair-counting is database intensive, and the writes to disk can
-   be a bottleneck to performance.
-
-10) Review the `observe-text` function in `link-pipeline.scm`. The
+9) Review the `observe-text` function in `link-pipeline.scm`. The
    default, as it is, is fine, and this is almost surely what you want.
    (And so you can skip this step).  Just be aware that this function
    was written to collect a large amount of additional information,
@@ -394,7 +426,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    Currently, no other code examines lengths; this is an open
    experiment.
 
-11) (Optional) Review the `sometimes-gc` and `maybe-gc` settings in
+10) (Optional) Review the `sometimes-gc` and `maybe-gc` settings in
    the file `link-pipeline.scm`.  These force garbage collection to
    occur more often than normal; they help keep the process size
    reasonable.  The current default is to force garbage collection
@@ -404,7 +436,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    `link-pipeline.scm` file to suit your whims in RAM usage and time
    spent in GC.  The default should be adequate for almost all users.
 
-12) Its convenient to have lots of terminals open and ready for use;
+11) Its convenient to have lots of terminals open and ready for use;
    the `byobu+tmux` terminal server provides this, without chewing up
    a lot of screen real-estate.  The `run-shells.sh` script will run
    a `byobu/tmux` session, start the cogserver in one of the terminals,
@@ -426,7 +458,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
 
    Run `wiki-ss-en.sh` in one of the byobu terminals.
 
-13) Pair-counting can take days or weeks.  The `wiki-ss-en.sh` will run
+12) Pair-counting can take days or weeks.  The `wiki-ss-en.sh` will run
    until all of the text files have been processed, or until it is
    interrupted.  If it is interrupted, it can be restarted; it will
    resume with the previous unfinished text file. As text files are
@@ -558,8 +590,12 @@ Thus, you may want to:
 
 * Make a copy of the word-pair-only database, so that you can return
   to it, if you decide that you need to return to it for some reason.
+  You can copy databases by saying:
+````
+  createdb -T existing_dbname new_dbname
+```
 
-In particular, this means using a differrent set of database credentials
+Note that this means using a different set of database credentials
 in the URL above!
 
 
@@ -686,6 +722,13 @@ are as follows:
   not seem to matter. You can pick a different directory name, if you
   wish.
 
+* Make a copy of the database containing word-pair mutual information.
+  The disjunct observation counts will be accumulated into the database,
+  further expanding it's size.  You probably want to keep a copy of the
+  original, "just in case". You can copy databases by saying:
+````
+  createdb -T existing_dbname new_dbname
+```
 * Make a copy of `config/opencog-mst-en.conf` (if you wish) and edit
   it to suit your tastes. Or use the default.  Make note of the port
   number: this one uses port 19005.
@@ -711,11 +754,6 @@ xxxxxxxx
   in the gamma-pages folder, by calling `mst-one.sh`, which sends a sentence
   to the cogserver with `submit-one.pl`, giving the correct opencog command.
 
-* (Optional but suggested) Make a copy of your word-pair database, "just
-  in case".  You can copy databases by saying:
-````
-  createdb -T existing_dbname new_dbname
-```
 
 * Edit `wiki-mst-??.sh` and change the directory `gamma-pages` to
   whatever directory holds your source text (or copy your text to
