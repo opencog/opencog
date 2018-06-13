@@ -888,42 +888,48 @@ stitching of this fabric be accounted for. The paper on 'sheaf theory'
 tries to explain this in greater detail. The code here tries to actually
 implement these ideas.
 
+Creating Grammatical Classes
+----------------------------
+The clustering code, for isolating grammatical classes, is in active
+development. The instructions here are provisional and subject to
+change.
 
-XXXXXXXXXXXXXXX
-everything below here is wrong or misleading or incomplete.
-Please wait.
+* Make a copy of the table holding the disjunct statistics. This is
+  critical! The clustering algorithm(s) actively alter the per-word
+  statistics as they proceed. The database contents will be scrambled
+  in such a way that the original word-disjunct stats will be lost.
 
-
-Exploring Connector-Sets
--------------------------
-Once you have a database with some fair number of connector sets in it,
-you can start exploring.
-
-* (optional) Make a copy of the MST database created above.
-
-* Do not run the connector-set code at the same time (on the same
-  database) as the MST parser. For one, if you are actively updating
-  the counts, then the connector-set counting will get confused.
-  Also, if you have two servers writing to the same database
-  at the same time, the issueing of UUID's will get confused, and
-  one or both the servers will crash, and possible database corruption
-  may occur.  It is possible to have multiple writers (and I've done
-  this before, any years ago), but this takes additional configuration,
-  and a miscellany of coding changes and a couple of enhancements, to
-  keep things in sync.
-
-* So, assuming a clean start: just start `guile` by hand, and enter
-  the following commands (by hand). They load the full disjunct/
-  connector-set database into the atomspace; it needs to be loaded
-  in order to get access to the cosine-distance tool.
+* At the guile prompt:
 ```
   (use-modules (opencog) (opencog persist) (opencog persist-sql))
   (use-modules (opencog nlp) (opencog nlp learn))
-  (use-modules (opencog matrix))
+  (use-modules (opencog matrix) (opencog sheaf))
   (sql-open "postgres:///en_pairs_sim?user=linas")
+```
+  and the, try either
+```
+  (gram-classify-greedy-discrim)
+```
+  or
+```
+  (gram-classify-greedy-fuzz)
+```
+  Both will take days to run. You can start poking at the results
+  earlier, though. the file `learn-lang-diary/word-classes/word-classes.scm`
+  contains an ad-hoc assortment of tools that can be used to examine
+  the word-classes discovered so far.  Read it for details.
+
+  Note that, because the above alters word-vectors on the fly, the
+  cosine-angles between words will change over time, and thus might
+  not actually be what you expect. If you want to play with cosine
+  distances or other metrics, you need to do so on a separate, clean
+  database load. The above database **will** be altered.
+
+Here's some games you can play with a clean dataset (before being
+altered by the clustering code):
+```
   (fetch-all-words)
   (length (get-all-words))
-  ; This reports 396262 for one my DB's has.
 
   (define pca (make-pseudo-cset-api))
   (define psa (add-pair-stars pca))
@@ -942,27 +948,28 @@ you can start exploring.
  (cset-vec-cosine (Word "he") (Word "she"))
 
 ```
-  Recall that subroutine documentation can be gotten by typing
-  `,apropos` or `,a` for short at the guile command line.  Docs
-  for individual routines can be read by saying `,describe subr-name`
-  or `,d` for short.
-
-  The `pseudo-csets.scm` file contains code for this stuff. Any routine
-  that is `define-public` can be invoked at the guile prompt. Most are
-  safe.  If its not `define-public`, you should not call it by hand.
+  The `pseudo-csets.scm` file contains code for working with word-
+  disjunct vectors.  Any routine that is `define-public` can be
+  invoked at the guile prompt. Most are safe to use.  If its not
+  `define-public`, you should not call it by hand.
 
   The `lang-learn-diary/disjunct-stats.scm` file contains ad-hoc code
   used to prepare the summary report.  To use it, just cut-n-paste to
   the guile prompt, to get it to do things.
 
   The marginal entropies and the mutual information between words and
-  disjuncts can be computed in the same way that it's done for
-  word-pairs:
+  disjuncts can be computed in the same way that it's done for word-
+  pairs:
 ```
   (define pca (make-pseudo-cset-api))
   (define psa (add-pair-stars pca))
   (batch-pairs psa)
 ```
+  Again, `(w,d)` is just a pair. Like other pairs, its a matrix, and
+  has marginal probabilities associated with it.
+
+Next steps
+----------
 
 
 Precomputed LXC containers
