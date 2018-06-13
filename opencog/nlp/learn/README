@@ -239,30 +239,39 @@ head.  Don't look in there. You have been warned!
 dones revenging
 
 
-Bulk Text Parsing
------------------
+Bulk Pair Counting
+------------------
+The first major stage of data processing is the generation of word-pair
+statistics. Later stages depend on high-quality word-pair statistics,
+and this is best obtained by processing a large number of text files;
+typically thousands or tens of thousands of them, for run-time of a
+few days to a week or two.  For a practice run, half-an-hour is
+sufficient, but a half-hours worth of data will be quite low-quality.
 
-10) Get ready to feed text to the pipeline (see Bulk Text Parsing
-  section below). It would be best to get text that
-  consists of narrative literature, adventure and young-adult novels,
-  newspaper stories. These contain a good mix of common nouns and verbs,
-  which is needed for conversational natural language.
+The best text for "natural" English is narrative literature, adventure
+and young-adult novels, and newspaper stories. These contain a good
+mix of common nouns and verbs, which is needed for conversational
+natural language.
 
-  Turns out that Wikipedia is a poor choice for a dataset. That's
-  because the "encyclopedic style" means it contains few pronouns,
-  and few action-verbs (hit, jump, push, take, sing, love) because
-  its mostly describing objects and events (is, has, was). It also
-  contains large numbers of product names, model numbers, geographical
-  place names, and foreign language words, which do little or nothing
-  for learning grammar. Finally, it has large numbers of tables and
-  lists of dates, awards, ceremonies, locations, sports-league names,
-  battles, etc. that get mistaken for sentences, and leads to unusual
-  deductions of grammar.  Thus, it turns out Wikipedia is a bad choice
-  for learning text.
+It turns out that Wikipedia is a poor choice for a dataset. That's
+because the "encyclopedic style" means it contains very few pronouns,
+and very few action-verbs (hit, jump, push, take, sing, love). Most
+Wikipedia articles state facts, describe objects, ideas and events
+(primarily using the verbs is, has, was). It also contains large
+numbers of product names, model numbers, geographical place names,
+and foreign language words, which do little or nothing for learning
+grammar. Finally, it has large numbers of tables and lists of dates,
+awards, ceremonies, locations, sports-league names, battles, etc.
+that get mistaken for valid sentences (they are not; they are lists),
+and leads to unusual deductions of grammar.  Thus, it turns out
+Wikipedia is a bad choice for learning text.
 
-  There are various scripts in the `download` directory for downloading
-  and pre-processing texts from Project Gutenberg, Wikipedia, and the
-  "Archive of Our Own" fan-fiction website.
+There are various scripts in the `download` directory for downloading
+and pre-processing texts from Project Gutenberg, Wikipedia, and the
+"Archive of Our Own" fan-fiction website.
+
+7) Explore the scripts in the `download` directory. Obtain a collection
+   of text to process.
 
 8) Optionally reduce the amount of data that is collected. Currently,
   the `observe-text` function in 'link-pipeline.scm` collects counts
