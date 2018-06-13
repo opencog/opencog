@@ -404,8 +404,7 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    `link-pipeline.scm` file to suit your whims in RAM usage and time
    spent in GC.  The default should be adequate for almost all users.
 
-
-12) Its conenient to have lots of terminals open and ready for use;
+12) Its convenient to have lots of terminals open and ready for use;
    the `byobu+tmux` terminal server provides this, without chewing up
    a lot of screen real-estate.  The `run-shells.sh` script will run
    a `byobu/tmux` session, start the cogserver in one of the terminals,
@@ -440,6 +439,11 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    of processing, a half-hour or so is sufficient for a trial run.
    Feel free to ctrl-C at this point, and move to the next step
    (covered in the section **Mutual Information** below.)
+
+   You may want to use the `renice.sh` script to lower the priority
+   of the postgres server.  This will help make your system more
+   responsive, if you are also doing other work on it.  You would
+   need to run this script as root (i.e. as `sudo renice.sh`).
 
 Notes:
 * Segmentation for Chinese. Currently, only some preliminary work has
@@ -542,6 +546,25 @@ on your dataset size. Small trial-run datasets should take no mmore than
 hint of the rate of progress.  The `print-matrix-summary-report` will
 print some technical stats about the result of the run.
 
+The above might double the size of the database, as it sits on disk --
+adding frequencies and mutual-information values to word pairs will
+increase the the storage size of each word-pair by a lot.  In addition,
+the marginal stats are not insignificant in size.
+
+Thus, you may want to:
+
+* Check that you have enough storage allocated for the postgres
+  database.
+
+* Make a copy of the word-pair-only database, so that you can return
+  to it, if you decide that you need to return to it for some reason.
+
+In particular, this means using a differrent set of database credentials
+in the URL above!
+
+
+The Structure in Pairs
+----------------------
 Note that any kind of pair `(x,y)` of things `x,y` that have a number
 `N(x,y)` associated with the pair can be though of as a matrix from
 linear algebra.  That is, `N` is a number, `x` is a row-index, and `y`
@@ -653,19 +676,37 @@ word was in. The code in this part of the pipeline accumulates
 observation counts on the large variety of possible disjuncts (that is,
 word-disjunct pairs) that can be observed.
 
-xxxxxxx
+Running MST Disjunct Counting
+-----------------------------
+The overall processing is very similar to batch pair-counting. The steps
+are as follows:
 
-Minimum spanning tree code is in `mst-parser.scm`. The current version
-works well.
+* Copy text files to the directory `gamma-pages` directory. This can
+  be a different set of text files from before, or the same. It does
+  not seem to matter. You can pick a different directory name, if you
+  wish.
 
-To perform MST parsing in bulk:
-* Review the file `opencog/nlp/learn/run/README`, and then copy the
-  scripts into your working dir, if you didn't do it before.
-  `run-server-mst.sh` starts the cogserver and sets a default prompt: set 
-  up by default to avoid conflicts and confusion, and to allow multiple 
-  languages to be processed at the same time. 
-  You need to pass the language and database credentials as arguments; 
-  see next steps
+* Make a copy of `config/opencog-mst-en.conf` (if you wish) and edit
+  it to suit your tastes. Or use the default.  Make note of the port
+  number: this one uses port 19005.
+
+* Make a copy of `mst-count-en.scm` (or another `mst-count-??.scm` file)
+  Edit it, and insert the database credentials for the database that
+  contains the word-pair MI data.  Indicate the cogserver config file to
+  use (previous step).
+
+* Make a copy of `run-shells.sh` and edit it to specify the copy of the
+  `mst-count-en.scm` file, created above.  Also adjust the port number
+  to match (19005 instead of 17005). Then run it, to get the byobu/tmux
+  session started.
+
+* Make a copy of the `wiki-mst-en.sh` file, and adjust the location
+  of the  text files, and the port number, to match the above.  If
+  you accept the defaults, no changes are needed.  In one of the tmux
+  terminals, run the `wiki-mst-en.sh` file.
+
+
+xxxxxxxx
   `wiki-mst-??.scm` starts the process of observing the text files contained
   in the gamma-pages folder, by calling `mst-one.sh`, which sends a sentence
   to the cogserver with `submit-one.pl`, giving the correct opencog command.
