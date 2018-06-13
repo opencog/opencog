@@ -167,38 +167,28 @@ important for saving partial results.
    For the practice run, suggest picking English, and using the `en`
    files. The other language files can be ignored (and can be deleted).
 
-xxxxxxxxxxx
+4) Start the OpenCog server.  Later on, the batch processing
+   instructions (below) indicate how to automate this. However, for
+   the practice run, it is better to do all this by hand.
 
-* `run-server-parse.sh` starts the cogserver and sets a default prompt: set 
-   up by default to avoid conflicts and confusion, and to allow multiple 
-   languages to be processed at the same time. 
-   You need to pass the language and database credentials as arguments; 
-   see next step.
+   First, review the contents of `config/opencog-pairs-en.conf`. This
+	simply declares the prompts that the cogserver will use; most
+   importantly, it declares the port number for the cogserver. Its's
+   currently coded to be 17005.
 
-* `wiki-ss-en.sh` starts the process of observing the text files contained
-   in the beta-pages folder, more on that later (see Bulk Text Parsing).
-   The rest of the relevant files are explained later.
+   Edit the `pair-count-en.scm` and hard-code your database credentials
+   into it. This sevaes you the trouble of having to remember them, and
+   to type them in by hand.
 
-5) Start the REPL server. Eventually, you can use the
-   `run-server-parse.sh` file in the `run` directory to do this;
-   it creates a `byobu` session with different servers in different
-   terminals, where you can keep an eye on them. However, the
-   first time through, it is better to do all this by hand. 
-   So, for now, start the REPL server in a terminal, as follows:
-
-XXX THIS is too complicated. Go back to the older, simpler way of doing
-this!  Lets try to keep things simple!
+   Finally, start the cogserver by
    ```
-     guile -l observe-launch.scm  -- --lang en --db learn-pairs --user your_user --password asdf
+     guile -l pair-count-en.scm
    ```
-   The --user option is needed only if the database owner is different from the
-   current user.
-   --password is also optional, not needed if no password was setup for the database
 
-6) Verify that the language processing pipeline works. In a second
-   terminal, try this:
+5) Verify that the pair-counting pipeline works. In a second terminal,
+   try this:
 ```
-   rlwrap telnet localhost 17005  # default port for the REPL server in English.
+   rlwrap telnet localhost 17005  # CogServer for English
    opencog-en> (observe-text "this is a test")
 ```
 
@@ -214,6 +204,7 @@ this!  Lets try to keep things simple!
    for parsing, counts the returned word-pairs, and stores them in
    the database.
 
+xxxxxxxxxxxxxxxx
 7) Verify that the above resulted in data sent to the SQL database.
    Log into the database, and check:
 ```
@@ -244,6 +235,14 @@ this!  Lets try to keep things simple!
   * Disjunct counts -- how often the random ANY disjuncts are used.
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
+
+ Eventually, you can use the
+   `run-server-parse.sh` file in the `run` directory to do this;
+   it creates a `byobu` session with different servers in different
+   terminals, where you can keep an eye on them. However, the
+* `wiki-ss-en.sh` starts the process of observing the text files contained
+   in the beta-pages folder, more on that later (see Bulk Text Parsing).
+   The rest of the relevant files are explained later.
 
 9) Optionally tune the forced garbage collection parameters. Currently
   garbage collection is forced whenever the guile heap exceeds 750
