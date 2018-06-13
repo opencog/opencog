@@ -27,6 +27,48 @@ select sum(floatvalue[3]) from valuations where type=7;
 ```
 where type 7 is `CountTruthValue`.
 
+Pair-counting batch results
+---------------------------
+Example stats and performance:
+current fr_pairs db has 16785 words and 177960 pairs.
+
+This takes 17K + 2x 178K = 370K total atoms loaded.
+These load up in 10-20 seconds-ish or so.
+
+New fr_pairs has 225K words, 5M pairs (10.3M atoms):
+Load 10.3M atoms, which takes about 10 minutes cpu time to load
+20-30 minutes wall-clock time (500K atoms per minute, 9K/second
+on an overloaded server).
+
+RSS for cogserver: 436MB, holding approx 370K atoms
+So this is about 1.2KB per atom, all included. Atoms are a bit fat...
+... loading all pairs is very manageable even for modest-sized machines.
+
+RSS for cogserver: 10GB, holding 10.3M atoms
+So this is just under 1KB per atom.
+
+(By comparison, direct measurement of atom size i.e. class Atom:
+typical atom size: 4820384 / 35444 = 136 Bytes/atom
+this is NOT counting indexes, etc.)
+
+For dataset (fr_pairs) with 225K words, 5M pairs:
+Current rate is 150 words/sec or 9K words/min.
+
+After the single-word counts complete, and all-pair count is done.
+This is fast, takes a couple of minutes.
+
+Next: batch-logli takes 540 seconds for 225K words
+
+Finally, an MI compute stage.
+Current rate is 60 words/sec = 3.6K per minute.
+This rate is per-word, not per word-pair .
+
+Update Feb 2014: fr_pairs now contains 10.3M atoms
+SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
+select count(uuid) from atoms where type = 77; gives  226030 (226K words)
+select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
+select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
+
 
 Performance
 -----------
