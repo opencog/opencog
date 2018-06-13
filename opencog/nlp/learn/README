@@ -69,16 +69,28 @@ pill. You've got a lot of RTFM in front of you.
 Setting up the AtomSpace
 ------------------------
 This section describes how to set up the atomspace to collect
-statistics.  Most of this revolves around setting up postgres.
+statistics.  The most time-consuming, difficult and error-prone step
+is the setup and configuration of postgres.  Postgres is centrally
+important for saving partial results.
 
-0.0) Optional. If you plan to run the pipeline on multiple
+0.1) Optional. If you plan to run the pipeline on multiple
    different languages, it can be convenient, for various reasons,
    to run the processing in an LXC container. If you already know
    LXC, then do it. If not, or this is your first time, then don't
-   bother.
+   bother right now. Come back to this later.
 
-0.1) Probably mandatory.  Chances are good that you'll work with large
-   datasets; in this case, you also need to do the below. Skipping this
+   LXC containsers are nice because:
+   * Each container can have a different config, different datasets,
+     and be executing different steps of the pipeline.  This is great,
+     for juggling multiple jobs.
+   * The system install in one container won't corrupt the other
+     containers; you can experiment, without impacting stable systems.
+   * LXC containers can be stopped and move to other system with more
+     RAM (or less RAM), more disk, or less disk. Handy for load-
+     balancing, and/or easily moving to a bigger system.
+
+0.2) Probably mandatory.  Chances are good that you'll work with large
+   datasets; in this case, you need to do the below. Skipping this
    step will lead to the error `Too many heap sections: Increase
    MAXHINCR or MAX_HEAP_SECTS`. So:
 ```
@@ -90,7 +102,7 @@ statistics.  Most of this revolves around setting up postgres.
    make; sudo make install
 ```
 
-0.2) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+0.3) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
 ```
    git clone git://git.sv.gnu.org/guile.git
@@ -104,7 +116,18 @@ statistics.  Most of this revolves around setting up postgres.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
-0.3) Opencog should be built with `link-grammar-5.5.0` or newer.
+0.4) Create/edit the `~/.guile` file and add the content below.
+   This makes the arrow keys work, and prints nicer stack traces.
+```
+   (use-modules (ice-9 readline))
+   (activate-readline)
+   (debug-enable 'backtrace)
+   (read-enable 'positions)
+   (add-to-load-path "/usr/local/share/opencog/scm")
+   (add-to-load-path ".")
+```
+
+0.5) Opencog should be built with `link-grammar-5.5.0` or newer.
    The currently installed version can be displayed by running
 ```
    link-parser --version
@@ -118,25 +141,33 @@ statistics.  Most of this revolves around setting up postgres.
 1) Set up and configure postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
 
-2) Create and initialize a database. Pick any name you want;
-   here it is `learn-pairs`.
+2) Create and initialize a database. Pick any name you want; here it
+   is `learn-pairs`.  Later on, you will have to place this name into
+   a config file (see below).
 ```
    createdb learn-pairs
    cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
 ```
 
-3) Create/edit the `~/.guile` file and add the following content:
-```
-   (use-modules (ice-9 readline))
-   (activate-readline)
-   (debug-enable 'backtrace)
-   (read-enable 'positions)
-   (add-to-load-path "/usr/local/share/opencog/scm")
-   (add-to-load-path ".")
-```
-4) Copy all files from the `opencog/opencog/nlp/learn/run` directory
-   to your working directory. There are a variaty of different files,
-   here, organized by language. Here's a short overview:
+3) Copy all files from the `opencog/opencog/nlp/learn/run` directory to
+   a new directory; suggest the directory `run-practice`.  Its best to
+   try a few practice runs before commiting to serious data processing.
+   The next number of steps describe how to do a practice run; a later
+   section focuses on batch processing.
+
+   There are two types of files in this directory: generic processing
+   scripts, and language-specific configuration files. Different
+   languages require different processing pipelines; e.g. most languages
+   will require a morphology processing step; English does not.
+   Different languages will typically train on a different set of
+   corpora organized in different directories in different ways. The
+   multitude of config files allows each language to be configured in
+   sharply different ways, running different kinds of experiments.
+
+   For the practice run, suggest picking English, and using the `en`
+   files. The other language files can be ignored (and can be deleted).
+
+xxxxxxxxxxx
 
 * `run-server-parse.sh` starts the cogserver and sets a default prompt: set 
    up by default to avoid conflicts and confusion, and to allow multiple 
