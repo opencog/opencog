@@ -207,9 +207,9 @@ over all its variables, we can compose `P` with each of them to
 produce specializations. For instance reusing `P`, `T` and `V` as
 defined in the section detailing [Step
 2](#step-2:-extract-valuation-set), the shallow abstractions over
-variable `$(Variable "$X")` are `(Concept "A")`, `(Concept "D")` and
+variable `(Variable "$X")` are `(Concept "A")`, `(Concept "D")` and
 `(Variable "$Y")`. Likewise the shallow abstractions over variable
-`$(Variable "$Y")` are `(Concept "B")`, `(Concept "C")` and `(Concept
+`(Variable "$Y")` are `(Concept "B")`, `(Concept "C")` and `(Concept
 "D")`.
 
 To carry out the composition `Put` is used as follows
