@@ -56,13 +56,13 @@ this insight.
 
 An very early and yet pretty presentation of algebraic linguistics,
 as seen axiomatically, is given by Solomon Marcus,
-[Algebraic Linguistics; Analytical Models](https://monoskop.org/images/2/26/Marcus_Solomon_editor_Algebraic_Linguistics_Analytical_Models_1967.pdf),
+“[Algebraic Linguistics; Analytical Models](https://monoskop.org/images/2/26/Marcus_Solomon_editor_Algebraic_Linguistics_Analytical_Models_1967.pdf)”,
 (1967), Elsevier.
 
 A feels-right explanation of how one extracts semantics from disjuncts is
 given by EA Nida,
 [“The Molecular Level of Lexical Semantics”](https://www.academia.edu/36534355/The_Molecular_Level_of_Lexical_Semantics_by_EA_Nida),
-(1997) International Journal of Lexicography, **10**(4): 265–274.
+(1997) *International Journal of Lexicography*, **10**(4): 265–274.
 What Nida is saying can, in fact, be measured, by correlating, for
 example, disjuncts with WordNet word-senses. The correlation is real and
 is measureable (and has been measured). The goal of this project is to
@@ -184,7 +184,7 @@ unhappy, painful experience.
    take weeks to run, and unexpected power outages can corrupt
    databases, resulting in weeks or months of lost work.
 
-   You have been warned! This is not a joke!
+   *You have been warned! This is not a joke!*
 
 0.2) Optional, but strongly recommended!  Consider investing in a
    pair of solid-state disk drives (SSD), configured as a RAID-1
