@@ -281,9 +281,9 @@ important for saving partial results.
    rlwrap telnet localhost 17005
    opencog-en> (observe-text "this is a test")
 ```
-    The port number 17005 was from the above-mentioned config file.
+   The port number 17005 was from the above-mentioned config file.
 
-    Better yet:
+   Better yet:
 ```
    echo -e "(observe-text \"this is a another test\")" |nc localhost 17005
    echo -e "(observe-text \"Bernstein () (1876\")" |nc localhost 17005
@@ -595,7 +595,7 @@ Thus, you may want to:
 * Make a copy of the word-pair-only database, so that you can return
   to it, if you decide that you need to return to it for some reason.
   You can copy databases by saying:
-````
+```
   createdb -T existing_dbname new_dbname
 ```
 
