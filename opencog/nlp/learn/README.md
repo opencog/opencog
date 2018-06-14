@@ -1031,6 +1031,15 @@ altered by the clustering code):
   has marginal probabilities associated with it.
 
 
+Exporting a Lexis
+-----------------
+The collection of grammatical classes, the words that belong to them,
+and the attached disjuncts comprise a lexis that is compatible with the
+Link Grammar parser. It can be exported with the `export-csets`
+function. When copied to a location where Link Grammar can find it,
+it can be used to parse text by the link parser.
+
+
 Next Steps
 ----------
 The clustering code is in development, and the best/fastest algorithms
