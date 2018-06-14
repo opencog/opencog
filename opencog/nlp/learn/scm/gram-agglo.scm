@@ -260,11 +260,11 @@
 
 ; Return a list of words that got placed into the class.
 (define (got-done WRDS CLS)
-	(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
+	(filter (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 ; Return a list of words NOT in the class.
 (define (still-to-do WRDS CLS)
-	(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
+	(remove (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 ; ---------------------------------------------------------------
 ;
@@ -407,7 +407,7 @@
 	(if (null? WRD-LST) TRUE-CLS-LST
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
-				; Can we assign the word to a class?
+				; Attempt to assign the word to an existing class.
 				(cls (assign-word-to-class MERGER wrd TRUE-CLS-LST)))
 
 			; If the word was merged into an existing class, then
