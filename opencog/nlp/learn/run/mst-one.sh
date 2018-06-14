@@ -2,9 +2,9 @@
 #
 # mst-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
-# Support script for batch parsing of wikipedia articles.
-# Sentence-split one file, submit it, via perl script, to the parser.
-# When done, move the file over to a 'finished' directory.
+# Support script for MST processing (disjunct counting) of text files.
+# Sentence-split one file, submit it, via perl script, to the cogserver.
+# When done, move the file over to the `mst-articles` directory.
 #
 # Example usage:
 #    ./mst-one.sh en Barbara localhost 17001
@@ -18,27 +18,18 @@ filename="$2"
 coghost="$3"
 cogport=$4
 
-# Not using relex anymore
-#splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
-#splitter=/usr/local/bin/split-sentences.pl
+# splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
 splitdir=split-articles
 subdir=mst-articles
 observe="observe-mst"
 
-# Punt if the cogserver has crashed. The grep is looking for the
-# uniquely-named config file.
-# haveserver=`ps aux |grep cogserver |grep opencog-$lang`
-# if [[ -z "$haveserver" ]] ; then
-# 	exit 1
-# fi
-# Alternate cogserver test: use netcat to ping it.
+# Punt if the cogserver has crashed. Use netcat to ping it.
 haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
-
 
 # Split the filename into two parts
 base=`echo $filename | cut -d \/ -f 1`
@@ -58,10 +49,6 @@ cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
 
 # Punt if the cogserver has crashed (second test,
 # before doing the mv and rm below)
-# haveserver=`ps aux |grep cogserver |grep opencog-$lang`
-# if [[ -z "$haveserver" ]] ; then
-# 	exit 1
-# fi
 haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1

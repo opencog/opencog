@@ -8,6 +8,68 @@ useless to you, except maybe for some weird voyeuristic reasons.
 ======================================================================
 Jan-Feb 2014
 
+Handy tools
+-----------
+Some handy SQL commands:
+```
+SELECT count(uuid) FROM Atoms;
+select count(uuid) from atoms where type =123;
+```
+
+type 123 is `WordNode` for me; verify with
+```
+SELECT * FROM Typecodes;
+```
+
+The total count accumulated is
+```
+select sum(floatvalue[3]) from valuations where type=7;
+```
+where type 7 is `CountTruthValue`.
+
+Pair-counting batch results
+---------------------------
+Example stats and performance:
+current fr_pairs db has 16785 words and 177960 pairs.
+
+This takes 17K + 2x 178K = 370K total atoms loaded.
+These load up in 10-20 seconds-ish or so.
+
+New fr_pairs has 225K words, 5M pairs (10.3M atoms):
+Load 10.3M atoms, which takes about 10 minutes cpu time to load
+20-30 minutes wall-clock time (500K atoms per minute, 9K/second
+on an overloaded server).
+
+RSS for cogserver: 436MB, holding approx 370K atoms
+So this is about 1.2KB per atom, all included. Atoms are a bit fat...
+... loading all pairs is very manageable even for modest-sized machines.
+
+RSS for cogserver: 10GB, holding 10.3M atoms
+So this is just under 1KB per atom.
+
+(By comparison, direct measurement of atom size i.e. class Atom:
+typical atom size: 4820384 / 35444 = 136 Bytes/atom
+this is NOT counting indexes, etc.)
+
+For dataset (fr_pairs) with 225K words, 5M pairs:
+Current rate is 150 words/sec or 9K words/min.
+
+After the single-word counts complete, and all-pair count is done.
+This is fast, takes a couple of minutes.
+
+Next: batch-logli takes 540 seconds for 225K words
+
+Finally, an MI compute stage.
+Current rate is 60 words/sec = 3.6K per minute.
+This rate is per-word, not per word-pair .
+
+Update Feb 2014: fr_pairs now contains 10.3M atoms
+SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
+select count(uuid) from atoms where type = 77; gives  226030 (226K words)
+select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
+select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
+
+
 Performance
 -----------
 Performance seems to suck:
@@ -104,6 +166,245 @@ writer does:
 
 am using boost-1.49 on cray
 
+
+
+
+Some typical entropies for word-pairs
+-------------------------------------
+Three experiments:
+1) Get H(de,*) H(*,de)  H(en,*) H(*,en) and compare to
+   H(de+en,*) H(*, de+en)
+
+2) H(vieux,*) H(* vieux) H(nouveaux, *) H(*, nouveaux)
+
+3) H(vieille, *) etc + vieux
+
+4) H(le, *) H(la,*)  vs. H(le+la)
+
+5) H(le,*) H(famille,*) which should fail ...!?
+
+
+
+Some typical entropies for word-pairs
+-------------------------------------
+The below is arithmeticaly correct, but theoretically garbage.
+
+(WordNode "famille") entropy H=11.185
+
+H(*, famille) = 11.195548
+H(famille, *) = 11.174561
+
+MI(et, famille) = -5.2777815
+H(et, *) = 5.5696678
+P(et, *) = 0.021055372363972875
+
+thus:
+H(et, famille) = -MI(et, famille) + H(famille, *) + H(et, *) = 22.0220103
+P(et, famille) = 2.348087815164205e-7
+
+MI(de, famille) = 2.1422486
+H(de, *) = 4.3749881
+P(de, *) = 0.04819448582223504
+
+H(de, famille) = -2.1422486 + 4.3749881 + 11.195548 = 13.4282875
+P(de, famille) = 9.071574511509601e-5
+
+P(de+et. *) = 0.06924985818620791
+H(de+et, *) = 3.8520450730427047
+
+P(de+et, famille) = 9.095055389661243e-5
+H(de+et, famille) = 13.424558050397735
+MI(de+et, famille) = 1.6230350226449701
+
+So  MI(et, famille) < MI(de+et, famille) < MI(de, famille)
+       -5.2777815   <   1.6230350226     <   2.1422486
+
+By contrast, the arithmetic average is:
+(MI(de, famille) * P(de, famille) + MI(et, famille) * P(et, famille)) /
+    (P(de, famille) + P(et, famille))
+  = 2.1230921666199825
+
+Change in entropy:
+MI(de, famille) * P(de, famille) + MI(et, famille) * P(et, famille) =  0.0012169
+
+MI(de+et, famille) * P(de+et, famille) = 1.476159343e-4
+
+Oh, wait ...
+H(de, famille) * P(de, famille) + H(et, famille) * P(et, famille) =  0.001223328
+
+H(de+et, famille) * P(de+et, famille) = 0.00122097099
+
+Change in entropy = 0.00122097099 - 0.001223328 = -2.35701e-6
+
+-------
+H(de) = 4.3808608
+H(et) = 5.5862331
+
+P(de) = 0.04799870191172842
+P(et) = 0.02081499323761464
+P(de+et) = 0.06881369514934306
+H(de+et) = 3.8611604742976153  = -log_2 (P(de)+P(et))
+By contrast, the weighted average is
+
+(P(de)*H(de) + P(et)*H(et)) /(P(de) + P(et)) = 4.745465784790553
+
+Combinations:
+  P(de+et)*H(de+et) = 0.2657007
+  P(de)*H(de) + P(et)*H(et) = 0.32655303
+
+The change in entropy, from forming a union, is:
+  P(de+et)*H(de+et) - P(de)*H(de) - P(et)*H(et) = -0.060852316
+
+Recap: Delta(de+et) = -0.060852316
+       Delta(de+et, famille) = -2.35701e-6
+
+Entropy increases (strongly) if word-pair merged, words are separated,
+
+-------
+
+MI(d'une, famille) = 5.230504
+H(d'une, *) = 9.792551
+
+H(la) = 5.6536283
+H(la, *) = 5.5858526
+
+sa
+est
+de
+H(d'une) = 9.7960119
+H(un) = 7.1578913
+H(et) = 5.5862331
+
+-----
+repeat, for vielle+nouveaux
+H(nouveaux) = 14.28815
+P(nouveaux) = 4.998483553100357e-5
+
+H(vieille) = 16.16037
+P(vieille) = 1.365349e-5
+
+P(nouveaux+vieille) = 6.363833e-5
+H(nouveaux+vieille) = 13.93974
+P(nouveaux+vieille)*H(nouveaux+vieille) = 8.87102088-4
+
+P(nouveaux)*H(nouveaux) + P(vieille)*H(vieille) = 9.3483638e-4
+
+Change in entropy is diff of the two: -4.7734297e-5
+
+
+-----
+repeat, for vielle+nouveaux
+H(*, famille) = 11.195548
+
+H(nouveaux, *) = 13.974219
+P(nouveaux, *) = 6.213565989765264e-5
+MI(nouveaux, famille) = 5.2966957
+H(nouveaux, famille) = 19.8730713
+P(nouveaux, famille) = 1.0413804797188067e-6
+
+H(vieille, *) = 15.998603
+P(vieille, *) = 1.5273571710064995e-5
+MI(vieille, famille) = 10.195547
+H(vieille, famille) = 16.998604
+P(vieille, famille) = 7.636780561617735e-6
+
+P(vieille+nouveaux, famille) = 8.678161041336542e-6
+H(vieille+nouveaux, famille) = 16.814179210712517
+
+P(vieille+nouveaux, *) = 7.740923160771763e-5
+H(vieille+nouveaux, *) = 13.657134846045357
+
+MI(vieille+nouveaux, famille) = 8.038503635332841
+
+so MI(nouveaux, famille) < MI(vieille+nouveaux, famille) < MI(vieille, famille)
+         5.2966957       <         8.038503635332841     <       10.195547
+
+Change in entropy:
+P(nouveaux, famille)*H(nouveaux, famille)  + P(vieille, famille)*H(vieille, famille)
+    = 1.505100371e-4
+
+P(vieille+nouveaux, famille) * H(vieille+nouveaux, famille) = 1.459161549e-4
+
+Change = 1.459161549e-4 - 1.505100371e-4 = -4.5938821e-6
+
+To recap: Delta(vieille+nouveaux) = -4.7734297e-5
+               reduces the entropy more than
+          Delta(vieille+nouveaux, famille) = -4.5938821e-6
+
+i.e. entropy increses if the word-pairs are merged, the words are separated.
+
+
+======================================================================
+Minimal morphology output
+
+
+;; Lets say that there was one word in the sentence, it was 'foobar'
+;; and the splitter split it into foo and bar
+;; then the following should be generated:
+
+;; for each sentence, create one of these, each with a distinct uuid:
+(ParseLink (stv 1 1)
+   (ParseNode "sentence@fc98a97a-4753-45d9-be5b-1c752b5b21d9_parse_0")
+   (SentenceNode "sentence@fc98a97a-4753-45d9-be5b-1c752b5b21d9")
+)
+
+;; For each pair of morphemes, cereate the below:
+(EvaluationLink (stv 1.0 1.0)
+   (LinkGrammarRelationshipNode "MOR")
+   (ListLink
+      (WordInstanceNode "foo@5e179119-3966-4bb9-8a38-ef2014b48f12")
+      (WordInstanceNode "bar@cb2443bb-fbec-472c-baee-36b822579861")
+   )
+)
+
+;; For each "word" aka morpheme, create these two clauses:
+;; note that the UUID's match up exactly with the above.
+;; the below shows only "foo", another pair is needed for "bar".
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode "foo@5e179119-3966-4bb9-8a38-ef2014b48f12")
+   (WordNode "foo")
+)
+(WordInstanceLink (stv 1.0 1.0)
+   (WordInstanceNode "foo@5e179119-3966-4bb9-8a38-ef2014b48f12")
+   (ParseNode "sentence@fc98a97a-4753-45d9-be5b-1c752b5b21d9_parse_0")
+)
+
+
+;; finally, at the very end:
+;; again, the UUID must match with what was given above.
+
+(ListLink (stv 1 1)
+   (AnchorNode "# New Parsed Sentence")
+   (SentenceNode "sentence@68e51cae-98bc-4102-b19c-78649c5f6cfb")
+)
+
+======================================================================
+Tagalog status:
+
+31 july 2014
+4519631 = 4.5M morpehem pairs
+204K morpehemes
+
+======================================================================
+
+Setup, July 2015
+----------------
+LXC container on gnucash.org
+
+AtomSpace.cc line 303
+
+LXC container on backlot
+------------------------
+nlp-base and nlp-server (currently used by rohit)
+morf-server (currrently used by ainish)
+
+LXC container on fanny
+----------------------
+ssh learn@10.0.3.182
+cd src/learn
+./run-all-servers.sh
+tmux attach
+psql en_pairs
 ======================================================================
 ======================================================================
 
@@ -176,7 +477,7 @@ lxc-start -n opencog-base --daemon
 time lxc-copy -n  opencog-learn -N learn-lt
 
 ------------------------------------
-4 Jan 2016
+4 Jan 2017
 ----------
 https://dumps.wikimedia.org/zhwiki/20170101/
 https://dumps.wikimedia.org/zh_yuewiki/20170101/
@@ -13550,3 +13851,47 @@ Bugs: lxc containers not shutting down correctly during power loss
 
 Bugs/feat:  no way to compute marginals incrementally, if the DB does
       not fit in RAM.
+
+TODO List
+=========
+* Count single-word probabilities.
+* Redo all the word-pair graphs and charts from wayyy back when.
+* Resume work on morphology.
+
+DONE
+----
+* Make sure that link-parser fully randomizes linkage choices for
+  long sentences. Done. See the rand_state and predictable_rand
+  flags in version 4.8.3.
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+  Done: copied one from moses-smt and put it in the run subdirectory
+* Raw psql seems not to be utf8.  Were the tables created wrong,
+  or is this a client bug?
+  Fixed: turned out to be a guile-related bug.
+* Handle database write asynchronously: have a thread collect
+  up the atoms, and write them. Maybe even multiple threads.
+  This is OK due to the atomptr design.
+  Done.  Not just one, but multiple writers.
+* Can we start a guile thread for each incoming sentence?
+  Threading will require more subtle sentence cleanup.
+  No. The main guile bug, opened 5 years ago, is still not fixed.
+* Table counts need to be more than 32-bit. Looks like the
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
+  Done. atoms.sql now uses bigint 64-bit uuids.
+* Investigate crash: while writing truuth value, stv_confidence
+  was pure virtual (circa line 920 of AtomStorage.cc) There's some
+  kind of smart-pointer race. See "Crash" section below.
+  Done. Ran for a month without issues.
+* Fix crash at linkage_set_domain_names+0xe0  Done. Need LG 5.4.0
+* Create OO system for generic pair statistics. Done.
+* Reduce num samples for 999 to 16. Done.
+* Fix (WordNode "…!ANY-PUNCT") Done.
+* Rework pipeline to use literary English sources. DONE.
+  New scripts in the `download` directory.
+* Prune low observation counts. Well, no that is a bad idea.
+  However, the (opencog matrix) code now includes data filters.
+* Create an LXC container for public use. DONE.
+  But not updated.... Well no one is interested in thsi so punt.
+* Implement sql-delete. DONE.

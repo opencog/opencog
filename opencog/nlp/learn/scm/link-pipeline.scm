@@ -566,26 +566,3 @@
 )
 
 ; ---------------------------------------------------------------------
-;
-; Some notes for hand-testing the code up above:
-;
-; (sql-open "postgres:///en_pairs?user=linas")
-; (use-relex-server "127.0.0.1" 4445)
-;
-; (define (prt x) (display x))
-;
-; (relex-parse "this is")
-; (get-new-parsed-sentences)
-;
-; (for-each-lg-link prt (get-new-parsed-sentences))
-;
-; (for-each-lg-link (lambda (x) (prt (make-word-link x)))
-;    (get-new-parsed-sentences))
-;
-; (for-each-lg-link (lambda (x) (prt (gddr (make-word-link x))))
-;    (get-new-parsed-sentences))
-;
-; (for-each-lg-link (lambda (x) (cog-inc-count! (make-word-link x) 1))
-;    (get-new-parsed-sentences))
-;
-; (observe-text "abcccccccccc  defffffffffffffffff")

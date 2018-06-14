@@ -3,14 +3,15 @@
 ; Depending on your database configuration, the usage patterns for scripts
 ; that invoke this function are,
    
-; guile -l script.scm -- --lang en --db wiki --user opencog_user --password cheese
+; guile -l script.scm -- --mode pairs --lang en --db wiki --user opencog_user --password cheese
 ; or
-; guile -l script.scm -- --lang en --db wiki
+; guile -l script.scm -- --mode pairs --lang en --db wiki
   
 (use-modules (ice-9 getopt-long))
 
 (define option-spec
-  '((lang (required? #t) (value #t))
+  '((mode (required? #t) (value #t))
+  	(lang (required? #t) (value #t))
     (db (required? #t) (value #t))
     (user (required? #f) (value #t))
     (password (required? #f) (value #t)))
@@ -20,6 +21,9 @@
 
 (define pw (option-ref options 'password ""))
 (define db_user (option-ref options 'user ""))
+
+(define (get-mode) 
+  (option-ref options 'mode #f))
 
 (define (get-lang) 
   (option-ref options 'lang #f))
