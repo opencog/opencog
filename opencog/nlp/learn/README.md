@@ -1,6 +1,6 @@
 
 Unsupervised Language Learning
-------------------------------
+==============================
 * Linas Vepstas December 2013
 * Updated May 2017
 * Updated June 2018
@@ -9,8 +9,8 @@ Current project, under construction.  See the
 [language learning wiki](http://wiki.opencog.org/w/Language_learning)
 for an alternate overview.
 
-Summary
--------
+Project Summary
+---------------
 The goal of this project is to create a system that is capable of
 learning the grammar and some of the semantics of natural language.
 The fundamental goal is to do this in an unsupervised fashion, with
@@ -69,7 +69,7 @@ is measureable (and has been measured). The goal of this project is to
 move beyond this.
 
 
-Processing overview
+Processing Overview
 -------------------
 Most of this README concerns the practical details of configuring and
 operating the system, as it stands, today.  A diary of scientific notes
@@ -116,10 +116,10 @@ Results from Step D can be found in the PDF file
 [Connector Sets](https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/learn-lang-diary/drafts/connector-sets.pdf)
 in the diary subdirectory.
 
-It is very important to understand that Step E is VERY DIFFERENT from
-commonly-reported algorithms used in the published literature, such as
-using K-means clustering and dimensional reduction to obtain word
-classes (grammatical categories). The reason for this is that the
+It is very important to understand that Step E is ***very different***
+from commonly-reported algorithms used in the published literature,
+such as using K-means clustering and dimensional reduction to obtain
+word classes (grammatical categories). The reason for this is that the
 disjuncts provide connectivity information, and that one must **not**
 (merely) cluster over a vector space, but that one must instead cluster
 over a "sheaf".  That is, the basis-elements of the vector space
@@ -129,15 +129,16 @@ and describe the connectivity information in the "basis elements".
 This connectivity information is absent from ordinary approaches to
 the machine-learning of grammatical classes.
 
-As a result, NONE of the industry-standard classifiers and clustering
-algorithms can be applied to step E: they all assume that the input
-data can be structured as a vector space.  The axioms of algebraic
-linguistics can resemble the axioms of a vector space, which is why
-vector-space techniques can work pretty well in the machine-learning
-of linguistic structure. However, ultimately, the axioms of algebraic
-linguistics are NOT the axioms of a vector space.  In practical terms,
-this means that clustering/classification algorithm used in step E is
-completely different than anything else available in the industry.
+As a result, ***none*** of the industry-standard classifiers and
+clustering algorithms can be applied to step E: they all assume that
+the input data can be structured as a vector space.  The axioms of
+algebraic linguistics can resemble the axioms of a vector space, which
+is why vector-space techniques can work pretty well in the machine-
+learning of linguistic structure. However, ultimately, the axioms of
+algebraic linguistics are ***not*** the axioms of a vector space.
+In practical terms, this means that clustering/classification algorithm
+used in step E is completely different than anything else available in
+the industry.
 
 The complete novelty of step E, coupled to the need to perform
 experiments in earlier and later stages means that industry-standard,
@@ -667,8 +668,8 @@ Note that this means using a different set of database credentials
 in the URL above!
 
 
-The Structure in Pairs
-----------------------
+The Vector Structure Encoded in Pairs
+--------------------------------------
 Note that any kind of pair `(x,y)` of things `x,y` that have a number
 `N(x,y)` associated with the pair can be though of as a matrix from
 linear algebra.  That is, `N` is a number, `x` is a row-index, and `y`
@@ -1032,7 +1033,7 @@ altered by the clustering code):
   has marginal probabilities associated with it.
 
 
-Next steps
+Next Steps
 ----------
 The clustering code is in development, and the best/fastest algorithms
 are not yet known.  The best metrics are not known; currently, the code

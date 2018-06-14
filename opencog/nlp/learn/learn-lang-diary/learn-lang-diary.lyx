@@ -29213,7 +29213,7 @@ Why SVD and K-means don't work
 \end_layout
 
 \begin_layout Standard
-Here's WHY both SVD and K-means are fundamentally wrong, and are total failures
+Here's WHY both SVM and K-means are fundamentally wrong, and are total failures
  for this particular task.
  Lets start with K-means.
  One minor issue with K-means is that you have to pick K in advance, but
