@@ -73,9 +73,7 @@ Processing Overview
 -------------------
 Most of this README concerns the practical details of configuring and
 operating the system, as it stands, today.  A diary of scientific notes
-and results is in the
-`[learn-lang-diary](https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/learn-lang-diary)`
-subdirectory.
+and results is in the [learn-lang-diary](learn-lang-diary) subdirectory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 
@@ -113,7 +111,7 @@ Steps A-C are "well-known" in the academic literature, with results
 reported by many researchers over the last two decades. The results
 from Steps D & E are new, and have never been published before.
 Results from Step D can be found in the PDF file
-[Connector Sets](https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/learn-lang-diary/drafts/connector-sets.pdf)
+[Connector Sets](learn-lang-diary/drafts/connector-sets.pdf)
 in the diary subdirectory.
 
 It is very important to understand that Step E is ***very different***
