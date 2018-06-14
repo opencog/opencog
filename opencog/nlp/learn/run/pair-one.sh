@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
+# pair-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
 # Support script for word-pair counting of plain-text files.
 # Sentence-split one file, submit it, via perl script, to the cogserver.
 # When done, move the file over to the `submitted-pages` directory.
 #
 # Example usage:
-#    ./ss-one.sh en Barbara localhost 17001
+#    ./pair-one.sh en Barbara localhost 17001
 #
 
 # Set up assorted constants needed to run.

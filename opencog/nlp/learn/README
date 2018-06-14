@@ -492,7 +492,7 @@ Notes:
   `pip install jieba` and then segment text:
   `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
   the `run` directory.  You will need to create modified versions of
-  the `run/ss-one.sh` and `run/mst-one.sh` scripts to invoke jieba.
+  the `run/pair-one.sh` and `run/mst-one.sh` scripts to invoke jieba.
 
   To run this segmenter, you will also need to run the sentence-splitter
   differently.  Use the `zh-pre` or `yue-pre` languages with the
@@ -542,14 +542,14 @@ If the above generates the error
 ```
    nc: invalid option -- 'N'
 ```
-then edit `ss-one.sh` and remove the `-N` option from the `nc` commands.
+then edit `pair-one.sh` and remove the `-N` option from the `nc` commands.
 Some versions of `nc` require the `-N` flag: the scripts will just hang
 without it. Other versions of `nc` are unaware of the `-N` option, and
 don't need it.  This is an `nc` design flaw.
 
 Some of the other files used in processing:
 
--- `ss-one.sh` calls `split-sentences.pl` to split the text file into
+-- `pair-one.sh` calls `split-sentences.pl` to split the text file into
    sentences, and then calls `submit-one.pl` to send the sentences,
    one at a time, to the cogserver for processing. None of these
    should need any modification.

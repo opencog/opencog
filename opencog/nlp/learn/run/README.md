@@ -39,13 +39,13 @@ A quick overview:
   here; its `gamma-pages` by default, but you can use any directory
   that you wish.
 
-* `ss-one.sh`: the actual sentence-splitting workhorse. It handles each
+* `pair-one.sh`: the actual sentence-splitting workhorse. It handles each
   text file, moving the file to a different directory when finished
   with it.  Note that there are hard-coded paths in here, pointing to
   the sentence splitter.
 
-* `ss-nosplit-one.sh`: similar to above, but assumes that the text-file
-  contains one sentence per line - i.e. has been pre-split.
+* `pair-nosplit-one.sh`: similar to above, but assumes that the
+  text-file contains one sentence per line - i.e. has been pre-split.
 
 * `submit-one.pl`: script to send sentences to the cogserver.
 
