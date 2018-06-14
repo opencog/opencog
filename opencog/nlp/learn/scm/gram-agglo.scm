@@ -694,6 +694,8 @@
 
 	(format #t "Start greedy-agglomeration of ~A words\n"
 		(length todo-words))
+	(format #t "Existing classes=~A singletons=~A done=~A\n"
+		(length sorted-cls) (length singletons) (length done-list))
 	(greedy-grow MERGER sorted-cls singletons done-list todo-words)
 
 	; XXX FIXME ... at the conclusion of this, we have a done list,
