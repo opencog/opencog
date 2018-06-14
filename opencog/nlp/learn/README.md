@@ -281,9 +281,9 @@ important for saving partial results.
    rlwrap telnet localhost 17005
    opencog-en> (observe-text "this is a test")
 ```
-   The port number 17005 was from the above-mentioned config file.
+    The port number 17005 was from the above-mentioned config file.
 
-   Better yet:
+    Better yet:
 ```
    echo -e "(observe-text \"this is a another test\")" |nc localhost 17005
    echo -e "(observe-text \"Bernstein () (1876\")" |nc localhost 17005
@@ -444,41 +444,41 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
     Make a copy this file, and manually alter it to start the cogserver
     the way that you want it started.
 
-   The `pair-submit-en.sh` script starts the process of observing text
-   for pair-counting. It looks for files in the `beta-pages` directory,
-   performs sentence-splitting (ss) on each, and then passes these to
-   the pair-counting scripts.
+    The `pair-submit-en.sh` script starts the process of observing text
+    for pair-counting. It looks for files in the `beta-pages` directory,
+    performs sentence-splitting (ss) on each, and then passes these to
+    the pair-counting scripts.
 
-   Make a copy of this file, and edit it to change the location of your
-   text files (if not using the default `beta-pages`) and to change the
-   port number (if not using the default 17005 for English). For
-   convenience, there are other files `pair-submit-??.sh`, set up for other
-   languages, using alternative default port numbers.
+    Make a copy of this file, and edit it to change the location of your
+    text files (if not using the default `beta-pages`) and to change the
+    port number (if not using the default 17005 for English). For
+    convenience, there are other files `pair-submit-??.sh`, set up for other
+    languages, using alternative default port numbers.
 
-   Run `pair-submit-en.sh` in one of the byobu terminals.
+    Run `pair-submit-en.sh` in one of the byobu terminals.
 
 12) Pair-counting can take days or weeks.  The `pair-submit-en.sh` will
-   run until all of the text files have been processed, or until it is
-   interrupted.  If it is interrupted, it can be restarted; it will
-   resume with the previous unfinished text file. As text files are
-   being processed, they are moved to the `split-articles` directory
-   and then, to the `submitted-articles` directory.  The input directory
-   will gradually empty out, the `submitted-articles` directory will
-   gradually fill up.  Progress can be monitored by saying `find |wc`.
+    run until all of the text files have been processed, or until it is
+    interrupted.  If it is interrupted, it can be restarted; it will
+    resume with the previous unfinished text file. As text files are
+    being processed, they are moved to the `split-articles` directory
+    and then, to the `submitted-articles` directory.  The input directory
+    will gradually empty out, the `submitted-articles` directory will
+    gradually fill up.  Progress can be monitored by saying `find |wc`.
 
-   Although high-quality pair-counts require a minimum of several days
-   of processing, a half-hour or so is sufficient for a trial run.
-   Feel free to ctrl-C at this point, and move to the next step
-   (covered in the section **Mutual Information** below.)
+    Although high-quality pair-counts require a minimum of several days
+    of processing, a half-hour or so is sufficient for a trial run.
+    Feel free to ctrl-C at this point, and move to the next step
+    (covered in the section **Mutual Information** below.)
 
-   You may want to use the `renice.sh` script to lower the priority
-   of the Postgres server.  This will help make your system more
-   responsive, if you are also doing other work on it.  You would
-   need to run this script as root (i.e. as `sudo renice.sh`).
+    You may want to use the `renice.sh` script to lower the priority
+    of the Postgres server.  This will help make your system more
+    responsive, if you are also doing other work on it.  You would
+    need to run this script as root (i.e. as `sudo renice.sh`).
 
-   You may want to empty out the `submitted-articles` directory upon
-   completion. The files there are no longer needed (assuming you kept
-   a copy of the originals).
+    You may want to empty out the `submitted-articles` directory upon
+    completion. The files there are no longer needed (assuming you kept
+    a copy of the originals).
 
 Notes:
 * Segmentation for Chinese. Currently, only some preliminary work has
