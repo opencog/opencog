@@ -436,13 +436,13 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    spent in GC.  The default should be adequate for almost all users.
 
 11) Its convenient to have lots of terminals open and ready for use;
-   the `byobu+tmux` terminal server provides this, without chewing up
-   a lot of screen real-estate.  The `run-shells.sh` script will run
-   a `byobu/tmux` session, start the cogserver in one of the terminals,
-   and leave open several other terminals for general use.
+    the `byobu+tmux` terminal server provides this, without chewing up
+    a lot of screen real-estate.  The `run-shells.sh` script will run
+    a `byobu/tmux` session, start the cogserver in one of the terminals,
+    and leave open several other terminals for general use.
 
-   Make a copy this file, and manually alter it to start the cogserver
-   the way that you want it started.
+    Make a copy this file, and manually alter it to start the cogserver
+    the way that you want it started.
 
    The `pair-submit-en.sh` script starts the process of observing text
    for pair-counting. It looks for files in the `beta-pages` directory,
