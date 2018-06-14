@@ -21,7 +21,7 @@ An early draft of how this can be done is presented in the paper
 [ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372). Some of this
 is repeated on the
 [language learning wiki](http://wiki.opencog.org/w/Language_learning).
-A very important update, deescribing how to move past state-of-the-art
+A very important update, describing how to move past state-of-the-art
 results, is presented in the
 "[Sheaf Theory](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/sheaves.pdf)"
 paper. This important step is simply summarized in a later section,
@@ -73,7 +73,9 @@ Processing overview
 -------------------
 Most of this README concerns the practical details of configuring and
 operating the system, as it stands, today.  A diary of scientific notes
-and results is in the `learn-lang-diary` directory.
+and results is in the
+`[learn-lang-diary](https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/learn-lang-diary)`
+subdirectory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 
@@ -110,20 +112,22 @@ and look promising.
 Steps A-C are "well-known" in the academic literature, with results
 reported by many researchers over the last two decades. The results
 from Steps D & E are new, and have never been published before.
-(Results from Step D can be found in the file, in this directory
-`learn-lang-diary/drafts/connector-sets.lyx`, the PDF of which
-was posted to the mailing lists)
+Results from Step D can be found in the PDF file
+[Connector Sets](https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/learn-lang-diary/drafts/connector-sets.pdf)
+in the diary subdirectory.
 
 It is very important to understand that Step E is VERY DIFFERENT from
 commonly-reported algorithms used in the published literature, such as
 using K-means clustering and dimensional reduction to obtain word
 classes (grammatical categories). The reason for this is that the
-disjuncts provide connectivity information, and one is NOT clustering
-over a vector space, one must instead cluster over a "sheaf".  That is,
-the basis-elements of the vector space themselves have non-trivial
-structure (which must not be ignored).  Sheaves resemble vector spaces,
-but are not the same.  They capture and describe the connectivity
-information in the "basis elements".
+disjuncts provide connectivity information, and that one must **not**
+(merely) cluster over a vector space, but that one must instead cluster
+over a "sheaf".  That is, the basis-elements of the vector space
+themselves have non-trivial structure (which must not be ignored).
+Sheaves resemble vector spaces, but are not the same.  They capture
+and describe the connectivity information in the "basis elements".
+This connectivity information is absent from ordinary approaches to
+the machine-learning of grammatical classes.
 
 As a result, NONE of the industry-standard classifiers and clustering
 algorithms can be applied to step E: they all assume that the input
