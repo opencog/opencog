@@ -719,7 +719,7 @@
 					sim
 					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 					(cog-name WORD-A) (cog-name WORD-B)
-					elapsed-time)
+					elapsed-time))
 
 			; Print mergers.
 			(if (< CUTOFF sim)
