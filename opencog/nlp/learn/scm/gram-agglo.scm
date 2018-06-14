@@ -260,11 +260,11 @@
 
 ; Return a list of words that got placed into the class.
 (define (got-done WRDS CLS)
-	(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
+	(filter (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 ; Return a list of words NOT in the class.
 (define (still-to-do WRDS CLS)
-	(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
+	(remove (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 ; ---------------------------------------------------------------
 ;
@@ -398,16 +398,18 @@
 		(max min-greedy (* scan-multiplier
 			(+ (num-classified-words) (length FAKE-CLS-LST)))))
 
-	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A ---\n"
+	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A -- \"~A\" ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(length DONE-LST)
-		(strftime "%c" (localtime (current-time))))
+		(strftime "%F %T" (localtime (current-time)))
+		(if (null? WRD-LST) '() (cog-name (car WRD-LST)))
+	)
 
 	; If the WRD-LST is empty, we are done; otherwise compute.
 	(if (null? WRD-LST) TRUE-CLS-LST
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
-				; Can we assign the word to a class?
+				; Attempt to assign the word to an existing class.
 				(cls (assign-word-to-class MERGER wrd TRUE-CLS-LST)))
 
 			; If the word was merged into an existing class, then
@@ -528,23 +530,6 @@
 		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
 )
 
-
-; Tunable parameter
-(define (cutoff-hack LLOBJ WRD-LST)
-
-	; XXX Adjust the minimum cutoff as desired!!!
-	; This is a tunable parameter!
-	; Right now, set to 20 observations, minimum. Less
-	; than this and weird typos and stuff get in.
-	(define min-obs-cutoff 20)
-	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
-
-	(format #t "After cutoff, ~A words left, out of ~A\n"
-		(length all-ranked-words) (length WRD-LST))
-
-	all-ranked-words
-)
-
 ; ---------------------------------------------------------------
 ; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
@@ -572,11 +557,10 @@
 				(assign-expand-class MERGER grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
-		(length ranked-words))
-	(fold-unordered-pairs sorted-cls check-pair ranked-words)
+		(length WRD-LST))
+	(fold-unordered-pairs sorted-cls check-pair WRD-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -585,11 +569,10 @@
 ;
 (define (agglo-over-words MERGER WRD-LST CLS-LST)
 
-	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
-		(length ranked-words))
-	(assign-to-classes MERGER sorted-cls '() ranked-words)
+		(length WRD-LST))
+	(assign-to-classes MERGER sorted-cls '() WRD-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -634,13 +617,11 @@
 	; Perhaps it should be a random number, altered between runs?
 	(define diag-block-size 20)
 
-	(define all-ranked-words (cutoff-hack MERGER WRD-LST))
-
 	; Ad hoc restart point. If we already have N classes, we've
 	; surely pounded the cosines of the first 2N or so words into
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
 	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
-	(define ranked-words (drop all-ranked-words num-to-drop))
+	(define ranked-words (drop WRD-LST num-to-drop))
 
 	(define sorted-cls (sort-class-list CLS-LST))
 
@@ -662,7 +643,6 @@
 ;
 (define (greedy-over-words MERGER WRD-LST CLS-LST)
 
-	(define ranked-words (cutoff-hack MERGER WRD-LST))
 	(define sorted-cls (sort-class-list CLS-LST))
 
 	; Get the list of words that have been classified already.
@@ -679,7 +659,7 @@
 		(find (lambda (x) (equal? x w)) done-list))
 
 	; Trim the word-list, keeping only the not-done words.
-	(define remain-words (remove! is-done? ranked-words))
+	(define remain-words (remove! is-done? WRD-LST))
 
 	; Fetch all of the singletons
 	(define junk (fetch-incoming-by-type *-greedy-anchor-* 'MemberLink))
@@ -694,6 +674,8 @@
 
 	(format #t "Start greedy-agglomeration of ~A words\n"
 		(length todo-words))
+	(format #t "Existing classes=~A singletons=~A done=~A\n"
+		(length sorted-cls) (length singletons) (length done-list))
 	(greedy-grow MERGER sorted-cls singletons done-list todo-words)
 
 	; XXX FIXME ... at the conclusion of this, we have a done list,
@@ -725,12 +707,39 @@
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 )
 
+; Remove infrequently-seen words from the word list.
+;
+; Any word seen less than MIN-OBS-CUTOFF times will be
+; removed from the list of words.
+;
+; In addition, the words will be ranked according to the total number
+; of observations, each. The returned list of words have the most
+; frequent words first.
+;
+(define (min-cutoff LLOBJ WRD-LST MIN-OBS-CUTOFF)
+
+	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST MIN-OBS-CUTOFF))
+
+	(format #t "After cutoff, ~A words left, out of ~A\n"
+		(length all-ranked-words) (length WRD-LST))
+
+	all-ranked-words
+)
+
 ; Attempt to merge words into word-classes.
-(define (gram-classify ALGO MERGER)
+;
+; MERGER should be a lambda accepting two words, and returning #t or #f
+; depending on whether the words should be merged together of not.
+;
+; MIN-OBS is the minumum number of observations that a word should have,
+; in order to be considered for merging.
+;
+(define (gram-classify ALGO MERGER MIN-OBS)
 	(load-stuff)
-	(ALGO MERGER
-		(cog-get-atoms 'WordNode)
-		(cog-get-atoms 'WordClassNode))
+	(let* ((wrd-lst (cog-get-atoms 'WordNode))
+			(ranked-words (min-cutoff MERGER wrd-lst MIN-OBS)))
+		(ALGO MERGER ranked-words
+			(cog-get-atoms 'WordClassNode)))
 )
 
 ; ---------------------------------------------------------------
@@ -739,7 +748,7 @@
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
 
-(define-public (gram-classify-pair-wise)
+(define-public (gram-classify-pair-wise MIN-OBS)
 "
   gram-classify-pair-wise - Merge words into word-classes.
 
@@ -747,10 +756,10 @@
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
 "
-	(gram-classify classify-pair-wise (make-fuzz))
+	(gram-classify classify-pair-wise (make-fuzz) MIN-OBS)
 )
 
-(define-public (gram-classify-agglo)
+(define-public (gram-classify-agglo MIN-OBS)
 "
   gram-classify-agglo - Merge words into word-classes.
 
@@ -758,10 +767,10 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words (make-fuzz))
+	(gram-classify agglo-over-words (make-fuzz) MIN-OBS)
 )
 
-(define-public (gram-classify-diag-blocks)
+(define-public (gram-classify-diag-blocks MIN-OBS)
 "
   gram-classify-diag-blocks - Merge words into word-classes.
 
@@ -770,10 +779,10 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words (make-fuzz))
+	(gram-classify diag-over-words (make-fuzz) MIN-OBS)
 )
 
-(define-public (gram-classify-greedy-fuzz)
+(define-public (gram-classify-greedy-fuzz MIN-OBS)
 "
   gram-classify-greedy-fuzz - Merge words into word-classes.
 
@@ -784,10 +793,10 @@
 
   Uses the \"fuzz\" merge algo: cosine=0.65, frac=0.3
 "
-	(gram-classify greedy-over-words (make-fuzz))
+	(gram-classify greedy-over-words (make-fuzz) MIN-OBS)
 )
 
-(define-public (gram-classify-greedy-discrim)
+(define-public (gram-classify-greedy-discrim MIN-OBS)
 "
   gram-classify-greedy-discrim - Merge words into word-classes.
 
@@ -798,11 +807,11 @@
 
   Uses the \"discrim\" merge algo: cosine=0.50, frac=variable
 "
-	(gram-classify greedy-over-words (make-discrim))
+	(gram-classify greedy-over-words (make-discrim) MIN-OBS)
 )
 
 ; ---------------------------------------------------------------
 ; Example usage
 ;
 ; (sql-open "postgres:///en_mst_sections?user=linas&password=asdf")
-; (gram-classify-greedy-fuzz)
+; (gram-classify-greedy-fuzz 20)
