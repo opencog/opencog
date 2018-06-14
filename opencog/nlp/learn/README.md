@@ -281,7 +281,7 @@ important for saving partial results.
    rlwrap telnet localhost 17005
    opencog-en> (observe-text "this is a test")
 ```
-:   The port number 17005 was from the above-mentioned config file.
+   The port number 17005 was from the above-mentioned config file.
 
    Better yet:
 ```
