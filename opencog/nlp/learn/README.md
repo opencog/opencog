@@ -24,9 +24,53 @@ is repeated on the
 A very important update, deescribing how to move past state-of-the-art
 results, is presented in the
 "[Sheaf Theory](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/sheaves.pdf)"
-paper. This important step is simply summearized in a later section,
+paper. This important step is simply summarized in a later section,
 below.
 
+The key process is a sequence of steps that can be used to extract the
+structure of the "language graph", with each step being noisey and
+error-prone, but the subsequent step averaging over this structure in
+such a way as to cancel noise, and allow the actual graphical structure
+to emerge. Central to this process is extracting the actual structure of
+the graph, as opposed to the extraction of vector spaces, as is currently
+done with neural-net techniques or other styles of clustering.
+
+The core insight is that although vector spaces can be layered onto
+language data (thus explaining the success of modern-day neural net
+techniques), ther is also a way of "stitching together" these vector
+spaces in such a way that they extract the underlying graphical
+structure.  The appearance of vector spaces is not an accident: the
+axioms of algebraic linguistics (such as those found in categorial
+grammar, pregroup grammar, link grammar) are similar to the axioms that
+define a vector space. The similarity accounts for why techniques such
+as Word2Vec are successful. The dis-similarity is why these same
+tecniques are incomplete.  The road-block can be overcome by viewing
+the language graph (and graphs in general) as being constructed out
+of connected parts, with explicitly-named connectors. This
+connector-based approach to the definition of a graph just so happens
+to obey the axioms of a sheaf (as commonly understood in sheaf theory).
+This connector-based approach also indicates how vector spaces can be
+assembled, connected together to form  the graph from which they are
+being sampled.  The code here is an exploration and implementation of
+this insight.
+
+An very early and yet pretty presentation of algebraic linguistics,
+as seen axiomatically, is given by Solomon Marcus,
+[Algebraic Linguistics; Analytical Models](https://monoskop.org/images/2/26/Marcus_Solomon_editor_Algebraic_Linguistics_Analytical_Models_1967.pdf),
+(1967), Elsevier.
+
+A feels-right explanation of how one extracts semantics from disjuncts is
+given by EA Nida,
+[“The Molecular Level of Lexical Semantics”](https://www.academia.edu/36534355/The_Molecular_Level_of_Lexical_Semantics_by_EA_Nida),
+(1997) International Journal of Lexicography, **10**(4): 265–274.
+What Nida is saying can, in fact, be measured, by correlating, for
+example, disjuncts with WordNet word-senses. The correlation is real and
+is measureable (and has been measured). The goal of this project is to
+move beyond this.
+
+
+Processing overview
+-------------------
 Most of this README concerns the practical details of configuring and
 operating the system, as it stands, today.  A diary of scientific notes
 and results is in the `learn-lang-diary` directory.
