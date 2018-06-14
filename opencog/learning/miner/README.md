@@ -209,8 +209,8 @@ defined in the section detailing [Step
 2](#step-2:-extract-valuation-set), the shallow abstractions over
 variable `(Variable "$X")` are `(Concept "A")`, `(Concept "D")` and
 `(Variable "$Y")`. Likewise the shallow abstractions over variable
-`(Variable "$Y")` are `(Concept "B")`, `(Concept "C")` and `(Concept
-"D")`.
+`(Variable "$Y")` are `(Concept "B")`, `(Concept "C")` and
+`(Concept "D")`.
 
 To carry out the composition `Put` is used as follows
 ```
