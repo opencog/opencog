@@ -730,7 +730,7 @@ are as follows:
   The disjunct observation counts will be accumulated into the database,
   further expanding it's size.  You probably want to keep a copy of the
   original, "just in case". You can copy databases by saying:
-````
+```
   createdb -T existing_dbname new_dbname
 ```
 * Make a copy of `config/opencog-mst-en.conf` (if you wish) and edit
