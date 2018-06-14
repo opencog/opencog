@@ -713,12 +713,21 @@
 				(now (get-internal-real-time))
 				(elapsed-time (* 1.0e-9 (- now start-time))))
 
-			(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
-				sim
-				(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
-				(cog-name WORD-A) (cog-name WORD-B)
-				elapsed-time)
-			(if (< CUTOFF sim) (display "------------------------------ Bingo!\n"))
+			; Only print if its time-consuming.
+			(if (< 2.0 elapsed-time)
+				(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
+					sim
+					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+					(cog-name WORD-A) (cog-name WORD-B)
+					elapsed-time)
+
+			; Print mergers.
+			(if (< CUTOFF sim)
+				(format #t "---------Bingo! Cosine=~6F for ~A \"~A\" -- \"~A\"\n"
+					sim
+					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+					(cog-name WORD-A) (cog-name WORD-B)
+					))
 			sim))
 
 	; True, if cosine similarity is larger than the cutoff.
