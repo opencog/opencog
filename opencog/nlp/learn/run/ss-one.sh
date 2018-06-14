@@ -2,9 +2,9 @@
 #
 # ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
-# Support script for batch parsing of plain-text files.
-# Sentence-split one file, submit it, via perl script, to the parser.
-# When done, move the file over to a 'finished' directory.
+# Support script for word-pair counting of plain-text files.
+# Sentence-split one file, submit it, via perl script, to the cogserver.
+# When done, move the file over to the `submitted-pages` directory.
 #
 # Example usage:
 #    ./ss-one.sh en Barbara localhost 17001
@@ -18,8 +18,6 @@ filename="$2"
 coghost="$3"
 cogport=$4
 
-# Not using relex any longer
-#splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
 #splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
@@ -33,19 +31,11 @@ if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
 
-# Punt if relex or link-grammar have crashed.
-# Not using relex any longer.
-# haveserver=`ps aux |grep relex |grep linkgram`
-# if [[ -z "$haveserver" ]] ; then
-# 	exit 1
-# fi
-
-
 # Split the filename into two parts
 base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
-echo "Processing file >>>$rest<<<"
+echo "Word-paring counting file >>>$rest<<<"
 
 # Create directories if missing
 mkdir -p $(dirname "$splitdir/$rest")
@@ -63,12 +53,6 @@ haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
-
-# Not using relex any longer.
-# haveserver=`ps aux |grep relex |grep linkgram`
-# if [[ -z "$haveserver" ]] ; then
-# 	exit 1
-# fi
 
 # Move article to the done-queue
 mv "$splitdir/$rest" "$subdir/$rest"
