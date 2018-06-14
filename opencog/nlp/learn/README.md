@@ -1,6 +1,6 @@
 
-Language Learning
------------------
+Unsupervised Language Learning
+------------------------------
 * Linas Vepstas December 2013
 * Updated May 2017
 * Updated June 2018
@@ -11,31 +11,47 @@ for an alternate overview.
 
 Summary
 -------
-The goal of the project is to build a system that can learn parse
-dictionaries for different languages, and possibly do some rudimentary
-semantic extraction.  The primary design point is that the learning is
-to be done in an unsupervised fashion.  A sketch of the theory that
-enables this can be found in the paper "Language Learning", B. Goertzel
-and L. Vepstas (2014) on [ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372)
-A shorter sketch is given below.  Most of this README concerns the
-practical details of configuring and operating the system, and some
-diary-like notes about system configuration and operation. A diary of
-scientific notes and results is in the `learn-lang-diary` directory.
+The goal of this project is to create a system that is capable of
+learning the grammar and some of the semantics of natural language.
+The fundamental goal is to do this in an unsupervised fashion, with
+no training data beyond that of un-annotated raw text.
+
+An early draft of how this can be done is presented in the paper
+"Language Learning", B. Goertzel and L. Vepstas (2014) on ArXiv; see
+[ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372). Some of this
+is repeated on the
+[language learning wiki](http://wiki.opencog.org/w/Language_learning).
+A very important update, deescribing how to move past state-of-the-art
+results, is presented in the
+"[Sheaf Theory](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/sheaves.pdf)"
+paper. This important step is simply summearized in a later section,
+below.
+
+Most of this README concerns the practical details of configuring and
+operating the system, as it stands, today.  A diary of scientific notes
+and results is in the `learn-lang-diary` directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
+
 A) Ingest a lot of raw text, such as novels and narrative literature,
    and count the occurrence of nearby word-pairs.
+
 B) Compute the mutual information (mutual entropy) between the word-pairs.
+
 C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
    of sentences.  This requires ingesting a lot of raw text, again.
    (Independently of step A)
+
 D) Extract linkage disjuncts from the parses, and count their frequency.
+
 E) Use agglomerative clustering to merge similar linkage disjuncts,
    while simultaneously merging similar words.  This will result in
    a set of word-classes (grammatical classes) with disjuncts on them
    that use word-class connectors.
+
 F) Place word-classes and word-class connectors into a link-grammar
    dictionary.
+
 G) Parse a large quantity of raw text, using the parser constructed in
    the previous step. Using maximum-entropy-style techniques, attempt
    to extract higher-order relations (resolve anaphora and other
