@@ -9,7 +9,7 @@ for downloading Wikipedia and Project Gutenberg texts can be found
 in the `../download` directory.
 
 You will typically want to make copies of these, and tailor them to
-your specific needs and proceedures. In particular, many of these
+your specific needs and procedures. In particular, many of these
 files require database credentials to be set; the exact credentials
 to use will depend on which copy of which database you are using.
 You WILL be copying around a lot of databases!

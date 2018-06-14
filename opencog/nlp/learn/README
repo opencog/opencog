@@ -371,8 +371,8 @@ and pre-processing texts from Project Gutenberg, Wikipedia, and the
    some master directory, and also copy them to the `beta-pages`
    directory.  The name `beta-pages` is not mandatory, but some of
    the default configurations look for files there. During processing,
-   files are moved to the `split-pages` directory and finally to the
-   `submitted-pages` directory. Processing continues until the scripts
+   files are moved to the `split-articles` directory and finally to the
+   `submitted-articles` directory. Processing continues until the scripts
    are interrupted, or until the `beta-pages` directory is empty.
 
    Little or no pre-processing of the text files are needed. Mostly,
