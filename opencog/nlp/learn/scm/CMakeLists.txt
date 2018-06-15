@@ -2,6 +2,7 @@ ADD_GUILE_MODULE (FILES
 	learn.scm
 	batch-word-pair.scm
 	common.scm
+	cross-connector.scm
 	gram-agglo.scm
 	gram-class.scm
 	link-pipeline.scm
