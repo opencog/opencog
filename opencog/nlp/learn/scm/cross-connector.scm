@@ -60,6 +60,7 @@
 
 	(let ((all-csets '()))
 
+		(define N (cog-arity DISJ))
 		(define con-lst (cog-outgoing-set DISJ))
 		(define start (take con-lst K))
 		(define rest (drop con-lst K))
@@ -102,6 +103,10 @@
 			(gar PAIR))
 
 		; Return the K'th element in the disjunct
+		; This does NO checking to make sure that the PAIR is valid.
+		; I think that's OK, because this will always be called with
+		; stars, which are a-priori always correct, so its a waste
+		; of cpu time to check.
 		(define (get-right-element PAIR)
 			(gar (car (drop (cog-outgoing-set (gdr PAIR)) K))))
 
@@ -112,6 +117,10 @@
 
 		; Use ListLinks for the wild-cards, to avoid polluting
 		; the space of Sections.  Is this a good idea? I dunno...
+		;
+		; Note also: this will create bogus wild-cards for WORD,
+		; so should not be called unless the result is an existing
+		; disjunct.
 		(define (get-left-wildcard WORD)
 			(ListLink any-left
 				(ConnectorSeq start (Connector WORD conndir) end)))
