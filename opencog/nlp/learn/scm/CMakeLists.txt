@@ -2,6 +2,7 @@ ADD_GUILE_MODULE (FILES
 	learn.scm
 	batch-word-pair.scm
 	common.scm
+	cross-connector.scm
 	gram-agglo.scm
 	gram-class.scm
 	link-pipeline.scm
@@ -10,6 +11,5 @@ ADD_GUILE_MODULE (FILES
 	singletons.scm
 	summary.scm
 	utilities.scm
-	word-cosines.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/learn"
 )
