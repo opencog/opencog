@@ -246,6 +246,24 @@
   (Word (string-append "|" (string-join (map cog-name (flatten-list ARGS)) ",") "|")))
 
 ; ----------
+(define (set-delay ARG)
+"
+  Occurrence of a set-delay event, which will set the STT cutoff time.
+"
+  (ExecutionOutput (GroundedSchema "scm: ghost-set-stt-cutoff")
+                   (List ARG))
+)
+
+(define-public (ghost-set-stt-cutoff SECOND)
+"
+  Support things like {% set delay=2 %} in the action of a rule, which
+  set how long STT should wait before sending the input to GHOST.
+"
+  ; TODO: Should be handled in OpenCog internally?
+  (Word (string-append "{% set delay=" (cog-name SECOND) " %}"))
+)
+
+; ----------
 (define (context-function NAME ARGS)
 "
   Occurrence of a function in the context of a rule.

@@ -341,6 +341,10 @@
               ; TTS feature
               ((equal? 'tts-feature (car n))
                (tts-feature (to-atomese (cdr n))))
+              ; Set STT cutoff time
+              ((equal? 'set-delay (car n))
+               (set-delay (Number
+                 (match:substring (string-match "[0-9]+" (cdr n))))))
               (else (Word (cdr n)))))
         actions)
       (if (null? choices)
