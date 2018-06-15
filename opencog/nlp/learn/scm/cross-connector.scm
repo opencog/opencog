@@ -153,6 +153,7 @@
 				((pair-type) get-pair-type)
 				((pair-count) get-pair-count)
 				((get-pair) get-pair)
+				((get-count) get-count)
 				((make-pair) make-pair)
 				((left-element) get-left-element)
 				((right-element) get-right-element)
@@ -175,7 +176,26 @@
 ;       (Connector (Word "###LEFT-WALL###") (ConnectorDir "-"))
 ;       (Connector (Word "hate") (ConnectorDir "+"))))
 ;
-; (define csb (make-cross-section-api 0 waha))
-; (define csc (make-cross-section-api 1 waha))
+; (define walo
+;    (ConnectorSeq
+;       (Connector (Word "###LEFT-WALL###") (ConnectorDir "-"))
+;       (Connector (Word "love") (ConnectorDir "+"))))
 ;
+; (Section (ctv 1 0 0.4) (WordClass "You'd He'd") waha)
+; (Section (ctv 1 0 0.9) (WordClass "You'd He'd") walo)
+; (Section (ctv 1 0 2.2) (Word "She'd") walo)
+; (Section (ctv 1 0 1.3) (Word "I'd") walo)
+; (Section (ctv 1 0 0.7) (Word "I'd") waha)
 ;
+; (define seca (make-cross-section-api 1 waha))
+; (define cosc (add-pair-cosine-compute seca))
+; (cosc 'right-cosine (WordClass "You'd He'd") (Word "She'd"))
+;
+; Expect to get:
+; (/ (* 0.9 2.2) (* 2.2 (sqrt (+ (* 0.4 0.4) (* 0.9 0.9)))))
+; = 0.9138115486202572
+;
+; Similarly:
+; (cosc 'left-cosine (Word "love") (Word "hate"))
+; = 0.508729312126641
+; (/ (* 1.3 0.7) (* (sqrt (+ (* 2.2 2.2) (* 1.3 1.3))) 0.7))
