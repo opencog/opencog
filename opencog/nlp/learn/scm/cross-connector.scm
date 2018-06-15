@@ -60,7 +60,6 @@
 
 	(let ((all-csets '()))
 
-		(define N (cog-arity DISJ))
 		(define con-lst (cog-outgoing-set DISJ))
 		(define start (take con-lst K))
 		(define rest (drop con-lst K))
@@ -118,12 +117,15 @@
 		; Use ListLinks for the wild-cards, to avoid polluting
 		; the space of Sections.  Is this a good idea? I dunno...
 		;
-		; Note also: this will create bogus wild-cards for WORD,
-		; so should not be called unless the result is an existing
-		; disjunct.
+		; This refuses to create bogus wild-cards for WORD.
+		; I'm not sure if the extra overhead for this is worth
+		; it, or if this will mess something up.
 		(define (get-left-wildcard WORD)
-			(ListLink any-left
-				(ConnectorSeq start (Connector WORD conndir) end)))
+			(define con (cog-link 'Connector WORD conndir))
+			(if (null? con) '()
+				(let ((seq (cog-link 'ConnectorSeq start con end)))
+					(if (null? seq) '()
+						(ListLink any-left seq)))))
 
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
