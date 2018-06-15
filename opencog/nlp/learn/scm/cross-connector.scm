@@ -140,7 +140,7 @@
 			(fetch-incoming-set any-left)
 			(fetch-incoming-set any-right)
 			(load-atoms-of-type 'Section)
-			(format #t "Elapsed time to load csets: ~A secs\n"
+			(format #t "Elapsed time to load word sections: ~A seconds\n"
 				(- (current-time) start-time)))
 
 		; Methods on the object
@@ -167,3 +167,15 @@
 )
 
 ; ---------------------------------------------------------------------
+; Example usage:
+;
+; (define wc (WordClass "You'd He'd"))
+; (define waha
+;    (ConnectorSeq
+;       (Connector (Word "###LEFT-WALL###") (ConnectorDir "-"))
+;       (Connector (Word "hate") (ConnectorDir "+"))))
+;
+; (define csb (make-cross-section-api 0 waha))
+; (define csc (make-cross-section-api 1 waha))
+;
+;
