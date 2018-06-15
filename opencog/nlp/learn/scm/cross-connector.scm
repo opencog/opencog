@@ -62,14 +62,20 @@
 
 		(define con-lst (cog-outgoing-set DISJ))
 		(define start (take con-lst K))
-		(define end (drop con-lst (+ K 1)))
+		(define rest (drop con-lst K))
+		(define conn (car rest))  ; the connector itself.
+		(define end (cdr rest))
+		(define conndir (gdr conn))  ; the connector direction
 
 		(define any-left (AnyNode "cset-word"))
 		(define any-right
 			(ConnectorSeq (append
 				start
-				(list (AnyNode
-					(format #f "cset-cross-connector-~D/~D" K (cog-arity DISJ))))
+				(Connector
+					(AnyNode
+						(format #f "cset-cross-connector-~D/~D"
+							 K (cog-arity DISJ)))
+					conndir)
 				end)))
 
 		(define (get-left-type) 'WordNode)
@@ -79,15 +85,17 @@
 		; Get the observational count on Section SECT
 		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
 
+		; Both L-ATOM and R-ATOM are WordNodes (or WordClassNodes)
 		(define (get-pair L-ATOM R-ATOM)
-			(define seq
-				(cog-link 'ConnectorSeq (append start (list R-ATOM) end)))
-			(if (null? seq) '()
-				(cog-link 'Section L-ATOM seq)))
+			(define con (cog-link 'Connector R-ATOM conndir))
+			(if (null? con) '()
+				(let ((seq (cog-link 'ConnectorSeq (append start con end))))
+					(if (null? seq) '()
+						(cog-link 'Section L-ATOM seq)))))
 
 		(define (make-pair L-ATOM R-ATOM)
 			(Section L-ATOM
-				(ConnectorSeq (append start (list R-ATOM) end))))
+				(ConnectorSeq (append start (Connector R-ATOM conndir) end))))
 
 		; Return the Word or WordClass of the Section
 		(define (get-left-element PAIR)
@@ -95,7 +103,7 @@
 
 		; Return the K'th element in the disjunct
 		(define (get-right-element PAIR)
-			(car (drop (cog-outcoing-set (gdr PAIR)) K)))
+			(gar (car (drop (cog-outgoing-set (gdr PAIR)) K))))
 
 		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
@@ -104,9 +112,9 @@
 
 		; Use ListLinks for the wild-cards, to avoid polluting
 		; the space of Sections.  Is this a good idea? I dunno...
-		(define (get-left-wildcard CNCTR)
+		(define (get-left-wildcard WORD)
 			(ListLink any-left
-				(ConnectorSeq (append start (list CNCTR) end))))
+				(ConnectorSeq (append start (Connector WORD conndir) end))))
 
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
