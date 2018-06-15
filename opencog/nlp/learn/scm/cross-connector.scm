@@ -44,48 +44,69 @@
 (use-modules (opencog persist))
 (use-modules (opencog matrix))
 
-(define-public (make-cross-section-api K N)
+(define-public (make-cross-section-api K DISJ)
 "
-  make-cross-api K N -- API for cross-section word-pairs.
+  make-cross-api K PROTO -- API for cross-section word-pairs.
 
   The 1st (left) member is the Word/WordClass of the section, while
-  the 2nd (right) member is the K'th element in a N-connector disjunct
-  on that section.  Sections that do not have exactly N connectors are
-  excluded from consideration.
+  the 2nd (right) member is the K'th element in the connector-sequence
+  DISJ on that section.  Sections that do not have the same disjunct
+  as DISJ (but differing only in position K) are excluded from
+  consideration.
 
   A more detailed description is at the top of this file.
 "
-	(let ((all-csets '())
-			(Kay K)   ; Cache K and N for later use.
-			(Nnn N))
+	(if (<= (cog-arity DISJ) K) (error "Bad offset K!"))
 
-		; Get the observational count on Section SECT
-		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
+	(let ((all-csets '()))
+
+		(define con-lst (cog-outgoing-set DISJ))
+		(define start (take con-lst K))
+		(define end (drop con-lst (+ K 1)))
 
 		(define any-left (AnyNode "cset-word"))
-		(define any-right (AnyNode
-			(format #f "cset-cross-connector-~D-~D" K N)))
+		(define any-right
+			(ConnectorSeq (append
+				start
+				(list (AnyNode
+					(format #f "cset-cross-connector-~D/~D" K (cog-arity DISJ))))
+				end)))
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 		(define (get-pair-type) 'Section)
 
-xxxxxxxxx
+		; Get the observational count on Section SECT
+		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
+
 		(define (get-pair L-ATOM R-ATOM)
-			'())
+			(define seq
+				(cog-link 'ConnectorSeq (append start (list R-ATOM) end)))
+			(if (null? seq) '()
+				(cog-link 'Section L-ATOM seq)))
 
 		(define (make-pair L-ATOM R-ATOM)
-			'())
+			(Section L-ATOM
+				(ConnectorSeq (append start (list R-ATOM) end))))
 
-		(define (get-left-element PAIR) (gar PAIR))
-		(define (get-right-element PAIR) xxxx)
+		; Return the Word or WordClass of the Section
+		(define (get-left-element PAIR)
+			(gar PAIR))
 
-		; Getting the count is .... XXX fixme
+		; Return the K'th element in the disjunct
+		(define (get-right-element PAIR)
+			(car (drop (cog-outcoing-set (gdr PAIR)) K)))
+
+		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
-			(get-count PAIR))
+			(define stats-atom (get-pair L-ATOM R-ATOM))
+			(if (null? stats-atom) 0 (get-count stats-atom)))
 
-		(define (get-left-wildcard DJ)
-			(ListLink any-left DJ))
+		; Use ListLinks for the wild-cards, to avoid polluting
+		; the space of Sections.  Is this a good idea? I dunno...
+		(define (get-left-wildcard CNCTR)
+			(ListLink any-left
+				(ConnectorSeq (append start (list CNCTR) end))))
 
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
@@ -93,8 +114,8 @@ xxxxxxxxx
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
 
-		; Fetch (from the database) all pseudo-csets
-		(define (fetch-pseudo-csets)
+		; Fetch (from the database) all sections
+		(define (fetch-sections)
 			(define start-time (current-time))
 			; marginals are located on any-left, any-right
 			(fetch-incoming-set any-left)
@@ -119,7 +140,7 @@ xxxxxxxxx
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)
-				((fetch-pairs) fetch-pseudo-csets)
+				((fetch-pairs) fetch-sections)
 				((provides) (lambda (symb) #f))
 				((filters?) (lambda () #f))
 				(else (error "Bad method call on cross-section:" message)))
