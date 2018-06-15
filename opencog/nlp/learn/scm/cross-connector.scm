@@ -69,14 +69,14 @@
 
 		(define any-left (AnyNode "cset-word"))
 		(define any-right
-			(ConnectorSeq (append
+			(ConnectorSeq
 				start
 				(Connector
 					(AnyNode
 						(format #f "cset-cross-connector-~D/~D"
 							 K (cog-arity DISJ)))
 					conndir)
-				end)))
+				end))
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
@@ -89,13 +89,13 @@
 		(define (get-pair L-ATOM R-ATOM)
 			(define con (cog-link 'Connector R-ATOM conndir))
 			(if (null? con) '()
-				(let ((seq (cog-link 'ConnectorSeq (append start con end))))
+				(let ((seq (cog-link 'ConnectorSeq start con end)))
 					(if (null? seq) '()
 						(cog-link 'Section L-ATOM seq)))))
 
 		(define (make-pair L-ATOM R-ATOM)
 			(Section L-ATOM
-				(ConnectorSeq (append start (Connector R-ATOM conndir) end))))
+				(ConnectorSeq start (Connector R-ATOM conndir) end)))
 
 		; Return the Word or WordClass of the Section
 		(define (get-left-element PAIR)
@@ -114,7 +114,7 @@
 		; the space of Sections.  Is this a good idea? I dunno...
 		(define (get-left-wildcard WORD)
 			(ListLink any-left
-				(ConnectorSeq (append start (Connector WORD conndir) end))))
+				(ConnectorSeq start (Connector WORD conndir) end)))
 
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
