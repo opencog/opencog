@@ -11,6 +11,5 @@ ADD_GUILE_MODULE (FILES
 	singletons.scm
 	summary.scm
 	utilities.scm
-	word-cosines.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/learn"
 )
