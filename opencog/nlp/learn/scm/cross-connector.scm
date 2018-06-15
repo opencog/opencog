@@ -3,7 +3,7 @@
 ;
 ; Representing words as vectors crossing over into individual connectors.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -13,9 +13,25 @@
 ; thier disjuncts. It "crosses" over, in a certain sideways-intersection
 ; sense, between words, and the other words inside of thier connectors.
 ;
-; A much simpler example of a word-vector can be found in
-; `pseudo-csets.scm`. That's a better place to start. This file
-; implements a more complex idea.
+; A key idea in grammatical classification is that words can be treated
+; as vectors, and thus, vector-style algorithms can be applied to them.
+; There are many kinds of vectors that are possible:
+; -- N-grams, where a word is associated with a vector of counts of
+;    the neighboring N words.
+; -- skip-grams, as above, but some words are skipped.
+; Neither of the above are implemented anywhere in this directory, but
+; they convey the idea of a word-vector.
+;
+; Another vector is a word-disjunct vector, where the word is associated
+; with a vector of counts of how often a disjunct is associated with it.
+; This is implemented in `pseudo-csets.scm`.  Its a good place to start.
+; The word-disjunct vectors behave a whole lot like skip-grams, for many
+; practical purposes.
+;
+; The vector *IN THIS FILE* is between a word, and connectors in a given
+; location in a specific disjunct.  This allows one to look at how
+; contexts cross over to other linked words.  Its a kind-of sideways
+; slice into the simpler word-disjunct vector (or skip-gram vector).
 ;
 ; Consider, for example, the section
 ;
