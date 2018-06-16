@@ -762,8 +762,8 @@
 		(define (merge WORD-A WORD-B)
 			(merge-project pcos UNION-FRAC WORD-A WORD-B))
 
-		(define (is-big? WORD)
-			(<= MIN-CNT (psu 'right-count WORD)))
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -771,7 +771,7 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				((big-enough?)      (apply is-big? args))
+				((discard?)         (apply is-small? args))
 				(else               (apply pca (cons message args)))
 			)))
 )
@@ -801,8 +801,8 @@
 		(define (merge WORD-A WORD-B)
 			(merge-disambig pcos CUTOFF WORD-A WORD-B))
 
-		(define (is-big? WORD)
-			(<= MIN-CNT (psu 'right-count WORD)))
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -810,7 +810,7 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				((big-enough?)      (apply is-big? args))
+				((discard?)         (apply is-small? args))
 				(else               (apply pca (cons message args)))
 			)))
 )

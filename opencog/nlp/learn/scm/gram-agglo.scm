@@ -412,6 +412,10 @@
 		(max min-greedy (* scan-multiplier
 			(+ (num-classified-words) (length FAKE-CLS-LST)))))
 
+	; If only a stub of a word is left, throw it away.
+	(define (keep WORD)
+		(if (LLOBJ 'discard? WORD) '() (list WORD)))
+
 	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A -- \"~A\" ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(length DONE-LST)
@@ -430,7 +434,7 @@
 			; recurse.  Place the word onto the done-list.
 			(if (eq? 'WordClassNode (cog-type cls))
 				(greedy-grow MERGER TRUE-CLS-LST FAKE-CLS-LST
-					(append! DONE-LST (list wrd)) rest)
+					(append! DONE-LST (keep wrd)) rest)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the singleton
@@ -486,7 +490,7 @@
 								; The new done-list is probably a lot longer
 								(append! DONE-LST
 									(got-done FAKE-CLS-LST new-cls)
-									(list wrd)
+									(keep wrd)
 									(got-done short-list new-cls))
 
 								; The new todo list is probably a lot shorter
@@ -708,7 +712,7 @@
 			(sort!
 				; Before sorting, trim the list, discarding words with
 				; low counts.
-				(filter (lambda (WRD) (LLOBJ 'big-enough? WRD)) LST)
+				(remove (lambda (WRD) (LLOBJ 'discard? WRD)) LST)
 				; Rank so that the highest support words are first in the list.
 				(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))))
 
