@@ -29209,7 +29209,7 @@ Meaning Redux
 \end_layout
 
 \begin_layout Subsection*
-Why SVD and K-means don't work
+Why SVM and K-means don't work
 \end_layout
 
 \begin_layout Standard
@@ -29304,7 +29304,7 @@ However, we do NOT know what these parts:
 \end_layout
 
 \begin_layout Standard
-SVD is a little bit better, if you use it correctly.
+SVM is a little bit better, if you use it correctly.
  I am not convinced that you are using it correctly.
  So, for example, lets say we had only four words: 
 \begin_inset Formula $v_{saw}$
@@ -29323,7 +29323,7 @@ SVD is a little bit better, if you use it correctly.
 \end_inset
 
 .
- Suppose that SVD was told to decompose into three dimensions, and that
+ Suppose that SVM was told to decompose into three dimensions, and that
  the three that were picked were mostly pointing along the direction of
  
 \begin_inset Formula $v_{look}$
@@ -29345,7 +29345,7 @@ Where should
 \begin_inset Formula $v_{saw}$
 \end_inset
 
- go? In traditional SVD, the three principle components are used to define
+ go? In traditional SVDM, the three principle components are used to define
  three hyperplanes or classifiers, and so the single vector 
 \begin_inset Formula $v_{saw}$
 \end_inset
@@ -29399,12 +29399,12 @@ NOT
 \end_layout
 
 \begin_layout Standard
-But, as I hope is now clear, both SVD and K-means are fundamentally wrong
+But, as I hope is now clear, both SVM and K-means are fundamentally wrong
  approaches, because both ERASE word-sense information from the dataset!
 \end_layout
 
 \begin_layout Standard
-Now, IF you are very careful, you might be able to modify SVD, and after
+Now, IF you are very careful, you might be able to modify SVM, and after
  finding principle components, go back for a second pass, and perform the
  factorization needed to extract the different word-senses.
  Maybe.
@@ -29497,6 +29497,213 @@ The problem here is that both K-means and SVD are completely ignorant of
  wrong for language-learning where we know, a priori, that the basis elements
  have structure.
  This is kind of a key idea from sheaves!
+\end_layout
+
+\begin_layout Subsection*
+Word vectors
+\end_layout
+
+\begin_layout Standard
+The last section introduces the idea of decomposable basis vectors.
+ Let try to make this more precise (a cleaned-up version of this and above
+ belongs in the (unfinished) sheaf paper.).
+ First, review the notion of a vector, and then show how to make vectors
+ from word-disjuncts, N-grams, and skip-grams.
+ Then review the idea of tensoring.
+\end_layout
+
+\begin_layout Standard
+So, the textbook standard definition of a vector 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ is 
+\begin_inset Formula 
+\[
+\vec{v}=a_{1}\widehat{e}_{1}+a_{2}\widehat{e}_{2}+\cdots+a_{n}\widehat{e}_{n}
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $a_{k}$
+\end_inset
+
+ are conventionally taken to be numbers; here, real numbers.
+ The 
+\begin_inset Formula $\widehat{e}_{k}$
+\end_inset
+
+ are called 
+\begin_inset Quotes eld
+\end_inset
+
+basis vectors
+\begin_inset Quotes erd
+\end_inset
+
+.
+ They have the property of having unit length; that is 
+\begin_inset Formula $\left\Vert \widehat{e}_{k}\right\Vert =1$
+\end_inset
+
+.
+ For every word 
+\begin_inset Formula $w$
+\end_inset
+
+, one can create several kinds of vectors.
+ A widely-known vector is the 
+\begin_inset Quotes eld
+\end_inset
+
+N-gram
+\begin_inset Quotes erd
+\end_inset
+
+, where each 
+\begin_inset Formula $\widehat{e}_{k}$
+\end_inset
+
+ corresponds to the N-word context in which the word 
+\begin_inset Formula $w$
+\end_inset
+
+ was observed, and 
+\begin_inset Formula $a_{k}$
+\end_inset
+
+ is the count of the number of observations.
+ Thus, for example, given the toy corpus: "John knew the bird was there.
+ John heard the bird.
+ John saw the bird.
+ Susan saw the bird too.
+ Mary saw it also".
+ Setting 
+\begin_inset Formula $w=bird$
+\end_inset
+
+ and N=3, and the requirement that the word be in the middle of the N-gram,
+ one has
+\begin_inset Formula 
+\begin{align*}
+\widehat{e}_{1} & =\left[the\;*\;was\right]\\
+\widehat{e}_{2} & =\left[the\;*\;.\right]\\
+\widehat{e}_{3} & =\left[the\;*\;too\right]
+\end{align*}
+
+\end_inset
+
+and observation counts 
+\begin_inset Formula $a_{1}=1$
+\end_inset
+
+, 
+\begin_inset Formula $a_{2}=2$
+\end_inset
+
+, 
+\begin_inset Formula $a_{3}=1$
+\end_inset
+
+.
+ Here, 
+\begin_inset Formula $a_{2}=2$
+\end_inset
+
+ because there are two sentences containing the word-sequence 
+\begin_inset Quotes eld
+\end_inset
+
+the bird.
+\begin_inset Quotes erd
+\end_inset
+
+ In more compact form, one may write 
+\begin_inset Formula 
+\[
+\overrightarrow{bird}=1\left[the\;*\;was\right]+2\left[the\;*\;.\right]+1\left[the\;*\;too\right]
+\]
+
+\end_inset
+
+This can be extended in an obvious way to a larger corpus, to a larger N
+ and one can drop the requirement that the word be in the middle.
+ Skip-grams are similar, but allow some words to be skipped, and have a
+ complex algorithm to determine when and how words can be skipped.
+\end_layout
+
+\begin_layout Standard
+Disjuncts behave in a very similar manner.
+ The word-pair counting and the MST pipeline creates disjuncts and the associate
+d counts.
+ For the above corpus, the disjuncts might possibly resemble these:
+\begin_inset Formula 
+\begin{align*}
+\widehat{e}_{1} & =the-\;\&\;was+\\
+\widehat{e}_{2} & =the-\;\&\;.+\\
+\widehat{e}_{3} & =the-\;\&\;too+
+\end{align*}
+
+\end_inset
+
+These disjuncts are essentially identical to the N-gram example above; only
+ the notation is different.
+ One might hope that the disjuncts coming out from the MST pipeline might
+ actually be of higher quality.
+ The support for this hope is several decades of research results on MST
+ parsing of natural language.
+ The point here is that N-grams, skip-grams and word-disjunct vectors are
+ quite similar to one another, and that, perhaps, word-disjunct vectors
+ are just a tiny bit more linguistically accurate.
+\end_layout
+
+\begin_layout Standard
+What does one do with vectors? Well, one can apply any vector-based algorithm
+ you can wrap your mind around.
+ Some classics are clustring; SVM or K-means.
+ Here, one commonly starts with a vector dot-product, leading to a cosine-disnta
+nce metric.
+ Given two vectors 
+\begin_inset Formula $\vec{a}=a_{1}\widehat{e}_{1}+a_{2}\widehat{e}_{2}+\cdots+a_{n}\widehat{e}_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{b}=b_{1}\widehat{e}_{1}+b_{2}\widehat{e}_{2}+\cdots+b_{n}\widehat{e}_{n}$
+\end_inset
+
+, the dot-product is given by 
+\begin_inset Formula 
+\[
+\vec{a}\cdot\vec{b}=a_{1}b_{1}+a_{2}b_{2}+\cdots+a_{n}b_{n}
+\]
+
+\end_inset
+
+The cosine angle between these is given by
+\end_layout
+
+\begin_layout Standard
+Perhaps word-disjunct vectors are of higher quality than skip-grams, but
+ this is not known: there are no published results comparing these.
+ It is reasonable (to me) to expect that the results would be quite similar,
+ with perhaps word-disjunct vectors becing just a smidgin higher-quality.
+\end_layout
+
+\begin_layout Subsection*
+Cross-connector vectors
+\end_layout
+
+\begin_layout Standard
+Instea
+\end_layout
+
+\begin_layout Subsection*
+Replacing Cosines by Entropy?
+\end_layout
+
+\begin_layout Standard
+H
 \end_layout
 
 \begin_layout Section*
@@ -32486,28 +32693,6 @@ Block-5x5
  were examined: so the 700 words are among the most frequent.
  Note that, due to the orthogonalization algorithm, not all of the counts
  are transfered from the words to the clusters; only some are.
-\end_layout
-
-\begin_layout Section*
-The Plan
-\end_layout
-
-\begin_layout Standard
-Here's the plan.
- Its time for a more complete day-to-day activity plan.
- So:
-\end_layout
-
-\begin_layout Itemize
-Collect more zh stats; write code to extract zh words, per discussion above.
-\end_layout
-
-\begin_layout Itemize
-Work on meaning extraction
-\end_layout
-
-\begin_layout Itemize
-Hook it to PLN...
 \end_layout
 
 \begin_layout Section*
