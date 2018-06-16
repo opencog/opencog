@@ -29574,11 +29574,15 @@ N-gram
 \end_inset
 
  is the count of the number of observations.
- Thus, for example, given the toy corpus: "John knew the bird was there.
+ Thus, for example, given the toy corpus: "
+\emph on
+John knew the bird was there.
  John heard the bird.
  John saw the bird.
  Susan saw the bird too.
- Mary saw it also".
+ Mary saw it also
+\emph default
+".
  Setting 
 \begin_inset Formula $w=bird$
 \end_inset
@@ -29681,13 +29685,128 @@ nce metric.
 \end_inset
 
 The cosine angle between these is given by
+\begin_inset Formula 
+\[
+\left\Vert \vec{a}\right\Vert \left\Vert \vec{b}\right\Vert \cos\theta=\vec{a}\cdot\vec{b}
+\]
+
+\end_inset
+
+where, as usual, the 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+ Hilbert-space norm is used: 
+\begin_inset Formula $\left\Vert \vec{a}\right\Vert =\sqrt{\vec{a}\cdot\vec{a}}$
+\end_inset
+
+.
+ The closer that 
+\begin_inset Formula $\theta$
+\end_inset
+
+ is to zero, the more parallel the two vectors are.
+ There are plenty of other interesting ways of measuring the similarity
+ of vectors.
+ The point here is that if the corpus included the sentences 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+John heard the crow.
+ John saw the crow.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and one obtained a vector for 
+\begin_inset Formula $\overrightarrow{crow}$
+\end_inset
+
+, one might typically discover that 
+\begin_inset Formula $\overrightarrow{crow}$
+\end_inset
+
+ is similar to 
+\begin_inset Formula $\overrightarrow{bird}$
+\end_inset
+
+: the cosine angle gives a concrete technology for measuring similarity.
 \end_layout
 
 \begin_layout Standard
-Perhaps word-disjunct vectors are of higher quality than skip-grams, but
- this is not known: there are no published results comparing these.
+Suppose one has a large number of vectors for a large number of words.
+ Similarity metrics that assign a number to the informal idea of similarity
+ then opens the door to automatically classifying words into bins, according
+ to thier similarity.
+ A common favorite is the K-means clustering algorithm, which can take a
+ large number of vectors, and assign them to one of K different bins, with
+ all words in the same bin being quite 
+\begin_inset Quotes eld
+\end_inset
+
+similar
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One can then make general hand-waving arguments that these clusters correspond
+ to 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical classes
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The actual data, the actual results make this obvious: a quick skim of
+ the clsuters makes it clear that some clusters are dominated by nous, and
+ others by verbs.
+ 
+\end_layout
+
+\begin_layout Standard
+There are other approaches, too.
+ Popular ones are the various deep learning approaches applied to neural
+ nets.
+ Word2Vec is a particularly famous one; its now a tensorflow tutorial.
+ The algorithmic details are interesting, and sophisticated.
+ However, conceptually, its not really all that different from what is described
+ above: one obtains a collection of vectors, and then one pumps the vectors
+ through a neural-net classifier, to obtain word-classes.
+\end_layout
+
+\begin_layout Standard
+The entire point of this section is tto drive home the idea that, whatever
+ one can do with N-grams or with skip-grams, one can also do with word-disjunct
+ vectors.
+ At the appropriate conceptual level, they are really very, very similar
+ to one-another.
+\end_layout
+
+\begin_layout Standard
+As a minor side-point, one can hold out some hope that perhaps word-disjunct
+ vectors are of (slightly) higher quality than skip-grams.
+ It seems like they could be or should be, as reinforced by decades of MST-lingu
+istics results.
+ If one takes some stock, off-the-shelf linguistics-K-means algorithm, or
+ some stock, off-the-shelf Word2vec algorithm, and instead plugs in word-disjunc
+t vectors wherever the skip-grams or N-grams might go, then what happens?
+ Maybe, possibly, one might get reulst that are an itsy-bitsy teensy-weensy
+ bit better.
+ Maybe.
+ This is not known: there are no published results comparing these.
  It is reasonable (to me) to expect that the results would be quite similar,
  with perhaps word-disjunct vectors becing just a smidgin higher-quality.
+\end_layout
+
+\begin_layout Standard
+Due diligence suggests that such head-to-head comparisons should be performed
+ and published.
+ 
 \end_layout
 
 \begin_layout Subsection*
