@@ -676,7 +676,8 @@
 ; list, ranked in order of the observed number of sections on the
 ; word. (i.e. the sum of the counts on each of the sections).
 ;
-; Words with fewer than MIN-CNT observations on them are discarded.
+; Words with low observation counts are discarded. A word is
+; considered to be 'big enough' if the LLOBJ says it is.
 ; Sorting is important, because of locality: words in similar
 ; grammatical classes also have similar frequency counts.
 ;
@@ -684,7 +685,7 @@
 ; attached to each word. This is important, as these counts are altered
 ; by mergers, rendering the cached marginal values incorrect.
 ;
-(define (trim-and-rank LLOBJ LST MIN-CNT)
+(define (trim-and-rank LLOBJ LST)
 	; (define pss (add-support-api LLOBJ)) ; from the margins
 	(define pss (add-support-compute LLOBJ))
 
@@ -701,32 +702,19 @@
 
 	(format #t "Finished fetching wildcards in ~5F seconds\n"
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
-	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
-	(sort!
-		; Before sorting, trim the list, discarding words with
-		; low counts.
-		(filter (lambda (WRD) (<= MIN-CNT (nobs WRD))) LST)
-		; Rank so that the highest support words are first in the list.
-		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
-)
 
-; Remove infrequently-seen words from the word list.
-;
-; Any word seen less than MIN-OBS-CUTOFF times will be
-; removed from the list of words.
-;
-; In addition, the words will be ranked according to the total number
-; of observations, each. The returned list of words have the most
-; frequent words first.
-;
-(define (min-cutoff LLOBJ WRD-LST MIN-OBS-CUTOFF)
+	(let ((trimed-ranked-words
+			(sort!
+				; Before sorting, trim the list, discarding words with
+				; low counts.
+				(filter (lambda (WRD) (LLOBJ 'big-enough? WRD)) LST)
+				; Rank so that the highest support words are first in the list.
+				(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))))
 
-	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST MIN-OBS-CUTOFF))
+		(format #t "After triming, ~A words left, out of ~A\n"
+			(length trimed-ranked-words) (length WRD-LST))
 
-	(format #t "After cutoff, ~A words left, out of ~A\n"
-		(length all-ranked-words) (length WRD-LST))
-
-	all-ranked-words
+		trimed-ranked-words)
 )
 
 ; Attempt to merge words into word-classes.
@@ -737,10 +725,10 @@
 ; MIN-OBS is the minumum number of observations that a word should have,
 ; in order to be considered for merging.
 ;
-(define (gram-classify ALGO MERGER MIN-OBS)
+(define (gram-classify ALGO MERGER)
 	(load-stuff)
 	(let* ((wrd-lst (cog-get-atoms 'WordNode))
-			(ranked-words (min-cutoff MERGER wrd-lst MIN-OBS))
+			(ranked-words (trim-and-rank MERGER wrd-lst))
 			(cls-lst (cog-get-atoms 'WordClassNode))
 			(sorted-cls (sort-class-list cls-lst)))
 		(ALGO MERGER ranked-words sorted-cls))
@@ -761,7 +749,7 @@
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
 "
-	(gram-classify classify-pair-wise (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
+	(gram-classify classify-pair-wise (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
 (define-public (gram-classify-agglo MIN-OBS)
@@ -772,7 +760,7 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
+	(gram-classify agglo-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
 (define-public (gram-classify-diag-blocks MIN-OBS)
@@ -784,7 +772,7 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
+	(gram-classify diag-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
 (define-public (gram-classify-greedy-fuzz MIN-OBS)
@@ -798,7 +786,7 @@
 
   Uses the \"fuzz\" merge algo: cosine=0.65, frac=0.3
 "
-	(gram-classify greedy-over-words (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
+	(gram-classify greedy-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
 (define-public (gram-classify-greedy-discrim MIN-OBS)
@@ -812,7 +800,7 @@
 
   Uses the \"discrim\" merge algo: cosine=0.50, frac=variable
 "
-	(gram-classify greedy-over-words (make-discrim 0.5 MIN-OBS) MIN-OBS)
+	(gram-classify greedy-over-words (make-discrim 0.5 MIN-OBS))
 )
 
 ; ---------------------------------------------------------------

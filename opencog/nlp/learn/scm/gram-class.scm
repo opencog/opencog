@@ -763,7 +763,7 @@
 			(merge-project pcos UNION-FRAC WORD-A WORD-B))
 
 		(define (is-big? WORD)
-			(< MIN-CNT (psu 'right-count WORD))
+			(<= MIN-CNT (psu 'right-count WORD)))
 
 		; ------------------
 		; Methods on this class.
@@ -802,7 +802,7 @@
 			(merge-disambig pcos CUTOFF WORD-A WORD-B))
 
 		(define (is-big? WORD)
-			(< MIN-CNT (psu 'right-count WORD))
+			(<= MIN-CNT (psu 'right-count WORD)))
 
 		; ------------------
 		; Methods on this class.
