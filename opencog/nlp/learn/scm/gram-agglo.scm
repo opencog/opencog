@@ -509,10 +509,9 @@
 				(assign-expand-class MERGER grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
 		(length WRD-LST))
-	(fold-unordered-pairs sorted-cls check-pair WRD-LST)
+	(fold-unordered-pairs GLST check-pair WRD-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -521,10 +520,9 @@
 ;
 (define (agglo-over-words MERGER WRD-LST CLS-LST)
 
-	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
 		(length WRD-LST))
-	(assign-to-classes MERGER sorted-cls '() WRD-LST)
+	(assign-to-classes MERGER CLS-LST '() WRD-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -575,13 +573,11 @@
 	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
 	(define ranked-words (drop WRD-LST num-to-drop))
 
-	(define sorted-cls (sort-class-list CLS-LST))
-
 	(format #t "Drop first ~A words from consideration, leaving ~A\n"
 		num-to-drop (length ranked-words))
 	(format #t "Start diag-block of ~A words, chunksz=~A\n"
 		(length ranked-words) diag-block-size)
-	(diag-blocks ranked-words diag-block-size sorted-cls)
+	(diag-blocks ranked-words diag-block-size CLS-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -595,13 +591,11 @@
 ;
 (define (greedy-over-words MERGER WRD-LST CLS-LST)
 
-	(define sorted-cls (sort-class-list CLS-LST))
-
 	; Get the list of words that have been classified already.
 	(define mdone-list
 		(fold (lambda (CLS LST)
 			(append! LST (map gar (cog-incoming-by-type CLS 'MemberLink))))
-			'() sorted-cls))
+			'() CLS-LST))
 
 	; Make sure that they really are words. (This should be a no-op...)
 	(define done-list
@@ -627,8 +621,8 @@
 	(format #t "Start greedy-agglomeration of ~A words\n"
 		(length todo-words))
 	(format #t "Existing classes=~A singletons=~A done=~A\n"
-		(length sorted-cls) (length singletons) (length done-list))
-	(greedy-grow MERGER sorted-cls singletons done-list todo-words)
+		(length CLS-LST) (length singletons) (length done-list))
+	(greedy-grow MERGER CLS-LST singletons done-list todo-words)
 
 	; XXX FIXME ... at the conclusion of this, we have a done list,
 	; which, because of repeated merging, might possibly have been
@@ -736,9 +730,10 @@
 (define (gram-classify ALGO MERGER MIN-OBS)
 	(load-stuff)
 	(let* ((wrd-lst (cog-get-atoms 'WordNode))
-			(ranked-words (min-cutoff MERGER wrd-lst MIN-OBS)))
-		(ALGO MERGER ranked-words
-			(cog-get-atoms 'WordClassNode)))
+			(ranked-words (min-cutoff MERGER wrd-lst MIN-OBS))
+			(cls-lst (cog-get-atoms 'WordClassNode))
+			(sorted-cls (sort-class-list cls-lst)))
+		(ALGO MERGER ranked-words sorted-cls))
 )
 
 ; ---------------------------------------------------------------
