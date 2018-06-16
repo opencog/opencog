@@ -30262,6 +30262,329 @@ was implied to be an all-or-nothing act.
  In fact, one can apply a likilihood or probability to this expansion, with
  the intent of keeping undesirable expansion at bay; of minimizing the risk
  of incorrect expansion.
+ This is done by replacing the lexical set that is the grammatical class
+ with a proabilisitically-weighted set.
+ That is, instead of writing
+\begin_inset Formula 
+\[
+THINGS:\;\left\{ bird,\,crow\right\} 
+\]
+
+\end_inset
+
+as a named set, one could introduce a probability or cost:
+\begin_inset Formula 
+\[
+THINGS:\;\left\{ \left(bird,h_{bird}\right),\,\left(crow,h_{crow}\right)\right\} 
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $h_{crow}=-\log_{2}p\left(crow\right)$
+\end_inset
+
+ and likewise for 
+\begin_inset Formula $h_{bird}$
+\end_inset
+
+.
+ The logarithm is used to keep the costs additive, instead of multiplicative;
+ this is a detail that tends to simplify things.
+ The value 
+\begin_inset Formula $p\left(crow\right)$
+\end_inset
+
+ is a pseudo-probability; there are several plausible ways to define it.
+ One might consider, for example, setting 
+\begin_inset Formula 
+\[
+p\left(crow\right)=\cos\left(\overrightarrow{THINGS},\overrightarrow{crow}\right)
+\]
+
+\end_inset
+
+that indicates how well 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ aligned with the class of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+THINGS
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+But this is naive – too naive: the cosine product 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\cos\left(\overrightarrow{THINGS},\overrightarrow{crow}\right)$
+\end_inset
+
+ was derived from vectors that used the grammatical context of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+crow
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+bird
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It did NOT take into account that, in the corpus, Susan had not yet seen
+ any birds.
+ Its as if the vector for 
+\begin_inset Formula $\overrightarrow{crow}$
+\end_inset
+
+ is incorrect – it should be taking Susan into account, in some way, but
+ its not, because the word 
+\begin_inset Quotes eld
+\end_inset
+
+Susan
+\begin_inset Quotes erd
+\end_inset
+
+ is too far away in the sentence.
+ For the disjuncts, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Susan
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Quotes erd
+\end_inset
+
+ is the subject of a verb, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+crow
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Quotes erd
+\end_inset
+
+ is the object, and there is no direct linkage of subject and object.
+ For N-grams, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Susan
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Quotes erd
+\end_inset
+
+ is simply too far away from the object, unless N is raised to an obscenely
+ large value.
+ Skip-grams do not materially improve on this issue.
+ In all cases, the subject is too far away removed.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Can this be remedied? Yes, it can.
+ The key observation will be that there are other (kinds of) vectors, besides
+ the vectors given above.
+ All of the vectors discussed so far are best considered to be 'naive' vectors.
+ They are 'naive' because they ignore the structure of the basis elements
+ themselves.
+ Acknowledging this structure allows one to move beyond the narrow constraints
+ of linear algebra.
+ Acknowledging this structure leads to the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf on a graph
+\begin_inset Quotes erd
+\end_inset
+
+ as a lingustically appropriate generalization of a vector space; it will
+ replace the vector spaces, and the linear algebra, by a more general concept,
+ roughly, one of collections of vector spaces, sewn together at the edges.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf
+\begin_inset Quotes erd
+\end_inset
+
+ comes from the idea that the axioms defining how the sewing-together is
+ to be performed are the same axioms as those of 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf theory
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But first, before we get to that, some more examples need to be developed.
 \end_layout
 
 \begin_layout Subsection*
