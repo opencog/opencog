@@ -812,7 +812,7 @@
 
   Uses the \"discrim\" merge algo: cosine=0.50, frac=variable
 "
-	(gram-classify greedy-over-words (make-discrim) MIN-OBS)
+	(gram-classify greedy-over-words (make-discrim 0.5 MIN-OBS) MIN-OBS)
 )
 
 ; ---------------------------------------------------------------
