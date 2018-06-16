@@ -31336,6 +31336,7 @@ merge-ortho
  Because the variable fraction should behave nicely, the minimum cosine
  is set to 0.50.
  The agglomeration algorithm is the greedy algorithm.
+ Run this as: `(gram-classify-greedy-discrim 0.5 20)`.
 \end_layout
 
 \begin_layout Standard
