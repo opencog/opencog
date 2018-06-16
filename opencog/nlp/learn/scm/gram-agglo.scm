@@ -216,6 +216,16 @@
 	(remove (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 ; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; Various different agglomerative clustring algos follow below.
+;
+; These are the main, recursive work-horses; they need to be
+; set up by initialization routines, before being usable.
+; The initializers are farther down in the file.
+; ---------------------------------------------------------------
+;
+; block-assign-to-classes -- cluster in in diagonal blocks.
+;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -267,6 +277,8 @@
 )
 
 ; ---------------------------------------------------------------
+;
+; assign-to-classes - Simple agglomerative clustering
 ;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
@@ -336,6 +348,8 @@
 )
 
 ; ---------------------------------------------------------------
+;
+; greedy-grow -- Agglomerative clustering; grow new classes first
 ;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
@@ -482,6 +496,10 @@
 
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; Agglomerative clustering entry points.
+;
+; The functions below set up parameters for the work-horses above.
 ; ---------------------------------------------------------------
 ; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
