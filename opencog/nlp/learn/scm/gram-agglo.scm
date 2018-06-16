@@ -680,21 +680,13 @@
 ; Sorting is important, because of locality: words in similar
 ; grammatical classes also have similar frequency counts.
 ;
-; Note: an earlier version of this ranked by the number of times
-; each word was observed: viz:
-;      (> (get-count ATOM-A) (get-count ATOM-B))
-; However, for WordNodes, this does not work very well, as the
-; observation count may be high from any-pair parsing, but
-; infrequently used in MST parsing.
-;
-; The current version gets observation counts from the partial sums
-; on the LLOBJ.  This is fine when starting from scratch, but gets
-; distorted, as word-merges transfer counts from the word to the
-; word-class, but fail to update the partial sums. XXX this needs
-; fixing. XXX FIXME
+; Counts are obtained by directly counting the number of disjuncts
+; attached to each word. This is important, as these counts are altered
+; by mergers, rendering the cached marginal values incorrect.
 ;
 (define (trim-and-rank LLOBJ LST MIN-CNT)
-	(define pss (add-support-api LLOBJ))
+	; (define pss (add-support-api LLOBJ)) ; from the margins
+	(define pss (add-support-compute LLOBJ))
 
 	; nobs == number of observations
 	(define (nobs WRD) (pss 'right-count WRD))
