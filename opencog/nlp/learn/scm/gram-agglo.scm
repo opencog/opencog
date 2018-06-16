@@ -483,54 +483,6 @@
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
-; Given the list LST of atoms, trim it, discarding atoms with
-; low observation counts, and then sort it, returning the sorted
-; list, ranked in order of the observed number of sections on the
-; word. (i.e. the sum of the counts on each of the sections).
-;
-; Words with fewer than MIN-CNT observations on them are discarded.
-; Sorting is important, because of locality: words in similar
-; grammatical classes also have similar frequency counts.
-;
-; Note: an earlier version of this ranked by the number of times
-; each word was observed: viz:
-;      (> (get-count ATOM-A) (get-count ATOM-B))
-; However, for WordNodes, this does not work very well, as the
-; observation count may be high from any-pair parsing, but
-; infrequently used in MST parsing.
-;
-; The current version gets observation counts from the partial sums
-; on the LLOBJ.  This is fine when starting from scratch, but gets
-; distorted, as word-merges transfer counts from the word to the
-; word-class, but fail to update the partial sums. XXX this needs
-; fixing. XXX FIXME
-;
-(define (trim-and-rank LLOBJ LST MIN-CNT)
-	(define pss (add-support-api LLOBJ))
-
-	; nobs == number of observations
-	(define (nobs WRD) (pss 'right-count WRD))
-
-	; The support API won't work, if we don't have the wild-cards
-	; in the atomspace before we sort. The wild-cards hold/contain
-	; the support subtotals.
-	(define start-time (get-internal-real-time))
-	(for-each
-		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
-		LST)
-
-	(format #t "Finished fetching wildcards in ~5F seconds\n"
-		(* 1.0e-9 (- (get-internal-real-time) start-time)))
-	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
-	(sort!
-		; Before sorting, trim the list, discarding words with
-		; low counts.
-		(filter (lambda (WRD) (<= MIN-CNT (nobs WRD))) LST)
-		; Rank so that the highest support words are first in the list.
-		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
-)
-
-; ---------------------------------------------------------------
 ; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
 ; expand that class as much as possible. Repeat until all pairs
@@ -707,6 +659,53 @@
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 )
 
+; Given the list LST of atoms, trim it, discarding atoms with
+; low observation counts, and then sort it, returning the sorted
+; list, ranked in order of the observed number of sections on the
+; word. (i.e. the sum of the counts on each of the sections).
+;
+; Words with fewer than MIN-CNT observations on them are discarded.
+; Sorting is important, because of locality: words in similar
+; grammatical classes also have similar frequency counts.
+;
+; Note: an earlier version of this ranked by the number of times
+; each word was observed: viz:
+;      (> (get-count ATOM-A) (get-count ATOM-B))
+; However, for WordNodes, this does not work very well, as the
+; observation count may be high from any-pair parsing, but
+; infrequently used in MST parsing.
+;
+; The current version gets observation counts from the partial sums
+; on the LLOBJ.  This is fine when starting from scratch, but gets
+; distorted, as word-merges transfer counts from the word to the
+; word-class, but fail to update the partial sums. XXX this needs
+; fixing. XXX FIXME
+;
+(define (trim-and-rank LLOBJ LST MIN-CNT)
+	(define pss (add-support-api LLOBJ))
+
+	; nobs == number of observations
+	(define (nobs WRD) (pss 'right-count WRD))
+
+	; The support API won't work, if we don't have the wild-cards
+	; in the atomspace before we sort. The wild-cards hold/contain
+	; the support subtotals.
+	(define start-time (get-internal-real-time))
+	(for-each
+		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
+		LST)
+
+	(format #t "Finished fetching wildcards in ~5F seconds\n"
+		(* 1.0e-9 (- (get-internal-real-time) start-time)))
+	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
+	(sort!
+		; Before sorting, trim the list, discarding words with
+		; low counts.
+		(filter (lambda (WRD) (<= MIN-CNT (nobs WRD))) LST)
+		; Rank so that the highest support words are first in the list.
+		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
+)
+
 ; Remove infrequently-seen words from the word list.
 ;
 ; Any word seen less than MIN-OBS-CUTOFF times will be
@@ -742,6 +741,7 @@
 			(cog-get-atoms 'WordClassNode)))
 )
 
+; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; Main entry points for word-classification,
 ;
