@@ -29644,9 +29644,9 @@ d counts.
  For the above corpus, the disjuncts might possibly resemble these:
 \begin_inset Formula 
 \begin{align*}
-\widehat{e}_{1} & =the-\;\&\;was+\\
-\widehat{e}_{2} & =the-\;\&\;.+\\
-\widehat{e}_{3} & =the-\;\&\;too+
+\widehat{e}_{1} & =the\negthinspace-\;\&\;was\negthinspace+\\
+\widehat{e}_{2} & =the\negthinspace-\;\&\;.\negthinspace+\\
+\widehat{e}_{3} & =the\negthinspace-\;\&\;too\negthinspace+
 \end{align*}
 
 \end_inset
@@ -29743,25 +29743,9 @@ Suppose one has a large number of vectors for a large number of words.
  to their similarity.
  A common favorite is the K-means clustering algorithm, which can take a
  large number of vectors, and assign them to one of K different bins, with
- all words in the same bin being quite 
-\begin_inset Quotes eld
-\end_inset
-
-similar
-\begin_inset Quotes erd
-\end_inset
-
-.
+ all words in the same bin being quite 'similar'.
  One can then make general hand-waving arguments that these clusters correspond
- to 
-\begin_inset Quotes eld
-\end_inset
-
-grammatical classes
-\begin_inset Quotes erd
-\end_inset
-
-.
+ to 'grammatical classes'.
  The actual data, the actual results make this obvious: a quick skim of
  the clusters makes it clear that some clusters are dominated by nous, and
  others by verbs.
@@ -29809,8 +29793,479 @@ Due diligence suggests that such head-to-head comparisons should be performed
  
 \end_layout
 
+\begin_layout Standard
+A later sections describes how one can do much better than naive clustering,
+ whether Word2vec or K-means.
+ But first, some additional basic issues need to be reviewed.
+\end_layout
+
 \begin_layout Subsection*
-Tensor-like structure
+Merging vectors
+\end_layout
+
+\begin_layout Standard
+In the above example, it seems obvious that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+bird
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should be merged: they are grammatically similar, given thier vectors.
+ So lets merge them into a class of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+THINGS
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ How should that class be created, formally? This is a non-trivial question,
+ since additional merges affect the class.
+ Suppose, for example, the corupus contained the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+John saw the book
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Is it plausible to merge 
+\begin_inset Quotes eld
+\end_inset
+
+book
+\begin_inset Quotes erd
+\end_inset
+
+ into 
+\begin_inset Quotes eld
+\end_inset
+
+THINGS
+\begin_inset Quotes erd
+\end_inset
+
+? If so, then how? One way is to compute the cosine similiarity 
+\begin_inset Formula $\cos\left(\overrightarrow{book},\overrightarrow{bird}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\cos\left(\overrightarrow{book},\overrightarrow{crow}\right)$
+\end_inset
+
+ and merge only if both are large enough.
+ The other is to compute 
+\begin_inset Formula $\cos\left(\overrightarrow{book},\overrightarrow{THINGS}\right)$
+\end_inset
+
+ but this requires the vector 
+\begin_inset Formula $\overrightarrow{THINGS}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+There are several ways to create this vector.
+ One way is by explicit vector addition 
+\begin_inset Formula 
+\[
+\overrightarrow{THINGS}_{sum}=\overrightarrow{bird}+\overrightarrow{crow}
+\]
+
+\end_inset
+
+This seems to be an adequate way of creating this grammatical class.
+ Recall that
+\begin_inset Formula 
+\[
+\overrightarrow{bird}=1\left|the\negthinspace-\;\&\;was\negthinspace+\right\rangle +2\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle +1\left|the\negthinspace-\;\&\;too\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+where we switched to disjunct notation.
+ The vector for 
+\begin_inset Formula $\overrightarrow{crow}$
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{crow}=2\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+Comparing these two, directly like this, suggests that other merge strategies
+ are possible.
+ For example, since 
+\begin_inset Formula $\overrightarrow{crow}$
+\end_inset
+
+ has neither 
+\begin_inset Formula $\left|the-\&was+\right\rangle $
+\end_inset
+
+ nor 
+\begin_inset Formula $\left|the-\&too+\right\rangle $
+\end_inset
+
+ on it, maybe these don't belong on the merged class: perhaps an intersection
+ of the basis vectors should be used, so that the combined vector is non-zero
+ only on the intersection of the basis elements.
+ Thus, perhaps a better defintion would be
+\begin_inset Formula 
+\[
+\overrightarrow{THINGS}_{intersect}=4\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+This is narrow definition is nice, because we have that 
+\begin_inset Formula 
+\[
+\overrightarrow{book}=1\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+and so clearly the cosine between 
+\begin_inset Formula $\overrightarrow{THINGS}_{intersect}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{book}$
+\end_inset
+
+ is one, and they're mergable.
+ By contrast, the cosine between 
+\begin_inset Formula $\overrightarrow{THINGS}_{sum}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{book}$
+\end_inset
+
+ is much less than one - which also makes sense, because books are not very
+ bird-like.
+\end_layout
+
+\begin_layout Standard
+Another possiblity is to combine some fraction 
+\begin_inset Formula $0\le\alpha\le1$
+\end_inset
+
+ of the basis elements that don't overlap.
+ This suggests a grammatical class of 
+\begin_inset Formula 
+\[
+\overrightarrow{THINGS}_{\alpha}=\alpha\left|the\negthinspace-\;\&\;was\negthinspace+\right\rangle +4\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle +\alpha\left|the\negthinspace-\;\&\;too\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+so that 
+\begin_inset Formula 
+\[
+\overrightarrow{THINGS}_{\alpha=0}=\overrightarrow{THINGS}_{intersect}
+\]
+
+\end_inset
+
+while
+\begin_inset Formula 
+\[
+\overrightarrow{THINGS}_{\alpha=1}=\overrightarrow{THINGS}_{sum}
+\]
+
+\end_inset
+
+That is, for 
+\begin_inset Formula $\alpha=1$
+\end_inset
+
+, 
+\begin_inset Formula $\overrightarrow{THINGS}_{\alpha}$
+\end_inset
+
+ is rather bird-like, whereas for 
+\begin_inset Formula $\alpha=0$
+\end_inset
+
+, its more generic.
+ 
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $\overrightarrow{THINGS}_{\alpha}$
+\end_inset
+
+ is not a linear combination of 
+\begin_inset Formula $\overrightarrow{bird}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{crow}$
+\end_inset
+
+.
+ It is non-linear, and, depending on the actual corpus, could be highly
+ non-linear.
+ 
+\end_layout
+
+\begin_layout Standard
+The choice of merge strategy alters the contents of the grammatical clusters.
+ This is not a surprise; the goal here is to illustrate that a number of
+ different merge strategies are possible.
+ it is not 
+\emph on
+a priori
+\emph default
+ obvious which is the best.
+\end_layout
+
+\begin_layout Subsection*
+Broadening and Generalization
+\end_layout
+
+\begin_layout Standard
+Take up the previous example, and consider the verbs 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+saw
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+heard
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ – John, Susan and others are seeing and hearing birds and crows.
+ The word-vectors for 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+saw
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+heard
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ will include the disjuncts:
+\begin_inset Formula 
+\begin{align*}
+\widehat{e}_{4} & =John\negthinspace-\;\&\;bird\negthinspace+\\
+\widehat{e}_{5} & =Susan\negthinspace-\;\&\;bird\negthinspace+\\
+\widehat{e}_{6} & =John\negthinspace-\;\&\;crow\negthinspace+
+\end{align*}
+
+\end_inset
+
+Working explicitly from this example, one would have the vector
+\begin_inset Formula 
+\[
+\overrightarrow{saw}=1\left|John\negthinspace-\;\&\;bird\negthinspace+\right\rangle +1\left|Susan\negthinspace-\;\&\;bird\negthinspace+\right\rangle +1\left|John\negthinspace-\;\&\;crow\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+bird
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ are merged into the grammatical class 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+THINGS
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, then none of the basis vectors 
+\begin_inset Formula $\widehat{e}_{4}$
+\end_inset
+
+, 
+\begin_inset Formula $\widehat{e}_{5}$
+\end_inset
+
+ or 
+\begin_inset Formula $\widehat{e}_{6}$
+\end_inset
+
+ are entirely appropriate any more.
+ They should be replaced by basis vectors made of the combined class; possibly,
+ for example,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{saw}=1\left|John\negthinspace-\;\&\;THINGS\negthinspace+\right\rangle +1\left|Susan\negthinspace-\;\&\;THINGS\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+But there's something odd in the above: Susan never saw a crow, in the sample
+ corpus; so the above has certainly enlarged or generalized the class of
+ things that ar see-able, at least with respect to Susan.
+ 
+\end_layout
+
+\begin_layout Standard
+That is, given specific examples, the act of deducing grammatical categories
+ enlarges the generative size of the grammar.
+ This is a technical statement, and needs some exmplanation.
+ Formally, a 'grammar' is a collection of rules that define how sentences
+ can be parsed.
+ A 'language' is the set of all possible sentences that the grammar allows.
+ The original corpus is a sampling of the language; deduction of the class
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+THINGS
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ expands the language, because, in this expanded grammar, the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Susan saw the crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is now allowed, is part of the language, whereas previously it was not.
+\end_layout
+
+\begin_layout Subsection*
+Pase ranking
+\end_layout
+
+\begin_layout Standard
+In the above, the expansion of the grammar from 
+\begin_inset Formula 
+\[
+saw:\,Susan\negthinspace-\;\&\;bird\negthinspace+;
+\]
+
+\end_inset
+
+ to 
+\begin_inset Formula 
+\[
+saw:\,Susan\negthinspace-\;\&\;THINGS\negthinspace+;
+\]
+
+\end_inset
+
+was implied to be an all-or-nothing act.
+ In fact, one can apply a likilihood or probability to this expansion, with
+ the intent of keeping undesirable expansion at bay; of minimizing the risk
+ of incorrect expansion.
+\end_layout
+
+\begin_layout Subsection*
+Tensor-like structure 
 \end_layout
 
 \begin_layout Standard
@@ -29835,193 +30290,6 @@ If this was just ordinary linear algebra, the story would end here, and
  But (I beleive that) one can do better by not ignoring the structure of
  the basis vectors.
  The following sections develop the ideas.
-\end_layout
-
-\begin_layout Subsection*
-Broadening and Generalization
-\end_layout
-
-\begin_layout Standard
-Take up the previous example, and consider the verbs 
-\begin_inset Quotes eld
-\end_inset
-
-saw
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-heard
-\begin_inset Quotes erd
-\end_inset
-
- – John, Susan and others are seeing and hearing birds and crows.
- The word-vectors for 
-\begin_inset Quotes eld
-\end_inset
-
-saw
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-heard
-\begin_inset Quotes erd
-\end_inset
-
- will include the disjuncts:
-\begin_inset Formula 
-\begin{align*}
-\widehat{e}_{4} & =John-\;\&\;bird+\\
-\widehat{e}_{5} & =Susan-\;\&\;bird+\\
-\widehat{e}_{6} & =John-\;\&\;crow+
-\end{align*}
-
-\end_inset
-
-Working explicitly from this example, one would have the vector
-\begin_inset Formula 
-\[
-\overrightarrow{saw}=1\left|John-\;\&\;bird+\right\rangle +1\left|Susan-\;\&\;bird+\right\rangle +1\left|John-\;\&\;crow+\right\rangle 
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-If 
-\begin_inset Quotes eld
-\end_inset
-
-bird
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-crow
-\begin_inset Quotes erd
-\end_inset
-
- are merged into the grammatical class 
-\begin_inset Quotes eld
-\end_inset
-
-THINGS
-\begin_inset Quotes erd
-\end_inset
-
-, then none of the basis vectors 
-\begin_inset Formula $\widehat{e}_{4}$
-\end_inset
-
-, 
-\begin_inset Formula $\widehat{e}_{5}$
-\end_inset
-
- or 
-\begin_inset Formula $\widehat{e}_{6}$
-\end_inset
-
- are entirely appropriate any more.
- They should be replaced by basis vectors made of the combined class; possibly,
- for example,
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\overrightarrow{saw}=1\left|John-\;\&\;THINGS+\right\rangle +1\left|Susan-\;\&\;THINGS+\right\rangle 
-\]
-
-\end_inset
-
-But there's something odd in the above: Susan never saw a crow, in the sample
- corpus; so the above has certainly enlarged or generalized the class of
- things that ar see-able, at least with respect to Susan.
- 
-\end_layout
-
-\begin_layout Standard
-That is, given specific examples, the act of deducing grammatical categories
- enlarges the generative size of the grammar.
- This is a technical statement, and needs some exmplanation.
- Formally, a 
-\begin_inset Quotes eld
-\end_inset
-
-grammar
-\begin_inset Quotes erd
-\end_inset
-
- is a collection of rules that define how sentences can be parsed.
- A 
-\begin_inset Quotes eld
-\end_inset
-
-language
-\begin_inset Quotes erd
-\end_inset
-
- is the set of all possible sentences that the grammar allows.
- The original corpus is a sampling of the language; deduction of the class
- of 
-\begin_inset Quotes eld
-\end_inset
-
-THINGS
-\begin_inset Quotes erd
-\end_inset
-
- expands the language, because, in this expanded grammar, the sentence 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-Susan saw the crow
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- is now allowed, is part of the language, whereas previously it was not.
-\end_layout
-
-\begin_layout Subsection*
-Merging vectors
-\end_layout
-
-\begin_layout Standard
-In this example, the grammatical class for 
-\begin_inset Quotes eld
-\end_inset
-
-THINGS
-\begin_inset Quotes erd
-\end_inset
-
- is created by vector addition.
- That is, it is explicitly given by 
-\begin_inset Formula 
-\[
-\overrightarrow{THINGS}=\overrightarrow{bird}+\overrightarrow{crow}
-\]
-
-\end_inset
-
-This seems to be an adequate way of creating this grammatical class.
- However, there are other
 \end_layout
 
 \begin_layout Subsection*
