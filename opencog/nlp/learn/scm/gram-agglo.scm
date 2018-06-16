@@ -201,6 +201,21 @@
 )
 
 ; ---------------------------------------------------------------
+; Utilities used by several of the functions
+
+; Return true if WRD is in word-class CLS
+(define (is-in-cls? WRD CLS)
+	(not (null? (cog-link 'MemberLink WRD CLS))))
+
+; Return a list of words that got placed into the class.
+(define (got-done WRDS CLS)
+	(filter (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; Return a list of words NOT in the class.
+(define (still-to-do WRDS CLS)
+	(remove (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -250,21 +265,6 @@
 								CLS-LST)))
 					(block-assign-to-classes MERGER rest new-lst)))))
 )
-
-; ---------------------------------------------------------------
-; Utilities used by several of the functions
-
-; Return true if WRD is in word-class CLS
-(define (is-in-cls? WRD CLS)
-	(not (null? (cog-link 'MemberLink WRD CLS))))
-
-; Return a list of words that got placed into the class.
-(define (got-done WRDS CLS)
-	(filter (lambda (w) (is-in-cls? w CLS)) WRDS))
-
-; Return a list of words NOT in the class.
-(define (still-to-do WRDS CLS)
-	(remove (lambda (w) (is-in-cls? w CLS)) WRDS))
 
 ; ---------------------------------------------------------------
 ;
