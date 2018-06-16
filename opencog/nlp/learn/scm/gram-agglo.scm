@@ -414,7 +414,7 @@
 
 	; If only a stub of a word is left, throw it away.
 	(define (keep WORD)
-		(if (LLOBJ 'discard? WORD) '() (list WORD)))
+		(if (MERGER 'discard? WORD) '() (list WORD)))
 
 	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A -- \"~A\" ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
@@ -675,7 +675,7 @@
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 )
 
-; Given the list LST of atoms, trim it, discarding atoms with
+; Given the list WRD-LST of atoms, trim it, discarding atoms with
 ; low observation counts, and then sort it, returning the sorted
 ; list, ranked in order of the observed number of sections on the
 ; word. (i.e. the sum of the counts on each of the sections).
@@ -689,7 +689,7 @@
 ; attached to each word. This is important, as these counts are altered
 ; by mergers, rendering the cached marginal values incorrect.
 ;
-(define (trim-and-rank LLOBJ LST)
+(define (trim-and-rank LLOBJ WRD-LST)
 	; (define pss (add-support-api LLOBJ)) ; from the margins
 	(define pss (add-support-compute LLOBJ))
 
@@ -703,7 +703,7 @@
 	(define start-time (get-internal-real-time))
 	(for-each
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
-		LST)
+		WRD-LST)
 
 	(format #t "Finished fetching wildcards in ~5F seconds\n"
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
@@ -712,7 +712,7 @@
 			(sort!
 				; Before sorting, trim the list, discarding words with
 				; low counts.
-				(remove (lambda (WRD) (LLOBJ 'discard? WRD)) LST)
+				(remove (lambda (WRD) (LLOBJ 'discard? WRD)) WRD-LST)
 				; Rank so that the highest support words are first in the list.
 				(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))))
 
@@ -794,7 +794,7 @@
 	(gram-classify greedy-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
-(define-public (gram-classify-greedy-discrim MIN-OBS)
+(define-public (gram-classify-greedy-discrim COSINE MIN-OBS)
 "
   gram-classify-greedy-discrim - Merge words into word-classes.
 
@@ -804,8 +804,14 @@
   be faster and more accurate than `gram-classify-diag-blocks`.
 
   Uses the \"discrim\" merge algo: cosine=0.50, frac=variable
+
+  COSINE should be the minimum cosine angle acceptable to perform
+  a merge on. Currently, 0.5 is recommended.
+
+  MIN-OBS is the smallest number of observations of the word that
+  is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify greedy-over-words (make-discrim 0.5 MIN-OBS))
+	(gram-classify greedy-over-words (make-discrim COSINE MIN-OBS))
 )
 
 ; ---------------------------------------------------------------
