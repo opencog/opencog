@@ -690,7 +690,8 @@
 	(define pss (add-support-compute LLOBJ))
 
 	; nobs == number of observations
-	(define (nobs WRD) (pss 'right-count WRD))
+	(define (wcnt WRD) (pss 'right-count WRD))
+	(define nobs (make-afunc-cache wcnt))
 
 	; The support API won't work, if we don't have the wild-cards
 	; in the atomspace before we sort. The wild-cards hold/contain
