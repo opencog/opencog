@@ -708,22 +708,27 @@
 	(format #t "Finished fetching wildcards in ~5F seconds\n"
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 
-	(let* ((tstart (get-internal-real-time))
-			(trimed-ranked-words
-			(sort!
-				; Before sorting, trim the list, discarding words with
-				; low counts.
-				(remove (lambda (WRD) (LLOBJ 'discard? WRD)) WRD-LST)
-				; Rank so that the highest support words are first in the list.
-				(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))))
+	; Before sorting, trim the list, discarding words with low counts.
+	(let* ((tr-start (get-internal-real-time))
+			(trimed-words
+				(remove (lambda (WRD) (LLOBJ 'discard? WRD)) WRD-LST)))
 
-		(format #t "Triming and sorting in ~5F seconds\n"
-			(* 1.0e-9 (- (get-internal-real-time) tstart)))
+		(format #t "Trimmed in ~5F seconds\n"
+			(* 1.0e-9 (- (get-internal-real-time) tr-start)))
 
 		(format #t "After triming, ~A words left, out of ~A\n"
-			(length trimed-ranked-words) (length WRD-LST))
+			(length trimed-words) (length WRD-LST))
 
-		trimed-ranked-words)
+		(let* ((ra-start (get-internal-real-time))
+				(ranked-words
+					(sort! trimed-words
+						; Rank so that the commonest words are first in the list.
+						(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))))
+
+			(format #t "Sorting in ~5F seconds\n"
+				(* 1.0e-9 (- (get-internal-real-time) ra-start)))
+
+			ranked-words))
 )
 
 ; Attempt to merge words into word-classes.
