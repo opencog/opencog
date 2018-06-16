@@ -761,7 +761,7 @@
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
 "
-	(gram-classify classify-pair-wise (make-fuzz) MIN-OBS)
+	(gram-classify classify-pair-wise (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
 )
 
 (define-public (gram-classify-agglo MIN-OBS)
@@ -772,7 +772,7 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words (make-fuzz) MIN-OBS)
+	(gram-classify agglo-over-words (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
 )
 
 (define-public (gram-classify-diag-blocks MIN-OBS)
@@ -784,7 +784,7 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words (make-fuzz) MIN-OBS)
+	(gram-classify diag-over-words (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
 )
 
 (define-public (gram-classify-greedy-fuzz MIN-OBS)
@@ -798,7 +798,7 @@
 
   Uses the \"fuzz\" merge algo: cosine=0.65, frac=0.3
 "
-	(gram-classify greedy-over-words (make-fuzz) MIN-OBS)
+	(gram-classify greedy-over-words (make-fuzz 0.65 0.3 MIN-OBS) MIN-OBS)
 )
 
 (define-public (gram-classify-greedy-discrim MIN-OBS)

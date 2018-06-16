@@ -736,19 +736,28 @@
 
 ; ---------------------------------------------------------------
 
-(define (make-fuzz)
+(define (make-fuzz CUTOFF UNION-FRAC MIN-CNT)
 "
-  make-fuzz -- Do fuzzy hard-coded merge.
+  make-fuzz -- Do projection-merge, with a fixed merge fraction.
 
-  use `merge-project` with hard-coded frac=0.3 and min acceptable
-  cosine=0.65
+  Uses `merge-project`.
+
+  CUTOFF is the min acceptable cosine, for words to be considered
+  mergable.
+
+  UNION-FRAC is the fxied fraction of the union-set of the disjuncts
+  that will be merged.
+
+  MIN-CNT is the minimum count (l1-norm) of the observations of
+  disjuncts that a word is allowed to have, to even be considered.
 "
 	(define cutoff 0.65)
 	(define union-frac 0.3)
 
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
-			(pcos (add-pair-cosine-compute psa))
+			(psu (add-support-compute psa))
+			(pcos (add-pair-cosine-compute psu))
 		)
 		(define (mpred WORD-A WORD-B)
 			(is-cosine-similar? pcos cutoff WORD-A WORD-B))
