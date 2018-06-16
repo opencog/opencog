@@ -741,7 +741,7 @@
 ;
 (define (gram-classify ALGO MERGER)
 	(load-stuff)
-	(let* ((wrd-lst (cog-get-atoms 'WordNode))
+	(let* ((wrd-lst (MERGER 'left-basis))
 			(ranked-words (trim-and-rank MERGER wrd-lst))
 			(cls-lst (cog-get-atoms 'WordClassNode))
 			(sorted-cls (sort-class-list cls-lst)))
