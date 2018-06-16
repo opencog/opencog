@@ -29810,7 +29810,7 @@ Due diligence suggests that such head-to-head comparisons should be performed
 \end_layout
 
 \begin_layout Subsection*
-Cross-connector vectors
+Tensor-like structure
 \end_layout
 
 \begin_layout Standard
@@ -29830,10 +29830,202 @@ If this was just ordinary linear algebra, the story would end here, and
  This section argues that the cosine similarity, as defined above, is a
  deeply flawed oversimplification for measuring word similarity.
  Its reasonably OK as a first pass: clearly, it gives OK results.
- People think that word2vec and it's cousins are hot shit.
+ Clearly, word2vec and it's cousins have made a big impression.
  That counts for something.
- But one can do better; a lot better.
- Here's how.
+ But (I beleive that) one can do better by not ignoring the structure of
+ the basis vectors.
+ The following sections develop the ideas.
+\end_layout
+
+\begin_layout Subsection*
+Broadening and Generalization
+\end_layout
+
+\begin_layout Standard
+Take up the previous example, and consider the verbs 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+heard
+\begin_inset Quotes erd
+\end_inset
+
+ – John, Susan and others are seeing and hearing birds and crows.
+ The word-vectors for 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+heard
+\begin_inset Quotes erd
+\end_inset
+
+ will include the disjuncts:
+\begin_inset Formula 
+\begin{align*}
+\widehat{e}_{4} & =John-\;\&\;bird+\\
+\widehat{e}_{5} & =Susan-\;\&\;bird+\\
+\widehat{e}_{6} & =John-\;\&\;crow+
+\end{align*}
+
+\end_inset
+
+Working explicitly from this example, one would have the vector
+\begin_inset Formula 
+\[
+\overrightarrow{saw}=1\left|John-\;\&\;bird+\right\rangle +1\left|Susan-\;\&\;bird+\right\rangle +1\left|John-\;\&\;crow+\right\rangle 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Quotes eld
+\end_inset
+
+bird
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+crow
+\begin_inset Quotes erd
+\end_inset
+
+ are merged into the grammatical class 
+\begin_inset Quotes eld
+\end_inset
+
+THINGS
+\begin_inset Quotes erd
+\end_inset
+
+, then none of the basis vectors 
+\begin_inset Formula $\widehat{e}_{4}$
+\end_inset
+
+, 
+\begin_inset Formula $\widehat{e}_{5}$
+\end_inset
+
+ or 
+\begin_inset Formula $\widehat{e}_{6}$
+\end_inset
+
+ are entirely appropriate any more.
+ They should be replaced by basis vectors made of the combined class; possibly,
+ for example,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{saw}=1\left|John-\;\&\;THINGS+\right\rangle +1\left|Susan-\;\&\;THINGS+\right\rangle 
+\]
+
+\end_inset
+
+But there's something odd in the above: Susan never saw a crow, in the sample
+ corpus; so the above has certainly enlarged or generalized the class of
+ things that ar see-able, at least with respect to Susan.
+ 
+\end_layout
+
+\begin_layout Standard
+That is, given specific examples, the act of deducing grammatical categories
+ enlarges the generative size of the grammar.
+ This is a technical statement, and needs some exmplanation.
+ Formally, a 
+\begin_inset Quotes eld
+\end_inset
+
+grammar
+\begin_inset Quotes erd
+\end_inset
+
+ is a collection of rules that define how sentences can be parsed.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+language
+\begin_inset Quotes erd
+\end_inset
+
+ is the set of all possible sentences that the grammar allows.
+ The original corpus is a sampling of the language; deduction of the class
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+THINGS
+\begin_inset Quotes erd
+\end_inset
+
+ expands the language, because, in this expanded grammar, the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Susan saw the crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is now allowed, is part of the language, whereas previously it was not.
+\end_layout
+
+\begin_layout Subsection*
+Merging vectors
+\end_layout
+
+\begin_layout Standard
+In this example, the grammatical class for 
+\begin_inset Quotes eld
+\end_inset
+
+THINGS
+\begin_inset Quotes erd
+\end_inset
+
+ is created by vector addition.
+ That is, it is explicitly given by 
+\begin_inset Formula 
+\[
+\overrightarrow{THINGS}=\overrightarrow{bird}+\overrightarrow{crow}
+\]
+
+\end_inset
+
+This seems to be an adequate way of creating this grammatical class.
+ However, there are other
+\end_layout
+
+\begin_layout Subsection*
+Cross-connector
 \end_layout
 
 \begin_layout Subsection*
@@ -29849,7 +30041,7 @@ Cosines are not additive.
 \begin_layout Standard
 \begin_inset Formula 
 \[
-f(x,y)=\sum_{z}p(x,z)p(y,z)
+f(x,y)=\sum_{z}N(x,z)N(y,z)
 \]
 
 \end_inset
