@@ -29665,9 +29665,9 @@ These disjuncts are essentially identical to the N-gram example above; only
 \begin_layout Standard
 What does one do with vectors? Well, one can apply any vector-based algorithm
  you can wrap your mind around.
- Some classics are clustring; SVM or K-means.
- Here, one commonly starts with a vector dot-product, leading to a cosine-disnta
-nce metric.
+ Some classics are clustering; SVM or K-means.
+ Here, one commonly starts with a vector dot-product, leading to a cosine-distan
+ce metric.
  Given two vectors 
 \begin_inset Formula $\vec{a}=a_{1}\widehat{e}_{1}+a_{2}\widehat{e}_{2}+\cdots+a_{n}\widehat{e}_{n}$
 \end_inset
@@ -29740,7 +29740,7 @@ John heard the crow.
 Suppose one has a large number of vectors for a large number of words.
  Similarity metrics that assign a number to the informal idea of similarity
  then opens the door to automatically classifying words into bins, according
- to thier similarity.
+ to their similarity.
  A common favorite is the K-means clustering algorithm, which can take a
  large number of vectors, and assign them to one of K different bins, with
  all words in the same bin being quite 
@@ -29763,7 +29763,7 @@ grammatical classes
 
 .
  The actual data, the actual results make this obvious: a quick skim of
- the clsuters makes it clear that some clusters are dominated by nous, and
+ the clusters makes it clear that some clusters are dominated by nous, and
  others by verbs.
  
 \end_layout
@@ -29780,7 +29780,7 @@ There are other approaches, too.
 \end_layout
 
 \begin_layout Standard
-The entire point of this section is tto drive home the idea that, whatever
+The entire point of this section is to drive home the idea that, whatever
  one can do with N-grams or with skip-grams, one can also do with word-disjunct
  vectors.
  At the appropriate conceptual level, they are really very, very similar
@@ -29795,12 +29795,12 @@ istics results.
  If one takes some stock, off-the-shelf linguistics-K-means algorithm, or
  some stock, off-the-shelf Word2vec algorithm, and instead plugs in word-disjunc
 t vectors wherever the skip-grams or N-grams might go, then what happens?
- Maybe, possibly, one might get reulst that are an itsy-bitsy teensy-weensy
+ Maybe, possibly, one might get results that are an itsy-bitsy teensy-weensy
  bit better.
  Maybe.
  This is not known: there are no published results comparing these.
  It is reasonable (to me) to expect that the results would be quite similar,
- with perhaps word-disjunct vectors becing just a smidgin higher-quality.
+ with perhaps word-disjunct vectors being just a smidgen higher-quality.
 \end_layout
 
 \begin_layout Standard
@@ -29814,7 +29814,26 @@ Cross-connector vectors
 \end_layout
 
 \begin_layout Standard
-Instea
+If this was just ordinary linear algebra, the story would end here, and
+ that would be that.
+ That's because, in ordinary linear algebra, the basis vectors 
+\begin_inset Formula $\widehat{e}_{k}$
+\end_inset
+
+ are indecomposable, structure-less, atomic.
+ Nothing more can be said about them.
+ However, in linguistics, the basis vectors 
+\begin_inset Formula $\widehat{e}_{k}$
+\end_inset
+
+ are not structure-less; they are made out of words! And that changes everything.
+ This section argues that the cosine similarity, as defined above, is a
+ deeply flawed oversimplification for measuring word similarity.
+ Its reasonably OK as a first pass: clearly, it gives OK results.
+ People think that word2vec and it's cousins are hot shit.
+ That counts for something.
+ But one can do better; a lot better.
+ Here's how.
 \end_layout
 
 \begin_layout Subsection*
@@ -29822,7 +29841,20 @@ Replacing Cosines by Entropy?
 \end_layout
 
 \begin_layout Standard
-H
+Cosines are not additive.
+ And thats a big problem when trying to add together contributions from
+ cross-connectors.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f(x,y)=\sum_{z}p(x,z)p(y,z)
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
