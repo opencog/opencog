@@ -29508,6 +29508,15 @@ It appears that no one understood what the 'sheaves' paper was about.
  So here we try again.
 \end_layout
 
+\begin_layout Section*
+Vector Algebra
+\end_layout
+
+\begin_layout Standard
+Here's the deal ..
+ vectors.
+\end_layout
+
 \begin_layout Subsection*
 Word vectors
 \end_layout
@@ -30446,11 +30455,19 @@ on (tht is, semantic extraction) are in principle possible.
 \end_layout
 
 \begin_layout Subsection*
-Broadening and Generalization
+Syntactic Broadening and Generalization
 \end_layout
 
 \begin_layout Standard
-Take up the previous example, and consider the verbs 
+The act of merging together also broadens or generalizes the syntactic structure
+ of the language.
+ It extracts grammatical generalities in addition to semantic particulars.
+ This is again best illustrated by example.
+\end_layout
+
+\begin_layout Standard
+Take up the previous example, of a nature scene with birds, and consider
+ the verbs 
 \begin_inset Quotes eld
 \end_inset
 
@@ -30624,7 +30641,7 @@ Susan saw the crow
 \end_layout
 
 \begin_layout Subsection*
-Pase ranking
+Pase Ranking
 \end_layout
 
 \begin_layout Standard
@@ -30636,7 +30653,7 @@ saw:\,Susan\negthinspace-\;\&\;bird\negthinspace+;
 
 \end_inset
 
- to 
+to 
 \begin_inset Formula 
 \[
 saw:\,Susan\negthinspace-\;\&\;THINGS\negthinspace+;
@@ -30950,8 +30967,9 @@ sheaf on a graph
 \end_inset
 
  as a lingustically appropriate generalization of a vector space; it will
- replace the vector spaces, and the linear algebra, by a more general concept,
- roughly, one of collections of vector spaces, sewn together at the edges.
+ replace the vector spaces, and the linear algebra, by a more general concept.
+ This is, roughly, one of collections of vector spaces, sewn together at
+ the edges.
  The word 
 \begin_inset Quotes eld
 \end_inset
@@ -30973,14 +30991,37 @@ sheaf theory
  But first, before we get to that, some more examples need to be developed.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Disjuncts are Tensors 
 \end_layout
 
 \begin_layout Standard
-If this was just ordinary linear algebra, the story would end here, and
- that would be that.
- That's because, in ordinary linear algebra, the basis vectors 
+The issue with 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+'naive' vectors is that they bring the story to a close.
+ 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+In ordinary linear algebra, the basis vectors 
 \begin_inset Formula $\widehat{e}_{k}$
 \end_inset
 
@@ -30991,14 +31032,19 @@ If this was just ordinary linear algebra, the story would end here, and
 \end_inset
 
  are not structure-less; they are made out of words! And that changes everything.
- This section argues that the cosine similarity, as defined above, is a
- deeply flawed oversimplification for measuring word similarity.
- Its reasonably OK as a first pass: clearly, it gives OK results.
- Clearly, word2vec and it's cousins have made a big impression.
- That counts for something.
+ 
+\end_layout
+
+\begin_layout Standard
+The concept of word-vectors, such as N-grams, skip-grams or word-disjunct
+ vectors, is just fine, but needs to be recognized as a flawed oversimplificatio
+n for the structure of language.
+ They're reasonably OK concepts, for a first pass, giving OK results.
+ Clearly, word2vec and it's cousins have made a big impression on the industry.
+ That counts for something and should not be dismissed.
  But (I beleive that) one can do better by not ignoring the structure of
  the basis vectors.
- The following sections develop the ideas.
+ These ideas are developed next.
 \end_layout
 
 \begin_layout Subsection*
