@@ -30519,9 +30519,9 @@ heard
  will include the disjuncts:
 \begin_inset Formula 
 \begin{align*}
-\widehat{e}_{4} & =John\negthinspace-\;\&\;bird\negthinspace+\\
-\widehat{e}_{5} & =Susan\negthinspace-\;\&\;bird\negthinspace+\\
-\widehat{e}_{6} & =John\negthinspace-\;\&\;crow\negthinspace+
+\widehat{e}_{4} & =\left|John\negthinspace-\;\&\;bird\negthinspace+\right\rangle \\
+\widehat{e}_{5} & =\left|Susan\negthinspace-\;\&\;bird\negthinspace+\right\rangle \\
+\widehat{e}_{6} & =\left|John\negthinspace-\;\&\;crow\negthinspace+\right\rangle 
 \end{align*}
 
 \end_inset
@@ -31047,12 +31047,188 @@ n for the structure of language.
  These ideas are developed next.
 \end_layout
 
-\begin_layout Subsection*
-Cross-connector
+\begin_layout Standard
+An earlier section wrote down the basis vector
 \end_layout
 
 \begin_layout Standard
-Describe this.
+\begin_inset Formula 
+\[
+\widehat{e}_{4}=\left|John\negthinspace-\;\&\;crow\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+The notation used in writing this was modelled on the usual Link Grammar
+ notation for disjuncts.
+ A tensor-style notation would be to write
+\begin_inset Formula 
+\[
+\widehat{e}_{4}=\left|John\negthinspace-\right\rangle \otimes\left|crow\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+which makes it perhaps a bit more clear that 
+\begin_inset Formula $\widehat{e}_{4}$
+\end_inset
+
+ consists of several parts.
+ When the 'naive' word-vectors were constructed, these parts were ignored.
+ In particular, thier contribution to the similarity was ignored.
+ The can be remedied by defining a different kind of vector, the cross-connector
+ vector.
+\end_layout
+
+\begin_layout Subsection*
+Cross-connector vectors
+\end_layout
+
+\begin_layout Standard
+Returning to the nature-watching example, the corpus of seven sentences
+ produces a dataset of observed disjuncts that includes the following:
+\begin_inset Formula 
+\begin{align*}
+knew: & John\negthinspace-\;\&\;bird\negthinspace+;\\
+heard: & John\negthinspace-\;\&\;bird\negthinspace+;\\
+saw: & John\negthinspace-\;\&\;bird\negthinspace+;\\
+saw: & Susan\negthinspace-\;\&\;bird\negthinspace+;\\
+heard: & John\negthinspace-\;\&\;crow\negthinspace+;\\
+saw: & John\negthinspace-\;\&\;crow\negthinspace+;
+\end{align*}
+
+\end_inset
+
+All of the above are observed exactly once, each.
+ This is in addition to the observations
+\begin_inset Formula 
+\begin{align*}
+bird: & the\negthinspace-\;\&\;was\negthinspace+;\\
+bird: & the\negthinspace-\;\&\;.\negthinspace+;\qquad\mbox{ (seen twice)}\\
+bird: & the\negthinspace-\;\&\;too\negthinspace+;\\
+crow: & the\negthinspace-\;\&\;.\negthinspace+;\qquad\mbox{ (seen twice)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We take up the question, again, can the words 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+bird
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ be merged into a single common grammatical class? Previously, this determinatio
+n was made, using the 'naive' word-disjunct vectors
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{bird}_{naive}=1\left|the\negthinspace-\;\&\;was\negthinspace+\right\rangle +2\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle +1\left|the\negthinspace-\;\&\;too\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+and 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{crow}_{naive}=2\left|the\negthinspace-\;\&\;.\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+The verb constructions allow a different kind of vector, that 
+\begin_inset Quotes eld
+\end_inset
+
+crosses over
+\begin_inset Quotes erd
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\overrightarrow{bird}_{dj}= & 1\left|knew:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|heard:John\negthinspace-\;\&\;*\negthinspace+\right\rangle \\
+ & \quad+1\left|saw:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|saw:Susan\negthinspace-\;\&\;*\negthinspace+\right\rangle 
+\end{align*}
+
+\end_inset
+
+The wild-card * is an explicit place-holder for the word in the disjunct.
+ The corresponding vector for 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+crow
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ would be
+\begin_inset Formula 
+\[
+\overrightarrow{crow}_{dj}=1\left|knew:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|heard:John\negthinspace-\;\&\;*\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+Both of these are again vectors, but very different in form and shape from
+ before.
+ 
+\end_layout
+
+\begin_layout Standard
+The mergability decision is going to be different, as a result.
+ Consider, for example, the cosines.
+ Computing explicitly:
+\begin_inset Formula 
+\[
+\cos\left(\overrightarrow{bird}_{naive},\overrightarrow{crow}_{naive}\right)=\frac{4}{\sqrt{6\cdot4}}=\frac{2}{\sqrt{6}}\approx0.8165
+\]
+
+\end_inset
+
+while
+\begin_inset Formula 
+\[
+\cos\left(\overrightarrow{bird}_{dj},\overrightarrow{crow}_{dj}\right)=\frac{2}{\sqrt{4\cdot2}}=\frac{1}{\sqrt{2}}\approx0.7071
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+which? one shows blah the othr blah.
 \end_layout
 
 \begin_layout Subsection*
