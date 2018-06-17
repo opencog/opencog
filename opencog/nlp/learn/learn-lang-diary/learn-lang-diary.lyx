@@ -30073,9 +30073,10 @@ Merge Strategies and Semantics
 \end_layout
 
 \begin_layout Standard
-The different strategies for merging vectors  lead in a natural way to the
+The different strategies for merging vectors lead in a natural way to the
  automated discovery of word-meaning.
- This reuires a different example, to make the idea manifest.
+ This can be illustrated by example; although a different example from the
+ above is needed.
 \end_layout
 
 \begin_layout Standard
@@ -30092,8 +30093,7 @@ saw
 \end_inset
 
 .
- After observing a sufficent amount of text, one will going to have a vector
- 
+ After observing a sufficent amount of text, one will find a vector 
 \begin_inset Formula $\overrightarrow{saw}$
 \end_inset
 
@@ -30179,7 +30179,8 @@ a priori
 \end_inset
 
  are.
- A good merge strategy would be able to factorize them out.
+ A good merge strategy would be able to factorize them out, to discover
+ these automatically.
  
 \end_layout
 
@@ -30224,7 +30225,7 @@ There are several possible non-linear merge strategies that are possible.
  One is given in the next section.
  However, the point here is not to propose the best-posible merge strategy,
  but rather to point out that this is where word-sense disambiguation comes
- from.
+ from, and that this is how it can be done.
  Different word-senses are already encoded in how words are used in sentences.
  Word-senses can be distinguished by paying attention to the disjuncts attached
  on a word.
@@ -30233,20 +30234,33 @@ There are several possible non-linear merge strategies that are possible.
 \end_layout
 
 \begin_layout Subsection*
-xxx
+An example non-linear merge strategy
 \end_layout
 
 \begin_layout Standard
-The non-linear merge strategy, of computing the intersection and the union
- of the sets of the basis vectors for the two, and then taking a fraction
- 
+The earlier section illustrated a non-linear merge, using 
+\begin_inset Formula $\overrightarrow{THINGS}_{\alpha}$
+\end_inset
+
+ as an example.
+ This section formalizes that example.
+ The result is a maybe-OK merge strategy, but not an obviously great one.
+ Its worth writing down only because its simple.
+\end_layout
+
+\begin_layout Standard
+The idea starts with the computation of the intersection and the union of
+ the support for the vectors to be merged, and then taking a fraction 
 \begin_inset Formula $0\le\alpha\le1$
 \end_inset
 
- when combining, seems to at least partly overcome the problem of the erasure
- of word-senses.
- This is a simple, plausbile strategy, worth detailing.
- Suppose 
+ on the union of the support when merging.
+ This merge strategy seems to at least partly overcome the problem of the
+ erasure of word-senses noted above.
+\end_layout
+
+\begin_layout Standard
+Suppose 
 \begin_inset Formula $\overrightarrow{CLASS}$
 \end_inset
 
@@ -30295,7 +30309,7 @@ The common support for
 
 \end_inset
 
- while the union would be
+while the union would be
 \end_layout
 
 \begin_layout Standard
@@ -30372,6 +30386,63 @@ This is designed so that, if
 
 , but not putting a lot of weight into the expanded support.
  
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ is a word, and not a class, and one wishes to for a class for the first
+ time, out of two words, one might instead choose
+\begin_inset Formula 
+\[
+c_{k}=\begin{cases}
+a_{k}+b_{k} & \mbox{if }\widehat{e}_{k}\in\mathcal{I}_{\overrightarrow{v}}\cap\mathcal{I}_{\vec{w}}\\
+\alpha\left(a_{k}+b_{k}\right) & \mbox{otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+What should the 'constant' 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ be? Certainly, a small 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ is very conservative, not expanding the meaning very much beyond the overlappin
+g set.
+ Perhaps a variable 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ would be better; for example, taking 
+\begin_inset Formula $\alpha=\left(\cos\left(\vec{v},\vec{w}\right)-\beta\right)/\left(1-\beta\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $\beta$
+\end_inset
+
+ is the smallest cosine that allows merging.
+ This makes the merges more conservative, the more different the words are,
+ but is very accepting when the words are similar.
+\end_layout
+
+\begin_layout Standard
+To avoid expanding the support in unwise ways, perhaps it would be best
+ to assemble a set of mergable words, first, and only then merge them all
+ together, in one shot, rather than merging pair-wise.
+\end_layout
+
+\begin_layout Standard
+The merge strategy here seems OK, but probably not great.
+ A better merge strategy is proposed below.
+ The point here is that merge strategies that do perform word-sense disambiguati
+on (tht is, semantic extraction) are in principle possible.
 \end_layout
 
 \begin_layout Subsection*
