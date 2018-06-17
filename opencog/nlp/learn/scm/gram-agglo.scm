@@ -713,7 +713,7 @@
 	; Before sorting, trim the list, discarding words with low counts.
 	(let* ((tr-start (get-internal-real-time))
 			(trimed-words
-				(remove (lambda (WRD) (LLOBJ 'discard? WRD)) WRD-LST)))
+				(remove (lambda (WRD) (LLOBJ 'discard-margin? WRD)) WRD-LST)))
 
 		(format #t "Trimmed in ~5F seconds\n"
 			(* 1.0e-9 (- (get-internal-real-time) tr-start)))

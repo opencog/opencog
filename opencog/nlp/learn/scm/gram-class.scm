@@ -754,6 +754,7 @@
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pss (add-support-api psa))
+			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
@@ -762,8 +763,11 @@
 		(define (merge WORD-A WORD-B)
 			(merge-project pcos UNION-FRAC WORD-A WORD-B))
 
-		(define (is-small? WORD)
+		(define (is-small-margin? WORD)
 			(< (pss 'right-count WORD) MIN-CNT))
+
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -771,6 +775,7 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
+				((discard-margin?)  (apply is-small-margin? args))
 				((discard?)         (apply is-small? args))
 				(else               (apply pca (cons message args)))
 			)))
@@ -793,6 +798,7 @@
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
 			(pss (add-support-api psa))
+			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
@@ -801,8 +807,11 @@
 		(define (merge WORD-A WORD-B)
 			(merge-disambig pcos CUTOFF WORD-A WORD-B))
 
-		(define (is-small? WORD)
+		(define (is-small-margin? WORD)
 			(< (pss 'right-count WORD) MIN-CNT))
+
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -810,6 +819,7 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
+				((discard-margin?)  (apply is-small-margin? args))
 				((discard?)         (apply is-small? args))
 				(else               (apply pca (cons message args)))
 			)))
