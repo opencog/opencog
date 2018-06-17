@@ -13801,6 +13801,10 @@ Existing classes=125 singletons=0 done=1545
 --- To-do=24115 ncls=125 sing=0 nredo=1545 2018-06-16 19:56:59 -- "###LEFT-WALL###" ---
 --- To-do=24114 ncls=125 sing=1 nredo=1545 2018-06-16 20:24:00 -- "the" ---
 
+after redoing the counts:
+After triming, 25505 words left, out of 851964
+so no change
+
 
 Redoing the counts:
 (sql-open "postgres:///mrg_two?user=linas&password=asdf")
@@ -13818,6 +13822,22 @@ Finished right support subtotals in 520 secs
 (define sto (make-store pca))
 (sto 'store-wildcards)
 (sto 'store-right-marginals)
+
+---------Bingo! Cosine=0.5656 for class "their its" -- "the"
+In opencog/nlp/learn/gram-agglo.scm:
+   417:20  5 (greedy-grow #<procedure 55a4f54a4400 at
+opencog/nlp/learn/gr…> …)
+In opencog/nlp/learn/gram-class.scm:
+   814:27  4 (is-small? _)
+In srfi/srfi-1.scm:
+   466:18  3 (fold #<procedure 55a537014fa0 at
+opencog/matrix/support.scm:…> …)
+In opencog/matrix/support.scm:
+   166:45  2 (_ #<Invalid handle> 20.850880324934934)
+In opencog/nlp/learn/pseudo-csets.scm:
+   102:55  1 (get-count _)
+In unknown file:
+           0 (cog-tv #<Invalid handle>)
 
 
 
