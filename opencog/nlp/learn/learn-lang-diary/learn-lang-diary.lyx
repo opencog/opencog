@@ -29499,6 +29499,15 @@ The problem here is that both K-means and SVD are completely ignorant of
  This is kind of a key idea from sheaves!
 \end_layout
 
+\begin_layout Section*
+Sheaves, Again
+\end_layout
+
+\begin_layout Standard
+It appears that no one understood what the 'sheaves' paper was about.
+ So here we try again.
+\end_layout
+
 \begin_layout Subsection*
 Word vectors
 \end_layout
@@ -30588,7 +30597,256 @@ sheaf theory
 \end_layout
 
 \begin_layout Subsection*
-Disjuncts are tensors 
+Merge Strategies and Meaning
+\end_layout
+
+\begin_layout Standard
+The different strattegies for merging vectors (covered in the section on
+ merging vectors, above) lead in a natural way to the automated discovery
+ of word-meaning.
+ This reuires a different example, to make the idea manifest.
+\end_layout
+
+\begin_layout Standard
+Consider the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+saw
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ After observing a sufficent amount of text, one will going to have a vector
+ 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ that contains disjuncts for appropriate for usages as a "cutting tool",
+ "the verb cut", and "the past tense of to see".
+ Suppose that there is an existing class 
+\begin_inset Formula $\overrightarrow{TOOLS}$
+\end_inset
+
+, consisting of nouns, and that the similarity measure judges that 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{TOOLS}$
+\end_inset
+
+ are similar.
+ Clearly, a merge strategy of expanding an existing cluster by linear addtion
+ is incorrect.
+ The expanded class
+\begin_inset Formula 
+\[
+\overrightarrow{TOOLS}_{linear-expand}=\overrightarrow{TOOLS}+\overrightarrow{saw}
+\]
+
+\end_inset
+
+is incorrect, or at least, not very good, as it now contains disjuncts for
+ "the verb cut" and "the past tense of to see".
+ Two bad things happen: (a) the noun cluster is polluted with verb-vector
+ components, and (b) the vector has not been factorized, and so 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+saw
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ cannot also be placed into other clusters as well.
+ 
+\end_layout
+
+\begin_layout Standard
+That is, subsequent judgements for similarity between verbs and 
+\begin_inset Formula $\overrightarrow{TOOLS}_{linear-expand}$
+\end_inset
+
+ might now suceed, due to the pollution.
+ And, since all of 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ was folded in, there was nothing left to
+\end_layout
+
+\begin_layout Standard
+Such linear expansion erases all correlation between 
+\end_layout
+
+\begin_layout Standard
+Clearly, noun-clusters should not contain these.
+ 
+\end_layout
+
+\begin_layout Standard
+Ergo -- K-means is fundamentally incorrect -- it cannot correctly cluster
+ linguistic data! 
+\end_layout
+
+\begin_layout Standard
+Lets write some formulas: let 
+\begin_inset Formula $v$
+\end_inset
+
+ be a vector.
+ The MST observation counts give us 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+.
+ We know that, a priori,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+v_{saw}=v_{tool}+v_{past-tense}+v_{cutting}
+\]
+
+\end_inset
+
+However, we do NOT know what these parts: 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+,
+\begin_inset Formula $v_{past-tense}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{cutting}$
+\end_inset
+
+ what they are.
+ We need to factorize them out.
+ K-means erases them, lumps them all into one.
+ It does not factorize.
+\end_layout
+
+\begin_layout Standard
+SVM is a little bit better, if you use it correctly.
+ I am not convinced that you are using it correctly.
+ So, for example, lets say we had only four words: 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+, 
+\begin_inset Formula $v_{heard}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+.
+ Suppose that SVM was told to decompose into three dimensions, and that
+ the three that were picked were mostly pointing along the direction of
+ 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{heard}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+ -- these were the three principle components.
+\end_layout
+
+\begin_layout Standard
+Where should 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ go? In traditional SVDM, the three principle components are used to define
+ three hyperplanes or classifiers, and so the single vector 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ would then be classified as to being either "on the same side of the hyperplane
+ as 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+, and thus a part of the 
+\begin_inset Formula $v_{look}$
+\end_inset
+
+ singular value", or "on the same side of the hyperplane as 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+, and thus a part of the 
+\begin_inset Formula $v_{tool}$
+\end_inset
+
+ singular value", etc.
+\end_layout
+
+\begin_layout Standard
+But this is again wrong.
+ We want to factor or decompose 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ along these three different principle components, thereby automatically
+ discovering that some of the disjuncts on 
+\begin_inset Formula $v_{saw}$
+\end_inset
+
+ are tool-like, that others are verb-like, etc.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+THIS
+\emph default
+ is where word-sense disambiguation comes from.
+ It is 
+\emph on
+NOT
+\emph default
+ done in some pre-cleaner, pre-disambiguator stage.
+ It is done at the clustering stage.
+\end_layout
+
+\begin_layout Standard
+But, as I hope is now clear, both SVM and K-means are fundamentally wrong
+ approaches, because both ERASE word-sense information from the dataset!
+\end_layout
+
+\begin_layout Standard
+Now, IF you are very careful, you might be able to modify SVM, and after
+ finding principle components, go back for a second pass, and perform the
+ factorization needed to extract the different word-senses.
+ Maybe.
+ I can see/guess at a way of doing this, but its hard.
+\end_layout
+
+\begin_layout Subsection*
+Disjuncts are Tensors 
 \end_layout
 
 \begin_layout Standard
