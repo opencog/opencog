@@ -30588,7 +30588,7 @@ sheaf theory
 \end_layout
 
 \begin_layout Subsection*
-Tensor-like structure 
+Disjuncts are tensors 
 \end_layout
 
 \begin_layout Standard
@@ -30617,6 +30617,10 @@ If this was just ordinary linear algebra, the story would end here, and
 
 \begin_layout Subsection*
 Cross-connector
+\end_layout
+
+\begin_layout Standard
+Describe this.
 \end_layout
 
 \begin_layout Subsection*
@@ -32083,6 +32087,8 @@ merge-ortho
  classifier, using a minimum cosine of 0.65 to propose a merge, and a fixed
  fraction of 0.3 for the union-merge.
  The agglomeration algorithm is the block-diagonal algorithm.
+ (This dataset has 40M sections; viz about 80M atoms, viz about 120GB to
+ load in full)
 \end_layout
 
 \begin_layout Description
@@ -32099,6 +32105,7 @@ merge-ortho
  classifier, using a minimum cosine of 0.65 to propose a merge, and a fixed
  fraction of 0.3 for the union-merge.
  The agglomeration algorithm is the greedy algorithm.
+ (this dataset has about 13M secions)
 \end_layout
 
 \begin_layout Description

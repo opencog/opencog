@@ -13794,6 +13794,31 @@ In unknown file:
    (define central-obj (make-central-compute wild-obj))
    (define store-obj (make-store wild-obj))
 
+Before redoing the counts:
+
+851964 words 25505 after triming
+Existing classes=125 singletons=0 done=1545
+--- To-do=24115 ncls=125 sing=0 nredo=1545 2018-06-16 19:56:59 -- "###LEFT-WALL###" ---
+--- To-do=24114 ncls=125 sing=1 nredo=1545 2018-06-16 20:24:00 -- "the" ---
+
+
+Redoing the counts:
+(sql-open "postgres:///mrg_two?user=linas&password=asdf")
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+Elapsed time to load csets: 3500 secs ; 38GB
+12901243 = 13M sections
+25924126 = 26M atoms total = 1.46K/atom
+
+(define psu (add-support-compute pca))
+(psu 'cache-all) ; XXX to slow, left not needed.
+(psu 'right-marginals)
+Finished left support subtotals in 36823 secs
+Finished right support subtotals in 520 secs
+(define sto (make-store pca))
+(sto 'store-wildcards)
+(sto 'store-right-marginals)
+
 
 
 

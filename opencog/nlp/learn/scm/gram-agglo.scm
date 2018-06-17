@@ -830,3 +830,16 @@
 ;
 ; (sql-open "postgres:///en_mst_sections?user=linas&password=asdf")
 ; (gram-classify-greedy-fuzz 20)
+;
+; After interruption, its worth recomputing the support marginals.
+; This can be done by saying:
+;
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)
+; (define psu (add-support-compute pca))
+; (psu 'right-marginals)
+; (define sto (make-store pca))
+; (sto 'store-right-marginals)
+;
+; The left marginals are not needed, and besides, they take 10x longer
+; to compute and store.
