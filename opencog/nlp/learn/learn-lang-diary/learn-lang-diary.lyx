@@ -30634,14 +30634,103 @@ Cosines are not additive.
 \end_layout
 
 \begin_layout Standard
+Consider instead a different word-similarity measure.
+ As always, let 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ be the count of the number of times the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ was observed on word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ Define the right-product
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-f(x,y)=\sum_{z}N(x,z)N(y,z)
+f(w,u)=\sum_{d}N(w,d)N(u,d)
 \]
 
 \end_inset
 
+with the sum ranging over all disjuncts shared in common between the two
+ words.
+ This is just the dot-product for the two vectors 
+\begin_inset Formula $\vec{w}$
+\end_inset
 
+ and 
+\begin_inset Formula $\vec{u}$
+\end_inset
+
+ – that is, 
+\begin_inset Formula $f(w,u)=\vec{w}\cdot\vec{u}$
+\end_inset
+
+ and so the cosine similarity of two word-disjunct vectors is just
+\begin_inset Formula 
+\[
+\cos\left(\vec{w},\vec{u}\right)=\frac{f\left(w,u\right)}{\sqrt{f\left(w,w\right)f\left(u,u\right)}}
+\]
+
+\end_inset
+
+Consider instead a similar quantity
+\begin_inset Formula 
+\[
+p\left(w,u\right)=\frac{f\left(w,u\right)}{f\left(*,*\right)}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $f\left(*,*\right)=\sum_{w,u}f\left(w,u\right)$
+\end_inset
+
+ is a normalization, a total count.
+ The quantity 
+\begin_inset Formula $p(w,u)$
+\end_inset
+
+ can be interpreted as a probability: it clearly sums to one.
+ It is symmetric: 
+\begin_inset Formula $p(w,u)=p(u,w)$
+\end_inset
+
+ and one can thus have traditional marginal probabilities: 
+\begin_inset Formula 
+\[
+p\left(w\right)=p\left(w,*\right)=\sum_{u}p\left(w,u\right)
+\]
+
+\end_inset
+
+This suggests a natural form for the mutual information between words:
+\begin_inset Formula 
+\[
+MI_{d}\left(w,u\right)=\log_{2}\frac{p\left(w,u\right)}{p\left(w\right)p\left(u\right)}
+\]
+
+\end_inset
+
+The subscript 
+\begin_inset Formula $d$
+\end_inset
+
+ on 
+\begin_inset Formula $MI_{d}$
+\end_inset
+
+ serves to remind that this variant of mutual information is derived from
+ the disjunct product, and not from word-pair observations.
+ Unlike the word-pair observations, this value of MI is symmetric under
+ word-interchange: the word-order does not matter.
 \end_layout
 
 \begin_layout Section*
