@@ -753,7 +753,7 @@
 "
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
-			(psu (add-support-compute psa))
+			(pss (add-support-api psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
@@ -763,7 +763,7 @@
 			(merge-project pcos UNION-FRAC WORD-A WORD-B))
 
 		(define (is-small? WORD)
-			(< (psu 'right-count WORD) MIN-CNT))
+			(< (pss 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -792,7 +792,7 @@
 "
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
-			(psu (add-support-compute psa))
+			(pss (add-support-api psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
@@ -802,7 +802,7 @@
 			(merge-disambig pcos CUTOFF WORD-A WORD-B))
 
 		(define (is-small? WORD)
-			(< (psu 'right-count WORD) MIN-CNT))
+			(< (pss 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.

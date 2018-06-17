@@ -685,17 +685,19 @@
 ; Sorting is important, because of locality: words in similar
 ; grammatical classes also have similar frequency counts.
 ;
-; Counts are obtained by directly counting the number of disjuncts
-; attached to each word. This is important, as these counts are altered
-; by mergers, rendering the cached marginal values incorrect.
+; Counts are obtained by looking them up in the margin. It is not
+; practical, at this point, to count them directly, as this would
+; require the entire matrix to be loaded.  Thus, only the marginal
+; counts are referenced.  Its up to the clustering algos, later on, to
+; verify counts, as desired. (The point here being that the marginal
+; counts are going to be a bit off, since these counts are altered by
+; mergers, rendering the cached marginal values incorrect.
 ;
 (define (trim-and-rank LLOBJ WRD-LST)
-	; (define pss (add-support-api LLOBJ)) ; from the margins
-	(define pss (add-support-compute LLOBJ))
+	(define pss (add-support-api LLOBJ)) ; from the margins
 
 	; nobs == number of observations
-	(define (wcnt WRD) (pss 'right-count WRD))
-	(define nobs (make-afunc-cache wcnt))
+	(define (nobs WRD) (pss 'right-count WRD))
 
 	; The support API won't work, if we don't have the wild-cards
 	; in the atomspace before we sort. The wild-cards hold/contain
@@ -741,7 +743,7 @@
 ;
 (define (gram-classify ALGO MERGER)
 	(load-stuff)
-	(let* ((wrd-lst (MERGER 'left-basis))
+	(let* ((wrd-lst (cog-get-atoms 'WordNode))
 			(ranked-words (trim-and-rank MERGER wrd-lst))
 			(cls-lst (cog-get-atoms 'WordClassNode))
 			(sorted-cls (sort-class-list cls-lst)))
