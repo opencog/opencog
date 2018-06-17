@@ -30069,6 +30069,312 @@ a priori
 \end_layout
 
 \begin_layout Subsection*
+Merge Strategies and Semantics
+\end_layout
+
+\begin_layout Standard
+The different strategies for merging vectors  lead in a natural way to the
+ automated discovery of word-meaning.
+ This reuires a different example, to make the idea manifest.
+\end_layout
+
+\begin_layout Standard
+Consider the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+saw
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ After observing a sufficent amount of text, one will going to have a vector
+ 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ that contains disjuncts for appropriate for usages as a "cutting tool",
+ "the verb cut", and "the past tense of to see".
+ Suppose that there is an existing class 
+\begin_inset Formula $\overrightarrow{TOOLS}$
+\end_inset
+
+, consisting of nouns, and that the similarity measure judges that 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{TOOLS}$
+\end_inset
+
+ are similar.
+ Clearly, a merge strategy of expanding an existing cluster by linear addtion
+ is incorrect.
+ The expanded class
+\begin_inset Formula 
+\[
+\overrightarrow{TOOLS}_{linear-expand}=\overrightarrow{TOOLS}+\overrightarrow{saw}
+\]
+
+\end_inset
+
+is incorrect, or at least, not very good, as it now contains disjuncts for
+ "the verb cut" and "the past tense of to see".
+ Two bad things happen: (a) the noun cluster is polluted with verb-vector
+ components, and (b) the vector has not been factorized, and so 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+saw
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ cannot also be placed into other clusters as well.
+ One looses the ability to distinguish different semantic meanings based
+ on grammatical usage.
+\end_layout
+
+\begin_layout Standard
+We know that, 
+\emph on
+a priori
+\emph default
+, the correct way of thinking about 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ is that it has the components
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{saw}=\vec{v}_{tool}+\vec{v}_{past-tense}+\vec{v}_{cutting}
+\]
+
+\end_inset
+
+However, we do not know (
+\emph on
+a priori
+\emph default
+) what the components 
+\begin_inset Formula $\vec{v}_{tool}$
+\end_inset
+
+,
+\begin_inset Formula $\vec{v}_{past-tense}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{cutting}$
+\end_inset
+
+ are.
+ A good merge strategy would be able to factorize them out.
+ 
+\end_layout
+
+\begin_layout Standard
+The best merge strategy is hardly obvious.
+ The three vectors 
+\begin_inset Formula $\vec{v}_{tool}$
+\end_inset
+
+,
+\begin_inset Formula $\vec{v}_{past-tense}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{cutting}$
+\end_inset
+
+ are not orthogonal (or rather, in general, won't be), so even if there
+ were pre-existing grammatical classes for these three, an orthogonal decomposit
+ion of 
+\begin_inset Formula $\overrightarrow{saw}$
+\end_inset
+
+ into components is not unique.
+ What's more, in early stages, a class for 
+\begin_inset Formula $\overrightarrow{TOOLS}$
+\end_inset
+
+ might exist, but not yet one for 
+\begin_inset Formula $\overrightarrow{CUTTING}$
+\end_inset
+
+; its not even clear that a class of the form 
+\begin_inset Formula $\overrightarrow{CUTTING}$
+\end_inset
+
+ might even be formable.
+\end_layout
+
+\begin_layout Standard
+There are several possible non-linear merge strategies that are possible.
+ One is given in the next section.
+ However, the point here is not to propose the best-posible merge strategy,
+ but rather to point out that this is where word-sense disambiguation comes
+ from.
+ Different word-senses are already encoded in how words are used in sentences.
+ Word-senses can be distinguished by paying attention to the disjuncts attached
+ on a word.
+ Picking the correct merge strategy picks out the word-senses.
+ Picking the wrong strategy blurs them all together.
+\end_layout
+
+\begin_layout Subsection*
+xxx
+\end_layout
+
+\begin_layout Standard
+The non-linear merge strategy, of computing the intersection and the union
+ of the sets of the basis vectors for the two, and then taking a fraction
+ 
+\begin_inset Formula $0\le\alpha\le1$
+\end_inset
+
+ when combining, seems to at least partly overcome the problem of the erasure
+ of word-senses.
+ This is a simple, plausbile strategy, worth detailing.
+ Suppose 
+\begin_inset Formula $\overrightarrow{CLASS}$
+\end_inset
+
+ is some existing word-class, and 
+\begin_inset Formula $\overrightarrow{word}$
+\end_inset
+
+ is a word that was judged 
+\begin_inset Quotes eld
+\end_inset
+
+mergable
+\begin_inset Quotes erd
+\end_inset
+
+ into 
+\begin_inset Formula $\overrightarrow{CLASS}$
+\end_inset
+
+.
+ Define the support of a vector 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ as
+\begin_inset Formula 
+\[
+\mathcal{I}_{\vec{v}}=\left\{ \widehat{e}_{k}\mbox{ such that }\vec{v}=a_{1}\widehat{e}_{1}+\cdots+a_{n}\widehat{e}_{n}\mbox{ and }a_{k}\ne0\right\} 
+\]
+
+\end_inset
+
+The common support for 
+\begin_inset Formula $\overrightarrow{CLASS}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{word}$
+\end_inset
+
+ would then be
+\begin_inset Formula 
+\[
+\mathcal{I}_{\overrightarrow{CLASS}}\,\cap\,\mathcal{I}_{\overrightarrow{word}}
+\]
+
+\end_inset
+
+ while the union would be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{I}_{\overrightarrow{CLASS}}\,\cup\,\mathcal{I}_{\overrightarrow{word}}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $\cap$
+\end_inset
+
+ and 
+\begin_inset Formula $\cup$
+\end_inset
+
+ denoting set-intersection and set-union, resepectively.
+ A plausible merge strategy for 
+\begin_inset Formula $\vec{v}=a_{1}\widehat{e}_{1}+\cdots+a_{n}\widehat{e}_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}=b_{1}\widehat{e}_{1}+\cdots+b_{n}\widehat{e}_{n}$
+\end_inset
+
+ might be
+\begin_inset Formula 
+\[
+\mbox{merge}\left(\vec{v},\vec{w},\alpha\right)=c_{1}\widehat{e}_{1}+\cdots+c_{n}\widehat{e}_{n}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula 
+\[
+c_{k}=\begin{cases}
+a_{k}+b_{k} & \mbox{if }\widehat{e}_{k}\in\mathcal{I}_{\overrightarrow{v}}\\
+\alpha b_{k} & \mbox{if }\widehat{e}_{k}\notin\mathcal{I}_{\overrightarrow{v}}
+\end{cases}
+\]
+
+\end_inset
+
+This is designed so that, if 
+\begin_inset Formula $\vec{v}=\overrightarrow{CLASS}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}=\overrightarrow{word}$
+\end_inset
+
+ then those disjuncts in 
+\begin_inset Formula $\overrightarrow{word}$
+\end_inset
+
+ that are already in 
+\begin_inset Formula $\overrightarrow{CLASS}$
+\end_inset
+
+ are folded in, in full, while disjuncts from 
+\begin_inset Formula $\overrightarrow{word}$
+\end_inset
+
+ that are not yet in 
+\begin_inset Formula $\overrightarrow{CLASS}$
+\end_inset
+
+ are only folded in a little bit, thus expanding the support for 
+\begin_inset Formula $\overrightarrow{CLASS}$
+\end_inset
+
+, but not putting a lot of weight into the expanded support.
+ 
+\end_layout
+
+\begin_layout Subsection*
 Broadening and Generalization
 \end_layout
 
@@ -30594,313 +30900,6 @@ sheaf theory
 
 .
  But first, before we get to that, some more examples need to be developed.
-\end_layout
-
-\begin_layout Subsection*
-Merge Strategies and Meaning
-\end_layout
-
-\begin_layout Standard
-The different strattegies for merging vectors (covered in the section on
- merging vectors, above) lead in a natural way to the automated discovery
- of word-meaning.
- This reuires a different example, to make the idea manifest.
-\end_layout
-
-\begin_layout Standard
-Consider the word 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-saw
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
-.
- After observing a sufficent amount of text, one will going to have a vector
- 
-\begin_inset Formula $\overrightarrow{saw}$
-\end_inset
-
- that contains disjuncts for appropriate for usages as a "cutting tool",
- "the verb cut", and "the past tense of to see".
- Suppose that there is an existing class 
-\begin_inset Formula $\overrightarrow{TOOLS}$
-\end_inset
-
-, consisting of nouns, and that the similarity measure judges that 
-\begin_inset Formula $\overrightarrow{saw}$
-\end_inset
-
- and 
-\begin_inset Formula $\overrightarrow{TOOLS}$
-\end_inset
-
- are similar.
- Clearly, a merge strategy of expanding an existing cluster by linear addtion
- is incorrect.
- The expanded class
-\begin_inset Formula 
-\[
-\overrightarrow{TOOLS}_{linear-expand}=\overrightarrow{TOOLS}+\overrightarrow{saw}
-\]
-
-\end_inset
-
-is incorrect, or at least, not very good, as it now contains disjuncts for
- "the verb cut" and "the past tense of to see".
- Two bad things happen: (a) the noun cluster is polluted with verb-vector
- components, and (b) the vector has not been factorized, and so 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-saw
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- cannot also be placed into other clusters as well.
- One looses the ability to distinguish different semantic meanings based
- on grammatical usage.
-\end_layout
-
-\begin_layout Standard
-We know that, 
-\emph on
-a priori
-\emph default
-, the correct way of thinking about 
-\begin_inset Formula $\overrightarrow{saw}$
-\end_inset
-
- is that it has the components
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\overrightarrow{saw}=\vec{v}_{tool}+\vec{v}_{past-tense}+\vec{v}_{cutting}
-\]
-
-\end_inset
-
-However, we do not know (
-\emph on
-a priori
-\emph default
-) what the components 
-\begin_inset Formula $\vec{v}_{tool}$
-\end_inset
-
-,
-\begin_inset Formula $\vec{v}_{past-tense}$
-\end_inset
-
- and 
-\begin_inset Formula $\vec{v}_{cutting}$
-\end_inset
-
- are.
- A good merge strategy would be able to factorize them out.
- 
-\end_layout
-
-\begin_layout Standard
-The best merge strategy is hardly obvious.
- The three vectors 
-\begin_inset Formula $\vec{v}_{tool}$
-\end_inset
-
-,
-\begin_inset Formula $\vec{v}_{past-tense}$
-\end_inset
-
- and 
-\begin_inset Formula $\vec{v}_{cutting}$
-\end_inset
-
- are not orthogonal (or rather, in general, won't be), so even if there
- were pre-existing grammatical classes for these three, an orthogonal decomposit
-ion of 
-\begin_inset Formula $\overrightarrow{saw}$
-\end_inset
-
- into components is not unique.
- What's more, in early stages, a class for 
-\begin_inset Formula $\overrightarrow{TOOLS}$
-\end_inset
-
- might exist, but not yet one for 
-\begin_inset Formula $\overrightarrow{CUTTING}$
-\end_inset
-
-; its not even clear that a class of the form 
-\begin_inset Formula $\overrightarrow{CUTTING}$
-\end_inset
-
- might even be formable.
-\end_layout
-
-\begin_layout Standard
-There are several possible non-linear merge strategies that are possible.
- One is given in the next section.
- However, the point here is not to propose the best-posible merge strategy,
- but rather to point out that this is where word-sense disambiguation comes
- from.
- Different word-senses are already encoded in how words are used in sentences.
- Word-senses can be distinguished by paying attention to the disjuncts attached
- on a word.
- Picking the correct merge strategy picks out the word-senses.
- Picking the wrong strategy blurs them all together.
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-The non-linear merge strategy, of computing the intersection and the union
- of the sets of the basis vectors for the two, and then taking a fraction
- 
-\begin_inset Formula $0\le\alpha\le1$
-\end_inset
-
- when combining, seems to at least partly overcome the problem of the erasure
- of word-senses.
- This is a simple, plausbile strategy, worth detailing.
- Suppose 
-\begin_inset Formula $\overrightarrow{CLASS}$
-\end_inset
-
- is some existing word-class, and 
-\begin_inset Formula $\overrightarrow{word}$
-\end_inset
-
- is a word that was judged 
-\begin_inset Quotes eld
-\end_inset
-
-mergable
-\begin_inset Quotes erd
-\end_inset
-
- into 
-\begin_inset Formula $\overrightarrow{CLASS}$
-\end_inset
-
-.
- Define the support of a vector 
-\begin_inset Formula $\vec{v}$
-\end_inset
-
- as
-\begin_inset Formula 
-\[
-\mathcal{I}_{\vec{v}}=\left\{ \widehat{e}_{k}\mbox{ such that }\vec{v}=a_{1}\widehat{e}_{1}+\cdots+a_{n}\widehat{e}_{n}\mbox{ and }a_{k}\ne0\right\} 
-\]
-
-\end_inset
-
-The common support for 
-\begin_inset Formula $\overrightarrow{CLASS}$
-\end_inset
-
- and 
-\begin_inset Formula $\overrightarrow{word}$
-\end_inset
-
- would then be
-\begin_inset Formula 
-\[
-\mathcal{I}_{\overrightarrow{CLASS}}\,\cap\,\mathcal{I}_{\overrightarrow{word}}
-\]
-
-\end_inset
-
- while the union would be
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\mathcal{I}_{\overrightarrow{CLASS}}\,\cup\,\mathcal{I}_{\overrightarrow{word}}
-\]
-
-\end_inset
-
-with 
-\begin_inset Formula $\cap$
-\end_inset
-
- and 
-\begin_inset Formula $\cup$
-\end_inset
-
- denoting set-intersection and set-union, resepectively.
- A plausible merge strategy for 
-\begin_inset Formula $\vec{v}=a_{1}\widehat{e}_{1}+\cdots+a_{n}\widehat{e}_{n}$
-\end_inset
-
- and 
-\begin_inset Formula $\vec{w}=b_{1}\widehat{e}_{1}+\cdots+b_{n}\widehat{e}_{n}$
-\end_inset
-
- might be
-\begin_inset Formula 
-\[
-\mbox{merge}\left(\vec{v},\vec{w},\alpha\right)=c_{1}\widehat{e}_{1}+\cdots+c_{n}\widehat{e}_{n}
-\]
-
-\end_inset
-
-with 
-\begin_inset Formula 
-\[
-c_{k}=\begin{cases}
-a_{k}+b_{k} & \mbox{if }\widehat{e}_{k}\in\mathcal{I}_{\overrightarrow{v}}\\
-\alpha b_{k} & \mbox{if }\widehat{e}_{k}\notin\mathcal{I}_{\overrightarrow{v}}
-\end{cases}
-\]
-
-\end_inset
-
-This is designed so that, if 
-\begin_inset Formula $\vec{v}=\overrightarrow{CLASS}$
-\end_inset
-
- and 
-\begin_inset Formula $\vec{w}=\overrightarrow{word}$
-\end_inset
-
- then those disjuncts in 
-\begin_inset Formula $\overrightarrow{word}$
-\end_inset
-
- that are already in 
-\begin_inset Formula $\overrightarrow{CLASS}$
-\end_inset
-
- are folded in, in full, while disjuncts from 
-\begin_inset Formula $\overrightarrow{word}$
-\end_inset
-
- that are not yet in 
-\begin_inset Formula $\overrightarrow{CLASS}$
-\end_inset
-
- are only folded in a little bit, thus expanding the support for 
-\begin_inset Formula $\overrightarrow{CLASS}$
-\end_inset
-
-, but not putting a lot of weight into the expanded support.
- 
 \end_layout
 
 \begin_layout Subsection*
