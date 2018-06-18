@@ -777,7 +777,7 @@
 				((merge-function)   (apply merge args))
 				((discard-margin?)  (apply is-small-margin? args))
 				((discard?)         (apply is-small? args))
-				(else               (apply pca (cons message args)))
+				(else               (apply pss (cons message args)))
 			)))
 )
 
@@ -821,7 +821,7 @@
 				((merge-function)   (apply merge args))
 				((discard-margin?)  (apply is-small-margin? args))
 				((discard?)         (apply is-small? args))
-				(else               (apply pca (cons message args)))
+				(else               (apply pss (cons message args)))
 			)))
 )
 
