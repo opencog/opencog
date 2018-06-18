@@ -757,18 +757,25 @@
 ; ---------------------------------------------------------------
 ; Main entry points for word-classification,
 ;
-; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
-; non-overlapping fraction to bring forwards.
-
-(define-public (gram-classify-pair-wise MIN-OBS)
+(define-public (gram-classify-pair-wise COS-CUT FRAC MIN-OBS)
 "
-  gram-classify-pair-wise - Merge words into word-classes.
+  gram-classify-pair-wise COS-CUT FRAC MIN-OBS - Merge words into
+  word-classes.
 
   Very slow, exhaustive O(N^2) algorithm. Suggest using instead
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
+
+  COS-CUT is the minimum cosine between vectors before a merge is
+  considered.  Current recomendation is 0.65.
+
+  FRAC is the fraction of the non-overlapping disjuncts that are merged
+  into the class. Current recommendation is 0.3.
+
+  MIN-OBS is the smallest number of observations of the word that
+  is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify classify-pair-wise (make-fuzz 0.65 0.3 MIN-OBS))
+	(gram-classify classify-pair-wise (make-fuzz COS-CUT FRAC MIN-OBS))
 )
 
 (define-public (gram-classify-agglo MIN-OBS)
@@ -794,7 +801,7 @@
 	(gram-classify diag-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
-(define-public (gram-classify-greedy-fuzz MIN-OBS)
+(define-public (gram-classify-greedy-fuzz COS-CUT FRAC MIN-OBS)
 "
   gram-classify-greedy-fuzz - Merge words into word-classes.
 
@@ -803,9 +810,18 @@
   `gram-classify-pair-wise` and `gram-classify-agglo` variants. Should
   be faster and more accurate than `gram-classify-diag-blocks`.
 
-  Uses the \"fuzz\" merge algo: cosine=0.65, frac=0.3
+  Uses the \"fuzz\" merge algo.
+
+  COS-CUT is the minimum cosine between vectors before a merge is
+  considered.  Current recomendation is 0.65.
+
+  FRAC is the fraction of the non-overlapping disjuncts that are merged
+  into the class. Current recommendation is 0.3.
+
+  MIN-OBS is the smallest number of observations of the word that
+  is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify greedy-over-words (make-fuzz 0.65 0.3 MIN-OBS))
+	(gram-classify greedy-over-words (make-fuzz COS-CUT FRAC MIN-OBS))
 )
 
 (define-public (gram-classify-greedy-discrim COSINE MIN-OBS)

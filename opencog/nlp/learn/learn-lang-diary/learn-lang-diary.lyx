@@ -30960,7 +30960,8 @@ merge-ortho
  classifier, using a minimum cosine of 0.65 to propose a merge, and a fixed
  fraction of 0.3 for the union-merge.
  The agglomeration algorithm is the greedy algorithm.
- (this dataset has about 13M sections)
+ (this dataset has about 13M sections) Run this as: `(gram-classify-greedy-fuzz
+ 0.65 0.3 20)`.
 \end_layout
 
 \begin_layout Description
