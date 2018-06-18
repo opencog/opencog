@@ -415,8 +415,8 @@
 	; If only a stub of a word is left, throw it away.
 	(define (keep WORD)
 		(MERGER 'clobber)
-		(format #t "---- Remaining support = ~6F for ~A"
-			((add-support-compute MERGER) 'right-support WORD) WORD)
+		(format #t "---- Remaining count = ~6F for ~A"
+			((add-support-compute MERGER) 'right-count WORD) WORD)
 		(if (MERGER 'discard? WORD) '() (list WORD)))
 
 	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A -- \"~A\" ---\n"
