@@ -736,25 +736,38 @@
 
 ; ---------------------------------------------------------------
 
-(define (make-fuzz)
+(define (make-fuzz CUTOFF UNION-FRAC MIN-CNT)
 "
-  make-fuzz -- Do fuzzy hard-coded merge.
+  make-fuzz -- Do projection-merge, with a fixed merge fraction.
 
-  use `merge-project` with hard-coded frac=0.3 and min acceptable
-  cosine=0.65
+  Uses `merge-project`.
+
+  CUTOFF is the min acceptable cosine, for words to be considered
+  mergable.
+
+  UNION-FRAC is the fxied fraction of the union-set of the disjuncts
+  that will be merged.
+
+  MIN-CNT is the minimum count (l1-norm) of the observations of
+  disjuncts that a word is allowed to have, to even be considered.
 "
-	(define cutoff 0.65)
-	(define union-frac 0.3)
-
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
+			(pss (add-support-api psa))
+			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(is-cosine-similar? pcos cutoff WORD-A WORD-B))
+			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-project pcos union-frac WORD-A WORD-B))
+			(merge-project pcos UNION-FRAC WORD-A WORD-B))
+
+		(define (is-small-margin? WORD)
+			(< (pss 'right-count WORD) MIN-CNT))
+
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -762,30 +775,43 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				(else               (apply pca (cons message args)))
+				((discard-margin?)  (apply is-small-margin? args))
+				((discard?)         (apply is-small? args))
+				(else               (apply pss (cons message args)))
 			)))
 )
 
 ; ---------------------------------------------------------------
 
-(define (make-discrim)
+(define (make-discrim CUTOFF MIN-CNT)
 "
   make-discrim -- Do a \"discriminating\" merge.
 
-  use `merge-project` with sigmoid taper and
-  hard-coded min acceptable cosine=0.50
-"
-	(define cutoff 0.50)
+  Use `merge-project` with sigmoid taper of the union-merge.
 
+  CUTOFF is the min acceptable cosine, for words to be considered
+  mergable.
+
+  MIN-CNT is the minimum count (l1-norm) of the observations of
+  disjuncts that a word is allowed to have, to even be considered.
+"
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
+			(pss (add-support-api psa))
+			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(is-cosine-similar? pcos cutoff WORD-A WORD-B))
+			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-disambig pcos cutoff WORD-A WORD-B))
+			(merge-disambig pcos CUTOFF WORD-A WORD-B))
+
+		(define (is-small-margin? WORD)
+			(< (pss 'right-count WORD) MIN-CNT))
+
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -793,7 +819,9 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				(else               (apply pca (cons message args)))
+				((discard-margin?)  (apply is-small-margin? args))
+				((discard?)         (apply is-small? args))
+				(else               (apply pss (cons message args)))
 			)))
 )
 
