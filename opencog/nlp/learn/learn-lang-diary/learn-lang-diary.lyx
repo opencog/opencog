@@ -31173,7 +31173,7 @@ crosses over
 :
 \begin_inset Formula 
 \begin{align*}
-\overrightarrow{bird}_{dj}= & 1\left|knew:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|heard:John\negthinspace-\;\&\;*\negthinspace+\right\rangle \\
+\overrightarrow{bird}_{obj}= & 1\left|knew:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|heard:John\negthinspace-\;\&\;*\negthinspace+\right\rangle \\
  & \quad+1\left|saw:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|saw:Susan\negthinspace-\;\&\;*\negthinspace+\right\rangle 
 \end{align*}
 
@@ -31195,7 +31195,7 @@ crow
  would be
 \begin_inset Formula 
 \[
-\overrightarrow{crow}_{dj}=1\left|knew:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|heard:John\negthinspace-\;\&\;*\negthinspace+\right\rangle 
+\overrightarrow{crow}_{obj}=1\left|knew:John\negthinspace-\;\&\;*\negthinspace+\right\rangle +1\left|heard:John\negthinspace-\;\&\;*\negthinspace+\right\rangle 
 \]
 
 \end_inset
@@ -31219,16 +31219,178 @@ The mergability decision is going to be different, as a result.
 while
 \begin_inset Formula 
 \[
-\cos\left(\overrightarrow{bird}_{dj},\overrightarrow{crow}_{dj}\right)=\frac{2}{\sqrt{4\cdot2}}=\frac{1}{\sqrt{2}}\approx0.7071
+\cos\left(\overrightarrow{bird}_{obj},\overrightarrow{crow}_{obj}\right)=\frac{2}{\sqrt{4\cdot2}}=\frac{1}{\sqrt{2}}\approx0.7071
 \]
 
 \end_inset
 
+So how similar are crows and birds? What should the similarity measure be
+ now? Should one take the average of these? Do something else? Perhaps one
+ might consider a total vector:
+\begin_inset Formula 
+\[
+\overrightarrow{bird}_{total}=\overrightarrow{bird}_{naive}+\overrightarrow{bird}_{obj}
+\]
 
+\end_inset
+
+This is appealing, but for one important property: the subspaces 
+\begin_inset Formula $\overrightarrow{word}_{naive}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{word}_{obj}$
+\end_inset
+
+ are always orthogonal to one-another, always, for any word.
+ These are really distinct vector spaces; they don't mix.
+ Also, there are more than just these two.
+ Consider the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+The bird flew away.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ This suggests a vector
+\begin_inset Formula 
+\[
+\overrightarrow{bird}_{subj}=1\left|flew:*\negthinspace-\;\&\;away\negthinspace+\right\rangle 
+\]
+
+\end_inset
+
+where the wild-card is now in the first position, not the second.
+ Clearly 
+\begin_inset Formula $\overrightarrow{word}_{subj}$
+\end_inset
+
+ is always orthgonal to 
+\begin_inset Formula $\overrightarrow{word}_{naive}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{word}_{obj}$
+\end_inset
+
+, for any word.
+ For any disjunct of length 
+\begin_inset Formula $N$
+\end_inset
+
+, there are at least 
+\begin_inset Formula $N$
+\end_inset
+
+ distinct, orthogonal vector spaces, because the wild-card can occur in
+ any one of 
+\begin_inset Formula $N$
+\end_inset
+
+ distinct locations in the disjunct.
+ The wild-card can also occur with a + attachment, or a - attachement, so
+ there are at least 
+\begin_inset Formula $2N$
+\end_inset
+
+ distinct vector spaces.
+ Finally, if the disjunct has 
+\begin_inset Formula $k$
+\end_inset
+
+ attachments that are -, and 
+\begin_inset Formula $N-k$
+\end_inset
+
+ that are +, then the 
+\begin_inset Formula $*\negthinspace-$
+\end_inset
+
+ can occur in any of 
+\begin_inset Formula $m$
+\end_inset
+
+ locations, while 
+\begin_inset Formula $*\negthinspace+$
+\end_inset
+
+ can occur in any of 
+\begin_inset Formula $N-k$
+\end_inset
+
+ locations.
+ Adding up these possibilities, disjuncts of length 
+\begin_inset Formula $N$
+\end_inset
+
+ span a total of 
+\begin_inset Formula $N\left(N+1\right)$
+\end_inset
+
+ mututally pair-wise orthogonal subspaces.
+ That's a lot of different subspaces to consider.
 \end_layout
 
 \begin_layout Standard
-which? one shows blah the othr blah.
+Despite this, one expects an overall consistency in the grammatical classificati
+on of a word: if one decides that birds are like crows, then the unified
+ grammatical class of THINGS that birds and crows belong to must behave
+ properly, when placed in any particular grammatical context.
+ Before, John heard and saw birds; now John can hear and see THINGS, and
+ this needs to hold true for all of the various possible grammatical relations:
+\begin_inset Formula 
+\begin{align*}
+heard: & John\negthinspace-\;\&\;THINGS\negthinspace+;\\
+THINGS: & the\negthinspace-\;\&\;was\negthinspace+;
+\end{align*}
+
+\end_inset
+
+It must necessarily be the same word-class 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+THINGS
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ in both of these locations.
+ It is grammatically inconsistent to have these being distinct from one-another.
+\end_layout
+
+\begin_layout Standard
+Thus one concludes: (a) there is more than one vector space available, over
+ which similarity comparisons can be made; (b) the decision to merge must
+ be made consistently over all available vector spaces; (c) the merge itself
+ must still be non-linear, in order to differentiate between different word-sens
+es attached to the same word.
+ How this may be accomplished is written up in the next section.
+ 
+\end_layout
+
+\begin_layout Standard
+The important constraint here is that of (b) – that the resulting grammatical
+ classes must be consistent, in all of the syntactic roles that they can
+ occur in.
+ The various syntactic vector spaces are not independent of one-another,
+ but stitch together.
+\end_layout
+
+\begin_layout Subsection*
+Merge decisions, redux
+\end_layout
+
+\begin_layout Standard
+Should one take the average of these?
 \end_layout
 
 \begin_layout Subsection*
@@ -31339,6 +31501,14 @@ The subscript
  the disjunct product, and not from word-pair observations.
  Unlike the word-pair observations, this value of MI is symmetric under
  word-interchange: the word-order does not matter.
+\end_layout
+
+\begin_layout Subsection*
+Replacing Cosines by Surprisingness?
+\end_layout
+
+\begin_layout Standard
+Can this work?
 \end_layout
 
 \begin_layout Section*
