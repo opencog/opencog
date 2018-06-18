@@ -88,11 +88,46 @@ Stitching Together Vector Spaces
 \end_layout
 
 \begin_layout Author
-Linas Vepstas
+Linas Vepštas
+\end_layout
+
+\begin_layout Date
+Draft of 17 June 2018 - First Draft
 \end_layout
 
 \begin_layout Abstract
-The 
+Applying machine learning to linguistics to extract both syntax and semantics,
+ ideally via unsupervised algorithms is the goal of an incresingly popular
+ quest.
+ At this time, vector-space based approaches seem to be the best suited
+ for this, and are thus increasingly commonplace and quite popular.
+ This includes systems such as word2vec and and GloVe as exemplars.
+ These systems fall short, however, as they fail to expose the syntactic
+ structure of natural language.
+ The reason for this, and how to move beyond this state of affairs, is discussed
+ in this text.
+\end_layout
+
+\begin_layout Abstract
+The key observation made here is that there is more than just one vector
+ space onto which words can be mapped.
+ The different vector spaces are necessaarily related to one-another through
+ syntactic relations.
+ When a set of words are clustered into a grammatical category, this clustering
+ must be made in a consistent fashion, for each of the vector spaces.
+ The vector spaces must be 
+\begin_inset Quotes eld
+\end_inset
+
+stitched together
+\begin_inset Quotes erd
+\end_inset
+
+ in a consistent fasion; this consistency condition is exactly the syntax
+ of the grammar.
+ The stitching obeys a certain set of axioms, which are the sheaf axioms.
+ The best possible stitching together can be found by minimizing an overall
+ cost function.
 \end_layout
 
 \begin_layout Section*
@@ -100,7 +135,12 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-T
+Not written.
+ See next section.
+\end_layout
+
+\begin_layout Standard
+Also, the last half of this text is not written.
 \end_layout
 
 \begin_layout Section*
@@ -251,321 +291,11 @@ Nida
 \end_layout
 
 \begin_layout Section*
-Meaning Redux
-\end_layout
-
-\begin_layout Standard
-(9 June 2018) I keep explaing, over and over, why K-means and SVD cannot
- be used.
- Here's a snapshot from a recent email, explaining it again:
-\end_layout
-
-\begin_layout Subsection*
-Why SVM and K-means don't work
-\end_layout
-
-\begin_layout Standard
-Here's WHY both SVM and K-means are fundamentally wrong, and are total failures
- for this particular task.
- Lets start with K-means.
- One minor issue with K-means is that you have to pick K in advance, but
- you don't know what K is.
- But whatever, that's not important.
- Its OK to guess that K=100 or so.
- The big problem is that K-means then takes the 
-\emph on
-MEAN
-\emph default
- (the 
-\emph on
-AVERAGE
-\emph default
-) of the vectors.
- That's what the word "mean" in "K-means" means.
- But we already know, a priori, that taking the average is wrong -- it wipes
- out, erases the different word senses.
-\end_layout
-
-\begin_layout Standard
-For example: the word-token "saw" is going to have a vector that contains
- disjuncts for both "cutting tool", "the verb cut" "the past tense of to
- see".
- With K-means, this word token can only be assigned to just one cluster:
- it will be the cluster for nouns, or the cluster for past tenses, or the
- cluster for cutting-manipulation-actions.
- No matter which cluster its assigned to, when the average/sum of the vector
- is merged into the cluster, the wrong disjuncts will be averaged in as
- well.
- 
-\end_layout
-
-\begin_layout Standard
-So, for example: lets assume k-means places "saw" into the "nouns cluster".
- After averaging, the noun cluster will now contain disjuncts for both past-tens
-e verbs, and also disjuncts for present-tense manipulation-verbs.
- Clearly, noun-clusters should not contain these.
- Two bad things happen: (a) the noun cluster is polluted with verb-vector
- components, and (b) the vector has not been factorized, and so "saw" cannot
- also be placed into other clusters as well.
- 
-\end_layout
-
-\begin_layout Standard
-Ergo -- K-means is fundamentally incorrect -- it cannot correctly cluster
- linguistic data! 
-\end_layout
-
-\begin_layout Standard
-Lets write some formulas: let 
-\begin_inset Formula $v$
-\end_inset
-
- be a vector.
- The MST observation counts give us 
-\begin_inset Formula $v_{saw}$
-\end_inset
-
-.
- We know that, a priori,
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-v_{saw}=v_{tool}+v_{past-tense}+v_{cutting}
-\]
-
-\end_inset
-
-However, we do NOT know what these parts: 
-\begin_inset Formula $v_{tool}$
-\end_inset
-
-,
-\begin_inset Formula $v_{past-tense}$
-\end_inset
-
-, 
-\begin_inset Formula $v_{cutting}$
-\end_inset
-
- what they are.
- We need to factorize them out.
- K-means erases them, lumps them all into one.
- It does not factorize.
-\end_layout
-
-\begin_layout Standard
-SVM is a little bit better, if you use it correctly.
- I am not convinced that you are using it correctly.
- So, for example, lets say we had only four words: 
-\begin_inset Formula $v_{saw}$
-\end_inset
-
-, 
-\begin_inset Formula $v_{look}$
-\end_inset
-
-, 
-\begin_inset Formula $v_{heard}$
-\end_inset
-
- and 
-\begin_inset Formula $v_{tool}$
-\end_inset
-
-.
- Suppose that SVM was told to decompose into three dimensions, and that
- the three that were picked were mostly pointing along the direction of
- 
-\begin_inset Formula $v_{look}$
-\end_inset
-
- and 
-\begin_inset Formula $v_{heard}$
-\end_inset
-
- and 
-\begin_inset Formula $v_{tool}$
-\end_inset
-
- -- these were the three principle components.
-\end_layout
-
-\begin_layout Standard
-Where should 
-\begin_inset Formula $v_{saw}$
-\end_inset
-
- go? In traditional SVDM, the three principle components are used to define
- three hyperplanes or classifiers, and so the single vector 
-\begin_inset Formula $v_{saw}$
-\end_inset
-
- would then be classified as to being either "on the same side of the hyperplane
- as 
-\begin_inset Formula $v_{look}$
-\end_inset
-
-, and thus a part of the 
-\begin_inset Formula $v_{look}$
-\end_inset
-
- singular value", or "on the same side of the hyperplane as 
-\begin_inset Formula $v_{tool}$
-\end_inset
-
-, and thus a part of the 
-\begin_inset Formula $v_{tool}$
-\end_inset
-
- singular value", etc.
-\end_layout
-
-\begin_layout Standard
-But this is again wrong.
- We want to factor or decompose 
-\begin_inset Formula $v_{saw}$
-\end_inset
-
- along these three different principle components, thereby automatically
- discovering that some of the disjuncts on 
-\begin_inset Formula $v_{saw}$
-\end_inset
-
- are tool-like, that others are verb-like, etc.
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-THIS
-\emph default
- is where word-sense disambiguation comes from.
- It is 
-\emph on
-NOT
-\emph default
- done in some pre-cleaner, pre-disambiguator stage.
- It is done at the clustering stage.
-\end_layout
-
-\begin_layout Standard
-But, as I hope is now clear, both SVM and K-means are fundamentally wrong
- approaches, because both ERASE word-sense information from the dataset!
-\end_layout
-
-\begin_layout Standard
-Now, IF you are very careful, you might be able to modify SVM, and after
- finding principle components, go back for a second pass, and perform the
- factorization needed to extract the different word-senses.
- Maybe.
- I can see/guess at a way of doing this, but its hard.
-\end_layout
-
-\begin_layout Subsection*
-Dimensional reduction
-\end_layout
-
-\begin_layout Standard
-There's a completely different issue - "dimensional reduction" which must
- not be ignored; its important, a big part of the task.
-\end_layout
-
-\begin_layout Standard
-So: My large dataset has 24 million disjuncts in it -- that's the dimension
- of the vector space -- all vectors are 24M-dimensional.
- How do you perform dimensional reduction? Well, its "easy" -- if two disjuncts
- have connectors that belong to the same word-class, replace them by one
- disjunct in that word-class.
- (The vector space is now (24M minus one)-dimensional) Lets suppose that
- one of the disjuncts is
-\end_layout
-
-\begin_layout Standard
-
-\family typewriter
-bird: the- & saw-
-\end_layout
-
-\begin_layout Standard
-\noindent
-When doing the dimensional reduction, the saw- needs to be replaced by:
- ??? either 
-\family typewriter
-TOOL-
-\family default
- or 
-\family typewriter
-PASTTENSE-
-\family default
- or by 
-\family typewriter
-CUTTING-.
-\family default
-Obviously, that disjunct was obtained from an MST parses of childrens-lit
- sentences like "John saw the bird.
- Susan saw the bird too.
- Mary saw it also".
- When you dimensionally reduce the saw- in this disjunct, which cluster
- do you assign it to?
-\end_layout
-
-\begin_layout Standard
-Well, if the text has the sentences: "John knew the bird was there.
- John heard the bird", and if clustering determined that "knew", "heard"
- belongs to 
-\family typewriter
-PASTTENSE
-\family default
- then the dim reduction is clear:
-\end_layout
-
-\begin_layout Standard
-
-\family typewriter
-bird: the- & PASTTENSE-
-\end_layout
-
-\begin_layout Standard
-\noindent
-\align left
-and we know that the following is wrong:
-\end_layout
-
-\begin_layout Standard
-
-\family typewriter
-bird-: the- & TOOL-
-\end_layout
-
-\begin_layout Standard
-\noindent
-The problem here is that both K-means and SVD are completely ignorant of
- the structure of the basis elements of the vector space.
- Both assume that the basis elements of the vector space are irreducible,
- atomic, indivisible.
- Its a natural assumption for some machine-learning tasks, but completely
- wrong for language-learning where we know, a priori, that the basis elements
- have structure.
- This is kind of a key idea from sheaves!
-\end_layout
-
-\begin_layout Section*
-Sheaves, Again
-\end_layout
-
-\begin_layout Standard
-It appears that no one understood what the 'sheaves' paper was about.
- So here we try again.
-\end_layout
-
-\begin_layout Section*
 Vector Algebra
 \end_layout
 
 \begin_layout Standard
-Here's the deal ..
+Here's the deal ...
  vectors.
 \end_layout
 
