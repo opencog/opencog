@@ -30960,7 +30960,7 @@ merge-ortho
  classifier, using a minimum cosine of 0.65 to propose a merge, and a fixed
  fraction of 0.3 for the union-merge.
  The agglomeration algorithm is the greedy algorithm.
- (this dataset has about 13M secions)
+ (this dataset has about 13M sections)
 \end_layout
 
 \begin_layout Description
@@ -31014,6 +31014,11 @@ Fuzz-5x2
 \series default
 , as its being computed.
  Each row represents a snapshot in a different point in time for the computation.
+ 
+\series bold
+Fuzz-5x2
+\series default
+ crashed; the last row are the stats at the time of the crash.
 \end_layout
 
 \begin_layout Standard
@@ -31026,7 +31031,7 @@ Fuzz-5x2
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="11" columns="8">
+<lyxtabular version="3" rows="10" columns="8">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -31703,85 +31708,11 @@ cpu
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+93
 \end_layout
 
 \end_inset
@@ -31790,7 +31721,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+835
 \end_layout
 
 \end_inset
@@ -31799,7 +31730,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+33
 \end_layout
 
 \end_inset
@@ -31808,7 +31739,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+1927
 \end_layout
 
 \end_inset
@@ -31817,7 +31748,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+33
 \end_layout
 
 \end_inset
@@ -31826,7 +31757,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+66
 \end_layout
 
 \end_inset
@@ -31835,7 +31766,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+34
 \end_layout
 
 \end_inset
@@ -31844,7 +31775,7 @@ cpu
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+26624
 \end_layout
 
 \end_inset
