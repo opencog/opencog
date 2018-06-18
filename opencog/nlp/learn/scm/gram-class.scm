@@ -777,7 +777,8 @@
 				((merge-function)   (apply merge args))
 				((discard-margin?)  (apply is-small-margin? args))
 				((discard?)         (apply is-small? args))
-				(else               (apply pss (cons message args)))
+				((clobber)          (psu 'clobber))
+				(else               (apply psa (cons message args)))
 			)))
 )
 
@@ -821,7 +822,8 @@
 				((merge-function)   (apply merge args))
 				((discard-margin?)  (apply is-small-margin? args))
 				((discard?)         (apply is-small? args))
-				(else               (apply pss (cons message args)))
+				((clobber)          (psu 'clobber))
+				(else               (apply psa (cons message args)))
 			)))
 )
 
