@@ -13814,11 +13814,14 @@ Elapsed time to load csets: 3500 secs ; 38GB
 12901243 = 13M sections
 25924126 = 26M atoms total = 1.46K/atom
 
+Elapsed time to load csets: 3382 secs
+but now its 24634125 atoms .... in mrg_test db
+
 (define psu (add-support-compute pca))
 (psu 'cache-all) ; XXX to slow, left not needed.
 (psu 'right-marginals)
 Finished left support subtotals in 36823 secs
-Finished right support subtotals in 520 secs
+Finished right support subtotals in 520 secs   now 457
 (define sto (make-store pca))
 (sto 'store-wildcards)
 (sto 'store-right-marginals)
