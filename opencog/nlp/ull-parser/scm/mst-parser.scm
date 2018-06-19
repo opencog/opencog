@@ -152,22 +152,6 @@
 		(if (null? ifx-list) str
 			(pad-dash (pad-a-dash str (car ifx-list) 0) (cdr ifx-list))))
 
-	; Merge certain types of punctuation back into one.
-	; e.g. three dots, or two dashes.
-	(define (remerge tkl buff punct rslt)
-		(if (null? tkl)
-			(if (< 0 (string-length buff)) (cons buff rslt) rslt)
-			(if (string=? (car tkl) punct)
-				(remerge (cdr tkl) (string-append buff punct) punct rslt)
-				(if (< 0 (string-length buff))
-					(remerge tkl "" punct (cons buff rslt))
-					(remerge (cdr tkl) "" punct (cons (car tkl) rslt))))))
-
-	; Merge a sequence of dots back into one word.
-	; Merge a sequence of ascii dashes back into one word.
-	(define (remerge-dot-dash tkl)
-		(remerge (remerge tkl "" "." '()) "" "-" '()))
-
 	; The left-wall indicates the start of the sentence, and
 	; is used to link to the head-verb, head-noun of the sentence.
 	(define left-wall "###LEFT-WALL###")
@@ -176,12 +160,11 @@
 			(word-list (string-split pad-text #\ ))
 			(strip-list (map strip-affix word-list))
 			(tok-list (concatenate (cons (list left-wall) strip-list)))
-			(merge-list (remerge-dot-dash tok-list))
 		)
 		; (format #t "strip-list is ~A\n" strip-list)
 		; (format #t "tok-list is ~A\n" tok-list)
 		; (format #t "merge-list is ~A\n" merge-list)
-		merge-list
+		tok-list
 	)
 )
 
