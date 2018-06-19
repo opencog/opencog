@@ -258,7 +258,9 @@
 
 (define-public (observe-mst-extra plain-text CNT-MODE DIST-MODE)
 "
-  observe-mst -- update pseduo-disjunct counts by observing raw text.
+  observe-mst-extra -- update pseduo-disjunct counts by observing raw text.
+
+  See also 'observe-mst'.
 
   This is the second part of the learning algo: simply count how
   often pseudo-disjuncts show up.
@@ -266,7 +268,7 @@
 	(define parse (mst-parse-text plain-text CNT-MODE DIST-MODE))
 	(export-mst-parse plain-text parse "mst-parses.txt")
 	; The count-one-atom function fetches from the SQL database,
-	; increments the count by 1, and stores the result back
+	; increments the count by one, and stores the result back
 	(for-each
 		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj 1)))
 		(make-sections parse)
@@ -325,7 +327,7 @@
 )
 
 ; ---------------------------------------------------------------------
-;(define-public (observe-mst-extra-manhin plain-text CNT-MODE DIST-MODE)
+;(define-public (observe-mst-extra plain-text CNT-MODE DIST-MODE)
 ;"
   ;observe-mst-extra -- update pseduo-disjunct counts by observing raw
   ;text.
