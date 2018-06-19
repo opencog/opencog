@@ -32620,6 +32620,100 @@ Fuzz-5x2
  `(compute-right-cosine (WordNode "”" #)
 \end_layout
 
+\begin_layout Standard
+Below are distribution graphs for the word-clases obtained using the two
+ differrent datasets, and three different classification schemes.
+ The general similarity of the graphs is immedately apparent.
+ One can conclude: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+graphs created with word-classes/distribution.gplot from stats generated
+ with word-classes.scm 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+The different classifcation schemes all generate the same distribution of
+ class sizes, and that distribution is very nearly purely Zipfian.
+ (Upper-left graph)
+\end_layout
+
+\begin_layout Itemize
+The distribution of disjuncts in the classes is bimodal, and the modality
+ and inflection is the same for the 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+, 
+\begin_inset Formula $l_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+-norms.
+\end_layout
+
+\begin_layout Itemize
+The distribution of disjuncts is determined primarily by the dataset, and
+ not by the classification algo.
+ That is, Fuzz-5x2 and Discrim-5x2 are two different classifiers running
+ on the same dataset; they are in many ways similar, and differing a bit
+ from the larger dataset Block-5x5.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/words-in-class.eps
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename word-classes/support-of-class.eps
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename word-classes/count-of-class.eps
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename word-classes/length-of-class.eps
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The overall lack of dramatic differences in the distributions is remarkable.
+ Visual inspection of the classes indicates that they are all arriving at
+ the same general and mostly-correct classification of words.
+ It could be interesting to see how much these classifications differ; measuring
+ this, however, is difficult, as they are in distinct datasets, and there's
+ no infrastructure for that.
+\end_layout
+
 \begin_layout Subsection*
 Quality evaluation
 \end_layout
