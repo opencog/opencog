@@ -49,10 +49,10 @@
 ;       (ConnectorSeq
 ;          (Connector
 ;             (WordNode "level")
-;             (LgConnDirNode "-"))
+;             (ConnectorDir "-"))
 ;          (Connector
 ;             (WordNode "field")
-;             (LgConnDirNode "+"))))
+;             (ConnectorDir "+"))))
 ;
 ; and therefore, this section is paired with (WordNode "level")
 ;
@@ -142,6 +142,35 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
+		(define (do-get-right-stars WORD)
+			(define body (Section
+				(Variable "$point")
+				(ConnectorSeq
+					(Glob "$begin")
+					(Connector WORD (Variable "$dir"))
+					(Glob "$end"))))
+
+			(define pattern
+				(Bind (VariableList
+					(TypedVariable (Variable "$point") (Type "WordNode"))
+					(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+					(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
+					(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
+					body body))
+
+			(define setlnk (cog-execute! pattern))
+			(cog-outgoing-set setlnk)
+		)
+
+		; Return all sections that have WORD appearing in a connector.
+		(define (get-right-stars WORD)
+			(do-get-right-stars WORD)
+		)
+
+		(define (get-left-stars SECT)
+			'()
+		)
+
 		;-------------------------------------------
 		; Explain the non-default provided methods.
 		(define (provides meth)
@@ -150,8 +179,8 @@
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
 				((right-basis-size) get-right-size)
-				;((left-stars)      get-left-stars)
-				;((right-stars)     get-right-stars)
+				((left-stars)       get-left-stars)
+				((right-stars)      get-right-stars)
 		))
 
 		; Methods on the object
@@ -177,6 +206,8 @@
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
 				((right-basis-size) get-right-size)
+				((left-stars)       get-left-stars)
+				((right-stars)      get-right-stars)
 
 				((provides)         provides)
 				((filters?)         (lambda () #f))
