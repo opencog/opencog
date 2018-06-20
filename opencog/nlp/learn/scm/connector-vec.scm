@@ -71,72 +71,36 @@
 "
 	(let ((all-csets '()))
 
-		(define con-lst (cog-outgoing-set DISJ))
-		(define start (take con-lst K))
-		(define rest (drop con-lst K))
-		(define conn (car rest))  ; the connector itself.
-		(define end (cdr rest))
-		(define conndir (gdr conn))  ; the connector direction
-
 		(define any-left (AnyNode "cset-word"))
-		(define any-right
-			(ConnectorSeq
-				start
-				(Connector
-					(AnyNode
-						(format #f "cset-cross-connector-~D/~D"
-							 K (cog-arity DISJ)))
-					conndir)
-				end))
+		(define any-right (AnyNode "section"))
 
 		(define (get-left-type) 'WordNode)
-		(define (get-right-type) 'WordNode)
+		(define (get-right-type) 'Section)
 		(define (get-pair-type) 'Section)
 
 		; Get the observational count on Section SECT
 		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
 
-		; Both L-ATOM and R-ATOM are WordNodes (or WordClassNodes)
-		(define (get-pair L-ATOM R-ATOM)
-			(define con (cog-link 'Connector R-ATOM conndir))
-			(if (null? con) '()
-				(let ((seq (cog-link 'ConnectorSeq start con end)))
-					(if (null? seq) '()
-						(cog-link 'Section L-ATOM seq)))))
+		; L-ATOM is a WordNode. R-ATOM is a Section.
+		; Currently, the pair is "trivial".
+		; XXX This is weird and maybe wrong.
+		(define (get-pair L-ATOM R-ATOM) R-ATOM)
 
-		(define (make-pair L-ATOM R-ATOM)
-			(Section L-ATOM
-				(ConnectorSeq start (Connector R-ATOM conndir) end)))
+		(define (make-pair L-ATOM R-ATOM) R-ATOM)
 
 		; Return the Word or WordClass of the Section
-		(define (get-left-element PAIR)
-			(gar PAIR))
+		; This is wrong....
+		(define (get-left-element PAIR) '())
 
-		; Return the K'th element in the disjunct
-		; This does NO checking to make sure that the PAIR is valid.
-		; I think that's OK, because this will always be called with
-		; stars, which are a-priori always correct, so its a waste
-		; of cpu time to check.
-		(define (get-right-element PAIR)
-			(gar (car (drop (cog-outgoing-set (gdr PAIR)) K))))
+		(define (get-right-element PAIR) PAIR)
 
 		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
-			(define stats-atom (get-pair L-ATOM R-ATOM))
-			(if (null? stats-atom) 0 (get-count stats-atom)))
+			(get-count R-ATOM))
 
 		; Use ListLinks for the wild-cards, to avoid polluting
 		; the space of Sections.  Is this a good idea? I dunno...
-		;
-		; This refuses to create bogus wild-cards for WORD.
-		; I'm not sure if the extra overhead for this is worth
-		; it, or if this will mess something up.
-		(define (get-left-wildcard WORD)
-			(define con (cog-link 'Connector WORD conndir))
-			(if (null? con) '()
-				(let ((seq (cog-link 'ConnectorSeq start con end)))
-					(if (null? seq) '()
-						(ListLink any-left seq)))))
+		(define (get-left-wildcard SECT) '())
 
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
@@ -181,32 +145,3 @@
 ; ---------------------------------------------------------------------
 ; Example usage:
 ;
-; (define wc (WordClass "You'd He'd"))
-; (define waha
-;    (ConnectorSeq
-;       (Connector (Word "###LEFT-WALL###") (ConnectorDir "-"))
-;       (Connector (Word "hate") (ConnectorDir "+"))))
-;
-; (define walo
-;    (ConnectorSeq
-;       (Connector (Word "###LEFT-WALL###") (ConnectorDir "-"))
-;       (Connector (Word "love") (ConnectorDir "+"))))
-;
-; (Section (ctv 1 0 0.4) (WordClass "You'd He'd") waha)
-; (Section (ctv 1 0 0.9) (WordClass "You'd He'd") walo)
-; (Section (ctv 1 0 2.2) (Word "She'd") walo)
-; (Section (ctv 1 0 1.3) (Word "I'd") walo)
-; (Section (ctv 1 0 0.7) (Word "I'd") waha)
-;
-; (define seca (make-cross-section-api 1 waha))
-; (define cosc (add-pair-cosine-compute seca))
-; (cosc 'right-cosine (WordClass "You'd He'd") (Word "She'd"))
-;
-; Expect to get:
-; (/ (* 0.9 2.2) (* 2.2 (sqrt (+ (* 0.4 0.4) (* 0.9 0.9)))))
-; = 0.9138115486202572
-;
-; Similarly:
-; (cosc 'left-cosine (Word "love") (Word "hate"))
-; = 0.508729312126641
-; (/ (* 1.3 0.7) (* (sqrt (+ (* 2.2 2.2) (* 1.3 1.3))) 0.7))
