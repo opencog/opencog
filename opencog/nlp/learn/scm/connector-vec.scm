@@ -147,6 +147,14 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
+		; -------------------------------------------------------
+		; The right-stars of a WordNode are all of the Sections in
+		; which that Word appears in some Connector. A BindLink is
+		; used to get those sections. This is done in a private,
+		; temporary atomspace, to avoid polluting the main atomspace
+		; with junk. Its also done RAII style, so that ctrl-C does
+		; not leave things in a fumbled state.
+		;
 		; Run a query, and return all Sections that contain WORD
 		; in a Connector, some Connector, any Connector.
 		(define (do-get-right-stars WORD)
@@ -206,8 +214,10 @@
 					(unlock-mutex mtx)
 					'())))
 
+		; Left-stars are much much simpler. These are just the list
+		; of words appearing in the section.
 		(define (get-left-stars SECT)
-			'()
+			(map gar (cog-outgoing-set (gdr SECT)))
 		)
 
 		;-------------------------------------------
@@ -261,3 +271,6 @@
 ; (cva 'fetch-pairs)
 ; (define cvs (add-pair-stars cva))
 ; (cvs 'left-basis-size)
+;
+; (cvs 'right-stars (Word "wiped"))
+; (cvs 'right-stars (Word "ride"))
