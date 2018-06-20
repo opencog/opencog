@@ -67,9 +67,15 @@
 "
   make-connector-vec-api -- API for cross-section word-pairs.
 
+  Due to the unusual nature of the structures that this is covering,
+  this provides it's own pair-stars API.
+
   A more detailed description is at the top of this file.
 "
-	(let ((all-csets '()))
+	(let ((l-basis '())
+			(r-basis '())
+			(l-size 0)
+			(r-size 0))
 
 		(define any-left (AnyNode "cset-word"))
 		(define any-right (AnyNode "section"))
@@ -118,26 +124,62 @@
 			(format #t "Elapsed time to load word sections: ~A seconds\n"
 				(- (current-time) start-time)))
 
+		; -------------------------------------------------------
+		; Stars API.
+		(define (get-left-basis)
+			(if (null? l-basis) (set! l-basis (cog-get-atoms 'WordNode)))
+			l-basis)
+
+		(define (get-right-basis)
+			(if (null? r-basis) (set! r-basis (cog-get-atoms 'Section)))
+			r-basis)
+
+		(define (get-left-size)
+			(if (eq? 0 l-size) (set! l-size (length (get-left-basis))))
+			l-size)
+
+		(define (get-right-size)
+			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
+			r-size)
+
+		;-------------------------------------------
+		; Explain the non-default provided methods.
+		(define (provides meth)
+			(case meth
+				((left-basis)       get-left-basis)
+				((right-basis)      get-right-basis)
+				((left-basis-size)  get-left-size)
+				((right-basis-size) get-right-size)
+				;((left-stars)      get-left-stars)
+				;((right-stars)     get-right-stars)
+		))
+
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
-				((name) (lambda () "Word, Cross-section-Word Pairs"))
-				((id)   (lambda () "cross-section"))
-				((left-type) get-left-type)
-				((right-type) get-right-type)
-				((pair-type) get-pair-type)
-				((pair-count) get-pair-count)
-				((get-pair) get-pair)
-				((get-count) get-count)
-				((make-pair) make-pair)
-				((left-element) get-left-element)
-				((right-element) get-right-element)
-				((left-wildcard) get-left-wildcard)
-				((right-wildcard) get-right-wildcard)
-				((wild-wild) get-wild-wild)
-				((fetch-pairs) fetch-sections)
-				((provides) (lambda (symb) #f))
-				((filters?) (lambda () #f))
+				((name)       (lambda () "Cross-section Words"))
+				((id)         (lambda () "cross-section"))
+				((left-type)        get-left-type)
+				((right-type)       get-right-type)
+				((pair-type)        get-pair-type)
+				((pair-count)       get-pair-count)
+				((get-pair)         get-pair)
+				((get-count)        get-count)
+				((make-pair)        make-pair)
+				((left-element)     get-left-element)
+				((right-element)    get-right-element)
+				((left-wildcard)    get-left-wildcard)
+				((right-wildcard)   get-right-wildcard)
+				((wild-wild)        get-wild-wild)
+				((fetch-pairs)      fetch-sections)
+
+				((left-basis)       get-left-basis)
+				((right-basis)      get-right-basis)
+				((left-basis-size)  get-left-size)
+				((right-basis-size) get-right-size)
+
+				((provides)         provides)
+				((filters?)         (lambda () #f))
 				(else (error "Bad method call on cross-section:" message)))
 			args)))
 )
@@ -145,3 +187,7 @@
 ; ---------------------------------------------------------------------
 ; Example usage:
 ;
+; (define cva (make-connector-vec-api))
+; (cva 'fetch-pairs)
+; (define cvs (add-pair-stars cva))
+; (cvs 'left-basis-size)
