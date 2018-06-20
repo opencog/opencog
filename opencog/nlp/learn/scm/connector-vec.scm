@@ -82,8 +82,8 @@
 			(aspace (cog-new-atomspace (cog-atomspace)))
 		)
 
-		(define any-left (AnyNode "cset-word"))
-		(define any-right (AnyNode "section"))
+		(define any-left (AnyNode "cross-connector word"))
+		(define any-right (AnyNode "cross-connector section"))
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'Section)
@@ -109,12 +109,16 @@
 		(define (get-pair-count L-ATOM R-ATOM)
 			(get-count R-ATOM))
 
-		; Use ListLinks for the wild-cards, to avoid polluting
-		; the space of Sections.  Is this a good idea? I dunno...
-		(define (get-left-wildcard SECT) '())
-
+		; Use ListLinks for the wild-cards.
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
+
+		; I cannot think of any reasonable way of defining a reasonable
+		; left-wildcard, at this time. Its an awkard concept, for this
+		; particular vector.  It could be the body of the BindLink,
+		; below, I suppose. ... is that reasonable? Or is it pointless
+		; cruft?
+		(define (get-left-wildcard SECT) '())
 
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
