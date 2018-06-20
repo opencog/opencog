@@ -63,6 +63,40 @@
 (use-modules (opencog persist))
 (use-modules (opencog matrix))
 
+; ---------------------------------------------------------------------
+
+(define-public (create-connector-left-stars)
+
+	(define star-wild (Variable "$connector-word"))
+	(define predno (Predicate "*-connector left stars-*"))
+
+	; Walk over a section, and insert a wild-card.
+	(define (create-wilds-for-section SEC)
+		; The root-point of the seed
+		(define point (gar SEC))
+		; The list of connectors
+		(define cncts (cog-outgoing-set (gdr SEC)))
+		(define num-cncts (length cncts))
+
+		; Place the wild-card into the N'th location of the section.
+		; Of course, this creates the section, if it does not yet
+		; exist. Well, we don't want to crete actual sections; that
+		; would screw up other code that expects sections to not
+		; have wildcards in them.
+		(define (insert-wild N)
+			(define back (drop cncts N))
+			(define dir (gdr (car back)))
+			(Evaluation predno
+				(List point (ConnectorSeq
+					(take cncts N) (Connector star-wild dir) (cdr back)))))
+
+		; Create all the wild-cards for this section.
+		(map insert-wild (list-tabulate num-cncts values))
+	)
+)
+
+; ---------------------------------------------------------------------
+;
 (define-public (make-connector-vec-api)
 "
   make-connector-vec-api -- API for cross-section word-pairs.
