@@ -75,7 +75,12 @@
 	(let ((l-basis '())
 			(r-basis '())
 			(l-size 0)
-			(r-size 0))
+			(r-size 0)
+
+			; Temporary atomspace
+			(mtx (make-mutex))
+			(aspace (cog-new-atomspace (cog-atomspace)))
+		)
 
 		(define any-left (AnyNode "cset-word"))
 		(define any-right (AnyNode "section"))
@@ -142,7 +147,10 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
+		; Run a query, and return all Sections that contain WORD
+		; in a Connector, some Connector, any Connector.
 		(define (do-get-right-stars WORD)
+			; The WORD must occur somewhere, anywhere in a conector.
 			(define body (Section
 				(Variable "$point")
 				(ConnectorSeq
@@ -150,6 +158,7 @@
 					(Connector WORD (Variable "$dir"))
 					(Glob "$end"))))
 
+			; The types that are matched must be just-so.
 			(define pattern
 				(Bind (VariableList
 					(TypedVariable (Variable "$point") (Type "WordNode"))
@@ -158,14 +167,44 @@
 					(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
 					body body))
 
+			; execute returns a SetLink. We don't want that.
 			(define setlnk (cog-execute! pattern))
 			(cog-outgoing-set setlnk)
 		)
 
+		; Use RAII-style code, so that if the user hits ctrl-C
+		; while we are in this, we will catch that and set the
+		; atomspace back to normal.
+		; XXX there is a small race here, between the setting
+		; of the atomspace, and the invocation of the
+		; throw-handler, but I don't care.
+		;
+		(define (raii-get-right-stars WORD)
+			(define old-as (cog-set-atomspace! aspace))
+			(with-throw-handler #t
+				(lambda ()
+					(let ((stars (do-get-right-stars WORD)))
+						(cog-atomspace-clear aspace)
+						(cog-set-atomspace! old-as)
+						stars))
+				(lambda (key . args)
+					(cog-atomspace-clear aspace)
+					(cog-set-atomspace! old-as)
+					'())))
+
 		; Return all sections that have WORD appearing in a connector.
+		; This is a wrapper to seriealize access to a temp atomspace,
+		; where the query is actually performed.
 		(define (get-right-stars WORD)
-			(do-get-right-stars WORD)
-		)
+			(lock-mutex mtx)
+			(with-throw-handler #t
+				(lambda ()
+					(define stars (raii-get-right-stars WORD))
+					(unlock-mutex mtx)
+					stars)
+				(lambda (key . args)
+					(unlock-mutex mtx)
+					'())))
 
 		(define (get-left-stars SECT)
 			'()
