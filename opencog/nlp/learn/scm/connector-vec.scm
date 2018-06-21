@@ -56,6 +56,27 @@
 ;
 ; and therefore, this section is paired with (WordNode "level")
 ;
+; Left wild-cards
+; ---------------
+; In the above example, the corresponding left-wildcard for "level"
+; would be (concpetually)
+;
+;    (Section
+;       (WordNode "playing")
+;       (ConnectorSeq
+;          (Connector
+;             (Variable "$wildcard")
+;             (ConnectorDir "-"))
+;          (Connector
+;             (WordNode "field")
+;             (ConnectorDir "+"))))
+;
+; I.e. with (Variable "$wildcard") replacing (WordNode "level")
+; These wildcards are needed to store the left-marginals.  In practice,
+; we don't want to pullute the namespace with ConnectorSeq's and
+; Sections that have variables in them, so the actual representation is
+; flattened.
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -85,6 +106,9 @@
 			(aspace (cog-new-atomspace (cog-atomspace)))
 		)
 
+		(define star-wild (Variable "$connector-word"))
+		(define predno (Predicate "*-connector left stars-*"))
+
 		(define any-left (AnyNode "cross-connector word"))
 		(define any-right (AnyNode "cross-connector section"))
 
@@ -95,12 +119,19 @@
 		; Get the observational count on Section SECT
 		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
 
-		; L-ATOM is a WordNode. R-ATOM is a Section.
-		; Currently, the pair is "trivial".
-		; XXX This is weird and maybe wrong.
+		; L-ATOM is a WordNode. R-ATOM is a wild-card.
+		; Disassemble the R-ATOM, insert L-ATOM into the variable
+		; location, and return the atom, if it exists.
 		(define (get-pair L-ATOM R-ATOM) R-ATOM)
 
-		(define (make-pair L-ATOM R-ATOM) R-ATOM)
+		(define (make-pair L-ATOM R-ATOM)
+			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
+			(define point (car tmpl))
+			(define conseq (cdr tmpl))
+			(define (not-var? ITEM) (not (equal? ITEM star-wild)))
+			(Section point (ConnectorSeq
+				(take-while not-var? conseq))))
+				
 
 		; Return the Word or WordClass of the Section
 		; This is wrong....
@@ -175,8 +206,7 @@
 		; the atomspace.
 		(define (create-connector-left-stars)
 
-			(define star-wild (Variable "$connector-word"))
-			(define predno (Predicate "*-connector left stars-*"))
+			(define start-time (current-time))
 
 			; Walk over a section, and insert a wild-card.
 			(define (create-wilds-for-section SEC)
@@ -203,6 +233,8 @@
 			)
 
 			(for-each create-wilds-for-section (cog-get-atoms 'Section))
+			(format #t "Elapsed time to compute left-stars: ~A secs\n"
+				(- (current-time) start-time))
 		)
 
 		; -------------------------------------------------------
