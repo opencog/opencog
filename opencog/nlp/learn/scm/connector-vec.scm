@@ -195,7 +195,7 @@
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis) (set! r-basis (cog-get-atoms 'Section)))
+			(if (null? r-basis) (set! r-basis (cog-incoming-set predno)))
 			r-basis)
 
 		(define (get-left-size)
