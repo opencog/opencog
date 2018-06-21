@@ -248,7 +248,8 @@ unhappy, painful experience.
 ```
 
 0.7) The AtomSpace MUST be built with guile version 2.2.2.1 or newer,
-   which can only be obtained from git: that is, by
+   which can be obtained from the Guile ftp repo
+   https://ftp.gnu.org/gnu/guile/ or git, by doing
 ```
    git clone git://git.sv.gnu.org/guile.git
    git checkout stable-2.2
