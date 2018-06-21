@@ -259,6 +259,41 @@
 		)
 
 		; -------------------------------------------------------
+
+		; Use RAII-style code, so that if the user hits ctrl-C
+		; while we are in this, we will catch that and set the
+		; atomspace back to normal.
+		; XXX there is a small race here, between the setting
+		; of the atomspace, and the invocation of the
+		; throw-handler, but I don't care.
+		;
+		(define (raii-get-stuff FUNC ITEM)
+			(define old-as (cog-set-atomspace! aspace))
+			(with-throw-handler #t
+				(lambda ()
+					(let ((stars (FUNC ITEM)))
+						(cog-atomspace-clear aspace)
+						(cog-set-atomspace! old-as)
+						stars))
+				(lambda (key . args)
+					(cog-atomspace-clear aspace)
+					(cog-set-atomspace! old-as)
+					'())))
+
+		; This is a wrapper to serialize access to a temp atomspace,
+		; where the query is actually performed.
+		(define (get-stars FUNC WORD)
+			(lock-mutex mtx)
+			(with-throw-handler #t
+				(lambda ()
+					(define stars (raii-get-stuff FUNC WORD))
+					(unlock-mutex mtx)
+					stars)
+				(lambda (key . args)
+					(unlock-mutex mtx)
+					'())))
+
+		; -------------------------------------------------------
 		; The right-stars of a WordNode are all of the Sections in
 		; which that Word appears in some Connector. A BindLink is
 		; used to get those sections. This is done in a private,
@@ -291,45 +326,27 @@
 			(cog-outgoing-set setlnk)
 		)
 
-		; Use RAII-style code, so that if the user hits ctrl-C
-		; while we are in this, we will catch that and set the
-		; atomspace back to normal.
-		; XXX there is a small race here, between the setting
-		; of the atomspace, and the invocation of the
-		; throw-handler, but I don't care.
-		;
-		(define (raii-get-right-stars WORD)
-			(define old-as (cog-set-atomspace! aspace))
-			(with-throw-handler #t
-				(lambda ()
-					(let ((stars (do-get-right-stars WORD)))
-						(cog-atomspace-clear aspace)
-						(cog-set-atomspace! old-as)
-						stars))
-				(lambda (key . args)
-					(cog-atomspace-clear aspace)
-					(cog-set-atomspace! old-as)
-					'())))
-
 		; Return all sections that have WORD appearing in a connector.
 		; This is a wrapper to seriealize access to a temp atomspace,
 		; where the query is actually performed.
-		(define (get-right-stars WORD)
-			(lock-mutex mtx)
-			(with-throw-handler #t
-				(lambda ()
-					(define stars (raii-get-right-stars WORD))
-					(unlock-mutex mtx)
-					stars)
-				(lambda (key . args)
-					(unlock-mutex mtx)
-					'())))
+		(define (get-right-stars WORD) (get-stars do-get-right-stars WORD))
 
-		; Left-stars are much much simpler. These are just the list
-		; of words appearing in the section.
-		(define (get-left-stars SECT)
-			(map gar (cog-outgoing-set (gdr SECT)))
+		;-------------------------------------------
+		(define (do-get-left-stars R-ATOM)
+			(define body (make-pair star-wild R-ATOM))
+
+			; The types that are matched must be just-so.
+			(define pattern
+				(Bind (TypedVariable star-wild (Type 'WordNode))
+					body body))
+
+			; execute returns a SetLink. We don't want that.
+			(define setlnk (cog-execute! pattern))
+			(cog-outgoing-set setlnk)
 		)
+
+		; Left-stars require a query to be run ....
+		(define (get-left-stars R-ATOM) (get-stars do-get-left-stars R-ATOM))
 
 		;-------------------------------------------
 		; Explain the non-default provided methods.
