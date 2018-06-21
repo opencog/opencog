@@ -182,7 +182,7 @@
 			(fetch-incoming-set any-right)
 			(load-atoms-of-type 'Section)
 			(format #t "Elapsed time to load word sections: ~A seconds\n"
-				(- (current-time) start-time)))
+				(- (current-time) start-time))
 			(set! start-time (current-time))
 			(fetch-incoming-set predno)
 			(format #t "Elapsed time to load cross-marginals: ~A seconds\n"
