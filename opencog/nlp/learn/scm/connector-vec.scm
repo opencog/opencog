@@ -122,8 +122,10 @@
 		; L-ATOM is a WordNode. R-ATOM is a wild-card.
 		; Disassemble the R-ATOM, insert L-ATOM into the variable
 		; location, and return the atom, if it exists.
+		; See (create-connector-left-stars) below for documentation
+		; about the structure of the R-ATOM.
 		(define (get-pair L-ATOM R-ATOM)
-			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
+			(define tmpl (cdr (cog-outgoing-set R-ATOM)))
 			(define point (car tmpl))
 			(define conseq (cdr tmpl))
 			(define (not-var? ITEM) (not (equal? (gar ITEM) star-wild)))
@@ -139,7 +141,7 @@
 
 		; Same as above, but actually create the thing.
 		(define (make-pair L-ATOM R-ATOM)
-			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
+			(define tmpl (cdr (cog-outgoing-set R-ATOM)))
 			(define point (car tmpl))
 			(define conseq (cdr tmpl))
 			(define (not-var? ITEM) (not (equal? (gar ITEM) star-wild)))
@@ -219,7 +221,7 @@
 		; avoid using both ConnectorSeq and Section directly, because
 		; these pollute the space of data. So, the above gets encoded
 		; as
-		; (Evaluation (Predicate "stars") (List (Word "foo")
+		; (Evaluation (Predicate "stars") (Word "foo")
 		;     (Connector (Word "bar") (ConnectorDir "-))
 		;     (Connector (Variable $X) (ConnectorDir "-))))
 		; with the left-word "foo" heading up the list.
@@ -245,9 +247,8 @@
 				(define (insert-wild N)
 					(define back (drop cncts N))
 					(define dir (gdr (car back)))
-					(Evaluation predno
-						(List point
-							(take cncts N) (Connector star-wild dir) (cdr back))))
+					(Evaluation predno point
+							(take cncts N) (Connector star-wild dir) (cdr back)))
 
 				; Create all the wild-cards for this section.
 				(map insert-wild (list-tabulate num-cncts values))
