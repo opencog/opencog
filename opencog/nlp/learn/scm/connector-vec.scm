@@ -113,7 +113,7 @@
 		(define any-right (AnyNode "cross-connector section"))
 
 		(define (get-left-type) 'WordNode)
-		(define (get-right-type) 'Section)
+		(define (get-right-type) 'EvaluationLink)
 		(define (get-pair-type) 'Section)
 
 		; Get the observational count on Section SECT
@@ -122,42 +122,59 @@
 		; L-ATOM is a WordNode. R-ATOM is a wild-card.
 		; Disassemble the R-ATOM, insert L-ATOM into the variable
 		; location, and return the atom, if it exists.
-		(define (get-pair L-ATOM R-ATOM) R-ATOM)
+		(define (get-pair L-ATOM R-ATOM)
+			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
+			(define point (car tmpl))
+			(define conseq (cdr tmpl))
+			(define (not-var? ITEM) (not (equal? ITEM star-wild)))
+			(define begin (take-while not-var? conseq))
+			(define rest (drop-while not-var? conseq))
+			(define dir (gdr (car rest)))
+			(define end (cdr rest))
+			(define ctcr (cog-link 'Connector L-ATOM dir))
+			(if (null? ctcr) '()
+				(let ((conseq (cog-link 'ConnectorSeq begin ctcr end)))
+					(if (null? conseq) '()
+						(cog-link 'Section point conseq)))))
 
+		; Same as above, but actually create the thing.
 		(define (make-pair L-ATOM R-ATOM)
 			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
 			(define point (car tmpl))
 			(define conseq (cdr tmpl))
 			(define (not-var? ITEM) (not (equal? ITEM star-wild)))
+			(define begin (take-while not-var? conseq))
+			(define rest (drop-while not-var? conseq))
+			(define dir (gdr (car rest)))
+			(define end (cdr rest))
 			(Section point (ConnectorSeq
-				(take-while not-var? conseq))))
-				
+				begin (Connector L-ATOM dir) end)))
 
 		; Return the Word or WordClass of the Section
-		; This is wrong....
+		; This is wrong.... There's not enough information to
+		; know what this is ...
 		(define (get-left-element PAIR) '())
 
-		(define (get-right-element PAIR) PAIR)
+		(define (get-right-element PAIR) '())
 
 		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
-			(get-count R-ATOM))
+			(define sect (get-pair L-ATOM R-ATOM))
+			(if (null? sect) 0 (get-count sect)))
 
 		; Use ListLinks for the wild-cards.
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
 
-		; I cannot think of any reasonable way of defining a reasonable
-		; left-wildcard, at this time. Its an awkard concept, for this
-		; particular vector.  It could be the body of the BindLink,
-		; below, I suppose. ... is that reasonable? Or is it pointless
-		; cruft?
-		(define (get-left-wildcard SECT) '())
+		; The only reasonable left-wildcard that I can think of is
+		; aready the wildcard. So this is a no-op.
+		(define (get-left-wildcard R-ATOM) R-ATOM)
 
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
 
-		; Fetch (from the database) all sections
+		; Fetch (from the database) all sections,
+		; as well as all the marginals.
 		(define (fetch-sections)
 			(define start-time (current-time))
 			; marginals are located on any-left, any-right
@@ -165,6 +182,10 @@
 			(fetch-incoming-set any-right)
 			(load-atoms-of-type 'Section)
 			(format #t "Elapsed time to load word sections: ~A seconds\n"
+				(- (current-time) start-time)))
+			(set! start-time (current-time))
+			(fetch-incoming-set predno)
+			(format #t "Elapsed time to load cross-marginals: ~A seconds\n"
 				(- (current-time) start-time)))
 
 		; -------------------------------------------------------
