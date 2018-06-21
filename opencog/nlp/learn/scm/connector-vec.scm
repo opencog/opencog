@@ -155,7 +155,24 @@
 			r-size)
 
 		; -------------------------------------------------------
-
+		; Create all of the atoms that correspond to the left-stars
+		; for the cross-connector. These are needed to hold marginal
+		; counts; left-marginals cannot be computed without these.
+		;
+		; Conceptually, these are of the form:
+		; (Section (Word "foo") (ConnectorSeq
+		;     (Connector (Word "bar") (ConnectorDir "-))
+		;     (Connector (Variable $X) (ConnectorDir "-))))
+		; where (Variable $X) is the wildcard.  However, we want to
+		; avoid using both ConnectorSeq and Section directly, because
+		; these pollute the space of data. So, the above gets encoded
+		; as
+		; (Evaluation (Predicate "stars") (List (Word "foo")
+		;     (Connector (Word "bar") (ConnectorDir "-))
+		;     (Connector (Variable $X) (ConnectorDir "-))))
+		; with the left-word "foo" heading up the list.
+		; This can be easily dis-assembled to run actual queries against
+		; the atomspace.
 		(define (create-connector-left-stars)
 
 			(define star-wild (Variable "$connector-word"))
@@ -178,8 +195,8 @@
 					(define back (drop cncts N))
 					(define dir (gdr (car back)))
 					(Evaluation predno
-						(List point (ConnectorSeq
-							(take cncts N) (Connector star-wild dir) (cdr back)))))
+						(List point
+							(take cncts N) (Connector star-wild dir) (cdr back))))
 
 				; Create all the wild-cards for this section.
 				(map insert-wild (list-tabulate num-cncts values))
@@ -298,6 +315,8 @@
 				((right-basis-size) get-right-size)
 				((left-stars)       get-left-stars)
 				((right-stars)      get-right-stars)
+
+				((make-left-stars)  create-connector-left-stars)
 
 				((provides)         provides)
 				((filters?)         (lambda () #f))
