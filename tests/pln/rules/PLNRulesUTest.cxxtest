@@ -63,6 +63,7 @@ public:
 		eval.eval("(use-modules (opencog))");
 		eval.eval("(use-modules (opencog attention-bank))");
 		eval.eval("(use-modules (opencog query))");
+		eval.eval("(use-modules (opencog exec))");
 		eval.eval("(use-modules (opencog logger))");
 		eval.eval("(use-modules (opencog rule-engine))");
 		eval.eval("(use-modules (srfi srfi-1))");
@@ -140,15 +141,15 @@ void PLNRulesUTest::test_deduction()
 	Handle results;
 
 	// To start with, it should only know that men are humans
-	results = eval.eval_h("(cog-bind find-humans)");
+	results = eval.eval_h("(cog-execute! find-humans)");
 	TS_ASSERT_EQUALS(1, getarity(results));
 
 	// Apply the rule
-	eval.eval_h("(cog-bind deduction-inheritance-rule)");
+	eval.eval_h("(cog-execute! deduction-inheritance-rule)");
 
 	// After applying the deduction rule, it should know that all 3 of the
 	// instances of men are also humans (Socrates, Einstein, and Peirce)
-	results = eval.eval_h("(cog-bind find-humans)");
+	results = eval.eval_h("(cog-execute! find-humans)");
 
 	logger().debug() << "results = " << results->to_string();
 
