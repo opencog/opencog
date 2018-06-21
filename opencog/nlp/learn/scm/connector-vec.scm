@@ -126,14 +126,14 @@
 			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
 			(define point (car tmpl))
 			(define conseq (cdr tmpl))
-			(define (not-var? ITEM) (not (equal? ITEM star-wild)))
-			(define begin (take-while not-var? conseq))
+			(define (not-var? ITEM) (not (equal? (gar ITEM) star-wild)))
+			(define begn (take-while not-var? conseq))
 			(define rest (drop-while not-var? conseq))
 			(define dir (gdr (car rest)))
 			(define end (cdr rest))
 			(define ctcr (cog-link 'Connector L-ATOM dir))
 			(if (null? ctcr) '()
-				(let ((conseq (cog-link 'ConnectorSeq begin ctcr end)))
+				(let ((conseq (cog-link 'ConnectorSeq begn ctcr end)))
 					(if (null? conseq) '()
 						(cog-link 'Section point conseq)))))
 
@@ -142,13 +142,13 @@
 			(define tmpl (cog-outgoing-set (gdr R-ATOM)))
 			(define point (car tmpl))
 			(define conseq (cdr tmpl))
-			(define (not-var? ITEM) (not (equal? ITEM star-wild)))
-			(define begin (take-while not-var? conseq))
+			(define (not-var? ITEM) (not (equal? (gar ITEM) star-wild)))
+			(define begn (take-while not-var? conseq))
 			(define rest (drop-while not-var? conseq))
 			(define dir (gdr (car rest)))
 			(define end (cdr rest))
 			(Section point (ConnectorSeq
-				begin (Connector L-ATOM dir) end)))
+				begn (Connector L-ATOM dir) end)))
 
 		; Return the Word or WordClass of the Section
 		; This is wrong.... There's not enough information to
