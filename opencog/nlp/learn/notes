@@ -13842,6 +13842,110 @@ In opencog/nlp/learn/pseudo-csets.scm:
 In unknown file:
            0 (cog-tv #<Invalid handle>)
 
+=========================================================================
+(define pca (make-pseudo-cset-api))
+(define psa (add-dynamic-stars pca))
+(define pco (add-pair-cosine-compute psa))
+(define pcf (add-pair-freq-api psa))
+(define pch (add-pair-cosine-compute pcf 'pair-entropy))
+(define pcm (add-pair-cosine-compute pcf 'pair-mi))
+
+(pco 'right-cosine (Word "peace") (Word "you"))
+Cosine=0.0282 for word "you" -- "peace" in 2.947 secs
+(pch 'right-cosine = 0.03289211797144457
+pcm = 0.003475665530244811
+
+(pco 'right-cosine (Word "peace") (Word "love"))
+0.1860942684698426
+(pch 'right-cosine (Word "peace") (Word "love"))
+0.18839731526266035
+(pcm 'right-cosine (Word "peace") (Word "love"))
+0.03816055080854275
+
+(pco 'right-cosine (Word "taken") (Word "locked"))
+0.10177549551488362
+(pch 'right-cosine (Word "taken") (Word "locked"))
+0.09444483468390132
+(pcm 'right-cosine (Word "taken") (Word "locked"))
+0.015026716721988248
+
+(define (sim swa swb)
+   (define wa (Word swa))
+   (define wb (Word swb))
+   (format #t "~A -- ~A  count=~6F  entrop=~6F  mi=~6F\n"
+      swa swb
+      (pco 'right-cosine wa wb)
+      (pch 'right-cosine wa wb)
+      (pcm 'right-cosine wa wb)))
+
+
+other same
+fine nice
+him me
+men women
+up down
+found called
+came went
+eyes hand
+
+other -- same  count=0.5866  entrop=0.5433  mi=0.3159
+nice -- fine  count=0.5256  entrop=0.4826  mi=0.2364
+him -- me  count=0.7842  entrop=0.7796  mi=0.6448
+men -- women  count=0.6077  entrop=0.5841  mi=0.2667
+up -- down  count=0.5630  entrop=0.5528  mi=0.4108
+found -- called  count=0.5576  entrop=0.5298  mi=0.3460
+came -- went  count=0.5900  entrop=0.5656  mi=0.3580
+eyes -- hand  count=0.7284  entrop=0.6669  mi=0.4827
+
+other -- same  *,*=-12.39 L=-21.52 R=-22.13 MI=4.1232
+nice -- fine  *,*=-12.39 L=-26.94 R=-25.21 MI=4.5210
+him -- me  *,*=-12.39 L=-20.81 R=-21.34 LR=-25.50 MI=4.2583
+men -- women  *,*=-12.39 L=-23.69 R=-25.79 LR=-33.24 MI=3.8489
+up -- down  *,*=-12.39 L=-22.46 R=-23.31 LR=-27.87 MI=5.5085
+
+men -- nice  *,*=-12.39 L=-23.69 R=-26.94 LR=-38.71 MI=-0.477
+
+
+
+=========================================================================
+
+(psa 'fetch-pairs)
+(define cva (make-connector-vec-api))
+(define cvs (add-pair-stars cva))
+(cvs 'left-basis-size)
+
+(cva 'make-left-stars)
+Elapsed time to compute left-stars: 1170 secs
+Elapsed time to compute left-stars: 999 secs
+(cvs 'right-basis-size)
+18265271 == 18M
+Argh, but there were only 8629163 Sections so most of those are
+singletons!  Ouch!  What to do ???
+
+(batch-all-pair-mi  cva)
+
+
+(define (how-many)
+   (fold (lambda (a s) (if (cog-ctv? (cog-tv a)) (+ 1 s) s)) 0 (cvs
+'right-basis)))
+(define (rate)
+   (define start-time (current-time))
+   (define start-count (how-many))
+   (define sleep-time 100)
+   (sleep sleep-time)
+   (let* ((count (how-many))
+         (done (- count start-count))
+         (elapse (- (current-time) start-time))
+         (adjt (+ sleep-time (* 0.5 (- elapse sleep-time))))
+         (rat (/ done adjt)))
+      (format #t "Did ~A in ~A secs done=~A rate=~A\n"
+         done adjt count rat)))
+
+Ouch. It is doing 92/second -> 18M will take   
+200K secs = 55 hours. Wow. That sucks.
+And its slowing down....
+done=194977 rate=69.9
+done=359402 rate=64.6
 
 
 
