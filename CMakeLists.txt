@@ -245,8 +245,8 @@ ELSE (GTK3_FOUND)
 ENDIF (GTK3_FOUND)
 
 # Gnu Guile scheme interpreter
-# Version 2.0.0 is needed for mrs io ports, compilation, etc.
-FIND_PACKAGE(Guile 2.0.0)
+# Version 2.2.2 is needed for mrs io ports, compilation, atomics, nlp
+FIND_PACKAGE(Guile 2.2.2)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(HAVE_GUILE 1)
