@@ -13902,8 +13902,28 @@ nice -- fine  *,*=-12.39 L=-26.94 R=-25.21 MI=4.5210
 him -- me  *,*=-12.39 L=-20.81 R=-21.34 LR=-25.50 MI=4.2583
 men -- women  *,*=-12.39 L=-23.69 R=-25.79 LR=-33.24 MI=3.8489
 up -- down  *,*=-12.39 L=-22.46 R=-23.31 LR=-27.87 MI=5.5085
+found -- called  *,*=-12.39 L=-23.62 R=-24.57 LR=-32.09 MI=3.7066
+came -- went  *,*=-12.39 L=-24.19 R=-24.72 LR=-31.32 MI=5.1930
+eyes -- hand  *,*=-12.39 L=-23.47 R=-23.19 LR=-28.91 MI=5.3589
+
+
 
 men -- nice  *,*=-12.39 L=-23.69 R=-26.94 LR=-38.71 MI=-0.477
+men -- went  *,*=-12.39 L=-23.69 R=-24.72 LR=-36.08 MI=-0.061
+nice -- went  *,*=-12.39 L=-26.94 R=-24.72 LR=-38.22 MI=1.0490
+called -- eyes  *,*=-12.39 L=-24.57 R=-23.47 LR=-38.14 MI=-2.499
+nice -- eyes  *,*=-12.39 L=-26.94 R=-23.47 LR=-40.21 MI=-2.193
+nice -- called  *,*=-12.39 L=-26.94 R=-24.57 LR=-35.63 MI=3.4810
+
+nice -- called  count=0.3794  entrop=0.3334  mi=0.1955
+nice -- eyes  count=0.0038  entrop=0.0050  mi=-0.000
+called -- eyes  count=0.0049  entrop=0.0069  mi=0.0007
+nice -- went  count=0.0353  entrop=0.0329  mi=0.0044
+men -- went  count=0.0249  entrop=0.0281  mi=0.0021
+men -- nice  count=0.0233  entrop=0.0262  mi=0.0001
+
+
+
 
 
 
@@ -13946,6 +13966,11 @@ Ouch. It is doing 92/second -> 18M will take
 And its slowing down....
 done=194977 rate=69.9
 done=359402 rate=64.6
+done=1527137 rate=47.39
+done=2008355 rate=53.03
+done=5003278 rate=32.55
+ 8*3600 did 3M == 100 or so ... Hm.
+done=6773636 rate=74.01
 
 
 

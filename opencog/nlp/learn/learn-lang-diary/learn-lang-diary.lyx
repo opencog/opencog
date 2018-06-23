@@ -32952,7 +32952,7 @@ What's this like? Some pairs below.
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="12" columns="7">
+<lyxtabular version="3" rows="15" columns="7">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -33395,7 +33395,7 @@ called
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+23.62
 \end_layout
 
 \end_inset
@@ -33404,7 +33404,7 @@ called
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+24.57
 \end_layout
 
 \end_inset
@@ -33413,7 +33413,7 @@ called
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+32.09
 \end_layout
 
 \end_inset
@@ -33422,7 +33422,7 @@ called
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+3.7066
 \end_layout
 
 \end_inset
@@ -33460,7 +33460,7 @@ went
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+24.19
 \end_layout
 
 \end_inset
@@ -33469,7 +33469,7 @@ went
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+24.72
 \end_layout
 
 \end_inset
@@ -33478,7 +33478,7 @@ went
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+31.32
 \end_layout
 
 \end_inset
@@ -33487,7 +33487,7 @@ went
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+5.1930
 \end_layout
 
 \end_inset
@@ -33525,7 +33525,7 @@ hand
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+23.47
 \end_layout
 
 \end_inset
@@ -33534,7 +33534,7 @@ hand
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+23.19
 \end_layout
 
 \end_inset
@@ -33543,7 +33543,7 @@ hand
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+28.91
 \end_layout
 
 \end_inset
@@ -33552,7 +33552,7 @@ hand
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+5.3589
 \end_layout
 
 \end_inset
@@ -33626,7 +33626,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.0233
 \end_layout
 
 \end_inset
@@ -33637,7 +33637,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+men
 \end_layout
 
 \end_inset
@@ -33646,7 +33646,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+went
 \end_layout
 
 \end_inset
@@ -33673,12 +33673,50 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+36.08
 \end_layout
 
 \end_inset
 </cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.061
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0249
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+nice
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+went
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -33692,6 +33730,163 @@ nice
 
 \begin_layout Plain Layout
 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+38.22
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
++1.0490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0353 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+called
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+eyes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+38.14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-2.499
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0049
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+nice
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+eyes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+40.21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-2.193
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0038
 \end_layout
 
 \end_inset
@@ -33702,7 +33897,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+nice
 \end_layout
 
 \end_inset
@@ -33711,7 +33906,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+called
 \end_layout
 
 \end_inset
@@ -33738,7 +33933,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+35.63
 \end_layout
 
 \end_inset
@@ -33747,7 +33942,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
++3.4810
 \end_layout
 
 \end_inset
@@ -33756,7 +33951,7 @@ nice
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+0.3794
 \end_layout
 
 \end_inset
