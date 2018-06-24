@@ -14120,15 +14120,6 @@ mmt-count is the wild-card sum_y N(x,y) N(*,y)
 (tcf 'total-mmt-count)           ;
 
 
-(define (sim swa swb)
-   (define wa (Word swa))
-   (define wb (Word swb))
-   (format #t "~A -- ~A  count=~6F  entrop=~6F  mi=~6F\n"
-      swa swb
-      (pco 'right-cosine wa wb)
-      (pch 'right-cosine wa wb)
-      (pcm 'right-cosine wa wb)))
-
 ================
 en_pairs_mtwo=> select count(*) from Atoms;
   count
