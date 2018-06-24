@@ -1,0 +1,95 @@
+
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'words-in-class.eps'
+# set term png
+# set out 'words-in-class.png'
+set logscale y
+set logscale x
+set xrange [1:140]
+set yrange [1:200]
+set title "Number of words in each word-class"
+set xlabel "Size rank of word-class"
+set ylabel "Number of words in word-class"
+plot "words-block55.dat" using 1:2 with lines linewidth 5 title "Block-5x5", \
+     "words-fuzz52.dat" using 1:2 with lines linewidth 5 title "Fuzz-5x2", \
+     "words-disc52.dat" using 1:2 with lines linewidth 5 title "Discrim-5x2", \
+     "words-block55.dat" using 1:(170.0/($1)** 0.95) with lines linewidth 2 \
+      title "170 / N^{0.95}"
+
+#################################################
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'support-of-class.eps'
+# set term png
+# set out 'support-of-class.png'
+set key bottom left
+set logscale y
+set logscale x
+set xrange [1:140]
+set yrange [1e3:2e6]
+set format y "10^{%4T}"
+set title "Unique disjuncts in each word-class"
+set xlabel "Rank of word-class"
+set ylabel "Number of unique disjuncts"
+plot "support-block55.dat" using 1:2 with lines linewidth 5 title "Block-5x5", \
+     "support-fuzz52.dat" using 1:2 with lines linewidth 5 title "Fuzz-5x2", \
+     "support-disc52.dat" using 1:2 with lines linewidth 5 title "Discrim-5x2", \
+     "support-disc52.dat" using  1:(1e6/($1)** 0.7) with lines linewidth 2 \
+      title "1x10^6 / N^{0.7}", \
+     "support-disc52.dat" using  1:(3e7/($1)** 2) with lines linewidth 2 \
+      title "3x10^7 / N^{2}"
+
+#################################################
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'count-of-class.eps'
+# set term png
+# set out 'count-of-class.png'
+set logscale y
+set logscale x
+set xrange [1:140]
+set yrange [1e3:5e6]
+set format y "10^{%4T}"
+set title "Total observations of disjuncts in each word-class"
+set xlabel "Rank of word-class"
+set ylabel "Num observations of disjuncts"
+plot "count-block55.dat" using 1:2 with lines linewidth 5 title "Block-5x5", \
+     "count-fuzz52.dat" using 1:2 with lines linewidth 5 title "Fuzz-5x2", \
+     "count-disc52.dat" using 1:2 with lines linewidth 5 title "Discrim-5x2", \
+     "count-disc52.dat" using  1:(2e6/($1)** 1.0) with lines linewidth 2 \
+      title "2x10^6 / N^{1.0}", \
+     "count-disc52.dat" using  1:(2e8/($1)** 2.5) with lines linewidth 2 \
+      title "2x10^8 / N^{2.5}"
+
+#################################################
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'length-of-class.eps'
+#  set term png
+# set out 'length-of-class.png'
+set logscale y
+set logscale x
+set xrange [1:140]
+set yrange [1e2:3e5]
+set format y "10^{%4T}"
+set title "Root-mean-square disjuncts in each word-class"
+set xlabel "Rank of word-class"
+set ylabel "RMS observations of disjuncts"
+plot "length-block55.dat" using 1:2 with lines linewidth 5 title "Block-5x5", \
+     "length-fuzz52.dat" using 1:2 with lines linewidth 5 title "Fuzz-5x2", \
+     "length-disc52.dat" using 1:2 with lines linewidth 5 title "Discrim-5x2", \
+     "length-disc52.dat" using  1:(2e5/($1)** 1.0) with lines linewidth 2 \
+      title "2x10^5 / N^{1.0}", \
+     "length-disc52.dat" using  1:(2e7/($1)** 2.5) with lines linewidth 2 \
+      title "2x10^7 / N^{2.5}"
+
+#################################################

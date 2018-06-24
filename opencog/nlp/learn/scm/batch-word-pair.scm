@@ -173,6 +173,21 @@
 				(- (current-time) start-time))
 		)
 
+		; Delete the pairs from the atomspace AND the database.
+		; But only those that are currently in the atomspace are
+		; deleted; if any are hiding in the database, they will not be
+		; touched.
+		(define (delete-any-pairs)
+			(define start-time (current-time))
+			(for-each (lambda (PAIR) (cog-delete-recursive (gdr PAIR)))
+				(cog-incoming-set any-pair-pred))
+			(cog-delete any-pair-pred)
+			(cog-delete any-left)
+			(cog-delete any-right)
+			(format #t "Elapsed time to delete ANY-link pairs: ~A secs\n"
+				(- (current-time) start-time))
+		)
+
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
@@ -192,6 +207,7 @@
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-any-pairs)
+					((delete-pairs) delete-any-pairs)
 					((provides) (lambda (symb) #f))
 					((filters?) (lambda () #f))
 					(else (error "Bad method call on ANY-link:" message)))

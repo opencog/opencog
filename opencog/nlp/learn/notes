@@ -13842,9 +13842,310 @@ In opencog/nlp/learn/pseudo-csets.scm:
 In unknown file:
            0 (cog-tv #<Invalid handle>)
 
+=========================================================================
+(define pca (make-pseudo-cset-api))
+(define psa (add-dynamic-stars pca))
+(define pco (add-pair-cosine-compute psa))
+(define pcf (add-pair-freq-api psa))
+(define pch (add-pair-cosine-compute pcf 'pair-entropy))
+(define pcm (add-pair-cosine-compute pcf 'pair-mi))
+
+(pco 'right-cosine (Word "peace") (Word "you"))
+Cosine=0.0282 for word "you" -- "peace" in 2.947 secs
+(pch 'right-cosine = 0.03289211797144457
+pcm = 0.003475665530244811
+
+(pco 'right-cosine (Word "peace") (Word "love"))
+0.1860942684698426
+(pch 'right-cosine (Word "peace") (Word "love"))
+0.18839731526266035
+(pcm 'right-cosine (Word "peace") (Word "love"))
+0.03816055080854275
+
+(pco 'right-cosine (Word "taken") (Word "locked"))
+0.10177549551488362
+(pch 'right-cosine (Word "taken") (Word "locked"))
+0.09444483468390132
+(pcm 'right-cosine (Word "taken") (Word "locked"))
+0.015026716721988248
+
+(define (sim swa swb)
+   (define wa (Word swa))
+   (define wb (Word swb))
+   (format #t "~A -- ~A  count=~6F  entrop=~6F  mi=~6F\n"
+      swa swb
+      (pco 'right-cosine wa wb)
+      (pch 'right-cosine wa wb)
+      (pcm 'right-cosine wa wb)))
+
+
+other same
+fine nice
+him me
+men women
+up down
+found called
+came went
+eyes hand
+
+other -- same  count=0.5866  entrop=0.5433  mi=0.3159
+nice -- fine  count=0.5256  entrop=0.4826  mi=0.2364
+him -- me  count=0.7842  entrop=0.7796  mi=0.6448
+men -- women  count=0.6077  entrop=0.5841  mi=0.2667
+up -- down  count=0.5630  entrop=0.5528  mi=0.4108
+found -- called  count=0.5576  entrop=0.5298  mi=0.3460
+came -- went  count=0.5900  entrop=0.5656  mi=0.3580
+eyes -- hand  count=0.7284  entrop=0.6669  mi=0.4827
+
+other -- same  *,*=-12.39 L=-21.52 R=-22.13 MI=4.1232
+nice -- fine  *,*=-12.39 L=-26.94 R=-25.21 MI=4.5210
+him -- me  *,*=-12.39 L=-20.81 R=-21.34 LR=-25.50 MI=4.2583
+men -- women  *,*=-12.39 L=-23.69 R=-25.79 LR=-33.24 MI=3.8489
+up -- down  *,*=-12.39 L=-22.46 R=-23.31 LR=-27.87 MI=5.5085
+found -- called  *,*=-12.39 L=-23.62 R=-24.57 LR=-32.09 MI=3.7066
+came -- went  *,*=-12.39 L=-24.19 R=-24.72 LR=-31.32 MI=5.1930
+eyes -- hand  *,*=-12.39 L=-23.47 R=-23.19 LR=-28.91 MI=5.3589
 
 
 
+men -- nice  *,*=-12.39 L=-23.69 R=-26.94 LR=-38.71 MI=-0.477
+men -- went  *,*=-12.39 L=-23.69 R=-24.72 LR=-36.08 MI=-0.061
+nice -- went  *,*=-12.39 L=-26.94 R=-24.72 LR=-38.22 MI=1.0490
+called -- eyes  *,*=-12.39 L=-24.57 R=-23.47 LR=-38.14 MI=-2.499
+nice -- eyes  *,*=-12.39 L=-26.94 R=-23.47 LR=-40.21 MI=-2.193
+nice -- called  *,*=-12.39 L=-26.94 R=-24.57 LR=-35.63 MI=3.4810
+
+nice -- called  count=0.3794  entrop=0.3334  mi=0.1955
+nice -- eyes  count=0.0038  entrop=0.0050  mi=-0.000
+called -- eyes  count=0.0049  entrop=0.0069  mi=0.0007
+nice -- went  count=0.0353  entrop=0.0329  mi=0.0044
+men -- went  count=0.0249  entrop=0.0281  mi=0.0021
+men -- nice  count=0.0233  entrop=0.0262  mi=0.0001
+
+
+
+
+
+
+=========================================================================
+
+(psa 'fetch-pairs)
+(define cva (make-connector-vec-api))
+(define cvs (add-pair-stars cva))
+(cvs 'left-basis-size)
+
+(cva 'make-left-stars)
+Elapsed time to compute left-stars: 1170 secs
+Elapsed time to compute left-stars: 999 secs
+(cvs 'right-basis-size)
+18265271 == 18M
+Argh, but there were only 8629163 Sections so most of those are
+singletons!  Ouch!  What to do ???
+
+(batch-all-pair-mi  cva)
+
+
+(define (how-many)
+   (fold (lambda (a s) (if (cog-ctv? (cog-tv a)) (+ 1 s) s)) 0 (cvs
+'right-basis)))
+(define (rate)
+   (define start-time (current-time))
+   (define start-count (how-many))
+   (define sleep-time 100)
+   (sleep sleep-time)
+   (let* ((count (how-many))
+         (done (- count start-count))
+         (elapse (- (current-time) start-time))
+         (adjt (+ sleep-time (* 0.5 (- elapse sleep-time))))
+         (rat (/ done adjt)))
+      (format #t "Did ~A in ~A secs done=~A rate=~A\n"
+         done adjt count rat)))
+
+Ouch. It is doing 92/second -> 18M will take   
+200K secs = 55 hours. Wow. That sucks.
+And its slowing down....
+done=194977 rate=69.9
+done=359402 rate=64.6
+done=1527137 rate=47.39
+done=2008355 rate=53.03
+done=5003278 rate=32.55
+ 8*3600 did 3M == 100 or so ... Hm.
+done=6773636 rate=74.01
+done=8362448 rate=29.16
+done=10414938 rate=33.30
+done=11074628 rate=67.14
+done=11703321 rate=0.0
+done=11811189 rate=69.24
+done=13161404 rate=21.38
+
+
+=========================================================================
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector
+Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.8875E+4    145.4
+Count   (l_1)  2.2958E+5    3440.         4.697        23.66
+Length  (l_2)  1.3729E+4    1773.         .2809        12.19
+RMS Count      1.3696E+4    1732.         .2802        11.91
+
+(psa 'fetch-pairs)
+(define cva (make-connector-vec-api))
+(cva 'fetch-pairs)
+(define cvs (add-pair-stars cva))
+(cvs 'left-basis-size)
+
+(cva 'make-left-stars)
+Elapsed time to compute left-stars: 1170 secs
+Elapsed time to compute left-stars: 999 secs
+(cvs 'right-basis-size)
+
+(define predno (Predicate "*-connector left stars-*"))
+(length (cog-incoming-set predno)) == 18265271 == 18M
+Argh, but there were only 8629163 Sections so most of those are
+singletons!
+Ouch!  What to do ???
+
+
+(define wild-obj (add-pair-stars cva))
+(define count-obj (make-compute-count wild-obj))
+
+(count-obj 'cache-all-right-counts)
+
+(batch-all-pair-mi  cva)
+
+Ouch. It is doing 92/second -> 18M will take
+200K secs = 55 hours. Wow. That sucks.
+
+(define (how-many)
+   (fold (lambda (a s) (if (cog-ctv? (cog-tv a)) (+ 1 s) s)) 0 (cvs
+'right-basis)))
+(define (rate)
+   (define start-time (current-time))
+   (define start-count (how-many))
+   (define sleep-time 100)
+   (sleep sleep-time)
+   (let* ((count (how-many))
+         (done (- count start-count))
+         (elapse (- (current-time) start-time))
+         (adjt (+ sleep-time (* 0.5 (- elapse sleep-time))))
+         (rat (/ done adjt)))
+      (format #t "Did ~A in ~A secs done=~A rate=~A\n"
+         done adjt count rat)))
+
+
+(define (bsize)
+   (fold (lambda (wld sum) (+ sum 1)) 0 (pcn 'right-basis)))
+
+(define (bcnt)
+   (fold (lambda (wld sum) (+ sum (pcn 'left-wild-count wld))) 0
+      (pcn 'right-basis)))
+
+(define (bsqu)
+   (fold (lambda (wld sum)
+      (let ((wcnt (pcn 'left-wild-count wld))) (+ sum (* wcnt wcnt)))) 0
+      (pcn 'right-basis)))
+
+(define (fsqu)
+   (fold (lambda (wld sum)
+      (let ((wcnt (pfa 'left-wild-freq wld))) (+ sum (* wcnt wcnt)))) 0
+      (pfa 'right-basis)))  --- 1.8603363179581776e-4
+
+(define (fcnt)
+   (fold (lambda (wld sum) (+ sum (pfa 'left-wild-freq wld))) 0
+      (pfa 'right-basis)))
+
+(define pfa (add-pair-freq-api psa #:nothrow #t))
+
+So:
+N(*,y) == 'left-count
+mmt-count is the wild-card sum_y N(x,y) N(*,y)
+
+(define (wilds WRD)
+   (fold (lambda (wld sum)
+      (let ((mrq (pfa 'left-wild-freq wld))
+            (fre (pfa 'pair-freq (pfa 'get-pair WRD wld))))
+         (+ sum (* mrq fre)))) 0
+      (pfa 'right-basis)))
+
+(wilds (WordNode "men"))
+7.397675578642773e-8
+
+
+(define (wilde WRD)
+   (fold (lambda (str sum)
+      (let ((mrq (pfa 'left-wild-freq (pfa 'right-element str)))
+            (fre (pfa 'pair-freq str)))
+         (+ sum (* mrq fre)))) 0
+      (pfa 'right-stars WRD)))
+
+(define (entro WA WB)
+   (fold (lambda (wld sum)
+      (let ((mrq (pfa 'pair-freq (pfa 'get-pair WA wld)))
+            (fre (pfa 'pair-freq (pfa 'get-pair WB wld))))
+         (+ sum (* mrq fre)))) 0
+      (pfa 'right-basis)))
+
+(define (log2 x) (/ (log x) (log 2)))
+
+(define (ensim swa swb)
+   (define wa (Word swa))
+   (define wb (Word swb))
+   (define sqsu 1.8603363179581776e-4)
+   (define pa (wilds wa))
+   (define pb (wilds wb))
+   (define pab (entro wa wb))
+   (define ent (log2 (/ (* sqsu pab) (* pa pb))))
+   (format #t "~A -- ~A  *,*=~6F L=~6F R=~6F LR=~6F MI=~6F\n"
+      swa swb
+      (log2 sqsu) (log2 pa) (log2 pb) (log2 pab) ent))
+
+(define tcc (add-transpose-compute pfa))
+(define tcf (add-transpose-compute pfa #:GET-COUNT 'pair-freq #:LEFT-COUNT 'left-wild-freq))
+
+(tcf 'mmt-count (Word "eyes"))   ; 8.6245e-8
+(tcf 'total-mmt-count)           ;
+
+
+(define (sim swa swb)
+   (define wa (Word swa))
+   (define wb (Word swb))
+   (format #t "~A -- ~A  count=~6F  entrop=~6F  mi=~6F\n"
+      swa swb
+      (pco 'right-cosine wa wb)
+      (pch 'right-cosine wa wb)
+      (pcm 'right-cosine wa wb)))
+
+================
+en_pairs_mtwo=> select count(*) from Atoms;
+  count
+----------
+ 79586531
+(1 row)
+
+en_pairs_mtwo=> select count(*) from valuations;
+   count
+-----------
+ 108255875
+(1 row)
+
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
+
+SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(7 AS BIGINT)];
+31798397 originally --
 
 
 =========================================================================
