@@ -13976,9 +13976,176 @@ done=10414938 rate=33.30
 done=11074628 rate=67.14
 done=11703321 rate=0.0
 done=11811189 rate=69.24
+done=13161404 rate=21.38
 
 
+=========================================================================
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector
+Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
 
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.8875E+4    145.4
+Count   (l_1)  2.2958E+5    3440.         4.697        23.66
+Length  (l_2)  1.3729E+4    1773.         .2809        12.19
+RMS Count      1.3696E+4    1732.         .2802        11.91
+
+(psa 'fetch-pairs)
+(define cva (make-connector-vec-api))
+(cva 'fetch-pairs)
+(define cvs (add-pair-stars cva))
+(cvs 'left-basis-size)
+
+(cva 'make-left-stars)
+Elapsed time to compute left-stars: 1170 secs
+Elapsed time to compute left-stars: 999 secs
+(cvs 'right-basis-size)
+
+(define predno (Predicate "*-connector left stars-*"))
+(length (cog-incoming-set predno)) == 18265271 == 18M
+Argh, but there were only 8629163 Sections so most of those are
+singletons!
+Ouch!  What to do ???
+
+
+(define wild-obj (add-pair-stars cva))
+(define count-obj (make-compute-count wild-obj))
+
+(count-obj 'cache-all-right-counts)
+
+(batch-all-pair-mi  cva)
+
+Ouch. It is doing 92/second -> 18M will take
+200K secs = 55 hours. Wow. That sucks.
+
+(define (how-many)
+   (fold (lambda (a s) (if (cog-ctv? (cog-tv a)) (+ 1 s) s)) 0 (cvs
+'right-basis)))
+(define (rate)
+   (define start-time (current-time))
+   (define start-count (how-many))
+   (define sleep-time 100)
+   (sleep sleep-time)
+   (let* ((count (how-many))
+         (done (- count start-count))
+         (elapse (- (current-time) start-time))
+         (adjt (+ sleep-time (* 0.5 (- elapse sleep-time))))
+         (rat (/ done adjt)))
+      (format #t "Did ~A in ~A secs done=~A rate=~A\n"
+         done adjt count rat)))
+
+
+(define (bsize)
+   (fold (lambda (wld sum) (+ sum 1)) 0 (pcn 'right-basis)))
+
+(define (bcnt)
+   (fold (lambda (wld sum) (+ sum (pcn 'left-wild-count wld))) 0
+      (pcn 'right-basis)))
+
+(define (bsqu)
+   (fold (lambda (wld sum)
+      (let ((wcnt (pcn 'left-wild-count wld))) (+ sum (* wcnt wcnt)))) 0
+      (pcn 'right-basis)))
+
+(define (fsqu)
+   (fold (lambda (wld sum)
+      (let ((wcnt (pfa 'left-wild-freq wld))) (+ sum (* wcnt wcnt)))) 0
+      (pfa 'right-basis)))  --- 1.8603363179581776e-4
+
+(define (fcnt)
+   (fold (lambda (wld sum) (+ sum (pfa 'left-wild-freq wld))) 0
+      (pfa 'right-basis)))
+
+(define pfa (add-pair-freq-api psa #:nothrow #t))
+
+So:
+N(*,y) == 'left-count
+mmt-count is the wild-card sum_y N(x,y) N(*,y)
+
+(define (wilds WRD)
+   (fold (lambda (wld sum)
+      (let ((mrq (pfa 'left-wild-freq wld))
+            (fre (pfa 'pair-freq (pfa 'get-pair WRD wld))))
+         (+ sum (* mrq fre)))) 0
+      (pfa 'right-basis)))
+
+(wilds (WordNode "men"))
+7.397675578642773e-8
+
+
+(define (wilde WRD)
+   (fold (lambda (str sum)
+      (let ((mrq (pfa 'left-wild-freq (pfa 'right-element str)))
+            (fre (pfa 'pair-freq str)))
+         (+ sum (* mrq fre)))) 0
+      (pfa 'right-stars WRD)))
+
+(define (entro WA WB)
+   (fold (lambda (wld sum)
+      (let ((mrq (pfa 'pair-freq (pfa 'get-pair WA wld)))
+            (fre (pfa 'pair-freq (pfa 'get-pair WB wld))))
+         (+ sum (* mrq fre)))) 0
+      (pfa 'right-basis)))
+
+(define (log2 x) (/ (log x) (log 2)))
+
+(define (ensim swa swb)
+   (define wa (Word swa))
+   (define wb (Word swb))
+   (define sqsu 1.8603363179581776e-4)
+   (define pa (wilds wa))
+   (define pb (wilds wb))
+   (define pab (entro wa wb))
+   (define ent (log2 (/ (* sqsu pab) (* pa pb))))
+   (format #t "~A -- ~A  *,*=~6F L=~6F R=~6F LR=~6F MI=~6F\n"
+      swa swb
+      (log2 sqsu) (log2 pa) (log2 pb) (log2 pab) ent))
+
+(define tcc (add-transpose-compute pfa))
+(define tcf (add-transpose-compute pfa #:GET-COUNT 'pair-freq #:LEFT-COUNT 'left-wild-freq))
+
+(tcf 'mmt-count (Word "eyes"))   ; 8.6245e-8
+(tcf 'total-mmt-count)           ;
+
+
+(define (sim swa swb)
+   (define wa (Word swa))
+   (define wb (Word swb))
+   (format #t "~A -- ~A  count=~6F  entrop=~6F  mi=~6F\n"
+      swa swb
+      (pco 'right-cosine wa wb)
+      (pch 'right-cosine wa wb)
+      (pcm 'right-cosine wa wb)))
+
+================
+en_pairs_mtwo=> select count(*) from Atoms;
+  count
+----------
+ 79586531
+(1 row)
+
+en_pairs_mtwo=> select count(*) from valuations;
+   count
+-----------
+ 108255875
+(1 row)
+
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
+
+SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(7 AS BIGINT)];
+31798397 originally --
 
 
 =========================================================================
