@@ -285,7 +285,7 @@
     ; context when it is true.
     (stv
       (fold * 1 (map (lambda (x) (cog-tv-mean x)) stv-list))
-      (fold min 1 (map (lambda (x) (cog-tv-conf x)) stv-list)))
+      (fold min 1 (map (lambda (x) (cog-tv-confidence x)) stv-list)))
   )
 
   ; map-in-order is used to simulate AndLink assuming
