@@ -95,6 +95,9 @@
       (result:suffix 'GAMBIT location
         (car (string->list (substring (string-trim
           (match:substring current-match)) 0 1)))))
+    ((has-match? "^[ ]*[{][%] set delay=[0-9]+ [%][}]" str)
+      (result:suffix 'SET_DELAY location
+        (string-trim (match:substring current-match))))
     ((has-match? "^[ ]*_[0-9]" str)
       (result:suffix 'MVAR location
         (substring (string-trim (match:substring current-match)) 1)))
@@ -233,7 +236,8 @@
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
      SAMPLE_INPUT TRAILSPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
-              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA)
+              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
+              SET_DELAY)
       (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
@@ -493,6 +497,7 @@
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
       (function) : $1
       (tts-feature) : $1
+      (SET_DELAY) : (format #f "(cons 'set-delay \"~a\")" $1)
       (LSBRACKET action-patterns RSBRACKET) :
         (format #f "(cons 'action-choices (list ~a))" $2)
     )

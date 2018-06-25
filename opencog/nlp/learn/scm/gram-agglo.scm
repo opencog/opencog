@@ -76,7 +76,7 @@
 ; Current best strategy: `greedy-grow`
 ; ------------------------------------
 ; The current best merge strategy is implemented in `greedy-grow` and
-; makes use of several tricks, based on paractical experience:
+; makes use of several tricks, based on practical experience:
 ;
 ; * Words are sorted into frequency order, thus giving a rough-cut of
 ;   having grammatically-similar words relatively near one-another in
@@ -86,7 +86,7 @@
 ;   word.
 ; * If a word cannot be assigned to an existing word-class, it is
 ;   designated to start a new 'singleton' class, of which it is the
-;   only member. For assignment of of words to classes, the most populus
+;   only member. For assignment of of words to classes, the most populous
 ;   classes are considered first, and the singleton classes are
 ;   considered last.
 ; * When a new cluster is formed, then perform the "greedy"/maximal
@@ -130,15 +130,17 @@
 ; WORD should be the WordNode to test.
 ; CLS-LST should be list of WordNodes or WordClassNodes to compare
 ;          to the WORD.
-; MERGER is the object tht provides the merge predicate and function
+; MERGER is the object that provides the merge predicate and function
 ;
 (define (assign-word-to-class MERGER WRD CLS-LST)
 
 	; Return #t if cls can be merged with WRD
 	(define (merge-pred cls) (MERGER 'merge-predicate cls WRD))
 
-	(let (; (cls (find merge-pred CLS-LST))
-			(cls (par-find merge-pred CLS-LST))
+	(let ((cls (find merge-pred CLS-LST))
+			; Sigh. The parallel-find is actually slower than
+			; the serial find.
+			; (cls (par-find merge-pred CLS-LST))
 		)
 		(if (not cls)
 			WRD
@@ -199,6 +201,31 @@
 )
 
 ; ---------------------------------------------------------------
+; Utilities used by several of the functions
+
+; Return true if WRD is in word-class CLS
+(define (is-in-cls? WRD CLS)
+	(not (null? (cog-link 'MemberLink WRD CLS))))
+
+; Return a list of words that got placed into the class.
+(define (got-done WRDS CLS)
+	(filter (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; Return a list of words NOT in the class.
+(define (still-to-do WRDS CLS)
+	(remove (lambda (w) (is-in-cls? w CLS)) WRDS))
+
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; Various different agglomerative clustring algos follow below.
+;
+; These are the main, recursive work-horses; they need to be
+; set up by initialization routines, before being usable.
+; The initializers are farther down in the file.
+; ---------------------------------------------------------------
+;
+; block-assign-to-classes -- cluster in in diagonal blocks.
+;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -250,21 +277,8 @@
 )
 
 ; ---------------------------------------------------------------
-; Utilities used by several of the functions
-
-; Return true if WRD is in word-class CLS
-(define (is-in-cls? WRD CLS)
-	(not (null? (cog-link 'MemberLink WRD CLS))))
-
-; Return a list of words that got placed into the class.
-(define (got-done WRDS CLS)
-	(filter! (lambda (w) (is-in-cls? w CLS)) WRDS))
-
-; Return a list of words NOT in the class.
-(define (still-to-do WRDS CLS)
-	(remove! (lambda (w) (is-in-cls? w CLS)) WRDS))
-
-; ---------------------------------------------------------------
+;
+; assign-to-classes - Simple agglomerative clustering
 ;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
@@ -335,6 +349,8 @@
 
 ; ---------------------------------------------------------------
 ;
+; greedy-grow -- Agglomerative clustering; grow new classes first
+;
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, treat it as if it were a new class. Return a list
@@ -343,7 +359,7 @@
 ;
 ; Similar to `assign-to-classes`, except that this attempts to
 ; maximally grow a newly-created class. It also attempts to manage
-; the word-list better, defering reconsideration of recently-assigned
+; the word-list better, deferring reconsideration of recently-assigned
 ; words for a later pass.
 ;
 ; WRD-LST is the list of words to be assigned to classes.
@@ -368,7 +384,7 @@
 ; words in the DONE-LIST have a good chance of being completely
 ; neutered, with almost nothing left in them. They should get dropped.
 ;
-; XXX Maybe-FIXME: There's some amount of poointless recomputation of
+; XXX Maybe-FIXME: There's some amount of pointless recomputation of
 ; cosines between the word-list, and the existing grammatical classes.
 ; During the construction of the classes, a greedy search was formed
 ; part-way down the word-list. Thus, when resuming the search, its
@@ -379,6 +395,7 @@
 ; solution that does not seem worth the effort. So we'll let the
 ; CPU work harder than it might otherwise need to.
 ;
+(define *-greedy-anchor-* (AnchorNode "*-greedy-singleton-words-*"))
 (define (greedy-grow MERGER TRUE-CLS-LST FAKE-CLS-LST DONE-LST WRD-LST)
 
 	; Tunable parameters
@@ -395,23 +412,32 @@
 		(max min-greedy (* scan-multiplier
 			(+ (num-classified-words) (length FAKE-CLS-LST)))))
 
-	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A ---\n"
+	; If only a stub of a word is left, throw it away.
+	(define (keep WORD)
+		(MERGER 'clobber)
+		(format #t "---- Remaining support = ~6F for ~A"
+			((add-support-compute MERGER) 'right-support WORD) WORD)
+		(if (MERGER 'discard? WORD) '() (list WORD)))
+
+	(format #t "--- To-do=~A ncls=~A sing=~A nredo=~A ~A -- \"~A\" ---\n"
 		(length WRD-LST) (length TRUE-CLS-LST) (length FAKE-CLS-LST)
 		(length DONE-LST)
-		(strftime "%c" (localtime (current-time))))
+		(strftime "%F %T" (localtime (current-time)))
+		(if (null? WRD-LST) '() (cog-name (car WRD-LST)))
+	)
 
 	; If the WRD-LST is empty, we are done; otherwise compute.
 	(if (null? WRD-LST) TRUE-CLS-LST
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
-				; Can we assign the word to a class?
+				; Attempt to assign the word to an existing class.
 				(cls (assign-word-to-class MERGER wrd TRUE-CLS-LST)))
 
 			; If the word was merged into an existing class, then
 			; recurse.  Place the word onto the done-list.
 			(if (eq? 'WordClassNode (cog-type cls))
 				(greedy-grow MERGER TRUE-CLS-LST FAKE-CLS-LST
-					(append! DONE-LST (list wrd)) rest)
+					(append! DONE-LST (keep wrd)) rest)
 
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the singleton
@@ -420,10 +446,15 @@
 
 					; If we failed to create a new class, then just
 					; append the word to the fake list, and recurse.
+					; Store the fake list in the database, as well.
+					; This is used in case of restart, and also for
+					; tracking progress statistics.
 					(if (eq? 'WordNode (cog-type new-cls))
-						(greedy-grow MERGER TRUE-CLS-LST
-							(append! FAKE-CLS-LST (list new-cls))
-							DONE-LST rest)
+						(begin
+							(store-atom (Member new-cls *-greedy-anchor-*))
+							(greedy-grow MERGER TRUE-CLS-LST
+								(append! FAKE-CLS-LST (list new-cls))
+								DONE-LST rest))
 
 						; If the result is a new class, then greedy-grow it.
 						; But only consider a limited subset of the word list,
@@ -438,6 +469,14 @@
 							(format #t "--- Checking the done-list len=~A\n"
 								(length DONE-LST))
 							(assign-expand-class MERGER new-cls DONE-LST)
+
+							; If anything was merged from the fake-list,
+							; then remove it from the anchor as well.
+							; (this is a database-delete).
+							(for-each
+								(lambda (unfake)
+									(cog-delete (Member unfake *-greedy-anchor-*)))
+								(got-done FAKE-CLS-LST new-cls))
 
 							; If anything from the done-list was merged, then
 							; what is left might be either a tiny piece of
@@ -454,7 +493,7 @@
 								; The new done-list is probably a lot longer
 								(append! DONE-LST
 									(got-done FAKE-CLS-LST new-cls)
-									(list wrd)
+									(keep wrd)
 									(got-done short-list new-cls))
 
 								; The new todo list is probably a lot shorter
@@ -465,70 +504,9 @@
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
-; Given the list LST of atoms, trim it, discarding atoms with
-; low observation counts, and then sort it, returning the sorted
-; list, ranked in order of the observed number of sections on the
-; word. (i.e. the sum of the counts on each of the sections).
+; Agglomerative clustering entry points.
 ;
-; Words with fewer than MIN-CNT observations on them are discarded.
-; Sorting is important, because of locality: words in similar
-; grammatical classes also have similar frequency counts.
-;
-; Note: an earlier version of this ranked by the number of times
-; each word was observed: viz:
-;      (> (get-count ATOM-A) (get-count ATOM-B))
-; However, for WordNodes, this does not work very well, as the
-; observation count may be high from any-pair parsing, but
-; infrequently used in MST parsing.
-;
-; The current version gets observation counts from the partial sums
-; on the LLOBJ.  This is fine when starting from scratch, but gets
-; distorted, as word-merges transfer counts from the word to the
-; word-class, but fail to update the partial sums. XXX this needs
-; fixing. XXX FIXME
-;
-(define (trim-and-rank LLOBJ LST MIN-CNT)
-	(define pss (add-support-api LLOBJ))
-
-	; nobs == number of observations
-	(define (nobs WRD) (pss 'right-count WRD))
-
-	; The support API won't work, if we don't have the wild-cards
-	; in the atomspace before we sort. The wild-cards hold/contain
-	; the support subtotals.
-	(define start-time (get-internal-real-time))
-	(for-each
-		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
-		LST)
-
-	(format #t "Finished fetching wildcards in ~5F sconds\n"
-		(* 1.0e-9 (- (get-internal-real-time) start-time)))
-	(format #t "Now trim to min of ~A observation counts\n" MIN-CNT)
-	(sort!
-		; Before sorting, trim the list, discarding words with
-		; low counts.
-		(filter (lambda (WRD) (<= MIN-CNT (nobs WRD))) LST)
-		; Rank so that the highest support words are first in the list.
-		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
-)
-
-
-; Tunable parameter
-(define (cutoff-hack LLOBJ WRD-LST)
-
-	; XXX Adjust the minimum cutoff as desired!!!
-	; This is a tunable parameter!
-	; Right now, set to 20 observations, minimum. Less
-	; than this and weird typos and stuff get in.
-	(define min-obs-cutoff 20)
-	(define all-ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
-
-	(format #t "After cutoff, ~A words left, out of ~A\n"
-		(length all-ranked-words) (length WRD-LST))
-
-	all-ranked-words
-)
-
+; The functions below set up parameters for the work-horses above.
 ; ---------------------------------------------------------------
 ; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
@@ -556,11 +534,9 @@
 				(assign-expand-class MERGER grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
-	(define ranked-words (cutoff-hack MERGER WRD-LST))
-	(define sorted-cls (sort-class-list GLST))
 	(format #t "Start pair-wise classification of ~A words\n"
-		(length ranked-words))
-	(fold-unordered-pairs sorted-cls check-pair ranked-words)
+		(length WRD-LST))
+	(fold-unordered-pairs GLST check-pair WRD-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -569,11 +545,9 @@
 ;
 (define (agglo-over-words MERGER WRD-LST CLS-LST)
 
-	(define ranked-words (cutoff-hack MERGER WRD-LST))
-	(define sorted-cls (sort-class-list CLS-LST))
 	(format #t "Start agglo classification of ~A words\n"
-		(length ranked-words))
-	(assign-to-classes MERGER sorted-cls '() ranked-words)
+		(length WRD-LST))
+	(assign-to-classes MERGER CLS-LST '() WRD-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -590,7 +564,7 @@
 ;
 ; XXX There is a user-adjustable parameter used below, `diag-block-size`,
 ; to specify the initial block size.  This could be exposed in the API,
-; maybe.  On the other hannd, it could stay hardcoded forever, for all
+; maybe.  On the other hand, it could stay hard-coded forever, for all
 ; practical purposes.
 ;
 (define (diag-over-words MERGER WRD-LST CLS-LST)
@@ -618,21 +592,17 @@
 	; Perhaps it should be a random number, altered between runs?
 	(define diag-block-size 20)
 
-	(define all-ranked-words (cutoff-hack MERGER WRD-LST))
-
 	; Ad hoc restart point. If we already have N classes, we've
 	; surely pounded the cosines of the first 2N or so words into
 	; a bloody CPU-wasting pulp. Avoid wasting CPU any further.
 	(define num-to-drop (inexact->exact (round (* 1.6 (length CLS-LST)))))
-	(define ranked-words (drop all-ranked-words num-to-drop))
-
-	(define sorted-cls (sort-class-list CLS-LST))
+	(define ranked-words (drop WRD-LST num-to-drop))
 
 	(format #t "Drop first ~A words from consideration, leaving ~A\n"
 		num-to-drop (length ranked-words))
 	(format #t "Start diag-block of ~A words, chunksz=~A\n"
 		(length ranked-words) diag-block-size)
-	(diag-blocks ranked-words diag-block-size sorted-cls)
+	(diag-blocks ranked-words diag-block-size CLS-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -646,14 +616,11 @@
 ;
 (define (greedy-over-words MERGER WRD-LST CLS-LST)
 
-	(define ranked-words (cutoff-hack MERGER WRD-LST))
-	(define sorted-cls (sort-class-list CLS-LST))
-
 	; Get the list of words that have been classified already.
 	(define mdone-list
 		(fold (lambda (CLS LST)
 			(append! LST (map gar (cog-incoming-by-type CLS 'MemberLink))))
-			'() sorted-cls))
+			'() CLS-LST))
 
 	; Make sure that they really are words. (This should be a no-op...)
 	(define done-list
@@ -663,13 +630,26 @@
 		(find (lambda (x) (equal? x w)) done-list))
 
 	; Trim the word-list, keeping only the not-done words.
-	(define remain-words (remove! is-done? ranked-words))
+	(define remain-words (remove! is-done? WRD-LST))
+
+	; Fetch all of the singletons
+	(define junk (fetch-incoming-by-type *-greedy-anchor-* 'MemberLink))
+
+	(define singletons (map gar
+		(cog-incoming-by-type *-greedy-anchor-* 'MemberLink)))
+
+	(define (is-single? w)
+		(find (lambda (x) (equal? x w)) singletons))
+
+	(define todo-words (remove! is-single? remain-words))
 
 	(format #t "Start greedy-agglomeration of ~A words\n"
-		(length remain-words))
-	(greedy-grow MERGER sorted-cls '() done-list remain-words)
+		(length todo-words))
+	(format #t "Existing classes=~A singletons=~A done=~A\n"
+		(length CLS-LST) (length singletons) (length done-list))
+	(greedy-grow MERGER CLS-LST singletons done-list todo-words)
 
-	; XXX FIXME ... at the conclusion of this, we havea done list,
+	; XXX FIXME ... at the conclusion of this, we have a done list,
 	; which, because of repeated merging, might possibly have been
 	; reduced to single senses, which can now be classified.
 )
@@ -698,21 +678,89 @@
 		(* 1.0e-9 (- (get-internal-real-time) start-time)))
 )
 
-; Attempt to merge words into word-classes.
-(define (gram-classify ALGO MERGER)
-	(load-stuff)
-	(ALGO MERGER
-		(cog-get-atoms 'WordNode)
-		(cog-get-atoms 'WordClassNode))
+; Given the list WRD-LST of atoms, trim it, discarding atoms with
+; low observation counts, and then sort it, returning the sorted
+; list, ranked in order of the observed number of sections on the
+; word. (i.e. the sum of the counts on each of the sections).
+;
+; Words with low observation counts are discarded. A word is
+; considered to be 'big enough' if the LLOBJ says it is.
+; Sorting is important, because of locality: words in similar
+; grammatical classes also have similar frequency counts.
+;
+; Counts are obtained by looking them up in the margin. It is not
+; practical, at this point, to count them directly, as this would
+; require the entire matrix to be loaded.  Thus, only the marginal
+; counts are referenced.  Its up to the clustering algos, later on, to
+; verify counts, as desired. (The point here being that the marginal
+; counts are going to be a bit off, since these counts are altered by
+; mergers, rendering the cached marginal values incorrect.
+;
+(define (trim-and-rank LLOBJ WRD-LST)
+	(define pss (add-support-api LLOBJ)) ; from the margins
+
+	; nobs == number of observations
+	(define (nobs WRD) (pss 'right-count WRD))
+
+	; The support API won't work, if we don't have the wild-cards
+	; in the atomspace before we sort. The wild-cards hold/contain
+	; the support subtotals.
+	(define start-time (get-internal-real-time))
+	(for-each
+		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
+		WRD-LST)
+
+	(format #t "Finished fetching wildcards in ~5F seconds\n"
+		(* 1.0e-9 (- (get-internal-real-time) start-time)))
+
+	; Before sorting, trim the list, discarding words with low counts.
+	(let* ((tr-start (get-internal-real-time))
+			(trimed-words
+				(remove (lambda (WRD) (LLOBJ 'discard-margin? WRD)) WRD-LST)))
+
+		(format #t "Trimmed in ~5F seconds\n"
+			(* 1.0e-9 (- (get-internal-real-time) tr-start)))
+
+		(format #t "After triming, ~A words left, out of ~A\n"
+			(length trimed-words) (length WRD-LST))
+
+		(let* ((ra-start (get-internal-real-time))
+				(ranked-words
+					(sort! trimed-words
+						; Rank so that the commonest words are first in the list.
+						(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))))
+
+			(format #t "Sorting in ~5F seconds\n"
+				(* 1.0e-9 (- (get-internal-real-time) ra-start)))
+
+			ranked-words))
 )
 
+; Attempt to merge words into word-classes.
+;
+; MERGER should be a lambda accepting two words, and returning #t or #f
+; depending on whether the words should be merged together of not.
+;
+; MIN-OBS is the minumum number of observations that a word should have,
+; in order to be considered for merging.
+;
+(define (gram-classify ALGO MERGER)
+	(load-stuff)
+	(let* ((wrd-lst (cog-get-atoms 'WordNode))
+			(ranked-words (trim-and-rank MERGER wrd-lst))
+			(cls-lst (cog-get-atoms 'WordClassNode))
+			(sorted-cls (sort-class-list cls-lst)))
+		(ALGO MERGER ranked-words sorted-cls))
+)
+
+; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; Main entry points for word-classification,
 ;
 ; XXX FIXME the 0.3 is a user-tunable parameter, for how much of the
 ; non-overlapping fraction to bring forwards.
 
-(define-public (gram-classify-pair-wise)
+(define-public (gram-classify-pair-wise MIN-OBS)
 "
   gram-classify-pair-wise - Merge words into word-classes.
 
@@ -720,10 +768,10 @@
   `gram-classify-agglo`, `gram-classify-diag-blocks` or
   `gram-classify-greedy` for better performance.
 "
-	(gram-classify classify-pair-wise (make-fuzz))
+	(gram-classify classify-pair-wise (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
-(define-public (gram-classify-agglo)
+(define-public (gram-classify-agglo MIN-OBS)
 "
   gram-classify-agglo - Merge words into word-classes.
 
@@ -731,10 +779,10 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words (make-fuzz))
+	(gram-classify agglo-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
-(define-public (gram-classify-diag-blocks)
+(define-public (gram-classify-diag-blocks MIN-OBS)
 "
   gram-classify-diag-blocks - Merge words into word-classes.
 
@@ -743,10 +791,10 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words (make-fuzz))
+	(gram-classify diag-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
-(define-public (gram-classify-greedy-fuzz)
+(define-public (gram-classify-greedy-fuzz MIN-OBS)
 "
   gram-classify-greedy-fuzz - Merge words into word-classes.
 
@@ -757,10 +805,10 @@
 
   Uses the \"fuzz\" merge algo: cosine=0.65, frac=0.3
 "
-	(gram-classify greedy-over-words (make-fuzz))
+	(gram-classify greedy-over-words (make-fuzz 0.65 0.3 MIN-OBS))
 )
 
-(define-public (gram-classify-greedy-discrim)
+(define-public (gram-classify-greedy-discrim COSINE MIN-OBS)
 "
   gram-classify-greedy-discrim - Merge words into word-classes.
 
@@ -770,12 +818,31 @@
   be faster and more accurate than `gram-classify-diag-blocks`.
 
   Uses the \"discrim\" merge algo: cosine=0.50, frac=variable
+
+  COSINE should be the minimum cosine angle acceptable to perform
+  a merge on. Currently, 0.5 is recommended.
+
+  MIN-OBS is the smallest number of observations of the word that
+  is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify greedy-over-words (make-discrim))
+	(gram-classify greedy-over-words (make-discrim COSINE MIN-OBS))
 )
 
 ; ---------------------------------------------------------------
 ; Example usage
 ;
 ; (sql-open "postgres:///en_mst_sections?user=linas&password=asdf")
-; (gram-classify-greedy-fuzz)
+; (gram-classify-greedy-fuzz 20)
+;
+; After interruption, its worth recomputing the support marginals.
+; This can be done by saying:
+;
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)
+; (define psu (add-support-compute pca))
+; (psu 'right-marginals)
+; (define sto (make-store pca))
+; (sto 'store-right-marginals)
+;
+; The left marginals are not needed, and besides, they take 10x longer
+; to compute and store.

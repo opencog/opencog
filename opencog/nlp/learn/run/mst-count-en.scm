@@ -2,7 +2,7 @@
 ; mst-count-en.scm
 ;
 ; Run everyting needed for the language-learning disjunct-counting
-; pipeline. Starts the REPL server, opens the database, loads the
+; pipeline. Starts the CogServer, opens the database, loads the
 ; database (which can take an hour or more!).
 ;
 (use-modules (system repl common))

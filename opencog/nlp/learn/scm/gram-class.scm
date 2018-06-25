@@ -38,7 +38,7 @@
 ;                ....
 ;
 ; The TV on the MemberLink holds a count value; that count equals the
-; total number of section-counts that were transfered from the word, to
+; total number of section-counts that were transferred from the word, to
 ; the word-class, when the word was merged into the class. The sum over
 ; all of these counts (on the MemberLinks) should exactly equal the sum
 ; over the counts on all Sections for that WordClassNode.  Thus, it can
@@ -165,7 +165,7 @@
 ; Overlap merging appears to solve the problem a) above (the SUPPORT
 ; issue), but, on the flip side, it also seems to prevent the discovery
 ; and broadening of the ways in which a word might be used. (Broadening
-; is duscuseed in greater detail below.)
+; is discussed in greater detail below.)
 ;
 ; Formal definition
 ; -----------------
@@ -193,20 +193,20 @@
 ; and v_b^new are everything else, everything left-over.  Note that
 ; v_a^new and v_b^new are orthogonal to v_cluster. Note that v_a^new
 ; and v_b^new are both exactly zero on {e_overlap} -- the subtraction
-; wipes out those coefficents. Note that the total number of counts
+; wipes out those coefficients. Note that the total number of counts
 ; is preserved.  That is,
 ;
 ;   ||v_a|| + ||v_b|| = ||v_cluster|| + ||v_a^new|| + ||v_b^new||
 ;
-; where ||v|| == ||v||_1 the l_1 norm aka count aka manhattan-distance.
+; where ||v|| == ||v||_1 the l_1 norm aka count aka Manhattan-distance.
 ;
 ; If v_a and v_b have several word-senses in common; then so will
 ; v_cluster.  Since there is no a priori way to force v_a and v_b to
 ; encode only one common word sense, there needs to be some distinct
-; machanism to split v_cluster ino multiple word senses, if that is
+; mechanism to split v_cluster into multiple word senses, if that is
 ; needed.
 ;
-; Union merging can be descrbied using almost the same formulas, except
+; Union merging can be described using almost the same formulas, except
 ; that one takes
 ;
 ;   {e_union} = {e_a} set-union {e_b}
@@ -248,10 +248,10 @@
 ;
 ; merge-discrim
 ; -------------
-; Built on the merge-prject method, the FRAC is a sigmoid function,
+; Built on the merge-project method, the FRAC is a sigmoid function,
 ; ranging from 0.0 to 1.0, depending on the cosine between the vectors.
 ; The idea is that, if two words are already extremely similar, we may
-; as well assum they really are in the same class, and so do a union
+; as well assume they really are in the same class, and so do a union
 ; merge. But if the words are only kind-of similar, but not a lot, then
 ; assume that the are both linear combinations of several word senses,
 ; and do only the minimal overlap merge, so as to avoid damaging the
@@ -333,7 +333,7 @@
   The merger of WA and WB are performed, using the 'projection
   merge' strategy. This is done like so. If WA and WB are both
   WordNodes, then a WordClass is created, having both WA and WB as
-  members.  Counts are then transfered from WA and WB to the class.
+  members.  Counts are then transferred from WA and WB to the class.
 
   The counts are summed only if both counts are non-zero. Otherwise,
   only a FRAC fraction of a single, unmatched count is transferred.
@@ -378,8 +378,8 @@
 		(define rsec (second SECT-PAIR))
 
 		; The counts on each, or zero.
-		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
-		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'get-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'get-count rsec)))
 
 		; Return #t if sect is a Word section, not a word-class section.
 		(define (is-word-sect? sect)
@@ -532,8 +532,8 @@
 		(define rsec (second SECT-PAIR))
 
 		; The counts on each, or zero.
-		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
-		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'get-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'get-count rsec)))
 
 		; Return #t if sect is a Word section, not a word-class section.
 		(define (is-word-sect? sect)
@@ -590,8 +590,8 @@
 			(define wrd (second CLAPR))
 
 			; The counts on each, or zero.
-			(define cc (if (null? cla) 0 (LLOBJ 'pair-count cla)))
-			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
+			(define cc (if (null? cla) 0 (LLOBJ 'get-count cla)))
+			(define wc (if (null? wrd) 0 (LLOBJ 'get-count wrd)))
 
 			(+ DOT-PROD (* cc wc))
 		)
@@ -614,8 +614,8 @@
 
 			; The counts on each, or zero.
 			; Both cla and wrd are actually Sections.
-			(define cc (if (null? cla) 0 (LLOBJ 'pair-count cla)))
-			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
+			(define cc (if (null? cla) 0 (LLOBJ 'get-count cla)))
+			(define wc (if (null? wrd) 0 (LLOBJ 'get-count wrd)))
 
 			; The orthogonal component.
 			(define orth (if (null? wrd) -999
@@ -685,14 +685,21 @@
 )
 
 ; ---------------------------------------------------------------
-; stub wrapper for word-similarity.
+; Is it OK to merge WORD-A and WORD-B into a common vector?
+;
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
-; XXX do something fancy here.
 ;
 ; COSOBJ must offer the 'right-cosine method
 ;
-(define (ok-to-merge COSOBJ CUTOFF WORD-A WORD-B)
+; This uses cosine-similarity and a cutoff to make the ok-to-merge
+; decision. (Other forms of similarity measure might also be
+; interesting to explore.) The code is glommed up with print statements
+; in order to show forward progress; this is because the current
+; infrastructure is sufficiently slow, that the prints are reassuring
+; that the system is not hung.
+;
+(define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
 
 	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
 
@@ -706,12 +713,21 @@
 				(now (get-internal-real-time))
 				(elapsed-time (* 1.0e-9 (- now start-time))))
 
-			(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
-				sim
-				(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
-				(cog-name WORD-A) (cog-name WORD-B)
-				elapsed-time)
-			(if (< CUTOFF sim) (display "------------------------------ Bingo!\n"))
+			; Only print if its time-consuming.
+			(if (< 2.0 elapsed-time)
+				(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
+					sim
+					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+					(cog-name WORD-A) (cog-name WORD-B)
+					elapsed-time))
+
+			; Print mergers.
+			(if (< CUTOFF sim)
+				(format #t "---------Bingo! Cosine=~6F for ~A \"~A\" -- \"~A\"\n"
+					sim
+					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+					(cog-name WORD-A) (cog-name WORD-B)
+					))
 			sim))
 
 	; True, if cosine similarity is larger than the cutoff.
@@ -720,25 +736,38 @@
 
 ; ---------------------------------------------------------------
 
-(define (make-fuzz)
+(define (make-fuzz CUTOFF UNION-FRAC MIN-CNT)
 "
-  make-fuzz -- Do fuzzy hard-coded merge.
+  make-fuzz -- Do projection-merge, with a fixed merge fraction.
 
-  use `merge-project` with hard-coded frac=0.3 and min acceptable
-  cosine=0.65
+  Uses `merge-project`.
+
+  CUTOFF is the min acceptable cosine, for words to be considered
+  mergable.
+
+  UNION-FRAC is the fxied fraction of the union-set of the disjuncts
+  that will be merged.
+
+  MIN-CNT is the minimum count (l1-norm) of the observations of
+  disjuncts that a word is allowed to have, to even be considered.
 "
-	(define cutoff 0.65)
-	(define union-frac 0.3)
-
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
+			(pss (add-support-api psa))
+			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pcos cutoff WORD-A WORD-B))
+			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-project pcos union-frac WORD-A WORD-B))
+			(merge-project pcos UNION-FRAC WORD-A WORD-B))
+
+		(define (is-small-margin? WORD)
+			(< (pss 'right-count WORD) MIN-CNT))
+
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -746,30 +775,43 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				(else               (apply pca (cons message args)))
+				((discard-margin?)  (apply is-small-margin? args))
+				((discard?)         (apply is-small? args))
+				(else               (apply pss (cons message args)))
 			)))
 )
 
 ; ---------------------------------------------------------------
 
-(define (make-discrim)
+(define (make-discrim CUTOFF MIN-CNT)
 "
   make-discrim -- Do a \"discriminating\" merge.
 
-  use `merge-project` with sigmoid taper and
-  hard-coded min acceptable cosine=0.50
-"
-	(define cutoff 0.50)
+  Use `merge-project` with sigmoid taper of the union-merge.
 
+  CUTOFF is the min acceptable cosine, for words to be considered
+  mergable.
+
+  MIN-CNT is the minimum count (l1-norm) of the observations of
+  disjuncts that a word is allowed to have, to even be considered.
+"
 	(let* ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
+			(pss (add-support-api psa))
+			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
 		(define (mpred WORD-A WORD-B)
-			(ok-to-merge pcos cutoff WORD-A WORD-B))
+			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-disambig pcos cutoff WORD-A WORD-B))
+			(merge-disambig pcos CUTOFF WORD-A WORD-B))
+
+		(define (is-small-margin? WORD)
+			(< (pss 'right-count WORD) MIN-CNT))
+
+		(define (is-small? WORD)
+			(< (psu 'right-count WORD) MIN-CNT))
 
 		; ------------------
 		; Methods on this class.
@@ -777,7 +819,9 @@
 			(case message
 				((merge-predicate)  (apply mpred args))
 				((merge-function)   (apply merge args))
-				(else               (apply pca (cons message args)))
+				((discard-margin?)  (apply is-small-margin? args))
+				((discard?)         (apply is-small? args))
+				(else               (apply pss (cons message args)))
 			)))
 )
 
@@ -798,17 +842,17 @@
 ; (length cit-vil)
 ;
 ; Show the first three values of the vector:
-; (ptu 'pair-count (car cit-vil))
-; (ptu 'pair-count (cadr cit-vil))
-; (ptu 'pair-count (caddr cit-vil))
+; (ptu 'get-count (car cit-vil))
+; (ptu 'get-count (cadr cit-vil))
+; (ptu 'get-count (caddr cit-vil))
 ;
 ; print the whole vector:
-; (for-each (lambda (pr) (ptu 'pair-count pr)) cit-vil)
+; (for-each (lambda (pr) (ptu 'get-count pr)) cit-vil)
 ;
 ; Is it OK to merge?
 ; (define pcos (add-pair-cosine-compute psa))
-; (ok-to-merge pcos (Word "run") (Word "jump"))
-; (ok-to-merge pcos (Word "city") (Word "village"))
+; (is-cosine-similar? pcos (Word "run") (Word "jump"))
+; (is-cosine-similar? pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
 ; (merge-project pcos 0.3 (Word "city") (Word "village"))

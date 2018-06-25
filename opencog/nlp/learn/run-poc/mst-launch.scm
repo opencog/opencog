@@ -5,6 +5,8 @@
 ; counting pipeline. Starts the cogserver, opens the database,
 ; loads the database (which can take an hour or more!)
 ;
+; XXX FIXME this is complicated. Why?
+;
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog cogserver))
 (use-modules (opencog nlp) (opencog nlp learn))
@@ -15,6 +17,7 @@
 
 (add-to-load-path ".")
 (load "utilities.scm")
+(load "mst-tools.scm")
 
 ; Get the database connection and language details
 (define database-uri (get-connection-uri))

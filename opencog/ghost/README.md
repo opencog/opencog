@@ -10,7 +10,7 @@ A GHOST rule is essentially an OpenPsi rule (aka psi-rule), which is an `Implica
 context AND procedure -> goal
 ```
 
-When a GHOST rule is being created, it will firstly be passed to the parser (`cs-parser.scm`) for syntax checking and preliminary interpretation. Any rules that is not syntactically correct will be rejected at this stage.
+When a GHOST rule is being created, it will firstly be passed to the parser (`cs-parser.scm`) for syntax checking and preliminary interpretation. Any rules that is not syntactically correct or with unsupported features will be rejected at this stage.
 
 The parser will then pass the intermediate interpretations (aka terms) to the translator (`translator.scm`) by calling either `create-rule` / `create-concept` / `create-topic` for creating a psi-rule / concept / topic respectively. Those terms will be converted into OpenCog atoms (defined in `terms.scm`) and stored in the AtomSpace.
 
@@ -29,7 +29,9 @@ Here is a list of features that are fully supported in GHOST:
 - [Phrase](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#proper-names)
 - [Concept](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#concepts)
 - [Choice](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#choices--)
+  - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
 - [Optional](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#optional-words--)
+  - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
 - [Indefinite Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#simple-indefinite-wildcards-)
 - [Precise Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#precise-wildcards-n)
 - [Range-restricted Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
@@ -37,18 +39,27 @@ Here is a list of features that are fully supported in GHOST:
 - [User Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
 - [Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
+  - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
+<<<<<<< HEAD
   - Currently only Scheme functions are accepted, can support other languages if needed
   - Should be in the public interface, e.g. use `define-public` when defining the function
   - There are several built-in functions that are available
+=======
+  - Currently only Scheme functions are accepted, can support other languages if needed.
+  - Should be in the public interface, e.g. use `define-public` when defining the function.
+  - There are several build-in functions that are available:
+>>>>>>> af713453dc994f6395d71cc56283159100869e45
     - `reuse`, to reuse the action of another rule, e.g.
       - `^reuse(some_label)` will reuse the action of another rule with a label named "some_label". It's recommended to use a unique label for each of the rules in the rulebase, `topic.label` is not supported.
       - Once triggered, the rule being reused will also be considered as triggered, so it will not be triggered again unless you `^keep()` it.
       - Note, currently reusing a rule with local variables in the action of the rule is not supported, but user variables are fine.
-    - `keep`, to keep the rule in the system so that it can be selected and executed more than once, this can be used at topic level too
+    - `keep`, to keep the rule in the system so that it can be selected and executed more than once, this can be used at topic level too.
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
-Note: Currently there is no special handling for various types of responders (`u` `s`) and gambits (`r` `t`), they are treated the same way, except for questions (`?`).
+There are different types of rules in ChatScript -- responders (`u:` `s:` `?:`) and gambits (`r:` `t:`). Currently they are handled without distinction, except for questions (`?:`) which will only be triggered if the input is a question.
+
+[Rejoinder](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#fast-overview-of-topic-files-top) (`a:` to `q:`) is also supported. Rejoinders have a higher priority than responders and gambits so it will always be selected if it satisfies the context. If more than one rejoinders satisfy the current context, the one that's defined first will always be selected.
 
 The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them. The value assigned to a goal will affect the strength of the rules (`ImplicationLinks`) linked to that goal.
 
@@ -114,7 +125,6 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
              (opencog nlp)
              (opencog nlp relex2logic)
              (opencog openpsi)
-             (opencog eva-behavior)
              (opencog ghost)
              (opencog ghost procedures))
 ```
@@ -139,7 +149,7 @@ One can also parse a rule file by using `ghost-parse-file`:
 (ghost-parse-file "path/to/the/rule/file")
 ```
 
-5) Play with it
+5) Send input to GHOST
 
 One can quickly test if a rule can be triggered by using `test-ghost`:
 
@@ -147,7 +157,7 @@ One can quickly test if a rule can be triggered by using `test-ghost`:
 (test-ghost "hi robot good morning")
 ```
 
-The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
+The output `[INFO] [say] (Hello human)"` will be printed.
 
 ## To Run With ECAN (experimental)
 1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh).
@@ -186,7 +196,6 @@ agents-start opencog::AFImportanceDiffusionAgent opencog::WAImportanceDiffusionA
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog attention)
-             (opencog eva-behavior)
              (opencog ghost)
              (opencog ghost procedures))
 ```
@@ -219,7 +228,7 @@ Or use `ghost-parse-file` to parse a rule file.
 (ghost "I eat apples")
 ```
 
-The output `[INFO] [GHOST] Say: "I want an apple"` will then be printed on the CogServer.
+The output `[INFO] [say] (I want an apple)` will then be printed on the CogServer.
 
 For experimental purpose, you may change the weights (default = 1) of various parameters being used in action selector, by doing `ghost-set-strength-weight`, `ghost-set-context-weight`, `ghost-set-sti-weight`, and `ghost-set-urge-weight`, for example:
 
