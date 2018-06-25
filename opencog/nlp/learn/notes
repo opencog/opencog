@@ -14172,6 +14172,8 @@ Done with wild-card count N(x,*) and N(*,y) in 43276 secs
 == 12 hours!!!
 Done computing N(*,*) total-count= 18489594.0 in 123 secs
 Done computing 8629163 pair MI's in 4368 secs
+Finished left entropy subtotals in 37788 secs
+
 
 
 ----------------
@@ -14220,14 +14222,25 @@ NEW TODO LIST
   a valid pair.   The stars must not be sections.  
   Also needed to make 'left-element work for sum-mtm-count
 Crap, This is not workable.
-  XXX No. right-stars returns sections of any shape with the word in the ctr
-  left-stars returns sections of fixed shape, but all words in that
-  shape.
+  XXX No.
+  right-stars (of a word) are sections of any shape with the word in
+     the ctr
+  left-stars (of a shape) returns sections of fixed shape, but all
+     words in that shape.
   L-ATOMS are words
   R-ATOMS are the Eval-predsicle shape
 
+  so the 'right-element of a right-star is a shape ... which is unique
+  only if the word appeared in it just once; otherwise its ambiguous.
+
+Make 'left-element etc take more arguments
+viz: 'left-element left-star-pair shape ... is the word in there.
+So 'left-dual and 'right-dual, instead
+
 
 -- remove words in en_dj_mtwo not in marginals. IN-PROG
+   (WordNode "kirtles")
+
 -- save en_dj_mtwo before starting the cross-marginals.
 -- start cross-marginals
 -- show graph distribution of mi of word-dj pairs in mtwo

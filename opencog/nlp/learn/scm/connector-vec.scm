@@ -59,7 +59,7 @@
 ; Left wild-cards
 ; ---------------
 ; In the above example, the corresponding left-wildcard for "level"
-; would be (concpetually)
+; would be (conceptually) the shape:
 ;
 ;    (Section
 ;       (WordNode "playing")
@@ -73,9 +73,11 @@
 ;
 ; I.e. with (Variable "$wildcard") replacing (WordNode "level")
 ; These wildcards are needed to store the left-marginals.  In practice,
-; we don't want to pullute the namespace with ConnectorSeq's and
+; we don't want to pollute the namespace with ConnectorSeq's and
 ; Sections that have variables in them, so the actual representation is
-; flattened.
+; flattened. See below for its actual form.
+;
+; Its convenient to give these the name of "shape".
 ;
 ; ---------------------------------------------------------------------
 ;
