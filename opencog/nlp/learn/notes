@@ -428,8 +428,8 @@ sql-open opencog_test opencog_tester cheese
 
 /etc/postgresql/9.6/main/pg_hba.conf looks OK...
 
-So: I have en_pairs and 
- opencog_test | linas    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+So: I have en_pairs and
+ opencog_test | linas    | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
 but the owner of the tables is opencog_tester
 
 /var/log/postgresql/postgresql-9.6-main.log
@@ -464,7 +464,7 @@ Loaded 9045489 atoms at height 2
 Finished loading 18487291 atoms in total
 12:35 to load .. !? 18487291 atoms/755 secs = 24.5K atoms/sec
 
-psql -h localhost -U ubuntu lt_pairs 
+psql -h localhost -U ubuntu lt_pairs
 
 ALTER USER ubuntu PASSWORD 'asdf';
 
@@ -528,10 +528,10 @@ cat opencog/persist/sql/odbc/atom.sql | psql yue_pairs
 
 。。
 
-\p{Block: CJK}   
-\p{Block=CJK_Symbols_And_Punctuation} 
+\p{Block: CJK}
+\p{Block=CJK_Symbols_And_Punctuation}
 \p{Punct}
-\p{InCJK}) 
+\p{InCJK})
 \p{Close_Punctuation}   aka \p{Pe}   (close parent)
  \p{Final_Punctuation}   aka \p{Pf})  more quote-close or open.. things
 \p{Ps} open quote
@@ -549,8 +549,8 @@ relex-server-port relex-server-host
 ; -- cog-report-counts -- Return an association list of counts.
 
 
-wtf 
-(define (foo atom) (display "duude\n")(display atom) (newline) #f) 
+wtf
+(define (foo atom) (display "duude\n")(display atom) (newline) #f)
 
 WARNING: No known abbreviations for language 'yue', attempting fall-back
 to English version..    FIXED
@@ -590,7 +590,7 @@ ten minutes later: 5048 atoms -- so 500 atoms per minute...
 after some halts and hiccups:
 2211 articles after 1 hour = 37 articles/minute
 18529 atoms after about 1 hour ...
-or about 8.4 atoms per article... 
+or about 8.4 atoms per article...
 
 There are only about 48K articles, so it should conclude in 24 hours
 ...!?
@@ -13592,7 +13592,7 @@ Tomas writes:
 > It just might be that Guile is seeing the outrageous process's memory
 > footprint and tries desperately to free some memory (which of course
 > can't suceed in your case because most memory usage isn't "guile's").
-> 
+>
 > [1] http://git.savannah.gnu.org/cgit/guile.git/tree/libguile/gc.c?h=v2.0.13#n770
 
 Hans writes:
@@ -13601,7 +13601,7 @@ Hans writes:
 > uses a small amount of heap. One can use say
 >   export GC_INITIAL_HEAP_SIZE=50G
 > on the shell command line before running the program.
-> 
+>
 > 1. https://github.com/Macaulay2/M2/issues/500
 
 Mark Weaver writes:
@@ -13961,7 +13961,7 @@ singletons!  Ouch!  What to do ???
       (format #t "Did ~A in ~A secs done=~A rate=~A\n"
          done adjt count rat)))
 
-Ouch. It is doing 92/second -> 18M will take   
+Ouch. It is doing 92/second -> 18M will take
 200K secs = 55 hours. Wow. That sucks.
 And its slowing down....
 done=194977 rate=69.9
@@ -14143,13 +14143,13 @@ VACUUM FULL;
  en_dj_mtwo  | 5022 MB | pg_default |
 
                        List of relations
- Schema |    Name    | Type  | Owner |    Size    | Description 
+ Schema |    Name    | Type  | Owner |    Size    | Description
 --------+------------+-------+-------+------------+-------------
- public | atoms      | table | linas | 1452 MB    | 
- public | spaces     | table | linas | 8192 bytes | 
- public | typecodes  | table | linas | 24 kB      | 
- public | valuations | table | linas | 842 MB     | 
- public | values     | table | linas | 8192 bytes | 
+ public | atoms      | table | linas | 1452 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 24 kB      |
+ public | valuations | table | linas | 842 MB     |
+ public | values     | table | linas | 8192 bytes |
 
 SELECT count(*) FROM Atoms;          15989736 = 16M
 SELECT count(*) FROM Valuations;      9481129 = 9.5M
@@ -14168,8 +14168,31 @@ There seem to be no marginals at all, so far... so how is the mrg_test
 working???
 
 (batch-all-pair-mi pca)
+Done with wild-card count N(x,*) and N(*,y) in 43276 secs
+== 12 hours!!!
+Done computing N(*,*) total-count= 18489594.0 in 123 secs
+Done computing 8629163 pair MI's in 4368 secs
 
 
+----------------
+Kill the unused words
+(define pcs (add-pair-stars pca))
+(define bas (pcs 'left-basis))
+(length bas)   ; 137078
+(define all-words (cog-get-atoms 'WordNode))
+(length all-words)  ; 851964
+
+(load-atoms-of-type 'WordNode)
+
+(define no-usar (remove
+	(lambda (wrd) (find (lambda (w) (equal? w wrd)) bas))
+	all-words))
+
+(length no-usar)
+
+(for-each cog-delete no-usar)
+
+----------------------------------------
 
 =========================================================================
 =========================================================================
@@ -14183,6 +14206,63 @@ crappier:
 Symbolic, Distributed and Distributional Representations for Natural
 Language Processing in the Era of Deep Learning: a Survey
 arxiv  1702.00764v1
+
+=========================================================================
+NEW TODO LIST
+
+-- word-pairs.pdf in the readings directory ...
+   where is the source for this?  Is it in git ?????
+
+-- left-stars on the cross object are necessarily the List+Var
+   so that the get-left returns the star so that the get-pair can make
+   a valid pair.   The stars must not be sections.  I think this
+   is currently correct, but unclear.
+
+-- remove words in en_dj_mtwo not in marginals.
+-- save en_dj_mtwo before starting the cross-marginals.
+-- start cross-marginals
+-- show graph distribution of mi of word-dj pairs in mtwo
+   (or verify it wss previously graphed)
+-- save en_dj_mtwo after cross-marginals
+
+-- In parallel start pair-removal in mfive; this should fit!?
+
+
+-- in parallel, experiments:
+(1) record both cosines and entropies for top word-pairs for
+    pseudo dj's. Show multiple graphs, depending on word-frequency
+
+(1a) scatterplot for cosine vs entropy
+
+(2) record both cosines and entropies for top word-pairs for
+    cross-connectors.
+(2a) as above.
+
+(3) show distribution of the sums, above.
+
+While waiting for above, write code for:
+(a) Merging crosses
+(b) computing cosines and entropies for crosses.
+
+-- merge styles redux.
+   * Fractional overlap merges for pseudo-disjuncts as it now is.
+   * Fractional overlap in crosses, as well ...
+
+export dicts.
+
+French.
+
+Quantification:
+---------------
+A Closer Look at Skip-gram Modelling
+David Guthrie, Ben Allison, Wei Liu, Louise Guthrie, Yorick Wilks
+LREC 2006
+
+Uses a training set, and then attempts to parse the test set to
+obtain coverage.  So, here:  statistically:
+1) given a dict, what fraction of the test set is parseable?
+2) earlier queston: what portion was parsable by MST Any skipped words?
+2a) What fraction of MST clique has zero counts on the training data?
 
 =========================================================================
 
@@ -14209,7 +14289,7 @@ Items: create LG feederbacker
 
 Bugs: cleanup embedded dashes in en  DONE
      -- save en_pairs_r again DONE
-     -- should pboably recompute pair-MI after above,
+     -- should probably recompute pair-MI after above,
      -- maybe recompute mst?? (since it was so quick!?)
 
 Bugs: sentences with more than 254 words....
