@@ -10,7 +10,7 @@
 (define (higest-tv-fitness atom)
   (let* ((tv (cog-tv atom))
          (tv-s (cog-tv-mean tv))
-         (tv-c (cog-tv-conf tv))
+         (tv-c (cog-tv-confidence tv))
          (res (* tv-s tv-s tv-c)))
     ;; (cog-logger-info "higest-tv-fitness(~a) = ~a" atom res)
     res))

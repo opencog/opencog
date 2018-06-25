@@ -51,7 +51,7 @@
     and confidence.
 "
   (let ((rule-stv (cog-tv RULE)))
-    (* (cog-tv-conf rule-stv) (cog-tv-mean rule-stv))
+    (* (cog-tv-confidence rule-stv) (cog-tv-mean rule-stv))
   )
 )
 
@@ -63,7 +63,7 @@
     confidence, and short-term-importance.
 "
   (let ((a-stv (cog-tv RULE)))
-    (* (cog-tv-conf a-stv) (cog-tv-mean a-stv) (cog-av-sti RULE))
+    (* (cog-tv-confidence a-stv) (cog-tv-mean a-stv) (cog-av-sti RULE))
   )
 )
 

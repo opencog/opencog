@@ -122,7 +122,7 @@
   The DEMAND must be a demand node that was previously declared to
   the system. The VALUE must be a floating-point number between [0, 1].
 "
-    (cog-set-tv! demand-node (stv demand-value (cog-tv-conf (cog-tv demand-node))))
+    (cog-set-tv! demand-node (stv demand-value (cog-tv-confidence (cog-tv demand-node))))
 )
 
 ; --------------------------------------------------------------
