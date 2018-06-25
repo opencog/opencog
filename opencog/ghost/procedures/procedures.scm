@@ -755,6 +755,32 @@
 )
 
 ; --------------------------------------------------------------
+; Define keys used by sources.
+;; Key for latest query passed.
+(define source-query-key (Predicate "query"))
+;; Key for recording query processing is being undertaken or not.
+(define source-processing-key (Predicate "processing")
+;; Key for getting a result when processing is complete.
+(define source-result-key (Predicate "result"))
+
+(define* (source name #:optional (input-type 'string) (output-type 'string))
+"
+  source NAME [INPUT-TYPE] [OUTPUT-TYPE]
+
+  Returns the atom that represents a source that is identified by NAME.
+  INPUT-TYPE and OUTPUT-TYPE are set to 'string by default.
+
+  TODO: Define other types of inputs and outputs.
+"
+  (define src (Concept name))
+  (Inheritance src (Concept "source"))
+  (cog-set-value! src source-query-key (StringValue ""))
+  (cog-set-value! src source-processing-key (stv 0 1))
+  (cog-set-value! src source-result-key (StringValue ""))
+  src
+)
+
+; --------------------------------------------------------------
 ; Because macros require all the bindings used before expansion load
 ; the files last.
 (load "procedures/predicates.scm")
