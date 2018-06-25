@@ -14211,14 +14211,23 @@ arxiv  1702.00764v1
 NEW TODO LIST
 
 -- word-pairs.pdf in the readings directory ...
-   where is the source for this?  Is it in git ?????
+   where is the source for this?  Is it in git ????? Ughh No.
+   Mass copy from 2009 fractal directory. scripts are lost.
+   Create pull req
 
--- left-stars on the cross object are necessarily the List+Var
-   so that the get-left returns the star so that the get-pair can make
-   a valid pair.   The stars must not be sections.  I think this
-   is currently correct, but unclear.
+* left-stars on the cross object are necessarily the List+Var
+  so that the 'left-element returns the star so that the get-pair can make
+  a valid pair.   The stars must not be sections.  
+  Also needed to make 'left-element work for sum-mtm-count
+Crap, This is not workable.
+  XXX No. right-stars returns sections of any shape with the word in the ctr
+  left-stars returns sections of fixed shape, but all words in that
+  shape.
+  L-ATOMS are words
+  R-ATOMS are the Eval-predsicle shape
 
--- remove words in en_dj_mtwo not in marginals.
+
+-- remove words in en_dj_mtwo not in marginals. IN-PROG
 -- save en_dj_mtwo before starting the cross-marginals.
 -- start cross-marginals
 -- show graph distribution of mi of word-dj pairs in mtwo
@@ -14227,6 +14236,7 @@ NEW TODO LIST
 
 -- In parallel start pair-removal in mfive; this should fit!?
 
+-- finish entropy in atomspace
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
@@ -14332,7 +14342,7 @@ DONE
   any-language goes hog-wild and creates huge counts for just
   one sentence ... is this desired?  Anyway, they'll overflow...
   Done. atoms.sql now uses bigint 64-bit uuids.
-* Investigate crash: while writing truuth value, stv_confidence
+* Investigate crash: while writing truth value, stv_confidence
   was pure virtual (circa line 920 of AtomStorage.cc) There's some
   kind of smart-pointer race. See "Crash" section below.
   Done. Ran for a month without issues.
@@ -14347,3 +14357,4 @@ DONE
 * Create an LXC container for public use. DONE.
   But not updated.... Well no one is interested in thsi so punt.
 * Implement sql-delete. DONE.
+

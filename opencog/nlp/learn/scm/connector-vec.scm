@@ -333,6 +333,9 @@
 		(define (get-right-stars WORD) (get-stars do-get-right-stars WORD))
 
 		;-------------------------------------------
+		; The left-stars consist of all Sections of a fixed shape,
+		; that shape given by R-ATOM, but with any word occuring
+		; in the connector-location in that shape.
 		(define (do-get-left-stars R-ATOM)
 			(define body (make-pair star-wild R-ATOM))
 
