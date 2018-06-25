@@ -14138,6 +14138,38 @@ CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(7 AS BIGINT)];
 31798397 originally --
 
+clean:  36 hours
+VACUUM FULL;
+ en_dj_mtwo  | 5022 MB | pg_default |
+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description 
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 1452 MB    | 
+ public | spaces     | table | linas | 8192 bytes | 
+ public | typecodes  | table | linas | 24 kB      | 
+ public | valuations | table | linas | 842 MB     | 
+ public | values     | table | linas | 8192 bytes | 
+
+SELECT count(*) FROM Atoms;          15989736 = 16M
+SELECT count(*) FROM Valuations;      9481129 = 9.5M
+
+pca
+(pca 'fetch-pairs)
+This loads 15274833 atoms.   What are the rest ???
+There are 851964 WordNodes, but only 137078 are loaded.
+851964 - 137078 = 714886
+15989736 - 15274833 = 714903  so 7 other atoms not loaded. marginals?
+
+(Connector . 268592) (ConnectorSeq . 6239997)
+(Section . 8629163) (WordNode . 137078)
+
+There seem to be no marginals at all, so far... so how is the mrg_test
+working???
+
+(batch-all-pair-mi pca)
+
+
 
 =========================================================================
 =========================================================================
