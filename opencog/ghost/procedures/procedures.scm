@@ -759,7 +759,7 @@
 ;; Key for latest query passed.
 (define source-query-key (Predicate "query"))
 ;; Key for recording query processing is being undertaken or not.
-(define source-processing-key (Predicate "processing")
+(define source-processing-key (Predicate "processing"))
 ;; Key for getting a result when processing is complete.
 (define source-result-key (Predicate "result"))
 
@@ -778,6 +778,61 @@
   (cog-set-value! src source-processing-key (stv 0 1))
   (cog-set-value! src source-result-key (StringValue ""))
   src
+)
+
+(define (source-set-query! source query)
+"
+  source-set-query! SOURCE QUERY
+
+  Returns SOURCE after recording the QUERY, which is a string.
+"
+  (cog-set-value! source source-query-key (StringValue query))
+)
+
+(define (source-query source)
+"
+  source-query SOURCE
+
+  Returns the query string that SOURCE has processed or is processing.
+"
+  (cog-value-ref (cog-value source source-query-key) 0)
+)
+
+(define (source-set-processing! source tv)
+"
+  source-set-processing? SOURCE TV
+
+  Returns SOURCE after setting its processing state to the simple truth value
+  TV. The value passed should be either (stv 1 1) or (stv 0 1)
+"
+  (cog-set-value! source source-processing-key tv)
+)
+
+(define (source-processing? source)
+"
+  source-processing? SOURCE
+
+  Returns (stv 1 1) if the source is processing a query and (stv 0 1) if not.
+"
+  (cog-value source source-processing-key)
+)
+
+(define (source-set-result! source result)
+"
+  source-set-result SOURCE RESULT
+
+  Return SOURCE after recording the RESULT, which is a string.
+"
+  (cog-set-value! source source-result-key (StringValue result))
+)
+
+(define (source-result source)
+"
+  source-result SOURCE
+
+  Returns the result string if SOURCE is not processing
+"
+  (cog-value-ref (cog-value source source-result-key) 0)
 )
 
 ; --------------------------------------------------------------
