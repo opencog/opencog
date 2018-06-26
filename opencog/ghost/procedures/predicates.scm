@@ -319,7 +319,8 @@
 "
   (cond
     (source (source-has-result? source))
-    ((any source-has-result? (get-sources)) (stv 1 1))
+    ((any (lambda (x) (equal? (stv 1 1) (source-has-result? x))) (get-sources))
+       (stv 1 1))
     (else (stv 0 1))
   )
 )
