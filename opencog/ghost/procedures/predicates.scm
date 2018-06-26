@@ -309,7 +309,22 @@
         (stv 0 1)))
 )
 
+; --------------------------------------------------------------
+(define* (any_answer #:optional source)
+"
+  any_answer [SOURCE]
 
+  Returns (stv 1 1) if SOURCE has a result and (stv 0 1) if not. If SOURCE
+  is not passed then it will check if all the sources have any answer.
+"
+  (cond
+    (source (source-has-result? source))
+    ((any source-has-result? (get-sources)) (stv 1 1))
+    (else (stv 0 1))
+  )
+)
+
+; --------------------------------------------------------------
 ; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it

@@ -44,6 +44,9 @@
     ; Time related predicates
     after_min
 
+    ; Source predicates
+    any_answer
+
     ; schemas
     animation
     expression
@@ -760,6 +763,9 @@
 )
 
 ; --------------------------------------------------------------
+; The Node that represents sources
+(define source-node (Concept "source"))
+
 ; Define keys used by sources.
 ;; Key for latest query passed.
 (define source-query-key (Predicate "query"))
@@ -767,6 +773,9 @@
 (define source-processing-key (Predicate "processing"))
 ;; Key for getting a result when processing is complete.
 (define source-result-key (Predicate "result"))
+;; Key for caching result after running result. This is for ghost purposes and
+;; shouldn't be used by sources.
+(define result-cache-key (Predicate "cached-result"))
 
 (define* (def-source name #:optional (input-type 'string) (output-type 'string))
 "
@@ -778,7 +787,7 @@
   TODO: Define other types of inputs and outputs.
 "
   (define src (Concept name))
-  (Inheritance src (Concept "source"))
+  (Inheritance src source-node)
   (cog-set-value! src source-query-key (StringValue ""))
   (cog-set-value! src source-processing-key (stv 0 1))
   (cog-set-value! src source-result-key (StringValue ""))
@@ -826,7 +835,8 @@
 "
   source-set-result SOURCE RESULT
 
-  Return SOURCE after recording the RESULT, which is a string.
+  Return SOURCE after recording the RESULT, which is a string. An empty
+  string is used to represent no result.
 "
   (cog-set-value! source source-result-key (StringValue result))
 )
@@ -835,9 +845,49 @@
 "
   source-result SOURCE
 
-  Returns the result string if SOURCE is not processing
+  Returns the result value if.
 "
-  (cog-value-ref (cog-value source source-result-key) 0)
+  (cog-value source source-result-key)
+)
+
+(define (source-has-result? source)
+"
+  source-has-result? SOURCE
+
+  Returns (stv 1 1) if SOURCE has a result else it returns (stv 0 1).
+"
+  (let ((result (source-result source)))
+    (cond
+      ((equal? (stv 1 1) (source-processing? source)) (stv 0 1))
+      ((equal? "" (cog-value-ref result 0)) (stv 0 1))
+      (else (cog-set-value! source result-cache-key result) (stv 1 1))
+    )
+  )
+)
+
+(define (get-cached-result source)
+"
+  get-cached-result SOURCE
+
+  Returns the string of the cached-result value.
+"
+  (cog-value-ref (cog-value source result-cache-key) 0)
+)
+
+(define (get-sources)
+"
+  get-sources
+
+  Returns a list of atoms that represent sources, or nil if their are no
+  sources defined.
+"
+  (cog-outgoing-set (cog-execute!
+    (Get
+      (TypedVariable
+        (Variable "source")
+        (Type "ConceptNode"))
+      (Inheritance (Variable "source") source-node))
+  ))
 )
 
 ; --------------------------------------------------------------
