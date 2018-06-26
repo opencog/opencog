@@ -596,7 +596,7 @@ There are only about 48K articles, so it should conclude in 24 hours
 ...!?
 
 hours later... 219127 atoms 6345 articles done ...
-Now its about 34.5 atoms per article.. whoa ... 
+Now its about 34.5 atoms per article.. whoa ...
 
 java claims to have parsed 12424 sentences
 11459 articles processed.
@@ -642,14 +642,14 @@ if (number-of-cells-collected-recently < GUILE_MIN_YIELD_X)
 `scm_i_gc_grow_heap_p ()' and `scm_gc_for_newcell ()'.)
 
 
-(WordSequenceLink lots of these ... 
+(WordSequenceLink lots of these ...
 
 
  gcprof procedure in the statprof library
 https://www.gnu.org/software/guile/manual/html_node/Statprof.html
 
 guile-yue> (statprof-display)
-%     cumulative   self             self     total             
+%     cumulative   self             self     total
 time   seconds    seconds  calls    ms/call  ms/call       name
  49.18  11506.88  11506.88   13516   851.35   851.35  inc
   4.92  23397.33   1150.69      27 42618.08 866567.64  catch
@@ -720,11 +720,11 @@ Java gets slower and slower
 
 =========================
 
-replace call to scm_gc_register_collectable_memory by call to 
+replace call to scm_gc_register_collectable_memory by call to
 scm_gc_register_allocation(size)
 
 
-whoa --- 
+whoa ---
 GC Warning: Repeated allocation of very large block (appr. size 27369472):
         May lead to memory leak and poor performance.
 GC Warning: Repeated allocation of very large block (appr. size 28766208):
@@ -757,8 +757,8 @@ after half-minute:
 guile> foo
 (ConceptNode "foo" (ctv 0 0 2520410))
 
- 6861 101000    20   0  735404  42952  16680 R 109.9  0.0  14:33.40 guile       
- 6861 101000    20   0  735404  42952  16680 R 114.5  0.0  44:35.68 guile       
+ 6861 101000    20   0  735404  42952  16680 R 109.9  0.0  14:33.40 guile
+ 6861 101000    20   0  735404  42952  16680 R 114.5  0.0  44:35.68 guile
 
 
 (gc-stats)
@@ -781,7 +781,7 @@ scm_gc_register_allocation(size)
 
 (define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv
 atom))))))
-scheme@(guile-user)> 
+scheme@(guile-user)>
 scheme@(guile-user)> (define foo (Concept "foo"))
 scheme@(guile-user)> (define (loo) (inc foo) (loo))
 scheme@(guile-user)> (loo)
@@ -799,7 +799,7 @@ duuude its pend cnt=19857 (476568) tot=50000000 (1200000000)
 (protected-objects . 7) (gc-times . 2051))
 guile-yue> foo
 (ConceptNode "foo" (ctv 0 0 26737610))
- 4617 linas     20   0  847596  50284  27072 R 133.2  0.1   5:26.89 guile       
+ 4617 linas     20   0  847596  50284  27072 R 133.2  0.1   5:26.89 guile
 
 (ConceptNode "foo" (ctv 0 0 46416463))
 duuude its pend cnt=20565 (493560) tot=94300000 (2263200000)
@@ -808,13 +808,13 @@ so -- 46M incrs but 94M take-tvs -- so two takes for each incr.
 -- one to get the value, one to set the value.
 
 
- 4617 linas     20   0  847584  50612  27156 R 135.2  0.1  23:46.94 guile       
+ 4617 linas     20   0  847584  50612  27156 R 135.2  0.1  23:46.94 guile
 
 (define (rate)
 (define shu (Concept "shu"))
 (define cnt 0)
 (define start (- (current-time) 0.1))
-(define (finc atom) 
+(define (finc atom)
 	(if (eq? 0 (modulo cnt 100000))
 		(begin (display "rate=")
 		(display (/ cnt (- (current-time) start))) (newline)))
@@ -906,7 +906,7 @@ each atom is 136 MB ex tv.
 
 2.9 gb resident, but 1.6M atoms for 215MB size, and 64MB of tlb contents
 what about atomspace?  only 19922 atoms in atomspace...
-heap size is 2GB ... 
+heap size is 2GB ...
 
 Maybe stub out capture-stack? it was the cuplrit before...
 Nope seems to make no difference.
@@ -935,7 +935,7 @@ Try below. ... It does not leak.
 (define (slu)
 (define cnt 0)
 (define start (- (current-time) 0.1))
-(define (mka) 
+(define (mka)
 	(if (eq? 0 (modulo cnt 100000))
 		(begin (display "rate=")
 		(display (/ cnt (- (current-time) start))) (newline)
@@ -1012,7 +1012,7 @@ what if we do one sentence over and over?
 (observe-text "係 拉 丁 字 母 同 阿 剌 伯 數 字 串 字")
 
 run it once, goes from (heap-size . 5963776)  to (heap-size . 20996096)
-run 10 times: (heap-size . 28332032) 
+run 10 times: (heap-size . 28332032)
 It still blows up....
 
 without bang.sh
@@ -1020,7 +1020,7 @@ without bang.sh
 (define (lo)
 (define cnt 0)
 (define start (- (current-time) 0.1))
-(define (mke) 
+(define (mke)
 	(if (eq? 0 (modulo cnt 20))
 		(begin (display "rate=")
 		(display (/ cnt (- (current-time) start))) (newline)
@@ -1037,7 +1037,7 @@ Above is .. wow its stable :
 (heap-size . 21184512) (gc-times . 70)
 (heap-size . 40243200) (gc-times . 242)
 (heap-size . 40243200) (gc-times . 1458)  14:19.43 cpu
-(heap-size . 40243200) (gc-times . 2554)  23:48.49 guile 
+(heap-size . 40243200) (gc-times . 2554)  23:48.49 guile
 
 ssooo .. its something thread-related.  But just having netcat did not do the
 trick. ... using java on one thread doesn't trigger it.  Using observe-text
@@ -1051,13 +1051,13 @@ do we have zombie threads?
 (define (th)
 (define cnt 0)
 (define start (- (current-time) 0.1))
-(define (thu v) (call-with-new-thread (lambda () 
+(define (thu v) (call-with-new-thread (lambda ()
 	(observe-text " 係 拉 丁 字 母 同 阿 剌 伯 數 字 串 字"))))
 
 (define lst (list 1 2 3 4 5 6 7 8 9 0))
 (define lst (make-list 10 42))
 
-(define (mke) 
+(define (mke)
 	(define thl (map thu lst))
 	(length (all-threads))
 	(map join-thread thl)
@@ -1084,7 +1084,7 @@ OK, full production system with the new guile:
 (heap-size . 755843072) (gc-times . 402) 11 minutes CPU
 (heap-size . 797286400) (gc-times . 530) 15 mins cpu
 (heap-size . 1285570560) (gc-times . 1713) 100 mins CPU
-(heap-size . 1546678272) (gc-times . 2251) 140 mins CPU 
+(heap-size . 1546678272) (gc-times . 2251) 140 mins CPU
 
 but is this really new? It was recompiled, but the version number is
 wrong...
@@ -1104,7 +1104,7 @@ guile (GNU Guile) 2.1.5.19-7e9395 (8 Jan 2017)
 (heap-size . 2931556352) (gc-times . 14211) ; 1199 min
 (heap-size . 3302985728) (gc-times . 23278) ; 2186
 
- 
+
 Much improved: an earlier result was:
 (heap-size . 4601581568) (gc-times . 485) ; almost 5GB!
 
@@ -1112,7 +1112,7 @@ Much improved: an earlier result was:
 
 ===========================================
 
-Non-openccog test case showing problem: bug 
+Non-openccog test case showing problem: bug
 https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
 
 (define junk 0)
@@ -1129,7 +1129,7 @@ https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
 	(define thrarg (make-list 10 0))
 
 	(define cnt 0)
-	(define (mke) 
+	(define (mke)
 		; Create a limited number of threads
 		(define thr-list (map mkthr thrarg))
 		; (display (length (all-threads)))
@@ -1159,17 +1159,17 @@ https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
 Gahh seg-faults too
 
 Thread 1 "guile" received signal SIGSEGV, Segmentation fault.
-thread_mark (addr=0x55556a3f9e00, mark_stack_ptr=<optimized out>, 
+thread_mark (addr=0x55556a3f9e00, mark_stack_ptr=<optimized out>,
     mark_stack_limit=0x7fffffffd350, env=<optimized out>)
     at ../../libguile/threads.c:111
 warning: Source file is more recent than executable.
 111	/* No threads; we can just use GC_stackbottom.  */
 (gdb) bt
-#0  thread_mark (addr=0x55556a3f9e00, mark_stack_ptr=<optimized out>, 
+#0  thread_mark (addr=0x55556a3f9e00, mark_stack_ptr=<optimized out>,
     mark_stack_limit=0x7fffffffd350, env=<optimized out>)
     at ../../libguile/threads.c:111
 
-bug-guile@gnu.org 
+bug-guile@gnu.org
 
 https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
 
@@ -1187,7 +1187,7 @@ https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
 (heap-size . 183734272) (gc-times . 1869962)
 (heap-size . 183734272) (gc-times . 8526663)
 
-stochastic gc: 
+stochastic gc:
 (heap-size . 369917952) (gc-times . 40387)
 (heap-size . 428638208) (gc-times . 511116)
 (heap-size . 428638208) (gc-times . 1218770)
@@ -1245,7 +1245,7 @@ dffe495d0de1466f62a91a6d74cc0f388e0f4f3f
 * libguile/threads.c (on_thread_exit): Lessen excess retention.
 12eb7b8256f579fab60ebe0b38eb8788c1276eb8
 
-scm_i_vm_free_stack 
+scm_i_vm_free_stack
 
 =================================================================
 Also 25387
@@ -1262,7 +1262,7 @@ https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387
 	(define cnt 0)
 	(define start (- (current-time) 0.1))
 
-	(define (mke) 
+	(define (mke)
 		(define x (make-dynamic-state (current-dynamic-state)))
 	
 		(set! cnt (+ cnt 1))
@@ -9387,17 +9387,6 @@ exception context!!!
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 GC_MALLOC_ATOMIC GC_malloc_atomic
 scm_gc_malloc_pointerless
 scm_gc_strndup
@@ -13582,13 +13571,13 @@ done.
 =========================================================================
 out-of-control GC
 
-try:  (gc-disable) 
+try:  (gc-disable)
 
 Tomas writes:
 > To just add one more: total memory usage (gc and non-gc) seems to enter
 > the gc triggering heuristics [1] (I couldn't follow in detail how, and
 > I don't know whether this is still valid in the 2.2 branch).
-> 
+>
 > It just might be that Guile is seeing the outrageous process's memory
 > footprint and tries desperately to free some memory (which of course
 > can't suceed in your case because most memory usage isn't "guile's").
@@ -13610,6 +13599,10 @@ Mark Weaver writes:
 and see email about this.
 
 =========================================================================
+=========================================================================
+=========================================================================
+=========================================================================
+
 =========================================================================
 
 2 June 2018
@@ -14168,16 +14161,27 @@ There seem to be no marginals at all, so far... so how is the mrg_test
 working???
 
 (batch-all-pair-mi pca)
+Support: found num left= 137078 num right= 6239997 in 281 secs
 Done with wild-card count N(x,*) and N(*,y) in 43276 secs
 == 12 hours!!!
+
 Done computing N(*,*) total-count= 18489594.0 in 123 secs
-Done computing 8629163 pair MI's in 4368 secs
+Going to do individual pair frequencies
+Done computing 8629163 pairs in 434 secs
+Start computing log P(*,y)
+Done computing 6239997 left-wilds in 206 secs
+Done with -log P(*,y), start -log P(x,*)
+Done computing 137078 right-wilds in 4 secs
+
+Done storing 6239997 left-wilds in 4577 secs
+Done computing 8629163 pair MI's in 4368 secs <<=== typical above so OK
 Finished left entropy subtotals in 37788 secs
+Finished right entropy subtotals in 308 secs
 
 
 
 ----------------
-Kill the unused words
+Kill the unused words --- OK wayyyy too slow for set intersection.
 (define pcs (add-pair-stars pca))
 (define bas (pcs 'left-basis))
 (length bas)   ; 137078
@@ -14199,17 +14203,6 @@ Kill the unused words
 =========================================================================
 =========================================================================
 =========================================================================
-=========================================================================
-OK-ish misses the mark:
-arxiv 1703.08314v1 coecke Interacting conceptual spaces
-
-
-crappier:
-Symbolic, Distributed and Distributional Representations for Natural
-Language Processing in the Era of Deep Learning: a Survey
-arxiv  1702.00764v1
-
-=========================================================================
 NEW TODO LIST
 
 -- word-pairs.pdf in the readings directory ...
@@ -14230,7 +14223,6 @@ NEW TODO LIST
 -- save en_dj_mtwo after cross-marginals
 
 -- In parallel start pair-removal in mfive; this should fit!?
-
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
@@ -14254,22 +14246,50 @@ While waiting for above, write code for:
 
 * export dicts.
 
-* French.
+Merging minor tasks DONE
+------------------------
+* right-stars (of a word) are sections of any shape with the word in
+  The 'left-element, 'right-element concept is borken.
+  left-stars (of a shape) returns sections of fixed shape, but all
+     words in that shape.
+  L-ATOMS are words
+  R-ATOMS are the Eval-predsicle shape
+  so the 'right-element of a right-star is a shape ... which is unique
+  only if the word appeared in it just once; otherwise its ambiguous.
+  So implement 'left-dual and 'right-dual, instead. DONE!
+* Finish symmetric MI in atomspace. DONE
+* Do duals in the cross-connectors. DONE.
+* Computing cosines and entropies for crosses.
+  How does cosine work of the pseudos??? It works cause cosine
+  ignores that it's being done on a WordClass...  DONE (untested)
 
-Quantification:
----------------
+=========================================================================
+
+Coverage Quantification:
+------------------------
+Cite:
 A Closer Look at Skip-gram Modelling
 David Guthrie, Ben Allison, Wei Liu, Louise Guthrie, Yorick Wilks
 LREC 2006
 
-Uses a training set, and then attempts to parse the test set to
+Above uses a training set, and then attempts to parse the test set to
 obtain coverage.  So, here:  statistically:
 1) given a dict, what fraction of the test set is parseable?
 2) earlier queston: what portion was parsable by MST Any skipped words?
 2a) What fraction of MST clique has zero counts on the training data?
 
 =========================================================================
+=========================================================================
+OK-ish misses the mark:
+arxiv 1703.08314v1 coecke Interacting conceptual spaces
 
+
+crappier:
+Symbolic, Distributed and Distributional Representations for Natural
+Language Processing in the Era of Deep Learning: a Survey
+arxiv  1702.00764v1
+
+=========================================================================
 
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.
@@ -14312,14 +14332,15 @@ TODO List
 =========
 * Count single-word probabilities.
 * Redo all the word-pair graphs and charts from wayyy back when.
-* Resume work on morphology.
+* Resume work on morphology. (French)
+* Do the "Coverage Quantification" task, above.
 
 DONE
 ----
 * Make sure that link-parser fully randomizes linkage choices for
   long sentences. Done. See the rand_state and predictable_rand
   flags in version 4.8.3.
-* Need a mutli-language sentence splitter; the maxent splitter only
+* Need a multi-language sentence splitter; the maxent splitter only
   works for English sentences.  Probably something simple will do ...
   Done: copied one from moses-smt and put it in the run subdirectory
 * Raw psql seems not to be utf8.  Were the tables created wrong,
@@ -14349,19 +14370,5 @@ DONE
 * Prune low observation counts. Well, no that is a bad idea.
   However, the (opencog matrix) code now includes data filters.
 * Create an LXC container for public use. DONE.
-  But not updated.... Well no one is interested in thsi so punt.
+  But not updated.... Well no one is interested in this so punt.
 * Implement sql-delete. DONE.
-  right-stars (of a word) are sections of any shape with the word in
-* The 'left-element, 'right-element concept is borken.
-  left-stars (of a shape) returns sections of fixed shape, but all
-     words in that shape.
-  L-ATOMS are words
-  R-ATOMS are the Eval-predsicle shape
-  so the 'right-element of a right-star is a shape ... which is unique
-  only if the word appeared in it just once; otherwise its ambiguous.
-  So implement 'left-dual and 'right-dual, instead. DONE!
-* Finish symmetric MI in atomspace. DONE
-* Do duals in the cross-connectors. DONE.
-* Computing cosines and entropies for crosses.
-  How does cosine work of the pseudos??? It works cause cosine
-  ignores that it's being done on a WordClass...  DONE (untested)
