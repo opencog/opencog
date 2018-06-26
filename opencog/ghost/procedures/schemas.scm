@@ -314,6 +314,68 @@
   fini
 )
 
+; --------------------------------------------------------------
+(define wa-src (def-source "Walfram|Alpha"))
+
+(define wa-appid "")
+(define (set-wa-appid! id)
+"
+  set-wa-appid ID
+
+  Set the Walfram|Alpha AppID to ID, which is needed for using the Walfram|Alpha APIs.
+"
+  (set! wa-appid id))
+
+(define (ask-wolframalpha QUERY)
+  (if (string-null? wa-appid)
+    (cog-logger-debug schema-logger "AppID for Walfram|Alpha has not been set yet!")
+    (begin
+      ; Assign the query to the source and start processing
+      (source-set-query! wa-src QUERY)
+      (source-set-processing! wa-src (stv 1 1))
+
+      (let* ((query-no-spaces
+               (regexp-substitute/global #f " " (string-downcase QUERY) 'pre "+" 'post))
+             (url (string-append
+               "http://api.wolframalpha.com/v2/query?appid="
+                 wa-appid "&input=" query-no-spaces "&format=plaintext"))
+             (body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+             (resp (car (last-pair body)))
+             (ans
+               (find
+                 (lambda (i)
+                   (and (pair? i)
+                        (equal? 'pod (car i))
+                        (equal? 'title (car (cadr (cadr i))))
+                        ; The tags we are looking for
+                        (not (equal? (member (cadr (cadr (cadr i)))
+                          (list "Result" "Definition" "Definitions"
+                                "Basic definition" "Basic information")) #f))))
+                 resp)))
+
+        (if (equal? ans #f)
+          (begin
+            (source-set-result! wa-src "")
+            (source-set-processing! wa-src (stv 0 1))
+            (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!"))
+          (let* ((text-ans (cadr (cadddr (cadddr ans))))
+                 ; Remove '(', ')', and '|' from the answer, if any
+                 (cleaned-ans (string-trim (string-filter
+                     (lambda (c) (not (or (char=? #\( c)
+                                          (char=? #\) c)
+                                          (char=? #\| c)))) text-ans)))
+                 ; Remove newline and split them into words
+                 (ans-1st-line (car (string-split cleaned-ans #\newline))))
+            (source-set-result! wa-src ans-1st-line)
+            (source-set-processing! wa-src (stv 0 1))
+          )
+        )
+      )
+    )
+  )
+)
+
+; --------------------------------------------------------------
 (define (stimulate_words . words)
 "
   stimulate_words WORDS
