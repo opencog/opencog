@@ -14217,28 +14217,11 @@ NEW TODO LIST
    Mass copy from 2009 fractal directory. scripts are lost.
    Create pull req
 
-* left-stars on the cross object are necessarily the List+Var
-  so that the 'left-element returns the star so that the get-pair can make
-  a valid pair.   The stars must not be sections.  
-  Also needed to make 'left-element work for sum-mtm-count
-Crap, This is not workable.
-  XXX No.
-  right-stars (of a word) are sections of any shape with the word in
-     the ctr
-  left-stars (of a shape) returns sections of fixed shape, but all
-     words in that shape.
-  L-ATOMS are words
-  R-ATOMS are the Eval-predsicle shape
-
-  so the 'right-element of a right-star is a shape ... which is unique
-  only if the word appeared in it just once; otherwise its ambiguous.
-
-Make 'left-element etc take more arguments
-viz: 'left-element left-star-pair shape ... is the word in there.
-So 'left-dual and 'right-dual, instead
-
+* Finish elimination of 'left-element, 'right-element in filters.
+* Do duals in the cross-connectors.
 
 -- remove words in en_dj_mtwo not in marginals. IN-PROG
+
    (WordNode "kirtles")
 
 -- save en_dj_mtwo before starting the cross-marginals.
@@ -14249,7 +14232,6 @@ So 'left-dual and 'right-dual, instead
 
 -- In parallel start pair-removal in mfive; this should fit!?
 
--- finish entropy in atomspace
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
@@ -14370,4 +14352,13 @@ DONE
 * Create an LXC container for public use. DONE.
   But not updated.... Well no one is interested in thsi so punt.
 * Implement sql-delete. DONE.
-
+  right-stars (of a word) are sections of any shape with the word in
+* The 'left-element, 'right-element concept is borken.
+  left-stars (of a shape) returns sections of fixed shape, but all
+     words in that shape.
+  L-ATOMS are words
+  R-ATOMS are the Eval-predsicle shape
+  so the 'right-element of a right-star is a shape ... which is unique
+  only if the word appeared in it just once; otherwise its ambiguous.
+  So implement 'left-dual and 'right-dual, instead. DONE!
+* Finish symmetric MI in atomspace. DONE
