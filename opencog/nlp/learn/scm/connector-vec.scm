@@ -281,6 +281,30 @@
 				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
 				body body))
 
+		; Just like above, but return the shape, not the section.
+		(define (right-duals-query WORD)
+			; The WORD must occur somewhere, anywhere in a conector.
+			(define body (Section
+				(Variable "$point")
+				(ConnectorSeq
+					(Glob "$begin")
+					(Connector WORD (Variable "$dir"))
+					(Glob "$end"))))
+
+			(define shape (Evaluation predno
+				(Variable "$point")
+				(Glob "$begin")
+				(Connector star-wild (Variable "$dir"))
+				(Glob "$end")))
+
+			; The types that are matched must be just-so.
+			(Bind (VariableList
+				(TypedVariable (Variable "$point") (Type "WordNode"))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
+				body shape))
+
 		;-------------------------------------------
 		; The left-stars consist of all Sections of a fixed shape,
 		; that shape given by R-ATOM, but with any word occuring
@@ -291,6 +315,11 @@
 			; The types that are matched must be just-so.
 			(Bind (TypedVariable star-wild (Type 'WordNode))
 				body body))
+
+		; Just like above, but return only the words, not the Sections.
+		(define (left-duals-query R-ATOM)
+			(Get (TypedVariable star-wild (Type 'WordNode))
+				(make-pair star-wild R-ATOM)))
 
 		;-------------------------------------------
 		; Explain the non-default provided methods.
