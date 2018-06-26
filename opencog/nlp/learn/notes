@@ -14177,16 +14177,31 @@ Done storing 6239997 left-wilds in 4577 secs
 Done computing 8629163 pair MI's in 4368 secs <<=== typical above so OK
 Finished left entropy subtotals in 37788 secs
 Finished right entropy subtotals in 308 secs
+Finished left MI subtotals in 37692 secs  <<===
+Finished right MI subtotals in 279 secs
+Finished left norm marginals in 34690 secs  <<===
+Finished right norm marginals in 449 secs
+Going to compute the left, right and total entropy
+Finished left norm totals in 21 secs
+Finished right norm totals in 1029 secs
+
+Fuuuuuuuu again.. it was almost done and I screwed it.
+(x-batch pca)
 
 
 
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
+New set intersection idea: 
+sort both lists via cog-atom-less? and then single-pass
+
 (define pcs (add-pair-stars pca))
 (define bas (pcs 'left-basis))
 (length bas)   ; 137078
 (define all-words (cog-get-atoms 'WordNode))
 (length all-words)  ; 851964
+(length no-usar)
+714886
 
 (load-atoms-of-type 'WordNode)
 
@@ -14196,9 +14211,41 @@ Kill the unused words --- OK wayyyy too slow for set intersection.
 
 (length no-usar)
 
-(for-each cog-delete no-usar)
+(define start-time (current-time))
+(for-each cog-delete diff)
+(format #t "Elapsed ~A\n" (- (current-time) start-time))
 
+(define start-time (current-time))
+(define diff (atoms-subtract all-words bas))
+(format #t "Elapsed ~A\n" (- (current-time) start-time))
+
+again ...
 ----------------------------------------
+Elapsed time to load csets: 2993 secs
+21651920 atoms, this time.
+
+851704  words.
+714626  to be deleted
+deletes are super-slow.  Why?
+DELETE FROM Atoms WHERE uuid =
+DELETE FROM Valuations WHERE key = %lu AND atom = %lu;
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)] LIMIT 1;
+
+124  8434500
+select * from atoms where name='regardoient'; is slow ...
+19568878
+
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(47851416 AS BIGINT)] LIMIT 1;
+is super-slow .. why? 
+incoming_index is there ...
+drop incoming index, it still runs at same terrible speed.
+recreate incoming_index ....
+after recreating it, it's now fast. So WTF ...!???
+would vacuum analyze have fixed it???
+
+select count(*) from atoms;
+ 21651928
+
 
 =========================================================================
 =========================================================================
