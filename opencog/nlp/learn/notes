@@ -14186,6 +14186,7 @@ Finished left norm totals in 21 secs
 Finished right norm totals in 1029 secs
 
 Fuuuuuuuu again.. it was almost done and I screwed it.
+start 13:43 expect update after midnight.
 (x-batch pca)
 
 
@@ -14246,6 +14247,21 @@ would vacuum analyze have fixed it???
 select count(*) from atoms;
  21651928
 
+=========================================================================
+ Failed to load cogserver module opencog/modules/libPersistModule.so
+
+=========================================================================
+And again, now for cfive on LXC
+guile -v
+guile (GNU Guile) 2.2.2.13-98461
+
+time createdb en_dj_cfive -T en_pairs_cfive_mst
+real    14m12.700s
+
+guile -l xclean.scm
+(ala 'fetch-pairs)
+(ala 'delete-pairs)
+
 
 =========================================================================
 =========================================================================
@@ -14258,10 +14274,6 @@ NEW TODO LIST
    Create pull req
 
 * Finish elimination of 'left-element, 'right-element in filters.
-
--- remove words in en_dj_mtwo not in marginals. IN-PROG
-
-   (WordNode "kirtles")
 
 -- save en_dj_mtwo before starting the cross-marginals.
 -- start cross-marginals
@@ -14309,6 +14321,7 @@ Merging minor tasks DONE
 * Computing cosines and entropies for crosses.
   How does cosine work of the pseudos??? It works cause cosine
   ignores that it's being done on a WordClass...  DONE (untested)
+* remove words in en_dj_mtwo not in marginals. IN-PROG DONE
 
 =========================================================================
 
