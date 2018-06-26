@@ -763,7 +763,7 @@
 ;; Key for getting a result when processing is complete.
 (define source-result-key (Predicate "result"))
 
-(define* (source name #:optional (input-type 'string) (output-type 'string))
+(define* (def-source name #:optional (input-type 'string) (output-type 'string))
 "
   source NAME [INPUT-TYPE] [OUTPUT-TYPE]
 
