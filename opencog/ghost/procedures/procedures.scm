@@ -838,7 +838,7 @@
   Return SOURCE after recording the RESULT, which is a string. An empty
   string is used to represent no result.
 "
-  (cog-set-value! source source-result-key (StringValue result))
+  (set-value! source source-result-key (StringValue result))
 )
 
 (define (source-result source)
@@ -847,7 +847,7 @@
 
   Returns the result value if.
 "
-  (cog-value source source-result-key)
+  (get-value source source-result-key 0)
 )
 
 (define (source-has-result? source)
@@ -860,7 +860,7 @@
     (cond
       ((equal? (stv 1 1) (source-processing? source)) (stv 0 1))
       ((equal? "" (cog-value-ref result 0)) (stv 0 1))
-      (else (cog-set-value! source result-cache-key result) (stv 1 1))
+      (else (set-value! source result-cache-key result) (stv 1 1))
     )
   )
 )
@@ -871,7 +871,27 @@
 
   Returns the string of the cached-result value.
 "
-  (cog-value-ref (cog-value source result-cache-key) 0)
+  (cog-value-ref (get-value source result-cache-key 0) 0)
+)
+
+(define (set-value! source key value)
+"
+  set-value SOURCE KEY VALUE
+
+  Returns SOURCE after associating KEY with VALUE. It differs from cog-value
+  b/c it uses a LinkValue of values so as to store additional information.
+"
+  (cog-set-value! source key (LinkValue value (FloatValue (current-time-us))))
+)
+
+(define (get-value source key index)
+"
+  get-value SOURCE KEY INDEX
+
+  Returns the value at INDEX of the LinkValue, that is returned when
+  running (cog-value SOURCE KEY).
+"
+  (cog-value-ref (cog-value source key) index)
 )
 
 (define (get-sources)
