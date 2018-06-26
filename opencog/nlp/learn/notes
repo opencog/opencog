@@ -14218,7 +14218,6 @@ NEW TODO LIST
    Create pull req
 
 * Finish elimination of 'left-element, 'right-element in filters.
-* Do duals in the cross-connectors.
 
 -- remove words in en_dj_mtwo not in marginals. IN-PROG
 
@@ -14227,7 +14226,7 @@ NEW TODO LIST
 -- save en_dj_mtwo before starting the cross-marginals.
 -- start cross-marginals
 -- show graph distribution of mi of word-dj pairs in mtwo
-   (or verify it wss previously graphed)
+   (or verify it was previously graphed)
 -- save en_dj_mtwo after cross-marginals
 
 -- In parallel start pair-removal in mfive; this should fit!?
@@ -14243,19 +14242,19 @@ NEW TODO LIST
     cross-connectors.
 (2a) as above.
 
-(3) show distribution of the sums, above.
+(3) Scatterplot of pseudo-cset MI vs. cross-MI.
+
+(4) show distribution of the sums, above.
 
 While waiting for above, write code for:
-(a) Merging crosses
-(b) computing cosines and entropies for crosses.
+* Merging crosses.  Do it same way as for pseudo-disjuncts,
+  just with independent parameter.
+  `merge-disambig` uses cosines to do fractionals.
+  Should this use MI in some way?
 
--- merge styles redux.
-   * Fractional overlap merges for pseudo-disjuncts as it now is.
-   * Fractional overlap in crosses, as well ...
+* export dicts.
 
-export dicts.
-
-French.
+* French.
 
 Quantification:
 ---------------
@@ -14362,3 +14361,7 @@ DONE
   only if the word appeared in it just once; otherwise its ambiguous.
   So implement 'left-dual and 'right-dual, instead. DONE!
 * Finish symmetric MI in atomspace. DONE
+* Do duals in the cross-connectors. DONE.
+* Computing cosines and entropies for crosses.
+  How does cosine work of the pseudos??? It works cause cosine
+  ignores that it's being done on a WordClass...  DONE (untested)

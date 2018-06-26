@@ -114,6 +114,8 @@
 		(define any-left (AnyNode "cross-connector word"))
 		(define any-right (AnyNode "cross-connector section"))
 
+		; Well, left-type can also be a WordClassNode, but we lie
+		; about that, here.
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'EvaluationLink)
 		(define (get-pair-type) 'Section)
@@ -187,8 +189,10 @@
 
 		; -------------------------------------------------------
 		; Stars API.
+		; Get both the Words and the WordClasses; put WordClasses first.
 		(define (get-left-basis)
-			(if (null? l-basis) (set! l-basis (cog-get-atoms 'WordNode)))
+			(if (null? l-basis) (set! l-basis
+				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode)))
 			l-basis)
 
 		(define (get-right-basis)
@@ -275,7 +279,8 @@
 
 			; The types that are matched must be just-so.
 			(Bind (VariableList
-				(TypedVariable (Variable "$point") (Type "WordNode"))
+				(TypedVariable (Variable "$point")
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
 				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
 				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
 				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
@@ -299,7 +304,8 @@
 
 			; The types that are matched must be just-so.
 			(Bind (VariableList
-				(TypedVariable (Variable "$point") (Type "WordNode"))
+				(TypedVariable (Variable "$point")
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
 				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
 				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
 				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
@@ -313,12 +319,14 @@
 			(define body (make-pair star-wild R-ATOM))
 
 			; The types that are matched must be just-so.
-			(Bind (TypedVariable star-wild (Type 'WordNode))
+			(Bind (TypedVariable star-wild
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
 				body body))
 
 		; Just like above, but return only the words, not the Sections.
 		(define (left-duals-query R-ATOM)
-			(Get (TypedVariable star-wild (Type 'WordNode))
+			(Get (TypedVariable star-wild
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
 				(make-pair star-wild R-ATOM)))
 
 		;-------------------------------------------
@@ -354,6 +362,7 @@
 				((wild-wild)        get-wild-wild)
 				((fetch-pairs)      fetch-sections)
 
+				; Methods provided for the add-pair-stars API
 				((left-basis)         get-left-basis)
 				((right-basis)        get-right-basis)
 				((left-basis-size)    get-left-size)
@@ -363,6 +372,7 @@
 				((left-dual-pattern)  left-duals-query)
 				((right-dual-pattern) right-duals-query)
 
+				; Custom call. These need to be explicitly made.
 				((make-left-stars)  create-connector-left-stars)
 
 				((provides)         provides)
