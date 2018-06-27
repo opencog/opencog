@@ -89,9 +89,6 @@ private:
     std::vector<PythonAgentFactory*> _agentFactories;
     std::vector<PythonRequestFactory*> _requestFactories;
 
-    // Main thread state only.
-    PyThreadState* _mainstate;
-
     bool preloadModules();
     bool unregisterAgentsAndRequests();
 public:
