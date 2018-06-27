@@ -355,14 +355,14 @@
 )
 
 ; --------------------------------------------------------------
-(define wa-src (def-source "Walfram|Alpha" "ask-wolframalpha"))
+(define wa-src (def-source "Wolfram|Alpha" "ask-wolframalpha"))
 
 (define wa-appid "")
 (define (set-wa-appid! id)
 "
   set-wa-appid ID
 
-  Set the Walfram|Alpha AppID to ID, which is needed for using the Walfram|Alpha APIs.
+  Set the Wolfram|Alpha AppID to ID, which is needed for using the Wolfram|Alpha APIs.
 "
   (set! wa-appid id))
 
@@ -535,5 +535,33 @@
   (for-each
     (lambda (r) (cog-set-sti! (get-rule-from-alias (cog-name r)) 0))
     rule-labels)
+  fini
+)
+
+; --------------------------------------------------------------
+; The module name must be captured during compile/load time, as it differs
+; during runtime.
+(define this-module (current-module))
+(define* (send_query query #:optional source)
+"
+  send_query QUERY [SOURCE]
+
+  Calls the interface of SOURCE with name of the node passed
+"
+  (define query-str
+    (if (equal? 'ListLink (cog-type query))
+      (string-join (map cog-name (cog-outgoing-set query)) " ")
+      (cog-name query)
+    ))
+
+  (define (spawn-source src)
+    (call-with-new-thread (lambda ()
+      (eval-string (format #f "(~a ~s)" (source-func-name src) query-str)
+		    ))))
+
+  (if source
+    (spawn-source (Concept (cog-name source)))
+    (par-map spawn-source (get-sources))
+  )
   fini
 )

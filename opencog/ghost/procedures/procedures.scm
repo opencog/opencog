@@ -1,6 +1,8 @@
 (define-module (opencog ghost procedures)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 regex)
+  #:use-module (ice-9 threads)
+  #:use-module (ice-9 eval-string)
   #:use-module (srfi srfi-1)
   #:use-module (sxml simple)
   #:use-module (web client)
@@ -77,6 +79,13 @@
     saccade_explore
     saccade_listen
     saccade_cancel
+
+    ; Source schemas
+    send_query
+
+    ; Source interfaces ; This need to public so to be callable by send_query
+    ask-duckduckgo
+    ask-wolframalpha
 
     ; Utilities
     set-dti!
@@ -804,7 +813,7 @@
 
   Returns the name of the function that acts the interface for SOURCE.
 "
-  (cog-value source source-func-name-key)
+  (cog-value-ref (cog-value source source-func-name-key) 0)
 )
 
 (define (source-set-query! source query)
