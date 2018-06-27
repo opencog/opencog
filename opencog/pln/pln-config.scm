@@ -41,7 +41,7 @@
 (define config-dir (dirname (current-filename)))
 (define (prepend-config-dir fp) (string-append config-dir "/" fp))
 (define rule-files (list "rules/term/deduction.scm"
-                         "rules/wip/modus-ponens.scm"))
+                         "rules/propositional/modus-ponens.scm"))
 (for-each (lambda (fp) (load (prepend-config-dir fp))) rule-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
