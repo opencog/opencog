@@ -539,14 +539,13 @@
 )
 
 ; --------------------------------------------------------------
-; The module name must be captured during compile/load time, as it differs
-; during runtime.
-(define this-module (current-module))
 (define* (send_query query #:optional source)
 "
   send_query QUERY [SOURCE]
 
-  Calls the interface of SOURCE with name of the node passed
+  Calls the interface of SOURCE with name of the node or the concatenation
+  of the names of the Nodes in a ListLink. If SOURCE is not specified then
+  the query is passed to all the sources.
 "
   (define query-str
     (if (equal? 'ListLink (cog-type query))
@@ -556,8 +555,7 @@
 
   (define (spawn-source src)
     (call-with-new-thread (lambda ()
-      (eval-string (format #f "(~a ~s)" (source-func-name src) query-str)
-		    ))))
+      (eval-string (format #f "(~a ~s)" (source-func-name src) query-str)))))
 
   (if source
     (spawn-source (Concept (cog-name source)))
