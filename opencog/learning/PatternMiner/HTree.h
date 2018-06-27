@@ -98,17 +98,6 @@ public:
           max_b_subpattern_num(0) {}
 };
 
-class HTree
-{
-public:
-    HTreeNode* rootNode;
-
-    HTree()
-    {
-        rootNode = new HTreeNode(); // the rootNode with no parents
-    }
-};
-
 } // ~namespace PatterMining
 
 using namespace PatternMining;
@@ -136,8 +125,6 @@ std::string oc_to_string(const std::set<HTreeNode*>& htrees,
 std::string oc_to_string(const HTreeNode* htnptr,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HTreeNode& htn,
-                         const std::string& indent=empty_string);
-std::string oc_to_string(const HTree& htree,
                          const std::string& indent=empty_string);
 
 /**

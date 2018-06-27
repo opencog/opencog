@@ -2716,7 +2716,6 @@ PatternMiner::~PatternMiner()
 // make sure it is called after reSetAllSettingsFromConfig
 void PatternMiner::initPatternMiner()
 {
-    htree = new HTree();
     as = new AtomSpace(&original_as);
 
 //    FrequencyHandle = as->add_node(CONCEPT_NODE, "Frequency");
@@ -2732,8 +2731,6 @@ void PatternMiner::initPatternMiner()
 
     cur_gram = 0;
 
-    htree = nullptr;
-
     observing_as = nullptr;
 
     patternsForGram.resize(param.MAX_GRAM);
@@ -2744,12 +2741,6 @@ void PatternMiner::initPatternMiner()
 // release everything
 void PatternMiner::cleanUpPatternMiner()
 {
-
-    if (htree != nullptr)
-    {
-        delete htree;
-        htree = nullptr;
-    }
 
     if (as != nullptr)
     {

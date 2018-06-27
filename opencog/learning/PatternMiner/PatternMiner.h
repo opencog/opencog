@@ -164,7 +164,6 @@ class PatternMiner
 
 protected:
 
-    HTree* htree;
     AtomSpace* as;              // AtomSpace holding the patterns
     AtomSpace& original_as;
     AtomSpace* observing_as;
