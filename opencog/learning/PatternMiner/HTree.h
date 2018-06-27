@@ -28,6 +28,7 @@
 #include <map>
 #include <vector>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -112,19 +113,32 @@ public:
 
 using namespace PatternMining;
 
-std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm);
-std::string oc_to_string(const std::vector<SuperRelation_b>& srbs);
-std::string oc_to_string(const std::vector<SubRelation_b>& srbs);
-std::string oc_to_string(const SuperRelation_b& srb);
-std::string oc_to_string(const SubRelation_b& srb);
-std::string oc_to_string(const ExtendRelation& extrel);
-std::string oc_to_string(const std::vector<ExtendRelation>& extrel);
-std::string oc_to_string(const std::vector<std::vector<HTreeNode*>>& htrees);
-std::string oc_to_string(const std::vector<HTreeNode*>& htrees);
-std::string oc_to_string(const std::set<HTreeNode*>& htrees);
-std::string oc_to_string(const HTreeNode* htnptr);
-std::string oc_to_string(const HTreeNode& htn);
-std::string oc_to_string(const HTree& htree);
+std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const std::vector<SuperRelation_b>& srbs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const std::vector<SubRelation_b>& srbs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const SuperRelation_b& srb,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const SubRelation_b& srb,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const ExtendRelation& extrel,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const std::vector<ExtendRelation>& extrel,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const std::vector<std::vector<HTreeNode*>>& htrees,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const std::vector<HTreeNode*>& htrees,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const std::set<HTreeNode*>& htrees,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HTreeNode* htnptr,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HTreeNode& htn,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HTree& htree,
+                         const std::string& indent=empty_string);
 
 /**
  * Template to simplify opencog container string convertion. Name is

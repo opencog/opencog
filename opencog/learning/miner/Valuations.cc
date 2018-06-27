@@ -224,11 +224,6 @@ std::string oc_to_string(const SCValuations& scv, const std::string& indent)
 	return ss.str();
 }
 
-std::string oc_to_string(const SCValuations& scv)
-{
-	return oc_to_string(scv, "");
-}
-
 std::string oc_to_string(const SCValuationsSet& scvs, const std::string& indent)
 {
 	std::stringstream ss;
@@ -243,11 +238,6 @@ std::string oc_to_string(const SCValuationsSet& scvs, const std::string& indent)
 	return ss.str();
 }
 
-std::string oc_to_string(const SCValuationsSet& scvs)
-{
-	return oc_to_string(scvs, "");
-}
-
 std::string oc_to_string(const Valuations& valuations, const std::string& indent)
 {
 	std::stringstream ss;
@@ -257,11 +247,6 @@ std::string oc_to_string(const Valuations& valuations, const std::string& indent
 	ss << indent << "scvaluations set:" << std::endl
 	   << oc_to_string(valuations.scvs, indent + OC_TO_STRING_INDENT);
 	return ss.str();
-}
-
-std::string oc_to_string(const Valuations& valuations)
-{
-	return oc_to_string(valuations, "");
 }
 
 std::string oc_to_string(const HandleValuationsMap& h2vals, const std::string& indent)
@@ -278,11 +263,6 @@ std::string oc_to_string(const HandleValuationsMap& h2vals, const std::string& i
 		++i;
 	}
 	return ss.str();
-}
-
-std::string oc_to_string(const HandleValuationsMap& h2vals)
-{
-	return oc_to_string(h2vals, "");
 }
 
 } // namespace opencog
