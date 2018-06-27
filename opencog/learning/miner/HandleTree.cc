@@ -131,11 +131,6 @@ std::string oc_to_string(const HandleTree& ht, const std::string& indent)
 	return ss.str();
 }
 
-std::string oc_to_string(const HandleTree& ht)
-{
-	return oc_to_string(ht, "");
-}
-
 std::string oc_to_string(const HandleMapTree& hmt, const std::string& indent)
 {
 	// TODO: show the hierarchy
@@ -148,11 +143,6 @@ std::string oc_to_string(const HandleMapTree& hmt, const std::string& indent)
 		++i;
 	}
 	return ss.str();
-}
-
-std::string oc_to_string(const HandleMapTree& hmt)
-{
-	return oc_to_string(hmt, "");
 }
 
 std::string oc_to_string(const HandleHandleTreeMap& hhtm, const std::string& indent)
@@ -168,11 +158,6 @@ std::string oc_to_string(const HandleHandleTreeMap& hhtm, const std::string& ind
 		++i;
 	}
 	return ss.str();
-}
-
-std::string oc_to_string(const HandleHandleTreeMap& hhtm)
-{
-	return oc_to_string(hhtm, "");
 }
 
 } // ~namespace opencog
