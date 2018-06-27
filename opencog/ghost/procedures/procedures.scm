@@ -776,13 +776,17 @@
 ;; Key for caching result after running result. This is for ghost purposes and
 ;; shouldn't be used by sources.
 (define result-cache-key (Predicate "cached-result"))
+;; Key used for recording the function name that is called with the query.
+(define source-func-name-key (Predicate "func-name"))
 
-(define* (def-source name #:optional (input-type 'string) (output-type 'string))
+(define* (def-source name func-name #:optional (input-type 'string)
+                     (output-type 'string))
 "
-  source NAME [INPUT-TYPE] [OUTPUT-TYPE]
+  def-source NAME FUNC-NAME [INPUT-TYPE] [OUTPUT-TYPE]
 
-  Returns the atom that represents a source that is identified by NAME.
-  INPUT-TYPE and OUTPUT-TYPE are set to 'string by default.
+  Returns the atom that represents a source that is identified by NAME after
+  recording the name of the function, FUNC-NAME, that is an interface to
+  the source. INPUT-TYPE and OUTPUT-TYPE are set to 'string by default.
 
   TODO: Define other types of inputs and outputs.
 "
@@ -791,7 +795,16 @@
   (cog-set-value! src source-query-key (StringValue ""))
   (cog-set-value! src source-processing-key (stv 0 1))
   (cog-set-value! src source-result-key (StringValue ""))
-  src
+  (cog-set-value! src source-func-name-key (StringValue func-name))
+)
+
+(define (source-func-name source)
+"
+  source-func-name SOURCE
+
+  Returns the name of the function that acts the interface for SOURCE.
+"
+  (cog-value source source-func-name-key)
 )
 
 (define (source-set-query! source query)

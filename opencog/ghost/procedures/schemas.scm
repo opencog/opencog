@@ -315,7 +315,7 @@
 )
 
 ; --------------------------------------------------------------
-(define ddg-src (def-source "DuckDuckGo"))
+(define ddg-src (def-source "DuckDuckGo" "ask-duckduckgo"))
 
 (define (ask-duckduckgo query)
   ; A very crude and limited way to get the first sentence
@@ -355,7 +355,7 @@
 )
 
 ; --------------------------------------------------------------
-(define wa-src (def-source "Walfram|Alpha"))
+(define wa-src (def-source "Walfram|Alpha" "ask-wolframalpha"))
 
 (define wa-appid "")
 (define (set-wa-appid! id)
