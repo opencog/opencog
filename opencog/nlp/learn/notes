@@ -14260,7 +14260,17 @@ real    14m12.700s
 
 guile -l xclean.scm
 (ala 'fetch-pairs)
+Elapsed time to load ANY-link pairs: 3188 secs
+sql-stats: Atomspace holds 58896045 atoms
+top: 75.290g  == 78947524 KB psaux
+(print-matrix-summary-report ala)  -- same as for cfive_mst, as expected.
+(cog-report-counts)
+((ListLink . 29136245) (EvaluationLink . 29136245) (SchemaNode . 1)
+(PredicateNode . 8) (AnchorNode . 1) (WordNode . 623548) (AnyNode . 2)
+(LinkGrammarRelationshipNode . 1))
+
 (ala 'delete-pairs)
+running at 500/second, need 116544.98 seconds == 32 hours!  Yow!
 
 
 =========================================================================
@@ -14282,6 +14292,7 @@ NEW TODO LIST
 -- save en_dj_mtwo after cross-marginals
 
 -- In parallel start pair-removal in mfive; this should fit!?
+   Yes, IN PROGRESS
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
