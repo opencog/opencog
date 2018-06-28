@@ -317,10 +317,18 @@
   Returns (stv 1 1) if SOURCE has a result and (stv 0 1) if not. If SOURCE
   is not passed then it will check if all the sources have any answer.
 "
+  (define (has-result? src)
+    (let ((sent (cog-value src source-latest-sent-key)))
+      ; Sometimes a check maybe run before any query is made to the source.
+      (if (null? sent)
+        (stv 0 1)
+        (source-has-result? sent src))
+    ))
+
   (cond
-    (source (source-has-result? source))
-    ((any (lambda (x) (equal? (stv 1 1) (source-has-result? x))) (get-sources))
-       (stv 1 1))
+    (source (has-result? source))
+    ((any (lambda (x) (equal? (stv 1 1) (has-result? x))) (get-sources))
+      (stv 1 1))
     (else (stv 0 1))
   )
 )

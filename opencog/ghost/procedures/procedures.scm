@@ -777,11 +777,12 @@
 (define source-node (Concept "source"))
 
 ; Define keys used by sources.
-;; Key for latest query passed.
+;; Key for query passed to a source.
 (define source-query-key (Predicate "query"))
 ;; Key used for recording the function name that is called with the query.
 (define source-func-name-key (Predicate "func-name"))
-
+;; Key used for recording the latest sentence passed for processing.
+(define source-latest-sent-key (Predicate "last-sentence"))
 
 (define* (def-source name func-name #:optional (input-type 'string)
                      (output-type 'string))
@@ -852,20 +853,22 @@
 "
   source-set-result SENT SOURCE RESULT
 
-  Return SENT after recording the RESULT from SOURCE for the query extracted
-  from it. An empty string is used to represent no result.
+  Record the RESULT from SOURCE for the query extracted from SENT.
+  An empty string is used to represent no result.
 
   It also signals that processing is completed.
 "
-  (source-set-processing! source sent (stv 0 1))
+  ; The order here matters for source-has-result?
   (set-value! sent source (StringValue result))
+  (source-set-processing! source sent (stv 0 1))
+  *unspecified*
 )
 
 (define (source-result sent source)
 "
   source-result SENT SOURCE
 
-  Returns the result value from SOURCE for the query extracted from SENT.
+  Returns the result value for the sentence SENT processed by SOURCE.
 "
   (get-value sent source 0)
 )
@@ -877,8 +880,9 @@
   Returns (stv 1 1) if SOURCE has a result for the query extracted from SENT
   else it returns (stv 0 1).
 "
-  (let ((result (source-result source))
+  (let ((result (source-result sent source))
     (sp (source-processing? source sent)))
+    ; The order here is dependent on source-set-result!
     (cond
       ((or (equal? '() sp) (equal? (stv 1 1) sp)) (stv 0 1))
       ((string-null? (cog-value-ref result 0)) (stv 0 1))
@@ -887,24 +891,28 @@
   )
 )
 
-(define (set-value! source key value)
+(define (set-value! sent source value)
 "
-  set-value SOURCE KEY VALUE
+  set-value! SENT SOURCE VALUE
 
-  Returns SOURCE after associating KEY with VALUE. It differs from cog-value
-  b/c it uses a LinkValue of values so as to store additional information.
+  Returns SENT after associating SOURCE with VALUE. It differs from cog-value
+  b/c it uses a LinkValue of values so as to store time information.
 "
-  (cog-set-value! source key (LinkValue value (FloatValue (current-time-us))))
+  (cog-set-value! sent source (LinkValue value (FloatValue (current-time-us))))
 )
 
-(define (get-value source key index)
+(define (get-value sent source index)
 "
-  get-value SOURCE KEY INDEX
+  get-value SENT SOURCE INDEX
 
   Returns the value at INDEX of the LinkValue, that is returned when
-  running (cog-value SOURCE KEY).
+  running (cog-value SENT SOURCE).
 "
-  (cog-value-ref (cog-value source key) index)
+  (let ((link-value (cog-value sent source)))
+    (if (null? link-value)
+      link-value
+      (cog-value-ref link-value index))
+  )
 )
 
 (define (get-sources)
