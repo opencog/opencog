@@ -50,7 +50,7 @@
 ; Utilities
 
 (define (get-rules tag) (cog-chase-link 'MemberLink 'ImplicationLink tag))
-(define (chat utt) (State input-utterance (car (nlp-parse utt))) (newline))
+(define (chat utt) (State input-utterance (cdr (nlp-parse utt))) (newline))
 
 ;-------------------------------------------------------------------------------
 ; Define two demands, with default values.
@@ -162,6 +162,7 @@
 ; These rules change the demand values whenever there is an input utterance
 
 (Member
+    perception-rule
     (psi-rule
         (list (Not (Equal (Set no-input-utterance)
             (Get (State input-utterance (Variable "$x"))))))
@@ -171,7 +172,6 @@
         (stv 1 1)
         sociality
     )
-    perception-rule
 )
 
 ;----------
@@ -187,6 +187,7 @@
 ; Utility for building the chat rules.
 (define (make-rule OUT-UTT DEMAND AMT W)
     (Member
+        chat-rule
         (psi-rule
             (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match")
                 (List in_utt)))
@@ -196,7 +197,6 @@
             W
             DEMAND
         )
-        chat-rule
     )
 )
 
@@ -212,6 +212,7 @@
 ; The default reply, if there is no matching rule in the system.
 
 (Member
+    chat-rule
     (psi-rule
         (list
             (Not (Equal (Set no-input-utterance)
@@ -227,7 +228,6 @@
         (stv 1 1)
         sociality
     )
-    chat-rule
 )
 
 ;---------------------------------------------------------------------
