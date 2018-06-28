@@ -8,41 +8,7 @@
 
 #ifdef HAVE_GUILE
 
-#include <opencog/atoms/base/Link.h>
-#include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/guile/SchemePrimitive.h>
-
-namespace opencog {
-
-class AttentionSCM
-{
-	protected:
-		static void* init_in_guile(void*);
-		static void init_in_module(void*);
-		void init(void);
-	public:
-		AttentionSCM(void);
-		~AttentionSCM();
-
-		AttentionValuePtr get_av(const Handle&);
-		Handle set_av(const Handle&, const AttentionValuePtr&);
-		Handle inc_vlti(const Handle&);
-		Handle dec_vlti(const Handle&);
-
-		Handle update_af(int);
-		int af_size(void);
-		int set_af_size(int);
-		Handle stimulate (const Handle&, double);
-
-		Handle af_bindlink(const Handle&);
-};
-
-}
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemePrimitive.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/attentionbank/AFImplicator.h>
+#include "AttentionSCM.h"
 
 using namespace opencog;
 
@@ -146,55 +112,28 @@ int AttentionSCM::set_af_size (int ssize)
  */
 Handle AttentionSCM::update_af(int n)
 {
+	HandleSeq attentionalFocus;
+
 	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-af");
 
-	Handle af_anchor = atomspace->add_node(ANCHOR_NODE,
-	                               "*-attentional-focus-boundary-*");
+	Handle af_anchor = atomspace->add_node(ANCHOR_NODE, "*-attentional-focus-boundary-*");
+	Handle af_key = atomspace->add_node(PREDICATE_NODE, "AttentionalFocus");
 
-	// Get the atoms that were previously in attention focus
-	IncomingSet paf(af_anchor->getIncomingSetByType(MEMBER_LINK));
-	HandleSet prev_af;
-	for (const LinkPtr& lp: paf)
-	{
-		Handle h(lp->getOutgoingAtom(0));
-		if (h != af_anchor)
-			prev_af.insert(h);
-	}
-
-	HandleSeq attentionalFocus;
 	attentionbank(atomspace).get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
 	size_t isz = attentionalFocus.size();
 
 	size_t N = isz;
 	if (0 < n) N = n;
 	if( N > isz)  N = isz;
+	std::reverse(attentionalFocus.begin(), attentionalFocus.end());
+	attentionalFocus.resize(N);
 
-	/* Add all the atoms in the current attentional focus that are not
-	 * already there. */
-	HandleSet curr_af;
-	for (size_t i = isz - N; i < isz; i++)
-	{
-		Handle hi = attentionalFocus[i];
-		auto gone = prev_af.find(hi);
-		if (prev_af.end() == gone)
-		{
-			atomspace->add_link(MEMBER_LINK, hi, af_anchor);
-		}
-		else
-		{
-			curr_af.insert(hi);
-		}
+	std::vector<ProtoAtomPtr> af;
+	for (Handle& h : attentionalFocus) {
+		af.push_back(h);
 	}
 
-	/* Remove the atoms no longer in attentional focus */
-	for (const Handle& h: prev_af)
-	{
-		auto gone = curr_af.find(h);
-		if (curr_af.end() == gone)
-		{
-			atomspace->extract_atom(h);
-		}
-	}
+	af_anchor->setValue(af_key, createLinkValue(af));
 
 	return af_anchor;
 }
