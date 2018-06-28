@@ -317,7 +317,8 @@
 ; --------------------------------------------------------------
 (define ddg-src (def-source "DuckDuckGo" "ask-duckduckgo"))
 
-(define (ask-duckduckgo query)
+(define (ask-duckduckgo sent)
+  (define query (source-query sent))
   ; A very crude and limited way to get the first sentence
   ; from the respond, but is OK in this context
   ; TODO: Replace by an actual sentence splitter
@@ -330,9 +331,6 @@
     )
   )
 
-  ; Assign the query to the source and start processing
-  (source-set-query! ddg-src query)
-
   (let* ((url (string-append "http://api.duckduckgo.com/?q="
            (string-downcase query) "&format=xml"))
          (body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
@@ -342,11 +340,11 @@
 
     (if (equal? (length abstract) 1)
       (begin
-        (source-set-result! ddg-src "")
+        (source-set-result! ddg-src sent "")
         (cog-logger-debug schema-logger "No answer found from DuckDuckGo!"))
       (let* ((ans (car (cdr abstract)))
              (ans-1st-sent (get-first-sentence ans)))
-        (source-set-result! ddg-src ans-1st-sent))
+        (source-set-result! sent ddg-src ans-1st-sent))
     )
   )
 )
@@ -363,47 +361,42 @@
 "
   (set! wa-appid id))
 
-(define (ask-wolframalpha query)
+(define (ask-wolframalpha sent)
+  (define query (source-query sent))
   (if (string-null? wa-appid)
     (cog-logger-debug schema-logger "AppID for Walfram|Alpha has not been set yet!")
-    (begin
-      ; Assign the query to the source and start processing
-      (source-set-query! wa-src query)
+    (let* ((query-no-spaces
+             (regexp-substitute/global #f " " (string-downcase query) 'pre "+" 'post))
+           (url (string-append
+             "http://api.wolframalpha.com/v2/query?appid="
+               wa-appid "&input=" query-no-spaces "&format=plaintext"))
+           (body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+           (resp (car (last-pair body)))
+           (ans
+             (find
+               (lambda (i)
+                 (and (pair? i)
+                      (equal? 'pod (car i))
+                      (equal? 'title (car (cadr (cadr i))))
+                      ; The tags we are looking for
+                      (not (equal? (member (cadr (cadr (cadr i)))
+                        (list "Result" "Definition" "Definitions"
+                              "Basic definition" "Basic information")) #f))))
+               resp)))
 
-      (let* ((query-no-spaces
-               (regexp-substitute/global #f " " (string-downcase query) 'pre "+" 'post))
-             (url (string-append
-               "http://api.wolframalpha.com/v2/query?appid="
-                 wa-appid "&input=" query-no-spaces "&format=plaintext"))
-             (body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
-             (resp (car (last-pair body)))
-             (ans
-               (find
-                 (lambda (i)
-                   (and (pair? i)
-                        (equal? 'pod (car i))
-                        (equal? 'title (car (cadr (cadr i))))
-                        ; The tags we are looking for
-                        (not (equal? (member (cadr (cadr (cadr i)))
-                          (list "Result" "Definition" "Definitions"
-                                "Basic definition" "Basic information")) #f))))
-                 resp)))
-
-        (if (equal? ans #f)
-          (begin
-            (source-set-result! wa-src "")
-            (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!"))
-          (let* ((text-ans (cadr (cadddr (cadddr ans))))
-                 ; Remove '(', ')', and '|' from the answer, if any
-                 (cleaned-ans (string-trim (string-filter
-                     (lambda (c) (not (or (char=? #\( c)
-                                          (char=? #\) c)
-                                          (char=? #\| c)))) text-ans)))
-                 ; Remove newline and split them into words
-                 (ans-1st-line (car (string-split cleaned-ans #\newline))))
-            (source-set-result! wa-src ans-1st-line)
-            (source-set-processing! wa-src (stv 0 1))
-          )
+      (if (equal? ans #f)
+        (begin
+          (source-set-result! wa-src sent "")
+          (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!"))
+        (let* ((text-ans (cadr (cadddr (cadddr ans))))
+               ; Remove '(', ')', and '|' from the answer, if any
+               (cleaned-ans (string-trim (string-filter
+                   (lambda (c) (not (or (char=? #\( c)
+                                        (char=? #\) c)
+                                        (char=? #\| c)))) text-ans)))
+               ; Remove newline and split them into words
+               (ans-1st-line (car (string-split cleaned-ans #\newline))))
+          (source-set-result! sent wa-src ans-1st-line)
         )
       )
     )
@@ -544,6 +537,7 @@
 
   It also signals that processing has started.
 "
+  (define sent (ghost-get-curr-sent))
   (define query-str
     (if (equal? 'ListLink (cog-type query))
       (string-join (map cog-name (cog-outgoing-set query)) " ")
@@ -552,8 +546,9 @@
 
   (define (spawn-source src)
     (call-with-new-thread (lambda ()
-      (source-set-processing! src (stv 1 1))
-      (eval-string (format #f "(~a ~s)" (source-func-name src) query-str)))))
+      (source-set-query! sent query-str)
+      (source-set-processing! src sent (stv 1 1))
+      (eval-string (format #f "(~a ~a)" (source-func-name src) sent)))))
 
   (if source
     (spawn-source (Concept (cog-name source)))
