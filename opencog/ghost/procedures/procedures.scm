@@ -859,8 +859,11 @@
 
   Return SOURCE after recording the RESULT, which is a string. An empty
   string is used to represent no result.
+
+  It also signals that processing is completed.
 "
   (set-value! source source-result-key (StringValue result))
+  (source-set-processing! source (stv 0 1))
 )
 
 (define (source-result source)
