@@ -644,7 +644,7 @@ class Fishgram:
                         members.add(member)
 
                     for member in members:
-                        memberlink = Tree('MemberLink', [member, concept])
+                        memberlink = Tree('MemberLink', [concept, member])
                         #print memberlink
                         link = atom_from_tree(memberlink, self.atomspace)
                         link.tv = DEFAULT_TV
