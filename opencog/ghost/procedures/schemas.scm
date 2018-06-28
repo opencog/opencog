@@ -546,9 +546,11 @@
 
   (define (spawn-source src)
     (call-with-new-thread (lambda ()
-      (source-set-query! sent query-str)
+      (cog-set-value! src source-latest-sent-key sent)
       (source-set-processing! src sent (stv 1 1))
       (eval-string (format #f "(~a ~a)" (source-func-name src) sent)))))
+
+  (source-set-query! sent query-str)
 
   (if source
     (spawn-source (Concept (cog-name source)))
