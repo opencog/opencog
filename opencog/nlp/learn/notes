@@ -13234,12 +13234,12 @@ zen_pairs_three
 
 why so slow?
 ---
-SELECT key FROM Valuations WHERE atom = 
+SELECT key FROM Valuations WHERE atom =
 SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
 SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;
 DELETE FROM Valuations WHERE key = %lu AND atom = %lu
 
-\di+ 
+\di+
 !!Missing:
 CREATE INDEX ON Valuations (key);  but not needed either...
 queue them up...
@@ -13302,7 +13302,7 @@ no leak with update-counts
 no leak with delete-sentence either. WTF
 
 1028 with 0
-Bingo! 
+Bingo!
 Now  1345 with 0
 
 -------------------------------------------
@@ -13326,7 +13326,7 @@ I think this is in en_pairs_rfive_mtwo on fanny.
  86498236 |     1 |   89 |      0 | *-SimKey cset cut-50-50-10 |
  86355966 |     1 |   89 |      0 | *-Cosine Sim Key-*         |
 
-select count(*) from valuations where key=86498236; --  142270 = 
+select count(*) from valuations where key=86498236; --  142270 =
 select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
 
 -- Need to re-graph cos sim for this much larger set.
@@ -13336,7 +13336,7 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
    there are 1058120  sims of length > 0.1
 
 	(define n 0)
-   (cog-map-type (lambda (ato) (set! n (+ n 1)) #f) 'WordNode) 
+   (cog-map-type (lambda (ato) (set! n (+ n 1)) #f) 'WordNode)
    have 5843 words that are in similarity-pairs.
    By contrast, there are  .... fuuu what is in this dataset????
 
@@ -13348,11 +13348,11 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
    * clean up infix punct in rfive_mfive call it rfive_mfx
 
 -- Need to redo the PCA.... DONE
-   
--- If two words are similar, then ... 
+
+-- If two words are similar, then ...
    * issue a uniq group ID
    * sum the counts
-   
+
 
 
 lxc-ls --active
@@ -13369,7 +13369,7 @@ write portno to file?
 
 ERROR:  could not create unique index "valuations_key_atom_idx"
 DETAIL:  Key (key, atom)=(1, 3853322) is duplicated.
-CREATE INDEX ON Valuations (key, atom); 
+CREATE INDEX ON Valuations (key, atom);
 
 /etc/init.d/rc.local
 
@@ -13387,7 +13387,7 @@ Request dtor calls
    ConsoleSocket::OnRequestComplete which does nothing but print...
    ConsoleSocket::put() decrements use count.
 
-handle_connection on socket remote close does 
+handle_connection on socket remote close does
 SetCloseAndDelete
 fractional line is dispatched in the thread of handle_connection
  ... using OnLine which just calls shell...
@@ -13395,7 +13395,7 @@ fractional line is dispatched in the thread of handle_connection
   because ServerSocket::SetCloseAndDelete runs
 
 fuck.
-OK, remote end closes, 
+OK, remote end closes,
 ServerSocket::handle_connection prints that its leaving...
 calls dtor on ConsoleSocket
 Generic shell is finishing up....
@@ -13423,7 +13423,7 @@ Below only happens if self-destruct runs
 [GenericShell] dtor, joined eval thread  yes too
 
 ------------------------
-wait ... 
+wait ..
 concurrent_set uses std:less... Handle
 
 a->operator<
@@ -13444,7 +13444,7 @@ how?
 ------------------------
 linear
 tuple math
-fold 
+fold
 ----------------------
 (define pca (make-pseudo-cset-api))
 (define psa (add-dynamic-stars pca))
@@ -13497,7 +13497,7 @@ windows tree trees shadows
 (cog-link 'Section (Word "island") this)
 island - 0.42243511
 hill - 0
-windows - 0 
+windows -
 tree - 1.8939653
 path - 0
 group - 15 before ortho  9.1974925 after
@@ -13524,7 +13524,7 @@ _num_atom_removes
 _num_atom_recursive_removes
 _num_valuation_removes
 76 flushes in 2000 secs ouch
-SELECT key FROM Valuations WHERE atom = 
+SELECT key FROM Valuations WHERE atom =
 CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
 SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
@@ -13533,7 +13533,7 @@ DELETE FROM Atoms WHERE uuid =  uuid is primary
 664 total initially and 658 finally .. meh
 
 is it idempotent?
-664 again ... 
+664 again ..
 (assign-to-classes psa 0.3 nou '())
 
 (define (copy-sect TO FRM)
@@ -14253,7 +14253,28 @@ Above, in plain English:
 137K words observed,
 6.2M unique disjuncts,
 8.6M word-disjunct pairs observed about 2.1 times each
-On average, 
+On average, there are 49K distinct disjuncts attached on each word.
+    This is weighted by the frequency with which the word was observed,
+    and thus is much, much larger than 6.24M/137K = 45.5 dj/word.
+    We conclude that frequent words also have a large number of
+    disjuncts on them - a top-end heavy Zipfian thing.
+Likewise, each distinct disjunct appears in 145 different words.
+    (Again, weighted by the frequency that the disjunct was observed.)
+On average, there were 230K observations of disjuncts for each word.
+    (Again, weighted by the frequency with which the word was observed)
+    This works out to 4.7 observations per disjunct (per word).
+The lengths are anemic. The weighted length of a typical word-vector
+    is 13.7K disjuncts. Which seems reasonable. This is the quantity
+    that appears in the denominator of the cosine products.  However,
+    when comparing this to the support: Oofdah. The support is just
+    sooo much larger. On average, each disjunct contributes to just
+    0.29 to the length.  (Remarkably, its even lower in cfive_mst!)
+
+Technical definitions: (line 99 of report-api.scm)
+        left-support = sum_x P(x,*) |(x,*)|
+        left-count = sum_x P(x,*) N(x,*)
+        left-length = sqrt [ sum_x P(x,*) L(x,*) ]
+    So x==word, here, and the *'s are disjuncts.
 
 4494883736 Bytes uncompressed = 4.5 GBytes
  474253125 Bytes compressed = 474 MBytes
@@ -14268,12 +14289,14 @@ next:
 createdb en_dj_etwo -T en_dj_mtwo
 (sql-open "postgres:///en_dj_etwo?user=linas&password=asdf")
 (define cra (make-connector-vec-api))
+(cra 'fetch-pairs)
+(cra 'make-left-stars)
 (batch-all-pair-mi cra)
 
 
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
-New set intersection idea: 
+New set intersection idea:
 sort both lists via cog-atom-less? and then single-pass
 
 (define pcs (add-pair-stars pca))
@@ -14317,7 +14340,7 @@ select * from atoms where name='regardoient'; is slow ...
 19568878
 
 SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(47851416 AS BIGINT)] LIMIT 1;
-is super-slow .. why? 
+is super-slow .. why?
 incoming_index is there ...
 drop incoming index, it still runs at same terrible speed.
 recreate incoming_index ....
@@ -14358,18 +14381,12 @@ running at 500/second, need 116544.98 seconds == 32 hours!  Yow!
 =========================================================================
 NEW TODO LIST
 
--- word-pairs.pdf in the readings directory ...
-   where is the source for this?  Is it in git ????? Ughh No.
-   Mass copy from 2009 fractal directory. scripts are lost.
-   Create pull req
-
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- save en_dj_mtwo before starting the cross-marginals.
--- start cross-marginals in dj_mtwo
+-- start cross-marginals in dj_etwo IN PROGRESS
+-- save en_dj_etwo after cross-marginals
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
--- save en_dj_mtwo after cross-marginals
 
 -- In parallel start pair-removal in mfive; this should fit!?
    Yes, IN PROGRESS
@@ -14416,6 +14433,12 @@ Merging minor tasks DONE
   How does cosine work of the pseudos??? It works cause cosine
   ignores that it's being done on a WordClass...  DONE (untested)
 * remove words in en_dj_mtwo not in marginals. IN-PROG DONE
+* word-pairs.pdf in the readings directory ...
+  where is the source for this?  Is it in git ????? Ughh No.
+  Mass copy from 2009 fractal directory. scripts are lost.
+  Create pull req DONE
+* save en_dj_mtwo before starting the cross-marginals. DONE
+
 
 =========================================================================
 
