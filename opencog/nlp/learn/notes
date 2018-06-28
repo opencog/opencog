@@ -14205,6 +14205,71 @@ Done storing 137078 right-wilds in 83 secs
 Finished with MI computations; this took 32.3 hours
 
 
+en_dj_mtwo
+----------
+A copy of en_pairs_rfive_mtwo but with all pairs removed, and only
+the disjuncts left.  Contains disjunct marginals.
+
+Recall that rfive is not "as good as" cfive.
+
+STATUS: Good.
+DATE: 27 June 2018
+
+en_dj_mtwo=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 2019 MB    |
+ public | spaces     | table | linas | 40 kB      |
+ public | typecodes  | table | linas | 56 kB      |
+ public | valuations | table | linas | 6206 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+select count(*) from atoms;      <<<< 21651928 == 21.6M atoms
+select count(*) from valuations; <<<< 57909950 == 57.9M values
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.8875E+4    145.4
+Count   (l_1)  2.2958E+5    3440.         4.697        23.66
+Length  (l_2)  1.3729E+4    1773.         .2809        12.19
+RMS Count      1.3696E+4    1732.         .2802        11.91
+
+Above, in plain English:
+137K words observed,
+6.2M unique disjuncts,
+8.6M word-disjunct pairs observed about 2.1 times each
+On average, 
+
+4494883736 Bytes uncompressed = 4.5 GB
+8 Bytes compressed = 
+
+md5sum
+8392529389ca2c07666860a64f4d594a  en_dj_mtwo.sql
+
+==========
+
+next:
+createdb en_dj_etwo -T en_dj_mtwo
+(sql-open "postgres:///en_dj_etwo?user=linas&password=asdf")
+(define cra (make-connector-vec-api))
+(batch-all-pair-mi cra)
+
+
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
 New set intersection idea: 
