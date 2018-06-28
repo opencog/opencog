@@ -221,9 +221,9 @@ bool UREMinerUTest::enough_support(const Handle& pat, int minsup)
 Handle UREMinerUTest::run_pm(const HandleSeq& texts, int minsup,
                              int maxiter, Handle initpat)
 {
-	// Make (Member text (Concept "texts)) links
+	// Make (Member (Concept "texts) text) links
 	for (const Handle& text : texts)
-		al(MEMBER_LINK, text, texts_cpt);
+		al(MEMBER_LINK, texts_cpt, text);
 
 	// If init is not defined then use top
 	if (not initpat)

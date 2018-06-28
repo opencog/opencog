@@ -90,7 +90,7 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	HandleSet texts_set;
 	IncomingSet member_links = texts->getIncomingSetByType(MEMBER_LINK);
 	for (const LinkPtr l : member_links) {
-		Handle member = l->getOutgoingAtom(0);
+		Handle member = l->getOutgoingAtom(1);
 		if (member != texts)
 			texts_set.insert(member);
 	}
