@@ -122,6 +122,22 @@
 "
   (define is-unordered? #f)
   (define has-words? #f)
+  (define specificity 0)
+
+  ; A word has at least the following conditions to be satisfied
+  ; - one and only one word -> i.e. lower & upper bound
+  ; - in a particular form of a particular lemma
+  (define spec-word 4)
+
+  ; A lemma has at least the following conditions to be satisfied
+  ; - one and only one word -> i.e. lower & upper bound
+  ; - a particular lemma (in any form)
+  (define spec-lemma 3)
+
+  ; A concept has at least the following conditions to be satisfied
+  ; - be grounded to one or more words -> i.e. lower bound
+  ; - be related to a particular "concept"
+  (define spec-concept 2)
 
   (define (process terms)
     (define v '())
@@ -137,44 +153,115 @@
     (for-each (lambda (t)
       (cond ((equal? 'unordered-matching (car t))
              (update-lists (process (cdr t)))
+             ; TODO: The specificity of ordered vs unordered should be
+             ; considered as well
              (set! is-unordered? #t))
             ((equal? 'word (car t))
              (update-lists (word (cdr t)))
+             (set! specificity (+ specificity spec-word))
              (set! has-words? #t))
             ((equal? 'word-apos (car t))
              (update-lists (word-apos (cdr t)))
+             ; Its specificity should be the same as a word
+             (set! specificity (+ specificity spec-word))
              (set! has-words? #t))
             ((equal? 'lemma (car t))
              (update-lists (lemma (cdr t)))
+             (set! specificity (+ specificity spec-lemma))
              (set! has-words? #t))
             ((equal? 'phrase (car t))
              (update-lists (phrase (cdr t)))
+             ; The specificity of a phrase depends on the number of
+             ; words it has and each of those words is considered
+             ; as a "word-term"
+             (set! specificity (+ specificity
+               (* (length (string-split (cdr t) #\sp)) spec-word)))
              (set! has-words? #t))
             ((equal? 'concept (car t))
              (update-lists (concept (cdr t)))
+             (set! specificity (+ specificity spec-concept))
              (set! has-words? #t))
             ((equal? 'choices (car t))
              (update-lists (choices (cdr t)))
+             ; The specificity of choices should be the term in
+             ; the list (of choices) with the least specificity
+             ; Potentially "concept" could have done this way too,
+             ; though concept may change dynamically at runtime
+             ; but this will not
+             (set! specificity (+ specificity
+               (fold
+                 (lambda (tc min-spec)
+                   (cond
+                     ; Only included the terms that are less specific
+                     ; than a phrase
+                     ((equal? 'concept (car tc)) spec-concept)
+                     ((and (equal? 'lemma (car tc))
+                           (< spec-lemma min-spec))
+                      spec-lemma)
+                     ((and (equal? 'word (car tc))
+                           (< spec-word min-spec))
+                      spec-word)
+                     (else min-spec)))
+                 ; The most specific term possibility exist in choices
+                 ; is a phrase, so check and see if there is any phrase
+                 ; and get its specificity, or just take the specificity
+                 ; of a word if not
+                 (fold
+                   (lambda (ph max-spec)
+                     (cond
+                       ((and (equal? 'phrase (car ph))
+                             (> (* (length (string-split (cdr ph) #\sp)) spec-word)
+                                max-spec))
+                        (* (length (string-split (cdr ph) #\sp)) spec-word))
+                       (else max-spec)))
+                   spec-word
+                   (cdr t)
+                 )
+                 (cdr t))))
              (set! has-words? #t))
             ((equal? 'optionals (car t))
              (update-lists (optionals (cdr t)))
+             ; The specificity of optionals is almost identical to concept,
+             ; except that it's not requied to be presence (viz optional)
+             (set! specificity (+ specificity (- spec-concept 1)))
              (set! has-words? #t))
             ((equal? 'negation (car t))
              (update-lists (negation (cdr t)))
+             ; Negation has a condition of not having a particular
+             ; term or a list of terms to be presented in the pattern
+             (set! specificity (+ specificity 1))
              (set! has-words? #t))
             ((equal? 'wildcard (car t))
              (update-lists (wildcard (cadr t) (cddr t)))
+             ; The specificity of a wildcard depands on the interval
+             ; For a pure wildcard, specificity = 0
+             ; For a range-restricted wildcard (zero to n),
+             ; upper bound is given so specificity = 1
+             ; For a precise wildcard (n and only n), both lower and
+             ; upper bound is given so specificity = 2
+             (if (> (cadr t) 0) (set! specificity (1+ specificity)))
+             (if (> (cddr t) -1) (set! specificity (1+ specificity)))
              (set! has-words? #t))
             ((equal? 'variable (car t))
              (update-lists (process (cdr t)))
              (set! pat-vars (append pat-vars (last-pair ws))))
             ((equal? 'uvar_exist (car t))
              (set! c (append c (list (uvar-exist? (cdr t)))))
+             ; User variable has a condition of checking if a particular
+             ; user variable has been defined
+             (set! specificity (+ specificity 1))
              (set! has-words? #t))
             ((equal? 'uvar_equal (car t))
              (set! c (append c (list (uvar-equal? (cadr t) (caddr t)))))
+             ; uvar_equal should have a specificity of a word as they
+             ; have the same set of conditions to be satisfied
+             (set! specificity (+ specificity spec-word))
              (set! has-words? #t))
             ((equal? 'function (car t))
+             ; The specificity of a function / predicate depends really
+             ; on what that function is doing (and it could be anything)
+             ; For now, just assume the specificity of a function is 1.
+             (set! specificity (+ specificity 1))
              (set! c (append c
                (list (context-function (cadr t)
                  (map (lambda (a)
@@ -263,7 +350,8 @@
                           lemma-seq))))
       (MemberLink (List lemma-seq) ghost-no-constant))
 
-  (list vars conds has-words?))
+  (list vars conds has-words? specificity)
+)
 
 ; ----------
 (define (process-action ACTION RULENAME)
@@ -613,6 +701,7 @@
                        (list-ref proc-type 0)))
          (conds (append (list-ref proc-terms 1)
                         (list-ref proc-type 1)))
+         (specificity (list-ref proc-terms 3))
          (type (assoc-ref rule-type-alist NAME))
          (action (process-action ACTION NAME))
          (is-rejoinder? (equal? type strval-rejoinder))
@@ -678,6 +767,9 @@
 
         ; Set the type
         (cog-set-value! a-rule ghost-rule-type type)
+
+        ; Set how specific the context of the rule is
+        (cog-set-value! a-rule ghost-context-specificity (FloatValue specificity))
 
         ; Associate it with its topic
         (if (not ghost-with-ecan)
