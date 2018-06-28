@@ -4573,8 +4573,6 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
         }
         else if (line.find("Pattern:") != string::npos) // one pattern start
         {
-            frequency = 0;
-
             int frequencyStart = line.find("Frequency = ") + 12;
             string frequencyStr = line.substr(frequencyStart, line.size() - frequencyStart);
             frequency = atoi(frequencyStr.c_str());
