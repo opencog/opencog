@@ -159,7 +159,6 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ##### Output (and 3 other variations of this link where elements of the ListLink are substituted with variables)
 ```
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
   (SatisfyingSetScopeLink (stv 1.000000 1.000000)
     (VariableNode "$X0") ; [441]
     (EvaluationLink (stv 1.000000 0.000000)
@@ -170,6 +169,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
       ) ; [443]
     ) ; [444]
   ) ; [445]
+  (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
 ) ; [446]
 ```
 
@@ -263,7 +263,6 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ###### Output
 ```
 (MemberLink (stv 1.000000 0.989841)
-  (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [217]
   (SatisfyingSetScopeLink (stv 1.000000 1.000000)
     (VariableNode "$X0") ; [385]
     (EvaluationLink (stv 1.000000 0.000000)
@@ -274,6 +273,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
       ) ; [922]
     ) ; [388]
   ) ; [389]
+  (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [217]
 ) ; [6375]
 ```
 

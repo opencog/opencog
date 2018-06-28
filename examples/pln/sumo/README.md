@@ -54,8 +54,8 @@ Then call the backward chainer on some hypothesis and target like
 
 ```scheme
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Org1-1" (stv 0.010000 1.000000))
   (ConceptNode "Organization" (stv 0.010000 1.000000))
+  (ConceptNode "Org1-1" (stv 0.010000 1.000000))
 )
 ```
 
@@ -71,8 +71,8 @@ Then call the backward chainer on some hypothesis and target like
     )
   )
   (MemberLink
-    (VariableNode "?MEMBER")
     (ConceptNode "Org1-1" (stv 0.010000 1.000000))
+    (VariableNode "?MEMBER")
   )
 )
 )

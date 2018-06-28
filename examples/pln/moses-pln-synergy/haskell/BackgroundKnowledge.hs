@@ -91,8 +91,8 @@ bkn = atomList
         (VariableNode "X")
         (ImplicationLink noTv
             (MemberLink noTv
-                (VariableNode "X")
                 (ConceptNode "injury-recovery-speed-predicates" noTv)
+                (VariableNode "X")
             )
             (ImplicationLink noTv
                 (PredicateNode "is-well-hydrated" noTv)
@@ -102,6 +102,6 @@ bkn = atomList
  |> PredicateNode "recovery-speed-of-injury-alpha" (stv 0.02 0.8)
  |> PredicateNode "recovery-speed-of-injury-alpha" noTv
  \> MemberLink (stv 1 1)
-        (PredicateNode "recovery-speed-of-injury-alpha" noTv)
         (ConceptNode "injury-recovery-speed-predicates" noTv)
+        (PredicateNode "recovery-speed-of-injury-alpha" noTv)
 

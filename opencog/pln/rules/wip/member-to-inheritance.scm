@@ -2,8 +2,8 @@
 ; MemberToInheritanceRule
 ;
 ; MemberLink
-;   B 
 ;   C
+;   B 
 ; |-
 ; InheritanceLink
 ;   B 
@@ -17,8 +17,8 @@
 			(VariableNode "$B")
 			(VariableNode "$C"))
 		(MemberLink
-			(VariableNode "$B")
-			(VariableNode "$C"))
+			(VariableNode "$C")
+			(VariableNode "$B"))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: member-to-inheritance-formula")
 			(ListLink
@@ -26,8 +26,8 @@
 					(VariableNode "$B")
 					(VariableNode "$C"))
 				(MemberLink
-					(VariableNode "$B")
-					(VariableNode "$C"))))))
+					(VariableNode "$C")
+					(VariableNode "$B"))))))
 
 ; -----------------------------------------------------------------------------
 ; Member To Inheritance Formula

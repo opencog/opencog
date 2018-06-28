@@ -25,14 +25,14 @@
 ;; First we need to know that concepts "a" to "z" are letters
 ;;
 ;; Member (stv 1 1)
-;;   Concept "a"
 ;;   Concept "latin-alphabet"
+;;   Concept "a"
 ;;
 ;; ...
 ;;
 ;; Member (stv 1 1)
-;;   Concept "z"
 ;;   Concept "latin-alphabet"
+;;   Concept "z"
 ;;
 ;; Then either
 ;;
@@ -44,8 +44,8 @@
 ;;     Variable "$X"
 ;;     Type "ConceptNode"
 ;;   Member
-;;     Variable "$X"
 ;;     Concept "latin-alphabet"
+;;     Variable "$X"
 ;;   Inheritance
 ;;     Concept "a"
 ;;     Variable "$X"
@@ -113,7 +113,7 @@
          (ConceptT (Type "ConceptNode")))
     (ImplicationScope (stv 1 1)
       (TypedVariable X ConceptT)
-      (Member X latin-alphabet)
+      (Member latin-alphabet X)
       (Inheritance a X))))
 
 (define (gen-a-before-all-letters-stupid-facts)
@@ -143,7 +143,7 @@
   (Concept "latin-alphabet"))
 
 (define (gen-alphabet-letter-member X)
-  (Member (stv 1 1) X latin-alphabet))
+  (Member (stv 1 1) latin-alphabet X))
 
 (define (gen-inheritance-letter-pair X Y)
   (Inheritance (stv 1 1) X Y))

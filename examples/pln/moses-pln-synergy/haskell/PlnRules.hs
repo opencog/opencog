@@ -213,8 +213,8 @@ plnRuleAverageHack = BindLink
         (QuoteLink (VariableNode "X"))
         (ImplicationLink noTv
            (MemberLink noTv
-              (QuoteLink (VariableNode "X"))
               (ConceptNode "injury-recovery-speed-predicates" noTv)
+              (QuoteLink (VariableNode "X"))
            )
            (ImplicationLink noTv
               (PredicateNode "is-well-hydrated" noTv)
@@ -224,8 +224,8 @@ plnRuleAverageHack = BindLink
      )
      (ImplicationLink (stv 0.7 0.6)
         (MemberLink noTv
-           (PredicateNode "recovery-speed-of-injury-alpha" noTv)
            (ConceptNode "injury-recovery-speed-predicates" noTv)
+           (PredicateNode "recovery-speed-of-injury-alpha" noTv)
         )
         (ImplicationLink noTv
            (PredicateNode "is-well-hydrated" noTv)

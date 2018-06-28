@@ -3,11 +3,11 @@
 ;
 ; AndLink
 ;   MemberLink
-;       C
 ;       A
-;   MemberLink
 ;       C
+;   MemberLink
 ;       B
+;       C
 ; |-
 ; ExtensionalSimilarityLink
 ;   A
@@ -23,11 +23,11 @@
             (VariableNode "$C"))
         (AndLink
             (MemberLink
-                (VariableNode "$C")
-                (VariableNode "$A"))
+                (VariableNode "$A")
+                (VariableNode "$C"))
             (MemberLink
-                (VariableNode "$C")
-                (VariableNode "$B")))
+                (VariableNode "$B")
+                (VariableNode "$C")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: extensional-similarity-evaluation-formula")
             (ListLink
@@ -35,11 +35,11 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))
                 (MemberLink
-                    (VariableNode "$C")
-                    (VariableNode "$A"))
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
                 (MemberLink
-                    (VariableNode "$C")
-                    (VariableNode "$B"))))))
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
 
 (define (extensional-similarity-evaluation-formula AB CA CB)
     (cog-set-tv!

@@ -3,11 +3,11 @@
 ;
 ; AndLink
 ;   MemberLink
-;       C
 ;       A
-;   MemberLink
 ;       C
+;   MemberLink
 ;       B
+;       C
 ; |-
 ; SubsetLink
 ;   NotLink
@@ -24,11 +24,11 @@
             (VariableNode "$C"))
         (AndLink
             (MemberLink
-                (VariableNode "$C")
-                (VariableNode "$A"))
+                (VariableNode "$A")
+                (VariableNode "$C"))
             (MemberLink
-                (VariableNode "$C")
-                (VariableNode "$B")))
+                (VariableNode "$B")
+                (VariableNode "$C")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: negated-subset-evaluation-formula")
             (ListLink
@@ -37,11 +37,11 @@
                         (VariableNode "$A"))
                     (VariableNode "$B"))
                 (MemberLink
-                    (VariableNode "$C")
-                    (VariableNode "$A"))
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
                 (MemberLink
-                    (VariableNode "$C")
-                    (VariableNode "$B"))))))
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
 
 (define (negated-subset-evaluation-formula nAB CA CB)
     (cog-set-tv!

@@ -26,24 +26,24 @@
 
 ;; Org1-1 is an Organization
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Org1-1" (stv 0.010000 1.000000))
   (ConceptNode "Organization" (stv 0.010000 1.000000))
+  (ConceptNode "Org1-1" (stv 0.010000 1.000000))
 )
 
 ;; 1. Apply conditional instantiation using the MemberLink above and
 ;; inheritance KB-15619, to obtain
 ;;
 ;; (MemberLink (stv 1 0.99)
-;;   (ConceptNode "Org1-1")
-;;   (ConceptNode "Group"))
+;;   (ConceptNode "Group")
+;;   (ConceptNode "Org1-1"))
 (meta-bind conditional-full-instantiation-inheritance-meta-rule)
 
 ;; 2. Apply conditional instantiation using the MemberLink in 1. and
 ;; inheritance KB-16125, to obtain
 ;;
 ;; (MemberLink (stv 1 0.99)
-;;   (ConceptNode "Org1-1")
-;;   (ConceptNode "Collection"))
+;;   (ConceptNode "Collection")
+;;   (ConceptNode "Org1-1"))
 (meta-bind conditional-full-instantiation-inheritance-meta-rule)
 
 ;; 3. Apply conditional instantiation using 2. and KB-16709 to produce
@@ -59,8 +59,8 @@
 ;;     )
 ;;   )
 ;;   (MemberLink
-;;     (VariableNode "?MEMBER")
 ;;     (ConceptNode "Org1-1" (stv 0.010000 1.000000))
+;;     (VariableNode "?MEMBER")
 ;;   )
 ;; )
 (meta-bind conditional-full-instantiation-implication-scope-meta-rule)
