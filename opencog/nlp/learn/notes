@@ -14255,11 +14255,12 @@ Above, in plain English:
 8.6M word-disjunct pairs observed about 2.1 times each
 On average, 
 
-4494883736 Bytes uncompressed = 4.5 GB
-8 Bytes compressed = 
+4494883736 Bytes uncompressed = 4.5 GBytes
+ 474253125 Bytes compressed = 474 MBytes
 
 md5sum
 8392529389ca2c07666860a64f4d594a  en_dj_mtwo.sql
+6d03d11dc356665868e7f1d529cc8fe7  en_dj_mtwo.sql.bz2
 
 ==========
 

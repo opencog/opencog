@@ -193,7 +193,7 @@
 		(define (get-left-basis)
 			(if (null? l-basis) (set! l-basis
 				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode)))
-			l-basis)
+			l-basis))
 
 		(define (get-right-basis)
 			(if (null? r-basis) (set! r-basis (cog-incoming-set predno)))
@@ -222,7 +222,7 @@
 		; as
 		; (Evaluation (Predicate "stars") (Word "foo")
 		;     (Connector (Word "bar") (ConnectorDir "-))
-		;     (Connector (Variable $X) (ConnectorDir "-))))
+		;     (Connector (Variable $X) (ConnectorDir "-)))
 		; with the left-word "foo" heading up the list.
 		; This can be easily dis-assembled to run actual queries against
 		; the atomspace.
@@ -378,7 +378,7 @@
 				((provides)         provides)
 				((filters?)         (lambda () #f))
 				(else (error "Bad method call on cross-section:" message)))
-			args)))
+			args))
 )
 
 ; ---------------------------------------------------------------------
