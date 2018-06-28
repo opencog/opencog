@@ -108,7 +108,7 @@ Make test links.
 # TODO: We should use an InheritanceLink rather than a MemberLink
 # to express something in the some class. A case in below is just example
 # to show how to blending algorithm works.
-l1 = MemberLink(car, metal)
+l1 = MemberLink(metal, car)
 a.set_tv(l1.h, TruthValue(0.6, 0.8))
 
 # B. Duplicated, not conflicted link.

@@ -130,8 +130,8 @@ class TestConceptualBlendingBase(object):
         l1 = self.a.add_link(
             types.MemberLink,
             [
-                self.sample_nodes["car"],
-                self.sample_nodes["metal"]
+                self.sample_nodes["metal"],
+                self.sample_nodes["car"]
             ]
         )
         self.a.set_tv(l1.h, TruthValue(0.6, 0.8))
