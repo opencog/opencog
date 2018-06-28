@@ -252,7 +252,7 @@
               (generate-eval ghost-lemma-seq lemma-seq))))))))
     ; See below
     (if (not ghost-with-ecan)
-      (MemberLink (car conds) ghost-no-constant)))
+      (MemberLink ghost-no-constant (car conds))))
 
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
@@ -261,7 +261,7 @@
         (equal? (length lemma-seq)
           (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                           lemma-seq))))
-      (MemberLink (List lemma-seq) ghost-no-constant))
+      (MemberLink ghost-no-constant (List lemma-seq)))
 
   (list vars conds has-words?))
 
@@ -811,7 +811,7 @@
     (apply LinkValue (map (lambda (f) (StringValue f)) FEATURES)))
 
   ; The set of keywords associate with the topic
-  (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
+  (for-each (lambda (kw) (Member rule-topic kw)) (terms-to-atomese KEYWORDS))
 
   rule-topic)
 
