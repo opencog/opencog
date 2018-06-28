@@ -14188,7 +14188,21 @@ Finished right norm totals in 1029 secs
 Fuuuuuuuu again.. it was almost done and I screwed it.
 start 13:43 expect update after midnight.
 (x-batch pca)
-
+Support: found num left= 137078 num right= 6239997 in 276 secs
+Going to do column and row subtotals
+Finished left entropy subtotals in 35680 secs <====
+Finished right entropy subtotals in 374 secs
+Finished left MI subtotals in 36424 secs
+Finished right MI subtotals in 382 secs
+Finished left norm marginals in 36593 secs
+Finished right norm marginals in 486 secs
+Going to compute the left, right and total entropy
+Finished left norm totals in 26 secs
+Finished right norm totals in 1227 secs
+Done computing totals; start saving wildcards
+Done storing 6239997 left-wilds in 4174 secs
+Done storing 137078 right-wilds in 83 secs
+Finished with MI computations; this took 32.3 hours
 
 
 ----------------
@@ -14286,19 +14300,22 @@ NEW TODO LIST
 * Finish elimination of 'left-element, 'right-element in filters.
 
 -- save en_dj_mtwo before starting the cross-marginals.
--- start cross-marginals
+-- start cross-marginals in dj_mtwo
 -- show graph distribution of mi of word-dj pairs in mtwo
-   (or verify it was previously graphed)
+   What scripts would these be?
 -- save en_dj_mtwo after cross-marginals
 
 -- In parallel start pair-removal in mfive; this should fit!?
    Yes, IN PROGRESS
+-- start cross-marginals in dj_cfive
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
-    pseudo dj's. Show multiple graphs, depending on word-frequency
+    pseudo dj's. Use (batch-similarity
 
-(1a) scatterplot for cosine vs entropy
+(1a) Show multiple graphs, depending on word-frequency
+
+(1b) scatterplot for cosine vs entropy
 
 (2) record both cosines and entropies for top word-pairs for
     cross-connectors.
