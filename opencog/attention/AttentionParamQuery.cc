@@ -47,8 +47,8 @@ const std::string AttentionParamQuery::rent_tournament_size = "RENT_TOURNAMENT_S
  * will be as follows:
  *
  * MemberLink
- *   Concept "$PARAMETER_i"
  *   Concept "ECAN_PARAMS"
+ *   Concept "$PARAMETER_i"
  *
  * then each paramter's value will be stored in a
  * state link.
@@ -62,9 +62,8 @@ AttentionParamQuery::AttentionParamQuery(AtomSpace* as): _as(as)
     parent_param = _as->add_node(CONCEPT_NODE, "ECAN_PARAMS");
 
     Handle var = _as->add_node(VARIABLE_NODE, "__ECAN_PARAM__");
-    Handle member = _as->add_link(MEMBER_LINK,
-            HandleSeq {var, parent_param});
-    hget_params = _as->add_link(BIND_LINK, HandleSeq{member, var});
+    Handle member = _as->add_link(MEMBER_LINK, parent_param, var);
+    hget_params = _as->add_link(BIND_LINK, member, var);
 }
 
 std::string AttentionParamQuery::get_param_value(const std::string& param)

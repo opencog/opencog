@@ -22,7 +22,7 @@
   (if (not (null? type-symbols))
     (StateLink
       SPREADING_FILTER
-      (MemberLink
+      (MemberLink  ; TODO: MemberLink should have 2 arguments and only
         (map (lambda (x) (TypeNode (symbol->string x))) type-symbols))))
 
   SPREADING_FILTER

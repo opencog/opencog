@@ -26,100 +26,100 @@
 (define SPREADING_FILTER (ConceptNode "SPREADING_FILTER"))
 
 (MemberLink 
+  ECAN_PARAM  
   AF_SIZE
-  ECAN_PARAM  
 )
 (MemberLink
-  MAX_AF_SIZE
   ECAN_PARAM
+  MAX_AF_SIZE
 )
 (MemberLink 
-  MIN_AF_SIZE
-  ECAN_PARAM  
+  ECAN_PARAM
+  MIN_AF_SIZE  
 )
 (MemberLink 
+  ECAN_PARAM
   AFB_DECAY
-  ECAN_PARAM
 )
 (MemberLink
+  ECAN_PARAM
   AFB_BOTTOM
-  ECAN_PARAM
 )
 (MemberLink
+  ECAN_PARAM
   MAX_AF_SIZE
+)
+(MemberLink 
   ECAN_PARAM
+  AF_RENT_FREQUENCY  
 )
 (MemberLink 
-  AF_RENT_FREQUENCY 
-  ECAN_PARAM  
-)
-(MemberLink 
+  ECAN_PARAM
   FORGET_THRESHOLD
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   MAX_LINKS
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   HEBBIAN_MAX_ALLOCATION_PERCENTAGE
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   LOCAL_FAR_LINK_RATIO
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   MAX_SPREAD_PERCENTAGE
-  ECAN_PARAM  
 )
 (MemberLink
+  ECAN_PARAM
   SPREADING_FILTER
+)
+(MemberLink 
   ECAN_PARAM
-)
-(MemberLink 
   SPREAD_HEBBIAN_ONLY
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   DIFFUSION_TOURNAMENT_SIZE
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   STARTING_ATOM_STI_RENT
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   STARTING_ATOM_LTI_RENT
-  ECAN_PARAM  
 )
 (MemberLink 
+  ECAN_PARAM
   TARGET_STI_FUNDS
-  ECAN_PARAM  
 )
 (MemberLink
+  ECAN_PARAM
   TARGET_LTI_FUNDS
-  ECAN_PARAM
 )
 (MemberLink 
+  ECAN_PARAM
   STI_FUNDS_BUFFER
-  ECAN_PARAM
 )
 (MemberLink 
+  ECAN_PARAM
   LTI_FUNDS_BUFFER
-  ECAN_PARAM
 )
 (MemberLink 
+  ECAN_PARAM
   TARGET_LTI_FUNDS_BUFFER
-  ECAN_PARAM
 )
 (MemberLink 
-  RENT_TOURNAMENT_SIZE
   ECAN_PARAM
+  RENT_TOURNAMENT_SIZE
 )
 (StateLink
   AF_SIZE
-  (NumberNode "0.2")  
+  (NumberNode "0.2")
 )
 (StateLink
   MIN_AF_SIZE
@@ -163,7 +163,7 @@
 )
 (StateLink
   SPREADING_FILTER
-  (MemberLink
+  (MemberLink     ; TODO: MemberLink should have 2 arguments
     (TypeNode "MemberLink")
   )
 )
