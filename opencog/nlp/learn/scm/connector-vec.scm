@@ -379,7 +379,7 @@
 				((filters?)         (lambda () #f))
 				(else (error "Bad method call on cross-section:" message)))
 			args))
-)
+))
 
 ; ---------------------------------------------------------------------
 ; Example usage:
