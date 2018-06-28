@@ -4,7 +4,7 @@
 
 (define (get-inferred-atoms)
     (let ((inferences (cog-execute!
-            (Get (Member pln-inferred-atoms (Variable "$x"))))))
+            (Get (Member (Variable "$x") pln-inferred-atoms)))))
 
         (cog-outgoing-set inferences)
     )
@@ -17,7 +17,7 @@
 ;; associated to the Anchor pln-inferred-atoms
 (define (add-to-pln-inferred-atoms s)
 ; FIXME: Why is it not adding somethimes?
-   (map (lambda (x) (Member pln-inferred-atoms x)) s)
+   (map (lambda (x) (Member x pln-inferred-atoms)) s)
 )
 
 (define (search-input-utterance-words)

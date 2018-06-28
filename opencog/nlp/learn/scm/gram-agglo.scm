@@ -189,7 +189,7 @@
 	(define (nwords-in-cls CLS)
 		(fold
 			(lambda (MEMB sum)
-				(if (eq? (cog-type (gar MEMB)) 'WordNode) (+ sum 1) sum))
+				(if (eq? (cog-type (gdr MEMB)) 'WordNode) (+ sum 1) sum))
 			0
 			(cog-incoming-by-type CLS 'MemberLink)))
 
@@ -205,7 +205,7 @@
 
 ; Return true if WRD is in word-class CLS
 (define (is-in-cls? WRD CLS)
-	(not (null? (cog-link 'MemberLink WRD CLS))))
+	(not (null? (cog-link 'MemberLink CLS WRD))))
 
 ; Return a list of words that got placed into the class.
 (define (got-done WRDS CLS)
@@ -451,7 +451,7 @@
 					; tracking progress statistics.
 					(if (eq? 'WordNode (cog-type new-cls))
 						(begin
-							(store-atom (Member new-cls *-greedy-anchor-*))
+							(store-atom (Member *-greedy-anchor-* new-cls))
 							(greedy-grow MERGER TRUE-CLS-LST
 								(append! FAKE-CLS-LST (list new-cls))
 								DONE-LST rest))
@@ -475,7 +475,7 @@
 							; (this is a database-delete).
 							(for-each
 								(lambda (unfake)
-									(cog-delete (Member unfake *-greedy-anchor-*)))
+									(cog-delete (Member *-greedy-anchor-* unfake)))
 								(got-done FAKE-CLS-LST new-cls))
 
 							; If anything from the done-list was merged, then
@@ -619,7 +619,7 @@
 	; Get the list of words that have been classified already.
 	(define mdone-list
 		(fold (lambda (CLS LST)
-			(append! LST (map gar (cog-incoming-by-type CLS 'MemberLink))))
+			(append! LST (map gdr (cog-incoming-by-type CLS 'MemberLink))))
 			'() CLS-LST))
 
 	; Make sure that they really are words. (This should be a no-op...)
@@ -635,7 +635,7 @@
 	; Fetch all of the singletons
 	(define junk (fetch-incoming-by-type *-greedy-anchor-* 'MemberLink))
 
-	(define singletons (map gar
+	(define singletons (map gdr
 		(cog-incoming-by-type *-greedy-anchor-* 'MemberLink)))
 
 	(define (is-single? w)

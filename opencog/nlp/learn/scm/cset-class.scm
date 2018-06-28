@@ -37,8 +37,8 @@
 ; Recall that a grammatical class is represented as
 ;
 ;     MemberLink
-;         WordNode "wordy"      ; the word itself
 ;         WordClassNode "noun"  ; the grammatical class of the word.
+;         WordNode "wordy"      ; the word itself
 ;
 ;
 ; Single-difference merging
@@ -129,7 +129,7 @@
 
 (define (get-classified-words)
 	; Trace the MemberLink
-	(define (memb CLS) (map gar (cog-incoming-by-type CLS 'MemberLink)))
+	(define (memb CLS) (map gdr (cog-incoming-by-type CLS 'MemberLink)))
 	; Discard everything that is not a word.
 	(define (wmemb CLS)
 		(filter (lambda (w) (eq? 'WordNode (cog-type w))) (memb CLS)))
@@ -152,7 +152,7 @@
 	(define (connector-in-any-class? CTR)
 		(define wrd-of-ctr (gar CTR)) ; Word of the connector
 		(find (lambda (MEMB)
-				(eq? 'WordClassNode (cog-type (gdr MEMB))))
+				(eq? 'WordClassNode (cog-type (gar MEMB))))
 			(cog-incoming-by-type wrd-of-ctr 'MemberLink)))
 
 	; Return not-#f if section SEC has connectors that
@@ -191,7 +191,7 @@
   in-gram-class? WORD GRAM-CLASS - is the WORD a member of the
   grammatical class CRAM-CLASS? Returns either #t or #f.
 "
-	(define memlnk (cog-link 'MemberLink WORD GCLS))
+	(define memlnk (cog-link 'MemberLink GCLS WORD))
 	(if (null? memlnk) #f #t)
 )
 
@@ -244,12 +244,12 @@
 			(map
 				; This lambda returns a list of words.
 				(lambda (CLS)  ; CLS is a WordClasNode
-					(fetch-incoming-by-type CLS 'MemberLink)
+					(fetch-incoming-by-type CLS 'MemberLink) ; TODO look like a bug
 					; map converts list of MemberLinks into list of words.
 					(map
 						; MEMB is a MemberLink; the zeroth atom in
 						; the MemberLink is the WordNode.
-						(lambda (MEMB) (cog-outgoing-atom MEMB 0))
+						(lambda (MEMB) (cog-outgoing-atom MEMB 1))
 						(cog-incoming-by-type CLS 'MemberLink)))
 				CLS-LST)))
 )

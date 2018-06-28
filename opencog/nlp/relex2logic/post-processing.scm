@@ -508,7 +508,7 @@
 		;	)
 		;)
 
-		(if update (Member interpretation-node  abstracted-interp-node))
+		(if update (Member abstracted-interp-node interpretation-node))
 
 		(map (lambda (lnk) (rebuild lnk lone-nodes '() update)) r2l-cleaned-set)
 	)
