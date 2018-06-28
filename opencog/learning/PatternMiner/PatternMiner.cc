@@ -4502,7 +4502,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr
     return pattern;
 }
 
-void PatternMiner::loadPatternsFromResultFile(string fileName)
+void PatternMiner::loadPatternsFromResultFile(string const &fileName)
 {
     ifstream resultFile;
     resultFile.open(fileName.c_str());
