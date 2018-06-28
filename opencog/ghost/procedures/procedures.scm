@@ -13,6 +13,7 @@
   #:use-module (opencog logger)
   #:use-module (opencog exec)
   #:use-module (opencog openpsi)
+  #:use-module (opencog ghost)
   #:export (
     ; Perception switches
     perception-start!
@@ -778,15 +779,9 @@
 ; Define keys used by sources.
 ;; Key for latest query passed.
 (define source-query-key (Predicate "query"))
-;; Key for recording query processing is being undertaken or not.
-(define source-processing-key (Predicate "processing"))
-;; Key for getting a result when processing is complete.
-(define source-result-key (Predicate "result"))
-;; Key for caching result after running result. This is for ghost purposes and
-;; shouldn't be used by sources.
-(define result-cache-key (Predicate "cached-result"))
 ;; Key used for recording the function name that is called with the query.
 (define source-func-name-key (Predicate "func-name"))
+
 
 (define* (def-source name func-name #:optional (input-type 'string)
                      (output-type 'string))
@@ -801,9 +796,6 @@
 "
   (define src (Concept name))
   (Inheritance src source-node)
-  (cog-set-value! src source-query-key (StringValue ""))
-  (cog-set-value! src source-processing-key (stv 0 1))
-  (cog-set-value! src source-result-key (StringValue ""))
   (cog-set-value! src source-func-name-key (StringValue func-name))
 )
 
@@ -816,87 +808,83 @@
   (cog-value-ref (cog-value source source-func-name-key) 0)
 )
 
-(define (source-set-query! source query)
+(define (source-set-query! sent query)
 "
-  source-set-query! SOURCE QUERY
+  source-set-query! SENT QUERY
 
-  Returns SOURCE after recording the QUERY, which is a string.
+  Returns SENT after recording the QUERY, which is a string.
 "
-  (cog-set-value! source source-query-key (StringValue query))
+  (cog-set-value! sent source-query-key (StringValue query))
 )
 
-(define (source-query source)
+(define (source-query sent)
 "
-  source-query SOURCE
+  source-query SENT
 
-  Returns the query string that SOURCE has processed or is processing.
+  Returns the query string that is extracted from SENT and is to be processed,
+  or is being processed, or was processed. SENT will identify a single query.
 "
-  (cog-value-ref (cog-value source source-query-key) 0)
+  (cog-value-ref (cog-value sent source-query-key) 0)
 )
 
-(define (source-set-processing! source tv)
+(define (source-set-processing! source sent tv)
 "
-  source-set-processing? SOURCE TV
+  source-set-processing? SOURCE SENT TV
 
-  Returns SOURCE after setting its processing state to the simple truth value
-  TV. The value passed should be either (stv 1 1) or (stv 0 1)
+  Returns SOURCE after setting its processing state, for the query extracted
+  from SENT, to the simple truth value TV. The value passed should be
+  either (stv 1 1) or (stv 0 1)
 "
-  (cog-set-value! source source-processing-key tv)
+  (cog-set-value! source sent tv)
 )
 
-(define (source-processing? source)
+(define (source-processing? source sent)
 "
-  source-processing? SOURCE
+  source-processing? SOURCE SENT
 
-  Returns (stv 1 1) if the source is processing a query and (stv 0 1) if not.
+  Returns (stv 1 1) if SOURCE is processing a query extracted from SENT
+  and (stv 0 1) if not.
 "
-  (cog-value source source-processing-key)
+  (cog-value source sent)
 )
 
-(define (source-set-result! source result)
+(define (source-set-result! sent source result)
 "
-  source-set-result SOURCE RESULT
+  source-set-result SENT SOURCE RESULT
 
-  Return SOURCE after recording the RESULT, which is a string. An empty
-  string is used to represent no result.
+  Return SENT after recording the RESULT from SOURCE for the query extracted
+  from it. An empty string is used to represent no result.
 
   It also signals that processing is completed.
 "
-  (set-value! source source-result-key (StringValue result))
-  (source-set-processing! source (stv 0 1))
+  (source-set-processing! source sent (stv 0 1))
+  (set-value! sent source (StringValue result))
 )
 
-(define (source-result source)
+(define (source-result sent source)
 "
-  source-result SOURCE
+  source-result SENT SOURCE
 
-  Returns the result value if.
+  Returns the result value from SOURCE for the query extracted from SENT.
 "
-  (get-value source source-result-key 0)
+  (get-value sent source 0)
 )
 
-(define (source-has-result? source)
+(define (source-has-result? sent source)
 "
-  source-has-result? SOURCE
+  source-has-result? SENT SOURCE
 
-  Returns (stv 1 1) if SOURCE has a result else it returns (stv 0 1).
+  Returns (stv 1 1) if SOURCE has a result for the query extracted from SENT
+  else it returns (stv 0 1).
 "
-  (let ((result (source-result source)))
+  (let ((result (source-result source))
+    (sp (source-processing? source sent)))
     (cond
-      ((equal? (stv 1 1) (source-processing? source)) (stv 0 1))
-      ((equal? "" (cog-value-ref result 0)) (stv 0 1))
-      (else (set-value! source result-cache-key result) (stv 1 1))
+      ((or (equal? '() sp) (equal? (stv 1 1) sp)) (stv 0 1))
+      ((string-null? (cog-value-ref result 0)) (stv 0 1))
+      (else (stv 1 1))
     )
   )
-)
-
-(define (get-cached-result source)
-"
-  get-cached-result SOURCE
-
-  Returns the string of the cached-result value.
-"
-  (cog-value-ref (get-value source result-cache-key 0) 0)
 )
 
 (define (set-value! source key value)
