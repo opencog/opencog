@@ -59,7 +59,7 @@
 ; Left wild-cards
 ; ---------------
 ; In the above example, the corresponding left-wildcard for "level"
-; would be (concpetually)
+; would be (conceptually) the shape:
 ;
 ;    (Section
 ;       (WordNode "playing")
@@ -73,9 +73,11 @@
 ;
 ; I.e. with (Variable "$wildcard") replacing (WordNode "level")
 ; These wildcards are needed to store the left-marginals.  In practice,
-; we don't want to pullute the namespace with ConnectorSeq's and
+; we don't want to pollute the namespace with ConnectorSeq's and
 ; Sections that have variables in them, so the actual representation is
-; flattened.
+; flattened. See below for its actual form.
+;
+; Its convenient to give these the name of "shape".
 ;
 ; ---------------------------------------------------------------------
 ;
@@ -112,6 +114,8 @@
 		(define any-left (AnyNode "cross-connector word"))
 		(define any-right (AnyNode "cross-connector section"))
 
+		; Well, left-type can also be a WordClassNode, but we lie
+		; about that, here.
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'EvaluationLink)
 		(define (get-pair-type) 'Section)
@@ -152,13 +156,6 @@
 			(Section point (ConnectorSeq
 				begn (Connector L-ATOM dir) end)))
 
-		; Return the Word or WordClass of the Section
-		; This is wrong.... There's not enough information to
-		; know what this is ...
-		(define (get-left-element PAIR) '())
-
-		(define (get-right-element PAIR) '())
-
 		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
 			(define sect (get-pair L-ATOM R-ATOM))
@@ -192,8 +189,10 @@
 
 		; -------------------------------------------------------
 		; Stars API.
+		; Get both the Words and the WordClasses; put WordClasses first.
 		(define (get-left-basis)
-			(if (null? l-basis) (set! l-basis (cog-get-atoms 'WordNode)))
+			(if (null? l-basis) (set! l-basis
+				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode)))
 			l-basis)
 
 		(define (get-right-basis)
@@ -260,41 +259,6 @@
 		)
 
 		; -------------------------------------------------------
-
-		; Use RAII-style code, so that if the user hits ctrl-C
-		; while we are in this, we will catch that and set the
-		; atomspace back to normal.
-		; XXX there is a small race here, between the setting
-		; of the atomspace, and the invocation of the
-		; throw-handler, but I don't care.
-		;
-		(define (raii-get-stuff FUNC ITEM)
-			(define old-as (cog-set-atomspace! aspace))
-			(with-throw-handler #t
-				(lambda ()
-					(let ((stars (FUNC ITEM)))
-						(cog-atomspace-clear aspace)
-						(cog-set-atomspace! old-as)
-						stars))
-				(lambda (key . args)
-					(cog-atomspace-clear aspace)
-					(cog-set-atomspace! old-as)
-					'())))
-
-		; This is a wrapper to serialize access to a temp atomspace,
-		; where the query is actually performed.
-		(define (get-stars FUNC WORD)
-			(lock-mutex mtx)
-			(with-throw-handler #t
-				(lambda ()
-					(define stars (raii-get-stuff FUNC WORD))
-					(unlock-mutex mtx)
-					stars)
-				(lambda (key . args)
-					(unlock-mutex mtx)
-					'())))
-
-		; -------------------------------------------------------
 		; The right-stars of a WordNode are all of the Sections in
 		; which that Word appears in some Connector. A BindLink is
 		; used to get those sections. This is done in a private,
@@ -304,7 +268,7 @@
 		;
 		; Run a query, and return all Sections that contain WORD
 		; in a Connector, some Connector, any Connector.
-		(define (do-get-right-stars WORD)
+		(define (right-stars-query WORD)
 			; The WORD must occur somewhere, anywhere in a conector.
 			(define body (Section
 				(Variable "$point")
@@ -314,51 +278,69 @@
 					(Glob "$end"))))
 
 			; The types that are matched must be just-so.
-			(define pattern
-				(Bind (VariableList
-					(TypedVariable (Variable "$point") (Type "WordNode"))
-					(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
-					(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
-					(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
-					body body))
+			(Bind (VariableList
+				(TypedVariable (Variable "$point")
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
+				body body))
 
-			; execute returns a SetLink. We don't want that.
-			(define setlnk (cog-execute! pattern))
-			(cog-outgoing-set setlnk)
-		)
+		; Just like above, but return the shape, not the section.
+		(define (right-duals-query WORD)
+			; The WORD must occur somewhere, anywhere in a conector.
+			(define body (Section
+				(Variable "$point")
+				(ConnectorSeq
+					(Glob "$begin")
+					(Connector WORD (Variable "$dir"))
+					(Glob "$end"))))
 
-		; Return all sections that have WORD appearing in a connector.
-		; This is a wrapper to seriealize access to a temp atomspace,
-		; where the query is actually performed.
-		(define (get-right-stars WORD) (get-stars do-get-right-stars WORD))
+			(define shape (Evaluation predno
+				(Variable "$point")
+				(Glob "$begin")
+				(Connector star-wild (Variable "$dir"))
+				(Glob "$end")))
+
+			; The types that are matched must be just-so.
+			(Bind (VariableList
+				(TypedVariable (Variable "$point")
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
+				body shape))
 
 		;-------------------------------------------
-		(define (do-get-left-stars R-ATOM)
+		; The left-stars consist of all Sections of a fixed shape,
+		; that shape given by R-ATOM, but with any word occuring
+		; in the connector-location in that shape.
+		(define (left-stars-query R-ATOM)
 			(define body (make-pair star-wild R-ATOM))
 
 			; The types that are matched must be just-so.
-			(define pattern
-				(Bind (TypedVariable star-wild (Type 'WordNode))
-					body body))
+			(Bind (TypedVariable star-wild
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
+				body body))
 
-			; execute returns a SetLink. We don't want that.
-			(define setlnk (cog-execute! pattern))
-			(cog-outgoing-set setlnk)
-		)
-
-		; Left-stars require a query to be run ....
-		(define (get-left-stars R-ATOM) (get-stars do-get-left-stars R-ATOM))
+		; Just like above, but return only the words, not the Sections.
+		(define (left-duals-query R-ATOM)
+			(Get (TypedVariable star-wild
+					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
+				(make-pair star-wild R-ATOM)))
 
 		;-------------------------------------------
 		; Explain the non-default provided methods.
 		(define (provides meth)
 			(case meth
-				((left-basis)       get-left-basis)
-				((right-basis)      get-right-basis)
-				((left-basis-size)  get-left-size)
-				((right-basis-size) get-right-size)
-				((left-stars)       get-left-stars)
-				((right-stars)      get-right-stars)
+				((left-basis)         get-left-basis)
+				((right-basis)        get-right-basis)
+				((left-basis-size)    get-left-size)
+				((right-basis-size)   get-right-size)
+				((left-star-pattern)  left-stars-query)
+				((right-star-pattern) right-stars-query)
+				((left-dual-pattern)  left-duals-query)
+				((right-dual-pattern) right-duals-query)
 		))
 
 		; Methods on the object
@@ -380,13 +362,17 @@
 				((wild-wild)        get-wild-wild)
 				((fetch-pairs)      fetch-sections)
 
-				((left-basis)       get-left-basis)
-				((right-basis)      get-right-basis)
-				((left-basis-size)  get-left-size)
-				((right-basis-size) get-right-size)
-				((left-stars)       get-left-stars)
-				((right-stars)      get-right-stars)
+				; Methods provided for the add-pair-stars API
+				((left-basis)         get-left-basis)
+				((right-basis)        get-right-basis)
+				((left-basis-size)    get-left-size)
+				((right-basis-size)   get-right-size)
+				((left-star-pattern)  left-stars-query)
+				((right-star-pattern) right-stars-query)
+				((left-dual-pattern)  left-duals-query)
+				((right-dual-pattern) right-duals-query)
 
+				; Custom call. These need to be explicitly made.
 				((make-left-stars)  create-connector-left-stars)
 
 				((provides)         provides)
