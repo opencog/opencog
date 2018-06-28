@@ -332,7 +332,6 @@
 
   ; Assign the query to the source and start processing
   (source-set-query! ddg-src query)
-  (source-set-processing! ddg-src (stv 1 1))
 
   (let* ((url (string-append "http://api.duckduckgo.com/?q="
            (string-downcase query) "&format=xml"))
@@ -344,12 +343,10 @@
     (if (equal? (length abstract) 1)
       (begin
         (source-set-result! ddg-src "")
-        (source-set-processing! ddg-src (stv 0 1))
         (cog-logger-debug schema-logger "No answer found from DuckDuckGo!"))
       (let* ((ans (car (cdr abstract)))
              (ans-1st-sent (get-first-sentence ans)))
-        (source-set-result! ddg-src ans-1st-sent)
-        (source-set-processing! ddg-src (stv 0 1)))
+        (source-set-result! ddg-src ans-1st-sent))
     )
   )
 )
@@ -372,7 +369,6 @@
     (begin
       ; Assign the query to the source and start processing
       (source-set-query! wa-src query)
-      (source-set-processing! wa-src (stv 1 1))
 
       (let* ((query-no-spaces
                (regexp-substitute/global #f " " (string-downcase query) 'pre "+" 'post))
@@ -396,7 +392,6 @@
         (if (equal? ans #f)
           (begin
             (source-set-result! wa-src "")
-            (source-set-processing! wa-src (stv 0 1))
             (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!"))
           (let* ((text-ans (cadr (cadddr (cadddr ans))))
                  ; Remove '(', ')', and '|' from the answer, if any
@@ -546,6 +541,8 @@
   Calls the interface of SOURCE with name of the node or the concatenation
   of the names of the Nodes in a ListLink. If SOURCE is not specified then
   the query is passed to all the sources.
+
+  It also signals that processing has started.
 "
   (define query-str
     (if (equal? 'ListLink (cog-type query))
@@ -555,6 +552,7 @@
 
   (define (spawn-source src)
     (call-with-new-thread (lambda ()
+      (source-set-processing! src (stv 1 1))
       (eval-string (format #f "(~a ~s)" (source-func-name src) query-str)))))
 
   (if source
@@ -562,4 +560,14 @@
     (par-map spawn-source (get-sources))
   )
   fini
+)
+
+(define* (get_answer #:optional source)
+"
+  get_answer [SOURCE]
+
+  Get the answer from SOURCE. If SOURCE is not specified then the query
+  is passed to all the sources.
+"
+  *unspecified*
 )
