@@ -315,20 +315,35 @@
   any_answer [SOURCE]
 
   Returns (stv 1 1) if SOURCE has a result and (stv 0 1) if not. If SOURCE
-  is not passed then it will check if all the sources have any answer.
+  is not passed then it will check if any of the sources have an answer, and
+  cache a random source from the list.
 "
+  ;TODO: The assumption is that this is used by an ordered goal. Make it
+  ; handle unordered goal.
+  (define src-list (get-sources))
+  (define sent
+    (cog-value (if source source (car src-list)) source-latest-sent-key))
+
   (define (has-result? src)
-    (let ((sent (cog-value src source-latest-sent-key)))
-      ; Sometimes a check maybe run before any query is made to the source.
-      (if (null? sent)
-        (stv 0 1)
-        (source-has-result? sent src))
-    ))
+    ; Sometimes a check maybe run before any query is made to the source.
+    (if (null? sent)
+      (stv 0 1)
+      (source-has-result? sent src)))
+
+  (define srcs-with-result '())
+  (define (any-result?)
+    (set! srcs-with-result
+      (filter (lambda (x) (equal? (stv 1 1) (has-result? x))) src-list))
+    (not (null? srcs-with-result)))
+  (define (pick-src)
+    (list-ref srcs-with-result
+		  (random (length srcs-with-result) (random-state-from-platform))))
 
   (cond
     (source (has-result? source))
-    ((any (lambda (x) (equal? (stv 1 1) (has-result? x))) (get-sources))
+    ((any-result?) (cog-set-value! sent (Predicate "random-source") (pick-src))
       (stv 1 1))
+    ; If the sources haven't finished processing
     (else (stv 0 1))
   )
 )

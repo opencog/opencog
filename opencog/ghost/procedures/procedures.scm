@@ -83,6 +83,7 @@
 
     ; Source schemas
     send_query
+    get_answer
 
     ; Source interfaces ; This need to public so to be callable by send_query
     ask-duckduckgo
@@ -880,12 +881,10 @@
   Returns (stv 1 1) if SOURCE has a result for the query extracted from SENT
   else it returns (stv 0 1).
 "
-  (let ((result (source-result sent source))
-    (sp (source-processing? source sent)))
+  (let ((sp (source-processing? source sent)))
     ; The order here is dependent on source-set-result!
     (cond
       ((or (equal? '() sp) (equal? (stv 1 1) sp)) (stv 0 1))
-      ((string-null? (cog-value-ref result 0)) (stv 0 1))
       (else (stv 1 1))
     )
   )

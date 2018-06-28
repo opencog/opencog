@@ -563,8 +563,25 @@
 "
   get_answer [SOURCE]
 
-  Get the answer from SOURCE. If SOURCE is not specified then the query
-  is passed to all the sources.
+  Get the latest answer from SOURCE. If SOURCE is not specified then the
+  latest answer is randomly selected from one of the sources.
 "
-  *unspecified*
+  (define src '())
+  (define sent '())
+  (if source
+    (begin
+      (set! src (Concept (cog-name source)))
+      (set! sent (cog-value src source-latest-sent-key)))
+    ; Since the assumption is that there are only ordered goals, any source
+    ; will work.
+    (begin
+      (set! sent (cog-value (car (get-sources)) source-latest-sent-key)))
+  )
+
+  (cond
+    ((null? sent) fini) ; If run before query is sent.
+    (source (Concept (cog-value-ref (source-result sent src) 0)))
+    (else (Concept (cog-value-ref
+		  (source-result sent (cog-value sent (Predicate "random-source"))) 0)))
+  )
 )
