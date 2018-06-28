@@ -1,6 +1,8 @@
 (define-module (opencog ghost procedures)
   #:use-module (ice-9 optargs)
   #:use-module (ice-9 regex)
+  #:use-module (ice-9 threads)
+  #:use-module (ice-9 eval-string)
   #:use-module (srfi srfi-1)
   #:use-module (sxml simple)
   #:use-module (web client)
@@ -11,6 +13,7 @@
   #:use-module (opencog logger)
   #:use-module (opencog exec)
   #:use-module (opencog openpsi)
+  #:use-module (opencog ghost)
   #:export (
     ; Perception switches
     perception-start!
@@ -44,6 +47,9 @@
     ; Time related predicates
     after_min
 
+    ; Source predicates
+    any_answer
+
     ; schemas
     animation
     expression
@@ -74,6 +80,14 @@
     saccade_explore
     saccade_listen
     saccade_cancel
+
+    ; Source schemas
+    send_query
+    get_answer
+
+    ; Source interfaces ; This need to public so to be callable by send_query
+    ask-duckduckgo
+    ask-wolframalpha
 
     ; Utilities
     set-dti!
@@ -760,84 +774,160 @@
 )
 
 ; --------------------------------------------------------------
+; The Node that represents sources
+(define source-node (Concept "source"))
+
 ; Define keys used by sources.
-;; Key for latest query passed.
+;; Key for query passed to a source.
 (define source-query-key (Predicate "query"))
-;; Key for recording query processing is being undertaken or not.
-(define source-processing-key (Predicate "processing"))
-;; Key for getting a result when processing is complete.
-(define source-result-key (Predicate "result"))
+;; Key used for recording the function name that is called with the query.
+(define source-func-name-key (Predicate "func-name"))
+;; Key used for recording the latest sentence passed for processing.
+(define source-latest-sent-key (Predicate "last-sentence"))
 
-(define* (def-source name #:optional (input-type 'string) (output-type 'string))
+(define* (def-source name func-name #:optional (input-type 'string)
+                     (output-type 'string))
 "
-  source NAME [INPUT-TYPE] [OUTPUT-TYPE]
+  def-source NAME FUNC-NAME [INPUT-TYPE] [OUTPUT-TYPE]
 
-  Returns the atom that represents a source that is identified by NAME.
-  INPUT-TYPE and OUTPUT-TYPE are set to 'string by default.
+  Returns the atom that represents a source that is identified by NAME after
+  recording the name of the function, FUNC-NAME, that is an interface to
+  the source. INPUT-TYPE and OUTPUT-TYPE are set to 'string by default.
 
   TODO: Define other types of inputs and outputs.
 "
   (define src (Concept name))
-  (Inheritance src (Concept "source"))
-  (cog-set-value! src source-query-key (StringValue ""))
-  (cog-set-value! src source-processing-key (stv 0 1))
-  (cog-set-value! src source-result-key (StringValue ""))
-  src
+  (Inheritance src source-node)
+  (cog-set-value! src source-func-name-key (StringValue func-name))
 )
 
-(define (source-set-query! source query)
+(define (source-func-name source)
 "
-  source-set-query! SOURCE QUERY
+  source-func-name SOURCE
 
-  Returns SOURCE after recording the QUERY, which is a string.
+  Returns the name of the function that acts the interface for SOURCE.
 "
-  (cog-set-value! source source-query-key (StringValue query))
+  (cog-value-ref (cog-value source source-func-name-key) 0)
 )
 
-(define (source-query source)
+(define (source-set-query! sent query)
 "
-  source-query SOURCE
+  source-set-query! SENT QUERY
 
-  Returns the query string that SOURCE has processed or is processing.
+  Returns SENT after recording the QUERY, which is a string.
 "
-  (cog-value-ref (cog-value source source-query-key) 0)
+  (cog-set-value! sent source-query-key (StringValue query))
 )
 
-(define (source-set-processing! source tv)
+(define (source-query sent)
 "
-  source-set-processing? SOURCE TV
+  source-query SENT
 
-  Returns SOURCE after setting its processing state to the simple truth value
-  TV. The value passed should be either (stv 1 1) or (stv 0 1)
+  Returns the query string that is extracted from SENT and is to be processed,
+  or is being processed, or was processed. SENT will identify a single query.
 "
-  (cog-set-value! source source-processing-key tv)
+  (cog-value-ref (cog-value sent source-query-key) 0)
 )
 
-(define (source-processing? source)
+(define (source-set-processing! source sent tv)
 "
-  source-processing? SOURCE
+  source-set-processing? SOURCE SENT TV
 
-  Returns (stv 1 1) if the source is processing a query and (stv 0 1) if not.
+  Returns SOURCE after setting its processing state, for the query extracted
+  from SENT, to the simple truth value TV. The value passed should be
+  either (stv 1 1) or (stv 0 1)
 "
-  (cog-value source source-processing-key)
+  (cog-set-value! source sent tv)
 )
 
-(define (source-set-result! source result)
+(define (source-processing? source sent)
 "
-  source-set-result SOURCE RESULT
+  source-processing? SOURCE SENT
 
-  Return SOURCE after recording the RESULT, which is a string.
+  Returns (stv 1 1) if SOURCE is processing a query extracted from SENT
+  and (stv 0 1) if not.
 "
-  (cog-set-value! source source-result-key (StringValue result))
+  (cog-value source sent)
 )
 
-(define (source-result source)
+(define (source-set-result! sent source result)
 "
-  source-result SOURCE
+  source-set-result SENT SOURCE RESULT
 
-  Returns the result string if SOURCE is not processing
+  Record the RESULT from SOURCE for the query extracted from SENT.
+  An empty string is used to represent no result.
+
+  It also signals that processing is completed.
 "
-  (cog-value-ref (cog-value source source-result-key) 0)
+  ; The order here matters for source-has-result?
+  (set-value! sent source (StringValue result))
+  (source-set-processing! source sent (stv 0 1))
+  *unspecified*
+)
+
+(define (source-result sent source)
+"
+  source-result SENT SOURCE
+
+  Returns the result value for the sentence SENT processed by SOURCE.
+"
+  (get-value sent source 0)
+)
+
+(define (source-has-result? sent source)
+"
+  source-has-result? SENT SOURCE
+
+  Returns (stv 1 1) if SOURCE has a result for the query extracted from SENT
+  else it returns (stv 0 1).
+"
+  (let ((sp (source-processing? source sent)))
+    ; The order here is dependent on source-set-result!
+    (cond
+      ((or (equal? '() sp) (equal? (stv 1 1) sp)) (stv 0 1))
+      (else (stv 1 1))
+    )
+  )
+)
+
+(define (set-value! sent source value)
+"
+  set-value! SENT SOURCE VALUE
+
+  Returns SENT after associating SOURCE with VALUE. It differs from cog-value
+  b/c it uses a LinkValue of values so as to store time information.
+"
+  (cog-set-value! sent source (LinkValue value (FloatValue (current-time-us))))
+)
+
+(define (get-value sent source index)
+"
+  get-value SENT SOURCE INDEX
+
+  Returns the value at INDEX of the LinkValue, that is returned when
+  running (cog-value SENT SOURCE).
+"
+  (let ((link-value (cog-value sent source)))
+    (if (null? link-value)
+      link-value
+      (cog-value-ref link-value index))
+  )
+)
+
+(define (get-sources)
+"
+  get-sources
+
+  Returns a list of atoms that represent sources, or nil if their are no
+  sources defined.
+"
+  (cog-outgoing-set (cog-execute!
+    (Get
+      (TypedVariable
+        (Variable "source")
+        (Type "ConceptNode"))
+      (Inheritance (Variable "source") source-node))
+  ))
 )
 
 ; --------------------------------------------------------------
