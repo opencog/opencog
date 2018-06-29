@@ -81,6 +81,9 @@ Additionally, when a rule in a sequence is triggered, it will have a lower STI w
 Updated May 2018:
 Looks like the above methods of biasing the rules to be triggered in the defined order are not enough to give the behavior that one would expect, so an extra condition has been added to the context of the rules to make sure the rule will be triggered only if the previous rules has been triggered.
 
+Updated Jun 2018:
+Another experimantal feature has been added -- to select rules based on the pattern specificity, i.e. the more specific rule will always be preferred to less specific one. For example, if there are two rules that can potentially be selected, `(how are you)` and `(how are *)`, then `(how are you)` will be selected.
+
 2) Rule level goal(s)
 
 ```
