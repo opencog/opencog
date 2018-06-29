@@ -33,7 +33,8 @@
 using namespace opencog;
 
 
-FrameQuery::FrameQuery(void)
+FrameQuery::FrameQuery(void) :
+    do_discard(false)
 {
 }
 
