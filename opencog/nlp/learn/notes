@@ -14285,22 +14285,23 @@ md5sum
 
 en_dj_cfive
 -----------
-Identical to en_pairs_cfive_mst but with word-pairs removed.
+Identical to en_pairs_cfive_mst but with word-pairs removed. This
+does contain the pseudo-dj marginals, but not the cross-connector
+marginals.
 
 STATUS: Good.
-DATE: xxx June 2018
+DATE: 28 June 2018
 
 en_dj_cfive=> \dt+
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 12 GB      | 
+ public | atoms      | table | ubuntu | 7453 MB    | 
  public | spaces     | table | ubuntu | 8192 bytes | 
  public | typecodes  | table | ubuntu | 24 kB      | 
- public | valuations | table | ubuntu | 26 GB      | 
+ public | valuations | table | ubuntu | 18 GB      | 
  public | values     | table | ubuntu | 8192 bytes | 
 (5 rows)
-
 
 select count(*) from atoms;      <<<<  81241106 == 81.2 M Atoms
 select count(*) from valuations; <<<< 217088222 == 217 M Valuations
@@ -14333,6 +14334,12 @@ There are 498239 words, of which 444903 have disjuncts and 53336
 are in connectors only.  From the cross-connectors, we can find
 out the converse: number of words that are in connectors only.
 
+17121601272 Bytes uncompressed == 17 GBytes
+ 1873684270 Bytes compressed == 1.87 GBytes
+
+c809c93f690ae0f583848ceb78d0c474  en_dj_cfive.sql
+c63df81bd14e5c0d478e654e3be76369  en_dj_cfive.sql.bz2
+
 ==========
 
 next:
@@ -14353,6 +14360,7 @@ Elapsed time to compute left-stars: 958 secs
 
 OK, makes sense.
 
+Before batching, we're at 41.346GB VIRT according to top.
 (batch-all-pair-mi cra)
 Support: found num left= 137078 num right= 18265271 in 0 secs
 
@@ -14478,13 +14486,21 @@ are in connectors only.  How many are in connectors, but not in
 disjuncts, total?
 
 pg_dump en_dj_cfive > en_dj_cfive.sql
-Also VACUUM FULL;
+Also VACUUM FULL;  done.
 
 And now
 createdb en_dj_efive -T en_dj_cfive
 
 (define cra (make-connector-vec-api))
 (cra 'fetch-pairs)
+Elapsed time to load word sections: 6054 seconds
+Elapsed time to load cross-marginals: 0 seconds
+67.9GBytes to load 56786433 == 56.7 M atoms
+
+(cra 'make-left-stars)
+
+
+=========================================================================
 
 =========================================================================
 =========================================================================
@@ -14499,7 +14515,6 @@ NEW TODO LIST
    What scripts would these be?
 
 -- start cross-marginals in dj_cfive IN PROGRESS
-   110 GB to load.
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
