@@ -14498,6 +14498,21 @@ Elapsed time to load cross-marginals: 0 seconds
 67.9GBytes to load 56786433 == 56.7 M atoms
 
 (cra 'make-left-stars)
+Elapsed time to compute left-stars: 6054 secs
+requires 139G at that time
+sql-stats: Atomspace holds 130597079 atoms -- 73810646 == 74M more
+(cog-report-counts)
+(Connector . 931184)
+(ConnectorSeq . 23444293)
+(EvaluationLink . 73810644)  <<== 3x larger than num connectors!
+(Section . 31914870)
+(WordNode . 496078)
+
+guile-dj-en>> (batch-all-pair-mi crs)
+Start computing the basis
+Support: found num left= 496078 num right= 73810644 in 2828 secs
+
+
 
 
 =========================================================================
