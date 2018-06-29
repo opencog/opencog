@@ -337,7 +337,7 @@
     (not (null? srcs-with-result)))
   (define (pick-src)
     (list-ref srcs-with-result
-		  (random (length srcs-with-result) (random-state-from-platform))))
+      (random (length srcs-with-result) (random-state-from-platform))))
 
   (cond
     (source (has-result? source))

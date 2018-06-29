@@ -340,7 +340,7 @@
 
     (if (equal? (length abstract) 1)
       (begin
-        (source-set-result! ddg-src sent "")
+        (source-set-result! sent ddg-src "")
         (cog-logger-debug schema-logger "No answer found from DuckDuckGo!"))
       (let* ((ans (car (cdr abstract)))
              (ans-1st-sent (get-first-sentence ans)))
@@ -386,7 +386,7 @@
 
       (if (equal? ans #f)
         (begin
-          (source-set-result! wa-src sent "")
+          (source-set-result! sent wa-src "")
           (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!"))
         (let* ((text-ans (cadr (cadddr (cadddr ans))))
                ; Remove '(', ')', and '|' from the answer, if any
@@ -582,6 +582,6 @@
     ((null? sent) fini) ; If run before query is sent.
     (source (Concept (cog-value-ref (source-result sent src) 0)))
     (else (Concept (cog-value-ref
-		  (source-result sent (cog-value sent (Predicate "random-source"))) 0)))
+      (source-result sent (cog-value sent (Predicate "random-source"))) 0)))
   )
 )
