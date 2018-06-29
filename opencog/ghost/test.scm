@@ -353,3 +353,12 @@
     (cog-logger-warn ghost-logger
       "The refractory period has to be a numberic value!"))
 )
+
+(define-public (ghost-set-specificity-based-as VAL)
+"
+  ghost-set-specificity-based-as VAL
+
+  Set whether or not to do specificity-based action selection.
+"
+  (set! specificity-based-action-selection VAL)
+)
