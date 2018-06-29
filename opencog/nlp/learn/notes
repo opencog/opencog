@@ -3175,7 +3175,7 @@ https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
 (cog-value atom key)
 (cog-value?
 cog-value->list
-cog-count
+cog-tv-count
 
 confidence
 

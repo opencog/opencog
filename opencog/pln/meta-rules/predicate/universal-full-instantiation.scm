@@ -105,7 +105,7 @@
 
 (define (universal-full-instantiation-forall-formula Pinst Forall)
   (let* ((Forall-tv (cog-tv Forall)))
-    (if (< 0 (cog-confidence Forall-tv)) ; avoid creating informationless knowledge
+    (if (< 0 (cog-tv-confidence Forall-tv)) ; avoid creating informationless knowledge
         (cog-merge-hi-conf-tv! Pinst Forall-tv))))
 
 ;; Name the forall scope meta rule
