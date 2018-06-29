@@ -264,7 +264,7 @@ pair<float, float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &patter
                     subPattern.append(aux);
                 }
                 if (DEBUG) subPattern.printForDebug("subPattern: ", "\n", true);
-                int count = countPattern(subPattern);
+                unsigned int count = countPattern(subPattern);
                 if (DEBUG) printf("count = %u\n", count);
                 if (count == 0) {
                     prod = 0;
@@ -354,7 +354,7 @@ pair<float, float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern)
 {
     float minP = 0;
     float maxP = 0;
-    if (DEBUG) printf("frames.size() = %lu\n", frames.size());
+    if (DEBUG) printf("frames.size() = %zu\n", frames.size());
     if (DEBUG) printf("floatUniverseCount = %f\n", floatUniverseCount);
 
     if (DEBUG) printf("minMaxSubsetProb()\n");
@@ -507,7 +507,7 @@ bool TypeFrameIndex::enqueueCompoundFrame(const TypeFrame &compoundFrame)
     static unsigned int queueDebugCount = 0;
     if (DEBUG) printf("enqueueCompoundFrame() BEGIN\n");
     compoundFrameQueue.push(compoundFrame);
-    if (DEBUG && (!(queueDebugCount++ % 100000))) printf("Queue size: %ld\n",  compoundFrameQueue.size());
+    if (DEBUG && (!(queueDebugCount++ % 100000))) printf("Queue size: %zu\n",  compoundFrameQueue.size());
     if (DEBUG) printf("enqueueCompoundFrame() END\n");
     return (compoundFrameQueue.size() > MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE);
 }
@@ -600,7 +600,7 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     }
     EquivalentTypeFrameSet baseSet;
 
-    if (DEBUG) printf("frames.size(): %lu\n", frames.size());
+    if (DEBUG) printf("frames.size(): %zu\n", frames.size());
     // Build a set of subcomponents that will be used to build candidate
     // compoundFrames. subcomponents are tipically links that will be glued
     // together with an AndLink to build a compoundFrame. compoundFrames have
@@ -630,7 +630,7 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     // Copy the baseSet to a vector to ease further manipulation
     // (memory waste is irrelevant)
     vector<TypeFrame> base(baseSet.begin(), baseSet.end());
-    if (DEBUG) printf("base.size(): %lu\n", base.size());
+    if (DEBUG) printf("base.size(): %zu\n", base.size());
 
     // Only non-empty-intersection subcompounds are glued together to build a
     // compoundFrame (intersection == sharing of at least 1 Node). Building (a
@@ -741,7 +741,7 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
         delete evaluationThread;
     }
 
-    if (DEBUG) printf("Finished mining. heap size = %lu\n", miningResultsHeap.size());
+    if (DEBUG) printf("Finished mining. heap size = %zu\n", miningResultsHeap.size());
 
     answer = miningResultsHeap;
 
@@ -1022,13 +1022,13 @@ vector<TypeFrame> TypeFrameIndex::computeSubPatterns(const TypeFrame &baseFrame,
             }
         }
         if (DEBUG) printf("Done [] []\n");
-        if (DEBUG) printf("Size =  %lu\n", answer.size());
+        if (DEBUG) printf("Size =  %zu\n", answer.size());
     }
 
     if (! TOPLEVEL_ONLY) {
         clock_t t1 = clock();
         for (unsigned int i = 0; i < answer.size(); i++) {
-            if (DEBUG) printf("Adding %u/%lu\n", i, answer.size());
+            if (DEBUG) printf("Adding %u/%zu\n", i, answer.size());
             addPatternOccurrence(answer.at(i), pos);
         }
         clock_t t2 = clock();
@@ -1063,7 +1063,7 @@ void TypeFrameIndex::addPatternOccurrence(TypeFrame &pattern, int pos)
 
 void TypeFrameIndex::buildSubPatternsIndex()
 {
-    if (DEBUG) printf("TypeFrameIndex::buildSubPatternsIndex()\nframes.size() = %lu\n", frames.size());
+    if (DEBUG) printf("TypeFrameIndex::buildSubPatternsIndex()\nframes.size() = %zu\n", frames.size());
     for (unsigned int i = 0; i < frames.size(); i++) {
         if ((frames.size() > 100) && (! (i % (frames.size() / 100))))
             logger().info("[PatternIndex] Building index %.0f%% done", ((float) i / frames.size()) * 100);
@@ -1276,7 +1276,7 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
         }
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) {
-                printf("recursion key[%d]: ", i);
+                printf("recursion key[%u]: ", i);
                 recursionKeyExpression.at(i).printForDebug("", "\n", true);
             }
             keyExpression.append(recursionKeyExpression.at(i));
