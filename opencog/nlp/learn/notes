@@ -14219,10 +14219,10 @@ en_dj_mtwo=> \dt+
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
 --------+------------+-------+-------+------------+-------------
- public | atoms      | table | linas | 2019 MB    |
- public | spaces     | table | linas | 40 kB      |
- public | typecodes  | table | linas | 56 kB      |
- public | valuations | table | linas | 6206 MB    |
+ public | atoms      | table | linas | 1976 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 24 kB      |
+ public | valuations | table | linas | 4956 MB    |
  public | values     | table | linas | 8192 bytes |
 (5 rows)
 
@@ -14283,6 +14283,56 @@ md5sum
 8392529389ca2c07666860a64f4d594a  en_dj_mtwo.sql
 6d03d11dc356665868e7f1d529cc8fe7  en_dj_mtwo.sql.bz2
 
+en_dj_cfive
+-----------
+Identical to en_pairs_cfive_mst but with word-pairs removed.
+
+STATUS: Good.
+DATE: xxx June 2018
+
+en_dj_cfive=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 12 GB      | 
+ public | spaces     | table | ubuntu | 8192 bytes | 
+ public | typecodes  | table | ubuntu | 24 kB      | 
+ public | valuations | table | ubuntu | 26 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+
+select count(*) from atoms;      <<<<  81241106 == 81.2 M Atoms
+select count(*) from valuations; <<<< 217088222 == 217 M Valuations
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 69447009)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 444903 Columns: 23444293
+Size: 31914870 non-zero entries of 10430436288579 possible
+Fraction non-zero: 3.0598E-6 Sparsity (-log_2): 18.318
+Total observations: 69447009.0  Avg obs per pair: 2.1760
+Entropy Total: 23.092   Left: 21.137   Right: 10.112
+Total MI: 8.1569
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.2742E+5    367.6    
+Count   (l_1)  9.4430E+5    7917.         4.152        21.54    
+Length  (l_2)  2.4549E+4    2397.         .1079        6.520    
+RMS Count      2.4499E+4    2379.         .1077        6.472    
+
+Ahh -- interesting ... there are words that appear in connectors, that
+do not appear in word-disjunct pairs. (that do not have an associated
+disjunct).
+
+There are 498239 words, of which 444903 have disjuncts and 53336
+are in connectors only.  From the cross-connectors, we can find
+out the converse: number of words that are in connectors only.
+
 ==========
 
 next:
@@ -14290,9 +14340,25 @@ createdb en_dj_etwo -T en_dj_mtwo
 (sql-open "postgres:///en_dj_etwo?user=linas&password=asdf")
 (define cra (make-connector-vec-api))
 (cra 'fetch-pairs)
-(cra 'make-left-stars)
-(batch-all-pair-mi cra)
+Elapsed time to load word sections: 2850 seconds
 
+(cra 'make-left-stars)
+Elapsed time to compute left-stars: 958 secs
+
+(EvaluationLink . 18265271)
+(Connector .  268594)
+(ConnectorSeq . 6239997)
+(Section . 8629163)
+(WordNode . 137078)
+
+OK, makes sense.
+
+(batch-all-pair-mi cra)
+Support: found num left= 137078 num right= 18265271 in 0 secs
+
+
+Verify that left-stars really got saved, yeah?
+(because they are crazy-format...)
 
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
@@ -14309,7 +14375,7 @@ sort both lists via cog-atom-less? and then single-pass
 
 (load-atoms-of-type 'WordNode)
 
-(define no-usar (remove
+(define no-usar (remove XXXXX no super slow n2 algo!!!
 	(lambda (wrd) (find (lambda (w) (equal? w wrd)) bas))
 	all-words))
 
@@ -14375,6 +14441,50 @@ top: 75.290g  == 78947524 KB psaux
 (ala 'delete-pairs)
 running at 500/second, need 116544.98 seconds == 32 hours!  Yow!
 
+Done.
+scheme@(guile-user)> (pca 'fetch-pairs)
+Elapsed time to load csets: 8680 secs
+81224835 atoms = 81M atoms  taking 110GB to load.
+(print-matrix-summary-report pca)  -- same as for cfive_mst, as expected.
+
+(cog-report-counts)
+((ListLink . 24169074) (SchemaNode . 1) (PredicateNode . 8)
+(AnchorNode . 1) (Connector . 971810) (ConnectorDir . 2) (ConnectorSeq .
+23670834) (Section . 31914870) (WordNode . 498239) (AnyNode . 2))
+
+(define all-words (cog-get-atoms 'WordNode))
+(length all-words)  ;  498239
+(load-atoms-of-type 'WordNode)
+
+(define all-words (cog-get-atoms 'WordNode))
+(length all-words)  ; 623548
+
+(define bas (pca 'left-basis))
+(length bas)     ; 444903  --- Hmm Fewer. Wonder why.
+
+(define start-time (current-time))
+(define diff (atoms-subtract all-words bas))
+(format #t "Elapsed ~A\n" (- (current-time) start-time))
+(length diff) ; --- 178645
+
+(define start-time (current-time))
+(for-each cog-delete diff)
+(format #t "Elapsed ~A\n" (- (current-time) start-time))
+
+Ahh -- interesting ... there are words that appear in connectors,
+that do not have corresponding disjuncts for them.
+There are 498239 words, of which 444903 have disjuncts and 53336
+are in connectors only.  How many are in connectors, but not in 
+disjuncts, total?
+
+pg_dump en_dj_cfive > en_dj_cfive.sql
+Also VACUUM FULL;
+
+And now
+createdb en_dj_efive -T en_dj_cfive
+
+(define cra (make-connector-vec-api))
+(cra 'fetch-pairs)
 
 =========================================================================
 =========================================================================
@@ -14388,9 +14498,8 @@ NEW TODO LIST
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
 
--- In parallel start pair-removal in mfive; this should fit!?
-   Yes, IN PROGRESS
--- start cross-marginals in dj_cfive
+-- start cross-marginals in dj_cfive IN PROGRESS
+   110 GB to load.
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
@@ -14438,6 +14547,7 @@ Merging minor tasks DONE
   Mass copy from 2009 fractal directory. scripts are lost.
   Create pull req DONE
 * save en_dj_mtwo before starting the cross-marginals. DONE
+* pair-removal in mfive; this should fit!?  Yes, IN PROGRESS DONE
 
 
 =========================================================================
