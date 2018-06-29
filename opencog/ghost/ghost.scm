@@ -166,6 +166,7 @@
 (define responder-sti-boost 1)
 (define rejoinder-sti-boost 10)
 (define refractory-period 1)
+(define specificity-based-action-selection #t)
 
 ;; --------------------
 ;; For monitoring the status

@@ -179,18 +179,38 @@
       (if (null? rejoinder)
         ; If there is no rejoinder that safisfy the current context, try the responders
         (begin
-          (let* ((accum-weight 0)
-                 (cutoff (* total-weight (random:uniform (random-state-from-platform))))
-                 (action-rtn
-                   (find
-                     (lambda (a)
-                       (set! accum-weight (+ accum-weight (cdr a)))
-                       (<= cutoff accum-weight))
-                     action-weight-alist)))
-            (if (equal? #f action-rtn)
+          (if specificity-based-action-selection
+            ; Specificity-based action selection (experimental)
+            ; It will select the one with the most specific context, always,
+            ; and randomly pick one if there are more than one rules with
+            ; the same specificity
+            (fold
+              (lambda (a rtn)
+                (cond
+                  ((null? rtn) (assoc-ref action-rule-alist (car a)))
+                  ((> (cog-value-ref (cog-value
+                        (assoc-ref action-rule-alist (car a)) ghost-context-specificity) 0)
+                      (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
+                   (assoc-ref action-rule-alist (car a)))
+                  (else rtn)))
               (list)
-              (assoc-ref action-rule-alist (car action-rtn))
-            )))
+              action-weight-alist
+            )
+            (let* ((accum-weight 0)
+                   (cutoff (* total-weight (random:uniform (random-state-from-platform))))
+                   (action-rtn
+                     (find
+                       (lambda (a)
+                         (set! accum-weight (+ accum-weight (cdr a)))
+                         (<= cutoff accum-weight))
+                       action-weight-alist)))
+              (if (equal? #f action-rtn)
+                (list)
+                (assoc-ref action-rule-alist (car action-rtn))
+              )
+            )
+          )
+        )
         rejoinder))))
 
 ; ----------
