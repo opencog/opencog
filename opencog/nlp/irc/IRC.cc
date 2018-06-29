@@ -44,8 +44,11 @@
 #endif
 
 IRC::IRC() :
+    irc_socket(-1),
     connected(false),
     cur_nick(nullptr),
+    dataout(nullptr),
+    datain(nullptr),
     chan_users(nullptr),
     hooks(nullptr)
 {}
