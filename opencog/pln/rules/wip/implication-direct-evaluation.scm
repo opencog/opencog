@@ -88,8 +88,8 @@
 (define (true-enough? A)
   (let* (
          (TV (cog-tv A))
-         (s (cog-mean TV))
-         (c (cog-confidence TV)))
+         (s (cog-tv-mean TV))
+         (c (cog-tv-confidence TV)))
     (and (> s 0.5) (> c 0))))
 
 (define (implication-direct-evaluation-formula P Q)

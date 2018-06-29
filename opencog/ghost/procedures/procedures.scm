@@ -246,7 +246,7 @@
 )
 
 (define (record-perception model new-conf)
-  (let ((old-conf (cog-confidence (cog-tv model)))
+  (let ((old-conf (cog-tv-confidence (cog-tv model)))
     (time (FloatValue (current-time-us))))
 
     (if percep (begin
@@ -562,7 +562,7 @@
 ; It is better to find the product of the strength and confidence but for now
 ; confidence is used as the default stv for new atoms is (stv 1 0), so
 ; need to waste cpu cycles.
-  (let ((conf (cog-confidence (cog-tv model))))
+  (let ((conf (cog-tv-confidence (cog-tv model))))
     (if (true-value? conf)
       (stv 1 1)
       (stv 0 1)
