@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
         patternindex().minePatterns(resultPatterns, indexKey);
         std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
 
-        printf("Top %lu results\n", resultPatterns.size());
+        printf("Top %zu results\n", resultPatterns.size());
         for (const auto& pattern : resultPatterns) {
             printf("%f: %s",
                    pattern.first,
