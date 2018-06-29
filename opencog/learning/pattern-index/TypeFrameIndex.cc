@@ -51,6 +51,8 @@ TypeFrameIndex::TypeFrameIndex()
     auxVar1.push_back(TypePair(VARIABLE_NODE, 0));
     auxVar1.setNodeNameAt(0, "V1");
     time1 = time2 = 0;
+    compoundFramesEnded = false;
+    floatUniverseCount = 1;
 }
 
 TypeFrameIndex::~TypeFrameIndex() 
