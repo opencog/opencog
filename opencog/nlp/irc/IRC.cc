@@ -43,13 +43,12 @@
 #define INVALID_SOCKET -1
 #endif
 
-IRC::IRC()
-{
-	hooks=0;
-	chan_users=0;
-	connected=false;
-	cur_nick=0;
-}
+IRC::IRC() :
+    connected(false),
+    cur_nick(nullptr),
+    chan_users(nullptr),
+    hooks(nullptr)
+{}
 
 IRC::~IRC()
 {
