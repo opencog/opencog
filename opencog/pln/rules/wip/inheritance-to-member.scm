@@ -6,8 +6,8 @@
 ;   C
 ; |-
 ; MemberLink
-;   B 
 ;   C
+;   B 
 ;
 ; -----------------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
 			(GroundedSchemaNode "scm: inheritance-to-member-formula")
 			(ListLink
 				(MemberLink
-					(VariableNode "$B")
-					(VariableNode "$C"))
+					(VariableNode "$C")
+					(VariableNode "$B"))
 				(InheritanceLink
 					(VariableNode "$B")
 					(VariableNode "$C"))))))

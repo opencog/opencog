@@ -636,7 +636,7 @@
 				;; (ForAllLink (VariableNode var_name) (ImplicationLink ...))
 				;; Right?
 				(ImplicationScopeLink
-					(MemberLink (VariableNode var_name) (ConceptNode instance))
+					(MemberLink (ConceptNode instance) (VariableNode var_name))
 					(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
 			(r2l-wordinst-concept instance)
 		)

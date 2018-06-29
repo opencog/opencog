@@ -30,9 +30,7 @@
 ;;     B
 ;;     T
 ;;
-;; Note that depending on <eval-type> the arguments should be
-;; swapped. For instance MemberLink and EvaluationLink have swapped
-;; arguments.
+;; where <eval-type> are typically EvaluationLink or MemberLink.
 ;;
 ;; Defined rules are:
 ;;
@@ -260,23 +258,13 @@
       (Type "PredicateNode")
       (Type "ConceptNode")))
 
-;; Determine whether the arguments of eval-type are swapped. The
-;; convention is that if MemberLink is used, then they are considered
-;; swapped, if EvaluationLink is used then they are considered not
-;; swapped.
-(define (eval-type-to-swap eval-type)
-  (equal? 'MemberLink eval-type))
-
 ;; Rule generator given the non-scope implication link type like
 ;; ImplicationLink, InheritanceLink, etc. The eval/member link (and
 ;; its argument order) will be automatically detected given impl-type.
 (define (gen-conditional-full-instantiation-meta-rule impl-type)
   (let* ((impl-arg-type-atom (impl-to-var-type impl-type))
          (eval-type (impl-to-eval-type impl-type))
-         (swapped (eval-type-to-swap eval-type))
-         (eval (lambda (A X) (if swapped
-                                 (cog-new-link eval-type X A)
-                                 (cog-new-link eval-type A X))))
+         (eval (lambda (A X) (cog-new-link eval-type A X)))
          (X (Variable "$X"))
          (A (Variable "$A"))
          (B (Variable "$B"))

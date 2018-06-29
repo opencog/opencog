@@ -651,7 +651,7 @@ void PLNRulesUTest::test_equivalence_to_implication()
 	Handle rule_alias =
 		eval.eval_h("equivalence-to-implication-rule-name"),
 		rbs = as.add_node(CONCEPT_NODE, "dummy rbs"),
-		rule_ml = as.add_link(MEMBER_LINK, rule_alias, rbs);
+		rule_ml = as.add_link(MEMBER_LINK, rbs, rule_alias);
 	Rule rule(rule_ml);
 	Handle results = bindlink(&as, rule.get_rule());
 	Handle expected = eval.eval_h(

@@ -28,16 +28,16 @@
 ;; Add axioms pertaining to the test
 ;; KB-test3-1
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Number3-1" (stv 0.010000 1.000000)) ; [6502352803782467190][1]
-  (ConceptNode "NonnegativeRealNumber" (stv 0.010000 1.000000)) ; [854426703771326157][1]
+  (ConceptNode "NonnegativeRealNumber" (stv 0.010000 1.000000)) ; [6502352803782467190][1]
+  (ConceptNode "Number3-1" (stv 0.010000 1.000000)) ; [854426703771326157][1]
 ) ; [12939358011030762013][1]
 
 ;; Define taget
 (define target
   (NotLink
     (MemberLink
-      (ConceptNode "Number3-1" (stv 0.010000 1.000000)) ; [6502352803782467190][1]
-      (ConceptNode "NegativeRealNumber" (stv 0.010000 1.000000)) ; [2370306305334504801][1]
+      (ConceptNode "NegativeRealNumber" (stv 0.010000 1.000000)) ; [6502352803782467190][1]
+      (ConceptNode "Number3-1" (stv 0.010000 1.000000)) ; [2370306305334504801][1]
     ) ; [14455237612593940657][1]
   ) ; [14475556587474805702][1]
 )

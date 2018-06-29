@@ -49,7 +49,7 @@ AttentionParamQueryUTest(): _atq(&as){
     _atq.set_param(params[3], 2);
 
     Handle h1 = as.add_node(TYPE_NODE, "MemberLink");
-    hvalue = as.add_link(MEMBER_LINK, h1);
+    hvalue = as.add_link(MEMBER_LINK, h1); // TODO: MemberLink take 2 arguments
     _atq.set_param(params[4], hvalue);
 }
 

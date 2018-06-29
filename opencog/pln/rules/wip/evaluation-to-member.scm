@@ -10,7 +10,6 @@
 ;       C
 ; |-
 ; MemberLink
-;   B 
 ;   SatisfyingSetScopeLink
 ;       X 
 ;       EvaluationLink
@@ -18,6 +17,7 @@
 ;           ListLink 
 ;               X 
 ;               C
+;   B 
 ;
 ; -----------------------------------------------------------------------------
 ; Temporary Rule for now. EvaluationToMemberRule split into three parts for 
@@ -51,12 +51,12 @@
 			(GroundedSchemaNode "scm: evaluation-to-member-0-formula")
 				(ListLink
 					(MemberLink
-						(VariableNode "$A")
 						(SatisfyingSetScopeLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
-								(VariableNode "$X"))))
+								(VariableNode "$X")))
+						(VariableNode "$A"))
 					(EvaluationLink
 						(VariableNode "$D")
 						(VariableNode "$A"))))))
@@ -92,13 +92,13 @@
 			(GroundedSchemaNode "scm: evaluation-to-member-1-formula")
 				(ListLink
 					(MemberLink
-						(VariableNode "$A")
 						(SatisfyingSetScopeLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
 								(ListLink
-									(VariableNode "$X")))))
+									(VariableNode "$X"))))
+						(VariableNode "$A"))
 					(EvaluationLink
 						(VariableNode "$D")
 						(ListLink
@@ -137,23 +137,23 @@
 			(GroundedSchemaNode "scm: evaluation-to-member-2-formula")
 				(ListLink
 					(MemberLink
-						(VariableNode "$A")
 						(SatisfyingSetScopeLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
 								(ListLink
 									(VariableNode "$X")
-									(VariableNode "$B")))))
+									(VariableNode "$B"))))
+						(VariableNode "$A"))
 					(MemberLink
-						(VariableNode "$B")
 						(SatisfyingSetScopeLink
 							(VariableNode "$Y")
 							(EvaluationLink
 								(VariableNode "$D")
 								(ListLink
 									(VariableNode "$A")
-									(VariableNode "$Y")))))
+									(VariableNode "$Y"))))
+						(VariableNode "$B"))
 					(EvaluationLink
 						(VariableNode "$D")
 						(ListLink
@@ -205,12 +205,12 @@
 ;(define (evaluation-to-member-formula DA)
 ;	(if (= (cog-arity (gdr DA)) 0)
 ;		(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
-;			(gdr DA)
 ;			(SatisfyingSetScopeLink
 ;				(VariableNode "$X")
 ;				(EvaluationLink
 ;					(gar DA)
-;					(VariableNode "$X"))))
+;					(VariableNode "$X")))
+;			(gdr DA))
 ;		(ListLink
 ;			(create-multiple-links DA '() (cog-outgoing-set (gdr DA))))))
 ;
@@ -218,7 +218,6 @@
 ;	(if (not (null? trailing-nodes))
 ;		(cons
 ;			(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
-;				(car trailing-nodes)
 ;				(SatisfyingSetScopeLink
 ;					(VariableNode "$X")
 ;					(EvaluationLink
@@ -228,7 +227,8 @@
 ;								preceding-nodes
 ;								(cons
 ;									(VariableNode "$X")
-;									(cdr trailing-nodes)))))))
+;									(cdr trailing-nodes))))))
+;				(car trailing-nodes))
 ;			(create-multiple-links 
 ;				DA
 ;				(reverse (cons (car trailing-nodes) (reverse preceding-nodes)))

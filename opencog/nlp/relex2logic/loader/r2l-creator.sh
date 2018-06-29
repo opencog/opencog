@@ -11,5 +11,5 @@ for var in `ls *.scm`
 do
 echo "(define "$var"-name (Node \"$var\"))" >>"loader/gen-r2l-en-rulebase.scm"
 echo "(DefineLink "$var"-name $var)" >>"loader/gen-r2l-en-rulebase.scm"
-echo "(MemberLink (stv 1 1) "$var"-name (ConceptNode \"R2L-en-RuleBase\"))" >>"loader/gen-r2l-en-rulebase.scm"
+echo "(MemberLink (stv 1 1) (ConceptNode \"R2L-en-RuleBase\") "$var"-name)" >> "loader/gen-r2l-en-rulebase.scm"
 done

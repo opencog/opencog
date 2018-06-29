@@ -83,23 +83,23 @@ namespace opencog
                 {
                     Handle param = _as->add_node(CONCEPT_NODE, param_name);
                     Handle member_link = _as->add_link(MEMBER_LINK, 
-                            HandleSeq{param, parent_param});
+                                                       parent_param, param);
 
                     std::ostringstream sstream;
                     sstream << value;
                     Handle hvalue  = _as->add_node(NUMBER_NODE, 
                                                    sstream.str());
 
-                    _as->add_link(STATE_LINK, HandleSeq{param, hvalue});
+                    _as->add_link(STATE_LINK, param, hvalue);
                 }
 
             void set_param(const std::string& param_name,Handle hvalue)
             {
                 Handle param = _as->add_node(CONCEPT_NODE, param_name);
                 Handle member_link = _as->add_link(MEMBER_LINK,
-                        HandleSeq{param, parent_param});
+                                                   parent_param, param);
 
-                _as->add_link(STATE_LINK, HandleSeq{param, hvalue});
+                _as->add_link(STATE_LINK, param, hvalue);
             }
 
     }; // class

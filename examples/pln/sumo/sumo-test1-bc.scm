@@ -28,8 +28,8 @@
 
 ;; Add axioms pertaining to the test
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Org1-1" (stv 0.010000 1.000000))
   (ConceptNode "Organization" (stv 0.010000 1.000000))
+  (ConceptNode "Org1-1" (stv 0.010000 1.000000))
 )
 
 ;; Define target
@@ -44,8 +44,8 @@
     )
   )
   (MemberLink
-    (VariableNode "?MEMBER")
     (ConceptNode "Org1-1" (stv 0.010000 1.000000))
+    (VariableNode "?MEMBER")
   )
 )
 )

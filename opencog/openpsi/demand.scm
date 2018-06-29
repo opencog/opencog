@@ -45,7 +45,7 @@
                     (TypeNode "ConceptNode"))
                 (AndLink
                     (InheritanceLink (VariableNode "demand") psi-demand-node)
-                    (MemberLink (VariableNode "demand") psi-label-skip)))
+                    (MemberLink psi-label-skip (VariableNode "demand"))))
         ))
 
     ; Compute the list of enabled demands, and cache it.
@@ -180,7 +180,7 @@
         (error (string-append "In procedure psi-demand-skip, expected "
             "argument to be a node representing a demand, got:") demand))
 
-    (MemberLink demand psi-label-skip)
+    (MemberLink psi-label-skip demand)
     (clear-demand-cache)
 )
 

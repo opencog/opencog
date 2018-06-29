@@ -264,7 +264,7 @@ if __name__ == '__main__':
                                                                                     atomspace.add_link('ListLink',
                                                                                                        [ENTITY1,
                                                                                                         ENTITY2])]),
-                                                                atomspace.add_link('MemberLink', [ENTITY2, CATEGORY])]),
+                                                                atomspace.add_link('MemberLink', [CATEGORY, ENTITY2])]),
                                             atomspace.add_link('EvaluationLink',
                                                                [atomspace.add_node('PredicateNode',
                                                                                    'near-object-of-type'),

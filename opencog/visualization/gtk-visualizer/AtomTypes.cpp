@@ -122,7 +122,7 @@ void AtomTypes::AddSymbol(string typeName)
     if(typeName.compare("SetLink")==0)
         symbol="{}";
     if(typeName.compare("MemberLink")==0)
-        symbol="∈";
+        symbol="∈"; // Warning: the class comes first and the element second
     if(typeName.compare("SubsetLink")==0)
         symbol="⊂";
     if(typeName.compare("ListLink")==0)

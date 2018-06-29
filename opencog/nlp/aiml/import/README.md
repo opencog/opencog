@@ -65,9 +65,9 @@ The output format is in the form of OpenPsi rules, which have the format:
 		(action))
 	(demand-goal))
 
-(Member (action) (Concept "OpenPsi: action"))
+(Member (Concept "OpenPsi: action") (action))
 
-(Member (implication) (demandgoal))
+(Member (demandgoal) (implication))
 ```
 
 The scheme functions `psi-rule` and `psi-demand` create these.

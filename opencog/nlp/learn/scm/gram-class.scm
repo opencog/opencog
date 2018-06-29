@@ -20,8 +20,8 @@
 ; A grammatical class is represented as
 ;
 ;     MemberLink
-;         WordNode "wordy"      ; the word itself
 ;         WordClassNode "noun"  ; the grammatical class of the word.
+;         WordNode "wordy"      ; the word itself
 ;
 ; Word classes have a designated grammatical behavior, using Sections,
 ; behaving just like the pseudo-connectors on single words. Thus, either
@@ -442,8 +442,8 @@
 	(for-each merge-section-pair (ptu 'right-stars (list WA WB)))
 
 	(if (eq? 'WordNode (cog-type WA))
-		(let ((ma (MemberLink WA wrd-class))
-				(mb (MemberLink WB wrd-class)))
+		(let ((ma (MemberLink wrd-class WA))
+				(mb (MemberLink wrd-class WB)))
 			; Track the number of word-observations moved from
 			; the words, the the class. This is how much the words
 			; contributed to the class.
@@ -457,7 +457,7 @@
 		; The process is similar, but slightly altered.
 		; We assume that WB is a WordNode, but perform no safety
 		; checking to verify this.
-		(let ((mb (MemberLink WB wrd-class)))
+		(let ((mb (MemberLink wrd-class WB)))
 			(set-count mb accum-rcnt)
 			; Add WB to the mrg-class (which is WA already)
 			(store-atom mb))
@@ -646,8 +646,8 @@
 		(begin
 
 			; Put the two words into the new word-class.
-			(store-atom (MemberLink WA wrd-class))
-			(store-atom (MemberLink WB wrd-class))
+			(store-atom (MemberLink wrd-class WA))
+			(store-atom (MemberLink wrd-class WB))
 
 			(orthogonalize wrd-class WA)
 			(orthogonalize wrd-class WB))
@@ -658,7 +658,7 @@
 		; checking to verify this.
 		(begin
 			; Add WB to the mrg-class (which is WA already)
-			(store-atom (MemberLink WB wrd-class))
+			(store-atom (MemberLink wrd-class WB))
 
 			; Redefine WB to be orthogonal to the word-class.
 			(orthogonalize wrd-class WB))

@@ -81,8 +81,8 @@
          (rules-to-targets (Bind
                              vardecl
                              (Member
-                               (Variable "$Rule")
-                               pln-rbs)
+                               pln-rbs
+                               (Variable "$Rule"))
                              target))
          (results (cog-execute! rules-to-targets)))
 
@@ -130,8 +130,8 @@
          (rules-to-targets (Bind
                              vardecl
                              (Member
-                               (Variable "$Rule")
-                               pln-rbs)
+                               pln-rbs
+                               (Variable "$Rule"))
                              target))
          (results (cog-execute! rules-to-targets)))
 

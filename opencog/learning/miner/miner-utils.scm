@@ -48,8 +48,8 @@
   For each element text of texts create
 
   MemberLink
-    text
     texts-cpt
+    text
 
   texts can be
   1. a Scheme list
@@ -70,7 +70,7 @@
                           ;; AtomSpace
                           ;; TODO: bug!!! should use the given atomspace
                           ((cog-atomspace? texts) (cog-get-atoms 'Atom #t))))
-         (mk-member (lambda (text) (Member text texts-cpt))))
+         (mk-member (lambda (text) (Member texts-cpt text))))
     (for-each mk-member texts-lst))
   texts-cpt)
 
@@ -143,8 +143,8 @@
   Given a concept node C, return all its members
 "
   (let* ((member-links (cog-filter 'MemberLink (cog-incoming-set C)))
-         (member-of-C (lambda (x) (equal? C (gdr x))))
-         (members (map gar (filter member-of-C member-links))))
+         (member-of-C (lambda (x) (equal? C (gar x))))
+         (members (map gdr (filter member-of-C member-links))))
     members))
 
 (define (get-cardinality C)
@@ -279,12 +279,12 @@
             such that
 
             (Member
-              t1
-              (Concept texts-name))
+              (Concept texts-name)
+              t1)
             ...
             (Member
-              tn
-              (Concept texts-name))
+              (Concept texts-name)
+              tn)
 
   ms: Minimum support. All pattern with frequency below ms are
       discarded

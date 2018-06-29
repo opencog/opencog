@@ -95,7 +95,7 @@ Handle OpenPsiRules::add_category(const Handle& new_category)
 
 Handle OpenPsiRules::add_to_category(const Handle& rule, const Handle& category)
 {
-  _as->add_link(MEMBER_LINK, rule, category);
+  _as->add_link(MEMBER_LINK, category, rule);
   // Add the category just in case it hasn't been declared.
   // TODO But why make the add_category public then?
   add_category(category);

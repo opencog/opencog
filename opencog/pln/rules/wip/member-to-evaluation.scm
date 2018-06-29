@@ -4,7 +4,6 @@
 ; MemberToEvaluationRule
 ;
 ; MemberLink
-;   B
 ;   SatisfyingSetScopeLink
 ;       X
 ;       EvaluationLink
@@ -12,6 +11,7 @@
 ;           ListLink
 ;               X
 ;               C
+;   B
 ; |-
 ; EvaluationLink
 ;   D
@@ -32,12 +32,12 @@
     				(VariableNode "$D")
     				(TypeNode "PredicateNode")))
 		(MemberLink
-			(VariableNode "$B")
 			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
-					(VariableNode "$X-M2E"))))
+					(VariableNode "$X-M2E")))
+			(VariableNode "$B"))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
@@ -45,12 +45,12 @@
 					(VariableNode "$D")
 					(VariableNode "$B"))
 				(MemberLink
-					(VariableNode "$B")
 					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
-							(VariableNode "$X-M2E"))))))))
+							(VariableNode "$X-M2E")))
+					(VariableNode "$B"))))))
 
 ; Has ListLink, 1 argument in EvaluationLink
 (define member-to-evaluation-1-rule
@@ -61,13 +61,13 @@
     				(VariableNode "$D")
     				(TypeNode "PredicateNode")))
 		(MemberLink
-			(VariableNode "$B")
 			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
 					(ListLink
-						(VariableNode "$X-M2E")))))
+						(VariableNode "$X-M2E"))))
+			(VariableNode "$B"))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
@@ -76,13 +76,13 @@
 					(ListLink
 						(VariableNode "$B")))
 				(MemberLink
-					(VariableNode "$B")
 					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
 							(ListLink
-								(VariableNode "$X-M2E")))))))))
+								(VariableNode "$X-M2E"))))
+					(VariableNode "$B"))))))
 
 ; Has ListLink, 2 arguments in EvaluationLink, 1st argument in MemberLink
 (define member-to-evaluation-2-1-rule
@@ -94,14 +94,14 @@
     				(VariableNode "$D")
     				(TypeNode "PredicateNode")))
 		(MemberLink
-			(VariableNode "$B")
 			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
 					(ListLink
 						(VariableNode "$X-M2E")
-						(VariableNode "$C")))))
+						(VariableNode "$C"))))
+			(VariableNode "$B"))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
@@ -111,14 +111,14 @@
 						(VariableNode "$B")
 						(VariableNode "$C")))
 				(MemberLink
-					(VariableNode "$B")
 					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
 							(ListLink
 								(VariableNode "$X-M2E")
-								(VariableNode "$C")))))))))
+								(VariableNode "$C"))))
+					(VariableNode "$B"))))))
 
 ; Has ListLink, 2 arguments in EvaluationLink, 2nd argument in MemberLink
 (define member-to-evaluation-2-2-rule
@@ -130,14 +130,14 @@
     				(VariableNode "$D")
     				(TypeNode "PredicateNode")))
 		(MemberLink
-			(VariableNode "$C")
 			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
 					(ListLink
 						(VariableNode "$B")
-						(VariableNode "$X-M2E")))))
+						(VariableNode "$X-M2E"))))
+			(VariableNode "$C"))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
@@ -147,14 +147,14 @@
 						(VariableNode "$B")
 						(VariableNode "$C")))
 				(MemberLink
-					(VariableNode "$C")
 					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
 							(ListLink
 								(VariableNode "$B")
-								(VariableNode "$X-M2E")))))))))
+								(VariableNode "$X-M2E"))))
+					(VariableNode "$C"))))))
 
 
 

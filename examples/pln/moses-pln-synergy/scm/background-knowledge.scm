@@ -182,8 +182,8 @@
          (VariableNode "$X")
          (TypeNode "PredicateNode"))
       (MemberLink
-         (VariableNode "$X")
-         (ConceptNode "injury-recovery-speed-predicates"))
+         (ConceptNode "injury-recovery-speed-predicates")
+         (VariableNode "$X"))
       (ImplicationLink
          (PredicateNode "is-well-hydrated")
          (VariableNode "$X"))))
@@ -197,6 +197,6 @@
 ;; recovery-speed-injury-alpha is in the class
 ;; injury-recovery-of-speed-predicates
 (MemberLink (stv 1 1)
-   (PredicateNode "recovery-speed-of-injury-alpha")
    (ConceptNode "injury-recovery-speed-predicates")
+   (PredicateNode "recovery-speed-of-injury-alpha")
 )

@@ -227,7 +227,7 @@
          (exact-match (filter psi-rule? (cog-get-trunk input-lseq)))
          ; The ones that contains no constant terms
          (no-const (filter psi-rule? (append-map cog-get-trunk
-           (map gar (cog-incoming-by-type ghost-no-constant 'MemberLink)))))
+           (map gdr (cog-incoming-by-type ghost-no-constant 'MemberLink)))))
          ; The ones found by the recognizer
          (dual-match (filter psi-rule? (append-map cog-get-trunk
            (cog-outgoing-set (cog-execute! (Dual input-lseq))))))

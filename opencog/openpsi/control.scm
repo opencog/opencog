@@ -124,7 +124,7 @@
   Specify that RULE is to be controlled and give it a NAME. Controlling means
   modifying the weight of the rule, thus affecting the likelyhood of it being choosen.
 "
-    (MemberLink psi-rule psi-controller-demand)
+    (MemberLink psi-controller-demand psi-rule)
 
     (psi-rule-set-atomese-weight psi-rule (cog-tv-mean (cog-tv psi-rule)))
 
@@ -144,7 +144,7 @@
             (TypedVariableLink
                 (VariableNode "controlled-rule")
                 (TypeNode "ImplicationLink"))
-            (MemberLink (Variable "controlled-rule") psi-controller-demand))))
+            (MemberLink psi-controller-demand (Variable "controlled-rule")))))
 )
 
 ; --------------------------------------------------------------
@@ -267,8 +267,8 @@
                     (Variable "controlled-rule")
                     (VariableNode "psi-rule-alias")))
             (MemberLink
-                (Variable "controlled-rule")
-                psi-controller-demand)
+                psi-controller-demand
+                (Variable "controlled-rule"))
             (StateLink ; FIXME should use AtTimeLink
                 (ListLink
                     (VariableNode "psi-rule-alias")

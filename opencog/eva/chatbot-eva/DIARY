@@ -581,14 +581,14 @@ Given new sent, return most similar one(s)
 
 (use-modules (opencog) (opencog query) (opencog exec))
 
-(Member (InterpretationNode "1") (Anchor "look-actions"))
-(Member (InterpretationNode "2") (Anchor "look-actions"))
-(Member (InterpretationNode "3") (Anchor "look-actions"))
+(Member (Anchor "look-actions") (InterpretationNode "1"))
+(Member (Anchor "look-actions") (InterpretationNode "2"))
+(Member (Anchor "look-actions") (InterpretationNode "3"))
 
 (State (Anchor "curr-interp") (InterpretationNode "55"))
 
 run set-to-member conversion such that
-(Member foo (SetLink ... foo ...))
+(Member (SetLink ... foo ...) foo)
 is-member-link
 
 
@@ -601,12 +601,12 @@ is-member-link
 			(TypedVariable (Variable "$likely-set") (Type "SetLink"))
 		)
 		(AndLink
-			(Member (Variable "$likely-interp") (Anchor "look-actions"))
+			(Member (Anchor "look-actions") (Variable "$likely-interp"))
 			(State (Anchor "curr-interp") (Variable "$curr-interp"))
 			; (Evaluation (Predicate "scm: is-member")
 			;	(List (Variable "$curr-interp") (Variable "$curr-set")))
-			(Member (Variable "$curr-interp") (Variable "$curr-set"))
-			(Member (Variable "$likely-interp") (Variable "$likely-set"))
+			(Member (Variable "$curr-set") (Variable "$curr-interp"))
+			(Member (Variable "$likely-set") (Variable "$likely-interp"))
 			; (FuzzyLink (Variable "$curr-set"))
 			(EvaluationLink
 				(Predicate "scm is-similar")
@@ -740,7 +740,7 @@ after ... unbundle_virtual
       (SignatureLink
 
       (EvaluationLink  (Variable $x))
-      (MemberLink (Concept "foo") (Concept "bar")))
+      (MemberLink (Concept "bar") (Concept "foo")))
 
 vertex
 
@@ -1326,8 +1326,8 @@ rename, hide psi-reset-valid-demand-cache   DONE
 psi-demand-skip?  FIXED
 
 (MemberLink
-   DEM   ; aso a conceptn
    psi-label-skip ; (ConceptNode "OpenPsi: skip")
+   DEM   ; aso a conceptn
 )
 
 -------------------------------------------------------------

@@ -69,23 +69,23 @@
 ;; Add axioms pertaining to the test
 ;; KB-test2-1
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Entity2-2" (stv 0.010000 1.000000)) ; [2771084889312061962][1]
-  (ConceptNode "Organism" (stv 0.010000 1.000000)) ; [6700036726303166665][1]
+  (ConceptNode "Organism" (stv 0.010000 1.000000)) ; [2771084889312061962][1]
+  (ConceptNode "Entity2-2" (stv 0.010000 1.000000)) ; [6700036726303166665][1]
 ) ; [15556963335151315501][1]
 ;; KB-test2-2
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Entity2-1" (stv 0.010000 1.000000)) ; [4514343376845643670][1]
-  (ConceptNode "Organism" (stv 0.010000 1.000000)) ; [6700036726303166665][1]
+  (ConceptNode "Organism" (stv 0.010000 1.000000)) ; [4514343376845643670][1]
+  (ConceptNode "Entity2-1" (stv 0.010000 1.000000)) ; [6700036726303166665][1]
 ) ; [17744261202630857017][1]
 ;; KB-test2-3
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Inconsistent" (stv 0.010000 1.000000)) ; [6471271079275877227][1]
-  (ConceptNode "Attribute" (stv 0.010000 1.000000)) ; [4582596031008048372][1]
+  (ConceptNode "Attribute" (stv 0.010000 1.000000)) ; [6471271079275877227][1]
+  (ConceptNode "Inconsistent" (stv 0.010000 1.000000)) ; [4582596031008048372][1]
 ) ; [15641830429550015449][1]
 ;; KB-test2-4
 (MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "TheKB2-1" (stv 0.010000 1.000000)) ; [1885560612557942259][1]
-  (ConceptNode "ComputerProgram" (stv 0.010000 1.000000)) ; [1602459263668714272][1]
+  (ConceptNode "ComputerProgram" (stv 0.010000 1.000000)) ; [1885560612557942259][1]
+  (ConceptNode "TheKB2-1" (stv 0.010000 1.000000)) ; [1602459263668714272][1]
 ) ; [18130572887050016141][1]
 ;; KB-test2-5
 (ImplicationScopeLink (stv 1.000000 1.000000)

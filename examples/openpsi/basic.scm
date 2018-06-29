@@ -46,6 +46,7 @@
 (define demand-bar (psi-demand "bar"))
 
 (Member
+	(Concept "demo rule")
 	(psi-rule
 		(list
 			(Evaluation (GroundedPredicate "scm: check-situation")
@@ -57,10 +58,10 @@
 		(stv 0.9 1)
 		demand-foo
 	)
-	(Concept "demo rule")
 )
 
 (Member
+	(Concept "demo rule")
 	(psi-rule
 		(list
 			(Evaluation (GroundedPredicate "scm: check-situation")
@@ -72,7 +73,6 @@
 		(stv 0.9 1)
 		demand-bar
 	)
-	(Concept "demo rule")
 )
 
 

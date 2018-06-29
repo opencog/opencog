@@ -31,7 +31,7 @@
 ; during classification, so we don't have any good counts left...)
 (define (prt-members-of-class CLS)
 	(define membs (cog-incoming-by-type CLS 'MemberLink))
-	(define words (map gar membs))
+	(define words (map gdr membs))
 	(define words-by-freq
 		(sort! words
 			(lambda (WRD-A WRD-B) (> (get-count WRD-A) (get-count WRD-B)))))
@@ -57,7 +57,7 @@
 ; Print all of the classes that a word belongs to.
 (define (prt-class-mebership WRD)
 	(define membs (cog-incoming-by-type WRD 'MemberLink))
-	(define classes (map gdr membs))
+	(define classes (map gar membs))
 	(format #t "Word '~A' belongs to ~A classes:\n   "
 		(cog-name WRD) (length classes))
 	(for-each
@@ -80,7 +80,7 @@
 	(for-each summer (cog-get-atoms 'WordNode))
 	(format #t "total words=~A total classes=~A unique classes=~A\n"
 		nwrds (length ducls)
-		(length (remove-duplicate-atoms (map gdr ducls))))
+		(length (remove-duplicate-atoms (map gar ducls))))
 )
 
 ; -----------------------------------------------------------------

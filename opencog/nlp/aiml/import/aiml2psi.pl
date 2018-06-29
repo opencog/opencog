@@ -1554,8 +1554,8 @@ CATEND,0
 ; is called (Concept "*-AIML-rulebase-*").  The actual name of
 ; the rulebase does not matter.
 (MemberLink
-   (DefinedSchema "<category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>")
-   (Concept "*-AIML-rulebase-*"))
+   (Concept "*-AIML-rulebase-*")
+   (DefinedSchema "<category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>"))
 
 ; This actually defines the schema. Note that the name used here must be
 ; *identical* to that above.  The Implication has two parts: it has a
@@ -1597,8 +1597,8 @@ Another example: a simple SRAI:
 ; <person> tage is converted into (DefinedSchema "AIML-tag person").
 ;
 (MemberLink
-   (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>")
-   (Concept "*-AIML-rulebase-*"))
+   (Concept "*-AIML-rulebase-*")
+   (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>"))
 (DefineLink
    (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>")
    (Implication

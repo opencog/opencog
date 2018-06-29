@@ -107,7 +107,7 @@ public:
 
   /**
    * Add a node to a category. The representation is as follows
-   *    (MemberLink rule category)
+   *    (MemberLink category rule)
    * Having this enables the possiblity of easily redefining the
    * representation.
    *

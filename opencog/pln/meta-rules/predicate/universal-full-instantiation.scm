@@ -24,9 +24,7 @@
 ;;     <universal-quantifer-atom>
 ;;     T
 ;;
-;; Note that depending on <eval-type> the arguments should be
-;; swapped. For instance MemberLink and EvaluationLink have swapped
-;; arguments.
+;; where <eval-type> are typically EvaluationLink or MemberLink.
 ;;
 ;; Also depending on the quantifier the formula may be different. For
 ;; now we simply (and wrongly) paste the TV from the quantifier to the

@@ -629,8 +629,8 @@
 			(cog-execute!
 				(Get
 					(Member
-						(Variable "$rule")
-						psi-interaction-rule)))))
+						psi-interaction-rule
+						(Variable "$rule"))))))
 
 ; helper to identify (Eval (Predicate "psi-changed" (List . . .))) links
 (define (psi-changed-eval? atom)

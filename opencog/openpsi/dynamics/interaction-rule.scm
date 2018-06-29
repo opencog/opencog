@@ -100,7 +100,7 @@
 					target-entity
 					(NumberNode strength)
 					trigger-entity))))
-	(Member rule psi-interaction-rule)
+	(Member psi-interaction-rule rule)
 	;(format #t (string-append "\npsi-create-interaction-rule  trigger: ~a  type:"
 	;	"  ~a  strength: ~a  target: ~a\nrule: ~a") trigger-entity change-type
 	;	strength target-entity rule)
@@ -116,7 +116,7 @@
 			(ExecutionOutputLink
 				consequent
 				consequent-params)))
-	(Member rule psi-interaction-rule)
+	(Member psi-interaction-rule rule)
 	;(display rule)
 	rule
 )
