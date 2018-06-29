@@ -571,11 +571,13 @@
   (if source
     (begin
       (set! src (Concept (cog-name source)))
-      (set! sent (cog-value src source-latest-sent-key)))
+      (set! sent (cog-value src source-latest-sent-key))
+      (set! answer-src src))
     ; Since the assumption is that there are only ordered goals, any source
     ; will work.
     (begin
-      (set! sent (cog-value (car (get-sources)) source-latest-sent-key)))
+      (set! sent (cog-value (car (get-sources)) source-latest-sent-key))
+      (set! answer-src (cog-value sent (Predicate "random-source"))))
   )
 
   (cond
@@ -584,4 +586,13 @@
     (else (Concept (cog-value-ref
       (source-result sent (cog-value sent (Predicate "random-source"))) 0)))
   )
+)
+
+(define (get_answer_source)
+"
+  get_answer_source
+
+  Get the source of the most recent answer returned by the 'get_answer' schema.
+"
+  answer-src
 )

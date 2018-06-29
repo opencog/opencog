@@ -84,6 +84,7 @@
     ; Source schemas
     send_query
     get_answer
+    get_answer_source
 
     ; Source interfaces ; This need to public so to be callable by send_query
     ask-duckduckgo
@@ -784,6 +785,10 @@
 (define source-func-name-key (Predicate "func-name"))
 ;; Key used for recording the latest sentence passed for processing.
 (define source-latest-sent-key (Predicate "last-sentence"))
+
+; Will be used by the 'get_answer' and 'get_answer_source' schemas
+; to indicate where does the answer come from
+(define answer-src '())
 
 (define* (def-source name func-name #:optional (input-type 'string)
                      (output-type 'string))
