@@ -1,9 +1,0 @@
-(=>
-    (member ?TRAIN Trains)
-    (member ?TRAIN CuteThings)
-)
-(member Train1 Trains)
-
-(query (member Train1 CuteThings))
-(rules ModusPonensRule)
-
