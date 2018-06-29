@@ -65,28 +65,29 @@ bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2);
 bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2);
 bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2);
 
+DistributedPatternMiner::DistributedPatternMiner(AtomSpace& _original_as) :
+    PatternMiner(_original_as),
+    parsePatternTaskThreads(nullptr),
+    allWorkersStop(false),
+    run_as_distributed_worker(false),
+    run_as_central_server(true),
+    cur_worker_mined_pattern_num(0),
+    total_pattern_received(0),
+    waitingForNewClients(false)
+{
+    is_distributed = true;
+    patternJsonArrays = new web::json::value[param.THREAD_NUM];
+    centralServerPort = config().get("PMCentralServerPort");
+    centralServerIP = config().get("PMCentralServerIP");
+    pattern_parse_thread_num = (unsigned int)(config().get_int("pattern_parse_thread_num"));
+    serverListener = new http_listener( utility::string_t("http://" + centralServerIP + ":" + centralServerPort +"/PatternMinerServer") );
+    serverListener->support(methods::POST, std::bind(&DistributedPatternMiner::handlePost, this,  std::placeholders::_1));
+}
+
 
 void DistributedPatternMiner::launchCentralServer()
 {
-    run_as_distributed_worker = false;
-    run_as_central_server = true;
-
-    waitingForNewClients = false;
-
-    centralServerPort = config().get("PMCentralServerPort");
-
-    centralServerIP = config().get("PMCentralServerIP");
-
-    pattern_parse_thread_num = (unsigned int)(config().get_int("pattern_parse_thread_num"));
-
-    serverListener = new http_listener( utility::string_t("http://" + centralServerIP + ":" + centralServerPort +"/PatternMinerServer") );
-
-    serverListener->support(methods::POST, std::bind(&DistributedPatternMiner::handlePost, this,  std::placeholders::_1));
-
-    allWorkersStop = false;
-
     centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
-
 
     while (true)
     {
