@@ -9,8 +9,8 @@
 ;; return atom.tv.s^2*atom.tv.c
 (define (higest-tv-fitness atom)
   (let* ((tv (cog-tv atom))
-         (tv-s (cog-tv-mean tv))
-         (tv-c (cog-tv-confidence tv))
+         (tv-s (cog-mean tv))
+         (tv-c (cog-confidence tv))
          (res (* tv-s tv-s tv-c)))
     ;; (cog-logger-info "higest-tv-fitness(~a) = ~a" atom res)
     res))

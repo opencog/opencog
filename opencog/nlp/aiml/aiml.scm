@@ -364,7 +364,7 @@
 	;; some weighting formula that makes more sense tahn this.
 	;; Currently, the square of the confidence.
 	(define (get-weight ATOM)
-		(define w (cog-tv-confidence (cog-tv ATOM)))
+		(define w (cog-confidence (cog-tv ATOM)))
 		(* w w)
 	)
 

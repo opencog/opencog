@@ -68,8 +68,8 @@
   (let* ;; TODO replace by a distributional TV based calculation.
       ((K 800) ; parameter to convert from count to confidence
        (true-enough? (lambda (A) (let* ((TV (cog-tv A))
-                                        (s (cog-tv-mean TV))
-                                        (c (cog-tv-confidence TV)))
+                                        (s (cog-mean TV))
+                                        (c (cog-confidence TV)))
                                    (and (> s 0.5) (> c 0)))))
        (both-true-enough? (lambda (pair) (and (true-enough? (car pair))
                                               (true-enough? (cadr pair)))))

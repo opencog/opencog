@@ -55,7 +55,7 @@
 
 (define (check-aiml-reply num-node)
     (let* ((tv (cog-tv (aiml-get-selected-rule)))
-           (conf (cog-tv-confidence tv))
+           (conf (cog-confidence tv))
            (threshold (string->number (cog-name num-node))))
         (if (> conf threshold)
             (stv 1 1)
