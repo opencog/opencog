@@ -88,6 +88,9 @@ public:
         delete mDataSetWithKey;
     }
 
+    MetaDataContainer(const MetaDataContainer&) = delete;
+    MetaDataContainer& operator=(const MetaDataContainer&) = delete;
+
     inline long size()
     {
         return mDataSetWithKey->size();
@@ -206,6 +209,9 @@ public:
         delete[] mRawDataNumbers;
         delete mDataSet;
     }
+
+    DataProvider(const DataProvider&) = delete;
+    DataProvider& operator=(const DataProvider&) = delete;
 
     // add one piece of meta data into the mMetaDataSet
     inline bool addOneMetaData(Metadata meta)
