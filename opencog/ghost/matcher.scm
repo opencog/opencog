@@ -80,20 +80,25 @@
     (* (/ 1 (assoc-ref action-cnt-alist A))
        (assoc-ref sum-weight-alist A)))
 
+  ; Check if a rule should be skipped or not, based on
+  ; its current STI, strength, and the last executed time
+  (define (skip-rule? r)
+    (or SKIP-STI
+        (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
+             (or (= strength-weight 0) (> (cog-stv-strength r) 0))
+             (or (null? (cog-value r ghost-time-last-executed))
+                 (> (- (current-time)
+                       (car (cog-value->list
+                         (cog-value r ghost-time-last-executed))))
+                    refractory-period)))))
+
   ; ----------
   (for-each
     (lambda (r)
       ; Skip the rule if its STI or strength is zero,
       ; unless we choose to ignore their weights,
       ; or if it's still with the refractory period
-      (if (or SKIP-STI
-              (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
-                   (or (= strength-weight 0) (> (cog-stv-strength r) 0))
-                   (or (null? (cog-value r ghost-time-last-executed))
-                       (> (- (current-time)
-                             (car (cog-value->list
-                               (cog-value r ghost-time-last-executed))))
-                          refractory-period))))
+      (if (skip-rule? r)
         (let ((rc (psi-get-context r))
               (ra (psi-get-action r)))
           ; Though an action may be in multiple psi-rule, but it doesn't
@@ -129,9 +134,10 @@
                   (set! sum-weight-alist (assoc-set! sum-weight-alist ra
                     (+ (assoc-ref sum-weight-alist ra) w)))))
               (cog-logger-debug ghost-logger
-                "Skipping action with zero weight: ~a" ra))))
-      (cog-logger-debug ghost-logger
-        "Skipping rule with zero STI/strength: ~a" r)))
+                "Skipping action with zero weight: ~a" ra))
+          ))
+        (cog-logger-debug ghost-logger
+          "Skipping rule with zero STI/strength: ~a" r)))
     RULES)
 
   ; Update the status
@@ -171,19 +177,40 @@
               (list)
               (map (lambda (a) (assoc-ref action-rule-alist (car a))) action-weight-alist))))
       (if (null? rejoinder)
+        ; If there is no rejoinder that safisfy the current context, try the responders
         (begin
-          ; If there is no rejoinder that safisfy the current context, try the responders
-          (let* ((accum-weight 0)
-                 (cutoff (* total-weight (random:uniform (random-state-from-platform))))
-                 (action-rtn
-                   (find
-                     (lambda (a)
-                       (set! accum-weight (+ accum-weight (cdr a)))
-                       (<= cutoff accum-weight))
-                     action-weight-alist)))
-            (if (equal? #f action-rtn)
+          (if specificity-based-action-selection
+            ; Specificity-based action selection (experimental)
+            ; It will select the one with the most specific context, always,
+            ; and randomly pick one if there are more than one rules with
+            ; the same specificity
+            (fold
+              (lambda (a rtn)
+                (cond
+                  ((null? rtn) (assoc-ref action-rule-alist (car a)))
+                  ((> (cog-value-ref (cog-value
+                        (assoc-ref action-rule-alist (car a)) ghost-context-specificity) 0)
+                      (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
+                   (assoc-ref action-rule-alist (car a)))
+                  (else rtn)))
               (list)
-              (assoc-ref action-rule-alist (car action-rtn)))))
+              action-weight-alist
+            )
+            (let* ((accum-weight 0)
+                   (cutoff (* total-weight (random:uniform (random-state-from-platform))))
+                   (action-rtn
+                     (find
+                       (lambda (a)
+                         (set! accum-weight (+ accum-weight (cdr a)))
+                         (<= cutoff accum-weight))
+                       action-weight-alist)))
+              (if (equal? #f action-rtn)
+                (list)
+                (assoc-ref action-rule-alist (car action-rtn))
+              )
+            )
+          )
+        )
         rejoinder))))
 
 ; ----------
