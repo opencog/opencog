@@ -1,6 +1,7 @@
 
 INCLUDE_DIRECTORIES (
 	${LINK_GRAMMAR_INCLUDE_DIRS}	# for LinkGrammar dictionary
+	${UUID_INCLUDE_DIRS}
 	${CMAKE_BINARY_DIR}           # for the NLP atom types
 )
 
@@ -15,7 +16,7 @@ TARGET_LINK_LIBRARIES (lg-parse
 	nlp-types
 	${ATOMSPACE_smob_LIBRARY}
 	${LINK_GRAMMAR_LIBRARY}
-	uuid
+	${UUID_LIBRARIES}
 )
 
 INSTALL (TARGETS lg-parse DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
