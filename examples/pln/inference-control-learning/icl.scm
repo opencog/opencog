@@ -2,8 +2,8 @@
 
 ;; Set parameters
 (define pss 100)                    ; Problem set size
-(define niter 1)                    ; Number of iterations
-(define piter 30)                   ; Number of iterations used for each problem
+(define niter 2)                    ; Number of iterations
+(define piter 20)                   ; Number of iterations used for each problem
 
 ;; Load utils
 (load "icl-utilities.scm")
@@ -16,7 +16,7 @@
 ;; Set loggers levels
 (cog-logger-set-level! "info")
 (icl-logger-set-level! "debug")
-(ure-logger-set-level! "info")
+(ure-logger-set-level! "debug")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
