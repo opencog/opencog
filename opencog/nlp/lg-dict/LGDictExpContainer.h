@@ -41,7 +41,7 @@ class LGDictExpContainer
 {
 public:
     LGDictExpContainer(Exp_type, Exp* exp);
-    LGDictExpContainer(Exp_type, std::vector<LGDictExpContainer>);
+    LGDictExpContainer(Exp_type, const std::vector<LGDictExpContainer>&);
 
     HandleSeq to_handle(const Handle& h);
 
