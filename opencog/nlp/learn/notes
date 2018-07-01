@@ -14561,7 +14561,7 @@ NEW TODO LIST
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
 
--- start cross-marginals in dj_cfive IN PROGRESS
+-- start cross-marginals in dj_cfive Uh NOPE.
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
@@ -14585,7 +14585,19 @@ While waiting for above, write code for:
   `merge-disambig` uses cosines to do fractionals.
   Should this use MI in some way?
 
-* export dicts.
+
+* XXX mmt-marginals is using the support obj, but all it needs
+  are the marginal counts .. wtf I'm confused.
+  supports are done with add-support-compute
+
+* make-compute-count is dual to add-pair-count-api
+
+* Redo compute-total-count to be one-sided.
+
+* The cosines do need the supports, right? (does it actually
+  use them, or does it ignore them?)
+
+* Also: which cosines: the batch cosines? what do thise use?
 
 Merging minor tasks DONE
 ------------------------

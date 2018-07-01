@@ -104,14 +104,15 @@
   to work correctly.
 "
 	(let* ((star-obj     (add-pair-stars LLOBJ))
+			(count-obj     (make-compute-count star-obj))
 			(support-obj   (add-support-api star-obj))
 			(store-obj     (make-store star-obj))
 			(trans-obj     (add-transpose-compute star-obj))
 		)
 
 		; Hackyyyy -- assume support already computed
+		; Assume that pairs have been fetched already.
 		(define (batch-pca)
-			(pca 'fetch-pairs)
 
 			; 'mmt-marginals loops over 'left-basis and records
 			; them on 'right-wildcard.  Thus, we need to save
@@ -119,6 +120,16 @@
 			(trans-obj 'mmt-marginals)
 			(store-obj 'store-right-marginals)
 			(display "Done computing and saving foobar P(x,*)\n")
+		)
+
+
+		; Assume that marginal counts have not yet been computed.
+		(define (batch-cross)
+			; 'mmt-marginals loops over 'left-basis and for each
+			; of those, loops over 'right-duals and calls 'left-count
+			; on the support-obj for each of the duals. This was saved
+			; on the 'left-wildcard on the dual.
+			(count-obj 'cache-all-left-counts)
 		)
 
 		; -------------
