@@ -151,7 +151,7 @@ void AtomSpaceInterface::GetConnectedAtoms(Vertex* vertex, NodeFilter* nodeFilte
     }
 }
 
-void AtomSpaceInterface::RetrieveVerticesFromCogServer(string query,vector<Vertex*>& foundVertices, bool &isFinished)
+void AtomSpaceInterface::RetrieveVerticesFromCogServer(const string &query,vector<Vertex*>& foundVertices, bool &isFinished)
 {
 	cout << query << endl;
 	string result = GetResultFromCogServer(query);
@@ -248,7 +248,7 @@ void AtomSpaceInterface::RetrieveVerticesFromCogServer(string query,vector<Verte
 	isFinished=(lexical_cast<int>(mapResult["skipped"])+vectorResults.size()>=(std::size_t)lexical_cast<int>(mapResult["total"]));
 }
 
-void AtomSpaceInterface::UpdateAtom(UUID uuid, short lti, short sti, string truthValue)
+void AtomSpaceInterface::UpdateAtom(UUID uuid, short lti, short sti, const string &truthValue)
 {
 	string queryString="atom?handle=" + lexical_cast<string>(uuid);
 	string postBody= "{ \"lti\":" + lexical_cast<string>(lti)+ ",\"sti\":" + lexical_cast<string>(sti) + ",\"truthvalue\":"+ truthValue + "}";
@@ -258,7 +258,7 @@ void AtomSpaceInterface::UpdateAtom(UUID uuid, short lti, short sti, string trut
 	cout << result << endl;
 }
 
-string AtomSpaceInterface::GetResultFromCogServer(string queryString)
+string AtomSpaceInterface::GetResultFromCogServer(const string &queryString)
 {
 
 	boost::asio::io_service io_service;
@@ -321,7 +321,7 @@ string AtomSpaceInterface::GetResultFromCogServer(string queryString)
 	return ret;
 }
 
-string AtomSpaceInterface::PostToCogServer(string queryString,string postBody)
+string AtomSpaceInterface::PostToCogServer(const string &queryString, const string &postBody)
 {
 
 	boost::asio::io_service io_service;

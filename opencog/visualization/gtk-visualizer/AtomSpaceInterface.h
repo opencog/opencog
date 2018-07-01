@@ -103,15 +103,15 @@ class AtomSpaceInterface
         virtual ~AtomSpaceInterface();
         void SearchAtom(AtomFilter* atomFilter, vector<Vertex*>& foundVertices, bool &isFinished, int skip);
         void GetConnectedAtoms(Vertex* vertex, NodeFilter* nodeFilter, LinkFilter* linkFilter, vector<Vertex*>& connectedVertices);
-        void UpdateAtom(UUID uuid, short lti, short sti, string truthValue);
+        void UpdateAtom(UUID uuid, short lti, short sti, const string &truthValue);
 
     private:
         int atomCount;
         AtomTypes* atomTypes;
         static const int maxNumberOfConnectedVertices=20;
-	    void RetrieveVerticesFromCogServer(string query,vector<Vertex*>& foundVertices, bool &isFinished);
-        string GetResultFromCogServer(string queryString);
-        string PostToCogServer(string queryString,string postBody);
+        void RetrieveVerticesFromCogServer(const string &query,vector<Vertex*>& foundVertices, bool &isFinished);
+        string GetResultFromCogServer(const string &queryString);
+        string PostToCogServer(const string &queryString, const string &postBody);
         void ConnectToCogServer(boost::asio::io_service &io_service,tcp::socket &socket);
         void AssertChar(char c, char d, stringstream &ss);
         void SkipWhiteSpace(stringstream &ss, char &c);
