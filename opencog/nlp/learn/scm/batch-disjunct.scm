@@ -62,7 +62,7 @@
 ;
 ;    [S] = [N][N]^T
 ;
-; where [N]^T is the matrix-transpose, i.e. is the matrix whose matrix 
+; where [N]^T is the matrix-transpose, i.e. is the matrix whose matrix
 ; elements are N^T(d,w)=N(w,d).
 ;
 ; COMPUTATIONS
@@ -95,4 +95,38 @@
 (use-modules (opencog matrix))
 
 ; ---------------------------------------------------------------------
+
+(define-public (batch-transpose LLOBJ)
+"
+  batch-transpose - bulk-compute transpose marginals.
+
+  This computes the marginals needed to get the `add-transpose-api`
+  to work correctly.
+"
+	(let* ((star-obj     (add-pair-stars LLOBJ))
+			(support-obj   (add-support-api star-obj))
+			(store-obj     (make-store star-obj))
+			(trans-obj     (add-transpose-compute star-obj))
+		)
+
+		; Hackyyyy -- assume support already computed
+		(define (batch-pca)
+			(pca 'fetch-pairs)
+
+			; 'mmt-marginals loops over 'left-basis and records
+			; them on 'right-wildcard.  Thus, we need to save
+			; the 'right-wildcard to disk.
+			(trans-obj 'mmt-marginals)
+			(store-obj 'store-right-marginals)
+			(display "Done computing and saving foobar P(x,*)\n")
+		)
+
+		; -------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((batch-pca)    (batch-pca))
+				((batch-cross)  (batch-cross))
+				(else           (apply LLOBJ (cons message args))))
+			)))
 

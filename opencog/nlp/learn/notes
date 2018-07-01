@@ -14395,8 +14395,10 @@ need total counts.
 precomputed add-support-api
 add-transpose-compute  'mmt-marginals
 
+----------------
+Redo contents of compute-mi.scm:
+* 
 
-xxxxxxxxxxxxxx
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
 New set intersection idea:
