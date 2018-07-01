@@ -30,25 +30,63 @@
 ; define a vector on the word `w`. Given two words `w` and `u`, one
 ; may define the vector dot-product between them as:
 ;
-;      D(u,w) = sum_d N(u,d) N(w,d)
+;      S(u,w) = sum_d N(u,d) N(w,d)
 ;
-; Note that this product is symmetric: D(u,w) = D(w,u)
+; Note that this product is symmetric: S(u,w) = S(w,u)
 ; Note that this product underlies the definition of the cosine between
 ; the two vectors.  The cosine is just
 ;
-;     cos(u,w) = D(u,w) / sqrt (D(u,u) D(w,w))
+;     cos(u,w) = S(u,w) / sqrt (S(u,u) S(w,w))
 ;
-; This product can also be used to define a symmetric mutial
+; This product can also be used to define a symmetric mutual
 ; information between the words:
 ;
-;     MI(u,w) = log_2 D(u,w) D(*,*) / D(u,*) D(w,*)
+;     MI(u,w) = log_2 S(u,w) S(*,*) / S(u,*) S(w,*)
 ;
 ; where, as usual, the star * defines a wild-card sum:
 ;
-;     D(u,*) = D(*,u) = sum_w D(u,w)
+;     S(u,*) = S(*,u) = sum_w S(u,w)
 ;
-; Note that the 
-xxxxxxx
+; The above follows because one can interpret
+;
+;     P(u,w) = S(u,w) / S(*,*)
+;
+; as a probability of observing the pair (u,w).  All the usual notions
+; of probability then ensue, and MI(u,w) is just the usual definition
+; of the (symmetric) mutual information.
+;
+; Note that S(u,w) can itself be thought of as a matrix; it is a product
+; of N times its transpose.  That is, let [N] denote the matrix whose
+; matrix elements are N(w,d), and [S] be thw matrix whose matrix
+; elements are S(u,w). Then one has that
+;
+;    [S] = [N][N]^T
+;
+; where [N]^T is the matrix-transpose, i.e. is the matrix whose matrix 
+; elements are N^T(d,w)=N(w,d).
+;
+; COMPUTATIONS
+; ------------
+; The definition of MI(u,w) above requires the partial sums for S(u,*)
+; and S(*,*). These can be fetched from the atomspace by the
+; `add-transpose-api` matrix class. But, to be fetched, they need to
+; first be precomputed by the `add-transpose-compute` matrix class.
+; This class, in turn relies on the `add-support-api` class, which
+; requires that the support marginals were previously computed by the
+; `add-support-compute` class.  Thus, this does all the bulk
+; calculations that generate these marginals, and then stores them back
+; to disk.
+;
+; Note that the scripts here are specifically tailored to doing just
+; one "side" of the computation: viz, only [N][N]^T or only [N]^T[N].
+; That is because typically, one is interested only in the one, or
+; in the other, but not both. Computing both takes a lot more CPU time.
+; Even worse, the number of disjuncts `d` far exceeds the number of
+; words `w`, by more than an order of magnitude, and sometimes two,
+; and so the sizes of these matrixes are vastly different, and the
+; resulting computations waste not only CPU but also RAM and storage.
+; Thus, only one "side" is computed here.
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
