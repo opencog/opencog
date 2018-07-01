@@ -298,9 +298,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		char idstr2[37];
 		uuid_unparse(uu2, idstr2);
 		char buff[801] = "";
-		strncat(buff, wrd, 800);
-		strncat(buff, "@", 800);
-		strncat(buff, idstr2, 800);
+		snprintf(buff, sizeof(buff), "%s@%s", wrd, idstr2);
 		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
 		wrds.push_back(winst);
 
