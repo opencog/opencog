@@ -13881,6 +13881,8 @@ found called
 came went
 eyes hand
 
+cosines computed from various number-sources:
+
 other -- same  count=0.5866  entrop=0.5433  mi=0.3159
 nice -- fine  count=0.5256  entrop=0.4826  mi=0.2364
 him -- me  count=0.7842  entrop=0.7796  mi=0.6448
@@ -13890,6 +13892,7 @@ found -- called  count=0.5576  entrop=0.5298  mi=0.3460
 came -- went  count=0.5900  entrop=0.5656  mi=0.3580
 eyes -- hand  count=0.7284  entrop=0.6669  mi=0.4827
 
+Actual symmetric MI's:
 other -- same  *,*=-12.39 L=-21.52 R=-22.13 MI=4.1232
 nice -- fine  *,*=-12.39 L=-26.94 R=-25.21 MI=4.5210
 him -- me  *,*=-12.39 L=-20.81 R=-21.34 LR=-25.50 MI=4.2583
@@ -14369,6 +14372,32 @@ Verify that left-stars really got saved, yeah?
 (because they are crazy-format...)
 
 ----------------
+what fraction?
+(fold (lambda (evo sum)
+	(if (cog-ctv? (cog-tv evo)) (+ sum 1) sum)) 0
+	(crs 'right-basis))
+7484838 .... not even half-way, yet
+10008397
+12988443
+15082554
+
+----------------
+OK, we don't need all of pair-MI for the cross-connector calculations.
+We only need ....  
+
+actually we need transpose partials on pca, as well.
+so:
+1) we don't need freq's. Nice but not necessary.
+2) we do need count marginals, from support-compute.
+3) we need transpose marginals, but only for mmt.
+
+need total counts.
+precomputed add-support-api
+add-transpose-compute  'mmt-marginals
+
+
+xxxxxxxxxxxxxx
+----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
 New set intersection idea:
 sort both lists via cog-atom-less? and then single-pass
@@ -14511,6 +14540,7 @@ sql-stats: Atomspace holds 130597079 atoms -- 73810646 == 74M more
 guile-dj-en>> (batch-all-pair-mi crs)
 Start computing the basis
 Support: found num left= 496078 num right= 73810644 in 2828 secs
+Got up to 175 GB and halted.
 
 
 
