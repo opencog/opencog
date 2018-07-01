@@ -2,7 +2,10 @@
 ; word-cosines.scm
 ;
 ; Compute the cosine-similarity between two pseudo-connector-sets.
-; Deprecated.
+; These provide convenience wrappers on the pseudo-connector-set api.
+; These were used by some of the graphing scripts that were used to
+; create graphs for the diary.  If/when the graphings scripts are
+; modernized, much of the contents of this file can be removed.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -15,20 +18,6 @@
 ;
 ; See the file `psuedo-csets.scm` for a technical explanation of what
 ; the vector is.
-;
-; XXX FIXME This file should be retired and moved to the diary
-; directory. Why? Because:
-;
-; (1) its a cheesy wrapper for the modern object API that the user
-; could easily do themselves. Most of these are one-liner functions
-; with documentation.
-;
-; (2) The API below does not allow the user to specify any sort of
-; filtering.  Using a filtered matrix radically alters results (in
-; both good and bad ways)!
-;
-; (3) The move-to-diary is useful, because some of the older scripts
-; there require this API to do thier number crunching.
 ;
 ; ---------------------------------------------------------------------
 ;
