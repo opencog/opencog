@@ -109,7 +109,7 @@
 			(trans-obj     (add-transpose-compute star-obj))
 		)
 
-		; Hackyyyy -- assume support already computed
+		; Hackyyyy -- assumes that support has already computed
 		; Assume that pairs have been fetched already.
 		(define (batch-pca)
 
@@ -118,17 +118,25 @@
 			; the 'right-wildcard to disk.
 			(trans-obj 'mmt-marginals)
 			(store-obj 'store-right-marginals)
-			(display "Done computing and saving foobar P(x,*)\n")
+			(display "Done computing and saving sum_y N(x,y) N(*,y)\n")
 		)
 
 
 		; Assume that marginal counts have not yet been computed.
 		(define (batch-cross)
+			; The cross-objects need to have the stars
+			(if (LLOBJ 'provides 'make-left-stars)
+				(LLOBJ 'make-left-stars))
+
 			; 'mmt-marginals loops over 'left-basis and for each
 			; of those, loops over 'right-duals and calls 'left-count
 			; on the support-obj for each of the duals. This was saved
-			; on the 'left-wildcard on the dual.
-			(count-obj 'cache-all-left-counts)
+			; on the 'left-wildcard on the dual.  That means that we
+			; need to have the left-marginals all computed.
+			(support-obj 'left-marginals)
+
+			; Same as above
+			(batch-pca)
 		)
 
 		; -------------
@@ -139,4 +147,3 @@
 				((batch-cross)  (batch-cross))
 				(else           (apply LLOBJ (cons message args))))
 			)))
-

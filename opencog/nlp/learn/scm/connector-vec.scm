@@ -341,6 +341,8 @@
 				((right-star-pattern) right-stars-query)
 				((left-dual-pattern)  left-duals-query)
 				((right-dual-pattern) right-duals-query)
+
+				((make-left-stars)    create-connector-left-stars)
 				(else #f)
 		))
 
