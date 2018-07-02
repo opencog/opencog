@@ -1,5 +1,8 @@
 ;; PLN actions
 (use-modules (srfi srfi-1))
+(use-modules (opencog))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot-psi))
 (use-modules (opencog logger))
 
 (load "pln-utils.scm")

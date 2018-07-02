@@ -1,7 +1,5 @@
 (use-modules (opencog exec))
 
-(load "states.scm")
-
 (define (get-inferred-atoms)
     (let ((inferences (cog-execute!
             (Get (Member pln-inferred-atoms (Variable "$x"))))))
