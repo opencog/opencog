@@ -232,8 +232,8 @@ ProtoAtomPtr LGParseLink::execute() const
 	char idstr[37];
 	uuid_unparse(uu, idstr);
 
-	char sentstr[48] = "sentence@";
-	strncat(sentstr, idstr, 47);
+	char sentstr[sizeof(idstr) + 9] = "sentence@";
+	strncat(sentstr, idstr, sizeof(idstr) - 1);
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
