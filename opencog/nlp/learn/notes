@@ -14595,6 +14595,9 @@ NEW TODO LIST
 (4) show distribution of the sums, above.
 
 While waiting for above, write code for:
+
+* Wait -- is fetch-pairs of pseudo-csets also getting WordClassNodes??
+
 * Merging crosses.  Do it same way as for pseudo-disjuncts,
   just with independent parameter.
   `merge-disambig` uses cosines to do fractionals.

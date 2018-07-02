@@ -192,8 +192,8 @@
 		; Get both the Words and the WordClasses; put WordClasses first.
 		(define (get-left-basis)
 			(if (null? l-basis) (set! l-basis
-				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode)))
-			l-basis))
+				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode))))
+			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis) (set! r-basis (cog-incoming-set predno)))
