@@ -104,7 +104,6 @@
   to work correctly.
 "
 	(let* ((star-obj     (add-pair-stars LLOBJ))
-			(count-obj     (make-compute-count star-obj))
 			(support-obj   (add-support-api star-obj))
 			(store-obj     (make-store star-obj))
 			(trans-obj     (add-transpose-compute star-obj))

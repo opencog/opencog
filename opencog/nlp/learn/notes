@@ -14588,20 +14588,10 @@ While waiting for above, write code for:
   `merge-disambig` uses cosines to do fractionals.
   Should this use MI in some way?
 
-
 * XXX mmt-marginals is using the support obj, but all it needs
   are the marginal counts .. wtf I'm confused.
   supports are done with add-support-compute
   well, it uses the supports, because it does a support variant.
-
-* Hmm.   If the counts are already computed, does support
-  make use of it? Or v.v. do we need counts, if we've done supports?
-  Probably not ...
-
-* make-compute-count is dual to add-pair-count-api
-  Both should be made obsolete....
-
-* Redo compute-total-count to be one-sided.
 
 * The cosines do need the supports, right? (does it actually
   use them, or does it ignore them?)
@@ -14631,6 +14621,11 @@ Merging minor tasks DONE
   Create pull req DONE
 * save en_dj_mtwo before starting the cross-marginals. DONE
 * pair-removal in mfive; this should fit!?  Yes, IN PROGRESS DONE
+* make-compute-count is dual to add-pair-count-api
+  Both should be made obsolete.... DONE
+* Redo compute-total-count to be one-sided. DONE
+
+
 
 
 =========================================================================

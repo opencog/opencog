@@ -40,7 +40,7 @@
 "
 	(define any-pairs-obj (make-any-link-api))
 	(define wild-obj (add-pair-stars any-pairs-obj))
-	(define pca (add-pair-count-api wild-obj))
+	(define pca (add-support-api wild-obj))
 
 	(define nww (pca 'wild-wild-count))
 
