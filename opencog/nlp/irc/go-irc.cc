@@ -57,7 +57,7 @@ void fixup_reply(irc_reply_data* ird)
  */
 int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 {
-	IRC* conn = (IRC*) data;
+	IRC* conn = static_cast<IRC*>(data);
 	fixup_reply(ird);
 
 	printf("chatbot got params=%s\n", params);
@@ -94,7 +94,7 @@ static bool is_nonblank(const char * str)
  */
 int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 {
-	IRC* conn = (IRC*) data;
+	IRC* conn = static_cast<IRC*>(data);
 	fixup_reply(ird);
 
 	printf("input=%s\n", params);

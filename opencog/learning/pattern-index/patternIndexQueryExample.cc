@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
         std::vector<PatternIndexAPI::QueryResult> queryResults;
         patternindex().query(queryResults, indexKey, queryStr2);
         printf("\n\nQuery 2:\n");
-        printf("%lu results\n", queryResults.size());
+        printf("%zu results\n", queryResults.size());
         for (unsigned int i = 0; i < queryResults.size(); i++) {
             printf("Result #%u:\n\n", i + 1);
             for (const Handle& result : queryResults.at(i).first) {

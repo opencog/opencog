@@ -207,7 +207,7 @@ void AtomSpacePublisherModule::proxy()
     {
         pub.bind(("tcp://" + zmq_ip + ":" + zmq_event_port).c_str());
     }
-    catch (zmq::error_t error)
+    catch (zmq::error_t &error)
     {
         std::cout << "ZeroMQ error: " << error.what() << std::endl;
         return;

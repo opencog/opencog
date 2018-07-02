@@ -27,7 +27,7 @@ PatternIndexAPI::~PatternIndexAPI()
     }
 }
 
-string PatternIndexAPI::getStringProperty(StringMap &map, const string key)
+string PatternIndexAPI::getStringProperty(StringMap &map, const string &key)
 {
     StringMap::iterator it = map.find(key);
     if (it == map.end()) {
@@ -38,7 +38,7 @@ string PatternIndexAPI::getStringProperty(StringMap &map, const string key)
 }
 
 int PatternIndexAPI::getIntProperty(StringMap &map, 
-                                    const string key, 
+                                    const string &key,
                                     int min, 
                                     int max)
 {
@@ -59,7 +59,7 @@ int PatternIndexAPI::getIntProperty(StringMap &map,
     return answer;
 }
 
-bool PatternIndexAPI::getBoolProperty(StringMap &map, const string key)
+bool PatternIndexAPI::getBoolProperty(StringMap &map, const string &key)
 {
     bool answer;
 
@@ -84,7 +84,7 @@ bool PatternIndexAPI::getBoolProperty(StringMap &map, const string key)
 }
 
 // Default properties are set using the config file
-void PatternIndexAPI::setDefaultProperty(StringMap &map, const string key)
+void PatternIndexAPI::setDefaultProperty(StringMap &map, const string &key)
 {
     string value = config().get("PatternIndex::" + key);
     map.insert(StringMap::value_type(key, value));

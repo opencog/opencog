@@ -32,6 +32,8 @@ CombinationGenerator::CombinationGenerator(unsigned int n, unsigned int k)
     depletedFlag = false;
     countOnes = k;
     combinationAlgorithm = K_COMB;
+    avoidAllZero = false;
+    avoidAllOne = false;
 }
 
 CombinationGenerator::~CombinationGenerator() 

@@ -344,7 +344,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         if (is_distributed)
         {
             newHTreeNode = new HTreeNode();
-            returnHTreeNode = newHTreeNode;
             newHTreeNode->count = 1;
             newHTreeNode->pattern = unifiedPattern;
             newHTreeNode->var_num = patternVarMap.size();

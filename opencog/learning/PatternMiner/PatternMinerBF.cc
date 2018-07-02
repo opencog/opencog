@@ -306,7 +306,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
             generateNextCombinationGroup(indexes, n_max);
         }
     }
-
+    delete[] indexes;
 }
 
 

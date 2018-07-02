@@ -221,16 +221,16 @@ class PatternIndexAPI
         PatternIndexAPI();
         void setDefaultProperties(StringMap &properties);
         void applyProperties(Handle key);
-        void setDefaultProperty(StringMap &map, const std::string propertyKey);
+        void setDefaultProperty(StringMap &map, const std::string &propertyKey);
         void query(std::vector<QueryResult> &answer,
                    Handle key,
                    const TypeFrame &query);
-        std::string getStringProperty(StringMap &map, const std::string key);
+        std::string getStringProperty(StringMap &map, const std::string &key);
         int getIntProperty(StringMap &map,
-                           const std::string key,
+                           const std::string &key,
                            int min = std::numeric_limits<int>::min(),
                            int max = std::numeric_limits<int>::max());
-        bool getBoolProperty(StringMap &map, const std::string key);
+        bool getBoolProperty(StringMap &map, const std::string &key);
 
 };
 
