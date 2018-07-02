@@ -125,7 +125,8 @@
 
 		; Assume that marginal counts have not yet been computed.
 		(define (batch-cross)
-			; The cross-objects need to have the stars
+			; The cross-objects need to have the stars created, before
+			; they can be used.
 			(if (LLOBJ 'provides 'make-left-stars)
 				(LLOBJ 'make-left-stars))
 
@@ -149,3 +150,13 @@
 				((batch-cross)  (batch-cross))
 				(else           (apply LLOBJ (cons message args))))
 			)))
+
+; ---------------------------------------------------------------------
+; Example usage
+;
+; (define cva (make-connector-vec-api))
+; (define cvs (add-pair-stars cva))
+; (define cvp (add-support-api cvs))
+; (define btc (batch-transpose cva))
+; (btc 'batch-cross)
+

@@ -14402,6 +14402,17 @@ add-transpose-compute  'mmt-marginals
 ----------------
 Redo contents of compute-mi.scm:
 * 
+(define cva (make-connector-vec-api))
+(define cvs (add-pair-stars cva))
+(define cvp (add-support-api cvs))
+(define btc (batch-transpose cva))
+(btc 'batch-cross)
+
+(cvp 'wild-wild-count)
+(define w (car (cvp 'left-basis)))
+(define cvt (add-transpose-compute cvs))
+(cvt 'mmt-support w)   ------ fails when w is a WordClass...
+
 
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
