@@ -135,6 +135,7 @@
 			; on the 'left-wildcard on the dual.  That means that we
 			; need to have the left-marginals all computed.
 			(scomp-obj 'left-marginals)
+			(store-obj 'store-left-marginals)
 
 			; Same as above
 			(batch-pca)
