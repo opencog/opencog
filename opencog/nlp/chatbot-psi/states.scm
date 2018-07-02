@@ -1,4 +1,4 @@
-(use-modules (opencog))
+(use-modules (opencog) (opencog atom-types))
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
@@ -6,9 +6,9 @@
 (define (chat-prefix node_name) (string-append "Chatbot: " node_name))
 
 (define input-utterance (Anchor (chat-prefix "InputUtterance")))
-(define input-utterance-sentence (Anchor (chat-prefix "InputUtteranceSentence")))
-(define input-utterance-text (Anchor (chat-prefix "InputUtteranceText")))
-(define input-utterance-words (Anchor (chat-prefix "InputUtteranceWords")))
+(define-public input-utterance-sentence (Anchor (chat-prefix "InputUtteranceSentence")))
+(define-public input-utterance-text (Anchor (chat-prefix "InputUtteranceText")))
+(define-public input-utterance-words (Anchor (chat-prefix "InputUtteranceWords")))
 (define no-input-utterance (Concept (chat-prefix "NoInputUtterance")))
 (State input-utterance no-input-utterance)
 (State input-utterance-sentence no-input-utterance)  ; No need to be reset
@@ -83,9 +83,9 @@
 (State chatbot-eva-action default-state)
 
 ;; PLN states
-(define pln-answers (Anchor (chat-prefix "PLNAnswers")))
-(define pln-qa (Anchor (chat-prefix "PLNQA")))
-(define pln-inferred-atoms (Anchor (chat-prefix "PLNInferredAtoms")))
+(define-public pln-answers (Anchor (chat-prefix "PLNAnswers")))
+(define-public pln-qa (Anchor (chat-prefix "PLNQA")))
+(define-public pln-inferred-atoms (Anchor (chat-prefix "PLNInferredAtoms")))
 (State pln-answers default-state)
 (State pln-qa default-state)
 
