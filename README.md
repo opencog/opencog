@@ -108,6 +108,11 @@ be built and run.
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
+###### libuuid
+> Library for generating UUID's
+> Used by various internal subsystems.
+> `sudo apt-get install uuid-dev`
+
 Optional Prerequisites
 ----------------------
 The following packages are optional. If they are not installed, some
