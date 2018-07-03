@@ -14386,6 +14386,29 @@ what fraction?
 17648358
 18149413
 18262285
+Done with wild-card count N(x,*) and N(*,y) in 374968 secs
+== 374968 = 104 hours = 4.34 days
+
+opencog/matrix/compute-mi.scm:254:32: Throw to key
+`bad-summation' with args `(count-all-pairs "Error: pair-counts unequal:
+42933043.0 47444396.0\n")'.
+
+wtf...
+(define crc (add-pair-count-api cra))
+(fold (lambda (wrd sum)
+    (+ sum (crc 'right-wild-count wrd))) 0 (cra 'left-basis))
+(fold (lambda (cro sum)
+    (+ sum (crc 'left-wild-count cro))) 0 (cra 'right-basis))
+
+Spot check?
+
+(length (crs 'right-stars (Word "Jurisdiction")))
+two sections, both count of 1
+one section has count f 10032
+other has count of 1 ... that's OK, then,
+
+Beat me. en_dj_etwo has these damaged counts, but the cause of damage is
+totally unclear.
 
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
@@ -14438,13 +14461,6 @@ so get-col-fun-avg  gives -left-avg-things  are average over columns
 
 ===========================================================
 
-OK, so ... set up the transpose marginals for pseudo-csets:
-createdb en_dj_ptwo -T en_dj_mtwo
-(define btp (batch-transpose psa))
-(btp 'fetch-pairs)
-(btp 'mmt-marginals)
-
-----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
 New set intersection idea:
 sort both lists via cog-atom-less? and then single-pass
@@ -14589,7 +14605,23 @@ Start computing the basis
 Support: found num left= 496078 num right= 73810644 in 2828 secs
 Got up to 175 GB and halted.
 
+----------------
 
+OK, so ... set up the transpose marginals for pseudo-csets:
+createdb en_dj_ptwo -T en_dj_mtwo
+guile -l x-mtwo.scm
+(define btp (batch-transpose psa))
+(btp 'fetch-pairs)
+Elapsed time to load csets: 3484 secs
+top VIRT 31.255g size
+
+(ListLink . 6377076)
+(Connector . 268592)
+(ConnectorSeq . 6239997)
+(Section . 8629163)
+(WordNode . 137078)
+
+(btp 'mmt-marginals)
 
 
 =========================================================================

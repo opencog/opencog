@@ -121,7 +121,7 @@
 		(define (get-pair-type) 'Section)
 
 		; Get the observational count on Section SECT
-		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
+		(define (get-count SECT) (cog-count SECT))
 
 		; L-ATOM is a WordNode. R-ATOM is a wild-card.
 		; Disassemble the R-ATOM, insert L-ATOM into the variable
