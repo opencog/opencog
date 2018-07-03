@@ -44,6 +44,7 @@ infixl 8 ...
 pattern CN name <-Node "ConceptNode" name _
 pattern AN name <-Node "AnchorNode" name _
 pattern PN name <-Node "PredicateNode" name _
+pattern NN name <-Node "NumberNode" name _
 pattern GPN name <-Node "GroundedPredicateNode" name _
 pattern VN name <-Node "VariableNode" name _
 pattern DSN name <- Node "DefinedSchemaNode" name _

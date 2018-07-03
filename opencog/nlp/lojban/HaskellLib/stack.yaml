@@ -6,9 +6,9 @@ resolver: lts-8.24
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location: #/home/roman/Programming/LojbanValidator/
-    git: https://github.com/rTreutlein/LojbanValidator
-    commit: e0d289628df9389c7f5ca921f52c84efd13e17fa
+- location: /home/roman/Programming/LojbanValidator/
+  #git: https://github.com/rTreutlein/LojbanValidator
+  #  commit: e0d289628df9389c7f5ca921f52c84efd13e17fa
   extra-dep: true
 - location: #/home/roman/OpenCog/Iso/
     git: https://github.com/rTreutlein/IsoSyntax

@@ -144,6 +144,9 @@ iffl = definedSchemaLink "IfAndOnlyIf"
 uL :: SynIso [Atom] Atom
 uL = definedSchemaLink "WetherOrNot"
 
+--FIXME this is completely broken would need use TypeNode
+--Which wouldn't allow using a1 and a2 makes is kinda pointless
+--Find other solution
 jiL :: SynIso [Atom] Atom
 jiL = Iso f g where
     f [a1,a2] = do
@@ -195,7 +198,7 @@ conLink = conLink' . second tolist2 . handleEKMods
                         ,orl    . rmfst "a"
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
-                        ,jiL    . rmfst "ji"
+                        {-,jiL    . rmfst "ji"-}
                         ]
 
 _JAtoA :: SynIso String String

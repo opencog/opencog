@@ -40,7 +40,7 @@ packages:
 - '../HaskellLib'
 - location:
    git: https://github.com/rTreutlein/LojbanValidator
-   commit: e0d289628df9389c7f5ca921f52c84efd13e17fa
+   commit: 78ccba6f3f7bb8f10814168a35b2af6f483c5e99
   extra-dep: true
 - location:
    git: https://github.com/rTreutlein/IsoSyntax

@@ -35,6 +35,7 @@ import qualified Data.Map as M
 
 mystate s = State {sFlags = M.empty
                   ,sAtoms = []
+                  ,sTVLs = []
                   ,sText = s
                   ,sSeed = 0
                   ,sNow = cCN "now_here" noTv

@@ -126,9 +126,10 @@ free_frees = filterDummy . handleFREEs . addfst dummy . ifEmptyFail . frees
 text_1 :: Syntax Atom
 text_1 = ((handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
         <<< optional (left . checkEmpty . (manySep (sepMorph "I")
-                      &&> optional joik_jek
-                      &&& (optional (stag <&& sepMorph "BO")
+                        &&> optional joik_jek
+                        &&& (optional (stag <&& sepMorph "BO")
                           <+> nothing <<< optMorph "BO"))
+                        -- &&& frees
                       <+>
                       right . (someNIhO &&& frees))
         &&& paragraphs
@@ -580,6 +581,7 @@ sumti_5Q = (handleSubSet . second setWithSize ||| maybeinof)
           handleSubSet = sndToState 1 . second (tolist1 . subsetL) . reorder2
 
           maybeinof = Iso f g where
+              f a@(NN _) = pure a
               f a = do
                   atoms <- gets sAtoms
                   case getDefinitions [a] atoms of
@@ -673,7 +675,7 @@ lerfu_string = instanceOf . concept . isoIntercalate "-" . cons
 lerfu_word :: Syntax String
 lerfu_word = morph "BY"
          <+> (tolist2 <<< consonant &&& token ((==) 'y'))
-         <+> handle . anyWord
+         <+> handle . anyWord . notsyn brivla' --Some brivla end in bu they have to be excluded because would succed before birlva'
  -- <+> adtMorph "LAU" &+& lerfu_word
  -- <+> adtMorph "TEI" &+& lerfu_string &+& adtMorph "FOI"
     where handle = Iso f g
@@ -707,8 +709,8 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
 
           noi :: Syntax Atom
           noi = sepMorph "NOI" &&> ((hasKEhA <<< relSentence)
-                                      <+>
-                                      ptp bridi_tail addKEhA relSentence)
+                                    <+>
+                                    ptp bridi_tail addKEhA relSentence)
               where hasKEhA = Iso f f
                     f a = if atomAny (\case { Link{} -> False
                                             ; (Node _ n _) -> "ke'a" `isInfixOf` n
@@ -737,12 +739,17 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
                             pure res
 
 le :: Syntax Atom
-le = (handleFREEs2 ||| id) . ifJustB
+le = handleFREEs2 . reorder
    <<< ((setFlagValueIso "LE_FLAG" . morph "LE")
        <+>
        (setFlagIso "LA_FLAG" . sepMorph "LA"))
-   &&> sumti_tail
+   &&> frees
+   &&& sumti_tail
    &&& optional (sepMorph "KU" &&> frees)
+    where reorder = mkIso f g
+          f (f1,(s,Just f2)) = (s,f1++f2)
+          f (f1,(s,Nothing)) = (s,f1)
+          g (s,f1) = (f1,(s,Nothing))
 
 sumti_tail :: Syntax Atom
 sumti_tail = sumti_tail_1
@@ -1017,19 +1024,13 @@ _space_time = addsnd (Just "space_time") . second (addfstAny noTv)
                                          . space_time
 
 _CAhA :: Syntax (Tagged SelbriNA)
-_CAhA = addsndAny Nothing . addfst Nothing . addfstAny noTv
-      . implicationOf . predicate . morph "CAhA"
+_CAhA = addsndAny Nothing . addfst Nothing . addfstAny noTv . handleFREEs2
+      <<< implicationOf . predicate . morph "CAhA" &&& many (fUI . indicators)
 
 _CUhE :: Syntax (Tagged SelbriNA)
-_CUhE = addsndAny Nothing . addfst Nothing . addfstAny noTv
-      . (randvarnode |||  implicationOf . predicate)
-      . switchOnValue "cu'e" . morph "CUhE"
-
---Fails when the Syntax Succeds and the other way arround
---Either the syn succeds then we fail with the zeroArrow
---Or the right . insertc succeds because syn failed then we do nothing
-notsyn :: Syntax a -> Syntax ()
-notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert ()))
+_CUhE = addsndAny Nothing . addfst Nothing . addfstAny noTv . handleFREEs2
+     <<< (randvarnode |||  implicationOf . predicate)
+      . switchOnValue "cu'e" . morph "CUhE" &&& many (fUI . indicators)
 
 -------------------------------------------------------------------------------
 --Selbri
@@ -1254,7 +1255,7 @@ brivla :: Syntax Atom
 brivla = handleFREEs2 <<< brivla' &&& frees
 
 brivla' :: Syntax Atom
-brivla' = implicationOf . predicate <<< gismu <+> Morph.brivla
+brivla' = implicationOf . predicate <<< Morph.brivla
 
 meP :: Syntax Atom
 meP = (handleFREEs2 ||| id) . handle
