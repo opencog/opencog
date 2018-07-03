@@ -15,7 +15,6 @@
 (load "learn/mst-parser.scm")
 (load "learn/pseudo-csets.scm")
 (load "learn/connector-vec.scm")
-(load "learn/batch-disjunct.scm")
 (load "learn/summary.scm")
 (load "learn/gram-class.scm")
 (load "learn/gram-agglo.scm")

@@ -1,6 +1,5 @@
 ADD_GUILE_MODULE (FILES
 	learn.scm
-	batch-disjunct.scm
 	batch-word-pair.scm
 	common.scm
 	connector-vec.scm
