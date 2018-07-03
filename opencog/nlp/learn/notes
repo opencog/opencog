@@ -14413,6 +14413,27 @@ Redo contents of compute-mi.scm:
 (define cvt (add-transpose-compute cvs))
 (cvt 'mmt-support w)   ------ fails when w is a WordClass...
 
+reports --- 
+print-matrix-summary-report
+add-report-api
+make-compute-freq  calls 'set-size
+(rptobj 'set-size left-size right-size cnt)
+ (rptobj (add-report-api LLOBJ))
+(define rpt-obj (add-report-api btc))
+(rpt-obj 'left-support)
+(define rtc (make-central-compute btc))
+(rtc 'cache-left) because ... left-marginals were cmputed
+left margs loop over right-basis which is get-col-fun
+wich are the ceche-lefts.
+
+WTF....
+
+The probability of a column y is 
+P(*,y) = N(*,y)/N(*,*)  == left-count
+get-right-fun-avg gives averge over columns. i.e. loop over right-basis
+FN must take a column .e.g. FN ... could be a left-count
+
+
 
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.

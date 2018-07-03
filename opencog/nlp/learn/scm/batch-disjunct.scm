@@ -106,6 +106,7 @@
 	(let* ((star-obj     (add-pair-stars LLOBJ))
 			(support-obj   (add-support-api star-obj))
 			(scomp-obj     (add-support-compute star-obj))
+			(centr-obj     (make-central-compute star-obj))
 			(store-obj     (make-store star-obj))
 			(trans-obj     (add-transpose-compute star-obj))
 		)
@@ -136,6 +137,7 @@
 			; on the 'left-wildcard on the dual.  That means that we
 			; need to have the left-marginals all computed.
 			(scomp-obj 'left-marginals)
+			(centr-obj 'cache-left)
 			(store-obj 'store-left-marginals)
 
 			; Same as above
