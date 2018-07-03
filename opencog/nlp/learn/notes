@@ -14347,6 +14347,7 @@ c63df81bd14e5c0d478e654e3be76369  en_dj_cfive.sql.bz2
 
 next:
 createdb en_dj_etwo -T en_dj_mtwo
+guile -l xmclean.scm
 (sql-open "postgres:///en_dj_etwo?user=linas&password=asdf")
 (define cra (make-connector-vec-api))
 (cra 'fetch-pairs)
@@ -14384,6 +14385,7 @@ what fraction?
 16514195
 17648358
 18149413
+18262285
 
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
@@ -14434,7 +14436,13 @@ get-right-fun-avg gives averge over columns. i.e. loop over right-basis
 FN must take a column .e.g. FN ... could be a left-count
 so get-col-fun-avg  gives -left-avg-things  are average over columns
 
+===========================================================
 
+OK, so ... set up the transpose marginals for pseudo-csets:
+createdb en_dj_ptwo -T en_dj_mtwo
+(define btp (batch-transpose psa))
+(btp 'fetch-pairs)
+(btp 'mmt-marginals)
 
 ----------------
 Kill the unused words --- OK wayyyy too slow for set intersection.
@@ -14593,6 +14601,7 @@ NEW TODO LIST
 
 * Finish elimination of 'left-element, 'right-element in filters.
 
+-- start transpose-marginals for en_dj_ptwo (pseudo-csets) IN PROGRESS
 -- start cross-marginals in dj_etwo IN PROGRESS
 -- save en_dj_etwo after cross-marginals
 -- show graph distribution of mi of word-dj pairs in mtwo
