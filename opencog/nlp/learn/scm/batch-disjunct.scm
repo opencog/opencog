@@ -101,7 +101,8 @@
   batch-transpose - bulk-compute transpose marginals.
 
   This computes the marginals needed to get the `add-transpose-api`
-  to work correctly.
+  to work correctly.  This is quite CPU-intensive. The resulting
+  marginals are saved to the database, after they are computed.
 "
 	(let* ((star-obj     (add-pair-stars LLOBJ))
 			(support-obj   (add-support-api star-obj))
@@ -111,6 +112,7 @@
 			(trans-obj     (add-transpose-compute star-obj))
 		)
 
+		; -------------
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-left-support)
 			; The cross-objects need to have the stars created, before
@@ -147,10 +149,39 @@
 		)
 
 		; -------------
+		; If the marginal counts have not yet been computed, do so now.
+		(define (batch-right-support)
+			; The cross-objects need to have the stars created, before
+			; they can be used.
+			(if (LLOBJ 'provides 'make-right-stars)
+				(LLOBJ 'make-right-stars))
+
+			(scomp-obj 'right-marginals)
+			(centr-obj 'cache-right)
+			(store-obj 'store-right-marginals)
+		)
+
+		; This assumes that pairs have been fetched already.
+		(define (batch-mtm-marginals)
+
+			; If right supports have not yet been computed, then
+			; do so now. We can tell if they have been, by simply
+			; accessing a quantity we expect to have already.
+			(catch #t (lambda () (support-obj 'total-support-right))
+				(lambda (key . args)
+					(batch-right-support)))
+
+			(trans-obj 'mtm-marginals)
+			(store-obj 'store-left-marginals)
+			(display "Done computing and saving sum_x N(x,y) N(x,*)\n")
+		)
+
+		; -------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((mmt-marginals)  (batch-mmt-marginals))
+				((mtm-marginals)  (batch-mtm-marginals))
 				(else             (apply LLOBJ (cons message args))))
 			)))
 
@@ -162,4 +193,3 @@
 ; (define cvp (add-support-api cvs))
 ; (define btc (batch-transpose cva))
 ; (btc 'batch-cross)
-
