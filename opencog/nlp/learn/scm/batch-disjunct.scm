@@ -111,21 +111,8 @@
 			(trans-obj     (add-transpose-compute star-obj))
 		)
 
-		; Hackyyyy -- assumes that support has already computed
-		; Assume that pairs have been fetched already.
-		(define (batch-pca)
-
-			; 'mmt-marginals loops over 'left-basis and records
-			; them on 'right-wildcard.  Thus, we need to save
-			; the 'right-wildcard to disk.
-			(trans-obj 'mmt-marginals)
-			(store-obj 'store-right-marginals)
-			(display "Done computing and saving sum_y N(x,y) N(*,y)\n")
-		)
-
-
-		; Assume that marginal counts have not yet been computed.
-		(define (batch-cross)
+		; If the marginal counts have not yet been computed, do so now.
+		(define (batch-left-support)
 			; The cross-objects need to have the stars created, before
 			; they can be used.
 			(if (LLOBJ 'provides 'make-left-stars)
@@ -139,18 +126,32 @@
 			(scomp-obj 'left-marginals)
 			(centr-obj 'cache-left)
 			(store-obj 'store-left-marginals)
+		)
 
-			; Same as above
-			(batch-pca)
+		; This assumes that pairs have been fetched already.
+		(define (batch-mmt-marginals)
+
+			; If left supports have not yet been computed, then
+			; do so now. We can tell if they have been, by simply
+			; accessing a quantity we expect to have already.
+			(catch #t (lambda () (support-obj 'total-support-left))
+				(lambda (key . args)
+					(batch-left-support)))
+
+			; 'mmt-marginals loops over 'left-basis and records
+			; them on 'right-wildcard.  Thus, we need to save
+			; the 'right-wildcard to disk.
+			(trans-obj 'mmt-marginals)
+			(store-obj 'store-right-marginals)
+			(display "Done computing and saving sum_y N(x,y) N(*,y)\n")
 		)
 
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((batch-pca)    (batch-pca))
-				((batch-cross)  (batch-cross))
-				(else           (apply LLOBJ (cons message args))))
+				((mmt-marginals)  (batch-mmt-marginals))
+				(else             (apply LLOBJ (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------

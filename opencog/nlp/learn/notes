@@ -14432,6 +14432,7 @@ The probability of a column y is
 P(*,y) = N(*,y)/N(*,*)  == left-count
 get-right-fun-avg gives averge over columns. i.e. loop over right-basis
 FN must take a column .e.g. FN ... could be a left-count
+so get-col-fun-avg  gives -left-avg-things  are average over columns
 
 
 
