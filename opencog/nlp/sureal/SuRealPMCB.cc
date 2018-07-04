@@ -240,6 +240,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             std::string sPat = hPatNode->get_name();
             std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
+            sPatWord = sPatWord.substr(0, sPatWord.find_last_of('.'));
 
             // Get the WordNode associated with the word
             // (extracted from "word@1234" convention).
@@ -373,6 +374,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
         std::string sName = kv.first->get_name();
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
+        sWord = sWord.substr(0, sWord.find_last_of('.'));
         Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
 
@@ -414,6 +416,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
                     std::string sName = qOS[0]->get_name();
                     std::string sWord = sName.substr(0, sName.find_first_of('@'));
+                    sWord = sWord.substr(0, sWord.find_last_of('.'));
 
                     // Skip if we have seen it before
                     if (std::find(qChkWords.begin(), qChkWords.end(), sWord) != qChkWords.end())
