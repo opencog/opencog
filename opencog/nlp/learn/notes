@@ -14166,6 +14166,38 @@ him -- me  L=-8.418 R=-8.945 LR=-13.11 MI=4.2583
 
 OK so we are good to go.
 
+================
+A summary report for transpose?
+mmt-count is the wild-card sum_y N(x,y) N(*,y)
+divide by total to get  Q(x) = sum_y P(x,y) P(*,y)
+
+1) support == left=dim, since Q(x) is non-zero for all x.
+2) sum_x Q(x) = 1  of course
+3) length == sqrt sum_x Q(x)Q(x) but why is this interesting?
+
+(define mmt-tot (pta 'total-mmt-count))
+(define (que wrd) (/ (pta 'mmt-count wrd) mmt-tot))
+(define sumsq (fold
+	(lambda (wrd sum) (define q (que wrd))
+		(+ sum (* q q)))  0
+	(pta 'left-basis)))
+
+for mtwo, this gives: 0.09987939734814384
+(sqrt sumsq)    ; 0.3160370189521219
+================
+
+Does similarity work?
+
+(define pts (add-similarity-api pta #f "pseudo-cset MI"))
+Uh no ..
+
+(define bmi
+	(batch-similarity pta #f "pseudo-cset MI"
+		0.0 (lambda (wa wb) (pmi 'mmt-fmi wa wb))))
+
+(bmi 'compute-similarity (Word "other") (Word "same"))
+
+(bmi 'batch-compute 12)
 
 ================
 en_pairs_mtwo=> select count(*) from Atoms;
@@ -14580,6 +14612,7 @@ select count(*) from atoms;
  Failed to load cogserver module opencog/modules/libPersistModule.so
 
 =========================================================================
+=========================================================================
 And again, now for cfive on LXC
 guile -v
 guile (GNU Guile) 2.2.2.13-98461
@@ -14689,6 +14722,7 @@ progress?? I assume its recomputing support....
 (define pcr (add-report-api psa))
 
 Finished left norm marginals in 35534 secs   <==== same as before
+      works out to 176 per second.  Ouch.
 Finished left totals in 227 secs
 Finished column (left) norm averages in 1042 secs
 Done storing 6239997 left-wilds in 4681 secs << == same as before, expected
@@ -14701,7 +14735,7 @@ size= 34.293g VIRT top
 (define cra (make-connector-vec-api))
 (define bcr (batch-transpose cra))
 (bcr 'mmt-marginals)   ; start 12:10 4 July
-
+Elapsed time to compute left-stars: 1005 secs
 
 
 =========================================================================
@@ -14718,10 +14752,10 @@ NEW TODO LIST
 -- SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
    and with transpose-marginals for both.
 
--- create report for transpose marginals.
 
--- start cross-marginal olde-style MI in dj_etwo IN PROGRESS
+-- start old-style MI cross-marginal in dj_etwo IN PROGRESS
 -- save en_dj_etwo after cross-marginals
+
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
 
@@ -14789,6 +14823,7 @@ Merging minor tasks DONE
   Both should be made obsolete.... DONE
 * Redo compute-total-count to be one-sided. DONE
 * Transpose-marginals for en_dj_ptwo (pseudo-csets) DONE
+* Create report for transpose marginals. Why is this interesting? not done.
 
 
 
