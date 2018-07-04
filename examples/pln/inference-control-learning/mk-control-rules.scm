@@ -6,12 +6,21 @@
   (clear)
   (cp-as history-as (cog-atomspace))
 
+  ;; [Experimental] Run pattern miner on the history to find frequent
+  ;; patterns for control rules.
+  (icl-logger-debug "Mine control rules")
+  (mine-control-rules)
+
   ;; We ground the control rules first then evaluate all antecedents
   ;; to allow direct evaluation of the control rules.
+  (icl-logger-debug "Ground control rules")
   (ground-control-rules)
+  (icl-logger-debug "Evaluate antecedents")
   (evaluate-antecedents)
 
   ;; Produce inference control rules
+  (ure-logger-flush)                    ; make sure the next message does get mangled
+  (icl-logger-debug "Produce control rules")
   (let* ((results (produce-control-rules)))
     ;; Copy inference control rules to the Inference Control Rules
     ;; atomspace
@@ -33,6 +42,7 @@
   ;; (expand ($A $L $R) $B)
   ;; ->
   ;; (preproof-of $B $T)
+  (icl-logger-debug "Ground context free control rules")
   (ground-context-free-rules)
 
   ;; Ground rules like
@@ -41,6 +51,7 @@
   ;; (expand ($A (Inheritance a $X) $R) $B)
   ;; ->
   ;; (preproof-of $B $T)
+  (icl-logger-debug "Ground a-pattern control rules")
   (ground-a-pattern-rules)
 )
 

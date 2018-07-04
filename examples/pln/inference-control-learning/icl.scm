@@ -1,21 +1,22 @@
 ;; Contain the main inference control learning experiment loop
 
 ;; Set parameters
-(define pss 100)                    ; Problem set size
-(define niter 2)                    ; Number of iterations
-(define piter 20)                   ; Number of iterations used for each problem
+(define pss 5)                    ; Problem set size
+(define niter 1)                    ; Number of iterations
+(define piter 10)                   ; Number of iterations used for each problem
 
 ;; Load utils
 (load "icl-utilities.scm")
 (load "mk-history.scm")
 (load "mk-control-rules.scm")
+(load "mine-control-rules.scm")
 
 ;; Set the random seed of the experiment
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
 (cog-logger-set-level! "info")
-(icl-logger-set-level! "debug")
+(icl-logger-set-level! "fine")
 (ure-logger-set-level! "debug")
 
 ;; Set loggers stdout
