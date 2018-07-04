@@ -7,6 +7,7 @@
 (use-modules (opencog exec))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
+(use-modules (opencog miner))
 
 ;; Set a logger for the experiment
 (define icl-logger (cog-new-logger))
@@ -25,6 +26,7 @@
 (define (icl-logger-info . args) (apply cog-logger-info (cons icl-logger args)))
 (define (icl-logger-debug . args) (apply cog-logger-debug (cons icl-logger args)))
 (define (icl-logger-fine . args) (apply cog-logger-fine (cons icl-logger args)))
+(define (icl-logger-flush) (cog-logger-flush icl-logger))
 
 ;; Let of characters of the alphabet
 (define alphabet-list
@@ -103,16 +105,37 @@
 ;; is it has an empty incoming set and its TV has null
 ;; confidence. Then call recursively on its outgoing set.
 (define (remove-dangling-atom atom)
-  (if (and (cog-atom? atom) (null-incoming-set? atom) (null-confidence? atom))
+  (if (and (cog-atom? atom)
+           (null-incoming-set? atom)
+           (null-confidence? atom))
       (let* ((outgoings (cog-outgoing-set atom)))
         (cog-delete atom)
         (remove-dangling-atom-list outgoings))))
+
+;; All almost false atoms (with almost null strength and non-null
+;; confidence) from the current atomspace
+(define (remove-almost-false-atoms)
+  (remove-almost-false-atom-list (get-all-atoms)))
+
+(define (remove-almost-false-atom-list atoms)
+  (for-each remove-almost-false-atom atoms))
+
+;; Remove the atom (and all its children) from the current atomspace
+;; if has almost null strength and non-null confidence
+(define (remove-almost-false-atom atom)
+  (if (and (cog-atom? atom)
+           (not (null-confidence? atom))
+           (almost-null-strength? atom))
+      (extract-hypergraph atom)))
 
 (define (null-incoming-set? atom)
   (null? (cog-incoming-set atom)))
 
 (define (null-confidence? atom)
-  (= 0 (cog-tv-conf (cog-tv atom))))
+  (= 0 (cog-confidence atom)))
+
+(define (almost-null-strength? atom)
+  (< (cog-mean atom) 0.1))
 
 ;; Copy all atoms from an atomspace to another atomspace
 (define (cp-as src dst)
@@ -162,7 +185,7 @@
     (cog-set-atomspace! old-as)
     result))
 
-;; Build an atomspace that is a union of a list of atomspaces
+;; Build an atomspace as the union of a list of atomspaces
 (define (union-as dst atomspaces)
   (for-each (lambda (src) (cp-as src dst)) atomspaces))
 
@@ -194,7 +217,8 @@
 
 (define (icl-cp-all AS)
 "
-  icl-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns the list of copied atoms.
+  icl-cp-all AS - Copy all atoms in the current atomspace to the given
+                  atomspace AS and returns the list of copied atoms.
 "
   (icl-cp AS (apply append (map cog-get-atoms (cog-get-types)))))
 
