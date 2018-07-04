@@ -73,10 +73,7 @@
   contents of the atomspace.  Intended to summary language-learning
   status.
 "
-	(catch #t
-		(lambda ()
-			(print-sentence-report)
-		)
+	(catch #t (print-sentence-report)
 		(lambda (key . args)
 			(format #t "~A: ~A: ~A \n" key (car args) (cadr args))
 			#f

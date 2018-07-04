@@ -13892,7 +13892,7 @@ found -- called  count=0.5576  entrop=0.5298  mi=0.3460
 came -- went  count=0.5900  entrop=0.5656  mi=0.3580
 eyes -- hand  count=0.7284  entrop=0.6669  mi=0.4827
 
-Actual symmetric MI's:
+Actual symmetric MI's:  (using code 200 lines below)
 other -- same  *,*=-12.39 L=-21.52 R=-22.13 MI=4.1232
 nice -- fine  *,*=-12.39 L=-26.94 R=-25.21 MI=4.5210
 him -- me  *,*=-12.39 L=-20.81 R=-21.34 LR=-25.50 MI=4.2583
@@ -13917,10 +13917,6 @@ called -- eyes  count=0.0049  entrop=0.0069  mi=0.0007
 nice -- went  count=0.0353  entrop=0.0329  mi=0.0044
 men -- went  count=0.0249  entrop=0.0281  mi=0.0021
 men -- nice  count=0.0233  entrop=0.0262  mi=0.0001
-
-
-
-
 
 
 =========================================================================
@@ -14088,6 +14084,7 @@ mmt-count is the wild-card sum_y N(x,y) N(*,y)
          (+ sum (* mrq fre)))) 0
       (pfa 'right-stars WRD)))
 
+; entro is same as cosine-compute 'right-product
 (define (entro WA WB)
    (fold (lambda (wld sum)
       (let ((mrq (pfa 'pair-freq (pfa 'get-pair WA wld)))
@@ -14114,6 +14111,60 @@ mmt-count is the wild-card sum_y N(x,y) N(*,y)
 
 (tcf 'mmt-count (Word "eyes"))   ; 8.6245e-8
 (tcf 'total-mmt-count)           ;
+----------------------
+OK, now that trans marginals are available, verify that they give same
+answers:
+
+So:
+N(*,y) == 'left-count
+mmt-count is the wild-card sum_y N(x,y) N(*,y)
+
+x-mtwo.scm
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(define pta (add-transpose-api psa))
+(pta 'total-mmt-count)     ; 63598403588.0  == 63.6 Gcounts
+
+(pta 'mmt-count (Word "other")) ; 113433851.0
+(pta 'mmt-count (Word "same"))  ; 74309919.0
+
+(define pco (add-pair-cosine-compute psa))
+
+(pco 'right-product (Word "other") (Word "same"))  ; 2309662.0
+(pco 'right-cosine (Word "other") (Word "same"))   ; 0.58660119
+
+(define (log2 x) (/ (log x) (log 2)))
+
+(define (symmi wa wb)
+   (define sqsu (pta 'total-mmt-count))
+   (define pa (pta 'mmt-count wa))
+   (define pb (pta 'mmt-count wb))
+   (define pab (pco 'right-product wa wb))
+   (define ent (log2 (/ (* sqsu pab) (* pa pb))))
+   (format #t "~A -- ~A  *,*=~6F L=~6F R=~6F LR=~6F MI=~6F\n"
+      (cog-name wa) (cog-name wb)
+      (log2 sqsu) (log2 pa) (log2 pb) (log2 pab) ent))
+
+other -- same  *,*=35.888 L=26.757 R=26.147 LR=21.139 MI=4.1232
+Great! same MI as before
+
+(define (symmi wa wb)
+   (define tot (pta 'total-mmt-count))
+   (define pa (/ (pta 'mmt-count wa) tot))
+   (define pb (/ (pta 'mmt-count wb) tot))
+   (define pab (/ (pco 'right-product wa wb) tot))
+   (define ent (log2 (/ pab (* pa pb))))
+   (format #t "~A -- ~A  L=~6F R=~6F LR=~6F MI=~6F\n"
+      (cog-name wa) (cog-name wb) (log2 pa) (log2 pb) (log2 pab) ent))
+
+other -- same  L=-9.131 R=-9.741 LR=-14.75 MI=4.1232
+nice -- fine  L=-14.55 R=-12.81 LR=-22.84 MI=4.5210
+him -- me  L=-8.418 R=-8.945 LR=-13.11 MI=4.2583
+
+(define pmi (add-symmetric-mi-compute psa))
+(pmi 'mmt-fmi (Word "other") (Word "same"))
+
+OK so we are good to go.
 
 
 ================
@@ -14410,6 +14461,15 @@ other has count of 1 ... that's OK, then,
 Beat me. en_dj_etwo has these damaged counts, but the cause of damage is
 totally unclear.
 
+Restart counting, on the same dataset.
+guile -l xmclean.scm
+(cra 'fetch-pairs)
+(cra 'make-left-stars)
+(batch-all-pair-mi cra)
+Its at 40.630g VIRT in top
+Support: found num left= 137078 num right= 18265271 in 33 secs
+and now, wait 4 days .... till 7th of July
+
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
 We only need ....  
@@ -14623,6 +14683,26 @@ top VIRT 31.255g size
 
 (btp 'mmt-marginals)
 
+progress?? I assume its recomputing support....
+(define bc (make-central-compute psa))
+(define pcs (add-support-api  psa))
+(define pcr (add-report-api psa))
+
+Finished left norm marginals in 35534 secs   <==== same as before
+Finished left totals in 227 secs
+Finished column (left) norm averages in 1042 secs
+Done storing 6239997 left-wilds in 4681 secs << == same as before, expected
+Finished mmt norm marginals in 790 secs << ===  great!
+Finished mmt totals in 8 secs
+Done storing 137078 right-wilds in 114 secs
+
+Now do crosses.
+size= 34.293g VIRT top
+(define cra (make-connector-vec-api))
+(define bcr (batch-transpose cra))
+(bcr 'mmt-marginals)   ; start 12:10 4 July
+
+
 
 =========================================================================
 
@@ -14633,8 +14713,14 @@ NEW TODO LIST
 
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- start transpose-marginals for en_dj_ptwo (pseudo-csets) IN PROGRESS
--- start cross-marginals in dj_etwo IN PROGRESS
+-- start transpose-marginals for crossed in en_dj_ptwo IN PROGRESS
+
+-- SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
+   and with transpose-marginals for both.
+
+-- create report for transpose marginals.
+
+-- start cross-marginal olde-style MI in dj_etwo IN PROGRESS
 -- save en_dj_etwo after cross-marginals
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
@@ -14702,7 +14788,7 @@ Merging minor tasks DONE
 * make-compute-count is dual to add-pair-count-api
   Both should be made obsolete.... DONE
 * Redo compute-total-count to be one-sided. DONE
-
+* Transpose-marginals for en_dj_ptwo (pseudo-csets) DONE
 
 
 
