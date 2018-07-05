@@ -63,9 +63,6 @@
 ;;       (Concept person-id)
 ;;       (Sentence <sentence-id>)))
 (define (mock-HEAD-chat person-id name message)
-  (chat message)
-  (sleep 1)                             ; you never know
-
   ;; Create name structure
   (Evaluation
      (Predicate "name")
@@ -74,7 +71,7 @@
         (Word name)))
 
   ;; Create say structure
-  (let* ((sentence (cog-chase-link 'ListLink 'SentenceNode (Node message))))
+  (let* ((sentence (ghost message)))
     (Evaluation
        (Predicate "say")
        (List
