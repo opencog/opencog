@@ -1,21 +1,16 @@
 (use-modules (opencog exec))
 
-(define (get-inferred-atoms)
-    (let ((inferences (cog-execute!
-            (Get (Member pln-inferred-atoms (Variable "$x"))))))
+(define inference-results-key (Predicate "inference-results"))
 
-        (cog-outgoing-set inferences)
-    )
+(define (get-inferred-atoms trail)
+    (cog-value trail inference-results-key)
 )
 
 (define (get-names atom-list)
   (map cog-name atom-list))
 
-;; Insert the elements of a given Set to the elements of the Set
-;; associated to the Anchor pln-inferred-atoms
-(define (add-to-pln-inferred-atoms s)
-; FIXME: Why is it not adding somethimes?
-   (map (lambda (x) (Member pln-inferred-atoms x)) s)
+(define (add-to-pln-inferred-atoms trail inferences)
+   (cog-set-value! trail inference-results-key inferences)
 )
 
 (define (search-input-utterance-words)

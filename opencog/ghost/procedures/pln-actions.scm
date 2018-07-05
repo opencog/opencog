@@ -136,13 +136,15 @@
   Fetch the semantics with the highest strength*confidence that
   contains words in common with the query
 "
+    (define time (pln-get-recorded-time))
+
     (cog-logger-info "[PLN-Action] Started (do-pln-qa)")
 
     (State pln-qa process-started)
     ; FIXME Why doesn't the first call of (update-inferences) work?
-    (update-inferences)
-    (update-inferences)
-    (let ((inferences (get-inferred-atoms)))
+    (update-inferences rb-trail-1 3 time)
+    (update-inferences rb-trail-1 3 time)
+    (let ((inferences (get-inferred-atoms rb-trail-1)))
         (if (null? inferences)
             (State pln-answers no-result)
             (choose-response-for-trail-1
