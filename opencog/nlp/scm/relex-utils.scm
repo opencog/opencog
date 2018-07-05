@@ -124,6 +124,18 @@
 )
 
 ; --------------------------------------------------------------------
+(define-public (sent-get-r2l-outputs sent-node)
+"
+  sent-get-r2l-outputs SENT-NODE
+
+  Returns a list of the r2l logic outputs associated with SENT-NODE, assuming
+  there is only one interpretation.
+"
+
+  (interp-get-r2l-outputs (car (sent-get-interp sent-node)))
+)
+
+; --------------------------------------------------------------------
 (define-public (parse-get-r2l-outputs parse-node)
 "
   parse-get-r2l-outputs    Get all R2L outputs in a parse.
