@@ -21,10 +21,10 @@
 (State input-parse no-input-utterance)
 
 (define default-state (Concept (chat-prefix "DefaultState")))
-(define process-started (Concept (chat-prefix "ProcessStarted")))
-(define process-finished (Concept (chat-prefix "ProcessFinished")))
+(define-public process-started (Concept (chat-prefix "ProcessStarted")))
+(define-public process-finished (Concept (chat-prefix "ProcessFinished")))
 (define setup-not-done (Concept (chat-prefix "SetupNotDone")))
-(define no-result (Concept (chat-prefix "NoResult")))
+(define-public no-result (Concept (chat-prefix "NoResult")))
 
 (define max-waiting-time (Anchor (chat-prefix "MaxWaitingTime")))
 (State max-waiting-time (Time 3))
