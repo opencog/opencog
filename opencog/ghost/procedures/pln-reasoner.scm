@@ -50,38 +50,23 @@
 (define (infer-on-r2l rule-base r2l-outputs steps)
     (let* ((inference-results
                 (simple-forward-chain rule-base r2l-outputs steps))
-          (clean-results (lset-difference equal? inference-results r2l-outputs))
-          (results-for-sureal
-                (cog-outgoing-set (filter-for-sureal clean-results)))
-          )
-        results-for-sureal
+          (clean-results
+                (lset-difference equal? inference-results r2l-outputs)))
+    ;      (filter-for-sureal clean-results)
+        clean-results
     )
 )
 
 ;-------------------------------------------------------------------------------
-;;;;;;;;;;
-;; Main ;;
-;;;;;;;;;;
-; FIXME: The reocrding starts on loading. Should only recored inputs used
-; for inference.
-(pln-record-current-time)
+(define (update-inferences trail steps time)
+"
+  update-inferences TRAIL STEPS TIME
 
-(define pln-update-count 0)
-(define-public (pln-get-update-count) pln-update-count)
-
-(define (update-inferences)
-    (cog-logger-info "[PLN-Action] Started (update-inferences)")
-
-    ;; Apply Implication direct evaluation (and put the result in
-    ;; pln-inferred-atoms state)
-    (let* ((inputs (pln-get-nlp-inputs (get-previous-said-sents
-                (pln-get-recorded-time))))
-        (inferences (infer-on-r2l rb-trail-1 inputs 3)))
-
-        (if (not (null? inferences))
-            (add-to-pln-inferred-atoms inferences))
+  Run the simple forward chainer using the TRAIL URE-rulebase over the
+  r2l outputs of sentences inputed since TIME(in seconds). The output of the
+  inferences are recorded as a value on TRAIL.
+"
+    (let* ((inputs (pln-get-nlp-inputs (get-previous-said-sents time))))
+        (add-to-pln-inferred-atoms trail (infer-on-r2l trail inputs steps))
     )
-
-    (set! pln-update-count (+ pln-update-count 1))
-    (cog-logger-info "[PLN-Action] Finished (update-inferences)")
 )
