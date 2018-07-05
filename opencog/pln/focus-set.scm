@@ -16,8 +16,7 @@
 "
     (append-map
         (lambda (sent-node)
-            (let* ((r2l-outputs (interp-get-r2l-outputs
-                        (car (sent-get-interp sent-node))))
+            (let* ((r2l-outputs (sent-get-r2l-outputs sent-node))
                   (nodes (delete-duplicates
                         (append-map cog-get-all-nodes r2l-outputs)))
                   (cn-and-pn (delete-duplicates
