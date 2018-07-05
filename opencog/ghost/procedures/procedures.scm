@@ -24,6 +24,7 @@
     perceive-word
     perceive-face-talking
     perceive-eye-state
+    perceive-neck-dir
 
     ; Sensory input hooks
     perceive-word-hook
@@ -80,6 +81,7 @@
     saccade_explore
     saccade_listen
     saccade_cancel
+    get_neck_dir
 
     ; Source schemas
     send_query
@@ -216,6 +218,21 @@
 )
 
 ; --------------------------------------------------------------
+(define (looking dir)
+"
+  looking DIR
+
+  Define the atom used to represent the direction of the neck turned,
+  to the left/right.
+"
+  (Evaluation
+    (Predicate "looking")
+    (List
+      (Concept "I")
+      (Concept dir)))
+)
+
+; --------------------------------------------------------------
 ; APIs for inputing sensory information.
 ; --------------------------------------------------------------
 ;(define (perceived-face face-id x y z)
@@ -309,6 +326,15 @@
   ecan stimulation.
 "
   (record-perception (eye-open face-id eye-id) confidence)
+)
+
+(define (perceive-neck-dir dir)
+"
+  perceive-neck-dir DIR
+
+  Return the atom used to represent which direction of the neck has turned.
+"
+  (record-perception (looking dir) 1)
 )
 
 ; --------------------------------------------------------------
