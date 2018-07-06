@@ -51,6 +51,9 @@
     ; Source predicates
     any_answer
 
+    ; self-model
+    neck_dir
+
     ; schemas
     animation
     expression

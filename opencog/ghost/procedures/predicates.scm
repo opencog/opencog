@@ -349,6 +349,21 @@
 )
 
 ; --------------------------------------------------------------
+(define (neck_dir dir)
+"
+  neck_dir DIR
+
+  Check if the current neck direction is equal to DIR.
+"
+  (define current-dir (cog-name (get_neck_dir)))
+
+  (if (string-ci=? (cog-name dir) current-dir)
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
+; --------------------------------------------------------------
 ; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
