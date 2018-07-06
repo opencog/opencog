@@ -600,10 +600,29 @@
 
   Get the direction of the head turned.
 "
-  (cog-execute! (Get
-    (Evaluation
-      (Predicate "looking")
-      (List (Concept "I") (Variable "$x")))))
+  (define directions
+    (cog-outgoing-set
+      (cog-execute!
+        (Get
+          (TypedVariable
+            (Variable "$x")
+            (Signature
+              (Evaluation
+                (Predicate "looking")
+                (List (Concept "I") (Type "ConceptNode")))))
+          (Variable "$x"))
+      )
+    )
+  )
+
+  (fold
+    (lambda (x rtn)
+      (cond ((null? rtn) x)
+            ((> (time-perceived x) (time-perceived rtn)) x)
+            (else rtn)))
+    (list)
+    directions
+  )
 )
 
 ; --------------------------------------------------------------
@@ -623,6 +642,9 @@
 
   Start the 'All Is Full Of Love' singing performance.
 "
-  (system singing-script-path)
+  (call-with-new-thread
+    (lambda ()
+      (system singing-script-path)))
+
   fini
 )
