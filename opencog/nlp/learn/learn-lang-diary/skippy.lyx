@@ -87,5 +87,105 @@ This document attempts to compare and contrast the various ways in which
 Introduction
 \end_layout
 
+\begin_layout Standard
+The introduction here is minimal; it is assumed that the reader is generally
+ conversant with both Link Grammar, and with AdaGram, as well as some of
+ the concepts employed in the OpenCog language-learning project.
+\end_layout
+
+\begin_layout Standard
+Link Grammar defines a word-disjunct pair as an object of the general form
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		word: A- & B+ & C+ & ...;
+\end_layout
+
+\end_inset
+
+The disjunct is the expression to the right of the colon.
+ The notations A-, B+, C+, etc.
+ are called connectors; they are types that indicate what other (classes
+ of) words the given word can connect to.
+ The minus and plus signs indicate whether the connectors link to the left
+ or to the right.
+ The number of such connectors is variable, depending on the disjunct.
+ The ampersand serves as a reminder that, uring parsing, all connectors
+ must be satisfied; that is, the connectors are conjoined.
+ A given word can have multiple disjuncts associated with it, these are
+ disjoined from one-another, thus the name 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For the language learning project, it is convenient to extend the above
+ to the notion of a pseudo-disjunct, where the connector types are replaced
+ by instances of individual words.
+ For example
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		ran: boy- & home+;
+\end_layout
+
+\end_inset
+
+is used to represent the grammatical structure of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+the boy ran home
+\begin_inset Quotes erd
+\end_inset
+
+, namely, that the verb 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ can attach to the word 
+\begin_inset Quotes eld
+\end_inset
+
+boy
+\begin_inset Quotes erd
+\end_inset
+
+ (the subject) on the left, and the word 
+\begin_inset Quotes eld
+\end_inset
+
+home
+\begin_inset Quotes erd
+\end_inset
+
+ (the object) on the right.
+ An early goal of the language learning project is to automatically discern
+ such pseudo-disjuncts; a later goal is to automatically classify such individua
+l-word connectors into word-classes, and so generalizing individual words
+ into connector types, just as in traditional link-grammar.
+ 
+\end_layout
+
+\begin_layout Standard
+so
+\end_layout
+
 \end_body
 \end_document
