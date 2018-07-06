@@ -339,9 +339,7 @@
            (and (pair? i) (equal? 'Abstract (car i)))) resp)))
 
     (if (equal? (length abstract) 1)
-      (begin
-        (source-set-result! sent ddg-src "")
-        (cog-logger-debug schema-logger "No answer found from DuckDuckGo!"))
+      (cog-logger-debug schema-logger "No answer found from DuckDuckGo!")
       (let* ((ans (car (cdr abstract)))
              (ans-1st-sent (get-first-sentence ans)))
         (source-set-result! sent ddg-src ans-1st-sent))
@@ -385,9 +383,7 @@
                resp)))
 
       (if (equal? ans #f)
-        (begin
-          (source-set-result! sent wa-src "")
-          (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!"))
+        (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!")
         (let* ((text-ans (cadr (cadddr (cadddr ans))))
                ; Remove '(', ')', and '|' from the answer, if any
                (cleaned-ans (string-trim (string-filter
