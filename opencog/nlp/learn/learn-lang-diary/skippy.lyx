@@ -93,6 +93,10 @@ The introduction here is minimal; it is assumed that the reader is generally
  the concepts employed in the OpenCog language-learning project.
 \end_layout
 
+\begin_layout Subsection*
+Link Grammar
+\end_layout
+
 \begin_layout Standard
 Link Grammar defines a word-disjunct pair as an object of the general form
 \begin_inset listings
@@ -138,7 +142,7 @@ status open
 
 \begin_layout Plain Layout
 
-		ran: boy- & home+;
+		ran: girl- & home+;
 \end_layout
 
 \end_inset
@@ -147,7 +151,7 @@ is used to represent the grammatical structure of the sentence
 \begin_inset Quotes eld
 \end_inset
 
-the boy ran home
+the girl ran home
 \begin_inset Quotes erd
 \end_inset
 
@@ -163,7 +167,7 @@ ran
 \begin_inset Quotes eld
 \end_inset
 
-boy
+girl
 \begin_inset Quotes erd
 \end_inset
 
@@ -179,8 +183,76 @@ home
  An early goal of the language learning project is to automatically discern
  such pseudo-disjuncts; a later goal is to automatically classify such individua
 l-word connectors into word-classes, and so generalizing individual words
- into connector types, just as in traditional link-grammar.
- 
+ into connector types, just as in traditional Link Grammar.
+\end_layout
+
+\begin_layout Standard
+The primary learning mechanism is to accumulate observation counts of different
+ disjuncts, thus leading naturally to the idea of word-vectors.
+ For example, one might observe the vector
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		ran: 3(girl- & home+) + 2(girl- & away+);
+\end_layout
+
+\end_inset
+
+that might naturally arise if the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+the girl ran home
+\begin_inset Quotes erd
+\end_inset
+
+ was observed three times, and 
+\begin_inset Quotes eld
+\end_inset
+
+the girl ran away
+\begin_inset Quotes erd
+\end_inset
+
+ was observed twice.
+ Such vectors can be used to judge word-similarity.
+ For example, a different vector 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		walked: 2(girl- & home+) + 3(girl- & away+);
+\end_layout
+
+\end_inset
+
+suggests that the cosine-product between the two might be used to judge
+ word-similarity: 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+ can be used in syntactically similar ways.
+\end_layout
+
+\begin_layout Subsection*
+Skip Grams
 \end_layout
 
 \begin_layout Standard
