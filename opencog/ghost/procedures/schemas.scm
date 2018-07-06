@@ -644,9 +644,11 @@
 
   Start the 'All Is Full Of Love' singing performance.
 "
-  (call-with-new-thread
-    (lambda ()
-      (system singing-script-path)))
+  ; This is just to give a pause before actually giving the performance
+  ; TODO: Should do this in the GHOST rule instead
+  (sleep 3)
+
+  (system singing-script-path)
 
   fini
 )
