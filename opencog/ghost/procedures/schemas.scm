@@ -592,3 +592,63 @@
 "
   answer-src
 )
+
+; --------------------------------------------------------------
+(define (get_neck_dir)
+"
+  get_neck_dir
+
+  Get the direction of the head turned.
+"
+  (define directions
+    (cog-outgoing-set
+      (cog-execute!
+        (Get
+          (TypedVariable
+            (Variable "$x")
+            (Signature
+              (Evaluation
+                (Predicate "looking")
+                (List (Concept "I") (Type "ConceptNode")))))
+          (Variable "$x"))
+      )
+    )
+  )
+
+  (gddr
+    (fold
+      (lambda (x rtn)
+        (cond ((null? rtn) x)
+              ((> (time-perceived x) (time-perceived rtn)) x)
+              (else rtn)))
+      (list)
+      directions
+    )
+  )
+)
+
+; --------------------------------------------------------------
+(define singing-script-path "")
+(define (set-singing-script-path! path)
+"
+  set-singing-script-path PATH
+
+  Specify where the script to start the singing performance is.
+"
+  (set! singing-script-path path)
+)
+
+(define (sing)
+"
+  sing
+
+  Start the 'All Is Full Of Love' singing performance.
+"
+  ; This is just to give a pause before actually giving the performance
+  ; TODO: Should do this in the GHOST rule instead
+  (sleep 3)
+
+  (system singing-script-path)
+
+  fini
+)
