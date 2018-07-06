@@ -339,7 +339,7 @@
 
 ;-------------------------------------------------------------------------------
 (define (configure-pln-rbs-1)
-    (define rb (ConceptNode "r2l-pln-2"))
+    (define rb (ConceptNode "r2l-pln-1"))
 
     (pln-load-rules "term/deduction")
     (pln-load-rules "wip/abduction")

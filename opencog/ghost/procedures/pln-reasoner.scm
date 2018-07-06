@@ -45,6 +45,7 @@
 (load "pln-utils.scm")
 (load "pln-trail-1.scm")
 (load "pln-trail-2.scm")
+(load "pln-trail-3.scm")
 
 ;-------------------------------------------------------------------------------
 (define (infer-on-r2l rule-base r2l-outputs steps)
