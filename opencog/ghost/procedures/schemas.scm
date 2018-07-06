@@ -605,3 +605,24 @@
       (Predicate "looking")
       (List (Concept "I") (Variable "$x")))))
 )
+
+; --------------------------------------------------------------
+(define singing-script-path "")
+(define (set-singing-script-path! path)
+"
+  set-singing-script-path PATH
+
+  Specify where the script to start the singing performance is.
+"
+  (set! singing-script-path path)
+)
+
+(define (sing)
+"
+  sing
+
+  Start the 'All Is Full Of Love' singing performance.
+"
+  (system singing-script-path)
+  fini
+)
