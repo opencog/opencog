@@ -615,13 +615,15 @@
     )
   )
 
-  (fold
-    (lambda (x rtn)
-      (cond ((null? rtn) x)
-            ((> (time-perceived x) (time-perceived rtn)) x)
-            (else rtn)))
-    (list)
-    directions
+  (gddr
+    (fold
+      (lambda (x rtn)
+        (cond ((null? rtn) x)
+              ((> (time-perceived x) (time-perceived rtn)) x)
+              (else rtn)))
+      (list)
+      directions
+    )
   )
 )
 
