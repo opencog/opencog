@@ -14,25 +14,28 @@
   Given a list of SentenceNodes ,sn-list, it returns a list with atoms that
   can be inferred on.
 "
-    (append-map
-        (lambda (sent-node)
-            (let* ((r2l-outputs (sent-get-r2l-outputs sent-node))
-                  (nodes (delete-duplicates
-                        (append-map cog-get-all-nodes r2l-outputs)))
-                  (cn-and-pn (delete-duplicates
-                        (filter
-                            (lambda (x)
-                                (or (equal? 'ConceptNode (cog-type x))
-                                    (equal? 'PredicateNode (cog-type x))))
-                            nodes))))
-                (append
-                    r2l-outputs
-                    (append-map
-                        ; For sog-hack-decomposition-rule
-                        (lambda (x) (cog-incoming-by-type x 'ReferenceLink))
-                        cn-and-pn))
-            ))
-        sn-list)
+;    (append-map
+;        (lambda (sent-node)
+;            (let* ((r2l-outputs (sent-get-r2l-outputs sent-node))
+;                  (nodes (delete-duplicates
+;                        (append-map cog-get-all-nodes r2l-outputs)))
+;                  (cn-and-pn (delete-duplicates
+;                        (filter
+;                            (lambda (x)
+;                                (or (equal? 'ConceptNode (cog-type x))
+;                                    (equal? 'PredicateNode (cog-type x))))
+;                            nodes))))
+;                (append
+;                    r2l-outputs
+;                    (append-map
+;                        ; For sog-hack-decomposition-rule
+;                        (lambda (x) (cog-incoming-by-type x 'ReferenceLink))
+;                        cn-and-pn))
+;            ))
+;        sn-list)
+  (fold
+    (lambda (x y) (append! y (get-abstract-version (car (sent-get-interp x)))))
+    '() (get-previous-said-sents (pln-get-recorded-time )))
 )
 
 ; ----------------------------------------------------------------------------
