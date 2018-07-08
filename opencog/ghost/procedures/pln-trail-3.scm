@@ -120,11 +120,11 @@ output = Lizards can breathe
     (ure-define-rbs rb 0)
     ; Not sure why
     (ure-set-fuzzy-bool-parameter rb "URE:attention-allocation" 0)
-
-    (ure-define-add-rule rb "r2l-post-processing-1-rule"
-         r2l-post-processing-1-rule (stv 1 1))
-    (ure-define-add-rule rb "r2l-post-processing-2-rule"
-         r2l-post-processing-2-rule (stv 1 1))
+;Not needed because pln-get-nlp-inputs creats required atoms.
+;    (ure-define-add-rule rb "r2l-post-processing-1-rule"
+;         r2l-post-processing-1-rule (stv 1 1))
+;    (ure-define-add-rule rb "r2l-post-processing-2-rule"
+;         r2l-post-processing-2-rule (stv 1 1))
     (ure-define-add-rule rb "r2l-post-processing-3-rule"
          r2l-post-processing-3-rule (stv 1 1))
     (ure-define-add-rule rb "evaluation-to-member-1-rule"
