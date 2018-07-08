@@ -6,8 +6,6 @@ Input = Lizards are reptiles
 output = Lizards can breathe
 
 !#
-; ----- For SuReal ----- ;
-(nlp-parse "cats can read")
 
 ; NOTE: get-abstract-version could be used for this example but this workflow
 ; is closer to the generic approach in the long term.
@@ -146,3 +144,24 @@ output = Lizards can breathe
 
 ;; Define rulebases
 (define rb-trail-3 (configure-pln-rbs-3))
+
+;; Example usage of rb-trail-3
+(define (eg-trail-3 steps)
+"
+  eg-trail-3 STEPS
+
+  Run rb-trail-3 and return outputs that are valid for sureal. 4 steps gives
+  the desired result
+"
+  (pln-record-current-time)
+  ; For SuReal
+  (nlp-parse "cats can read")
+
+  ; Inputs
+  (ghost "Reptiles can breathe")
+  (ghost "Lizards are reptiles")
+
+  ; Inference and filtered output.
+  (update-inferences rb-trail-3 steps (pln-get-recorded-time))
+  (filter-for-sureal (cog-value->list (get-inferred-atoms rb-trail-3 )))
+)
