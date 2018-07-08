@@ -59,6 +59,7 @@
 )
 
 ;-------------------------------------------------------------------------------
+(define inference-inputs-key (Predicate "inference-inputs"))
 (define (update-inferences trail steps time)
 "
   update-inferences TRAIL STEPS TIME
@@ -68,6 +69,24 @@
   inferences are recorded as a value on TRAIL.
 "
     (let* ((inputs (pln-get-nlp-inputs (get-previous-said-sents time))))
-        (add-to-pln-inferred-atoms trail (infer-on-r2l trail inputs steps))
+        (if (null? inputs)
+          (error "Inference in requested without proper configuration")
+        ; Why record the inputs? -> To be able to filter outputs based on
+        ; similarities to the inputs.
+          (begin
+            (cog-set-value! trail inference-inputs-key inputs)
+            (add-to-pln-inferred-atoms trail (infer-on-r2l trail inputs steps))
+          )
+        )
     )
+)
+
+;-------------------------------------------------------------------------------
+(define (get-inference-inputs trail)
+"
+  get-inference-inputs TRAIL
+
+  Retuns a LinkValue of the latest inputs passed to be inferred by using TRAIL
+"
+  (cog-value trail inference-inputs-key)
 )
