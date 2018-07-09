@@ -164,5 +164,5 @@ output = Lizards can breathe
 
   ; Inference and filtered output.
   (update-inferences rb-trail-3 steps (pln-get-recorded-time))
-  (filter-for-sureal (cog-value->list (get-inferred-atoms rb-trail-3 )))
+  (pln->sureal rb-trail-3)
 )
