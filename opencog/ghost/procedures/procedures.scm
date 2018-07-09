@@ -14,6 +14,7 @@
   #:use-module (opencog exec)
   #:use-module (opencog openpsi)
   #:use-module (opencog ghost)
+  #:use-module (opencog pln)
   #:export (
     ; Perception switches
     perception-start!
@@ -85,10 +86,12 @@
     send_query
     get_answer
     get_answer_source
+    pln_start_recording
 
     ; Source interfaces ; This need to public so to be callable by send_query
     ask-duckduckgo
     ask-wolframalpha
+    ask-pln
 
     ; Utilities
     set-dti!
@@ -940,3 +943,5 @@
 ; the files last.
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
+; TODO: move genric steps to the pln module
+(load "procedures/pln-actions.scm")

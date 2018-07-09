@@ -43,8 +43,8 @@
 (use-modules (srfi srfi-1))
 
 (load "pln-utils.scm")
-(load "pln-trail-1.scm")
-(load "pln-trail-2.scm")
+;(load "pln-trail-1.scm")
+;(load "pln-trail-2.scm")
 (load "pln-trail-3.scm")
 
 ;-------------------------------------------------------------------------------
