@@ -90,3 +90,26 @@
 "
   (cog-value trail inference-inputs-key)
 )
+
+;-------------------------------------------------------------------------------
+(define (pln->sureal trail)
+"
+  pln->sureal TRAIL
+
+  Surealize and return the string of the TRAIL's inferred results.
+"
+  (define pln-outputs (cog-value->list (get-inferred-atoms trail)))
+  (define candidates
+    (if (null? pln-outputs)
+      '()
+      (cog-outgoing-set (filter-for-sureal pln-outputs))))
+
+  ; TODO: Add measure to choose between candidates based on query or some
+  ; other method.
+  (if (null? candidates)
+    ""
+    ; FIXME: This only works for trail-3
+    (string-join (car (sureal (Set (car (filter
+			(lambda (x) (equal? 'EvaluationLink (cog-type x))) candidates))))))
+  )
+)
