@@ -403,10 +403,11 @@
   )
 )
 
+(load-trail-3)
 ;-------------------------------------------------------------------------------
 (define pln-src (def-source "pln" "ask-pln"))
 
-(define* (ask-pln sent #:optional (steps 4))
+(define* (ask-pln sent #:optional (steps 24))
   ; TODO: use query for filtering results, by using similarity measures b/n
   ; the query and the inferred outputs. There may be multiple layers of
   ; filters.
