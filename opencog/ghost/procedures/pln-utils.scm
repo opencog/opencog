@@ -3,7 +3,8 @@
 (define inference-results-key (Predicate "inference-results"))
 
 (define (get-inferred-atoms trail)
-    (cog-value trail inference-results-key)
+    (define result (cog-value trail inference-results-key))
+    (if (null? result) (LinkValue) result)
 )
 
 (define (get-names atom-list)
