@@ -1,5 +1,3 @@
-(use-modules (opencog exec))
-
 (define inference-results-key (Predicate "inference-results"))
 
 (define (get-inferred-atoms trail)
