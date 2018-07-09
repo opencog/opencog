@@ -166,3 +166,14 @@ output = Lizards can breathe
   (update-inferences rb-trail-3 steps (pln-get-recorded-time))
   (pln->sureal rb-trail-3)
 )
+
+; Temporary schemas
+
+(define-public (do_pln)
+  (update-inferences rb-trail-3 4 (pln-get-recorded-time))
+  (cog-set-value! rb-trail-3 (Node "answer") (Concept (pln->sureal rb-trail-3)))
+  (Node "return")
+)
+(define-public (get_pln_answer)
+  (cog-value rb-trail-3 (Node "answer"))
+)
