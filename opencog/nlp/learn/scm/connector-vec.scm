@@ -268,6 +268,10 @@
 		;
 		; Run a query, and return all Sections that contain WORD
 		; in a Connector, some Connector, any Connector.
+		;
+		; Use Put-Get instead of BindLink, so that mutiple distinct
+		; Get's that might generate identical Put's are generated
+		; correctly (i.e. with multiplicity)
 		(define (right-stars-query WORD)
 			; The WORD must occur somewhere, anywhere in a conector.
 			(define body (Section
@@ -277,14 +281,15 @@
 					(Connector WORD (Variable "$dir"))
 					(Glob "$end"))))
 
-			; The types that are matched must be just-so.
-			(Bind (VariableList
+			(define vardecl (VariableList
 				(TypedVariable (Variable "$point")
 					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
-				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
 				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
-				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
-				body body))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1)))))
+
+			; The types that are matched must be just-so.
+			(Put body (Get vardecl body)))
 
 		; Just like above, but return the shape, not the section.
 		(define (right-duals-query WORD)
@@ -302,14 +307,19 @@
 				(Connector star-wild (Variable "$dir"))
 				(Glob "$end")))
 
-			; The types that are matched must be just-so.
-			(Bind (VariableList
+			(define vardecl (VariableList
 				(TypedVariable (Variable "$point")
 					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
-				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
 				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
-				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
-				body shape))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1)))))
+
+			; The types that are matched must be just-so.
+			(Put (VariableList
+				(Variable "$point")
+				(Glob "$begin")
+				(Variable "$dir")
+				(Glob "$end")) shape (Get vardecl body)))
 
 		;-------------------------------------------
 		; The left-stars consist of all Sections of a fixed shape,
@@ -319,9 +329,9 @@
 			(define body (make-pair star-wild R-ATOM))
 
 			; The types that are matched must be just-so.
-			(Bind (TypedVariable star-wild
+			(Put body (Get (TypedVariable star-wild
 					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
-				body body))
+				body)))
 
 		; Just like above, but return only the words, not the Sections.
 		(define (left-duals-query R-ATOM)
