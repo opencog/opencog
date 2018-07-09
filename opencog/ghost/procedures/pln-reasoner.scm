@@ -32,21 +32,6 @@
 ;; ;; Question about happiness. Answer should be: crazy people are happy
 ;; (mock-HEAD-chat "p-1" "Eddie" "What do you know about happy?")
 
-(use-modules (opencog))
-(use-modules (opencog atom-types))
-(use-modules (opencog logger))
-(use-modules (opencog query))
-(use-modules (opencog rule-engine))
-(use-modules (opencog nlp))
-(use-modules (opencog nlp chatbot))
-(use-modules (opencog nlp relex2logic))
-(use-modules (srfi srfi-1))
-
-(load "pln-utils.scm")
-;(load "pln-trail-1.scm")
-;(load "pln-trail-2.scm")
-(load "pln-trail-3.scm")
-
 ;-------------------------------------------------------------------------------
 (define (infer-on-r2l rule-base r2l-outputs steps)
     (let* ((inference-results

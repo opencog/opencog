@@ -153,11 +153,12 @@ output = Lizards can breathe
   Run rb-trail-3 and return outputs that are valid for sureal. 4 steps gives
   the desired result
 "
-  (pln-record-current-time)
   ; For SuReal
   (nlp-parse "cats can read")
 
   ; Inputs
+  (sleep 1) ; The delay is added to not pollute pln inputs.
+  (pln-record-current-time)
   (ghost "Reptiles can breathe")
   (ghost "Lizards are reptiles")
 

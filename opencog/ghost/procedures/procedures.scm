@@ -12,9 +12,13 @@
   #:use-module (opencog attention)
   #:use-module (opencog logger)
   #:use-module (opencog exec)
+  #:use-module (opencog nlp)
+  #:use-module (opencog nlp chatbot)
+  #:use-module (opencog nlp sureal)
   #:use-module (opencog openpsi)
-  #:use-module (opencog ghost)
   #:use-module (opencog pln)
+  #:use-module (opencog rule-engine)
+  #:use-module (opencog ghost)
   #:export (
     ; Perception switches
     perception-start!
@@ -944,4 +948,6 @@
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
 ; TODO: move genric steps to the pln module
-(load "procedures/pln-actions.scm")
+(load "procedures/pln-reasoner.scm")
+(load "procedures/pln-trail-3.scm")
+(load "procedures/pln-utils.scm")

@@ -6,10 +6,7 @@
 (use-modules (opencog nlp chatbot-psi))
 (use-modules (opencog nlp sureal))
 (use-modules (opencog logger))
-
-(load "pln-utils.scm")
-(load "pln-reasoner.scm")
-
+(use-modules (opencog pln))
 
 ;; return atom.tv.s^2*atom.tv.c
 (define (higest-tv-fitness atom)
