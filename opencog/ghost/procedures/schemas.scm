@@ -628,27 +628,15 @@
 )
 
 ; --------------------------------------------------------------
-(define singing-script-path "")
-(define (set-singing-script-path! path)
-"
-  set-singing-script-path PATH
-
-  Specify where the script to start the singing performance is.
-"
-  (set! singing-script-path path)
+(Define
+  (DefinedSchema "sing")
+  (Lambda
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List (Concept "sing")))
+  )
 )
 
 (define (sing)
-"
-  sing
-
-  Start the 'All Is Full Of Love' singing performance.
-"
-  ; This is just to give a pause before actually giving the performance
-  ; TODO: Should do this in the GHOST rule instead
-  (sleep 3)
-
-  (system singing-script-path)
-
-  fini
+  (cog-execute! (Put (DefinedSchema "sing") (List)))
 )
