@@ -414,7 +414,6 @@
   (define query (source-query sent))
   ; TODO: How to choose an appropriate trail or set of trails?
   (update-inferences rb-trail-3 steps (pln-get-recorded-time))
-  (filter-for-sureal (cog-value->list (get-inferred-atoms rb-trail-3 )))
   (source-set-result! sent pln-src (pln->sureal rb-trail-3))
 )
 
