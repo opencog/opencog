@@ -972,12 +972,22 @@
   ))
 )
 
+(define-public (load-trail-3)
+  (load-from-path
+    (string-append "opencog/ghost/procedures/" "pln-reasoner.scm"))
+  (load-from-path
+    (string-append "opencog/ghost/procedures/" "pln-trail-3.scm"))
+  (load-from-path
+    (string-append "opencog/ghost/procedures/" "pln-utils.scm"))
+)
 ; --------------------------------------------------------------
 ; Because macros require all the bindings used before expansion load
 ; the files last.
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
 ; TODO: move genric steps to the pln module
-(load "procedures/pln-reasoner.scm")
-(load "procedures/pln-trail-3.scm")
-(load "procedures/pln-utils.scm")
+;(load "procedures/pln-reasoner.scm")
+;(load "procedures/pln-trail-3.scm")
+;(load "procedures/pln-utils.scm")
+
+

@@ -287,7 +287,8 @@
     (define result (cog-execute! (MapLink filter-in-pattern filter-from)))
 
     ; Delete the filter-from SetLink and its encompasing MapLink.
-    (cog-extract-recursive filter-from)
+    ; FIXME: This results in 'result' being 'Invalid handle' sometimes.
+    ;(cog-extract-recursive filter-from)
 
     result
 )
