@@ -301,11 +301,13 @@
 					(Connector WORD (Variable "$dir"))
 					(Glob "$end"))))
 
-			(define shape (Evaluation predno
+			; We use the DontExec hack, as otherwise the execution of
+			; this attempts to evaluate the resulting EvaluationLink.
+			(define shape (DontExec (Evaluation predno
 				(Variable "$point")
 				(Glob "$begin")
 				(Connector star-wild (Variable "$dir"))
-				(Glob "$end")))
+				(Glob "$end"))))
 
 			(define vardecl (VariableList
 				(TypedVariable (Variable "$point")
