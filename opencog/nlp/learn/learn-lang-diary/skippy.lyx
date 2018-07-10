@@ -189,7 +189,11 @@ l-word connectors into word-classes, and so generalizing individual words
 \begin_layout Standard
 The primary learning mechanism is to accumulate observation counts of different
  disjuncts, thus leading naturally to the idea of word-vectors.
- For example, one might observe the vector
+ For example, one might observe the vector 
+\begin_inset Formula $\vec{v}_{ran}$
+\end_inset
+
+ represented as
 \begin_inset listings
 inline false
 status open
@@ -220,6 +224,13 @@ the girl ran away
  was observed twice.
  Such vectors can be used to judge word-similarity.
  For example, a different vector 
+\begin_inset Formula $\vec{v}_{walked}$
+\end_inset
+
+ represented as
+\end_layout
+
+\begin_layout Standard
 \begin_inset listings
 inline false
 status open
@@ -231,8 +242,11 @@ status open
 
 \end_inset
 
-suggests that the cosine-product between the two might be used to judge
- word-similarity: 
+suggests that the cosine-product 
+\begin_inset Formula $\cos\left(\vec{v}_{ran},\vec{v}_{walked}\right)$
+\end_inset
+
+ between the two might be used to judge word-similarity: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -249,6 +263,12 @@ walked
 \end_inset
 
  can be used in syntactically similar ways.
+\end_layout
+
+\begin_layout Standard
+The disjunct representation also allows other kinds of vectors, such as
+ those anchored on connectors.
+ Using the examples above, one also has a vector
 \end_layout
 
 \begin_layout Subsection*
