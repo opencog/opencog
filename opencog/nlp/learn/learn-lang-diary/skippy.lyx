@@ -105,7 +105,7 @@ status open
 
 \begin_layout Plain Layout
 
-		word: A- & B+ & C+ & ...;
+	word: A- & B+ & C+ & ...;
 \end_layout
 
 \end_inset
@@ -142,7 +142,7 @@ status open
 
 \begin_layout Plain Layout
 
-		ran: girl- & home+;
+	ran: girl- & home+;
 \end_layout
 
 \end_inset
@@ -200,7 +200,7 @@ status open
 
 \begin_layout Plain Layout
 
-		ran: 3(girl- & home+) + 2(girl- & away+);
+	ran: 3(girl- & home+) + 2(girl- & away+);
 \end_layout
 
 \end_inset
@@ -237,7 +237,7 @@ status open
 
 \begin_layout Plain Layout
 
-		walked: 2(girl- & home+) + 3(girl- & away+);
+	walked: 2(girl- & home+) + 3(girl- & away+);
 \end_layout
 
 \end_inset
@@ -268,7 +268,46 @@ walked
 \begin_layout Standard
 The disjunct representation also allows other kinds of vectors, such as
  those anchored on connectors.
- Using the examples above, one also has a vector
+ Using the examples above, one also has a vector for the word 
+\begin_inset Quotes eld
+\end_inset
+
+home
+\begin_inset Quotes erd
+\end_inset
+
+, which can be awkwardly written as
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	3(ran: girl- & home+) + 2(walked: girl- & home+)
+\end_layout
+
+\end_inset
+
+Note that the counts, here, of 3 and 2, are identical to the counts above:
+ all of these counts are derived from the same observational dataset.
+ What differs is the choice of the attachment-point for which the vector
+ is to be formed.
+\end_layout
+
+\begin_layout Standard
+The correct conceptual model for the observational data is that of a large
+ network graph, with observation counts attached to each vertex.
+ This network graph can be understood as a sheaf (see reference).
+ The above examples show how certain sections of that graph can be made
+ to correspond to vectors.
+ Obviously, these vectors are not independent of one-another, as they are
+ all different slices through the same dataset.
+ Rather, they provide a local, linear view of the language graph, reminiscent
+ of the tangent-space of a manifold.
+ 
 \end_layout
 
 \begin_layout Subsection*
