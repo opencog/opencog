@@ -121,7 +121,7 @@
 		(define (get-pair-type) 'Section)
 
 		; Get the observational count on Section SECT
-		(define (get-count SECT) (cog-tv-count (cog-tv SECT)))
+		(define (get-count SECT) (cog-count SECT))
 
 		; L-ATOM is a WordNode. R-ATOM is a wild-card.
 		; Disassemble the R-ATOM, insert L-ATOM into the variable
@@ -192,8 +192,8 @@
 		; Get both the Words and the WordClasses; put WordClasses first.
 		(define (get-left-basis)
 			(if (null? l-basis) (set! l-basis
-				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode)))
-			l-basis))
+				(append! (cog-get-atoms 'WordClassNode) (cog-get-atoms 'WordNode))))
+			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis) (set! r-basis (cog-incoming-set predno)))
@@ -268,6 +268,10 @@
 		;
 		; Run a query, and return all Sections that contain WORD
 		; in a Connector, some Connector, any Connector.
+		;
+		; Use Put-Get instead of BindLink, so that mutiple distinct
+		; Get's that might generate identical Put's are generated
+		; correctly (i.e. with multiplicity)
 		(define (right-stars-query WORD)
 			; The WORD must occur somewhere, anywhere in a conector.
 			(define body (Section
@@ -277,14 +281,15 @@
 					(Connector WORD (Variable "$dir"))
 					(Glob "$end"))))
 
-			; The types that are matched must be just-so.
-			(Bind (VariableList
+			(define vardecl (VariableList
 				(TypedVariable (Variable "$point")
 					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
-				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
 				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
-				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
-				body body))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1)))))
+
+			; The types that are matched must be just-so.
+			(Put body (Get vardecl body)))
 
 		; Just like above, but return the shape, not the section.
 		(define (right-duals-query WORD)
@@ -296,20 +301,27 @@
 					(Connector WORD (Variable "$dir"))
 					(Glob "$end"))))
 
-			(define shape (Evaluation predno
+			; We use the DontExec hack, as otherwise the execution of
+			; this attempts to evaluate the resulting EvaluationLink.
+			(define shape (DontExec (Evaluation predno
 				(Variable "$point")
 				(Glob "$begin")
 				(Connector star-wild (Variable "$dir"))
-				(Glob "$end")))
+				(Glob "$end"))))
 
-			; The types that are matched must be just-so.
-			(Bind (VariableList
+			(define vardecl (VariableList
 				(TypedVariable (Variable "$point")
 					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
-				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
 				(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
-				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1))))
-				body shape))
+				(TypedVariable (Variable "$dir") (Type "ConnectorDir"))
+				(TypedVariable (Glob "$end") (Interval (Number 0) (Number -1)))))
+
+			; The types that are matched must be just-so.
+			(Put (VariableList
+				(Variable "$point")
+				(Glob "$begin")
+				(Variable "$dir")
+				(Glob "$end")) shape (Get vardecl body)))
 
 		;-------------------------------------------
 		; The left-stars consist of all Sections of a fixed shape,
@@ -319,9 +331,9 @@
 			(define body (make-pair star-wild R-ATOM))
 
 			; The types that are matched must be just-so.
-			(Bind (TypedVariable star-wild
+			(Put body (Get (TypedVariable star-wild
 					(TypeChoice (Type 'WordClassNode) (Type 'WordNode)))
-				body body))
+				body)))
 
 		; Just like above, but return only the words, not the Sections.
 		(define (left-duals-query R-ATOM)
@@ -341,6 +353,9 @@
 				((right-star-pattern) right-stars-query)
 				((left-dual-pattern)  left-duals-query)
 				((right-dual-pattern) right-duals-query)
+
+				((make-left-stars)    create-connector-left-stars)
+				(else #f)
 		))
 
 		; Methods on the object
@@ -355,8 +370,6 @@
 				((get-pair)         get-pair)
 				((get-count)        get-count)
 				((make-pair)        make-pair)
-				((left-element)     get-left-element)
-				((right-element)    get-right-element)
 				((left-wildcard)    get-left-wildcard)
 				((right-wildcard)   get-right-wildcard)
 				((wild-wild)        get-wild-wild)

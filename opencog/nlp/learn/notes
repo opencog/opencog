@@ -13234,12 +13234,12 @@ zen_pairs_three
 
 why so slow?
 ---
-SELECT key FROM Valuations WHERE atom = 
+SELECT key FROM Valuations WHERE atom =
 SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
 SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;
 DELETE FROM Valuations WHERE key = %lu AND atom = %lu
 
-\di+ 
+\di+
 !!Missing:
 CREATE INDEX ON Valuations (key);  but not needed either...
 queue them up...
@@ -13302,7 +13302,7 @@ no leak with update-counts
 no leak with delete-sentence either. WTF
 
 1028 with 0
-Bingo! 
+Bingo!
 Now  1345 with 0
 
 -------------------------------------------
@@ -13326,7 +13326,7 @@ I think this is in en_pairs_rfive_mtwo on fanny.
  86498236 |     1 |   89 |      0 | *-SimKey cset cut-50-50-10 |
  86355966 |     1 |   89 |      0 | *-Cosine Sim Key-*         |
 
-select count(*) from valuations where key=86498236; --  142270 = 
+select count(*) from valuations where key=86498236; --  142270 =
 select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
 
 -- Need to re-graph cos sim for this much larger set.
@@ -13336,7 +13336,7 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
    there are 1058120  sims of length > 0.1
 
 	(define n 0)
-   (cog-map-type (lambda (ato) (set! n (+ n 1)) #f) 'WordNode) 
+   (cog-map-type (lambda (ato) (set! n (+ n 1)) #f) 'WordNode)
    have 5843 words that are in similarity-pairs.
    By contrast, there are  .... fuuu what is in this dataset????
 
@@ -13348,11 +13348,11 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
    * clean up infix punct in rfive_mfive call it rfive_mfx
 
 -- Need to redo the PCA.... DONE
-   
--- If two words are similar, then ... 
+
+-- If two words are similar, then ...
    * issue a uniq group ID
    * sum the counts
-   
+
 
 
 lxc-ls --active
@@ -13369,7 +13369,7 @@ write portno to file?
 
 ERROR:  could not create unique index "valuations_key_atom_idx"
 DETAIL:  Key (key, atom)=(1, 3853322) is duplicated.
-CREATE INDEX ON Valuations (key, atom); 
+CREATE INDEX ON Valuations (key, atom);
 
 /etc/init.d/rc.local
 
@@ -13387,7 +13387,7 @@ Request dtor calls
    ConsoleSocket::OnRequestComplete which does nothing but print...
    ConsoleSocket::put() decrements use count.
 
-handle_connection on socket remote close does 
+handle_connection on socket remote close does
 SetCloseAndDelete
 fractional line is dispatched in the thread of handle_connection
  ... using OnLine which just calls shell...
@@ -13395,7 +13395,7 @@ fractional line is dispatched in the thread of handle_connection
   because ServerSocket::SetCloseAndDelete runs
 
 fuck.
-OK, remote end closes, 
+OK, remote end closes,
 ServerSocket::handle_connection prints that its leaving...
 calls dtor on ConsoleSocket
 Generic shell is finishing up....
@@ -13423,7 +13423,7 @@ Below only happens if self-destruct runs
 [GenericShell] dtor, joined eval thread  yes too
 
 ------------------------
-wait ... 
+wait ..
 concurrent_set uses std:less... Handle
 
 a->operator<
@@ -13444,7 +13444,7 @@ how?
 ------------------------
 linear
 tuple math
-fold 
+fold
 ----------------------
 (define pca (make-pseudo-cset-api))
 (define psa (add-dynamic-stars pca))
@@ -13497,7 +13497,7 @@ windows tree trees shadows
 (cog-link 'Section (Word "island") this)
 island - 0.42243511
 hill - 0
-windows - 0 
+windows -
 tree - 1.8939653
 path - 0
 group - 15 before ortho  9.1974925 after
@@ -13524,7 +13524,7 @@ _num_atom_removes
 _num_atom_recursive_removes
 _num_valuation_removes
 76 flushes in 2000 secs ouch
-SELECT key FROM Valuations WHERE atom = 
+SELECT key FROM Valuations WHERE atom =
 CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
 SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
@@ -13533,7 +13533,7 @@ DELETE FROM Atoms WHERE uuid =  uuid is primary
 664 total initially and 658 finally .. meh
 
 is it idempotent?
-664 again ... 
+664 again ..
 (assign-to-classes psa 0.3 nou '())
 
 (define (copy-sect TO FRM)
@@ -13881,6 +13881,8 @@ found called
 came went
 eyes hand
 
+cosines computed from various number-sources:
+
 other -- same  count=0.5866  entrop=0.5433  mi=0.3159
 nice -- fine  count=0.5256  entrop=0.4826  mi=0.2364
 him -- me  count=0.7842  entrop=0.7796  mi=0.6448
@@ -13890,6 +13892,7 @@ found -- called  count=0.5576  entrop=0.5298  mi=0.3460
 came -- went  count=0.5900  entrop=0.5656  mi=0.3580
 eyes -- hand  count=0.7284  entrop=0.6669  mi=0.4827
 
+Actual symmetric MI's:  (using code 200 lines below)
 other -- same  *,*=-12.39 L=-21.52 R=-22.13 MI=4.1232
 nice -- fine  *,*=-12.39 L=-26.94 R=-25.21 MI=4.5210
 him -- me  *,*=-12.39 L=-20.81 R=-21.34 LR=-25.50 MI=4.2583
@@ -13914,10 +13917,6 @@ called -- eyes  count=0.0049  entrop=0.0069  mi=0.0007
 nice -- went  count=0.0353  entrop=0.0329  mi=0.0044
 men -- went  count=0.0249  entrop=0.0281  mi=0.0021
 men -- nice  count=0.0233  entrop=0.0262  mi=0.0001
-
-
-
-
 
 
 =========================================================================
@@ -14085,6 +14084,7 @@ mmt-count is the wild-card sum_y N(x,y) N(*,y)
          (+ sum (* mrq fre)))) 0
       (pfa 'right-stars WRD)))
 
+; entro is same as cosine-compute 'right-product
 (define (entro WA WB)
    (fold (lambda (wld sum)
       (let ((mrq (pfa 'pair-freq (pfa 'get-pair WA wld)))
@@ -14111,7 +14111,93 @@ mmt-count is the wild-card sum_y N(x,y) N(*,y)
 
 (tcf 'mmt-count (Word "eyes"))   ; 8.6245e-8
 (tcf 'total-mmt-count)           ;
+----------------------
+OK, now that trans marginals are available, verify that they give same
+answers:
 
+So:
+N(*,y) == 'left-count
+mmt-count is the wild-card sum_y N(x,y) N(*,y)
+
+x-mtwo.scm
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(define pta (add-transpose-api psa))
+(pta 'total-mmt-count)     ; 63598403588.0  == 63.6 Gcounts
+
+(pta 'mmt-count (Word "other")) ; 113433851.0
+(pta 'mmt-count (Word "same"))  ; 74309919.0
+
+(define pco (add-pair-cosine-compute psa))
+
+(pco 'right-product (Word "other") (Word "same"))  ; 2309662.0
+(pco 'right-cosine (Word "other") (Word "same"))   ; 0.58660119
+
+(define (log2 x) (/ (log x) (log 2)))
+
+(define (symmi wa wb)
+   (define sqsu (pta 'total-mmt-count))
+   (define pa (pta 'mmt-count wa))
+   (define pb (pta 'mmt-count wb))
+   (define pab (pco 'right-product wa wb))
+   (define ent (log2 (/ (* sqsu pab) (* pa pb))))
+   (format #t "~A -- ~A  *,*=~6F L=~6F R=~6F LR=~6F MI=~6F\n"
+      (cog-name wa) (cog-name wb)
+      (log2 sqsu) (log2 pa) (log2 pb) (log2 pab) ent))
+
+other -- same  *,*=35.888 L=26.757 R=26.147 LR=21.139 MI=4.1232
+Great! same MI as before
+
+(define (symmi wa wb)
+   (define tot (pta 'total-mmt-count))
+   (define pa (/ (pta 'mmt-count wa) tot))
+   (define pb (/ (pta 'mmt-count wb) tot))
+   (define pab (/ (pco 'right-product wa wb) tot))
+   (define ent (log2 (/ pab (* pa pb))))
+   (format #t "~A -- ~A  L=~6F R=~6F LR=~6F MI=~6F\n"
+      (cog-name wa) (cog-name wb) (log2 pa) (log2 pb) (log2 pab) ent))
+
+other -- same  L=-9.131 R=-9.741 LR=-14.75 MI=4.1232
+nice -- fine  L=-14.55 R=-12.81 LR=-22.84 MI=4.5210
+him -- me  L=-8.418 R=-8.945 LR=-13.11 MI=4.2583
+
+(define pmi (add-symmetric-mi-compute psa))
+(pmi 'mmt-fmi (Word "other") (Word "same"))
+
+OK so we are good to go.
+
+================
+A summary report for transpose?
+mmt-count is the wild-card sum_y N(x,y) N(*,y)
+divide by total to get  Q(x) = sum_y P(x,y) P(*,y)
+
+1) support == left=dim, since Q(x) is non-zero for all x.
+2) sum_x Q(x) = 1  of course
+3) length == sqrt sum_x Q(x)Q(x) but why is this interesting?
+
+(define mmt-tot (pta 'total-mmt-count))
+(define (que wrd) (/ (pta 'mmt-count wrd) mmt-tot))
+(define sumsq (fold
+	(lambda (wrd sum) (define q (que wrd))
+		(+ sum (* q q)))  0
+	(pta 'left-basis)))
+
+for mtwo, this gives: 0.09987939734814384
+(sqrt sumsq)    ; 0.3160370189521219
+================
+
+Does similarity work?
+
+(define pts (add-similarity-api pta #f "pseudo-cset MI"))
+Uh no ..
+
+(define bmi
+	(batch-similarity pta #f "pseudo-cset MI"
+		0.0 (lambda (wa wb) (pmi 'mmt-fmi wa wb))))
+
+(bmi 'compute-similarity (Word "other") (Word "same"))
+
+(bmi 'batch-compute 12)
 
 ================
 en_pairs_mtwo=> select count(*) from Atoms;
@@ -14219,10 +14305,10 @@ en_dj_mtwo=> \dt+
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
 --------+------------+-------+-------+------------+-------------
- public | atoms      | table | linas | 2019 MB    |
- public | spaces     | table | linas | 40 kB      |
- public | typecodes  | table | linas | 56 kB      |
- public | valuations | table | linas | 6206 MB    |
+ public | atoms      | table | linas | 1976 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 24 kB      |
+ public | valuations | table | linas | 4956 MB    |
  public | values     | table | linas | 8192 bytes |
 (5 rows)
 
@@ -14253,7 +14339,28 @@ Above, in plain English:
 137K words observed,
 6.2M unique disjuncts,
 8.6M word-disjunct pairs observed about 2.1 times each
-On average, 
+On average, there are 49K distinct disjuncts attached on each word.
+    This is weighted by the frequency with which the word was observed,
+    and thus is much, much larger than 6.24M/137K = 45.5 dj/word.
+    We conclude that frequent words also have a large number of
+    disjuncts on them - a top-end heavy Zipfian thing.
+Likewise, each distinct disjunct appears in 145 different words.
+    (Again, weighted by the frequency that the disjunct was observed.)
+On average, there were 230K observations of disjuncts for each word.
+    (Again, weighted by the frequency with which the word was observed)
+    This works out to 4.7 observations per disjunct (per word).
+The lengths are anemic. The weighted length of a typical word-vector
+    is 13.7K disjuncts. Which seems reasonable. This is the quantity
+    that appears in the denominator of the cosine products.  However,
+    when comparing this to the support: Oofdah. The support is just
+    sooo much larger. On average, each disjunct contributes to just
+    0.29 to the length.  (Remarkably, its even lower in cfive_mst!)
+
+Technical definitions: (line 99 of report-api.scm)
+        left-support = sum_x P(x,*) |(x,*)|
+        left-count = sum_x P(x,*) N(x,*)
+        left-length = sqrt [ sum_x P(x,*) L(x,*) ]
+    So x==word, here, and the *'s are disjuncts.
 
 4494883736 Bytes uncompressed = 4.5 GBytes
  474253125 Bytes compressed = 474 MBytes
@@ -14262,18 +14369,248 @@ md5sum
 8392529389ca2c07666860a64f4d594a  en_dj_mtwo.sql
 6d03d11dc356665868e7f1d529cc8fe7  en_dj_mtwo.sql.bz2
 
+en_dj_cfive
+-----------
+Identical to en_pairs_cfive_mst but with word-pairs removed. This
+does contain the pseudo-dj marginals, but not the cross-connector
+marginals.
+
+STATUS: Good.
+DATE: 28 June 2018
+
+en_dj_cfive=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 7453 MB    |
+ public | spaces     | table | ubuntu | 8192 bytes |
+ public | typecodes  | table | ubuntu | 24 kB      |
+ public | valuations | table | ubuntu | 18 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
+(5 rows)
+
+select count(*) from atoms;      <<<<  81241106 == 81.2 M Atoms
+select count(*) from valuations; <<<< 217088222 == 217 M Valuations
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 69447009)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 444903 Columns: 23444293
+Size: 31914870 non-zero entries of 10430436288579 possible
+Fraction non-zero: 3.0598E-6 Sparsity (-log_2): 18.318
+Total observations: 69447009.0  Avg obs per pair: 2.1760
+Entropy Total: 23.092   Left: 21.137   Right: 10.112
+Total MI: 8.1569
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.2742E+5    367.6
+Count   (l_1)  9.4430E+5    7917.         4.152        21.54
+Length  (l_2)  2.4549E+4    2397.         .1079        6.520
+RMS Count      2.4499E+4    2379.         .1077        6.472
+
+Ahh -- interesting ... there are words that appear in connectors, that
+do not appear in word-disjunct pairs. (that do not have an associated
+disjunct).
+
+There are 498239 words, of which 444903 have disjuncts and 53336
+are in connectors only.  From the cross-connectors, we can find
+out the converse: number of words that are in connectors only.
+
+17121601272 Bytes uncompressed == 17 GBytes
+ 1873684270 Bytes compressed == 1.87 GBytes
+
+c809c93f690ae0f583848ceb78d0c474  en_dj_cfive.sql
+c63df81bd14e5c0d478e654e3be76369  en_dj_cfive.sql.bz2
+
 ==========
 
 next:
 createdb en_dj_etwo -T en_dj_mtwo
+guile -l x-mclean.scm
 (sql-open "postgres:///en_dj_etwo?user=linas&password=asdf")
 (define cra (make-connector-vec-api))
+(cra 'fetch-pairs)
+Elapsed time to load word sections: 2850 seconds
+
+(cra 'make-left-stars)
+Elapsed time to compute left-stars: 958 secs
+
+(EvaluationLink . 18265271)
+(Connector .  268594)
+(ConnectorSeq . 6239997)
+(Section . 8629163)
+(WordNode . 137078)
+
+OK, makes sense.
+
+Before batching, we're at 41.346GB VIRT according to top.
+during marginal counting, up to 45.990 VIRT
 (batch-all-pair-mi cra)
+Support: found num left= 137078 num right= 18265271 in 0 secs
+
+
+Verify that left-stars really got saved, yeah?
+(because they are crazy-format...)
+
+----------------
+what fraction?
+(fold (lambda (evo sum)
+	(if (cog-ctv? (cog-tv evo)) (+ sum 1) sum)) 0
+	(crs 'right-basis))
+7484838 .... not even half-way, yet
+10008397
+12988443
+15082554
+16514195
+17648358
+18149413
+18262285
+Done with wild-card count N(x,*) and N(*,y) in 374968 secs
+== 374968 = 104 hours = 4.34 days
+
+opencog/matrix/compute-mi.scm:254:32: Throw to key
+`bad-summation' with args `(count-all-pairs "Error: pair-counts unequal:
+42933043.0 47444396.0\n")'.
+
+wtf...
+(define crc (add-pair-count-api cra))
+(fold (lambda (wrd sum)
+    (+ sum (crc 'right-wild-count wrd))) 0 (cra 'left-basis))
+(fold (lambda (cro sum)
+    (+ sum (crc 'left-wild-count cro))) 0 (cra 'right-basis))
+
+Spot check?
+
+(length (crs 'right-stars (Word "Jurisdiction")))
+two sections, both count of 1
+one section has count f 10032
+other has count of 1 ... that's OK, then,
+
+Beat me. en_dj_etwo has these damaged counts, but the cause of damage is
+totally unclear.
+
+Restart counting, on the same dataset.
+guile -l x-mclean.scm
+(cra 'fetch-pairs)
+(cra 'make-left-stars)
+(batch-all-pair-mi cra)
+Its at 40.630g VIRT in top
+Support: found num left= 137078 num right= 18265271 in 33 secs
+and now, wait 4 days .... till 7th of July
+
+Finished left norm marginals in 368287 secs  <<<= 102 hours, 4 days
+Finished left totals in 460 secs
+Finished right norm marginals in 3233 secs
+Finished right totals in 4 secs
+Done with wild-card count N(x,*) and N(*,y) in 371984 secs
+Total count N(*,*) = 47444396.0 = 42933043.0   <<<< === not symmetric!!!
+Finished column (left) norm averages in 2173 secs
+Finished row (right) norm averages in 42 secs
+Going to do individual pair frequencies
+Done computing 23058056 pairs in 5442 secs
+Start computing log P(*,y)
+Done computing 18265271 left-wilds in 461 secs
+Done with -log P(*,y), start -log P(x,*)
+Done computing 137078 right-wilds in 10 secs
+Stored 40000 of 18265271 left-wilds in 37 secs (1081 pairs/sec)
+tored 18240000 of 18265271 left-wilds in 28 secs (1429 pairs/sec)
+Done storing 18265271 left-wilds in 12945 secs
+Stored 40000 of 137078 right-wilds in 25 secs (1600 pairs/sec)
+Stored 80000 of 137078 right-wilds in 26 secs (1538 pairs/sec)
+Stored 120000 of 137078 right-wilds in 26 secs (1538 pairs/sec)
+Done storing 137078 right-wilds in 88 secs
+Done computing and saving -log P(x,*) and P(*,y)
+Going to do individual pair MI
+ERROR: In procedure scm-error:
+Bad method call on cross-section: right-element
+
+scheme@(guile-user) [1]> ,bt
+In opencog/matrix/compute-mi.scm:
+   583:24  7 (batch-all-pair-mi _)
+   366:24  6 (compute-n-cache-pair-mi _)
+In srfi/srfi-1.scm:
+    640:9  5 (for-each #<procedure right-loop (left-item)> (# # # # # # # # …))
+In opencog/matrix/compute-mi.scm:
+   347:58  4 (right-loop (WordNode "litigant")
+)
+In srfi/srfi-1.scm:
+   592:17  3 (map1 (# # #))
+In opencog/matrix/compute-mi.scm:
+   337:75  2 (do-one-pair #)
+In opencog/nlp/learn/connector-vec.scm:
+   381:38  1 (_ _ . _)
+In unknown file:
+           0 (scm-error misc-error #f "~A ~S" ("Bad method call on cross…" …) …)
+
+Fix many things, restart... on 1AM 10 July
+$ guile -l x-mclean.scm
+scheme@(guile-user)> (cra 'fetch-pairs)
+Elapsed time to load word sections: 3032 seconds
+Elapsed time to load cross-marginals: 2674 seconds
+scheme@(guile-user)> (cra 'make-left-stars)
+Elapsed time to compute left-stars: 735 secs
+scheme@(guile-user)> (batch-all-pair-mi cra)
+Start computing the basis
+Support: found num left= 137078 num right= 18265271 in 40 secs
 
 
 ----------------
+OK, we don't need all of pair-MI for the cross-connector calculations.
+We only need ....
+
+actually we need transpose partials on pca, as well.
+so:
+1) we don't need freq's. Nice but not necessary.
+2) we do need count marginals, from support-compute.
+3) we need transpose marginals, but only for mmt.
+
+need total counts.
+precomputed add-support-api
+add-transpose-compute  'mmt-marginals
+
+----------------
+Redo contents of compute-mi.scm:
+*
+(define cva (make-connector-vec-api))
+(define cvs (add-pair-stars cva))
+(define cvp (add-support-api cvs))
+(define btc (batch-transpose cva))
+(btc 'batch-cross)
+
+(cvp 'wild-wild-count)
+(define w (car (cvp 'left-basis)))
+(define cvt (add-transpose-compute cvs))
+(cvt 'mmt-support w)   ------ fails when w is a WordClass...
+
+reports --- 
+print-matrix-summary-report
+add-report-api
+make-compute-freq  calls 'set-size
+(rptobj 'set-size left-size right-size cnt)
+ (rptobj (add-report-api LLOBJ))
+(define rpt-obj (add-report-api btc))
+(rpt-obj 'left-support)
+(define rtc (make-central-compute btc))
+(rtc 'cache-left) because ... left-marginals were cmputed
+left margs loop over right-basis which is get-col-fun
+wich are the ceche-lefts.
+
+WTF....
+
+The probability of a column y is 
+P(*,y) = N(*,y)/N(*,*)  == left-count
+get-right-fun-avg gives averge over columns. i.e. loop over right-basis
+FN must take a column .e.g. FN ... could be a left-count
+so get-col-fun-avg  gives -left-avg-things  are average over columns
+
+===========================================================
+
 Kill the unused words --- OK wayyyy too slow for set intersection.
-New set intersection idea: 
+New set intersection idea:
 sort both lists via cog-atom-less? and then single-pass
 
 (define pcs (add-pair-stars pca))
@@ -14286,7 +14623,7 @@ sort both lists via cog-atom-less? and then single-pass
 
 (load-atoms-of-type 'WordNode)
 
-(define no-usar (remove
+(define no-usar (remove XXXXX no super slow n2 algo!!!
 	(lambda (wrd) (find (lambda (w) (equal? w wrd)) bas))
 	all-words))
 
@@ -14317,7 +14654,7 @@ select * from atoms where name='regardoient'; is slow ...
 19568878
 
 SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(47851416 AS BIGINT)] LIMIT 1;
-is super-slow .. why? 
+is super-slow .. why?
 incoming_index is there ...
 drop incoming index, it still runs at same terrible speed.
 recreate incoming_index ....
@@ -14330,6 +14667,7 @@ select count(*) from atoms;
 =========================================================================
  Failed to load cogserver module opencog/modules/libPersistModule.so
 
+=========================================================================
 =========================================================================
 And again, now for cfive on LXC
 guile -v
@@ -14352,28 +14690,169 @@ top: 75.290g  == 78947524 KB psaux
 (ala 'delete-pairs)
 running at 500/second, need 116544.98 seconds == 32 hours!  Yow!
 
+Done.
+scheme@(guile-user)> (pca 'fetch-pairs)
+Elapsed time to load csets: 8680 secs
+81224835 atoms = 81M atoms  taking 110GB to load.
+(print-matrix-summary-report pca)  -- same as for cfive_mst, as expected.
+
+(cog-report-counts)
+((ListLink . 24169074) (SchemaNode . 1) (PredicateNode . 8)
+(AnchorNode . 1) (Connector . 971810) (ConnectorDir . 2) (ConnectorSeq .
+23670834) (Section . 31914870) (WordNode . 498239) (AnyNode . 2))
+
+(define all-words (cog-get-atoms 'WordNode))
+(length all-words)  ;  498239
+(load-atoms-of-type 'WordNode)
+
+(define all-words (cog-get-atoms 'WordNode))
+(length all-words)  ; 623548
+
+(define bas (pca 'left-basis))
+(length bas)     ; 444903  --- Hmm Fewer. Wonder why.
+
+(define start-time (current-time))
+(define diff (atoms-subtract all-words bas))
+(format #t "Elapsed ~A\n" (- (current-time) start-time))
+(length diff) ; --- 178645
+
+(define start-time (current-time))
+(for-each cog-delete diff)
+(format #t "Elapsed ~A\n" (- (current-time) start-time))
+
+Ahh -- interesting ... there are words that appear in connectors,
+that do not have corresponding disjuncts for them.
+There are 498239 words, of which 444903 have disjuncts and 53336
+are in connectors only.  How many are in connectors, but not in 
+disjuncts, total?
+
+pg_dump en_dj_cfive > en_dj_cfive.sql
+Also VACUUM FULL;  done.
+
+And now
+createdb en_dj_efive -T en_dj_cfive
+
+(define cra (make-connector-vec-api))
+(cra 'fetch-pairs)
+Elapsed time to load word sections: 6054 seconds
+Elapsed time to load cross-marginals: 0 seconds
+67.9GBytes to load 56786433 == 56.7 M atoms
+
+(cra 'make-left-stars)
+Elapsed time to compute left-stars: 6054 secs
+requires 139G at that time
+sql-stats: Atomspace holds 130597079 atoms -- 73810646 == 74M more
+(cog-report-counts)
+(Connector . 931184)
+(ConnectorSeq . 23444293)
+(EvaluationLink . 73810644)  <<== 3x larger than num connectors!
+(Section . 31914870)
+(WordNode . 496078)
+
+guile-dj-en>> (batch-all-pair-mi crs)
+Start computing the basis
+Support: found num left= 496078 num right= 73810644 in 2828 secs
+Got up to 175 GB and halted.
+
+----------------
+
+OK, so ... set up the transpose marginals for pseudo-csets:
+createdb en_dj_ptwo -T en_dj_mtwo
+guile -l x-mtwo.scm
+(define btp (batch-transpose psa))
+(btp 'fetch-pairs)
+Elapsed time to load csets: 3484 secs
+top VIRT 31.255g size
+
+(ListLink . 6377076)
+(Connector . 268592)
+(ConnectorSeq . 6239997)
+(Section . 8629163)
+(WordNode . 137078)
+
+(btp 'mmt-marginals)
+
+progress?? I assume its recomputing support....
+(define bc (make-central-compute psa))
+(define pcs (add-support-api  psa))
+(define pcr (add-report-api psa))
+
+Finished left norm marginals in 35534 secs   <==== same as before
+      works out to 176 per second.  Ouch.
+Finished left totals in 227 secs
+Finished column (left) norm averages in 1042 secs
+Done storing 6239997 left-wilds in 4681 secs << == same as before, expected
+Finished mmt norm marginals in 790 secs << ===  great!
+Finished mmt totals in 8 secs
+Done storing 137078 right-wilds in 114 secs
+
+----------
+Now do crosses.
+size= 34.293g VIRT top
+(define cra (make-connector-vec-api))
+(define bcr (batch-transpose cra))
+(cra 'fetch-pairs)
+(bcr 'mmt-marginals)   ; start 12:10 4 July
+Elapsed time to compute left-stars: 1005 secs
+Finished left norm marginals in 374539 secs <<<== 104 hours
+Finished left totals in 283 secs
+Finished column (left) norm averages in 1316 secs
+Stored 40000 of 18265271 left-wilds in 28 secs (1429 pairs/sec)
+Stored 18240000 of 18265271 left-wilds in 30 secs (1333 pairs/sec)
+Done storing 18265271 left-wilds in 13195 secs <<<== 3.7 hours
+Finished mmt norm marginals in 6859 secs
+Finished mmt totals in 4 secs
+Stored 40000 of 137078 right-wilds in 25 secs (1600 pairs/sec)
+Stored 80000 of 137078 right-wilds in 24 secs (1667 pairs/sec)
+Stored 120000 of 137078 right-wilds in 25 secs (1600 pairs/sec)
+Done storing 137078 right-wilds in 84 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+Restart again 1AM 10 July
+$ guile -l x-mtwo.scm
+scheme@(guile-user)> (cra 'fetch-pairs)
+Elapsed time to load word sections: 3034 seconds
+Elapsed time to load cross-marginals: 2818 seconds
+scheme@(guile-user)> (bcr 'mmt-marginals)
+Finished mmt norm marginals in 8589 secs
+Finished mmt totals in 4 secs
+Stored 40000 of 137078 right-wilds in 7 secs (5714 pairs/sec)
+Stored 80000 of 137078 right-wilds in 8 secs (5000 pairs/sec)
+Stored 120000 of 137078 right-wilds in 7 secs (5714 pairs/sec)
+Done storing 137078 right-wilds in 25 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+Argh; we need to force the redo of the supports.
+(cog-report-counts)
+(EvaluationLink . 18265271) -- so they are there as expected.
+         (scomp-obj 'left-marginals)
+         (centr-obj 'cache-left)
+         (store-obj 'store-left-marginals)
+
+
+
+=========================================================================
 
 =========================================================================
 =========================================================================
 =========================================================================
 NEW TODO LIST
 
--- word-pairs.pdf in the readings directory ...
-   where is the source for this?  Is it in git ????? Ughh No.
-   Mass copy from 2009 fractal directory. scripts are lost.
-   Create pull req
-
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- save en_dj_mtwo before starting the cross-marginals.
--- start cross-marginals in dj_mtwo
+-- start transpose-marginals for crossed in en_dj_ptwo IN PROGRESS
+
+-- SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
+   and with transpose-marginals for both.
+
+
+-- start old-style MI cross-marginal in dj_etwo IN PROGRESS
+-- save en_dj_etwo after cross-marginals
+
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
--- save en_dj_mtwo after cross-marginals
 
--- In parallel start pair-removal in mfive; this should fit!?
-   Yes, IN PROGRESS
--- start cross-marginals in dj_cfive
+-- start cross-marginals in dj_cfive Uh NOPE.
 
 -- in parallel, experiments:
 (1) record both cosines and entropies for top word-pairs for
@@ -14392,12 +14871,23 @@ NEW TODO LIST
 (4) show distribution of the sums, above.
 
 While waiting for above, write code for:
+
+* Wait -- is fetch-pairs of pseudo-csets also getting WordClassNodes??
+
 * Merging crosses.  Do it same way as for pseudo-disjuncts,
   just with independent parameter.
   `merge-disambig` uses cosines to do fractionals.
   Should this use MI in some way?
 
-* export dicts.
+* XXX mmt-marginals is using the support obj, but all it needs
+  are the marginal counts .. wtf I'm confused.
+  supports are done with add-support-compute
+  well, it uses the supports, because it does a support variant.
+
+* The cosines do need the supports, right? (does it actually
+  use them, or does it ignore them?)
+
+* Also: which cosines: the batch cosines? what do thise use?
 
 Merging minor tasks DONE
 ------------------------
@@ -14416,6 +14906,19 @@ Merging minor tasks DONE
   How does cosine work of the pseudos??? It works cause cosine
   ignores that it's being done on a WordClass...  DONE (untested)
 * remove words in en_dj_mtwo not in marginals. IN-PROG DONE
+* word-pairs.pdf in the readings directory ...
+  where is the source for this?  Is it in git ????? Ughh No.
+  Mass copy from 2009 fractal directory. scripts are lost.
+  Create pull req DONE
+* save en_dj_mtwo before starting the cross-marginals. DONE
+* pair-removal in mfive; this should fit!?  Yes, IN PROGRESS DONE
+* make-compute-count is dual to add-pair-count-api
+  Both should be made obsolete.... DONE
+* Redo compute-total-count to be one-sided. DONE
+* Transpose-marginals for en_dj_ptwo (pseudo-csets) DONE
+* Create report for transpose marginals. Why is this interesting? not done.
+
+
 
 =========================================================================
 

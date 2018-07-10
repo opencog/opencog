@@ -472,8 +472,8 @@
 
   Example usage: (verify-clique-pair-sums)
 "
-	(define cliq (add-pair-count-api (make-clique-pair-api)))
-	(define dist (add-pair-count-api (make-distance-pair-api 10000000)))
+	(define cliq (make-clique-pair-api))
+	(define dist (make-distance-pair-api 10000000))
 	(define all-pairs (cliq 'all-pairs))
 
 	(define cnt 0)
