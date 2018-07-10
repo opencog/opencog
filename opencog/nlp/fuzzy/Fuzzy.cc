@@ -50,7 +50,10 @@ Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll, bool af_only) :
 {
 }
 
-Fuzzy::Fuzzy(AtomSpace* a) : as(a)
+Fuzzy::Fuzzy(AtomSpace* a) :
+    as(a),
+    bank(&attentionbank(as)),
+    _af_only(false)
 {
 }
 

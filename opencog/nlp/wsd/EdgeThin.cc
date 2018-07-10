@@ -215,7 +215,7 @@ bool EdgeThin::thin_word(const Handle& word_h)
 #ifdef THIN_DEBUG
 	Handle wh = get_dict_word_of_word_instance(word_h);
 	const std::string &wn = atom_space->get_name(wh);
-	printf ("; EdgeThin::thin_word %s to %d from %d\n",
+	printf ("; EdgeThin::thin_word %s to %d from %zu\n",
 		wn.c_str(), keep, sense_list.size());
 #endif
 

@@ -314,6 +314,92 @@
   fini
 )
 
+; --------------------------------------------------------------
+(define ddg-src (def-source "DuckDuckGo" "ask-duckduckgo"))
+
+(define (ask-duckduckgo sent)
+  (define query (source-query sent))
+  ; A very crude and limited way to get the first sentence
+  ; from the respond, but is OK in this context
+  ; TODO: Replace by an actual sentence splitter
+  (define (get-first-sentence str)
+    (define default-length 50)
+    (if (< (string-length str) default-length)
+      (substring str 0 (string-index str #\.))
+      (substring str 0 (+ default-length
+        (string-index (substring str default-length) #\.)))
+    )
+  )
+
+  (let* ((url (string-append "http://api.duckduckgo.com/?q="
+           (string-downcase query) "&format=xml"))
+         (body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+          (resp (car (last-pair body)))
+         (abstract (find (lambda (i)
+           (and (pair? i) (equal? 'Abstract (car i)))) resp)))
+
+    (if (equal? (length abstract) 1)
+      (cog-logger-debug schema-logger "No answer found from DuckDuckGo!")
+      (let* ((ans (car (cdr abstract)))
+             (ans-1st-sent (get-first-sentence ans)))
+        (source-set-result! sent ddg-src ans-1st-sent))
+    )
+  )
+)
+
+; --------------------------------------------------------------
+(define wa-src (def-source "Wolfram|Alpha" "ask-wolframalpha"))
+
+(define wa-appid "")
+(define (set-wa-appid! id)
+"
+  set-wa-appid ID
+
+  Set the Wolfram|Alpha AppID to ID, which is needed for using the Wolfram|Alpha APIs.
+"
+  (set! wa-appid id))
+
+(define (ask-wolframalpha sent)
+  (define query (source-query sent))
+  (if (string-null? wa-appid)
+    (cog-logger-debug schema-logger "AppID for Walfram|Alpha has not been set yet!")
+    (let* ((query-no-spaces
+             (regexp-substitute/global #f " " (string-downcase query) 'pre "+" 'post))
+           (url (string-append
+             "http://api.wolframalpha.com/v2/query?appid="
+               wa-appid "&input=" query-no-spaces "&format=plaintext"))
+           (body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+           (resp (car (last-pair body)))
+           (ans
+             (find
+               (lambda (i)
+                 (and (pair? i)
+                      (equal? 'pod (car i))
+                      (equal? 'title (car (cadr (cadr i))))
+                      ; The tags we are looking for
+                      (not (equal? (member (cadr (cadr (cadr i)))
+                        (list "Result" "Definition" "Definitions"
+                              "Basic definition" "Basic information")) #f))))
+               resp)))
+
+      (if (equal? ans #f)
+        (cog-logger-debug schema-logger "No answer found from Wolfram|Alpha!")
+        (let* ((text-ans (cadr (cadddr (cadddr ans))))
+               ; Remove '(', ')', and '|' from the answer, if any
+               (cleaned-ans (string-trim (string-filter
+                   (lambda (c) (not (or (char=? #\( c)
+                                        (char=? #\) c)
+                                        (char=? #\| c)))) text-ans)))
+               ; Remove newline and split them into words
+               (ans-1st-line (car (string-split cleaned-ans #\newline))))
+          (source-set-result! sent wa-src ans-1st-line)
+        )
+      )
+    )
+  )
+)
+
+; --------------------------------------------------------------
 (define (stimulate_words . words)
 "
   stimulate_words WORDS
@@ -433,5 +519,136 @@
   (for-each
     (lambda (r) (cog-set-sti! (get-rule-from-alias (cog-name r)) 0))
     rule-labels)
+  fini
+)
+
+; --------------------------------------------------------------
+(define* (send_query query #:optional source)
+"
+  send_query QUERY [SOURCE]
+
+  Calls the interface of SOURCE with name of the node or the concatenation
+  of the names of the Nodes in a ListLink. If SOURCE is not specified then
+  the query is passed to all the sources.
+
+  It also signals that processing has started.
+"
+  (define sent (ghost-get-curr-sent))
+  (define query-str
+    (if (equal? 'ListLink (cog-type query))
+      (string-join (map cog-name (cog-outgoing-set query)) " ")
+      (cog-name query)
+    ))
+
+  (define (spawn-source src)
+    (call-with-new-thread (lambda ()
+      (cog-set-value! src source-latest-sent-key sent)
+      (source-set-processing! src sent (stv 1 1))
+      (eval-string (format #f "(~a ~a)" (source-func-name src) sent)))))
+
+  (source-set-query! sent query-str)
+
+  (if source
+    (spawn-source (Concept (cog-name source)))
+    (par-map spawn-source (get-sources))
+  )
+  fini
+)
+
+(define* (get_answer #:optional source)
+"
+  get_answer [SOURCE]
+
+  Get the latest answer from SOURCE. If SOURCE is not specified then the
+  latest answer is randomly selected from one of the sources.
+"
+  (define src '())
+  (define sent '())
+  (if source
+    (begin
+      (set! src (Concept (cog-name source)))
+      (set! sent (cog-value src source-latest-sent-key))
+      (set! answer-src src))
+    ; Since the assumption is that there are only ordered goals, any source
+    ; will work.
+    (begin
+      (set! sent (cog-value (car (get-sources)) source-latest-sent-key))
+      (set! answer-src (cog-value sent (Predicate "random-source"))))
+  )
+
+  (cond
+    ((null? sent) fini) ; If run before query is sent.
+    (source (Concept (cog-value-ref (source-result sent src) 0)))
+    (else (Concept (cog-value-ref
+      (source-result sent (cog-value sent (Predicate "random-source"))) 0)))
+  )
+)
+
+(define (get_answer_source)
+"
+  get_answer_source
+
+  Get the source of the most recent answer returned by the 'get_answer' schema.
+"
+  answer-src
+)
+
+; --------------------------------------------------------------
+(define (get_neck_dir)
+"
+  get_neck_dir
+
+  Get the direction of the head turned.
+"
+  (define directions
+    (cog-outgoing-set
+      (cog-execute!
+        (Get
+          (TypedVariable
+            (Variable "$x")
+            (Signature
+              (Evaluation
+                (Predicate "looking")
+                (List (Concept "I") (Type "ConceptNode")))))
+          (Variable "$x"))
+      )
+    )
+  )
+
+  (gddr
+    (fold
+      (lambda (x rtn)
+        (cond ((null? rtn) x)
+              ((> (time-perceived x) (time-perceived rtn)) x)
+              (else rtn)))
+      (list)
+      directions
+    )
+  )
+)
+
+; --------------------------------------------------------------
+(define singing-script-path "")
+(define (set-singing-script-path! path)
+"
+  set-singing-script-path PATH
+
+  Specify where the script to start the singing performance is.
+"
+  (set! singing-script-path path)
+)
+
+(define (sing)
+"
+  sing
+
+  Start the 'All Is Full Of Love' singing performance.
+"
+  ; This is just to give a pause before actually giving the performance
+  ; TODO: Should do this in the GHOST rule instead
+  (sleep 3)
+
+  (system singing-script-path)
+
   fini
 )

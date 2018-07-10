@@ -78,7 +78,7 @@ std::string HTreeNode::to_string() const
 	return ss.str();
 }
 
-std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm)
+std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm, const std::string& /*indent*/)
 {
     std::stringstream ss;
 	ss << "size = " << sm.size();
@@ -93,17 +93,20 @@ std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm)
 	return ss.str();
 }
 
-std::string oc_to_string(const std::vector<SuperRelation_b>& srbs)
+std::string oc_to_string(const std::vector<SuperRelation_b>& srbs,
+                         const std::string& /*indent*/)
 {
 	return oc_to_string(srbs, "SuperRelation_b");
 }
 
-std::string oc_to_string(const std::vector<SubRelation_b>& srbs)
+std::string oc_to_string(const std::vector<SubRelation_b>& srbs,
+                         const std::string& /*indent*/)
 {
 	return oc_to_string(srbs, "SubRelation_b");
 }
 
-std::string oc_to_string(const SuperRelation_b& srb)
+std::string oc_to_string(const SuperRelation_b& srb,
+                         const std::string& /*indent*/)
 {
 	stringstream ss;
 	ss << "superHTreeNode:" << std::endl
@@ -113,7 +116,8 @@ std::string oc_to_string(const SuperRelation_b& srb)
 	return ss.str();
 }
 
-std::string oc_to_string(const SubRelation_b& srb)
+std::string oc_to_string(const SubRelation_b& srb,
+                         const std::string& /*indent*/)
 {
 	stringstream ss;
 	ss << "subHTreeNode:" << std::endl
@@ -123,7 +127,8 @@ std::string oc_to_string(const SubRelation_b& srb)
 	return ss.str();
 }
 
-std::string oc_to_string(const ExtendRelation& extrel)
+std::string oc_to_string(const ExtendRelation& extrel,
+                         const std::string& /*indent*/)
 {
 	stringstream ss;
 	ss << "extendedHTreeNode:" << std::endl
@@ -138,37 +143,44 @@ std::string oc_to_string(const ExtendRelation& extrel)
 	return ss.str();
 }
 
-std::string oc_to_string(const std::vector<ExtendRelation>& extrels)
+std::string oc_to_string(const std::vector<ExtendRelation>& extrels,
+                         const std::string& /*indent*/)
 {
 	return oc_to_string(extrels, "ExtendRelation");
 }
 
-std::string oc_to_string(const std::vector<std::vector<HTreeNode*>>& htrees_seq)
+std::string oc_to_string(const std::vector<std::vector<HTreeNode*>>& htrees_seq,
+                         const std::string& /*indent*/)
 {
 	return oc_to_string(htrees_seq, "HTreeNodeSeq");
 }
 
-std::string oc_to_string(const std::vector<HTreeNode*>& htrees)
+std::string oc_to_string(const std::vector<HTreeNode*>& htrees,
+                         const std::string& /*indent*/)
 {
 	return oc_to_string(htrees, "HTreeNode");
 }
 
-std::string oc_to_string(const std::set<HTreeNode*>& htrees)
+std::string oc_to_string(const std::set<HTreeNode*>& htrees,
+                         const std::string& /*indent*/)
 {
 	return oc_to_string(htrees, "HTreeNode");
 }
 
-std::string oc_to_string(const HTreeNode* htnptr)
+std::string oc_to_string(const HTreeNode* htnptr,
+                         const std::string& /*indent*/)
 {
 	return htnptr ? htnptr->to_string() : string("none\n") ;
 }
 
-std::string oc_to_string(const HTreeNode& htn)
+std::string oc_to_string(const HTreeNode& htn,
+                         const std::string& /*indent*/)
 {
 	return htn.to_string();
 }
 
-std::string oc_to_string(const HTree& htree)
+std::string oc_to_string(const HTree& htree,
+                         const std::string& /*indent*/)
 {
 	stringstream ss;
 	ss << "rootNode:" << std::endl << htree.rootNode->to_string();

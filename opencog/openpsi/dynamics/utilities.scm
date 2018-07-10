@@ -74,7 +74,7 @@
 	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
 		(set! result (string->number (cog-name result))))
 	; if result is a tv and confidenct is 0, means that it has not been set
-	(if (and (cog-tv? result) (> (cog-tv-conf result) 0))
+	(if (and (cog-tv? result) (> (cog-tv-confidence result) 0))
 		(set! result (cog-tv-mean result)))
 	(if (not (number? result))
 		(set! result #f))
@@ -178,7 +178,7 @@
 				(if (or (equal? atom-type 'PredicateNode)
 					   (equal? atom-type 'GroundedPredicateNode)
 					   (equal? atom-type 'DefinedPredicateNode))
-					(let ((confidence (cog-tv-conf
+					(let ((confidence (cog-tv-confidence
 							(cog-evaluate! (Evaluation entity (List))))))
 						(if (not (eq? confidence 0))
 							(begin

@@ -118,11 +118,7 @@ protected:
 
 public:
 
-    DistributedPatternMiner(AtomSpace& _original_as) : PatternMiner(_original_as)
-    {
-        is_distributed = true;
-        patternJsonArrays = new web::json::value[param.THREAD_NUM];
-    }
+    DistributedPatternMiner(AtomSpace& _original_as);
 
     void launchADistributedWorker();
     void launchCentralServer();

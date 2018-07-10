@@ -191,7 +191,7 @@
             (if (not (null? result))
                 (cog-set-tv! rule
                     (stv (string->number (cog-name (car result)))
-                         (cog-tv-conf (cog-tv rule))))
+                         (cog-tv-confidence (cog-tv rule))))
             )
         ))
 

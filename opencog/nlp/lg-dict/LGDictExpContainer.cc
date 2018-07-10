@@ -74,7 +74,7 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
  * @param s    vector of next level's containers
  */
 LGDictExpContainer::LGDictExpContainer(Exp_type t,
-                                       std::vector<LGDictExpContainer> s)
+                                       const std::vector<LGDictExpContainer> &s)
     : m_type(t), m_subexps(s)
 {
     if (t != AND_type && t != OR_type)

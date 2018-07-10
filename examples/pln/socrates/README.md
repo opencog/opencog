@@ -1,7 +1,7 @@
 relex2logic / PLN demo
 ======================
 
-**Incomplete, still in-progress**
+**Incomplete, still in-progress, may refer to code in obsolete-Python-PLN tag**
 
 Author: Cosmo Harrigan
 March 2014

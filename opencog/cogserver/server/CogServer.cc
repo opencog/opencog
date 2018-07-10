@@ -228,6 +228,7 @@ void CogServer::runLoopStep(void)
     // Process mind agents
     if (customLoopRun() and agentsRunning and 0 < agentScheduler.get_agents().size())
     {
+        gettimeofday(&timer_start, NULL);
         agentScheduler.process_agents();
 
         gettimeofday(&timer_end, NULL);

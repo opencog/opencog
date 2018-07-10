@@ -61,21 +61,20 @@ using namespace opencog;
 #define CAN 0x18  // cancel or ^X at keyboard.
 #define ESC 0x1b  // ecsape or ^[ at keyboard.
 
-GenericShell::GenericShell(void)
-{
-	show_output = true;
-	show_prompt = true;
-	normal_prompt = "> ";
-	abort_prompt = normal_prompt;
-	pending_prompt = "... ";
-
-	socket = nullptr;
-	evalthr = nullptr;
-	pollthr = nullptr;
-	self_destruct = false;
-	_eval_done = true;
-	_evaluator = nullptr;
-}
+GenericShell::GenericShell(void) :
+    socket(nullptr),
+    evalthr(nullptr),
+    pollthr(nullptr),
+    _init_done(false),
+    abort_prompt("> "),
+    normal_prompt(abort_prompt),
+    pending_prompt("... "),
+    show_output(true),
+    show_prompt(true),
+    self_destruct(false),
+    _eval_done(true),
+    _evaluator(nullptr)
+{}
 
 GenericShell::~GenericShell()
 {

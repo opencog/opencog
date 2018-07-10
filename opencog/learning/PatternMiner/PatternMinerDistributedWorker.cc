@@ -505,12 +505,12 @@ bool DistributedPatternMiner::sendRequest(http_request &request, http_response &
             return false;
         }
     }
-    catch (http_exception e)
+    catch (http_exception &e)
     {
         cout << "http_exception:" << e.what() << std::endl;
         return false;
     }
-    catch (exception e)
+    catch (exception &e)
     {
         cout << "exception:" << e.what() << std::endl;
         return false;

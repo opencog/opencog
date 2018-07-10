@@ -647,7 +647,7 @@ public:
         return finalPatternsForGram[gram - 1];
     }
 
-    void loadPatternsFromResultFile(string fileName);
+    void loadPatternsFromResultFile(string const &fileName);
 
     void testPatternMatcher();
 

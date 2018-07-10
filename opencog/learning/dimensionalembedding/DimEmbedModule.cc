@@ -952,8 +952,6 @@ double DimEmbedModule::separation(const HandleSeq& cluster,
         if (better && !inCluster) {
             minDist=dist;
         }
-        better=false;
-        inCluster=false;
     }
     return minDist;
 }

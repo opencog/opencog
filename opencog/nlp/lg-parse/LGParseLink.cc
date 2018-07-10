@@ -232,8 +232,8 @@ ProtoAtomPtr LGParseLink::execute() const
 	char idstr[37];
 	uuid_unparse(uu, idstr);
 
-	char sentstr[48] = "sentence@";
-	strncat(sentstr, idstr, 47);
+	char sentstr[sizeof(idstr) + 9] = "sentence@";
+	strncat(sentstr, idstr, sizeof(idstr) - 1);
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
@@ -298,9 +298,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		char idstr2[37];
 		uuid_unparse(uu2, idstr2);
 		char buff[801] = "";
-		strncat(buff, wrd, 800);
-		strncat(buff, "@", 800);
-		strncat(buff, idstr2, 800);
+		snprintf(buff, sizeof(buff), "%s@%s", wrd, idstr2);
 		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
 		wrds.push_back(winst);
 

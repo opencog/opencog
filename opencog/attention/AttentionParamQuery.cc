@@ -70,7 +70,6 @@ AttentionParamQuery::AttentionParamQuery(AtomSpace* as): _as(as)
 std::string AttentionParamQuery::get_param_value(const std::string& param)
 {
     Handle hparam = _as->add_node(CONCEPT_NODE, param);
-    std::string value = "";
     // This should always return one atom.
     HandleSeq hsvalue = get_target_neighbors(hparam, STATE_LINK);
     if(hsvalue.empty()){

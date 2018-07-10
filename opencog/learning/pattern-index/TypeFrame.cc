@@ -55,7 +55,7 @@ string TypeFrame::nodeNameAt(unsigned int pos) const
     string answer = "";
     NodeNameMap::const_iterator it = nodeNameMap.find(pos);
     if (it == nodeNameMap.end()) {
-        fprintf(stderr, "Attempting to get name at non-node position: %d\n", pos);
+        fprintf(stderr, "Attempting to get name at non-node position: %u\n", pos);
     } else {
         answer = it->second;
     }
@@ -732,10 +732,10 @@ int TypeFrame::countTargets(const string &txt, unsigned int begin)
 int TypeFrame::recursiveParse(const string &txt, unsigned int begin)
 {
     if (txt.at(begin) != '(') {
-        fprintf(stderr, "Expected \'(\' at index %d of string %s\n", begin, txt.c_str());
+        fprintf(stderr, "Expected \'(\' at index %u of string %s\n", begin, txt.c_str());
         return -1;
     }
-    if (DEBUG) printf("recursiveParse() begin = %d\n", begin);
+    if (DEBUG) printf("recursiveParse() begin = %u\n", begin);
     int separatorPos = txt.find_first_of(" (", begin + 1);
     if (DEBUG) printf("separatorPos = %d\n", separatorPos);
     string typeName = txt.substr(begin + 1, separatorPos - begin - 1);

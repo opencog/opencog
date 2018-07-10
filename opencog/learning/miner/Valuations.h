@@ -23,6 +23,7 @@
 #ifndef OPENCOG_VALUATIONS_H_
 #define OPENCOG_VALUATIONS_H_
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Variables.h>
 
@@ -176,14 +177,14 @@ private:
 
 typedef std::map<Handle, Valuations> HandleValuationsMap;
 
-std::string oc_to_string(const SCValuations& scvaluations, const std::string& indent);
-std::string oc_to_string(const SCValuations& scvaluations);
-std::string oc_to_string(const SCValuationsSet& scvs, const std::string& indent);
-std::string oc_to_string(const SCValuationsSet& scvs);
-std::string oc_to_string(const Valuations& valuations, const std::string& indent);
-std::string oc_to_string(const Valuations& valuations);
-std::string oc_to_string(const HandleValuationsMap& h2vals, const std::string& indent);
-std::string oc_to_string(const HandleValuationsMap& h2vals);
+std::string oc_to_string(const SCValuations& scvaluations,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const SCValuationsSet& scvs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Valuations& valuations,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleValuationsMap& h2vals,
+                         const std::string& indent=empty_string);
 
 } // ~namespace opencog
 

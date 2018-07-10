@@ -43,7 +43,7 @@
 using namespace opencog;
 
 HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
-    Agent(cs), _atq(&cs.getAtomSpace())
+    Agent(cs), _atq(&cs.getAtomSpace()), maxLinkNum(0), localToFarLinks(0)
 {
     _bank = &attentionbank(_as);
 

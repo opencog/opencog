@@ -2,6 +2,9 @@
 Example of how to convert a set of atoms into a DOT graph description
 
 Refer to README.md before use.
+
+Warning to run this you need to checkout the obscolete-Python-PLN tag.
+
 """
 
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name

@@ -54,7 +54,7 @@ void TulipWriter::writeNodes()
 
 }
 
-void TulipWriter::writeHeader(std::string comment)
+void TulipWriter::writeHeader(const std::string &comment)
 {
     // Write header
     myfile << "(tlp \"2.0\"" << endl;
