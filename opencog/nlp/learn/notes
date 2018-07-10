@@ -14814,6 +14814,21 @@ scheme@(guile-user)> (cra 'fetch-pairs)
 Elapsed time to load word sections: 3034 seconds
 Elapsed time to load cross-marginals: 2818 seconds
 scheme@(guile-user)> (bcr 'mmt-marginals)
+Finished mmt norm marginals in 8589 secs
+Finished mmt totals in 4 secs
+Stored 40000 of 137078 right-wilds in 7 secs (5714 pairs/sec)
+Stored 80000 of 137078 right-wilds in 8 secs (5000 pairs/sec)
+Stored 120000 of 137078 right-wilds in 7 secs (5714 pairs/sec)
+Done storing 137078 right-wilds in 25 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+Argh; we need to force the redo of the supports.
+(cog-report-counts)
+(EvaluationLink . 18265271) -- so they are there as expected.
+         (scomp-obj 'left-marginals)
+         (centr-obj 'cache-left)
+         (store-obj 'store-left-marginals)
+
 
 
 =========================================================================
