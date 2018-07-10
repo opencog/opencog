@@ -89,8 +89,22 @@ Introduction
 
 \begin_layout Standard
 The introduction here is minimal; it is assumed that the reader is generally
- conversant with both Link Grammar, and with AdaGram, as well as some of
- the concepts employed in the OpenCog language-learning project.
+ conversant with both Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+, and with SkipGram
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013"
+
+\end_inset
+
+ or AdaGram, as well as some of the concepts employed in the OpenCog language-le
+arning project.
 \end_layout
 
 \begin_layout Subsection*
@@ -298,6 +312,33 @@ Note that the counts, here, of 3 and 2, are identical to the counts above:
 \end_layout
 
 \begin_layout Standard
+A less awkward notation for these two kinds of vectors would be nice; however,
+ for current purposes, it is enough to distinguish them with superscripts
+ D and C: 
+\emph on
+viz
+\emph default
+.
+ write 
+\begin_inset Formula $\vec{v}_{ran}^{D}$
+\end_inset
+
+ for the disjunct-based vector, and 
+\begin_inset Formula $\vec{v}_{home}^{C}$
+\end_inset
+
+ for the connector-based vector.
+ These two vectors can be thought of as inhabiting two orthogonal subspaces
+ of 
+\begin_inset Formula $\vec{V}^{D}\otimes\vec{V}^{C}$
+\end_inset
+
+; there are many interesting relationships between these subspaces, they
+ can be viewed as sections of a sheaf of a graph.
+ 
+\end_layout
+
+\begin_layout Standard
 The correct conceptual model for the observational data is that of a large
  network graph, with observation counts attached to each vertex.
  This network graph can be understood as a sheaf (see reference).
@@ -315,7 +356,30 @@ Skip Grams
 \end_layout
 
 \begin_layout Standard
-so
+so this one: 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013"
+
+\end_inset
+
+ has balh blah.
+\end_layout
+
+\begin_layout Standard
+Basically the input vector is like the one, and the output vector is like
+ the other.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
