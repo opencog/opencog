@@ -14737,6 +14737,15 @@ size= 34.293g VIRT top
 (bcr 'mmt-marginals)   ; start 12:10 4 July
 Elapsed time to compute left-stars: 1005 secs
 
+(ListLink . 6377077)         ; one more
+(EvaluationLink . 18265271)
+(Connector . 268594)         ; two more
+(ConnectorSeq . 6239997)     ; as before
+(Section . 8629163)          ; as before
+(WordNode . 137078)
+
+
+
 
 =========================================================================
 
