@@ -14430,7 +14430,7 @@ c63df81bd14e5c0d478e654e3be76369  en_dj_cfive.sql.bz2
 
 next:
 createdb en_dj_etwo -T en_dj_mtwo
-guile -l xmclean.scm
+guile -l x-mclean.scm
 (sql-open "postgres:///en_dj_etwo?user=linas&password=asdf")
 (define cra (make-connector-vec-api))
 (cra 'fetch-pairs)
@@ -14494,7 +14494,7 @@ Beat me. en_dj_etwo has these damaged counts, but the cause of damage is
 totally unclear.
 
 Restart counting, on the same dataset.
-guile -l xmclean.scm
+guile -l x-mclean.scm
 (cra 'fetch-pairs)
 (cra 'make-left-stars)
 (batch-all-pair-mi cra)
@@ -14545,6 +14545,19 @@ In opencog/nlp/learn/connector-vec.scm:
    381:38  1 (_ _ . _)
 In unknown file:
            0 (scm-error misc-error #f "~A ~S" ("Bad method call on cross…" …) …)
+
+Fix many things, restart... on 1AM 10 July
+$ guile -l x-mclean.scm
+scheme@(guile-user)> (cra 'fetch-pairs)
+Elapsed time to load word sections: 3032 seconds
+Elapsed time to load cross-marginals: 2674 seconds
+scheme@(guile-user)> (cra 'make-left-stars)
+Elapsed time to compute left-stars: 735 secs
+scheme@(guile-user)> (batch-all-pair-mi cra)
+Start computing the basis
+Support: found num left= 137078 num right= 18265271 in 40 secs
+
+
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
 We only need ....
@@ -14773,12 +14786,34 @@ Finished mmt norm marginals in 790 secs << ===  great!
 Finished mmt totals in 8 secs
 Done storing 137078 right-wilds in 114 secs
 
+----------
 Now do crosses.
 size= 34.293g VIRT top
 (define cra (make-connector-vec-api))
 (define bcr (batch-transpose cra))
+(cra 'fetch-pairs)
 (bcr 'mmt-marginals)   ; start 12:10 4 July
 Elapsed time to compute left-stars: 1005 secs
+Finished left norm marginals in 374539 secs <<<== 104 hours
+Finished left totals in 283 secs
+Finished column (left) norm averages in 1316 secs
+Stored 40000 of 18265271 left-wilds in 28 secs (1429 pairs/sec)
+Stored 18240000 of 18265271 left-wilds in 30 secs (1333 pairs/sec)
+Done storing 18265271 left-wilds in 13195 secs <<<== 3.7 hours
+Finished mmt norm marginals in 6859 secs
+Finished mmt totals in 4 secs
+Stored 40000 of 137078 right-wilds in 25 secs (1600 pairs/sec)
+Stored 80000 of 137078 right-wilds in 24 secs (1667 pairs/sec)
+Stored 120000 of 137078 right-wilds in 25 secs (1600 pairs/sec)
+Done storing 137078 right-wilds in 84 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+Restart again 1AM 10 July
+$ guile -l x-mtwo.scm
+scheme@(guile-user)> (cra 'fetch-pairs)
+Elapsed time to load word sections: 3034 seconds
+Elapsed time to load cross-marginals: 2818 seconds
+scheme@(guile-user)> (bcr 'mmt-marginals)
 
 
 =========================================================================
