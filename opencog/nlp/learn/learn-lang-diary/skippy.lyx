@@ -406,6 +406,79 @@ on the training text, consisting of
 \end_layout
 
 \begin_layout Standard
+The above formulas define the 
+\begin_inset Quotes eld
+\end_inset
+
+classic
+\begin_inset Quotes erd
+\end_inset
+
+ N-gram model, in that there is a sliding window of 
+\begin_inset Formula $N$
+\end_inset
+
+ words in width, and one is using all of those words to make a prediction.
+ Because of the combinatorial explosion in the size of the vocabulary, 
+\begin_inset Formula $N$
+\end_inset
+
+ is usually kept small: 
+\begin_inset Formula $N=3$
+\end_inset
+
+ (trigrams) or 
+\begin_inset Formula $N=5$
+\end_inset
+
+.
+ That is, for a vocabulary of 
+\begin_inset Formula $W$
+\end_inset
+
+ words, there are 
+\begin_inset Formula $W^{N}$
+\end_inset
+
+ probabilities 
+\begin_inset Formula $p$
+\end_inset
+
+ that must be computed (trained) and remembered.
+ For 
+\begin_inset Formula $W=10^{4}$
+\end_inset
+
+ and 
+\begin_inset Formula $N=3$
+\end_inset
+
+, this requires 
+\begin_inset Formula $W^{N}=10^{12}$
+\end_inset
+
+ probabilities to be maintained: clearly beyond the scope of present-day
+ computers.
+\end_layout
+
+\begin_layout Standard
+To avoid the combinatorial explosion, several tricks are used.
+ One is to understand that not all of the 
+\begin_inset Formula $N$
+\end_inset
+
+ words in the context are particularly relevant to the prediction, so that
+ one can still make a good prediction while skipping some of them: this
+ is the SkipGram model.
+ The next obvious trick is to realize that the context size 
+\begin_inset Formula $N$
+\end_inset
+
+ itself can be dynamically varied; this is the Adaptive SkipGram or AdaGram
+ model.
+\end_layout
+
+\begin_layout Standard
 The SkipGram model defines the probability as the 
 \begin_inset Quotes eld
 \end_inset
@@ -422,7 +495,185 @@ p\left(w_{O}\left|w_{I}\right.\right)=\frac{\exp\left(\left.v_{w_{O}}^{\prime}\r
 
 \end_inset
 
+Here, 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ is an input context of words, 
+\begin_inset Formula $w_{O}$
+\end_inset
+
+ is a set of words one is trying to predict, 
+\begin_inset Formula $v_{w}^{\prime}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{w}$
+\end_inset
+
+ are two different vectors, the 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ vectors, defined by the SkipGram model.
+ The sum in the denominator ranges over 
+\begin_inset Formula $W$
+\end_inset
+
+ total words in the vocabulary.
+\end_layout
+
+\begin_layout Standard
+Training of the softmax model can be done by hill-climbing, that is, by
+ computing the local gradient
+\begin_inset Formula 
+\[
+\nabla p\left(w_{O}\left|w_{I}\right.\right)
+\]
+
+\end_inset
+
+and then adjusting parameters so as to follow the gradient uphill (viz maximizin
+g the probability).
+\end_layout
+
+\begin_layout Section*
+Similarities and Differences
+\end_layout
+
+\begin_layout Standard
+On the face of it, the descriptions given in the above two sections appear
+ to be completely different.
+ The similarities are obscured by the notation.
+\end_layout
+
+\begin_layout Subsection*
+Disjuncts as Context
+\end_layout
+
+\begin_layout Standard
+First, let us unpack the probability
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+The above notation is meant to indicate the probability of observing the
+ word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, given 
+\begin_inset Formula $c$
+\end_inset
+
+ words that occur before it, and 
+\begin_inset Formula $c$
+\end_inset
+
+ words that occur after it.
+ Let 
+\begin_inset Formula $c=1$
+\end_inset
+
+ and let 
+\begin_inset Formula $w_{t}=ran$
+\end_inset
+
+, 
+\begin_inset Formula $w_{t-1}=girl$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{t+1}=home$
+\end_inset
+
+.
+ This clearly resembles the Link Grammar disjunct 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ran: girl- & home+;
+\end_layout
+
+\end_inset
+
+One difference is the Link Grammar disjunct notation does not provide any
+ location at which to attach a probability.
+ This can be remedied in a straight-forward manner: write 
+\begin_inset Formula $d$
+\end_inset
+
+ for the disjunct, 
+\begin_inset Formula $girl-\&home+$
+\end_inset
+
+ in this example.
+ One can then define the probability
+\begin_inset Formula 
+\[
+p\left(w|d\right)=\frac{p\left(w,d\right)}{p\left(*,d\right)}
+\]
+
+\end_inset
+
+ where 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is the probability of observing the pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+, while 
+\begin_inset Formula 
+\[
+p\left(*,d\right)=\sum_{w=1}^{W}p\left(w,d\right)
+\]
+
+\end_inset
+
+is simply the sum over all words in the vocabulary.
+\end_layout
+
+\begin_layout Standard
+The resemblance, at this point, should be obvious: the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ plays the role of the N-gram context.
+ Abusing some notation, one might think that
+\begin_inset Formula 
+\[
+d\approx w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}
+\]
+
+\end_inset
+
+and the point of this section is that this approximate equivalence is not
+ a bad way of understanding the situation.
  
+\end_layout
+
+\begin_layout Standard
+Less obvious, perhaps, is that the disjunct is already capturing aspects
 \end_layout
 
 \begin_layout Standard
