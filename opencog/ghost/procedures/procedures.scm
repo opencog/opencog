@@ -9,7 +9,7 @@
   #:use-module (web response)
   #:use-module (opencog)
   #:use-module (opencog atom-types)
-  #:use-module (opencog attention)
+  #:use-module (opencog attention-bank)
   #:use-module (opencog logger)
   #:use-module (opencog exec)
   #:use-module (opencog nlp)
