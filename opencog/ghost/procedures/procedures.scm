@@ -109,7 +109,6 @@
     percep-refractory-period
     set-percep-refractory-period!
     set-wa-appid!
-    set-singing-script-path!
   )
 )
 
