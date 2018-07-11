@@ -617,6 +617,31 @@ status open
 
 One difference is the Link Grammar disjunct notation does not provide any
  location at which to attach a probability.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The Link Grammar software does provide a device, called the 
+\begin_inset Quotes eld
+\end_inset
+
+cost
+\begin_inset Quotes erd
+\end_inset
+
+, which is an additive floating point number that represents the penalty
+ of using a particular disjunct.
+ It can be thought of as being the same thing as 
+\begin_inset Formula $-\log p\left(w|d\right)$
+\end_inset
+
+.
+ The hand-crafted dictionaries provide hand-crafted estimates for this cost/log-
+likelihood.
+\end_layout
+
+\end_inset
+
  This can be remedied in a straight-forward manner: write 
 \begin_inset Formula $d$
 \end_inset
@@ -651,6 +676,7 @@ p\left(*,d\right)=\sum_{w=1}^{W}p\left(w,d\right)
 \end_inset
 
 is simply the sum over all words in the vocabulary.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -768,6 +794,37 @@ know
 
  that the correct size of the context for determiners and adjectives is
  one: an adjective can modify only one noun.
+\end_layout
+
+\begin_layout Standard
+One important difference should be immediately apparent: the Link Grammar
+ probabilities are obtained by direct counting, and not by any training,
+ relaxation or hill-climbing technique.
+ That is, 
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
+\]
+
+\end_inset
+
+so that the probability is properly normalized: 
+\begin_inset Formula $p\left(*,*\right)=1$
+\end_inset
+
+.
+ The 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ is just the observational count of observing the pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ in text; the probabilities is just the frequentist probability.
+ This differs from the probability in N-gram/skipgram models, which is obtained
+ by maximizing an objective function built from (defined in terms of) the
+ probabilities.
 \end_layout
 
 \begin_layout Subsection*
