@@ -99,7 +99,7 @@ key "Sleator1991,Sleator1993"
 , and with SkipGram
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013"
+key "Mikolov2013,Mikolov2013a"
 
 \end_inset
 
