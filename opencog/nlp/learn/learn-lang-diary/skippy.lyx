@@ -674,6 +674,116 @@ and the point of this section is that this approximate equivalence is not
 
 \begin_layout Standard
 Less obvious, perhaps, is that the disjunct is already capturing aspects
+ of both skip-grams and adaptive N-grams.
+ That is, disjuncts are intended to capture the dependency grammar description
+ of a language.
+ A dependency grammar naturally 
+\begin_inset Quotes eld
+\end_inset
+
+skips
+\begin_inset Quotes erd
+\end_inset
+
+ over words, and 
+\begin_inset Quotes eld
+\end_inset
+
+adaptively
+\begin_inset Quotes erd
+\end_inset
+
+ sizes the context to be appropriate.
+ Consider the dependency parse of 
+\begin_inset Quotes eld
+\end_inset
+
+The girl, upset by the taunting, ran home in tears.
+\begin_inset Quotes erd
+\end_inset
+
+ There are four words, and two punctuation symbols separating the word 
+\begin_inset Quotes eld
+\end_inset
+
+girl
+\begin_inset Quotes erd
+\end_inset
+
+ from the word 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Dependency grammars do not have any difficulty in arranging for the attachement
+ of the words 
+\begin_inset Quotes eld
+\end_inset
+
+girl--ran
+\begin_inset Quotes erd
+\end_inset
+
+, skipping over the post-nominal modifier phrase 
+\begin_inset Quotes eld
+\end_inset
+
+upset by the taunting
+\begin_inset Quotes erd
+\end_inset
+
+, which attaches to the noun, and not the verb: it's the girl who is upset,
+ not the running.
+ Such long-distance attachements are problematic for adaptive skip-grams:
+ 
+\begin_inset Formula $N$
+\end_inset
+
+ must be quite very large to skip over the post-nominal modifier.
+ 
+\end_layout
+
+\begin_layout Standard
+Similarly, dependency grammars are 
+\begin_inset Quotes eld
+\end_inset
+
+adaptive
+\begin_inset Quotes erd
+\end_inset
+
+ by design: verbs tend to have more attachments that nouns, which have more
+ attachments than determiners or adjectives.
+ That is, dependency grammars already 
+\begin_inset Quotes eld
+\end_inset
+
+know
+\begin_inset Quotes erd
+\end_inset
+
+ that the correct size of the context for determiners and adjectives is
+ one: an adjective can modify only one noun.
+\end_layout
+
+\begin_layout Subsection*
+Vectors
+\end_layout
+
+\begin_layout Standard
+Consider the vector product
+\begin_inset Formula 
+\[
+\left.v_{w_{O}}^{\prime}\right.^{\intercal}v_{w_{I}}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
