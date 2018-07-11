@@ -399,6 +399,30 @@
   )
 )
 
+(load-trail-3)
+;-------------------------------------------------------------------------------
+(define pln-src (def-source "pln" "ask-pln"))
+
+(define* (ask-pln sent #:optional (steps 24))
+  ; TODO: use query for filtering results, by using similarity measures b/n
+  ; the query and the inferred outputs. There may be multiple layers of
+  ; filters.
+  (define query (source-query sent))
+  ; TODO: How to choose an appropriate trail or set of trails?
+  (update-inferences rb-trail-3 steps (pln-get-recorded-time))
+  (source-set-result! sent pln-src (pln->sureal rb-trail-3))
+)
+
+(define (pln_start_recording)
+"
+  pln_start-recording
+
+  Records the present time for usage in getting nlp inputs for inferrence.
+"
+  (pln-record-current-time)
+  fini
+)
+
 ; --------------------------------------------------------------
 (define (stimulate_words . words)
 "

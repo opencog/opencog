@@ -46,7 +46,7 @@
 ; TODO: Record the acutal inference trails that have been learned and apply
 ; them instead of trying to randomly try different permutations.
 (define (configure-pln-rbs-2)
-    (define rb (ConceptNode "r2l-pln-1"))
+    (define rb (ConceptNode "r2l-pln-2"))
 
     (pln-load-rules "term/deduction")
     (pln-load-rules "wip/abduction")

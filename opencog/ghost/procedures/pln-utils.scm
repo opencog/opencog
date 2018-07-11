@@ -1,23 +1,15 @@
-(use-modules (opencog exec))
+(define inference-results-key (Predicate "inference-results"))
 
-(load "states.scm")
-
-(define (get-inferred-atoms)
-    (let ((inferences (cog-execute!
-            (Get (Member pln-inferred-atoms (Variable "$x"))))))
-
-        (cog-outgoing-set inferences)
-    )
+(define (get-inferred-atoms trail)
+    (define result (cog-value trail inference-results-key))
+    (if (null? result) (LinkValue) result)
 )
 
 (define (get-names atom-list)
   (map cog-name atom-list))
 
-;; Insert the elements of a given Set to the elements of the Set
-;; associated to the Anchor pln-inferred-atoms
-(define (add-to-pln-inferred-atoms s)
-; FIXME: Why is it not adding somethimes?
-   (map (lambda (x) (Member pln-inferred-atoms x)) s)
+(define (add-to-pln-inferred-atoms trail inferences)
+   (cog-set-value! trail inference-results-key inferences)
 )
 
 (define (search-input-utterance-words)
@@ -65,9 +57,6 @@
 ;;       (Concept person-id)
 ;;       (Sentence <sentence-id>)))
 (define (mock-HEAD-chat person-id name message)
-  (chat message)
-  (sleep 1)                             ; you never know
-
   ;; Create name structure
   (Evaluation
      (Predicate "name")
@@ -76,7 +65,7 @@
         (Word name)))
 
   ;; Create say structure
-  (let* ((sentence (cog-chase-link 'ListLink 'SentenceNode (Node message))))
+  (let* ((sentence (ghost message)))
     (Evaluation
        (Predicate "say")
        (List

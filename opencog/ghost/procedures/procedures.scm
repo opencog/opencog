@@ -12,7 +12,12 @@
   #:use-module (opencog attention)
   #:use-module (opencog logger)
   #:use-module (opencog exec)
+  #:use-module (opencog nlp)
+  #:use-module (opencog nlp chatbot)
+  #:use-module (opencog nlp sureal)
   #:use-module (opencog openpsi)
+  #:use-module (opencog pln)
+  #:use-module (opencog rule-engine)
   #:use-module (opencog ghost)
   #:export (
     ; Perception switches
@@ -91,10 +96,12 @@
     send_query
     get_answer
     get_answer_source
+    pln_start_recording
 
     ; Source interfaces ; This need to public so to be callable by send_query
     ask-duckduckgo
     ask-wolframalpha
+    ask-pln
 
     ; Utilities
     set-dti!
@@ -965,8 +972,22 @@
   ))
 )
 
+(define-public (load-trail-3)
+  (load-from-path
+    (string-append "opencog/ghost/procedures/" "pln-reasoner.scm"))
+  (load-from-path
+    (string-append "opencog/ghost/procedures/" "pln-trail-3.scm"))
+  (load-from-path
+    (string-append "opencog/ghost/procedures/" "pln-utils.scm"))
+)
 ; --------------------------------------------------------------
 ; Because macros require all the bindings used before expansion load
 ; the files last.
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
+; TODO: move genric steps to the pln module
+;(load "procedures/pln-reasoner.scm")
+;(load "procedures/pln-trail-3.scm")
+;(load "procedures/pln-utils.scm")
+
+
