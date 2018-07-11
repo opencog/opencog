@@ -7,6 +7,8 @@
   #:use-module (opencog logger)
   #:use-module (opencog exec)
   #:use-module (opencog ghost procedures)
+  #:use-module (opencog attention-bank)
+  #:use-module (opencog attention)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs io ports)
   #:use-module (ice-9 popen)
@@ -17,12 +19,6 @@
   #:use-module (ice-9 eval-string)
   #:use-module (ice-9 receive)
   #:use-module (system base lalr))
-
-; Temporarily used during transitioning. The aim is to make life easier for
-; developers who work with atomspace before opencog/atomspace/pull/1664 while
-; waiting for opencog/opencog/issues/3107 to resolve.
-(if (resolve-module '(opencog attention-bank) #:ensure #f)
-  (use-modules (opencog attention-bank)))
 
 ;; --------------------
 ;; Shared things being used in the module
