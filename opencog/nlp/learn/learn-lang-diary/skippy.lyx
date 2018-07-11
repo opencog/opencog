@@ -352,18 +352,77 @@ The correct conceptual model for the observational data is that of a large
 \end_layout
 
 \begin_layout Subsection*
-Skip Grams
+N-Grams, Skip Grams
 \end_layout
 
 \begin_layout Standard
-so this one: 
+The primary task set forth in N-gram and SkipGram papers (such as 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mikolov2013"
 
 \end_inset
 
- has balh blah.
+) is that of estimating the next words in a text, given all the previous
+ ones.
+ More precisely, one is interested in the probability 
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+of observing a word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, at location 
+\begin_inset Formula $t$
+\end_inset
+
+ in the text, given a local context of 
+\begin_inset Formula $N-1=2c$
+\end_inset
+
+ surrounding words in the text.
+ This probability can be obtained by observing text, and attempting to maximize
+ the utility function (objective function)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\phi=\frac{1}{T}\sum_{t=1}^{T}\sum_{-c\le j\le c;j\ne0}\log p\left(w_{t+j}\left|w_{t}\right.\right)
+\]
+
+\end_inset
+
+on the training text, consisting of 
+\begin_inset Formula $T$
+\end_inset
+
+ words in sequential order.
+\end_layout
+
+\begin_layout Standard
+The SkipGram model defines the probability as the 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ function
+\begin_inset Formula 
+\[
+p\left(w_{O}\left|w_{I}\right.\right)=\frac{\exp\left(\left.v_{w_{O}}^{\prime}\right.^{\intercal}v_{w_{I}}\right)}{\sum_{w=1}^{W}\exp\left(\left.v_{w}^{\prime}\right.^{\intercal}v_{w_{I}}\right)}
+\]
+
+\end_inset
+
+ 
 \end_layout
 
 \begin_layout Standard
