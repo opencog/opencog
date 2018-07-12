@@ -263,8 +263,13 @@
   Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
   Should run this with the main OpenPsi loop.
 "
+  (set! ghost-result '())
   (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
-  ghost-buffer
+
+  ; Wait until a ghost rule has been triggered,
+  ; and return the result
+  (while (null? ghost-result) (usleep 100000))
+  ghost-result
 )
 
 ; ----------
