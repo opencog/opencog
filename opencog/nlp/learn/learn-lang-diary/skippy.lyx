@@ -848,6 +848,105 @@ Basically the input vector is like the one, and the output vector is like
  the other.
 \end_layout
 
+\begin_layout Section*
+Generalization
+\end_layout
+
+\begin_layout Standard
+The language-learning task requires one to infer the structure of language
+ from a small number of instances and examples.
+ Bengio 
+\emph on
+etal.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+
+\emph default
+ describe this for continuous probabilistic models.
+ First, one imagines some continuous, uniform space.
+ Example sentences form a training corpus are associated with single points
+ in this space: the probability mass is initially located at a collection
+ of points.
+ One then imagines that generalization consists of smearing out those points
+ over an extended volume, thereby assigning non-zero probability weights
+ to other 
+\begin_inset Quotes eld
+\end_inset
+
+nearby
+\begin_inset Quotes erd
+\end_inset
+
+ sentences.
+ This suggests that there is a choice as to how this smearing-out is done:
+ one can spread the probabilities uniformly, in all 
+\begin_inset Quotes eld
+\end_inset
+
+directions
+\begin_inset Quotes erd
+\end_inset
+
+, or one can preferentially spread probabilities only along certain directions.
+ Bengio suggests that higher-quality learning and generalization can be
+ acheived by finding and appropriately non-uniform way of smearing the probabili
+ty masses from training.
+\end_layout
+
+\begin_layout Standard
+This description seems like a useful and harmless way of guiding one's thoughts.
+ But it leaves open and vague several undefined concepts: that of the 
+\begin_inset Quotes eld
+\end_inset
+
+space
+\begin_inset Quotes erd
+\end_inset
+
+: is this some topolgical space, perhaps linear, or something else? That
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+nearby sentences
+\begin_inset Quotes erd
+\end_inset
+
+: the presumption (the axiom?) that the space is endowed with a metric that
+ measures distances.
+ Finally, the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+direction
+\begin_inset Quotes erd
+\end_inset
+
+, or at least, a local tangent manifold at each point of the space.
+ It seems reasonable to assert that langauge lives on a manifold, but then,
+ the structure of that manifold needs to be elucidated and demonstrated.
+ In particular, the 
+\begin_inset Quotes eld
+\end_inset
+
+non-uniform spreading
+\begin_inset Quotes erd
+\end_inset
+
+ of probability weights suggests confusion or inconsistency: Perhaps the
+ spreading appears to be non-uniform, because the initial metric assigned
+ to the space is incorrect? In geometry, one usually works with normalized
+ tangent vectors, so that when one extends them to geodesics, each geodesic
+ moves with unit velocity.
+ It seems plausible to spread out probability weights the same way: spread
+ them uniformly, and adjust the shape of the underlying space so that this
+ results in a high-quality langauge model.
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
