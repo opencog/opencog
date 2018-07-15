@@ -172,31 +172,16 @@ jiL = Iso f g where
     g = error "AtomUtil.jiL.g not defined"
 
 handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
-handleEKMods = Iso f g where
-    f ((bna,(bse,(c,bnai))),(a1,a2)) = do
-        na1 <- if bna
-                 then do
-                     name <- randName (showAtom a1)
-                     let args = ((noTv,drata),[(a1,"1"),(referent,"2")])
-                         referent = cCN name noTv
-                         drata = cPN "drata" highTv
-                     l <- apply _frames args
-                     pushAtom l
-                     pure referent
-                 else pure a1
-        na2 <- if bnai
-                 then do
-                     name <- randName (showAtom a2)
-                     let args = ((noTv,drata),[(a2,"1"),(referent,"2")])
-                         referent = cCN name noTv
-                         drata = cPN "drata" highTv
-                     l <- apply _frames args
-                     pushAtom l
-                     pure referent
-                 else pure a2
-        if bse
-           then pure (c,(na2,na1))
-           else pure (c,(na1,na2))
+handleEKMods = mkIso f g where
+    f ((bna,(bse,(c,bnai))),(a1,a2)) = let na1 = if bna
+                                                 then cNL noTv a1
+                                                 else a1
+                                           na2 = if bnai
+                                                 then cNL noTv a2
+                                                 else a2
+                                       in if bse
+                                             then (c,(na2,na1))
+                                             else (c,(na1,na2))
     g (s,(na1,na2)) = error "handleEKMods.g not implmented."
                    -- let (bna,a1) = case na1 of
                    --             (NL [a1]) -> (True,a1)
