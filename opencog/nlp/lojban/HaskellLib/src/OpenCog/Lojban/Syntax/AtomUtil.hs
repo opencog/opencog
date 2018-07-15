@@ -182,14 +182,13 @@ handleEKMods = mkIso f g where
                                        in if bse
                                              then (c,(na2,na1))
                                              else (c,(na1,na2))
-    g (s,(na1,na2)) = error "handleEKMods.g not implmented."
-                   -- let (bna,a1) = case na1 of
-                   --             (NL [a1]) -> (True,a1)
-                   --             _         -> (False,na1)
-                   --     (bnai,a2) = case na2 of
-                   --             (NL [a2]) -> (True ,a2)
-                   --             _         -> (False,na2)
-                   -- in pure ((bna,(False,(s,bnai))),(a1,a2))
+    g (s,(na1,na2)) = let (bna,a1) = case na1 of
+                                  (NL [a1]) -> (True,a1)
+                                  _         -> (False,na1)
+                          (bnai,a2) = case na2 of
+                                  (NL [a2]) -> (True ,a2)
+                                  _         -> (False,na2)
+                      in pure ((bna,(False,(s,bnai))),(a1,a2))
 
 conLink :: SynIso (EK,(Atom,Atom)) Atom
 conLink = conLink' . second tolist2 . handleEKMods
