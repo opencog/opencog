@@ -123,12 +123,29 @@ free_frees = filterDummy . handleFREEs . addfst dummy . ifEmptyFail . frees
           f a = pure a
           g a = pure a
 
+handleStatementCon :: SynIso (Atom,(Con,Atom)) Atom
+handleStatementCon = listl . cons
+                   . ((withFlagValue "StatementCon" "all" handleCon2) *** gsAtoms)
+                   . unit
+
+toLO :: SynIso SelbriNA Atom
+toLO = genInstance "SubsetLink" . _ssl . handleBRIDI
+     . addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
+
+
+handleStatementCon1 :: SynIso (Con,Atom) Atom
+handleStatementCon1 = listl . cons
+                   . ((handleCON . second prepare) *** gsAtoms)
+                   . unit
+    where prepare = first instanceOf . addfst (cCN "zo'e" noTv)
+          handleCON = (withFlagValue "StatementCon" "one" handleCon)
+
 text_1 :: Syntax Atom
-text_1 = ((handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
+text_1 = ((handleStatementCon1 ||| handleNIhO) . distribute ||| id) . ifJustA
         <<< optional (left . checkEmpty . (manySep (sepMorph "I")
                         &&> optional joik_jek
                         &&& (optional (stag <&& sepMorph "BO")
-                          <+> nothing <<< optMorph "BO"))
+                             <+> nothing <<< optMorph "BO"))
                         -- &&& frees
                       <+>
                       right . (someNIhO &&& frees))
@@ -136,7 +153,6 @@ text_1 = ((handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
     where handleNIhO = listl . tolist2
                              . second (handleFREEs.commute)
                              . inverse associate
-          handleCON = handleCon . second (addfst $ cCN "dummy" noTv) --FIXME no dummy
           someNIhO = mkIso f g . countNulls . some (sepMorph "NIhO")
           f i = cAN ("paragraphLevel" ++ show i)
           g (AN name) = read $ drop 14 name
@@ -206,7 +222,7 @@ statement' = listl . cons . addfst (cAN "statement") . cons
         <<< (statement_1 <+> (prenex &&> statement)) &&& gsAtoms
 
 statement_1 :: Syntax Atom
-statement_1 = isoFoldl handleCon2
+statement_1 = isoFoldl handleStatementCon
     <<< statement_2 &&& many (sepMorph "I"
                               &&>
                               (just.joik_jek &&& insert Nothing)
@@ -215,7 +231,7 @@ statement_1 = isoFoldl handleCon2
                              )
 
 statement_2 :: Syntax Atom
-statement_2 = (handleCon2 ||| id) . ifJustB
+statement_2 = (handleStatementCon ||| id) . ifJustB
     <<< statement_3 &&& optional (sepMorph "I"
                                   &&> (checkEmpty <<< optional joik_jek
                                                   &&& optional stag)
@@ -1376,6 +1392,8 @@ nuP = maybeImpl . isoFoldl handleCon2 . manage
              ff predP (ImpL _ predD _) = predP == predD
              ff _ _ = False
 
+toNuEvent :: SynIso Atom SelbriNA
+toNuEvent = addfst Nothing . addfst noTv . handleNU "nu" (mkNuEvent ["fasnu"])
 
 nuHandlers :: [SynIso (String,Atom) Atom]
 nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u")           . rmfst "du'u",
@@ -1390,40 +1408,40 @@ nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u")           . rmfst "du'u",
               handleNU "li'i" (mkNuEventLabel "is_experience")  . rmfst "li'i",
               handleNU "pu'u" (mkNuEventLabel "is_point_event") . rmfst "pu'u",
               handleNU "jei"  (mkNuEventLabel "is_truth_value") . rmfst "jei"]
-  where
-    -- Functions that specify the type of the abstraction
-    -- Note: atomNub may leave AndLink with only one atom
-    mkNuEventLabel :: String -> String -> SynIso Atom [Atom]
-    mkNuEventLabel eventName _ = tolist2 . (mkEval . atomNub . mkEvent &&& id)
-      where mkEval = _eval . addfst (cPN eventName highTv)
-                   . tolist2 . addfstAny (cCN "$2" highTv)
 
-    mkNuEvent :: [String] -> String -> SynIso Atom [Atom]
-    mkNuEvent (nuType:nts) name = isoConcat . tolist2 . addfstAny nuImps
-                                            . tolist2 . (wrapNuVars &&& id)
-     where
-       nuPred = cPN (nuType ++ "_" ++ name) highTv
+-- Functions that specify the type of the abstraction
+-- Note: atomNub may leave AndLink with only one atom
+mkNuEventLabel :: String -> String -> SynIso Atom [Atom]
+mkNuEventLabel eventName _ = tolist2 . (mkEval . atomNub . mkEvent &&& id)
+  where mkEval = _eval . addfst (cPN eventName highTv)
+               . tolist2 . addfstAny (cCN "$2" highTv)
 
-       nuImps = cImpL highTv nuPred (cPN nuType highTv)
-            :(case nts of
-                [] -> []
-                [nts] -> let nuSec = cPN (nts ++ "_" ++ name) highTv
-                         in [cIImpL highTv nuPred nuSec
-                            ,cImpL highTv nuSec (cPN nts highTv)])
+mkNuEvent :: [String] -> String -> SynIso Atom [Atom]
+mkNuEvent (nuType:nts) name = isoConcat . tolist2 . addfstAny nuImps
+                                        . tolist2 . (wrapNuVars &&& id)
+ where
+   nuPred = cPN (nuType ++ "_" ++ name) highTv
 
-       wrapNuVars = andl . tolist2 . (mkEval "1" *** mkEval "2")
-                         . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
+   nuImps = cImpL highTv nuPred (cPN nuType highTv)
+        :(case nts of
+            [] -> []
+            [nts] -> let nuSec = cPN (nts ++ "_" ++ name) highTv
+                     in [cIImpL highTv nuPred nuSec
+                        ,cImpL highTv nuSec (cPN nts highTv)])
 
-       mkEval num = _evalTv . addfstAny highTv
-                            . addfstAny (cPN ("sumti" ++ num) highTv)
-                            . tolist2
-                            . addfstAny nuPred
+   wrapNuVars = andl . tolist2 . (mkEval "1" *** mkEval "2")
+                     . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
 
-    --Turns a Sentence into a conjunction of predicates
-    mkEvent = atomIsoMap (mkIso f id) where
-     f (CtxL _ (SL (evals:_))) = evals
-     f (EvalL _ (PN _) (LL [vn@(VN _), _])) = vn -- can be PN:CN, PN:WN, anything else?
-     f a = a
+   mkEval num = _evalTv . addfstAny highTv
+                        . addfstAny (cPN ("sumti" ++ num) highTv)
+                        . tolist2
+                        . addfstAny nuPred
+
+--Turns a Sentence into a conjunction of predicates
+mkEvent = atomIsoMap (mkIso f id) where
+ f (CtxL _ (SL (evals:_))) = evals
+ f (EvalL _ (PN _) (LL [vn@(VN _), _])) = vn -- can be PN:CN, PN:WN, anything else?
+ f a = a
 
 --As for "pu'u", "pruce" and "farvi" don't seem quite right
 
@@ -2171,7 +2189,14 @@ handleCon = merge
           . (mapIso handle_joik_ek *** mapIso handle_jjctts)
           . reorder
     where handle_joik_ek = (handleJOIK ||| conLink) . expandEither
-          handle_jjctts = handleJJCTTS .> tolist2
+          handle_jjctts = handleJJCTTS
+                        . second (tolist2 .
+                                  (( ((toLONU *** toLONU) ||| (id *** toLONU))
+                                    . switchOnFlagValue "StatementCon" "all"
+                                   ) ||| id)
+                                   . switchOnFlag "StatementCon"
+                                 )
+          toLONU = toLO . toNuEvent
 
           reorder = mkIso f g where
               f ((s,ts),as)                 = (eM (s,as),eM (ts,as))
