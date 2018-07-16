@@ -14890,6 +14890,12 @@ RAM usage: 50.831g per top
 Atomspace holds 33677206 atoms <<== 1621 bytes/atom
  postgres:///en_dj_ptwo
 
+(pca 'fetch-pairs)
+Elapsed time to load csets: 2309 secs
+(cog-report-counts)
+(ListLink . 6514155) <<== Ahh, OK, they were hiding (+ 137078 6377077)
+
+
 
 en_dj_ptwo
 -----------
@@ -14936,11 +14942,23 @@ Count   (l_1)  2.7318E+4       n/a        19.21           n/a
 Length  (l_2)  3114.           n/a        2.190           n/a
 RMS Count      3092.           n/a        2.174           n/a
 
-6562246442 Bytes uncompressed == 6.5GBytes
+6562246442 Bytes uncompressed == 6.5 GBytes
+ 709796728 Bytes compressed == 710 MBytes
 
 af614f3c448c2a36024cf1899066f63d  en_dj_ptwo.sql
+8e730f8cf114e940737579dbfc544770  en_dj_ptwo.sql.bz2
 
 =========================================================================
+OK, so where were we? We want
+* cosines between words, using dj's
+* cosines between words, using cross
+* entropy-thing, for above two.
+
+ALTER DATABASE en_dj_ptwo RENAME TO en_dj_two_sim;
+(sql-open "postgres:///en_dj_two_sim?user=linas&password=asdf")
+
+See "similarity.scm" for the rest.
+
 
 =========================================================================
 =========================================================================
@@ -14949,11 +14967,9 @@ NEW TODO LIST
 
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
-   and with transpose-marginals for both.
-
 -- Copy en_dj_ptwo and start running cosines, entropies, etc.
-   for the top 1K's
+   for the top 1K's for both disjuncts and for cross connectors.
+   - IN PROGRESS
 
 -- start old-style MI cross-marginal in dj_etwo IN PROGRESS
 -- save en_dj_etwo after cross-marginals
@@ -14964,16 +14980,12 @@ NEW TODO LIST
 -- start cross-marginals in dj_cfive Uh NOPE.
 
 -- in parallel, experiments:
-(1) record both cosines and entropies for top word-pairs for
-    pseudo dj's. Use (batch-similarity
-
-(1a) Show multiple graphs, depending on word-frequency
+(1a) Show multiple graphs, of cosines, MI, etc.
+     depending on word-frequency
 
 (1b) scatterplot for cosine vs entropy
 
-(2) record both cosines and entropies for top word-pairs for
-    cross-connectors.
-(2a) as above.
+(2a) graphs, for the corsses, too
 
 (3) Scatterplot of pseudo-cset MI vs. cross-MI.
 
@@ -15027,6 +15039,9 @@ Merging minor tasks DONE
 * Transpose-marginals for en_dj_ptwo (pseudo-csets) DONE
 * Create report for transpose marginals. Why is this interesting? not done.
 * Start transpose-marginals for crossed in en_dj_ptwo DONE
+* SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
+  and with transpose-marginals for both. DONE
+
 
 
 
