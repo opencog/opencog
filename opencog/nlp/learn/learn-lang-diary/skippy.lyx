@@ -352,6 +352,55 @@ The correct conceptual model for the observational data is that of a large
 \end_layout
 
 \begin_layout Subsection*
+Statistical Models
+\end_layout
+
+\begin_layout Standard
+It is commonly understood that the task of langauge learning is to create
+ a statistical model that predicts the probability of a text, given the
+ conditional probabilities of how each word depends on all of the previous
+ ones:
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+P\left(w_{1}^{T}\right)=\prod_{t=1}^{T}P\left(w_{t}\left|w_{1}^{t-1}\right.\right)
+\]
+
+\end_inset
+
+Here, the text is presumed to consist of 
+\begin_inset Formula $T$
+\end_inset
+
+ words 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ occuring in sequential order.
+ The notation 
+\begin_inset Formula $w_{i}^{n}$
+\end_inset
+
+ is used to denote a sequence of words, that is, 
+\begin_inset Formula $w_{i}^{n}=\left(w_{i},w_{i+1},\cdots,w_{n}\right)$
+\end_inset
+
+.
+ Although this statistical model is commonly taken as gospel, it is, of
+ course, wrong: we know, a priori, that sentences are constructed whole
+ before being written, and so the current word also depends on future words,
+ ones that follow it in the text.
+ This is the case not just at the sentence-level, but also at the level
+ of the entire text, as the writer already has a theme in mind.
+\end_layout
+
+\begin_layout Subsection*
 N-Grams, Skip Grams
 \end_layout
 
