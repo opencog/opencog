@@ -476,7 +476,59 @@ of observing a word
 \end_inset
 
  surrounding words, to the left and right, in the text.
+ The probability of the text is then modelled by
+\begin_inset Formula 
+\[
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+The smaller window does make the computation more tractable.
  
+\end_layout
+
+\begin_layout Standard
+The above contains another key simplifcation: the total probability is assumed
+ to factor into the product of single-word probabilities, and each single-word
+ probability is translationally invariant; that is, the probability has
+ no explicit dependence on the index 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ This is commonly taken to be a reasonable simplification, but is, of course,
+ 
+\begin_inset Quotes eld
+\end_inset
+
+obviously
+\begin_inset Quotes erd
+\end_inset
+
+ wrong.
+ The words at the end of a text occur with different probabilities than
+ those at the beginning; for example, in a dramatic story, a new character
+ may appear mid-way, or the setting may move from indoors to outdoors, with
+ furniture-words becoming uncommon, while nature-words becoming common.
+ The translational invariance only becomes plausible in the limit of 
+\begin_inset Formula $T\to\infty$
+\end_inset
+
+ where one is considering 
+\begin_inset Quotes eld
+\end_inset
+
+all human language
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This too, is preposterous; first, because not everything that can be said
+ has been said; second, because different individuals speak differently,
+ and third, because new words are invented regularly, as others become archaic.
+ Despite all this, the assumption of translational invariance is entirely
+ appropriate at this level.
 \end_layout
 
 \begin_layout Standard
@@ -573,45 +625,105 @@ Neural Nets
 \end_layout
 
 \begin_layout Standard
-The neural net model proposed by Bengio
+Bengio
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bengio2003"
 
 \end_inset
 
- proposes that the probability of seeing a text (a word sequence) of length
- 
-\begin_inset Formula $T$
-\end_inset
-
- can be factorized into a product of single word probabilities, together
- with a function described by a neural net on a sliding window of 
-\begin_inset Formula $N-1$
-\end_inset
-
- words in width.
- That is, the probability of observing the text 
-\begin_inset Formula $w_{1}^{T}$
-\end_inset
-
- is modelled by the value
+ proposes two different kinds of neural net models.
+ One is used to approximate the conditional probability
 \begin_inset Formula 
 \[
-\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}\widehat{P}\left(w_{t}\left|g\left(w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right)\right.\right)
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
 \]
 
 \end_inset
 
-with 
-\begin_inset Formula $g$
+of observing the word 
+\begin_inset Formula $w_{t}$
 \end_inset
 
- being some function depending only on the context words (and not thier
- positions).
- The proposed model uses a single hidden-layer neural net, a softmax output
- function, and represents each input word with a vector.
- Some effort is needed to unpack these ideas into workable noation.
+, given the context of surrounding words.
+ The other, and more interesting model approximates the conditional probability
+ 
+\begin_inset Formula 
+\[
+p\left(w_{O}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+of observing a set of words 
+\begin_inset Formula $w_{O}$
+\end_inset
+
+ of which 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ is a member (that is, 
+\begin_inset Formula $w_{t}\in w_{O}$
+\end_inset
+
+).
+ The set 
+\begin_inset Formula $w_{O}$
+\end_inset
+
+ is to be thought of as a class of words having similar semantic (and probably
+ syntactic) qualities.
+\end_layout
+
+\begin_layout Standard
+The proposed model uses a single hidden-layer neural net, a softmax output
+ function, represents each input word with a vector, and represents the
+ output class as a vector as well.
+ Some effort is needed to unpack these ideas into workable notation.
+\end_layout
+
+\begin_layout Standard
+First, one represents each (input) word 
+\begin_inset Formula $w$
+\end_inset
+
+ with an 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ vector 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+.
+ The value of the vector components are determined during training.
+ The dimension of this vector is typically taken to be above 80 and below
+ 300.
+ The context of words is then represented as a product vector
+\begin_inset Formula 
+\[
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\vec{v}_{k}\equiv\vec{v}_{w_{k}}$
+\end_inset
+
+abuses the notation to pull up the subscript.
+ By another abuse of notation, it is convenient to drop to location index
+ 
+\begin_inset Formula $t$
+\end_inset
+
+, since the assumption of decomposition into products means that the probabiliti
+es are translationally invariant.
  
 \end_layout
 
