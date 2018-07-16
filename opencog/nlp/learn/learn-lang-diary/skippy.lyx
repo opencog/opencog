@@ -703,7 +703,11 @@ input
 .
  The value of the vector components are determined during training.
  The dimension of this vector is typically taken to be above 80 and below
- 300.
+ 300; fix it to be a number 
+\begin_inset Formula $m$
+\end_inset
+
+.
  The context of words is then represented as a product vector
 \begin_inset Formula 
 \[
@@ -724,7 +728,156 @@ abuses the notation to pull up the subscript.
 
 , since the assumption of decomposition into products means that the probabiliti
 es are translationally invariant.
+ The dimension of 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ is then 
+\begin_inset Formula $mN$
+\end_inset
+
+, where, as before 
+\begin_inset Formula $N$
+\end_inset
+
+ is the sie of the context.
+\end_layout
+
+\begin_layout Standard
+The input vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ is then sent to a 
+\begin_inset Quotes eld
+\end_inset
+
+hidden
+\begin_inset Quotes erd
+\end_inset
+
+ feed-forward (perceptron) neural layer, by means of a weight matrix 
+\begin_inset Formula $H$
+\end_inset
+
+ and an offset vector 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+ Taking 
+\begin_inset Formula $h$
+\end_inset
+
+ as the number of hidden-layer neurons, the matrix 
+\begin_inset Formula $H$
+\end_inset
+
+ has dimension 
+\begin_inset Formula $h\times mN$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ has dimension 
+\begin_inset Formula $h$
+\end_inset
+
+.
+ The outputs of the hidden layer are passed through a sigmoid function 
+\begin_inset Formula $\sigma\left(x\right)$
+\end_inset
+
+ (which can be 
+\begin_inset Formula $\tanh x$
+\end_inset
+
+ or 
+\begin_inset Formula $1/\left(1+e^{-x}\right)$
+\end_inset
+
+ or similar, according to taste) on a component-by-component basis.
+ The result is a vector 
+\begin_inset Formula $\vec{s}$
+\end_inset
+
+ whose vector components are given by 
+\begin_inset Formula 
+\[
+\vec{s}=\sigma\left(H\vec{v}+\vec{d}\right)
+\]
+
+\end_inset
+
+with the understanding that the sigmoid is applied to each compoent of 
+\begin_inset Formula $H\vec{v}+\vec{d}$
+\end_inset
+
+; so that 
+\begin_inset Formula $\vec{s}$
+\end_inset
+
+ is an 
+\begin_inset Formula $h$
+\end_inset
+
+-dimensional vector.
+ This is multiplied by an 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+ vector 
+\begin_inset Formula $\vec{v}_{O}^{\prime}$
+\end_inset
+
+ of dimension 
+\begin_inset Formula $h$
+\end_inset
+
+ to given a scalar 
+\begin_inset Quotes eld
+\end_inset
+
+energy functional
+\begin_inset Quotes erd
+\end_inset
+
  
+\begin_inset Formula 
+\[
+E\left(\vec{v}_{I};\vec{v}_{O}^{\prime}\right)=\vec{v}_{O}^{\prime}\cdot\vec{s}
+\]
+
+\end_inset
+
+This is a single real-valued number.
+ The final probability is modeled by the 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ function
+\begin_inset Formula 
+\[
+p\left(w_{O}\left|w_{I}\right.\right)=\frac{\exp\, E\left(\vec{v}_{I};\vec{v}_{O}^{\prime}\right)}{\sum_{j}\exp\, E\left(\vec{v}_{I};\vec{v}_{j}^{\prime}\right)}
+\]
+
+\end_inset
+
+with the sum over 
+\begin_inset Formula $j$
+\end_inset
+
+ running over all output word classes.
 \end_layout
 
 \begin_layout Subsection*
