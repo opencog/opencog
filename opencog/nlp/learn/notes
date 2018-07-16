@@ -14895,6 +14895,11 @@ Elapsed time to load csets: 2309 secs
 (cog-report-counts)
 (ListLink . 6514155) <<== Ahh, OK, they were hiding (+ 137078 6377077)
 
+Crap. We also needed to do right-marginals....
+
+(scomp-obj 'right-marginals)
+(centr-obj 'cache-right)
+(store-obj 'store-right-marginals)
 
 
 en_dj_ptwo
@@ -14958,6 +14963,46 @@ ALTER DATABASE en_dj_ptwo RENAME TO en_dj_two_sim;
 (sql-open "postgres:///en_dj_two_sim?user=linas&password=asdf")
 
 See "similarity.scm" for the rest.
+
+(bco 'batch-compute 12)
+Done 10/12 frac=100.0% Time: 2201 Done: 98.5% rate=-0.00 K prs/sec
+
+wtf?
+(cog-map-type (lambda (atm) (display atm) #f) 'SimilarityLink)
+
+bcr and bci went too fast ....
+(bcr 'compute-similarity (Word "and") (Word "was"))
+(Word "in") (Word "a"))
+   (WordNode "and") (WordNode "to")
+ (WordNode "to") (WordNode "of")     
+
+(cog-incoming-by-type (Word "in") 'SimilarityLink)
+
+(define s (SimilarityLink (Word "in") (Word "of")))
+
+(define kpco (PredicateNode "*-SimKey pseudo-cset Cosine-*"))
+(define kpmi (PredicateNode "*-SimKey pseudo-cset MI-*"))
+(define kcco (PredicateNode "*-SimKey Cross Cosine-*"))
+
+(define s (SimilarityLink (Word "and") (Word "was")))
+(cog-value s kpco)
+
+(cog-value s kpmi)
+
+batch-simlist
+
+(define basis (crs 'left-basis))
+
+(define supp-obj (add-support-api crs))
+(supp-obj 'right-count ITEM) returns 0 why... ?
+'right-stars returns stars correctly with counts on them (Sections)
+
+support api is looking for support on... get-right-count
+on right-wildcard  (supp-obj 'right-wildcard s)
+Need to set-right-norms set-right-totals
+
+(add-support-compute 'right-marginals
+
 
 
 =========================================================================
