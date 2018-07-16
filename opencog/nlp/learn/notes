@@ -14897,7 +14897,7 @@ Elapsed time to load csets: 2309 secs
 
 Crap. We also needed to do right-marginals....
 
-(scomp-obj 'right-marginals)
+(scomp-obj 'right-marginals) ; Start noon-ish 16 July
 (centr-obj 'cache-right)
 (store-obj 'store-right-marginals)
 
@@ -14911,7 +14911,9 @@ word pairs removed, and and only the disjuncts left). This one adds the
 transpose marginals, viz (batch-transpose (make-connector-vec-api)
 'mmt-marginals) that are needed for fast entropy-similarities.
 
-STATUS: Good.
+STATUS: OK, but not quite good...
+REASON: Missing right marginals on cross-connectors, which are needed
+        for similarity computations.
 DATE: 15 July 2018
 
 en_dj_ptwo=> \dt+
