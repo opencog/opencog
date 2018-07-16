@@ -579,9 +579,9 @@ sumti_5 = ptp (quantifier &&& lookahead selbri) (isoAppend " lo ") sumti_5Q
 
 -- Quantiviers
 sumti_5Q :: Syntax Atom
-sumti_5Q = (handleSubSet . second setWithSize ||| maybeinof)
-        . manage
-       <<< (optional quantifier &&& sumti_5R)
+sumti_5Q = (isoFoldl handleKEhA ||| id) . ifJustB
+         . first ((handleSubSet . second setWithSize ||| maybeinof) . manage)
+         <<< (optional quantifier &&& sumti_6) &&& optional relative_clauses
 
     where manage :: SynIso (Maybe Atom,Atom) (Either (Atom,(Atom,Atom)) Atom)
           manage = Iso f g where
@@ -609,12 +609,6 @@ sumti_5Q = (handleSubSet . second setWithSize ||| maybeinof)
               f (t,s)     = (s,(s,t))
               g (s,(_,t)) = (t,s)
 
-
-
--- Relative clauses
-sumti_5R :: Syntax Atom
-sumti_5R = (isoFoldl handleKEhA ||| id) . ifJustB
-        <<< sumti_6 &&& optional relative_clauses
 
 handleRelClause :: SynIso (Atom,Maybe [Atom]) Atom
 handleRelClause = (isoFoldl handleKEhA ||| id) . ifJustB

@@ -188,7 +188,7 @@ handleEKMods = mkIso f g where
                           (bnai,a2) = case na2 of
                                   (NL [a2]) -> (True ,a2)
                                   _         -> (False,na2)
-                      in pure ((bna,(False,(s,bnai))),(a1,a2))
+                      in ((bna,(False,(s,bnai))),(a1,a2))
 
 conLink :: SynIso (EK,(Atom,Atom)) Atom
 conLink = conLink' . second tolist2 . handleEKMods
