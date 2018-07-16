@@ -352,7 +352,7 @@ The correct conceptual model for the observational data is that of a large
 \end_layout
 
 \begin_layout Subsection*
-Statistical Models
+Statistical Models, N-grams, Skip Grams
 \end_layout
 
 \begin_layout Standard
@@ -398,23 +398,29 @@ Here, the text is presumed to consist of
  ones that follow it in the text.
  This is the case not just at the sentence-level, but also at the level
  of the entire text, as the writer already has a theme in mind.
-\end_layout
-
-\begin_layout Subsection*
-N-Grams, Skip Grams
+ To estimate the probability of a word at a given location, one must look
+ at words to both the left and right of the given location.
 \end_layout
 
 \begin_layout Standard
-The primary task set forth in N-gram and SkipGram papers (such as 
+At any rate, for 
+\begin_inset Formula $T$
+\end_inset
+
+ greater than a few dozen words, the above becomes computationally intractable,
+ and so instead one approximates with a sliding window of length 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ Following Mikolov
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mikolov2013"
 
 \end_inset
 
-) is that of estimating the next words in a text, given all the previous
- ones.
- More precisely, one is interested in the probability 
+, write the probability 
 \begin_inset Formula 
 \[
 p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
@@ -430,12 +436,17 @@ of observing a word
 \begin_inset Formula $t$
 \end_inset
 
- in the text, given a local context of 
+ in the text, as being conditioned on a local context (sliding window) of
+ 
 \begin_inset Formula $N-1=2c$
 \end_inset
 
- surrounding words in the text.
- This probability can be obtained by observing text, and attempting to maximize
+ surrounding words, to the left and right, in the text.
+ 
+\end_layout
+
+\begin_layout Standard
+This probability can be obtained by observing text, and attempting to maximize
  the utility function (objective function)
 \end_layout
 
@@ -447,11 +458,7 @@ of observing a word
 
 \end_inset
 
-on the training text, consisting of 
-\begin_inset Formula $T$
-\end_inset
-
- words in sequential order.
+on the training text.
 \end_layout
 
 \begin_layout Standard
