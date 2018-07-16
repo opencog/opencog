@@ -4036,12 +4036,12 @@ en_pairs=> select * from atoms where type=74;
  143427163 |     1 |   74 |      0 | right-word | 
 
 en_pairs=> select * from atoms where outgoing='{143427138,143427163}';
-   uuid    | space | type | height | name |       outgoing        
+   uuid    | space | type | height | name |       outgoing
 -----------+-------+------+--------+------+-----------------------
  143670792 |     1 |    8 |      1 |      | {143427138,143427163}
 
 en_pairs=> select * from atoms where outgoing='{152,143670792}';
-   uuid    | space | type | height | name |    outgoing     
+   uuid    | space | type | height | name |    outgoing
 -----------+-------+------+--------+------+-----------------
  143670793 |     1 |   47 |      2 |      | {152,143670792}
 
@@ -8069,7 +8069,7 @@ Total MI: -3.023
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  2.9904E+4    3.4828E+4                       
+Support (l_0)  2.9904E+4    3.4828E+4
 Count   (l_1)  4.4813E+6    5.2946E+6    149.9        152.0
 Length  (l_2)  4.9537E+5    4.9524E+5    16.57        14.22
 RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
@@ -11235,7 +11235,7 @@ select * from atoms where outgoing = '{32131120, 50491}' -> 32131316 = List
 LinkGrammarRelationshipNode "ANY" is 7
 
 (Evalu = uuid  32131317
- -->                      
+ -->
 en_pairs_rthree_mall=> select * from valuations where atom=32131317;
    key    |   atom   | type |   floatvalue    | stringvalue | linkvalue 
 ----------+----------+------+-----------------+-------------+-----------
@@ -11777,15 +11777,15 @@ scheme@(guile-user)> (print-mst "Maie threw back her veil and smiled")
 1 . ###LEFT-WALL###   <-->  8 . smiled  cost= 1.75135762004661
 7 . and   <-->  8 . smiled  cost= 1.67365955937873
 
-    +------->WV------->+--MVs-+---CV->+     
+    +------->WV------->+--MVs-+---CV->+
     +--Wd--+-Sp*i+--I--+Osm+  +Cs+-Sp-+--O-+
     |      |     |     |   |  |  |    |    |
 LEFT-WALL I.p will.v do.v it if you say.v so 
 
 
-   +--MVs-+---CV->+     
+   +--MVs-+---CV->+
    |      +Cs+-Sp-+--O--+
-   |      |  |    |     |     
+   |      |  |    |     |
    ?     if  ?  say     ? 
 
 
@@ -12207,12 +12207,12 @@ x/4a 0x7ffc6ba59e40
 (gdb) x 0x7f26dfca8440
 0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16>
 
-(gdb) print *this                             
+(gdb) print *this
 $15 = {<> = {<> = {_M_weak_this = {<No data fields>}}, 
     _vptr.ProtoAtom = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
     _type = 127}, _flags = 0 '\000', _content_hash = 11383300620556476978,
   _atom_space = 0x0, _truthValue = {<No data fields>},
-  _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}        
+  _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}
 
 So... 
 
@@ -12740,7 +12740,7 @@ dranked:
 
 LEFT-WALL -- ... .. .... *** Two Bit - The “ And But So Perhaps Though When As Then While If Have Can Did Do Will Thank Are Where Who What Why How Or Now Here This That It There He She I You We They Some One Most Instead However Besides Well Oh Ah No Yes Yeah Good Ham 2 1 4 3 A Mai Demelza Richard John George nothing something anything everything it there who which that what where when until as because since if before while little small large good great second woman man child boy girl king house city village world town country ship sun latter land others children people men things them us me him her his my your their our the this every another leave take get find see hear speak move stop fight be make give show keep bring meet follow call ask tell help go live stay talk turn run change use read say understand remember know think suppose guess hope promise believe mean am myself fear thought knew saw felt found called happy fine certain new single word moment minute year day night evening morning way book letter party distance light fire forest room air sea earth ground floor table subject story line case question place time thing person family soul heart body own wife brother sister father mother daughter son hands face feet mouth eyes hand mind friends friend thoughts arm arms chest staff words office past water door window truth same whole best present first last least once home back down up at over on in by from upon under through into for with such having like quite only also still born gone already been seen done taken known given brought made making taking after above among between of all near against to will can cannot may must might would should could did does was is seems seemed appeared used began tried wanted needed meant came went turned continued said says spoke had has always never ever usual possible well soon far much late bad strong big young white black dark blue closed opened open hold put stand sleep answer try return come enough ready trying going supposed beginning rest sound corner direction presence name side power nature one most part kind sort number lot bit couple matter group other two three four five ten several many some out length force death life voice hair husband lips head shoulder eye bed business point state view sense feeling thinking saying now indeed therefore however sir yes God dear lady poor old dead wrong right here doing glad afraid sure sorry coming close hard long short real different clear probably certainly simply just almost not hardly easily feel have shall wish need want seem next following Queen captain wall future general London work himself herself smiled sighed nodded asked replied cried got stood sat looked look smile chance reason means longer doubt idea end edge bottom top account instead perhaps and or but though although then thus yet even really heard left lost passed met were are do love told gave took held followed behind within half an raised free better less more rather often true alone again ) too so very pretty a its these those anyone you we they he she North Jack Pitch Ross Jim Dallas Telzey Goth Sir san together along off away around round about how why – ; , : … ! . ? — All From In On By To With After For It’s It's Not Just Even At See paragraph spirit cause middle sight front spite charge form attention throat breath money law human few hundred thousand years hours minutes days times later ago ' " ” 」 ’ _ etc Mr Mrs Dr sama don ul looking especially nor either each any no finally suddenly slowly quietly Mary King Lord Lady Miss Captain I'm I’m My Her His Your ( ‘ Illustration Stats Category Rating Fandom Character Warning Is Really Please Father Mother May course being without let set sitting drawing living high heavy cold public fact particular full relief order hour individual General outside both talking able happened exactly else hell non re self S t six natural than fell deep wide deal agree don’t don't didn’t didn't received paid care drop provide York agreement ape medium author laws terms works forward forth shook enjoyed originally access permission instance chapter comment St Princess Old New Summary Notes Our THE # * Of { including Prince notes states copies copy ‐ YOU THIS OF OR Section CHAPTER Chapter + | Project eBook eBooks Gutenberg } P tax States fee electronic associated Archive Foundation United & copyright Literary donations License trademark distribution refund Van distributing Ooal Additional Posted archive Tags  
 
-"Ham" "2" "1" "4" "3" "A" "Mai" "Demelza" "Richard" "John" "George" "nothing" "something" "anything" "everything" "it" "there" "who" "which" "that" "what" "where" "when" "until" "as" "because" "since" 
+"Ham" "2" "1" "4" "3" "A" "Mai" "Demelza" "Richard" "John" "George" "nothing" "something" "anything" "everything" "it" "there" "who" "which" "that" "what" "where" "when" "until" "as" "because" "since"
 
 Ham .. 2  0.721
 2 .. 1  0.881
@@ -12794,7 +12794,7 @@ make-cosine-matrix
 Bitseat Tadesse
 /home/linas/ftp/script-to-download-books.sh
 
-sent splitter quotation marks mishandled. 
+sent splitter quotation marks mishandled.
 ” after a period is part of that sentence, not the next. also ’
 
 Hmm. was working on zh_pairs_mst !!
@@ -12824,8 +12824,8 @@ GB18030 -- yes!
 GBK -- yes
 
 use 7z -x not unzip
-iconv -f  GB18030 -t UTF-8 
-find *.txt | iconv -f  GB18030 -t UTF-8  | xargs 
+iconv -f  GB18030 -t UTF-8
+find *.txt | iconv -f  GB18030 -t UTF-8  | xargs
 
 find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  > `echo $f.utf8 | iconv -f  GB18030 -t UTF-8`; rm $f ; done
 
@@ -12855,31 +12855,31 @@ except its still printing dict ver wtf.
 
 remove the relex check  Punt from ss-nosplit-one.sh
 
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
-26784 ubuntu    30  10 12.463g 1.495g  34788 S 207.3  0.6  12:24.44 guile      
-26784 ubuntu    30  10 13.065g 7.990g  34788 S 232.0  3.2   1483:55 guile      
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+26784 ubuntu    30  10 12.463g 1.495g  34788 S 207.3  0.6  12:24.44 guile
+26784 ubuntu    30  10 13.065g 7.990g  34788 S 232.0  3.2   1483:55 guile
 foo cnt=951 rate=1.1375598073147588
 vs slog of 0.43 previously, after 24 hours
 foo cnt=104494 rate=2.8365047910446783
 
 Again with minimal:
-(monitor-rate "foo")                                        
+(monitor-rate "foo")
 foo cnt=571 rate=4.167883182665671
 foo cnt=1836 rate=4.636363625198028
 foo cnt=8922 rate=3.7725158547155386
 foo cnt=71196 rate=4.316740435086596
 
 
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
- 3792 ubuntu    30  10 12.392g 1.270g  35144 S 291.3  0.5   7:37.33 guile      
- 3792 ubuntu    30  10 12.886g 4.362g  35252 S 287.3  1.7 108:03.44 guile      
- 3792 ubuntu    30  10 13.053g 6.788g  35252 S 222.7  2.7 694:53.99 guile      
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 3792 ubuntu    30  10 12.392g 1.270g  35144 S 291.3  0.5   7:37.33 guile
+ 3792 ubuntu    30  10 12.886g 4.362g  35252 S 287.3  1.7 108:03.44 guile
+ 3792 ubuntu    30  10 13.053g 6.788g  35252 S 222.7  2.7 694:53.99 guile
 
 cogserver: if it fails the first time, its says runing the second tim
 and then stop crashes
 
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
-27600 ubuntu    30  10 12.905g 3.073g  34772 S 283.0  1.2  57:47.82 guile      
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+27600 ubuntu    30  10 12.905g 3.073g  34772 S 283.0  1.2  57:47.82 guile
 
 (monitor-rate "foo")
 foo cnt=10805 rate=7.71785713759977
@@ -12904,7 +12904,7 @@ Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
 False. Curtis was mistaken when he said this. DONE.
 
 --------
-/dev/md127 on /data 
+/dev/md127 on /data
 /dev/md127 on /home2/linas/lxc-local-containers/learn-en/rootfs/var/lib/postgres
 fstab!!!
 
@@ -12922,7 +12922,7 @@ also -- dump the all-atoms thing!!!!
 
 line 460 of compute-mi.scm do-one-pair
 (right-loop
-(WordNode "fields" 
+(WordNode "fields"
 
 (define psf (add-pair-freq-api psa))
 (define (dop lipr)
@@ -12944,7 +12944,7 @@ line 460 of compute-mi.scm do-one-pair
 
 (psf 'set-pair-freq fa  1.285376022487705e-8)
 
-change make-batch-mi 
+change make-batch-mi
 store-pairs
 make-store
 
@@ -12989,7 +12989,7 @@ how to find handles....  handle_to_scm won't work.
 		(psa 'left-stars rig)))
 (for-each wtf (psa 'right-basis))
 
-(define cs 
+(define cs
 (ConnectorSeq
    (Connector (WordNode "the") (ConnectorDir "-"))
    (Connector (WordNode "broad") (ConnectorDir "-"))
@@ -13044,7 +13044,7 @@ fields, again!
 (define (is-alpha? wstr)
 	(and
 		(char-set-contains? char-set:letter (string-ref wstr 0))
-		(char-set-contains? char-set:letter 
+		(char-set-contains? char-set:letter
 			(string-ref wstr (- (string-length wstr) 1)))))
 
 ; Look for embedded punctuation.
@@ -13120,7 +13120,7 @@ en_pairs_rfive_mst
 Again: en_pairs_mfive_mst:
 total of 522243 words == 522K words appearing in disjuncts
 total of 851964 words when all are considered Uhh oh.
-After (fetch-all-words) have 
+After (fetch-all-words) have
 zero with []
 zero trailing blanks
 228416 which embeded punct.  Same as before
@@ -13146,17 +13146,17 @@ fetch incoming set of (LLOBJ 'wild-wild))
 75GB in size
 (length (cog-incoming-set (AnyNode "cset-word"))) ; 25162435 = 25M
 (cog-report-counts)
-((ListLink . 25162435) (Connector . 1032779) 
-(ConnectorSeq . 25162434) (WordNode . 522243) 
+((ListLink . 25162435) (Connector . 1032779)
+(ConnectorSeq . 25162434) (WordNode . 522243)
 (fetch-incoming-set (AnyNode "cset-disjunct"))
 above is before;
 afterwards have
-((ListLink . 24169074)  (Connector .  988068) 
-(ConnectorSeq . 23670834) (WordNode . 623548) 
+((ListLink . 24169074)  (Connector .  988068)
+(ConnectorSeq . 23670834) (WordNode . 623548)
 
 so ... a little shrinkage, not that much,..
 
-Overall, we expect .... 
+Overall, we expect ....
 24M conseq + 24M any-con-list-links + 35M sections = 83M atoms
 plus 2M slop = 85M!? atoms
 
@@ -13199,7 +13199,7 @@ deleted 10000 地向床[!] in 82 secs
 deleted 11000 安恬[!] in 98 secs
 
 
-without txn, run at ... 
+without txn, run at ...
 deleted 1000 肢体冲突[!] in 91 secs
 deleted 2000 掮客[!] in 96 secs
 deleted 3000 华然[!] in 106 secs
@@ -13212,10 +13212,10 @@ write queue is always a store....
 (fetch-all-words)
 
 
-84894 
-2 .... 18 
+84894
+2 .... 18
 
-reg: 377872  RSS  fetch in 75  total of 
+reg: 377872  RSS  fetch in 75  total of
 max-load=3 -- 376524  piffle
 
 
@@ -13227,7 +13227,7 @@ vals:  26941144 = 27M
 
 zen_three: 351295 words ... 266419 bad ones. Discard thios POS.
 
-again, restart: 
+again, restart:
 
 zen_pairs_two
 zen_pairs_three
@@ -14556,6 +14556,34 @@ Elapsed time to compute left-stars: 735 secs
 scheme@(guile-user)> (batch-all-pair-mi cra)
 Start computing the basis
 Support: found num left= 137078 num right= 18265271 in 40 secs
+Finished left norm marginals in 393573 secs
+Finished left totals in 332 secs
+Finished right norm marginals in 6591 secs
+Finished right totals in 10 secs
+Done with wild-card count N(x,*) and N(*,y) in 400506 secs
+Total count N(*,*) = 47444396.0 = 47444396.0
+Finished column (left) norm averages in 1538 secs
+Finished row (right) norm averages in 31 secs
+Going to do individual pair frequencies
+Done computing 24213074 pairs in 8776 secs
+Start computing log P(*,y)
+Done computing 18265271 left-wilds in 308 secs
+Done with -log P(*,y), start -log P(x,*)
+Done computing 137078 right-wilds in 5 secs
+Stored 40000 of 18265271 left-wilds in 12 secs (3333 pairs/sec)
+Stored 18240000 of 18265271 left-wilds in 12 secs (3333 pairs/sec)
+Done storing 18265271 left-wilds in 5644 secs
+Stored 40000 of 137078 right-wilds in 15 secs (2667 pairs/sec)
+Stored 80000 of 137078 right-wilds in 13 secs (3077 pairs/sec)
+Stored 120000 of 137078 right-wilds in 14 secs (2857 pairs/sec)
+Done storing 137078 right-wilds in 48 secs
+Done computing and saving -log P(x,*) and P(*,y)
+Going to do individual pair MI
+Done 10000 of 137078 outer loops in 1074 secs, pairs=1319927 (1229.0 pairs/sec)
+Done 130000 of 137078 outer loops in 2877 secs, pairs=22949051 (949.64 pairs/sec)
+Done computing 24213074 pair MI's in 23091 secs
+Going to do column and row subtotals
+
 
 
 ----------------
@@ -14586,7 +14614,7 @@ Redo contents of compute-mi.scm:
 (define cvt (add-transpose-compute cvs))
 (cvt 'mmt-support w)   ------ fails when w is a WordClass...
 
-reports --- 
+reports ---
 print-matrix-summary-report
 add-report-api
 make-compute-freq  calls 'set-size
@@ -14601,7 +14629,7 @@ wich are the ceche-lefts.
 
 WTF....
 
-The probability of a column y is 
+The probability of a column y is
 P(*,y) = N(*,y)/N(*,*)  == left-count
 get-right-fun-avg gives averge over columns. i.e. loop over right-basis
 FN must take a column .e.g. FN ... could be a left-count
@@ -14723,7 +14751,7 @@ Elapsed time to load csets: 8680 secs
 Ahh -- interesting ... there are words that appear in connectors,
 that do not have corresponding disjuncts for them.
 There are 498239 words, of which 444903 have disjuncts and 53336
-are in connectors only.  How many are in connectors, but not in 
+are in connectors only.  How many are in connectors, but not in
 disjuncts, total?
 
 pg_dump en_dj_cfive > en_dj_cfive.sql
@@ -14837,8 +14865,80 @@ Argh; we need to force the redo of the supports.
 (Section . 8629163)          ; as before
 (WordNode . 137078)
 
+(scomp-obj 'left-marginals)
+Finished left norm marginals in 393917 secs <== 109 hours
+Finished left totals in 444 secs
+(centr-obj 'cache-left)
+Finished column (left) norm averages in 2174 secs
+(store-obj 'store-left-marginals)
+Stored 40000 of 18265271 left-wilds in 10 secs (4000 pairs/sec)
+Stored 18240000 of 18265271 left-wilds in 7 secs (5714 pairs/sec)
+Done storing 18265271 left-wilds in 3516 secs
+(bcr 'mmt-marginals)
+Finished mmt norm marginals in 11700 secs
+Finished mmt totals in 11 secs
+Stored 40000 of 137078 right-wilds in 7 secs (5714 pairs/sec)
+Stored 80000 of 137078 right-wilds in 8 secs (5000 pairs/sec)
+Stored 120000 of 137078 right-wilds in 7 secs (5714 pairs/sec)
+Done storing 137078 right-wilds in 25 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+RAM usage: 50.831g per top
+(cog-report-counts)
+(ListLink . 137080)  <==== hang on, there used to be 6M of these ..  whazzup?
+(sql-stats)
+Atomspace holds 33677206 atoms <<== 1621 bytes/atom
+ postgres:///en_dj_ptwo
 
 
+en_dj_ptwo
+-----------
+English disjuncts and transpose/cross marginals.
+
+Identical to en_dj_mtwo (which was en_pairs_rfive_mtwo but with all
+word pairs removed, and and only the disjuncts left). This one adds the
+transpose marginals, viz (batch-transpose (make-connector-vec-api)
+'mmt-marginals) that are needed for fast entropy-similarities.
+
+STATUS: Good.
+DATE: 15 July 2018
+
+en_dj_ptwo=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 4228 MB    |
+ public | spaces     | table | linas | 40 kB      |
+ public | typecodes  | table | linas | 56 kB      |
+ public | valuations | table | linas | 8223 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+select count(*) from atoms;      <<<< 40054286 == 40M (19M more than mtwo)
+select count(*) from valuations; <<<< 76449384 == 76M (18M more than mtwo)
+
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 47444396)
+   (AnyNode "cross-connector word")
+   (AnyNode "cross-connector section")
+)
+Rows: 137078 Columns: 18265271
+Size: 24213074 non-zero entries of 2503766818138 possible
+Fraction non-zero: 9.6707E-6 Sparsity (-log_2): 16.658
+Total observations: 47444396.0  Avg obs per pair: 1.9595
+No MI statistics are present; run compute-mi to get them.
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1422.           n/a
+Count   (l_1)  2.7318E+4       n/a        19.21           n/a
+Length  (l_2)  3114.           n/a        2.190           n/a
+RMS Count      3092.           n/a        2.174           n/a
+
+6562246442 Bytes uncompressed == 6.5GBytes
+
+af614f3c448c2a36024cf1899066f63d  en_dj_ptwo.sql
 
 =========================================================================
 
@@ -14849,11 +14949,11 @@ NEW TODO LIST
 
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- start transpose-marginals for crossed in en_dj_ptwo IN PROGRESS
-
 -- SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
    and with transpose-marginals for both.
 
+-- Copy en_dj_ptwo and start running cosines, entropies, etc.
+   for the top 1K's
 
 -- start old-style MI cross-marginal in dj_etwo IN PROGRESS
 -- save en_dj_etwo after cross-marginals
@@ -14926,6 +15026,7 @@ Merging minor tasks DONE
 * Redo compute-total-count to be one-sided. DONE
 * Transpose-marginals for en_dj_ptwo (pseudo-csets) DONE
 * Create report for transpose marginals. Why is this interesting? not done.
+* Start transpose-marginals for crossed in en_dj_ptwo DONE
 
 
 
