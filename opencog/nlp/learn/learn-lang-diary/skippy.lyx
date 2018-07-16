@@ -356,9 +356,11 @@ Statistical Models, N-grams, Skip Grams
 \end_layout
 
 \begin_layout Standard
-It is commonly understood that the task of langauge learning is to create
- a statistical model that predicts the probability of a text, given the
- conditional probabilities of how each word depends on all of the previous
+The task of langauge learning is commonly taken to be one of estimating
+ the probability of a text, consisting of a sequence of words.
+ One common model assumes that the probability of the text can be approximated
+ by the product of the conditional probabilities of individual words, and
+ specifically, of how each word conditionally depends on all of the previous
  ones:
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -369,7 +371,7 @@ key "Bengio2003"
 
 \begin_inset Formula 
 \[
-P\left(w_{1}^{T}\right)=\prod_{t=1}^{T}P\left(w_{t}\left|w_{1}^{t-1}\right.\right)
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}P\left(w_{t}\left|w_{1}^{t-1}\right.\right)
 \]
 
 \end_inset
@@ -392,10 +394,39 @@ Here, the text is presumed to consist of
 \end_inset
 
 .
- Although this statistical model is commonly taken as gospel, it is, of
- course, wrong: we know, a priori, that sentences are constructed whole
- before being written, and so the current word also depends on future words,
- ones that follow it in the text.
+ Thus, the text as a whole is denoted by 
+\begin_inset Formula $w_{1}^{T}$
+\end_inset
+
+, and so 
+\begin_inset Formula $\widehat{P}\left(w_{1}^{T}\right)$
+\end_inset
+
+ is an approximate model for the probability 
+\begin_inset Formula $P\left(w_{1}^{T}\right)$
+\end_inset
+
+ of observing the text (the carat over 
+\begin_inset Formula $P$
+\end_inset
+
+ serving to remind that approximations are being made; that the model is
+ an approximation for the 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ probability.)
+\end_layout
+
+\begin_layout Standard
+Although this statistical model is commonly taken as gospel, it is, of course,
+ wrong: we know, a priori, that sentences are constructed whole before being
+ written, and so the current word also depends on future words, ones that
+ follow it in the text.
  This is the case not just at the sentence-level, but also at the level
  of the entire text, as the writer already has a theme in mind.
  To estimate the probability of a word at a given location, one must look
@@ -408,11 +439,14 @@ At any rate, for
 \end_inset
 
  greater than a few dozen words, the above becomes computationally intractable,
- and so instead one approximates with a sliding window of length 
+ and so instead one approximates the conditional probabilities by limiting
+ the word-sequence to a sliding window of length 
 \begin_inset Formula $N$
 \end_inset
 
 .
+ It is convenient, at this point, to also allow words on the left, as well
+ as those on the right, to determine the conditional probability.
  Following Mikolov
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -446,8 +480,8 @@ of observing a word
 \end_layout
 
 \begin_layout Standard
-This probability can be obtained by observing text, and attempting to maximize
- the utility function (objective function)
+In principle, this probability can be obtained by observing text, and attempting
+ to maximize the utility function (objective function)
 \end_layout
 
 \begin_layout Standard
@@ -532,6 +566,57 @@ To avoid the combinatorial explosion, several tricks are used.
 
  itself can be dynamically varied; this is the Adaptive SkipGram or AdaGram
  model.
+\end_layout
+
+\begin_layout Subsection*
+Neural Nets
+\end_layout
+
+\begin_layout Standard
+The neural net model proposed by Bengio
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+ proposes that the probability of seeing a text (a word sequence) of length
+ 
+\begin_inset Formula $T$
+\end_inset
+
+ can be factorized into a product of single word probabilities, together
+ with a function described by a neural net on a sliding window of 
+\begin_inset Formula $N-1$
+\end_inset
+
+ words in width.
+ That is, the probability of observing the text 
+\begin_inset Formula $w_{1}^{T}$
+\end_inset
+
+ is modelled by the value
+\begin_inset Formula 
+\[
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}\widehat{P}\left(w_{t}\left|g\left(w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right)\right.\right)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $g$
+\end_inset
+
+ being some function depending only on the context words (and not thier
+ positions).
+ The proposed model uses a single hidden-layer neural net, a softmax output
+ function, and represents each input word with a vector.
+ Some effort is needed to unpack these ideas into workable noation.
+ 
+\end_layout
+
+\begin_layout Subsection*
+SkipGram
 \end_layout
 
 \begin_layout Standard
