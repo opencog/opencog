@@ -463,7 +463,7 @@ key "Mikolov2013"
 
 \end_inset
 
-, write the probability 
+, one may write the probability 
 \begin_inset Formula 
 \[
 p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
@@ -481,7 +481,7 @@ of observing a word
 
  in the text, as being conditioned on a local context (sliding window) of
  
-\begin_inset Formula $N-1=2c$
+\begin_inset Formula $N=2c$
 \end_inset
 
  surrounding words, to the left and right, in the text.
@@ -494,7 +494,9 @@ of observing a word
 \end_inset
 
 The smaller window does make the computation more tractable.
- 
+ Here, the window is written in a manifestly symmetric fashion; in general,
+ one might poner a window with a different number of words to the left or
+ right.
 \end_layout
 
 \begin_layout Standard
@@ -541,23 +543,8 @@ all human language
 \end_layout
 
 \begin_layout Standard
-In principle, this probability can be obtained by observing text, and attempting
- to maximize the utility function (objective function)
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\phi=\frac{1}{T}\sum_{t=1}^{T}\sum_{-c\le j\le c;j\ne0}\log p\left(w_{t+j}\left|w_{t}\right.\right)
-\]
-
-\end_inset
-
-on the training text.
-\end_layout
-
-\begin_layout Standard
-The above formulas define the 
+Without any further elaboration, the above define what is more-or-less the
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -565,7 +552,8 @@ classic
 \begin_inset Quotes erd
 \end_inset
 
- N-gram model, in that there is a sliding window of 
+ N-gram model.
+ The general property is that there is a sliding window of 
 \begin_inset Formula $N$
 \end_inset
 
@@ -608,25 +596,45 @@ classic
 \begin_inset Formula $W^{N}=10^{12}$
 \end_inset
 
- probabilities to be maintained: clearly beyond the scope of present-day
- computers.
+ probabilities to be maintained: at 8 giga-probabilities, this is clearly
+ near the edge of what is possible with present-day computers.
+\end_layout
+
+\begin_layout Subsection*
+Model Building
 \end_layout
 
 \begin_layout Standard
-To avoid the combinatorial explosion, several tricks are used.
- One is to understand that not all of the 
-\begin_inset Formula $N$
+The combinatorial explosion can be avoided by proposing models that 
+\begin_inset Quotes eld
 \end_inset
 
- words in the context are particularly relevant to the prediction, so that
- one can still make a good prediction while skipping some of them: this
- is the SkipGram model.
- The next obvious trick is to realize that the context size 
-\begin_inset Formula $N$
+guess
+\begin_inset Quotes erd
 \end_inset
 
- itself can be dynamically varied; this is the Adaptive SkipGram or AdaGram
- model.
+, in an 
+\emph on
+a priori
+\emph default
+ fashion, that some of these probabilities are zero, or that they are (approxima
+tely) equal to one-another.
+ More correctly, one hypothesizes that the vast majority of the probabilites
+ are either zero or fall into classes where they are equal: say, all but
+ one in ten-thousand, or thereabouts, is the 
+\emph on
+de facto
+\emph default
+ order of magnitude obtained in these models.
+\end_layout
+
+\begin_layout Standard
+There is a fairly rich variety of models.
+ Reviewed immediately below are two common foundational models: the so-called
+ CBOW model, and the SkipGram model.
+ The general goal of this paper is to demonstrate that Link Grammar, and
+ thus dependency grammars in general, can be understood to also fit into
+ this same class of probabilistic models.
 \end_layout
 
 \begin_layout Subsection*
@@ -639,7 +647,7 @@ Mikolov,
 etal
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013a"
+key "Mikolov2013a,Mikolov2013"
 
 \end_inset
 
@@ -658,7 +666,7 @@ continuous bag-of-words
  proposed earlier.
  As a simplification, it makes sense to present it first; neural net models
  are reviewed below.
- This section paraphrases the model.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -784,10 +792,115 @@ projections
 \end_layout
 
 \begin_layout Standard
+The CBOW is a model of the conditional probability
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+As already mentioned, it projects each word down to a lower-dimensional
+ space.
+ To get the output word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, one has to 
+\begin_inset Quotes eld
+\end_inset
+
+unproject
+\begin_inset Quotes erd
+\end_inset
+
+ back out, which is conventially done with a different projection matrix
+ 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+.
+ To establish some notation: let 
+\begin_inset Formula $\hat{e}_{w}$
+\end_inset
+
+ be a 
+\begin_inset Formula $W$
+\end_inset
+
+-dimensional unit vector that is all-zero, except for a single, solitary
+ 1 in the 
+\begin_inset Formula $w$
+\end_inset
+
+'th position.
+ Then one has that 
+\begin_inset Formula $\vec{v}_{w}=\pi\hat{e}_{w}$
+\end_inset
+
+ is the projection of 
+\begin_inset Formula $w$
+\end_inset
+
+ -- equivalently, it is the 
+\begin_inset Formula $w$
+\end_inset
+
+'th column of the matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+.
+ For the reverse projection, let 
+\begin_inset Formula $\vec{u}_{w}=\pi^{\prime}\hat{e}_{w}$
+\end_inset
+
+.
+ (Many machine-learning texts write 
+\begin_inset Formula $\vec{v}_{w}^{\prime}$
+\end_inset
+
+ for 
+\begin_inset Formula $\vec{u}_{w}$
+\end_inset
+
+; we use a different letter here, instead of a prime, to help maintain distinctn
+ess.
+ Almost all machine-learning texts avoid putting the vector arrow over the
+ letters; here, they serve to remind the reader where the vector is, so
+ as to avoid confusion in later sections.)
+\end_layout
+
+\begin_layout Standard
+nd then performing hill-climbing on the projection matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+, treated as a parameter.
+ The model is sometimes called the 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ model; it is given by
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{I}\right.\right)=\frac{\exp\,\vec{v}_{t}\cdot\vec{v}_{I}}{\sum_{j}\exp\,\vec{v}_{t}\cdot\vec{v}_{j}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The context of words is then represented as a product vector
 \begin_inset Formula 
 \[
-\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t-1}\times\vec{v}_{t+1}\times\cdots\times\vec{v}_{t+c}
 \]
 
 \end_inset
@@ -809,11 +922,11 @@ es are translationally invariant.
 \end_inset
 
  is then 
-\begin_inset Formula $ND$
+\begin_inset Formula $\left(N-1\right)D$
 \end_inset
 
 , where, as before 
-\begin_inset Formula $N$
+\begin_inset Formula $N-1=2c$
 \end_inset
 
  is the size of the context.
