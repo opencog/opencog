@@ -34,7 +34,7 @@
 "
   Try to find (and execute) the matching rules given an input TXT.
 "
-  (ghost TXT)
+  (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
   (process-ghost-buffer)
   (let ((rule (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent)))))
     (map (lambda (r) (psi-imply r)) rule)
