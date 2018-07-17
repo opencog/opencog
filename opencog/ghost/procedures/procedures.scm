@@ -8,7 +8,6 @@
   #:use-module (web client)
   #:use-module (web response)
   #:use-module (opencog)
-  #:use-module (opencog atom-types)
   #:use-module (opencog attention-bank)
   #:use-module (opencog logger)
   #:use-module (opencog exec)
@@ -20,9 +19,11 @@
   #:use-module (opencog rule-engine)
   #:use-module (opencog ghost)
   #:export (
+    ; -------------------- Perception -------------------- ;
     ; Perception switches
     perception-start!
     perception-stop!
+
     ; Perception input apis
     perceive-face
     perceive-emotion
@@ -34,18 +35,22 @@
     ; Sensory input hooks
     perceive-word-hook
 
+    ; -------------------- Predicates -------------------- ;
     ; Perceptual predicates
     word_perceived
-    ;; Perceptual predicates for a talking face
+
+    ; Perceptual predicates for a talking face
     new_talking
     talking
     end_talking
     not_talking
-    ;; Perceptual predicates for visibility of a face
+
+    ; Perceptual predicates for visibility of a face
     new_face
     face
     end_face
-    ;; Perceptual predicates for emotion of a face
+
+    ; Perceptual predicates for emotion of a face
     new_emotion
     emotion
     end_emotion
@@ -59,7 +64,7 @@
     ; self-model
     neck_dir
 
-    ; schemas
+    ; -------------------- Schemas -------------------- ;
     animation
     expression
     start_timer
@@ -98,12 +103,13 @@
     get_answer_source
     pln_start_recording
 
-    ; Source interfaces ; This need to public so to be callable by send_query
+    ; Source interfaces
+    ; This need to public so to be callable by send_query
     ask-duckduckgo
     ask-wolframalpha
     ask-pln
 
-    ; Utilities
+    ; -------------------- Utilities -------------------- ;
     set-dti!
     get-dti
     is-model-true?
