@@ -68,8 +68,7 @@
 (bcr 'compute-similarity (Word "other") (Word "same"))
 
 (bcr 'batch-compute 12)
-; Done 10/12 frac=100.0% Time: 2 Done: 98.5% rate=-0.00 K prs/sec
-; whooops
+; Done 10/14 Frac=11.76% Time: 4591 Done: 93.4% Rate=0.002 prs/sec (459.1 sec/pr)
 
 ; -------------
 ; FMI between words, using crossovers -- below works
@@ -82,7 +81,7 @@
 (bci 'compute-similarity (Word "other") (Word "same")) ;
 
 (bci 'batch-compute 12)
-; Done 10/12 frac=100.0% Time: 7 Done: 98.5% rate=-0.00 K prs/sec
+; Done 10/12 frac=95.38% Time: 20314 Done: 98.5% rate=-0.00 prs/sec
 
 ; -------------
 (cog-count-atoms 'SimilarityLink)

@@ -14898,8 +14898,12 @@ Elapsed time to load csets: 2309 secs
 Crap. We also needed to do right-marginals....
 
 (scomp-obj 'right-marginals) ; Start noon-ish 16 July
+Finished right norm marginals in 6478 secs
+Finished right totals in 14 secs
 (centr-obj 'cache-right)
+Finished row (right) norm averages in 32 secs
 (store-obj 'store-right-marginals)
+Done storing 137078 right-wilds in 81 secs
 
 
 en_dj_ptwo
@@ -14955,11 +14959,65 @@ RMS Count      3092.           n/a        2.174           n/a
 af614f3c448c2a36024cf1899066f63d  en_dj_ptwo.sql
 8e730f8cf114e940737579dbfc544770  en_dj_ptwo.sql.bz2
 
+en_dj_qtwo
+-----------
+English disjuncts+cross from rfive-mtwo plus marginals.
+
+Extended from en_dj_mtwo (which was en_pairs_rfive_mtwo but with all
+word pairs removed, and and only the disjuncts left). The extensions
+are:
+* cross-conector structures from (make-connector-vec-api)
+* left and right marginals for the pseudo-csets
+* left and right marginals for the cross-conector structures
+* 'mmt-marginals for both of the above.
+
+STATUS: Good.
+DATE: 16 July 2018
+
+en_dj_qtwo=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 4228 MB    |
+ public | spaces     | table | linas | 40 kB      |
+ public | typecodes  | table | linas | 56 kB      |
+ public | valuations | table | linas | 8223 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+select count(*) from atoms;      <<<< 40054291 == 40M (19M more than mtwo)
+select count(*) from valuations; <<<< 76586464 == 76M (18M more than mtwo)
+
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 47444396)
+   (AnyNode "cross-connector word")
+   (AnyNode "cross-connector section")
+)
+Rows: 137078 Columns: 18265271
+Size: 24213074 non-zero entries of 2503766818138 possible
+Fraction non-zero: 9.6707E-6 Sparsity (-log_2): 16.658
+Total observations: 47444396.0  Avg obs per pair: 1.9595
+No MI statistics are present; run compute-mi to get them.
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1422.        1.2051E+5
+Count   (l_1)  2.7318E+4    2.3690E+5     19.21        1.966
+Length  (l_2)  3114.        6763.         2.190        5.6123E-2
+RMS Count      3092.        +nan.0        2.174        +nan.0
+
+6569432244 Bytes uncompressed == 6.5 GBytes
+ 710826943 Bytes compressed == 711 MBytes
+
+7593d2c6bf14216b42da77c8f6024cad  en_dj_qtwo.sql
+8cf228f8e7b5a80072d60cf87e77a592  en_dj_qtwo.sql.bz2
+
 =========================================================================
 OK, so where were we? We want
 * cosines between words, using dj's
 * cosines between words, using cross
-* entropy-thing, for above two.
+* symmetric mi's, for above two.
 
 ALTER DATABASE en_dj_ptwo RENAME TO en_dj_two_sim;
 (sql-open "postgres:///en_dj_two_sim?user=linas&password=asdf")
@@ -15004,6 +15062,32 @@ on right-wildcard  (supp-obj 'right-wildcard s)
 Need to set-right-norms set-right-totals
 
 (add-support-compute 'right-marginals
+
+
+(WordNode "the") (WordNode "of")
+to a and . ,
+
+
+; bci:
+(WordNode "I") -- (WordNode "he") = 0.80011 in 146 secs
+(WordNode "_") -- (WordNode "he") = -2.6201 in 118 secs
+(WordNode "_") -- (WordNode "I") = 0.17530 in 83 secs
+(WordNode "a") -- (WordNode "I") = -2.3699 in 195 secs
+(WordNode "a") -- (WordNode "_") = -3.2270 in 167 secs
+
+bcr:
+(WordNode "I") -- (WordNode "he") = 0.15193 in 249 secs
+(WordNode "_") -- (WordNode "he") = 0.00147 in 200 secs
+(WordNode "_") -- (WordNode "I") = 0.06457 in 186 secs
+(WordNode "a") -- (WordNode "he") = 0.16861 in 344 secs
+(WordNode "a") -- (WordNode "_") = 0.00080 in 268 secs
+
+goodcnt
+prs
+compcnt
+savecnt
+
+
 
 
 
