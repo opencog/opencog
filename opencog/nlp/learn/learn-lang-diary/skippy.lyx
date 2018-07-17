@@ -96,15 +96,24 @@ key "Sleator1991,Sleator1993"
 
 \end_inset
 
-, and with SkipGram
+.
+ A slightly more details review of N-gram, neural net
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+ and SkipGram
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mikolov2013,Mikolov2013a"
 
 \end_inset
 
- or AdaGram, as well as some of the concepts employed in the OpenCog language-le
-arning project.
+ models are given, including AdaGram.
+ It is generally assumed that the reader is generally familair with various
+ concepts employed in the OpenCog language-learning project.
 \end_layout
 
 \begin_layout Subsection*
@@ -352,7 +361,7 @@ The correct conceptual model for the observational data is that of a large
 \end_layout
 
 \begin_layout Subsection*
-Statistical Models, N-grams, Skip Grams
+Statistical Models
 \end_layout
 
 \begin_layout Standard
@@ -621,6 +630,196 @@ To avoid the combinatorial explosion, several tricks are used.
 \end_layout
 
 \begin_layout Subsection*
+CBOW
+\end_layout
+
+\begin_layout Standard
+Mikolov, 
+\emph on
+etal
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013a"
+
+\end_inset
+
+
+\emph default
+ propose a model termed as the 
+\begin_inset Quotes eld
+\end_inset
+
+continuous bag-of-words
+\begin_inset Quotes erd
+\end_inset
+
+ model.
+ It is presented as a simplification of neural net models that have been
+ proposed earlier.
+ As a simplification, it makes sense to present it first; neural net models
+ are reviewed below.
+ This section paraphrases the model.
+\end_layout
+
+\begin_layout Standard
+In the CBOW model, each (input) word 
+\begin_inset Formula $w$
+\end_inset
+
+ is represented by an 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ vector 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+ of relatively small dimension.
+ One does the same in an ordinary bag-of-words model, but with much higher
+ dimension.
+ In an ordinary bag-of-words model, one considers a vector space of dimension
+ 
+\begin_inset Formula $W$
+\end_inset
+
+, with 
+\begin_inset Formula $W$
+\end_inset
+
+ being the size of the vocabulary.
+ One then makes frequentist observations, counting how often each word is
+ observed in some text.
+ The result of this counting is a vector living in a 
+\begin_inset Formula $W$
+\end_inset
+
+-dimensional space.
+ Different texts correspond to different vectors.
+ However, nothing about the grammar of individual sentences or words is
+ learned in this process.
+\end_layout
+
+\begin_layout Standard
+In the CBOW model, the dimension of the space in which the vector 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+ lives is set to a much smaller value 
+\begin_inset Formula $D\ll W$
+\end_inset
+
+.
+ Commonly used values for 
+\begin_inset Formula $D$
+\end_inset
+
+ are in the range of 50--300; by contrast, typical vocabulary sizes 
+\begin_inset Formula $W$
+\end_inset
+
+ range from 
+\begin_inset Formula $10^{4}$
+\end_inset
+
+ to 
+\begin_inset Formula $10^{6}$
+\end_inset
+
+.
+ The mismatch of dimensions results in the mapping sometimes being called
+ 
+\begin_inset Quotes eld
+\end_inset
+
+dimensional reduction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+In the CBOW model, the mapping from the space of words to the space of vectors
+ 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+ is linear; there are no non-linear functions, as there would be in a neural
+ net.
+ That is, the mapping is given by a matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+ of dimension 
+\begin_inset Formula $D\times W$
+\end_inset
+
+.
+ Maps from higher to lower dimensional spaces are called 
+\begin_inset Quotes eld
+\end_inset
+
+projections
+\begin_inset Quotes erd
+\end_inset
+
+.
+ (The notation of the lower-case greek letter 
+\begin_inset Formula $\pi$
+\end_inset
+
+ for projection is common-place in the mathematical literature, but uncommon
+ in the machine-learning world.
+ It's convenient here, as it avoids burning yet another roman letter.) The
+ projection matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is unknown at the outset; the goal of training is to determine it.
+\end_layout
+
+\begin_layout Standard
+The context of words is then represented as a product vector
+\begin_inset Formula 
+\[
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\vec{v}_{k}\equiv\vec{v}_{w_{k}}$
+\end_inset
+
+abuses the notation to pull up the subscript.
+ By another abuse of notation, it is convenient to drop to location index
+ 
+\begin_inset Formula $t$
+\end_inset
+
+, since the assumption of decomposition into products means that the probabiliti
+es are translationally invariant.
+ The dimension of 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ is then 
+\begin_inset Formula $ND$
+\end_inset
+
+, where, as before 
+\begin_inset Formula $N$
+\end_inset
+
+ is the size of the context.
+\end_layout
+
+\begin_layout Subsection*
 Neural Nets
 \end_layout
 
@@ -838,7 +1037,20 @@ hidden
 \end_inset
 
 .
- The outputs of the hidden layer are passed through a sigmoid function 
+ Typical choices for 
+\begin_inset Formula $h$
+\end_inset
+
+ are in the 500--1000 range (and thus comparable to the size of 
+\begin_inset Formula $ND$
+\end_inset
+
+, making the matrix 
+\begin_inset Formula $H$
+\end_inset
+
+ approximately square.) The outputs of the hidden layer are passed through
+ a sigmoid function 
 \begin_inset Formula $\sigma\left(x\right)$
 \end_inset
 
