@@ -93,6 +93,7 @@ cGL     a       = Link "GetLink"                            [a]     noTv
 cAL  tv a       = Link "AndLink"                              a     tv
 cOL  tv a       = Link "OrLink"                               a     tv
 cNL  tv a       = Link "NotLink"                            [a]     tv
+cMNL tv a       = Link "MyNotLink"                          [a]     tv
 cDL  tv a       = Link "DefineLink"                           a     tv
 cEXOL tv a      = Link "ExecutionOutputLink"                  a     tv
 cEXL tv a b     = Link "ExecutionOutputLink"              [a,b]     tv

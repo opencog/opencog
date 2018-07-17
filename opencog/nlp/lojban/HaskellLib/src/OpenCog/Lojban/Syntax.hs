@@ -580,23 +580,10 @@ sumti_5 = ptp (quantifier &&& lookahead selbri) (isoAppend " lo ") sumti_5Q
 -- Quantiviers
 sumti_5Q :: Syntax Atom
 sumti_5Q = (isoFoldl handleKEhA ||| id) . ifJustB
-         . first ((handleSubSet . second setWithSize ||| maybeinof) . manage)
+         . first ((handleSetWithSize ||| maybeinof) . ifJustA)
          <<< (optional quantifier &&& sumti_6) &&& optional relative_clauses
 
-    where manage :: SynIso (Maybe Atom,Atom) (Either (Atom,(Atom,Atom)) Atom)
-          manage = Iso f g where
-              f (Just pa,sumti) = do
-                        atoms <- gets sAtoms
-                        case findSetType sumti atoms of
-                            Just t  -> pure $ Left (sumti,(pa,t    ))
-                            Nothing -> pure $ Left (sumti,(pa,sumti))
-              f (Nothing,sumti) = pure $ Right sumti
-              g (Left (sumti,(pa,t))) = pure (Just pa,sumti)
-              g (Right sumti)         = pure (Nothing,sumti)
-
-          handleSubSet = sndToState 1 . second (tolist1 . subsetL) . reorder2
-
-          maybeinof = Iso f g where
+    where maybeinof = Iso f g where
               f a@(NN _) = pure a
               f a = do
                   atoms <- gets sAtoms
@@ -605,10 +592,20 @@ sumti_5Q = (isoFoldl handleKEhA ||| id) . ifJustB
                       _  -> pure a              --We have a lep which is already an instance
               g a = error "Check for lep somehow"
 
-          reorder2 = mkIso f g where
-              f (t,s)     = (s,(s,t))
-              g (s,(_,t)) = (t,s)
+          handleSubSet = sndToState 1 . second (tolist1 . subsetL)
 
+          reorder2 = mkIso f g where
+                        f (s,t)     = (s,(s,t))
+                        g (s,(_,t)) = (s,t)
+
+          handleSetWithSize = ( handleSubSet . reorder2
+                               . first setWithSize . associate
+                               |||
+                               setWithSize)
+                            . distribute2 . second findSetType
+
+distribute2 :: SynIso (a,Either b c) (Either (a,b) (a,c))
+distribute2 = (commute +++ commute) . distribute . commute
 
 handleRelClause :: SynIso (Atom,Maybe [Atom]) Atom
 handleRelClause = (isoFoldl handleKEhA ||| id) . ifJustB

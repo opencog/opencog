@@ -129,7 +129,7 @@ andl :: SynIso [Atom] Atom
 andl = linkIso "AndLink" noTv
 
 orl :: SynIso [Atom] Atom
-orl = linkIso "OrLink" noTv
+orl = linkIso "MyOrLink" noTv
 
 exel :: SynIso [Atom] Atom
 exel = linkIso "ExecutionLink" noTv
@@ -174,10 +174,10 @@ jiL = Iso f g where
 handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
 handleEKMods = mkIso f g where
     f ((bna,(bse,(c,bnai))),(a1,a2)) = let na1 = if bna
-                                                 then cNL noTv a1
+                                                 then cMNL noTv a1
                                                  else a1
                                            na2 = if bnai
-                                                 then cNL noTv a2
+                                                 then cMNL noTv a2
                                                  else a2
                                        in if bse
                                              then (c,(na2,na1))
@@ -431,11 +431,20 @@ getDefinitions ns ls = if ns == nns then links else getDefinitions nns ls
           nodes = concatMap atomGetAllNodes links --Get all Nodes from the links
           nns   = nub $ ns ++ nodes --Remove duplicates
 
-findSetType :: Atom -> [Atom] -> Maybe Atom
-findSetType a = fmap getType . F.find f
-    where f (Link "SetTypeLink" [s,t] _) = s == a
-          f _ = False
-          getType (Link "SetTypeLink" [s,t] _) = t
+findSetType :: SynIso Atom (Either (Atom,Atom) Atom)
+findSetType = Iso f g where
+    f a = do
+        atoms <- gets sAtoms
+        case fmap getType $ F.find (pat a) atoms of
+            Just t -> pure $ Left (t,a)
+            Nothing -> pure $ Right a
+    g (Left (t,a)) = pure a
+    g (Right a) = pure a
+
+    getType (Link "SetTypeLink" [s,t] _) = t
+
+    pat a (Link "SetTypeLink" [s,t] _) = s == a
+    pat _ _ = False
 
 atomIsoMap :: SynIso Atom Atom -> SynIso Atom Atom
 atomIsoMap iso = Iso f g where
