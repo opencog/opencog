@@ -45,9 +45,6 @@
     (set! expt-var rule)
   )
 
-  ; Wait until a ghost rule has been triggered,
-  ; and return the result
-  (while (null? ghost-result) (usleep 100000))
   ghost-result
 )
 
