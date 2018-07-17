@@ -717,7 +717,7 @@
 
     ; Update the count -- how many rules we've seen under this top level goal
     ; Do it only if the rules are ordered and it's not a rejoinder
-    (if (and is-rule-seq (not is-rejoinder?))
+    (if (and is-rule-seq? (not is-rejoinder?))
       (begin
         (set! goal-rule-cnt (+ goal-rule-cnt 1))
         ; Force the rules defined in a sequence to be triggered
@@ -755,7 +755,7 @@
             ; Check if the goal is defined at the rule level
             ; If the rule is ordered, the weight should change
             ; accordingly as well
-            (if (or (member goal RULE-LV-GOALS) (not is-rule-seq))
+            (if (or (member goal RULE-LV-GOALS) (not is-rule-seq?))
               (stv (cdr goal) .9)
               (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
             ghost-component))
@@ -804,7 +804,7 @@
             ; If it's not a rejoinder, its parent rules should
             ; be the rules at every level that are still in
             ; the rule-hierarchy
-            (if (and is-rule-seq (not (null? rule-hierarchy)))
+            (if (and is-rule-seq? (not (null? rule-hierarchy)))
               (for-each
                 (lambda (lv)
                   (for-each
@@ -877,7 +877,7 @@
     GOALS)
 
   (set! top-lv-goals GOALS)
-  (set! is-rule-seq ORDERED)
+  (set! is-rule-seq? ORDERED)
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
