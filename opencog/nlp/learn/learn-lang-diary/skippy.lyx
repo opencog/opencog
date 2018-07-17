@@ -701,14 +701,66 @@ input
 \end_inset
 
 .
- The value of the vector components are determined during training.
- The dimension of this vector is typically taken to be above 80 and below
- 300; fix it to be a number 
-\begin_inset Formula $m$
+ This is sometimes called the 
+\begin_inset Quotes eld
+\end_inset
+
+projection
+\begin_inset Quotes erd
+\end_inset
+
+ or the 
+\begin_inset Quotes eld
+\end_inset
+
+dimensional reduction
+\begin_inset Quotes erd
+\end_inset
+
+ of the larger vocabulary of 
+\begin_inset Formula $W$
+\end_inset
+
+ words to a smaller 
+\begin_inset Quotes eld
+\end_inset
+
+projection space
+\begin_inset Quotes erd
+\end_inset
+
+ of dimension 
+\begin_inset Formula $D\ll W$
 \end_inset
 
 .
- The context of words is then represented as a product vector
+ The projection, 
+\emph on
+viz
+\emph default
+, the value of the vector components, are determined during training.
+ Commonly used values for 
+\begin_inset Formula $D$
+\end_inset
+
+ are in the range of 50--300; by contrast, typical vocabulary sizes 
+\begin_inset Formula $W$
+\end_inset
+
+ range from 
+\begin_inset Formula $10^{4}$
+\end_inset
+
+ to 
+\begin_inset Formula $10^{6}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The context of words is then represented as a product vector
 \begin_inset Formula 
 \[
 \vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
@@ -733,14 +785,14 @@ es are translationally invariant.
 \end_inset
 
  is then 
-\begin_inset Formula $mN$
+\begin_inset Formula $ND$
 \end_inset
 
 , where, as before 
 \begin_inset Formula $N$
 \end_inset
 
- is the sie of the context.
+ is the size of the context.
 \end_layout
 
 \begin_layout Standard
@@ -774,7 +826,7 @@ hidden
 \end_inset
 
  has dimension 
-\begin_inset Formula $h\times mN$
+\begin_inset Formula $h\times ND$
 \end_inset
 
  and 
@@ -880,70 +932,9 @@ with the sum over
  running over all output word classes.
 \end_layout
 
-\begin_layout Subsection*
-SkipGram
-\end_layout
-
 \begin_layout Standard
-The SkipGram model defines the probability as the 
-\begin_inset Quotes eld
-\end_inset
-
-softmax
-\begin_inset Quotes erd
-\end_inset
-
- function
-\begin_inset Formula 
-\[
-p\left(w_{O}\left|w_{I}\right.\right)=\frac{\exp\left(\left.v_{w_{O}}^{\prime}\right.^{\intercal}v_{w_{I}}\right)}{\sum_{w=1}^{W}\exp\left(\left.v_{w}^{\prime}\right.^{\intercal}v_{w_{I}}\right)}
-\]
-
-\end_inset
-
-Here, 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- is an input context of words, 
-\begin_inset Formula $w_{O}$
-\end_inset
-
- is a set of words one is trying to predict, 
-\begin_inset Formula $v_{w}^{\prime}$
-\end_inset
-
- and 
-\begin_inset Formula $v_{w}$
-\end_inset
-
- are two different vectors, the 
-\begin_inset Quotes eld
-\end_inset
-
-output
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-input
-\begin_inset Quotes erd
-\end_inset
-
- vectors, defined by the SkipGram model.
- The sum in the denominator ranges over 
-\begin_inset Formula $W$
-\end_inset
-
- total words in the vocabulary.
-\end_layout
-
-\begin_layout Standard
-Training of the softmax model can be done by hill-climbing, that is, by
- computing the local gradient
+Training of the model can be done by hill-climbing, that is, by computing
+ the local gradient
 \begin_inset Formula 
 \[
 \nabla p\left(w_{O}\left|w_{I}\right.\right)
@@ -951,8 +942,11 @@ Training of the softmax model can be done by hill-climbing, that is, by
 
 \end_inset
 
-and then adjusting parameters so as to follow the gradient uphill (viz maximizin
-g the probability).
+and then adjusting parameters so as to follow the gradient uphill (
+\emph on
+viz
+\emph default
+ maximizing the probability).
 \end_layout
 
 \begin_layout Section*
