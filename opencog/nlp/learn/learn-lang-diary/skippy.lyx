@@ -833,7 +833,15 @@ unproject
 \begin_inset Formula $w$
 \end_inset
 
-'th position.
+'th position (this is sometimes called the 
+\begin_inset Quotes eld
+\end_inset
+
+one-hot
+\begin_inset Quotes erd
+\end_inset
+
+ vector in machine learning).
  Then one has that 
 \begin_inset Formula $\vec{v}_{w}=\pi\hat{e}_{w}$
 \end_inset
@@ -923,7 +931,7 @@ softmax
  The model is given by
 \begin_inset Formula 
 \[
-p\left(w_{t}\left|w_{I}\right.\right)=\frac{\sum_{i\in I}\exp\,\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{j\in W}\exp\,\vec{u}_{t}\cdot\vec{v}_{j}}
+p\left(w_{t}\left|w_{I}\right.\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{j\in W}\exp\,\sum_{i\in I}\vec{u}_{j}\cdot\vec{v}_{i}}
 \]
 
 \end_inset
@@ -937,7 +945,17 @@ The sum in the numerator runs over all words in the input set
 \end_inset
 
 .
- 
+ The sum in the denominator explicitly normalizes the probability to be
+ a unit probability.
+ That is, for fixed 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+, one has that 
+\begin_inset Formula $1=\sum_{j}p\left(w_{j}\left|w_{I}\right.\right)$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -950,9 +968,53 @@ Computation of the matrixes
 \end_inset
 
  is done by explictly expanding them in the expression above, and then performin
-g hill-climbing, usually by computing the gradient and following it upwards.
- The mechanics for doing this does not concern this essay; it is widely
- covered in many other texts.
+g hill-climbing, attempting to maximize the probability.
+ To provide a nicer landscape for hill-climbing, it is usually done on the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $E=-\log p\left(w_{t}\left|w_{I}\right.\right)$
+\end_inset
+
+.
+ One works with the gradient 
+\begin_inset Formula $\nabla_{\pi,\pi^{\prime}}E$
+\end_inset
+
+ and takes small steps uphill.
+ The detailed mechanics for doing this does not concern this essay; it is
+ widely covered in many other texts
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Minnaar2015b"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+By convention, 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ are taken to be two distinct projection matrixes.
+ I do not currently know of any theoretical reason nor experimental result
+ why this should be done, instead of taking 
+\begin_inset Formula $\pi=\pi^{\prime}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection*
@@ -964,22 +1026,59 @@ The SkipGram model is very similar to the CBOW model, and is commonly presented
  as it's opposite.
  It uses essentially the same Boltzmann distribution as CBOW, except that
  it is now looking at the probability 
-\begin_inset Formula $p\left(w_{i}\left|w_{t}\right.\right)$
+\begin_inset Formula $p\left(w_{I}\left|w_{t}\right.\right)$
 \end_inset
 
- of some context word 
-\begin_inset Formula $w_{i}$
+ of the context 
+\begin_inset Formula $I$
 \end_inset
 
- (for 
-\begin_inset Formula $i\in I$
-\end_inset
-
-) given the target word 
+ given the target word 
 \begin_inset Formula $w_{t}$
 \end_inset
 
 .
+ Explicitly, the model is given by
+\begin_inset Formula 
+\[
+p\left(w_{I}\left|w_{t}\right.\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{I\in W^{N}}\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}
+\]
+
+\end_inset
+
+That is, the word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ is held fixed, and the sum ranges over all possible 
+\begin_inset Formula $N$
+\end_inset
+
+-tuples 
+\begin_inset Formula $I$
+\end_inset
+
+ in the (now much larger) space 
+\begin_inset Formula $W^{N}$
+\end_inset
+
+ (as always, 
+\begin_inset Formula $N$
+\end_inset
+
+ is the width of the sliding window.
+\end_layout
+
+\begin_layout Standard
+As in the CBOW model, the projection matrixes 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ are computed by means of hill-climbing the loss-function.
 \end_layout
 
 \begin_layout Subsection*
