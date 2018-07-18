@@ -2274,6 +2274,326 @@ losts of zero entries
 , but distribute them in a more accurate way?
 \end_layout
 
+\begin_layout Subsection*
+Disjunct Vectors
+\end_layout
+
+\begin_layout Standard
+The last question can be answered by noting that the Link Grammar disjunct
+ representation is also a very highly sparse matrix; however, it is sparse
+ in a very different way, and does NOT have the block-diagonal structure
+ of the deep-learning systems.
+ The can be explicitly illustrated and numerically quantified.
+ 
+\end_layout
+
+\begin_layout Standard
+At the end of one stage of training, one obtains a matrix of observation
+ counts 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+, which are easily normalized to probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ This is, in fact, a very sparse matrix.
+ Four datasets can be quoted: for English, the so-called 
+\begin_inset Quotes eld
+\end_inset
+
+en_mtwo
+\begin_inset Quotes erd
+\end_inset
+
+ dataset, and the 
+\begin_inset Quotes eld
+\end_inset
+
+en_cfive
+\begin_inset Quotes erd
+\end_inset
+
+ dataset; for Mandarin, the 
+\begin_inset Quotes eld
+\end_inset
+
+zen
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+zen_three
+\begin_inset Quotes erd
+\end_inset
+
+ datasets.
+ Please refer to the diary for a detailed description of these datasets.
+ The dimensions and sparsity are summarized in the table below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $W$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left|d\right|$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sparsity
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_mtwo
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+137K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6.24M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16.60 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_cfive
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+445K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23.4M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18.32 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zen
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+60K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+602K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.46 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zen_three
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+85K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4.88M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.85 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, as always, 
+\begin_inset Formula $W=\left|w\right|$
+\end_inset
+
+ is the number of observed vocabulary words, 
+\begin_inset Formula $\left|d\right|$
+\end_inset
+
+ is the number of observed disjuncts, and the sparsity is the log of the
+ number of number of non-zero pairs, measured in bits:
+\begin_inset Formula 
+\[
+\mbox{sparsity}=\log_{2}\frac{\left|w\right|\left|d\right|}{\left|\left(w,d\right)\right|}
+\]
+
+\end_inset
+
+Notable in the above report is that the measured sparsity seems to be approximat
+ely langauge-independent, and dataset-size independent.
+\end_layout
+
+\begin_layout Standard
+Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
+ the numbers reported above are much lower.
+ There are several ways to interpret this: the simple disjunct model, as
+ presented above, fails to compress sufficiently well, or the SkipGram model
+ compresses too much.
+ Its likely that both situations are the case.
+\end_layout
+
+\begin_layout Subsection*
+Word Classes
+\end_layout
+
+\begin_layout Standard
+In operational practice, dependency grammars work with word-classes, and
+ not with words.
+ That is, one carves up the set of words into grammatical classes, such
+ as nouns, verbs, adjectives, etc.
+ and then assign words to each.
+ Each grammatical class is associated with a set of disjuncts that indicate
+ how a word in that class can attach to words in other classes.
+ 
+\end_layout
+
 \begin_layout Section*
 Generalization
 \end_layout
