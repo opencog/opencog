@@ -1931,7 +1931,7 @@ loss function
 ) built from (defined in terms of) the probabilities.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Model Building and Vector Representations
 \end_layout
 
@@ -2591,11 +2591,185 @@ In operational practice, dependency grammars work with word-classes, and
  and then assign words to each.
  Each grammatical class is associated with a set of disjuncts that indicate
  how a word in that class can attach to words in other classes.
- 
+ This can be made notationally precise.
+ There is a set of word-classes 
+\begin_inset Formula $C=\left\{ c\right\} $
+\end_inset
+
+ and two projection matrices 
+\begin_inset Formula $\pi^{W}$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{D}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\vec{\eta}_{w}=\pi^{W}\hat{e}_{w}$
+\end_inset
+
+ is a vector that classifies the word 
+\begin_inset Formula $w$
+\end_inset
+
+ into one or more word-classes 
+\begin_inset Formula $c$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula $\vec{\eta}_{w}$
+\end_inset
+
+ is a 
+\begin_inset Formula $C$
+\end_inset
+
+-dimensional vector.
+ In many cases, all but one of the entries in 
+\begin_inset Formula $\vec{\eta}_{w}$
+\end_inset
+
+ will be zero: we expect the word 
+\begin_inset Formula $w=\mbox{the}$
+\end_inset
+
+ to belong to only one class, the class of determiners.
+ By contrast, 
+\begin_inset Formula $w=\mbox{saw}$
+\end_inset
+
+ has to belong to at least three classes: the past-tense of the verb 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+, the noun for the cutting tool, and the verb approximately synonymous to
+ the verb for cutting.
+ The hand-built dictionary for English Link Grammar has over a thousand
+ distinct word-classes; one might expect a similar quantity from an unsupervised
+ algorithm.
+\end_layout
+
+\begin_layout Standard
+The projection matrix 
+\begin_inset Formula $\pi^{D}$
+\end_inset
+
+ performs a similar projection for the disjuncts.
+ That is 
+\begin_inset Formula $\vec{\zeta}_{d}=\pi^{D}\hat{e}_{d}$
+\end_inset
+
+, so that each disjunct is associated with a 
+\begin_inset Formula $C$
+\end_inset
+
+-dimensional vector 
+\begin_inset Formula $\vec{\zeta}_{d}$
+\end_inset
+
+.
+ Most of the entries in this vector will likewise be zero.
+ This vector basically states that any give disjunct is typically associated
+ with just one, or a few word classes.
+ So, for example, the disjunct
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	the-
+\end_layout
+
+\end_inset
+
+is always associated with (the class of) common nouns.
+ The only non-zero entry in 
+\begin_inset Formula $\vec{\zeta}_{\mbox{the-}}$
+\end_inset
+
+.
+ will therefore be 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	<common-nouns>: the-;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Given these two projection matrixes, the probability can then be decomposed
+ as an inner product:
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
+\]
+
+\end_inset
+
+The word-classes here play a role analogous to the hidden layer in the CBOW/Skip
+Gram model.
+ Its worth making a more direct comparison.
+ Let ...
 \end_layout
 
 \begin_layout Section*
-Generalization
+Sheaves
+\end_layout
+
+\begin_layout Standard
+The previous section begins by stating that, ideally, one wants to wants
+ to model the probability 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+, but due to the apparent computational intractability, one beats a tactical
+ retreat to computing 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+ in the CBOW/SkipGram model, and something analogous in the Link Grammar
+ model.
+ However, by re-casting the problem in terms of disjuncts, however, one
+ can do better.
+ Dependency parsing allows one to easily create low-cost, simple computational
+ models for 
+\begin_inset Formula $P\left(\mbox{phrase}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+ or even 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+.
+ This is because disjuncts are compositional: they can be assembled, like
+ jigsaw-puzzle pieces, into larger assemblages.
+ If this is further enhanced with reference resolution, one has a direct
+ path towards a computationally tractable model of 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+, with, at the outset, seemed hopelessly intractable.
+\end_layout
+
+\begin_layout Standard
+TODO flesh out this section.
+\end_layout
+
+\begin_layout Subsection*
+Gluing axioms
 \end_layout
 
 \begin_layout Standard
