@@ -6,7 +6,6 @@ IF (HAVE_cpprest)
             HTree
             Parameters
             PatternMiner
-            PatternMinerBF
             PatternMinerDF
             PatternMinerDistributedWorker
             PatternMinerCentralServer
@@ -25,7 +24,6 @@ ELSE (HAVE_cpprest)
             HTree
             Parameters
             PatternMiner
-            PatternMinerBF
             PatternMinerDF
     )
 
