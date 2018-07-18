@@ -542,9 +542,13 @@ all human language
  appropriate at this level.
 \end_layout
 
+\begin_layout Subsection*
+N-Gram Model
+\end_layout
+
 \begin_layout Standard
-Without any further elaboration, the above define what is more-or-less the
- 
+Without any further elaboration, and taken at face value, the above defines
+ what is more-or-less the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -600,6 +604,25 @@ classic
  near the edge of what is possible with present-day computers.
 \end_layout
 
+\begin_layout Standard
+The model can be made computationally tractable with several variants.
+ One common variant is to blend together, in varying proportions, the models
+ for 
+\begin_inset Formula $N=0$
+\end_inset
+
+, 
+\begin_inset Formula $N=1$
+\end_inset
+
+ and 
+\begin_inset Formula $N=2$
+\end_inset
+
+.
+ The details are of no particular concern to the rest of this essay.
+\end_layout
+
 \begin_layout Subsection*
 Model Building
 \end_layout
@@ -618,7 +641,8 @@ guess
 a priori
 \emph default
  fashion, that some of these probabilities are zero, or that they are (approxima
-tely) equal to one-another.
+tely) equal to one-another, or that they can be grouped or summed in some
+ other ways.
  More correctly, one hypothesizes that the vast majority of the probabilites
  are either zero or fall into classes where they are equal: say, all but
  one in ten-thousand, or thereabouts, is the 
@@ -626,6 +650,9 @@ tely) equal to one-another.
 de facto
 \emph default
  order of magnitude obtained in these models.
+ Alternately, one can hypothesize that certain linear combinations of the
+ probabilities are identical; this is the common tactic of most deep-learning
+ algorithms.
 \end_layout
 
 \begin_layout Standard
@@ -635,6 +662,11 @@ There is a fairly rich variety of models.
  The general goal of this paper is to demonstrate that Link Grammar, and
  thus dependency grammars in general, can be understood to also fit into
  this same class of probabilistic models.
+ What differs is the mechanism by which the models are trained; the Link
+ Grammar training algorithm, already sketched above, is not a hill-climbing/deep
+-learning technique.
+ A proper comparison will be made after the initial review of the CBOW and
+ SkipGram models.
 \end_layout
 
 \begin_layout Subsection*
@@ -1079,6 +1111,11 @@ As in the CBOW model, the projection matrixes
 \end_inset
 
  are computed by means of hill-climbing the loss-function.
+ The important contribution of of Mikolov et al.
+ is not only to describe this model, but also to propse several algorithmic
+ variations to minimize the RAM footprint, and to improve the speed of convergen
+ce.
+ 
 \end_layout
 
 \begin_layout Subsection*
@@ -1086,182 +1123,20 @@ Neural Nets
 \end_layout
 
 \begin_layout Standard
-Bengio
+The neural net model propsed by Bengio
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bengio2003"
 
 \end_inset
 
- proposes two different kinds of neural net models.
- One is used to approximate the conditional probability
-\begin_inset Formula 
-\[
-p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
-\]
-
+ is worth reviewing, as it places the CBOW and SkipGram models in context.
+ It builds on the same basic mechanics, except that it now replaces the
+ dot-product 
+\begin_inset Formula $\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}$
 \end_inset
 
-of observing the word 
-\begin_inset Formula $w_{t}$
-\end_inset
-
-, given the context of surrounding words.
- The other, and more interesting model approximates the conditional probability
- 
-\begin_inset Formula 
-\[
-p\left(w_{O}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
-\]
-
-\end_inset
-
-of observing a set of words 
-\begin_inset Formula $w_{O}$
-\end_inset
-
- of which 
-\begin_inset Formula $w_{t}$
-\end_inset
-
- is a member (that is, 
-\begin_inset Formula $w_{t}\in w_{O}$
-\end_inset
-
-).
- The set 
-\begin_inset Formula $w_{O}$
-\end_inset
-
- is to be thought of as a class of words having similar semantic (and probably
- syntactic) qualities.
-\end_layout
-
-\begin_layout Standard
-The proposed model uses a single hidden-layer neural net, a softmax output
- function, represents each input word with a vector, and represents the
- output class as a vector as well.
- Some effort is needed to unpack these ideas into workable notation.
-\end_layout
-
-\begin_layout Standard
-First, one represents each (input) word 
-\begin_inset Formula $w$
-\end_inset
-
- with an 
-\begin_inset Quotes eld
-\end_inset
-
-input
-\begin_inset Quotes erd
-\end_inset
-
- vector 
-\begin_inset Formula $\vec{v}_{w}$
-\end_inset
-
-.
- This is sometimes called the 
-\begin_inset Quotes eld
-\end_inset
-
-projection
-\begin_inset Quotes erd
-\end_inset
-
- or the 
-\begin_inset Quotes eld
-\end_inset
-
-dimensional reduction
-\begin_inset Quotes erd
-\end_inset
-
- of the larger vocabulary of 
-\begin_inset Formula $W$
-\end_inset
-
- words to a smaller 
-\begin_inset Quotes eld
-\end_inset
-
-projection space
-\begin_inset Quotes erd
-\end_inset
-
- of dimension 
-\begin_inset Formula $D\ll W$
-\end_inset
-
-.
- The projection, 
-\emph on
-viz
-\emph default
-, the value of the vector components, are determined during training.
- Commonly used values for 
-\begin_inset Formula $D$
-\end_inset
-
- are in the range of 50--300; by contrast, typical vocabulary sizes 
-\begin_inset Formula $W$
-\end_inset
-
- range from 
-\begin_inset Formula $10^{4}$
-\end_inset
-
- to 
-\begin_inset Formula $10^{6}$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-The context of words is then represented as a product vector
-\begin_inset Formula 
-\[
-\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $\vec{v}_{k}\equiv\vec{v}_{w_{k}}$
-\end_inset
-
-abuses the notation to pull up the subscript.
- By another abuse of notation, it is convenient to drop to location index
- 
-\begin_inset Formula $t$
-\end_inset
-
-, since the assumption of decomposition into products means that the probabiliti
-es are translationally invariant.
- The dimension of 
-\begin_inset Formula $\vec{v}_{I}$
-\end_inset
-
- is then 
-\begin_inset Formula $ND$
-\end_inset
-
-, where, as before 
-\begin_inset Formula $N$
-\end_inset
-
- is the size of the context.
-\end_layout
-
-\begin_layout Standard
-The input vector 
-\begin_inset Formula $\vec{v}_{I}$
-\end_inset
-
- is then sent to a 
+ by a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1269,54 +1144,28 @@ hidden
 \begin_inset Quotes erd
 \end_inset
 
- feed-forward (perceptron) neural layer, by means of a weight matrix 
+ feed-forward (perceptron) neural layer.
+ 
+\end_layout
+
+\begin_layout Standard
+The perceptron consists of another projection, this time called the 
+\begin_inset Quotes eld
+\end_inset
+
+weight matrix
+\begin_inset Quotes erd
+\end_inset
+
+ 
 \begin_inset Formula $H$
 \end_inset
 
- and an offset vector 
-\begin_inset Formula $\vec{d}$
-\end_inset
-
-.
- Taking 
-\begin_inset Formula $h$
-\end_inset
-
- as the number of hidden-layer neurons, the matrix 
-\begin_inset Formula $H$
-\end_inset
-
- has dimension 
-\begin_inset Formula $h\times ND$
-\end_inset
-
- and 
-\begin_inset Formula $\vec{d}$
-\end_inset
-
- has dimension 
-\begin_inset Formula $h$
-\end_inset
-
-.
- Typical choices for 
-\begin_inset Formula $h$
-\end_inset
-
- are in the 500--1000 range (and thus comparable to the size of 
-\begin_inset Formula $ND$
-\end_inset
-
-, making the matrix 
-\begin_inset Formula $H$
-\end_inset
-
- approximately square.) The outputs of the hidden layer are passed through
- a sigmoid function 
+, and a non-linear sigmoid function 
 \begin_inset Formula $\sigma\left(x\right)$
 \end_inset
 
- (which can be 
+, which is commonly taken to be 
 \begin_inset Formula $\tanh x$
 \end_inset
 
@@ -1324,103 +1173,197 @@ hidden
 \begin_inset Formula $1/\left(1+e^{-x}\right)$
 \end_inset
 
- or similar, according to taste) on a component-by-component basis.
- The result is a vector 
-\begin_inset Formula $\vec{s}$
-\end_inset
-
- whose vector components are given by 
-\begin_inset Formula 
-\[
-\vec{s}=\sigma\left(H\vec{v}+\vec{d}\right)
-\]
-
-\end_inset
-
-with the understanding that the sigmoid is applied to each compoent of 
-\begin_inset Formula $H\vec{v}+\vec{d}$
-\end_inset
-
-; so that 
-\begin_inset Formula $\vec{s}$
-\end_inset
-
- is an 
-\begin_inset Formula $h$
-\end_inset
-
--dimensional vector.
- This is multiplied by an 
-\begin_inset Quotes eld
-\end_inset
-
-output
-\begin_inset Quotes erd
-\end_inset
-
- vector 
-\begin_inset Formula $\vec{v}_{O}^{\prime}$
-\end_inset
-
- of dimension 
-\begin_inset Formula $h$
-\end_inset
-
- to given a scalar 
-\begin_inset Quotes eld
-\end_inset
-
-energy functional
-\begin_inset Quotes erd
-\end_inset
-
- 
-\begin_inset Formula 
-\[
-E\left(\vec{v}_{I};\vec{v}_{O}^{\prime}\right)=\vec{v}_{O}^{\prime}\cdot\vec{s}
-\]
-
-\end_inset
-
-This is a single real-valued number.
- The final probability is modeled by the 
-\begin_inset Quotes eld
-\end_inset
-
-softmax
-\begin_inset Quotes erd
-\end_inset
-
- function
-\begin_inset Formula 
-\[
-p\left(w_{O}\left|w_{I}\right.\right)=\frac{\exp\, E\left(\vec{v}_{I};\vec{v}_{O}^{\prime}\right)}{\sum_{j}\exp\, E\left(\vec{v}_{I};\vec{v}_{j}^{\prime}\right)}
-\]
-
-\end_inset
-
-with the sum over 
-\begin_inset Formula $j$
-\end_inset
-
- running over all output word classes.
+ or similar, according to taste.
 \end_layout
 
 \begin_layout Standard
-Training of the model can be done by hill-climbing, that is, by computing
- the local gradient
+The input to the weight matrix is the vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ which is a Cartesian product of the input vectors 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+ for the 
+\begin_inset Formula $i\in I$
+\end_inset
+
+.
+ That is,
 \begin_inset Formula 
 \[
-\nabla p\left(w_{O}\left|w_{I}\right.\right)
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
 \]
 
 \end_inset
 
-and then adjusting parameters so as to follow the gradient uphill (
-\emph on
-viz
-\emph default
- maximizing the probability).
+where, for illustration, we've taken the same 
+\begin_inset Formula $I$
+\end_inset
+
+ as given in the previous sections.
+ This vector is 
+\begin_inset Formula $ND$
+\end_inset
+
+-dimensional, where, as always, 
+\begin_inset Formula $N$
+\end_inset
+
+ is the cardinality of 
+\begin_inset Formula $I$
+\end_inset
+
+ and 
+\begin_inset Formula $D$
+\end_inset
+
+ is the dimension of the projected space.
+\end_layout
+
+\begin_layout Standard
+The input vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ is then sent through a weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ to a 
+\begin_inset Quotes eld
+\end_inset
+
+hidden
+\begin_inset Quotes erd
+\end_inset
+
+ neuron layer consisting of 
+\begin_inset Formula $H$
+\end_inset
+
+ neurons.
+ That is, the matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ has dimensions 
+\begin_inset Formula $ND\times H$
+\end_inset
+
+.
+ An offset vector 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ (of dimension 
+\begin_inset Formula $H$
+\end_inset
+
+) is used to properly center the result in the sigmoid.
+ The output of the perceptron is then the 
+\begin_inset Formula $H$
+\end_inset
+
+-dimensional vector 
+\begin_inset Formula 
+\[
+\vec{s}=\sigma\left(h\vec{v}+\vec{d}\right)
+\]
+
+\end_inset
+
+where the sigmoid is understood to act component by component; that is,
+ the 
+\begin_inset Formula $k$
+\end_inset
+
+'th component 
+\begin_inset Formula $\left[\vec{s}\right]_{k}$
+\end_inset
+
+ of the vector 
+\begin_inset Formula $\vec{s}$
+\end_inset
+
+ is given by 
+\begin_inset Formula 
+\[
+\left[\vec{s}\right]_{k}=\sigma\left(\left[h\vec{v}+\vec{d}\right]_{k}\right)
+\]
+
+\end_inset
+
+This is then passed through the 
+\begin_inset Quotes eld
+\end_inset
+
+anti-
+\begin_inset Quotes erd
+\end_inset
+
+projection matrix 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+, as before, except that here, 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ must be 
+\begin_inset Formula $H\times W$
+\end_inset
+
+-dimensional.
+ Maintaining the notation from earlier sections, the perceptron model is
+ then 
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{I}\right.\right)=\frac{\exp\,\vec{u}_{t}\cdot\vec{s}}{\sum_{j\in W}\exp\,\vec{u}_{j}\cdot\vec{s}}
+\]
+
+\end_inset
+
+Just as in the CBOW/SkipGram model, training can be accomplished by hill-climbin
+g, this time by taking not only 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ as free parameters, but also 
+\begin_inset Formula $h$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Typical choices for the dimension 
+\begin_inset Formula $H$
+\end_inset
+
+ is in the 500--1000 range, and is thus comparable to the size of 
+\begin_inset Formula $ND$
+\end_inset
+
+, making the weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ approximately square.
+ That is, the weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ does a minimal amount of, if any at all, of dimensional reduction.
 \end_layout
 
 \begin_layout Section*
