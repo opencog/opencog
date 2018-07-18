@@ -372,8 +372,11 @@ HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned m
 	// Calculate how many valuations will be encompassed by these
 	// shallow abstractions
 	unsigned val_count = valuations.size() / var_scv.size();
-	for (const HandleSeq& valuation : var_scv.valuations)
-		shapats[val_shallow_abstract(valuation[0])] += val_count;
+	for (const HandleSeq& valuation : var_scv.valuations) {
+		Handle shabs = val_shallow_abstract(valuation[0]);
+		if (shabs)
+			shapats[val_shallow_abstract(valuation[0])] += val_count;
+	}
 
 	// Only consider the shallow abstractions that reach the minimum
 	// support
