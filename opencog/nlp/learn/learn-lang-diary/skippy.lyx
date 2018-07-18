@@ -2722,7 +2722,41 @@ p\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
 The word-classes here play a role analogous to the hidden layer in the CBOW/Skip
 Gram model.
  Its worth making a more direct comparison.
- Let ...
+ The comaprable quantity, in the Boltzmann/
+\begin_inset Quotes erd
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ formulation would be 
+\begin_inset Formula 
+\[
+p\left(w_{t},w_{I}\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}}
+\]
+
+\end_inset
+
+This quantity is not normally avilable or computed in the CBOW/Skipgram
+ models; it is written here as a theoretical quantity.
+ It corresponds to the partition function 
+\begin_inset Formula 
+\[
+Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)
+\]
+
+\end_inset
+
+Applying the variational principle to the partition function gives 
+\begin_inset Formula 
+\[
+p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t}I}}\right|_{J=0}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
