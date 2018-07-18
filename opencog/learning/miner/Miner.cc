@@ -321,7 +321,7 @@ Handle Miner::matched_results(const Handle& pattern, const Handle& text) const
 	tmp_as.add_atom(text);
 	AtomSpace tmp_pattern_as(&tmp_as);
 	Handle tmp_pattern = tmp_pattern_as.add_atom(pattern),
-		tmp_text = 	tmp_as.add_atom(text),
+		tmp_text = tmp_as.add_atom(quote(text)),
 		ml = tmp_as.add_link(MAP_LINK, tmp_pattern, tmp_text);
 	Instantiator inst(&tmp_as);
 	return HandleCast(inst.execute(ml));
