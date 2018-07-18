@@ -1932,24 +1932,346 @@ loss function
 \end_layout
 
 \begin_layout Subsection*
-Vector Representations
+Model Building and Vector Representations
 \end_layout
 
 \begin_layout Standard
-Consider the vector product
+The key driver behind the deep-learning models is the replacement of untractable
+ probabilistic models by those that are computationally efficient.
+ This is accomplished in several stages.
+ First, the full-text probability function 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+ is replaced by the much simpler probability function 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+.
+ The former probability function is extremely high-diemnsional, whereas
+ the later is less so.
+ Its still computationally infeasible, so there are two directions one can
+ go in.
+ The traditional bag-of-words model replaces 
+\begin_inset Quotes eld
+\end_inset
+
+fulltext
+\begin_inset Quotes erd
+\end_inset
+
+ by 
+\begin_inset Quotes eld
+\end_inset
+
+set of words in the fulltext
+\begin_inset Quotes erd
+\end_inset
+
+ AKA the 
+\begin_inset Quotes eld
+\end_inset
+
+bag
+\begin_inset Quotes erd
+\end_inset
+
+, and so one computes 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ bag}\right.\right)$
+\end_inset
+
+ which is computationally feasible.
+ Algorithms such as TF-IDF, and many others accomplish this.
+ The characteristic idea here is to ignore the (syntactic) structure of
+ the full-text, completely erasing all indication of word-order.
+\end_layout
+
+\begin_layout Standard
+The bag, however, loses syntactic and semantic structure, and so goes to
+ far.
+ An alternate route is to start with 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+ and simplify it by using instead a sliding-window probability function
+ 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ window}\right.\right)$
+\end_inset
+
+, thus giving the N-gram model.
+ The characteristic idea here is to explicitly set 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ other-words}\right.\right)=0$
+\end_inset
+
+ whenever the other-words are not in the window.
+\end_layout
+
+\begin_layout Standard
+The N-gram model is still computationally untractable for 
+\begin_inset Formula $N\ge3$
+\end_inset
+
+ and so the deep-learning models propose that yet more entries in 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ window}\right.\right)$
+\end_inset
+
+ can be ignored or conflated.
+ Conceptually, the models propose computing 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+ with the context being a projection to a low-dimensional space.
+ These ideas can be illustrated more precisely.
+ Let 
 \begin_inset Formula 
 \[
-\left.v_{w_{O}}^{\prime}\right.^{\intercal}v_{w_{I}}
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
 \]
 
 \end_inset
 
+be the context, with 
+\begin_inset Formula $\vec{v}_{w}=\pi\hat{e}_{w}$
+\end_inset
 
+ the projection of the unit vector of the word down to the low-dimensional
+ 
+\begin_inset Quotes eld
+\end_inset
+
+hidden layer
+\begin_inset Quotes erd
+\end_inset
+
+ vector space.
+ This projection can be writen as 
+\begin_inset Formula $\vec{v}_{I}=\left[\pi\oplus\cdots\oplus\pi\right]\left(\hat{e}_{t-c}\times\hat{e}_{t-c+1}\times\cdots\times\hat{e}_{t-c}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $\pi\oplus\cdots\oplus\pi$
+\end_inset
+
+ is the block-diagonal matrix 
+\begin_inset Formula 
+\[
+\pi\oplus\cdots\oplus\pi=\begin{bmatrix}\pi & 0\\
+0 & \pi\\
+ &  & \ddots\\
+ &  &  & \pi & 0\\
+ &  &  & 0 & \pi
+\end{bmatrix}
+\]
+
+\end_inset
+
+and so the off-block-diagonal entries are explictly assumed to be zero,
+ as an 
+\emph on
+a priori
+\emph default
+ built-in assumption.
+ Note that the zero entries in this matrix greatly outnumber the non-zero
+ entries.
+ Almost all entries are zero.
+ 
 \end_layout
 
 \begin_layout Standard
-Basically the input vector is like the one, and the output vector is like
- the other.
+Its useful to keep tabs on these sizes.
+ The matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+ was 
+\begin_inset Formula $D\times W$
+\end_inset
+
+-dimensional, with 
+\begin_inset Formula $W$
+\end_inset
+
+ the number of vocabulary words (as always) and 
+\begin_inset Formula $D$
+\end_inset
+
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+hidden
+\begin_inset Quotes erd
+\end_inset
+
+ dimension.
+ For a window of size 
+\begin_inset Formula $N$
+\end_inset
+
+, the matrix 
+\begin_inset Formula $\pi\oplus\cdots\oplus\pi$
+\end_inset
+
+ has dimensions 
+\begin_inset Formula $ND\times NW$
+\end_inset
+
+.
+ Of these, only 
+\begin_inset Formula $NDW$
+\end_inset
+
+ are non-zero, the remaining 
+\begin_inset Formula $N\left(N-1\right)DW$
+\end_inset
+
+ are zero.
+ That's a lot of zeros.
+\end_layout
+
+\begin_layout Standard
+One can do one of several things with the vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+.
+ In the SkipGram and CBOW models, one sums over words; that is, one creates
+ the vector 
+\begin_inset Formula $\sum_{i\in I}\vec{v}_{i}$
+\end_inset
+
+.
+ Its worth writing this out, matrix style.
+ One has that 
+\begin_inset Formula 
+\[
+\sum_{i\in I}\vec{v}_{i}=S\vec{v_{I}}
+\]
+
+\end_inset
+
+where the matrix 
+\begin_inset Formula $S$
+\end_inset
+
+ is a concatenation of identity matrixes.
+ 
+\begin_inset Formula 
+\[
+S=\begin{bmatrix}1 & 0 &  &  & 1 & 0 &  &  &  & 1 & 0\\
+0 & 1 &  &  & 0 & 1 &  &  & \cdots & 0 & 1\\
+ &  & \ddots &  &  &  & \ddots &  & \cdots &  &  & \ddots\\
+ &  &  & 1 &  &  &  & 1 &  &  &  &  & 1
+\end{bmatrix}
+\]
+
+\end_inset
+
+The reason for writing it out in this way to understand that there is another
+ dimensional reduction: again, almost all entries in this matrix are zero.
+ Each identity matrix was 
+\begin_inset Formula $D\times D$
+\end_inset
+
+ dimensional, and there are 
+\begin_inset Formula $N$
+\end_inset
+
+ of them, so that 
+\begin_inset Formula $S$
+\end_inset
+
+ has dimensions 
+\begin_inset Formula $D\times ND$
+\end_inset
+
+.
+ Of these, there are only 
+\begin_inset Formula $ND$
+\end_inset
+
+ non-zero entries; the remaining 
+\begin_inset Formula $ND\left(D-1\right)$
+\end_inset
+
+ are all zero.
+ The reduction is huge.
+ 
+\end_layout
+
+\begin_layout Standard
+For the perceptron model of Bengio, the matrix 
+\begin_inset Formula $S$
+\end_inset
+
+ is replaced by a weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ projecting to the perceptron layer.
+ All of the entries in the matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ are, by assumption, non-zero.
+ This perhaps helps make it clear just how much more complex the perceptron
+ model is.
+ Since 
+\begin_inset Formula $h$
+\end_inset
+
+ is an approximately square matrix, this implies a large-number of non-zero
+ entries.
+\end_layout
+
+\begin_layout Standard
+Its worth getting an intuitive feeling for the size of these numbers: following
+ Mikolov, assume that 
+\begin_inset Formula $W=10^{4}$
+\end_inset
+
+ although this sharply underestimates the size of the vocabulary of English.
+ Assume 
+\begin_inset Formula $N=5$
+\end_inset
+
+ and 
+\begin_inset Formula $D=300$
+\end_inset
+
+.
+ The size of the input vector space is thus 
+\begin_inset Formula $W^{N}=10^{20}$
+\end_inset
+
+, this is being modeled by a vector space of size 300.
+ The sparsity is thus 
+\begin_inset Formula 
+\[
+\log_{2}\frac{10^{20}}{300}=31.3\mbox{ bits}
+\]
+
+\end_inset
+
+A truly vast amount of potential information is being discarded by this
+ language model.
+ Of course, the claim is that the English language never carried this much
+ information in the first place: almost all five-word sequences are meaningless
+ non-sense; only a very small number of these are syntactically valid, and
+ somewhat fewer are semantically meaningful.
+\end_layout
+
+\begin_layout Standard
+This exposes the real question: just how meaningful are the CBOW/SkipGram
+ models, and can one find better models that also have 
+\begin_inset Quotes eld
+\end_inset
+
+losts of zero entries
+\begin_inset Quotes erd
+\end_inset
+
+, but distribute them in a more accurate way?
 \end_layout
 
 \begin_layout Section*
