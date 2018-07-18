@@ -5,6 +5,8 @@
 ; NOTE: This script assumes that the databas already contains 
 ; the mutual information for the pairs obtained from an observe
 ; pass over the same sentences to be parsed.
+;
+;  Written by glicerico
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp ull-parser))
