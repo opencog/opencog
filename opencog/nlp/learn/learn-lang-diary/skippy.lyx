@@ -2591,8 +2591,107 @@ In operational practice, dependency grammars work with word-classes, and
  and then assign words to each.
  Each grammatical class is associated with a set of disjuncts that indicate
  how a word in that class can attach to words in other classes.
- This can be made notationally precise.
- There is a set of word-classes 
+ This can be made notationally precise, although it requires some background
+ theory.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider again the nature of the hidden layer (the layer in which the vectors
+ live) in the CBOW/SkipGram model.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ formulation allows the conditional probabilites to be written a certain
+ way; the corresponding unconditional probability is 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p\left(w_{t},w_{I}\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}}
+\]
+
+\end_inset
+
+This quantity is not normally avilable or computed in the CBOW/Skipgram
+ models; here, it is written here as a theoretical quantity.
+ It can be obtained from the partition function 
+\begin_inset Formula 
+\[
+Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)
+\]
+
+\end_inset
+
+by applying the variational principle to one of the many 
+\begin_inset Quotes eld
+\end_inset
+
+sources
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $J_{w_{t},I}$
+\end_inset
+
+.
+ This yeilds the standard Boltzmann distribution: 
+\begin_inset Formula 
+\[
+p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t},I}}\right|_{J=0}
+\]
+
+\end_inset
+
+In other words, CBOW/SkipGram fit squarely into the standard maximum entropy
+ theoretical framework.
+ This is no accident, of course; the 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ function was used precisely because it gives the maximum entropy distribution.
+\end_layout
+
+\begin_layout Standard
+There is no particular reason to diverge from the principle of maximum entropy
+ when working with word classes.
+ Specifically, this suggests that the word-disjunct pairs be viewed in the
+ frame of the 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+ (equivalently, the Hamiltonian or energy):
+\begin_inset Formula 
+\[
+H\left(w,d\right)=-\log p\left(w,d\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+is suggests that the 
+\end_layout
+
+\begin_layout Standard
+There is a set of word-classes 
 \begin_inset Formula $C=\left\{ c\right\} $
 \end_inset
 
@@ -2714,49 +2813,12 @@ Given these two projection matrixes, the probability can then be decomposed
  as an inner product:
 \begin_inset Formula 
 \[
-p\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
+E\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
 \]
 
 \end_inset
 
-The word-classes here play a role analogous to the hidden layer in the CBOW/Skip
-Gram model.
- Its worth making a more direct comparison.
- The comaprable quantity, in the Boltzmann/
-\begin_inset Quotes erd
-\end_inset
-
-softmax
-\begin_inset Quotes erd
-\end_inset
-
- formulation would be 
-\begin_inset Formula 
-\[
-p\left(w_{t},w_{I}\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}}
-\]
-
-\end_inset
-
-This quantity is not normally avilable or computed in the CBOW/Skipgram
- models; it is written here as a theoretical quantity.
- It corresponds to the partition function 
-\begin_inset Formula 
-\[
-Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)
-\]
-
-\end_inset
-
-Applying the variational principle to the partition function gives 
-\begin_inset Formula 
-\[
-p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t}I}}\right|_{J=0}
-\]
-
-\end_inset
-
-
+The word-classes 
 \end_layout
 
 \begin_layout Section*
