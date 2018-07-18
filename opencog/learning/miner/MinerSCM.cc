@@ -81,8 +81,8 @@ void MinerSCM::init(void)
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
-                                             Handle texts,
-                                             Handle ms)
+                                     Handle texts,
+                                     Handle ms)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
