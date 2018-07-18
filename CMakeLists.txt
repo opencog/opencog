@@ -24,7 +24,7 @@ IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
     ADD_DEFINITIONS(-DECAN_EXPERIMENT)
 ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
-INSTALL (TARGETS attentionbank
+INSTALL (TARGETS attentionbank EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -36,3 +36,6 @@ INSTALL (FILES
 	StochasticImportanceDiffusion.h
 	DESTINATION "include/opencog/attentionbank"
 )
+
+set(atomspace_libs ${atomspace_libs} attentionbank PARENT_SCOPE)
+
