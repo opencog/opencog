@@ -41,17 +41,17 @@ namespace opencog
  * Frequent Subtree Mining -- An Overview, from Yun Chi et al, when
  * possible.
  */
-struct XPMParameters {
+struct MinerParameters {
 
 	/**
 	 * CTor. Note that conjuncts will be overwritten by initpat, if
 	 * provided.
 	 */
-	XPMParameters(unsigned minsup=1,
-	              unsigned conjuncts=1,
-	              const Handle& initpat=Handle::UNDEFINED,
-	              int maxdepth=-1,
-	              double info=1.0);
+	MinerParameters(unsigned minsup=1,
+	                unsigned conjuncts=1,
+	                const Handle& initpat=Handle::UNDEFINED,
+	                int maxdepth=-1,
+	                double info=1.0);
 
 	// Minimum support. Mined patterns must have a frequency equal or
 	// above this value.
@@ -114,15 +114,20 @@ public:
 	/**
 	 * CTor
 	 */
-	Miner(AtomSpace& as, const XPMParameters& param=XPMParameters());
+	Miner(const MinerParameters& param=MinerParameters());
 
 	/**
-	 * Mine and return a tree of patterns linked by specialization
-	 * relationship (children are specializations of parent) with
-	 * frequency equal to or above minsup, starting from the initial
-	 * pattern, excluded.
+	 * Mine the given AtomSpace and return a tree of patterns linked by
+	 * specialization relationship (children are specializations of
+	 * parent) with frequency equal to or above minsup, starting from
+	 * the initial pattern, excluded.
 	 */
-	HandleTree operator()();
+	HandleTree operator()(const AtomSpace& texts_as);
+
+	/**
+	 * Like above but only mine amongst the provided text collection.
+	 */
+	HandleTree operator()(const HandleSet& texts);
 
 	/**
 	 * Specialization. Given a pattern and a collection to text atoms,
@@ -148,14 +153,8 @@ public:
 	                          const Valuations& valuations,
 	                          int maxdepth);
 
-	// AtomSpace containing the text trees to mine.
-	AtomSpace& text_as;
-
 	// Parameters
-	XPMParameters param;
-
-	// Working atomspace containing the patterns, and other junk.
-	AtomSpace pattern_as;
+	MinerParameters param;
 
 private:
 
@@ -216,8 +215,10 @@ private:
 	 * at the given variable, then call Miner::specialize on the
 	 * obtained specialization.
 	 */
-	HandleTree specialize_shapat(const Handle& pattern, const HandleSet texts,
-	                             const Handle& var, const Handle& shapat,
+	HandleTree specialize_shapat(const Handle& pattern,
+	                             const HandleSet texts,
+	                             const Handle& var,
+	                             const Handle& shapat,
 	                             int maxdepth);
 
 	/**
