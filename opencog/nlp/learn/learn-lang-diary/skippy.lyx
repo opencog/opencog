@@ -337,13 +337,31 @@ viz
 \end_inset
 
  for the connector-based vector.
- These two vectors can be thought of as inhabiting two orthogonal subspaces
- of 
-\begin_inset Formula $\vec{V}^{D}\otimes\vec{V}^{C}$
+ Given any word 
+\begin_inset Formula $w$
 \end_inset
 
-; there are many interesting relationships between these subspaces, they
- can be viewed as sections of a sheaf of a graph.
+, there will be vectors 
+\begin_inset Formula $\vec{v}_{w}^{D}$
+\end_inset
+
+ and also 
+\begin_inset Formula $\vec{v}_{w}^{C}$
+\end_inset
+
+.
+ These two vectors can be taken together as 
+\begin_inset Formula $\vec{v}_{w}^{D}\oplus\vec{v}_{w}^{C}$
+\end_inset
+
+ and inhabit two orthogonal subspaces of 
+\begin_inset Formula $\vec{V}^{D}\oplus\vec{V}^{C}$
+\end_inset
+
+.
+ There are many interesting relationships between these subspaces; the most
+ important of these, developed in a later section, is that they can be viewed
+ as sections of a sheaf of a graph.
  
 \end_layout
 
@@ -1118,8 +1136,33 @@ ce.
  
 \end_layout
 
+\begin_layout Standard
+Both SkipGram and CBOW are sometimes called 
+\begin_inset Quotes eld
+\end_inset
+
+neural net
+\begin_inset Quotes erd
+\end_inset
+
+ models, but this is perhaps slightly misleading, as neither make use of
+ the sigmoid function that is characteristic of neural nets.
+ Given that the charachteristic commonality is that the probabilities are
+ obtained by hill-climbing, it seems more appropriate to simply call these
+ 
+\begin_inset Quotes eld
+\end_inset
+
+deep learning
+\begin_inset Quotes erd
+\end_inset
+
+ models.
+ The distinction is made more clear in the next section.
+\end_layout
+
 \begin_layout Subsection*
-Neural Nets
+Perceptrons as Neural Nets 
 \end_layout
 
 \begin_layout Standard
@@ -1371,9 +1414,12 @@ Similarities and Differences
 \end_layout
 
 \begin_layout Standard
-On the face of it, the descriptions given in the above two sections appear
- to be completely different.
- The similarities are obscured by the notation.
+On the face of it, the description given for Link Grammar seems to bear
+ no resemblance to that of the descriptiion of probabilistic neural net
+ models, other than to invoke vectors in some way.
+ The descriptions of language appear to be completely different.
+ There are similarities; they are obscured both by the notation, and the
+ viewpoint.
 \end_layout
 
 \begin_layout Subsection*
@@ -1381,7 +1427,7 @@ Disjuncts as Context
 \end_layout
 
 \begin_layout Standard
-First, let us unpack the probability
+Consider the probability
 \begin_inset Formula 
 \[
 p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
@@ -1389,8 +1435,7 @@ p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
 
 \end_inset
 
-The above notation is meant to indicate the probability of observing the
- word 
+This is meant to indicate the probability of observing the word 
 \begin_inset Formula $w_{t}$
 \end_inset
 
@@ -1502,7 +1547,7 @@ The resemblance, at this point, should be obvious: the disjunct
 \end_inset
 
  plays the role of the N-gram context.
- Abusing some notation, one might think that
+ Abusing the existing notation, one should should understand that
 \begin_inset Formula 
 \[
 d\approx w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}
@@ -1510,16 +1555,113 @@ d\approx w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}
 
 \end_inset
 
-and the point of this section is that this approximate equivalence is not
- a bad way of understanding the situation.
+The abuse of notation was partly cured by writing 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ for the 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ words of the CBOW/SkipGram models, so that 
+\begin_inset Formula $I$
+\end_inset
+
+ was a set of relative indexes into the text.
+ The disjunct notation does everything that the index notation can do: it
+ specifies a fixed order of words, to the left, and to the right of the
+ target (
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+) word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+.
  
 \end_layout
 
 \begin_layout Standard
-Less obvious, perhaps, is that the disjunct is already capturing aspects
- of both skip-grams and adaptive N-grams.
- That is, disjuncts are intended to capture the dependency grammar description
- of a language.
+In fact, the disjunct notation can do more: it can also encode parse information.
+ That is, one could take the disjunct as being a sequence of words, with
+ no gaps allowed between the words.
+ If this is done, then the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ becomes fully compatible with the index set 
+\begin_inset Formula $I$
+\end_inset
+
+ and one can legitimately write that 
+\begin_inset Formula $d=w_{I}$
+\end_inset
+
+ are just two notations for saying the same thing.
+ But the disjunt can also do more: it effectively suggests that the index
+ set can be used as parse information.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Skip-Grams and Grammar
+\end_layout
+
+\begin_layout Standard
+The above explicit identification of 
+\begin_inset Formula $d=w_{I}$
+\end_inset
+
+ suggests that CBOW and SkipGram models already encode grammatical information,
+ and that finding it is as simple as re-interpreting 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ as a disjunct.
+ That is, given either form 
+\begin_inset Formula $p\left(w_{t}\left|w_{I}\right.\right)$
+\end_inset
+
+ or 
+\begin_inset Formula $p\left(w_{I}\left|w_{t}\right.\right)$
+\end_inset
+
+, simply re-interpret 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ as specifying left-going and right-going connectors.
+ The Link Grammar cost is nothing other than the 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $E=-\log p\left(w_{t}\left|w_{I}\right.\right)$
+\end_inset
+
+; they are one and the same thing.
+ One could do this immediately, today: given a SkipGram dataset, one can
+ just write an export function, and dump the contents into a Link Grammar
+ dictionary.
+ All that remains would be to evaluate the quality of the results.
+\end_layout
+
+\begin_layout Standard
+Disjuncts are intended to capture the dependency grammar description of
+ a language.
  A dependency grammar naturally 
 \begin_inset Quotes eld
 \end_inset
@@ -1581,13 +1723,116 @@ upset by the taunting
 
 , which attaches to the noun, and not the verb: it's the girl who is upset,
  not the running.
- Such long-distance attachements are problematic for adaptive skip-grams:
  
+\end_layout
+
+\begin_layout Standard
+Such long-distance attachements are problematic for CBOW or Skip-Grams,
+ in several ways.
+ One is that the window 
 \begin_inset Formula $N$
 \end_inset
 
- must be quite very large to skip over the post-nominal modifier.
- 
+ must be quite large to skip over the post-nominal modifier.
+ Counting punctuation, one must look at least seven words to the right,
+ in the above example.
+ If the window is symmetric about the target word, this calls for 
+\begin_inset Formula $N\ge14$
+\end_inset
+
+, which is a bit larger than currently reported results; for example, Mikolov
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013"
+
+\end_inset
+
+ reports results for 
+\begin_inset Formula $N=5$
+\end_inset
+
+.
+ The point here is that 
+\begin_inset Formula 
+\[
+p\left(w_{t}=\mbox{girl}\left|w_{t-1}=\mbox{the },w_{t+1}=\mbox{ran}\right.\right)
+\]
+
+\end_inset
+
+can be trivially re-interpreted as the disjunct
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	girl: the- & ran+;
+\end_layout
+
+\end_inset
+
+However, that is not what is needed to parse 
+\begin_inset Quotes eld
+\end_inset
+
+The girl, upset by the taunting, ran home in tears.
+\begin_inset Quotes erd
+\end_inset
+
+ What is needed, instead, is the disjunct 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	girl: the- & upset+ & ran+;
+\end_layout
+
+\end_inset
+
+which is invisible with an 
+\begin_inset Formula $N=5$
+\end_inset
+
+ window.
+ The punctuation is also important for the post-nominal modifier; somewhere
+ one must also find
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	upset: girl- & ,- & by+ & ,+;
+\end_layout
+
+\end_inset
+
+which also does not fit in an 
+\begin_inset Formula $N=5$
+\end_inset
+
+ window; it requires at least 
+\begin_inset Formula $N=9$
+\end_inset
+
+.
+ Long-distance attachements present a problem for the simpler, less sophisticate
+d deep-learning models.
+\end_layout
+
+\begin_layout Standard
+Another difficulty is
+\end_layout
+
+\begin_layout Standard
+Besides 
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
