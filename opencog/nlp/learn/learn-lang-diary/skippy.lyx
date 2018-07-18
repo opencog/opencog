@@ -872,12 +872,46 @@ ess.
 \end_layout
 
 \begin_layout Standard
-nd then performing hill-climbing on the projection matrix 
-\begin_inset Formula $\pi$
+Let 
+\begin_inset Formula $I$
 \end_inset
 
-, treated as a parameter.
- The model is sometimes called the 
+ be the set of context (or 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+) word subscript offsets; to be consistent with the above, one would have
+ 
+\begin_inset Formula $I=\left\{ -c,-c+1,\cdots,-1,+1,\cdots,+c\right\} $
+\end_inset
+
+.
+ By abuse of notation, one might also write, for offset 
+\begin_inset Formula $t$
+\end_inset
+
+ or for word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, that 
+\begin_inset Formula $I=\left\{ t-c,t-c+1,\cdots t-1,t+1,\cdots,t+c\right\} $
+\end_inset
+
+ or that 
+\begin_inset Formula $I=w_{I}=\left\{ w_{t-c},w_{t-c+1},\cdots,w_{t-1},w_{t+1},\cdots,w_{t+c}\right\} $
+\end_inset
+
+; exactly which of these sets is intended will hopefully be clear from context.
+\end_layout
+
+\begin_layout Standard
+The CBOW model then uses the Bolztmann distribution obtained from a certain
+ paritition function, sometimes called the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -885,51 +919,67 @@ softmax
 \begin_inset Quotes erd
 \end_inset
 
- model; it is given by
+ model.
+ The model is given by
 \begin_inset Formula 
 \[
-p\left(w_{t}\left|w_{I}\right.\right)=\frac{\exp\,\vec{v}_{t}\cdot\vec{v}_{I}}{\sum_{j}\exp\,\vec{v}_{t}\cdot\vec{v}_{j}}
+p\left(w_{t}\left|w_{I}\right.\right)=\frac{\sum_{i\in I}\exp\,\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{j\in W}\exp\,\vec{u}_{t}\cdot\vec{v}_{j}}
 \]
 
 \end_inset
 
+The sum in the numerator runs over all words in the input set 
+\begin_inset Formula $I$
+\end_inset
 
+; the sum in the denominator runs over all words in the vocabulary 
+\begin_inset Formula $W$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
-The context of words is then represented as a product vector
-\begin_inset Formula 
-\[
-\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t-1}\times\vec{v}_{t+1}\times\cdots\times\vec{v}_{t+c}
-\]
-
+Computation of the matrixes 
+\begin_inset Formula $\pi$
 \end_inset
 
-where 
-\begin_inset Formula $\vec{v}_{k}\equiv\vec{v}_{w_{k}}$
+ and 
+\begin_inset Formula $\pi^{\prime}$
 \end_inset
 
-abuses the notation to pull up the subscript.
- By another abuse of notation, it is convenient to drop to location index
- 
-\begin_inset Formula $t$
+ is done by explictly expanding them in the expression above, and then performin
+g hill-climbing, usually by computing the gradient and following it upwards.
+ The mechanics for doing this does not concern this essay; it is widely
+ covered in many other texts.
+\end_layout
+
+\begin_layout Subsection*
+SkipGram
+\end_layout
+
+\begin_layout Standard
+The SkipGram model is very similar to the CBOW model, and is commonly presented
+ as it's opposite.
+ It uses essentially the same Boltzmann distribution as CBOW, except that
+ it is now looking at the probability 
+\begin_inset Formula $p\left(w_{i}\left|w_{t}\right.\right)$
 \end_inset
 
-, since the assumption of decomposition into products means that the probabiliti
-es are translationally invariant.
- The dimension of 
-\begin_inset Formula $\vec{v}_{I}$
+ of some context word 
+\begin_inset Formula $w_{i}$
 \end_inset
 
- is then 
-\begin_inset Formula $\left(N-1\right)D$
+ (for 
+\begin_inset Formula $i\in I$
 \end_inset
 
-, where, as before 
-\begin_inset Formula $N-1=2c$
+) given the target word 
+\begin_inset Formula $w_{t}$
 \end_inset
 
- is the size of the context.
+.
 \end_layout
 
 \begin_layout Subsection*
