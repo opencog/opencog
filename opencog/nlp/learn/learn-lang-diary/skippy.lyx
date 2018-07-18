@@ -1760,7 +1760,7 @@ p\left(w_{t}=\mbox{girl}\left|w_{t-1}=\mbox{the },w_{t+1}=\mbox{ran}\right.\righ
 
 \end_inset
 
-can be trivially re-interpreted as the disjunct
+can be trivially re-interpreted as the dictionary entry
 \begin_inset listings
 inline false
 status open
@@ -1780,7 +1780,7 @@ The girl, upset by the taunting, ran home in tears.
 \begin_inset Quotes erd
 \end_inset
 
- What is needed, instead, is the disjunct 
+ What is needed, instead, is the dictionary entry 
 \begin_inset listings
 inline false
 status open
@@ -1824,19 +1824,7 @@ d deep-learning models.
 \end_layout
 
 \begin_layout Standard
-Another difficulty is
-\end_layout
-
-\begin_layout Standard
-Besides 
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-Similarly, dependency grammars are 
+Another difficulty is that dependency grammars are naturally 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1855,12 +1843,59 @@ know
 \end_inset
 
  that the correct size of the context for determiners and adjectives is
- one: an adjective can modify only one noun.
+ one: a determiner can typically modify only one noun.
+ One expects the entry
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	the: girl+;
+\end_layout
+
+\end_inset
+
+The size of the context for the word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ is just 
+\begin_inset Formula $N=1$
+\end_inset
+
+; more is not needed.
+ If the deep-learning model fails to explicitly contain an entry of the
+ form 
+\begin_inset Formula 
+\[
+p\left(w_{t}=\mbox{the}\left|w_{t+1}=\mbox{girl}\right.\right)
+\]
+
+\end_inset
+
+with no other context words present, then one will have trouble building
+ a suitable dictionary.
 \end_layout
 
 \begin_layout Standard
-One important difference should be immediately apparent: the Link Grammar
- probabilities are obtained by direct counting, and not by any training,
+Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
+ problems, but I have not studied it.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Training
+\end_layout
+
+\begin_layout Standard
+One important difference between the earlier description of Link Grammar,
+ and the deep-learning algorithms should be immediately apparent: the Link
+ Grammar probabilities are obtained by direct counting, and not by any training,
  relaxation or hill-climbing technique.
  That is, 
 \begin_inset Formula 
@@ -1884,13 +1919,20 @@ so that the probability is properly normalized:
 \end_inset
 
  in text; the probabilities is just the frequentist probability.
- This differs from the probability in N-gram/skipgram models, which is obtained
- by maximizing an objective function built from (defined in terms of) the
- probabilities.
+ This differs sharply from the probability in the CBOW/SkipGram models,
+ which is obtained by maximizing an objective function (the 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+) built from (defined in terms of) the probabilities.
 \end_layout
 
 \begin_layout Subsection*
-Vectors
+Vector Representations
 \end_layout
 
 \begin_layout Standard
