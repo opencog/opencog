@@ -1,7 +1,6 @@
 #Created by Kbib version 0.6.5
 #Last modified: Fri May 21 15:08:57 2010
 
-
 @book{A,
 	title = {Handbook of Mathematical Functions},
 	publisher = {Dover Publications},
@@ -38,11 +37,41 @@
    lockkey = {Y}
 }
 
-@ARTICLE{Bell2003,
-    author = {Anthony J. Bell},
-    title = {The Co-Information Lattice},
-    journal = {Somewhere or other},
-    year = {2003},
+@article{Baez2009,
+	title = {Physics, Topology, Logic and Computation: A Rosetta Stone},
+	author = {John C. Baez and Mike Stay},
+	journal = {Arxiv/abs/0903.0340},
+	year = 2009,
+	url = {http://math.ucr.edu/home/baez/rosetta.pdf},
+	lockkey = {Y}
+}
+
+@article{Bell1998,
+	author = {Anthony J. Bell},
+	title = {The Co-Information Lattice},
+	journal = {Somewhere or other},
+	year = {1998},
+	url = {http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.457.2244&rep=rep1&type=pdf},
+	doi = {10.1.1.457.2244}
+}
+
+@article{Bengio2003,
+	author = {Bengio, Y. and Ducharme, R. and Vincent. P.},
+	title = {A neural probabilistic language model.},
+	year = 2003,
+	journal = {Journal of Machine Learning Research},
+	volume = 3,
+	pages = {1137-1155}
+}
+
+@article{Coecke2010,
+	title = {Quantum Links Let Computers Read},
+	author = {Bob Coecke},
+	journal = {New Scientist},
+	year = 2010,
+	month = December,
+	url = {http://www.cs.ox.ac.uk/people/bob.coecke/NewScientist.pdf},
+   lockkey = {Y}
 }
 
 
@@ -66,6 +95,15 @@
 	abstract = {Intelligent agents must be able to handle the complexity and uncertainty of the real world. Logical AI has focused mainly on the former, and statistical AI on the latter. Markov logic combines the two by attaching weights to first-order formulas and viewing them as templates for features of Markov networks. Inference algorithms for Markov logic draw on ideas from satisfiability, Markov chain Monte Carlo and knowledge-based model construction. Learning algorithms are based on the voted perceptron, pseudo-likelihood and inductive logic programming. Markov logic has been successfully applied to problems in entity resolution, link prediction, information extraction and others, and is the basis of the open-source Alchemy system.},
 	isbn = {978-1-57735-281-5},
 	location = {Boston, Massachusetts},
+	lockkey = {Y}
+}
+
+@book{Eisenbud2000,
+	title = {The Geometry of Schemes},
+	author = {David Eisenbud and Joe Harris},
+	publisher = {Springer},
+	year = 2000,
+	isbn = {0-387-98637-5},
 	lockkey = {Y}
 }
 
@@ -158,6 +196,13 @@
   author = { Goertzel, Ben and Cassio Pennachin and Samir Araujo and Ruiting Lian and Fabricio Silva and  Murilo Queiroz and Welter Silva and  Mike Ross and  Linas Vepstas and  Andre Senna},
 }
 
+@unpublished{Goertzel2014,
+	author = {Ben Goertzel and Linas Vepstas},
+	title = {Langauge Learning},
+	note = {ArXiv abs/1401.3372},
+	year = 2014,
+	url = {https://arxiv.org/abs/1401.3372},
+}
 
 @unpublished{RelEx,
 	author = {Mike Ross and Linas Vepstas and Ben Goertzel},
@@ -167,13 +212,25 @@
 	url = {http://opencog.org/wiki/RelEx},
 }
 
-@book{HoTT2013,
-  author = {The Univalent Foundations Program},
-  publisher = {Institute for Advanced Study},
-  title = {Homotopy Type Theory: Univalent Foundations of Mathematics},
-  year = 2013,
-  keywords = {type theory},
+@article{Guthrie2006,
+  title = {A Closer Look at Skip-gram Modelling},
+  author = {David Guthrie and Ben Allison and Wei Liu and Louise Guthrie and Yorick Wilks},
+  year = 2006,
+  journal = {Proceedings of the Fifth international Conference on Language Resources and Evaluation},
+
+  url = {https://homepages.inf.ed.ac.uk/ballison/pdf/lrec_skipgrams.pdf},
+  abstract = {Data sparsity is a large problem in natural language processing that refers to the fact that language is a system of rare events, so varied and complex, that even using an extremely large corpus, we can never accurately model all possible strings of words.  This paper examines the use of skip-grams (a technique where by n-grams are still stored to model language, but they allow for tokens to be skipped) to overcome the data sparsity problem. We analyze this by computing all possible skip-grams in a training corpus and measure how many adjacent (standard) n-grams these cover in test documents. We examine skip-gram modelling using one to four skips with various amount of training data and test against similar documents as well as documents generated from a machine translation system. In this paper we also determine the amount of extra training data required to achieve skip-gram coverage using standard adjacent tri-grams.},
   lockkey = {Y}
+}
+
+@book{HoTT2013,
+	author = {The Univalent Foundations Program},
+	publisher = {Institute for Advanced Study},
+	title = {Homotopy Type Theory: Univalent Foundations of Mathematics},
+	year = 2013,
+	url = {https://homotopytypetheory.org/book/},
+	keywords = {type theory},
+	lockkey = {Y}
 }
 
 @book{Hud84,
@@ -203,18 +260,6 @@
   lockkey = {Y}
 }
 
-@article{Kart2013,
-	author = {Dimitri Kartsaklis and Mehrnoosh Sadrzadeh and Stephen Pulman and Bob Coecke},
-
-	title = {Reasoning about Meaning in Natural Language with Compact Closed Categories and Frobenius Algebras},
-	journal = {},
-	year = 2013,
-	volume = {},
-	pages = {},
-   url = {https://www.cs.ox.ac.uk/files/5468/sadrzadeh_kartsaklis.pdf},
-	lockkey = {Y}
-}
-
 @inproceedings{Kart2012,
 	author = {Dimitri Kartsaklis and Mehrnoosh Sadrzadeh and Stephen Pulman},
 	title = {A Unified Sentence Space for Categorical Distributional-Compositional Semantics: Theory and Experiments},
@@ -222,6 +267,29 @@
 	year = {2012},
 	pages = {549-558},
    url = {http://www.cs.ox.ac.uk/files/5265/kartsaklis_etal_2012.pdf},
+	lockkey = {Y}
+}
+
+@inproceedings{Kart2013,
+	author = {Dimitri Kartsaklis and Mehrnoosh Sadrzadeh and Stephen Pulman and Bob Coecke},
+	title = {Reasoning about Meaning in Natural Language with Compact Closed Categories and Frobenius Algebras},
+	booktitle = {Logic and Algebraic Structures in Quantum Computing},
+	publisher = {Cambridge University Press},
+	year = 2013,
+   url = {https://www.cs.ox.ac.uk/files/5468/sadrzadeh_kartsaklis.pdf},
+	lockkey = {Y}
+}
+
+@article{Kart2014,
+	author = {Dimitri Kartsaklis and Mehrnoosh Sadrzadeh},
+
+	title = {A Study of Entanglement in a Categorical Framework of Natural Language},
+	journal = {Proceedings Quantum Physics and Logic, Electronic Proceedings in Theoretical Computer Science},
+	year = 2014,
+	volume = 172,
+	pages = {249-260},
+   url = {https://arxiv.org/abs/1405.2874},
+	doi = {10.4204/EPTCS.172.17},
 	lockkey = {Y}
 }
 
@@ -268,7 +336,6 @@ inference.},
 
 }
 
-
 @ARTICLE{Lian2010,
   author = {Ruiting Lian, Ben Goertzel, et al.},
   title = {Language Generation via Glocal Similarity Matching},
@@ -284,6 +351,28 @@ inference.},
   year = {2012},
 }
 
+@inproceedings{Lambek61,
+	author = {J. Lambek},
+	title = {On the calculus of syntactic types},
+	booktitle = {Structure of Language and its Mathematical Aspects},
+	publisher = {America Methematical Society},
+	year = {1961},
+	pages = {166-178},
+   lockkey = {Y}
+}
+
+@article{Li92,
+	author = {Wentian Li},
+	title = {Random Texts Exhibit Zipf's-Law-Like Word Frequency Distribution},
+	journal = {IEEE Transactions on Information Theory},
+	year = 1992,
+	volume = {38},
+	number = 6,
+	pages = {1842-1845},
+	url = {http://www.nslij-genetics.org/wli/pub/ieee92_pre.pdf},
+	doi = {10.1109/18.165464}
+}
+
 @inproceedings{Lin1998,
 	author = {Lin, Dekang},
 	title = {Automatic retrieval and clustering of similar words},
@@ -292,8 +381,7 @@ inference.},
 	year = 1998,
 	address = {Morristown, NJ, USA},
 	publisher = {Association for Computational Linguistics},
-	doi = {http://dx.doi.org/10.3115/980691.980696},
-
+	doi = {http://dx.doi.org/10.3115/980691.980696}
 }
 
 @inproceedings{Lin1998minipar,
@@ -360,19 +448,6 @@ inference.},
   bibsource = {DBLP, http://dblp.uni-trier.de}
 }
 
-@article{Li92,
-	author = {Wentian Li},
-	title = {Random Texts Exhibit Zipf's-Law-Like Word Frequency Distribution},
-	journal = {IEEE Transactions on Information Theory},
-	year = 1992,
-	volume = {38},
-	number = 6,
-	pages = {1842-1845},
-	url = {http://www.nslij-genetics.org/wli/pub/ieee92_pre.pdf},
-	doi = {10.1109/18.165464},
-
-}
-
 @article{Milicevic2006,
   title={A short guide to the meaning-text linguistic theory},
   author={Mili{\'c}evi{\'c}, Jasmina},
@@ -386,6 +461,71 @@ inference.},
 #  journal={한국사전학},
 #  publisher={한국사전학회}
 
+@inproceedings{Louw2007,
+	author = {Bill Louw},
+	title = {Truth, literary worlds and devices as collocation},
+	url = {https://www.academia.edu/843973/Truth_literary_worlds_and_devices_as_collocation},
+	year = 2007,
+	booktitle = {Language and Computers, Corpora in the Foreign Language Classroom},
+	editor = {Encarnación Hildalgo, Luis Quereda and Juan Santana},
+	pages = {329-362},
+	issue = 34,
+	publisher = Rodopi,
+	lockkey = {Y}
+}
+
+@book{MacLane1992,
+	author = {Saunders Mac  Lane and Ieke Moerdijk},
+	title = {Sheaves in Geometry and Logic},
+	year = 1992,
+	publisher = {Springer},
+	isbn = {0-387-97710-4},
+	lockkey = {Y}
+}
+
+@book{Marcus1967,
+   author = {Solomon Marcus},
+   title = {Algebraic Linguistics; Analytical Models},
+   year = 1967,
+	url = {https://monoskop.org/images/2/26/Marcus_Solomon_editor_Algebraic_Linguistics_Analytical_Models_1967.pdf},
+	publisher = Elsevier,
+   lockkey = {Y}
+}
+
+@inproceedings{Marneffe2008,
+	author = {Marie-Catherine de Marneffe and Christopher D. Manning},
+	title = {The Stanford typed dependencies representation},
+	booktitle = {CrossParser '08: Coling 2008: Proceedings of the workshop on Cross-Framework and Cross-Domain Parser Evaluation},
+	pages = {1--8},
+	year = {2008},
+	address = {Morristown, NJ, USA},
+	publisher = {Association for Computational Linguistics},
+	isbn = {978-1-905593-50-7},
+	location = {Manchester, United Kingdom},
+	lockkey = {Y}
+}
+
+@inproceedings{Marneffe2006stanford,
+	author = {Marie-Catherine de Marneffe, Bill MacCartney and Christopher D. Manning},
+	title = {Generating typed dependency parses from phrase structure parses},
+	booktitle = {Proceedings of the fifth international conference on Language Resources and Evaluation (LREC-06)},
+	pages = {449--454},
+	year = {2006},
+	lockkey = {Y}
+}
+
+@inproceedings{McDonald2006,
+	author = {McDonald, Ryan and Lerman, Kevin and Pereira, Fernando},
+	title = {Multilingual dependency analysis with a two-stage discriminative parser},
+	booktitle = {CoNLL-X '06: Proceedings of the Tenth Conference on Computational Natural Language Learning},
+	pages = {216--220},
+	year = 2006,
+	address = {Morristown, NJ, USA},
+	publisher = {Association for Computational Linguistics},
+	location = {New York City, New York},
+	lockkey = {Y}
+}
+
 @article{Mel'cuk1987,
 	author = {Igor A. Mel'cuk and Alain Polguere},
 	title = {A Formal Lexicon in Meaning-Text Theory},
@@ -393,6 +533,30 @@ inference.},
 	year = 1987,
 	volume = {13},
 	pages = {261-275},
+	lockkey = {Y}
+}
+
+@inproceedings{Meza-Ruiz2009,
+	author = {Meza-Ruiz, Ivan and Riedel, Sebastian},
+	title = {Jointly identifying predicates, arguments and senses using Markov logic},
+	booktitle = {NAACL '09: Proceedings of Human Language Technologies: The 2009 Annual Conference of the North American Chapter of the Association for Computational Linguistics},
+	pages = {155--163},
+	year = 2009,
+	address = {Morristown, NJ, USA},
+	publisher = {Association for Computational Linguistics},
+	isbn = {978-1-932432-41-1},
+	location = {Boulder, Colorado},
+	lockkey = {Y}
+}
+
+@inproceedings{Mihalcea2004,
+	author = {Mihalcea, Rada and Tarau, Paul and Figa, Elizabeth},
+	title = {PageRank on semantic networks, with application to word sense disambiguation},
+	booktitle = {COLING '04: Proceedings of the 20th international conference on Computational Linguistics},
+	year = 2004,
+	address = {Morristown, NJ, USA},
+	publisher = {Association for Computational Linguistics},
+	doi = {http://dx.doi.org/10.3115/1220355.1220517},
 	lockkey = {Y}
 }
 
@@ -420,62 +584,45 @@ inference.},
 
 }
 
-@inproceedings{Mihalcea2004,
-	author = {Mihalcea, Rada and Tarau, Paul and Figa, Elizabeth},
-	title = {PageRank on semantic networks, with application to word sense disambiguation},
-	booktitle = {COLING '04: Proceedings of the 20th international conference on Computational Linguistics},
-	year = 2004,
-	address = {Morristown, NJ, USA},
-	publisher = {Association for Computational Linguistics},
-	doi = {http://dx.doi.org/10.3115/1220355.1220517},
-	lockkey = {Y}
+@article{Mikolov2013a,
+	author = {Mikolov, Tomas and Chen, Kai and Corrado, Greg and Dean, Jeffrey},
+	title = {Efficient Estimation of Word Representations in Vector Space},
+	year = 2013,
+	journal = {arXiv/1301.3781v3},
 }
 
-@inproceedings{Marneffe2006stanford,
-	author = {Marie-Catherine de Marneffe, Bill MacCartney and Christopher D. Manning},
-	title = {Generating typed dependency parses from phrase structure parses},
-	booktitle = {Proceedings of the fifth international conference on Language Resources and Evaluation (LREC-06)},
-	pages = {449--454},
-	year = {2006},
-	lockkey = {Y}
+@article{Mikolov2013b,
+	author = {Mikolov, Tomas and Sutskever, Ilya and Chen, Kai and Dean, Jeffrey and Corrado, Greg},
+	title = {Distributed Representations of Words and Phrases and their Compositionality},
+	year = 2013,
+	journal = {arXiv/1310.4546},
 }
 
-@inproceedings{Marneffe2008,
-	author = {Marie-Catherine de Marneffe and Christopher D. Manning},
-	title = {The Stanford typed dependencies representation},
-	booktitle = {CrossParser '08: Coling 2008: Proceedings of the workshop on Cross-Framework and Cross-Domain Parser Evaluation},
-	pages = {1--8},
-	year = {2008},
-	address = {Morristown, NJ, USA},
-	publisher = {Association for Computational Linguistics},
-	isbn = {978-1-905593-50-7},
-	location = {Manchester, United Kingdom},
-	lockkey = {Y}
+@article{Milicevic2006,
+	title={A short guide to the meaning-text linguistic theory},
+	author={Mili{\'c}evi{\'c}, Jasmina},
+	journal={Journal of Koralex},
+	number={8},
+	pages={187--233},
+	year={2006},
+	url = {http://www.olst.umontreal.ca/pdf/IntroMTTJM.pdf},
+	doi = {10.1.1.83.7153}
+}
+#  journal={한국사전학},
+#  publisher={한국사전학회}
+
+@unpublished{Minnaar2015a,
+	author = {Alex Minnaar},
+	title = {Word2Vec Tutorial Part I: The SkipGram Model},
+	year = {2015},
+	url = {http://mccormickml.com/assets/word2vec/Alex_Minnaar_Word2Vec_Tutorial_Part_I_The_Skip-Gram_Model.pdf}
 }
 
-@inproceedings{Meza-Ruiz2009,
-	author = {Meza-Ruiz, Ivan and Riedel, Sebastian},
-	title = {Jointly identifying predicates, arguments and senses using Markov logic},
-	booktitle = {NAACL '09: Proceedings of Human Language Technologies: The 2009 Annual Conference of the North American Chapter of the Association for Computational Linguistics},
-	pages = {155--163},
-	year = 2009,
-	address = {Morristown, NJ, USA},
-	publisher = {Association for Computational Linguistics},
-	isbn = {978-1-932432-41-1},
-	location = {Boulder, Colorado},
-	lockkey = {Y}
-}
-
-@inproceedings{McDonald2006,
-	author = {McDonald, Ryan and Lerman, Kevin and Pereira, Fernando},
-	title = {Multilingual dependency analysis with a two-stage discriminative parser},
-	booktitle = {CoNLL-X '06: Proceedings of the Tenth Conference on Computational Natural Language Learning},
-	pages = {216--220},
-	year = 2006,
-	address = {Morristown, NJ, USA},
-	publisher = {Association for Computational Linguistics},
-	location = {New York City, New York},
-	lockkey = {Y}
+@unpublished{Minnaar2015b,
+	author = {Alex Minnaar},
+	title = {Word2Vec Tutorial Part II: The Continuous Bag-of-Words Model},
+	year = {2015},
+	url = {http://mccormickml.com/assets/word2vec/Alex_Minnaar_Word2Vec_Tutorial_Part_II_The_Continuous_Bag-of-Words_Model.pdf}
 }
 
 @book{Nivre2006,
@@ -511,12 +658,20 @@ inference.},
    lockkey = {Y}
 }
 
+@article{Pentus98,
+	author = {Mati Pentus},
+	title = {Lambek Calculus and Formal Grammars},
+	year = 1998,
+	journal = {American Mathematical Society Translations},
+	url = {http://lpcs.math.msu.su/~pentus/ftp/papers/ams.pdf},
+   lockkey = {Y}
+}
+
 @BOOK{PLN,
   title = {Probabilistic Logic Networks},
   publisher = {Springer},
   year = {2008},
-  author = {Goertzel, B. and M. Ikle and I. Goertzel and Heljakka, A.},
-  
+  author = {Goertzel, B. and M. Ikle and I. Goertzel and Heljakka, A.}
 }
 
 @inproceedings{Poon2009,
@@ -532,6 +687,20 @@ inference.},
 	lockkey = {Y}
 }
 
+@article{Rosen1996,
+	author = {Ronald Rosenfeld},
+	title = {A Maximum Entropy Approach to Adaptive Statistical Language Modeling},
+	journal = {Computer Speech \& Language},
+	year = 1996,
+	pages = {187-228},
+	volume = 10,
+	month = July,
+	issue = 3,
+	url = {https://www.cs.cmu.edu/\~roni/papers/me-csl-revised.pdf},
+	doi = {10.1006/csla.1996.0011},
+	publisher = Elsevier,
+	lockkey = {Y}
+}
 
 @book{Saussure1916,
          author = {Ferdinand de Saussure},
@@ -614,14 +783,6 @@ of the Association for Computational Linguistics},
   lockkey = {Y}
 }
 
-@unpublished{Goertzel2014,
-	author = {Ben Goertzel and Linas Vepstas},
-	title = {Langauge Learning},
-	note = {ArXiv abs/1401.3372},
-	year = 2014,
-	url = {https://arxiv.org/abs/1401.3372},
-}
-
 @inproceedings{Wallach2006,
 	author = {Hanna M. Wallach},
 	title = {Topic Modeling: Beyond Bag-of-Words},
@@ -651,20 +812,13 @@ of the Association for Computational Linguistics},
 }
 
 @book{Yuret1998,
-  author = {Deniz Yuret},
+	author = {Deniz Yuret},
 	publisher = {PhD thesis, MIT},
-  title = {Discovery of Linguistic Relations Using Lexical Attraction},
-  year = 1998,
-  keywords = {MI mutual-information},
-  lockkey = {Y}
-}
-
-@book{Zipf35,
-	author = {George Kingsley Zipf},
-	title = {The Psychobiology of Language},
-	publisher = {Houghton-Mifflin},
-	year = 1935,
-
+	title = {Discovery of Linguistic Relations Using Lexical Attraction},
+	year = 1998,
+	url = {http://www2.denizyuret.com/pub/yuretphd.html},
+	keywords = {MI mutual-information},
+	lockkey = {Y}
 }
 
 @book{Zipf32,
@@ -672,7 +826,13 @@ of the Association for Computational Linguistics},
 	title = {Selective Studies and the Principle of Relative Frequency in Language (Cambridge, Mass, 1932)},
 	publisher = {xx},
 	year = 1932,
+}
 
+@book{Zipf35,
+	author = {George Kingsley Zipf},
+	title = {The Psychobiology of Language},
+	publisher = {Houghton-Mifflin},
+	year = 1935
 }
 
 @unpublished{WP-Argument,
@@ -694,4 +854,3 @@ of the Association for Computational Linguistics},
 	title = {Boolean satisfiability problem},
 	note = {$http://en.wikipedia.org/wiki/Boolean_satisfiability_problem$},
 }
-
