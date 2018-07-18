@@ -703,7 +703,7 @@ relative_clauses :: Syntax [Atom]
 relative_clauses = cons <<< relative_clause &&& many (sepMorph "ZIhE" &&> relative_clause)
 
 relative_clause :: Syntax Atom
-relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
+relative_clause = goi <+> noi
     where goi :: Syntax Atom
           goi = ptp (morph "GOI") goiToNoi noi where
               goiToNoi = mkSynonymIso [("pe "  ,"poi ke'a srana ")
@@ -715,9 +715,13 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
                                       ,("goi " ,"poi ke'a du ")]
 
           noi :: Syntax Atom
-          noi = sepMorph "NOI" &&> ((hasKEhA <<< relSentence)
-                                    <+>
-                                    ptp bridi_tail addKEhA relSentence)
+          noi = handleFREEs2 . reorder <<<
+                sepMorph "NOI" &&> frees
+                               &&& noiSentence
+                               &&& (((sepMorph "KUhO" <+> sepMorph "GEhU")
+                                      &&> frees
+                                    ) <+> insert [])
+
               where hasKEhA = Iso f f
                     f a = if atomAny (\case { Link{} -> False
                                             ; (Node _ n _) -> "ke'a" `isInfixOf` n
@@ -728,6 +732,14 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
                     addKEhA = mkIso f g where
                       f = (++) "ke'a "
                       g = drop 4
+
+                    reorder = mkIso f g where
+                        f (f1,(ns,f2)) = (ns,f1++f2)
+                        g (ns,f) = ([],(ns,f))
+
+                    noiSentence = ((hasKEhA <<< relSentence)
+                                    <+>
+                                    ptp bridi_tail addKEhA relSentence)
 
                     relSentence = withNoCTX subsentence
 
