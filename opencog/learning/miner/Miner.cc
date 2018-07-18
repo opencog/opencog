@@ -309,6 +309,12 @@ bool Miner::match(const Handle& pattern, const Handle& text) const
 	if (pattern->get_type() != LAMBDA_LINK)
 		return content_eq(pattern, text);
 
+	// Ignore text of these types
+	Type tt = text->get_type();
+	if (tt == DEFINE_LINK or
+	    tt == DEFINED_SCHEMA_NODE)
+		return false;
+
 	// Otherwise see if pattern matches text
 	return (bool)matched_results(pattern, text);
 }
@@ -461,13 +467,13 @@ Handle Miner::val_shallow_abstract(const Handle& value)
 
 	Type tt = value->get_type();
 	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
-	Handle vardecl = variable_list(rnd_vars),
-		body = createLink(rnd_vars, tt);
+	Handle vardecl = variable_list(rnd_vars);
 
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
-		return lambda(vardecl, local_quote(body));
+		return lambda(vardecl, local_quote(createLink(rnd_vars, tt)));
 	}
+
 	// Links wrapped with QuoteLink and UnquoteLinks
 	if (tt == BIND_LINK or
 	    tt == EVALUATION_LINK or
@@ -478,11 +484,15 @@ Handle Miner::val_shallow_abstract(const Handle& value)
 		for (Handle& var : rnd_vars)
 			uq_vars.push_back(unquote(var));
 
-		return lambda(vardecl, quote(body));
+		return lambda(vardecl, quote(createLink(uq_vars, tt)));
 	}
 
-	// Generic non empty link, let's abstract away all the arguments
-	return lambda(vardecl, body);
+	// Links to ignore (till supported)
+	if (tt == DEFINE_LINK)
+		return Handle::UNDEFINED;
+
+	// Generic non empty link, abstract away all the arguments
+	return lambda(vardecl, createLink(rnd_vars, tt));
 }
 
 Handle Miner::variable_list(const HandleSeq& vars)
