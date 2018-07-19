@@ -2155,14 +2155,24 @@ where the matrix
 \end_inset
 
  is a concatenation of identity matrixes.
- 
 \begin_inset Formula 
 \[
-S=\begin{bmatrix}1 & 0 &  &  & 1 & 0 &  &  &  & 1 & 0\\
-0 & 1 &  &  & 0 & 1 &  &  & \cdots & 0 & 1\\
- &  & \ddots &  &  &  & \ddots &  & \cdots &  &  & \ddots\\
- &  &  & 1 &  &  &  & 1 &  &  &  &  & 1
-\end{bmatrix}
+S=\left[\left|\begin{array}{cccc}
+1 & 0\\
+0 & 1\\
+ &  & \ddots\\
+ &  &  & 1
+\end{array}\right|\left|\begin{array}{cccc}
+1 & 0\\
+0 & 1\\
+ &  & \ddots\\
+ &  &  & 1
+\end{array}\right|\cdots\left|\begin{array}{cccc}
+1 & 0\\
+0 & 1\\
+ &  & \ddots\\
+ &  &  & 1
+\end{array}\right|\right]
 \]
 
 \end_inset
