@@ -2601,8 +2601,129 @@ In operational practice, dependency grammars work with word-classes, and
  and then assign words to each.
  Each grammatical class is associated with a set of disjuncts that indicate
  how a word in that class can attach to words in other classes.
- This can be made notationally precise, although it requires some background
- theory.
+ This can be made notationally precise.
+\end_layout
+
+\begin_layout Standard
+Given a word 
+\begin_inset Formula $w$
+\end_inset
+
+ and the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ it was observed with, the goal is to classify it into some grammatical
+ category 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ Writing the probability of that assignment as 
+\begin_inset Formula $p(w,d,g)$
+\end_inset
+
+, one then must have that 
+\begin_inset Formula 
+\[
+p\left(w,d\right)=p\left(w,d,*\right)=\sum_{g\in G}p\left(w,d,g\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $G$
+\end_inset
+
+ is the set of all grammatical classes.
+ Typically, any given 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ pair can belong to only one grammatical category.
+ So, for example, the pair
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	girl: the-;
+\end_layout
+
+\end_inset
+
+would be associated with 
+\begin_inset Formula $g=\mathtt{<common-nouns>}$
+\end_inset
+
+.
+ The assignment need not always be unambiguous; suppose one had classes
+ 
+\begin_inset Formula $g=\mathtt{<cutting-actions>}$
+\end_inset
+
+ and 
+\begin_inset Formula $g=\mathtt{<looking-verbs>}$
+\end_inset
+
+; the assignment of 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	saw: I- & wood+;
+\end_layout
+
+\end_inset
+
+would have non-zero probabilities for both 
+\begin_inset Formula $g$
+\end_inset
+
+'s.
+ 
+\end_layout
+
+\begin_layout Standard
+The correct assignment of a pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ is not known, a priori.
+ Solving this problem can be done in a fashion similar to the previous examples.
+ Associate to each pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ a vector 
+\begin_inset Formula $\vec{m}_{w,d}$
+\end_inset
+
+ whose individual vector components are the (unknown) probabilities 
+\begin_inset Formula $p(w,d,g)$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula 
+\[
+\left[\vec{m}_{w,d}\right]_{g}=p(w,d,g)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+xxxx
+\end_layout
+
+\begin_layout Standard
+, although it requires some background theory.
  
 \end_layout
 
