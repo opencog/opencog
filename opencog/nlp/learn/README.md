@@ -842,6 +842,31 @@ are as follows:
   counts for the disjuncts.  For a trial-run, a half-hour should be
   sufficient.
 
+Disjunct Marginal Statistics
+----------------------------
+The next steps require marginal statistics to be available for the
+disjuncts. The previous step gathered a large number of observation
+counts for disjuncts. These need to be summarized, so that one obtains
+per-word statistics.  Marginals will be needed both form the
+pseudo-csets and for the cross-connector sets.  First, compute the
+marginals for the pseudo-csets:
+```
+  (sql-open "postgres:///en_disjuncts?user=linas")
+  (define pca (make-pseudo-cset-api))
+  (define psa (add-pair-stars pca))
+  (define btr (batch-transpose psa))
+  (psa 'fetch-pairs)
+  (btr 'left-marginals)
+  (btr 'right-marginals)
+  (btr 'mmt-marginals)
+```
+To obtain the marginals for the cross-connectors, repeat the above
+steps, but this time with `(make-connector-vec-api)` as the base class.
+
+The above omputations may take hours or days, depending on the size of
+the disjunct set.  Be sure to make a backup copy of the resulting
+database before proceeding to the next step.
+
 
 Determining Grammatical Classes
 -------------------------------
