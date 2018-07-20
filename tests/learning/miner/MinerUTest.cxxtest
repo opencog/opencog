@@ -509,28 +509,25 @@ void MinerUTest::test_AB_AC()
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y);
 
-	// Run C++ pattern miner
-	HandleTree cpp_results = cpp_pm(texts, 2), // TODO: fix when texts
-                                              // is replaced by _as
-		cpp_expected(al(LAMBDA_LINK, VarXY, InhXY),
-		             { al(LAMBDA_LINK, Y, InhAY) });
+	// Run C++ pattern miner (using _as for testing more diverse
+	// content)
+	HandleTree cpp_results = cpp_pm(_as, 2);
+	Handle cpp_expected = al(LAMBDA_LINK, Y, InhAY);
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
 
-	TS_ASSERT(content_eq(cpp_results, cpp_expected));
+	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
-	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 10),
-		ure_expected = mk_minsup_evals(2,
-		                               { top,
-		                                 al(LAMBDA_LINK, VarXY, InhXY),
-		                                 al(LAMBDA_LINK, Y, InhAY) });
+	// Run URE pattern miner (using _as for testing more diverse
+	// content)
+	Handle ure_results = ure_pm(_as, 2, 10),
+		ure_expected = mk_minsup_eval(2, al(LAMBDA_LINK, Y, InhAY));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
 
-	TS_ASSERT(content_eq(ure_results, ure_expected));
+	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
 }
 
 void MinerUTest::test_AB_AC_BC()
