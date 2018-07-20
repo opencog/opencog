@@ -477,7 +477,7 @@ Handle Miner::val_shallow_abstract(const Handle& value)
 	// Links wrapped with QuoteLink and UnquoteLinks
 	if (tt == BIND_LINK or
 	    tt == EVALUATION_LINK or
-	    tt == EXECUTION_OUTPUT_LINK)
+	    nameserver().isA(tt, FUNCTION_LINK))
 	{
 		// Wrap variables in UnquoteLink
 		HandleSeq uq_vars;
