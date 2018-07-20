@@ -77,7 +77,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --FEhE switch between temporal/spatioal interval_propertys
 
 lojban :: Syntax (Maybe Atom)
-lojban = finalCheck <<< (just . text <+> insert Nothing) <&& optMorph "FAhO"
+lojban = finalCheck <<< text <&& optMorph "FAhO"
 
 finalCheck :: SynIso a a
 finalCheck = Iso f g where
@@ -110,8 +110,8 @@ text_1 = handle
     &&& optional paragraphs
 -}
 
-text :: Syntax Atom
-text = text_1 <+> free_frees
+text :: Syntax (Maybe Atom)
+text = (just <<< ifNothingFail . text_1 <+> free_frees) <+> insert Nothing
 
 free_frees :: Syntax Atom
 free_frees = filterDummy . handleFREEs . addfst dummy . ifEmptyFail . frees
@@ -133,33 +133,42 @@ toLO = genInstance "SubsetLink" . _ssl . handleBRIDI
      . addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
 
 
-handleStatementCon1 :: SynIso (Con,Atom) Atom
+handleStatementCon1 :: SynIso (Con,Maybe Atom) Atom
 handleStatementCon1 = listl . cons
-                   . ((handleCON . second prepare) *** gsAtoms)
-                   . unit
+                    . ((handleCON . second prepare) *** gsAtoms)
+                    . unit
+                    . (id ||| addsnd dummy)
+                    . ifJustB
     where prepare = first instanceOf . addfst (cCN "zo'e" noTv)
           handleCON = (withFlagValue "StatementCon" "one" handleCon)
+          dummy = cCN "dummy" noTv
 
-text_1 :: Syntax Atom
-text_1 = ((handleStatementCon1 ||| handleNIhO) . distribute ||| id) . ifJustA
-        <<< optional (left . checkEmpty . (manySep (sepMorph "I")
-                        &&> optional joik_jek
-                        &&& (optional (stag <&& sepMorph "BO")
-                             <+> nothing <<< optMorph "BO"))
-                        -- &&& frees
+text_1 :: Syntax (Maybe Atom)
+text_1 = (just . (handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
+        <<< optional (left . (checkEmpty . (manySep (sepMorph "I")
+                                            &&> optional joik_jek
+                                            &&& (optional (stag <&& sepMorph "BO")
+                                                 <+> nothing <<< optMorph "BO"))
+                             &&& frees)
                       <+>
                       right . (someNIhO &&& frees))
-        &&& paragraphs
+        &&& optional paragraphs
     where handleNIhO = listl . tolist2
                              . second (handleFREEs.commute)
                              . inverse associate
+                             . (id ||| addsnd dummy)
+                             . ifJustB
+          dummy = cCN "dummy" noTv
+          handleCON :: SynIso ((Con,[Free]),Maybe Atom) Atom
+          handleCON = handleFREEs . commute . second handleStatementCon1
+                    . inverse associate . first commute
           someNIhO = mkIso f g . countNulls . some (sepMorph "NIhO")
           f i = cAN ("paragraphLevel" ++ show i)
           g (AN name) = read $ drop 14 name
 
 checkEmpty :: SynIso Con Con
 checkEmpty = Iso f g where
-    f (Nothing,Nothing) = lift $ Left "No connectives"
+    f (Nothing,Nothing) = lift $ Left "No connectives or frees"
     f a = pure a
     g a = pure a
 
@@ -242,7 +251,7 @@ statement_2 = (handleStatementCon ||| id) . ifJustB
 statement_3 :: Syntax Atom
 statement_3 = sentence
             <+> (handle <<< optional tag <&& sepMorph "TUhE" &&& frees
-                                         &&& text_1
+                                         &&& ifNothingFail . text_1
                                          &&& ((sepMorph "TUhU" &&> frees)
                                               <+> insert [])
                 )
@@ -952,7 +961,7 @@ kohaP = da <+> ma <+> ko <+> keha <+> koha
           keha = concept . word "ke'a"
 
 luP :: Syntax Atom
-luP = instanceOf <<< sepMorph "LU" &&> text <&& optMorph "LIhU"
+luP = instanceOf . ifNothingFail <<< sepMorph "LU" &&> text <&& optMorph "LIhU"
 
 setWithSize :: SynIso (Atom,Atom) Atom
 setWithSize = sndToState 2 . second (tolist2 . (sizeL *** setTypeL)) . makeSet
@@ -1674,7 +1683,14 @@ vocatives = mapIso (implicationOf . predicate) . merge
             g _ = error "Not implemented vocative merge g."
 
 toTOI :: Syntax Atom
-toTOI = sepMorph "TO" &&> text <&& optMorph "TOI"
+toTOI = ifNothingFail <<< sepMorph "TO" &&> text <&& optMorph "TOI"
+
+--FIXME: Using this to liberatly try to remove where possible
+ifNothingFail :: SynIso (Maybe a) a
+ifNothingFail = Iso f g where
+    f (Just a) = pure a
+    f (Nothing) = lift $ Left "Nothing not allowed."
+    g a = pure (Just a)
 
 --Vice Versa
 --soi :: Syntax Atom
