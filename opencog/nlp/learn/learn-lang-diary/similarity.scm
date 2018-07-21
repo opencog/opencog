@@ -27,6 +27,10 @@
 (define psa (add-pair-stars pca))
 (define pta (add-transpose-api psa))
 
+(load-atoms-of-type 'SimilarityLink)
+(cog-count-atoms 'SimilarityLink)
+(pca 'fetch-pairs)
+
 (define pco (add-pair-cosine-compute pta))
 (define bco
 	(batch-similarity pta #f "pseudo-cset Cosine-*" 0.0
@@ -59,6 +63,8 @@
 (define crs (add-pair-stars cra))
 (define crt (add-transpose-api crs))
 
+(cra 'fetch-pairs)
+
 (define cco (add-pair-cosine-compute crt))
 (define bcr
 	(batch-similarity crt #f "Cross Cosine-*" 0.0
@@ -86,4 +92,11 @@
 ; -------------
 (cog-count-atoms 'SimilarityLink)
 
-(cog-map-type (lambda (atm) (store-atom atm) #f) 'SimilarityLink)
+(define (store-sims)
+	(cog-map-type (lambda (atm) (store-atom atm) #f) 'SimilarityLink))
+
+(define (store-regularly)
+	(sleep 3600)
+	(store-sims)
+	(format #t "Done storing ~A\n" (strftime "%c" (localtime (current-time))))
+	(store-regularly))

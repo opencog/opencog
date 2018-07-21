@@ -14583,7 +14583,8 @@ Done 10000 of 137078 outer loops in 1074 secs, pairs=1319927 (1229.0 pairs/sec)
 Done 130000 of 137078 outer loops in 2877 secs, pairs=22949051 (949.64 pairs/sec)
 Done computing 24213074 pair MI's in 23091 secs
 Going to do column and row subtotals
-
+Finished left entropy subtotals in 405905 secs
+Finished right entropy subtotals in 6812 secs
 
 
 ----------------
@@ -15087,8 +15088,68 @@ prs
 compcnt
 savecnt
 
+=========================================================================
+(statprof (lambda ()
+   (fcr 'compute-similarity (Word "this")(Word "that")) #f))
 
 
+%     cumulative   self
+time   seconds     seconds  procedure
+ 39.78     30.06     30.06  cog-link
+ 11.86      8.96      8.96  cog-outgoing-atom
+ 10.93      8.26      8.26  cog-outgoing-set
+  5.63     13.41      4.26  opencog/nlp/learn/connector-vec.scm:135:24:not-var?
+  4.63      3.50      3.50  cog-handle
+  3.36      2.54      2.54  opencog/matrix/transpose.scm:132:8
+  3.28      2.48      2.48  cog-count
+  2.61      1.97      1.97  opencog/matrix/object-api.scm:513:24
+  2.44     10.61      1.84  srfi/srfi-1.scm:729:0:take-while
+  1.93     50.14      1.46  opencog/nlp/learn/connector-vec.scm:131:16:get-pair
+  1.60 6840244.56      1.21  srfi/srfi-1.scm:590:5:map1
+  1.51      1.14      1.14  opencog/base/utilities.scm:134:0:gar
+  1.35      4.51      1.02  opencog/base/atom-cache.scm:84:8:atom-hash
+  1.18      5.78      0.89  srfi/srfi-1.scm:760:0:drop-while
+  1.01      0.95      0.76  srfi/srfi-1.scm:586:2:map
+  1.01      0.76      0.76  opencog/nlp/learn/connector-vec.scm:362:16
+  0.84      0.64      0.64  equal?
+  0.50      0.38      0.38  *
+  0.42      0.32      0.32  opencog/base/atom-cache.scm:86:22
+  0.34      6.23      0.25  srfi/srfi-1.scm:458:2:fold
+  0.34      3.11      0.25  opencog/matrix/fold-api.scm:233:16:get-func-count
+  0.34      0.25      0.25  opencog/matrix/fold-api.scm:226:32
+  0.34      0.25      0.25  procedure?
+  0.34      0.25      0.25  opencog/base/utilities.scm:142:0:gdr
+  0.34      0.25      0.25  opencog/base/atom-cache.scm:85:8:atom-assoc
+  0.34      0.25      0.25  opencog/matrix/fold-api.scm:186:32
+  0.25      0.19      0.19  list?
+  0.25      0.19      0.19  opencog/base/atom-cache.scm:93:40
+  0.25      0.19      0.19  opencog/matrix/fold-api.scm:251:16
+  0.17      2.29      0.13  opencog/matrix/support.scm:308:40
+  0.17      0.13      0.13  cog-atomspace-clear
+  0.17      0.13      0.13  opencog-extension
+  0.17      0.13      0.13  opencog/matrix/fold-api.scm:236:40
+  0.08      5.66      0.06  hashx-set!
+  0.08      0.25      0.06  opencog/base/atom-cache.scm:88:8
+  0.08      0.06      0.06  cog-new-link
+  0.08      0.06      0.06  opencog/nlp/learn/connector-vec.scm:124:16:get-count
+  0.00     75.57      0.00  ice-9/eval.scm:618:6
+  0.00     75.57      0.00  opencog/matrix/similarity-api.scm:193:16:compute-sim
+  0.00     75.50      0.00  opencog/matrix/cosine.scm:128:16:compute-right-cosine
+  0.00     68.89      0.00  opencog/matrix/support.scm:300:16:sum-right-count
+  0.00     11.44      0.00  srfi/srfi-1.scm:634:2:for-each
+  0.00      5.91      0.00  opencog/matrix/fold-api.scm:224:16:right-star-union
+  0.00      3.69      0.00  opencog/matrix/support.scm:291:32
+  0.00      2.73      0.00  opencog/matrix/support.scm:319:16:sum-right-length
+  0.00      0.83      0.00  find
+  0.00      0.76      0.00  ice-9/boot-9.scm:834:2:with-throw-handler
+  0.00      0.38      0.00  opencog/matrix/object-api.scm:387:32
+  0.00      0.38      0.00  opencog/matrix/object-api.scm:404:32
+  0.00      0.38      0.00  opencog/matrix/object-api.scm:418:16:do-run-query
+  0.00      0.19      0.00  hash-for-each-handle
+---
+Sample count: 1189
+Total time: 75.565334546 seconds (128.369109622 seconds in GC)
+#f
 
 
 =========================================================================
