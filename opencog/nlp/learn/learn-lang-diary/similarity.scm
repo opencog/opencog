@@ -19,7 +19,7 @@
 ; ALTER DATABASE en_dj_ptwo RENAME TO en_dj_two_sim;
 ;
 
-(sql-open "postgres:///en_dj_two_sim?user=linas&password=asdf")
+; (sql-open "postgres:///en_dj_two_sim?user=linas&password=asdf")
 
 ; -------------
 ; Cosines between words, using dj's
@@ -36,24 +36,27 @@
 	(batch-similarity pta #f "pseudo-cset Cosine-*" 0.0
 		(lambda (wa wb) (pco 'right-cosine wa wb))))
 
-(pco 'right-cosine (Word "other") (Word "same")) ; 0.5866011982435116
-(bco 'compute-similarity (Word "other") (Word "same"))
+; (pco 'right-cosine (Word "other") (Word "same")) ; 0.5866011982435116
+; (bco 'compute-similarity (Word "other") (Word "same"))
 
-(bco 'batch-compute 12)
+; (bco 'batch-compute 12)
 ; Done 10/12 frac=100.0% Time: 2201 Done: 98.5% rate=0.030 prs/sec
 ; Done 70/72 frac=97.42% Time: 23066 Done: 100.0% rate=0.108 prs/sec
 
 ; -------------
 ; FMI between words, using dj's -- below works
-(define pmi (add-symmetric-mi-compute psa))
+(define pcam (make-pseudo-cset-api))
+(define psam (add-pair-stars pcam))
+(define ptam (add-transpose-api psam))
+(define pmi (add-symmetric-mi-compute psam))
 (define bmi
-	(batch-similarity pta #f "pseudo-cset MI-*" -999.0
+	(batch-similarity ptam #f "pseudo-cset MI-*" -999.0
 		(lambda (wa wb) (pmi 'mmt-fmi wa wb))))
 
-(pmi 'mmt-fmi (Word "other") (Word "same")) ; 4.123194356470049
-(bmi 'compute-similarity (Word "other") (Word "same"))
+; (pmi 'mmt-fmi (Word "other") (Word "same")) ; 4.123194356470049
+; (bmi 'compute-similarity (Word "other") (Word "same"))
 
-(bmi 'batch-compute 12)
+; (bmi 'batch-compute 12)
 ; Done 10/12 frac=100.0% Time: 1299 Done: 98.5% rate=0.050 prs/sec
 ; Done 70/72 frac=97.42% Time: 13926 Done: 100.0% rate=0.179 prs/sec
 
@@ -70,23 +73,27 @@
 	(batch-similarity crt #f "Cross Cosine-*" 0.0
 		(lambda (wa wb) (cco 'right-cosine wa wb))))
 
-(cco 'right-cosine (Word "other") (Word "same")) ; 0.5853349406547999
-(bcr 'compute-similarity (Word "other") (Word "same"))
+; (cco 'right-cosine (Word "other") (Word "same")) ; 0.5853349406547999
+; (bcr 'compute-similarity (Word "other") (Word "same"))
 
-(bcr 'batch-compute 12)
+; (bcr 'batch-compute 12)
 ; Done 10/14 Frac=11.76% Time: 4591 Done: 93.4% Rate=0.002 prs/sec (459.1 sec/pr)
 
 ; -------------
 ; FMI between words, using crossovers -- below works
-(define cmi (add-symmetric-mi-compute crs))
+(define cram (make-connector-vec-api))
+(define crsm (add-pair-stars cram))
+(define crtm (add-transpose-api crsm))
+
+(define cmi (add-symmetric-mi-compute crsm))
 (define bci
-	(batch-similarity crt #f "Cross MI-*" -999.0
+	(batch-similarity crtm #f "Cross MI-*" -999.0
 		(lambda (wa wb) (cmi 'mmt-fmi wa wb))))
 
-(cmi 'mmt-fmi (Word "other") (Word "same")) ; 3.2194667964612314
-(bci 'compute-similarity (Word "other") (Word "same")) ;
+; (cmi 'mmt-fmi (Word "other") (Word "same")) ; 3.2194667964612314
+; (bci 'compute-similarity (Word "other") (Word "same")) ;
 
-(bci 'batch-compute 12)
+; (bci 'batch-compute 12)
 ; Done 10/12 frac=95.38% Time: 20314 Done: 98.5% rate=-0.00 prs/sec
 
 ; -------------
@@ -98,5 +105,7 @@
 (define (store-regularly)
 	(sleep 3600)
 	(store-sims)
-	(format #t "Done storing ~A\n" (strftime "%c" (localtime (current-time))))
+	(format #t "Done storing ~A ~A\n"
+		(cog-count-atoms 'SimilarityLink)
+		(strftime "%c" (localtime (current-time))))
 	(store-regularly))
