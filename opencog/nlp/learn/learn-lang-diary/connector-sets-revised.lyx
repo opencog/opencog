@@ -331,16 +331,27 @@ key "Vepstas2017sheaves"
 \end_layout
 
 \begin_layout Standard
+This report examines one specific dataset of word-disjunct pairs.
+ It explores the overall distribution of words and disjuncts, which are
+ unsuprisingly Zipfian in nature.
+ It explores various different measures of similarity between words, such
+ as cosine distance and entropic distance, either of which are employable
+ for discerning the grammatical classes into which the word-disjunct pairs
+ can be assigned.
+ In effect, this provides the background needed for understanding how words
+ are assigned to grammatical categories, in practice.
+ It characterizes the nature and structure of natural language, when viewed
+ from the path of disjuncts derived from MST parses derived from the mututal
+ information (MI) distribution of word pairs.
+ The analysis is similar in spirit to an earlier analysis of the statistics
+ of word-pairs.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2009"
 
-\end_layout
+\end_inset
 
-\begin_layout Standard
-is a report on a dataset of disjuncts and connector sets, extracted from
- MST parses of a batch of sentences.
- First, a recap of what these are, then a characterization of the database
- contents, and finally, a report on the grammatical similarity of words
- in the dataset.
- 
+
 \end_layout
 
 \begin_layout Subsection*
