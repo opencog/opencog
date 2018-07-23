@@ -7411,7 +7411,81 @@ Given the earlier Zipfian results on the average degree
 Similarity
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Standard
+The primary intended use of the connector set dataset is to provide input
+ to the measurement of the syntactic (and semantic) similarity of words,
+ so that they can be organized into grammatical classes (colloquially, into
+ parts of speech).
+ Two words are grammatically similar if they share many disjuncts in common,
+ that is, if they are used in sentences in much the same walk.
+ Thus, for example, one might imagine that the words 
+\begin_inset Quotes eld
+\end_inset
+
+run
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+trot
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+jog
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+walk
+\begin_inset Quotes erd
+\end_inset
+
+ might get used in similar ways, sometimes being almost interchangeable.
+ Thus, it is interesting to develop metrics by which similarity might be
+ gauged.
+\end_layout
+
+\begin_layout Standard
+A number of different metrics are possible, and many are proposed in the
+ section that follows.
+ Two are of particular interest.
+ The first is the cosine similarity; this is interesting, if for no other
+ reason than that it is widely defined and used.
+ The second is the entropic similarity.
+ Thus lurks in many contexts under the name of 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+; however, the term 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+ has already been heavily used in the previous sections, and the entropic
+ similarity is something different; it resembles the cosine similarity,
+ but has much nicer properties, when one is concerned with maximizing the
+ information content over large datasets.
+ 
+\end_layout
+
+\begin_layout Subsection
 Disjunct Cosine Similarity
 \begin_inset CommandInset label
 LatexCommand label
