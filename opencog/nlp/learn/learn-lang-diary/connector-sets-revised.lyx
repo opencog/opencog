@@ -172,8 +172,21 @@ complete
 
 , in the sense that it is sufficient to construct and accurate parser of
  language.
- This is unlike the situation encountered with Word2Vec or AdaGram, where
- one can discover 
+ This is unlike the situation encountered with Word2Vec
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013a"
+
+\end_inset
+
+ or AdaGram
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bartunov2015"
+
+\end_inset
+
+, where one can discover 
 \begin_inset Quotes eld
 \end_inset
 
@@ -196,6 +209,33 @@ key "Vepstas2018skippy"
  The goal of this report is to provide a fairly detailed statistical analysis
  of the distribution of disjuncts, thereby characterizing the structure
  of natural language at a grammatical, syntactic level.
+\end_layout
+
+\begin_layout Standard
+The origin of the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+ comes from the Link Grammar theory of semantic-syntactic parsing.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ Link Grammar is a form of dependency grammar; it is essentially equivalent
+ to other forms of dependency grammar, in that Link Grammar dependencies
+ can be algorithmically converted into other kinds of dependencies, as well
+ as into phrase-structure grammars.
+\end_layout
+
+\begin_layout Standard
+forumlation of natural language syntax.
 \end_layout
 
 \begin_layout Standard
