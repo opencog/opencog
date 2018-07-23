@@ -232,14 +232,106 @@ key "Sleator1991,Sleator1993"
  to other forms of dependency grammar, in that Link Grammar dependencies
  can be algorithmically converted into other kinds of dependencies, as well
  as into phrase-structure grammars.
+ In Link Grammar, a disjunct is defined as an ordered sequence of connectors;
+ those connectors indicate how a word can attach or connect to othe words,
+ forming links.
+ A reasonable conceptual model for a disjunct is to think of it as a jigsaw-puzz
+le piece; the connectors correspond to the tabs and slots on the jigsaw-puzzle
+ piece.
+ Parsing a sentence then consists of assembling jigsaw pieces together,
+ in such a way that there are no unconnected tabs or slots at the end of
+ the process.
+ The links between words then indicate the syntactic and semantic relationships
+ between them.
 \end_layout
 
 \begin_layout Standard
-forumlation of natural language syntax.
+A similar relationship between words can be obtained by performing a maximum-spa
+nning-tree (MST) parse, where links between words are the ones that maximize
+ the mutual information between the word-pairs.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+ The MST approach to natural language grammar has been well-explored, and
+ provides a reasonable accurate model.
+ The primary issue is that, when interpreted naively, it does not provide
+ any labels that describe the relationships between words, such as 
+\begin_inset Quotes eld
+\end_inset
+
+subject
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+object
+\begin_inset Quotes erd
+\end_inset
+
+ relationships, which are considered to be key to the symbolic, linguistic
+ grammatical structure of a language.
+ 
 \end_layout
 
 \begin_layout Standard
-resembles the somewhat 
+A bridge can be built between the the unlabelled MST representation of a
+ parsed sentence, and the labelled Link Grammar parse of a sentence.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+ This is done by starting with an unlabelled MST parse of a sentence, and
+ then applying a label to each link, that label consisting of the word-pair,
+ itself.
+ In effect, one obtains a jigsaw-puzzle piece, where each tab and slot is
+ labelled by the word that the tab/slot is allowed to connect to.
+ After accumulating a large database of statistics on such jigsaw-puzzle
+ pieces, one can compare them, looking for similarity.
+ By clustering together similar pieces, one is effectively creating a dictionary
+ or lexis of grammatical categories (parts of speech) together with the
+ grammatical information as to how these can be assembled into grammatically
+ correct, semantically meaningful sentences.
+\end_layout
+
+\begin_layout Standard
+This approach appears to be sufficient to distinguish between different
+ meanings associated with a word.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ The final outcome is not dissimilar to popular neural-net techniques, although
+ the path taken is entirely different.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+ The overall approach of discerning graph structure from large bodies of
+ statistical data is hypothesized to be generalizable to domains far outside
+ of linguistics, including genomics and proteomics.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017sheaves"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Standard
