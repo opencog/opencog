@@ -48,8 +48,9 @@ namespace opencog
 // TODO:
 // 7. make sure that filtering is still meaningfull
 
-XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
-                             const Handle& ipat, int maxd, double io)
+MinerParameters::MinerParameters(unsigned ms, unsigned iconjuncts,
+                                 const Handle& ipat, int maxd,
+                                 double io)
 	: minsup(ms), initconjuncts(iconjuncts), initpat(ipat),
 	  maxdepth(maxd), info(io)
 {
@@ -79,14 +80,19 @@ XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
 	initconjuncts = Miner::conjuncts(initpat);
 }
 
-Miner::Miner(AtomSpace& as, const XPMParameters& prm)
-	: text_as(as), param(prm) {}
+Miner::Miner(const MinerParameters& prm)
+	: param(prm) {}
 
-HandleTree Miner::operator()()
+HandleTree Miner::operator()(const AtomSpace& texts_as)
 {
 	HandleSet texts;
-	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
-	                            opencog::ATOM, true);
+	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
+	                             opencog::ATOM, true);
+	return operator()(texts);
+}
+
+HandleTree Miner::operator()(const HandleSet& texts)
+{
 	// If the initial pattern is specialized, this initial filtering
 	// may save some computation
 	HandleSet fltexts = filter_texts(param.initpat, texts);
@@ -97,6 +103,7 @@ HandleTree Miner::specialize(const Handle& pattern,
                              const HandleSet& texts,
                              int maxdepth)
 {
+	// TODO: decide what to choose and remove or comment
 	// return specialize_alt(pattern, texts, Valuations(pattern, texts), maxdepth);
 	return specialize(pattern, texts, Valuations(pattern, texts), maxdepth);
 }
@@ -651,25 +658,25 @@ Handle Miner::restricted_satisfying_set(const Handle& pattern,
                                         const HandleSet& texts,
                                         int maxf)
 {
-	static AtomSpace tmp_text_as;
-	tmp_text_as.clear();
+	static AtomSpace tmp_texts_as;
+	tmp_texts_as.clear();
 	HandleSeq tmp_texts;
 	for (const auto& text : texts)
-		tmp_texts.push_back(tmp_text_as.add_atom(text));
+		tmp_texts.push_back(tmp_texts_as.add_atom(text));
 
 	// Avoid pattern matcher warning
 	// TODO: support 1 < conjuncts
 	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
-		return tmp_text_as.add_link(SET_LINK, tmp_texts);
+		return tmp_texts_as.add_link(SET_LINK, tmp_texts);
 
 	// Run the pattern matcher
-	AtomSpace tmp_query_as(&tmp_text_as);
+	AtomSpace tmp_query_as(&tmp_texts_as);
 	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
 		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = (maxf < 0 ? satisfying_set(&tmp_text_as, gl)
-		           : satisfying_set(&tmp_text_as, gl, maxf));
+		results = (maxf < 0 ? satisfying_set(&tmp_texts_as, gl)
+		           : satisfying_set(&tmp_texts_as, gl, maxf));
 	return results;
 }
 

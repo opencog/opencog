@@ -179,12 +179,4 @@ std::string oc_to_string(const HTreeNode& htn,
 	return htn.to_string();
 }
 
-std::string oc_to_string(const HTree& htree,
-                         const std::string& /*indent*/)
-{
-	stringstream ss;
-	ss << "rootNode:" << std::endl << htree.rootNode->to_string();
-	return ss.str();
-}
-
 }

@@ -34,15 +34,19 @@
 "
   Try to find (and execute) the matching rules given an input TXT.
 "
-  (ghost TXT)
+  (set! ghost-result '())
+  (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
   (process-ghost-buffer)
+
   (let ((rule (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent)))))
     (map (lambda (r) (psi-imply r)) rule)
     ; not using ghost-last-executed, because getting back to the rule
     ; from the alias atom is a hassle.
     (set! expt-var rule)
   )
-  *unspecified*)
+
+  ghost-result
+)
 
 (define-public (ghost-action-executed?)
   (if (null? expt-var) (stv 0 1) (psi-action-executed? (car expt-var)))

@@ -20,6 +20,8 @@ This approach has its own limitation -- it doesn't work well with predicates (e.
 
 A better yet still experimental approach is to use ECAN to help with rule discovery. When sensory input is received, certain atoms, which can be `WordNodes`, `PredicateNodes`, or some other types of atoms, will be stimulated, results in an increase in their importance value. For now, we focus on the short-term importance (STI) only. The [Importance Diffusion Agent](https://github.com/opencog/opencog/blob/master/opencog/attention/ImportanceDiffusionBase.h) will then diffuse the STI from the atoms being stimulated to their neighboring atoms and, depending on the situation, may bring some actual psi-rules that are potentially applicable to the context to the attentional focus. The action selector in GHOST will look at the attentional focus, pick and evaluate any psi-rules that are in there, and eventually return the most appropriate one that can be executed.
 
+A rule that has been triggered will not be triggered again unless you `^keep()` it (see below), but even if you do, it still won't be triggered again within the refractory period. The default refractory period is 1 second.
+
 ## Syntax
 
 The syntax of GHOST rules is modeled heavily on [ChatScript](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules). However, GHOST uses several ChatScript features for different purposes than they are normally used in ChatScript; and also contains some additional features.
@@ -79,10 +81,10 @@ For example, if there are five rules under the above `please_user=0.8` goal, the
 Additionally, when a rule in a sequence is triggered, it will have a lower STI while the next rules in the same sequence will receive a boost in STI, so as to increase the chance of being selected in the next cycle.
 
 Updated May 2018:
-Looks like the above methods of biasing the rules to be triggered in the defined order are not enough to give the behavior that one would expect, so an extra condition has been added to the context of the rules to make sure the rule will be triggered only if the previous rules has been triggered.
+Looks like the above methods of biasing the rules to be triggered in the defined order are not enough to give the behavior that one would expect, so an extra condition has been added to the context of the rules to make sure the rule will be triggered only if the previous rules has been triggered under the same ordered-goal.
 
 Updated Jun 2018:
-Another experimantal feature has been added -- to select rules based on the pattern specificity, i.e. the more specific rule will always be preferred to less specific one. For example, if there are two rules that can potentially be selected, `(how are you)` and `(how are *)`, then `(how are you)` will be selected.
+Another experimantal feature has been added -- to select rules based on the pattern specificity, i.e. the more specific rule will always be preferred to less specific one. For example, if there are two rules that can potentially be selected, `(how are you)` and `(how are *)`, then `(how are you)` will be selected. You can do `(ghost-set-specificity-based-as #f)` to turn it off.
 
 2) Rule level goal(s)
 
@@ -140,10 +142,10 @@ Similarly for creating concepts:
 (ghost-parse "concept: ~young (child kid youngster)")
 ```
 
-One can also parse a rule file by using `ghost-parse-file`:
+One can also parse one or more rule files by using `ghost-parse-files`:
 
 ```
-(ghost-parse-file "path/to/the/rule/file")
+(ghost-parse-files "path/to/the/rule/file1" "path/to/the/rule/file2")
 ```
 
 5) Send input to GHOST
@@ -192,7 +194,6 @@ agents-start opencog::AFImportanceDiffusionAgent opencog::WAImportanceDiffusionA
              (opencog nlp)
              (opencog nlp relex2logic)
              (opencog openpsi)
-             (opencog attention)
              (opencog ghost)
              (opencog ghost procedures))
 ```
@@ -211,7 +212,11 @@ Note, rules being created after running this will be slimmer (preferred) and can
 (ghost-parse "#goal: (novelty=0.24) u: (eat apple) I want an apple")
 ```
 
-Or use `ghost-parse-file` to parse a rule file.
+Or use `ghost-parse-files` to parse rule files.
+
+```
+(ghost-parse-files "path/to/the/rule/file1" "path/to/the/rule/file2")
+```
 
 9) Start GHOST
 

@@ -109,7 +109,7 @@
 (define top-lv-goals '())
 
 ; Whether the rules defined under a top level goal is ordered
-(define is-rule-seq #f)
+(define is-rule-seq? #f)
 
 ; How many rules we've seen under a particular top level goal
 (define goal-rule-cnt 0)
@@ -242,6 +242,8 @@
 
 (define-public (ghost-parse TXT)
 "
+  ghost-parse TXT
+
   Parse the TXT, convert them into atomese.
 "
   (test-parse TXT)
@@ -251,15 +253,30 @@
 ; ----------
 (define-public (ghost-parse-file FILE)
 "
-  Parse everything in the topic FILE, and convert them into atomese.
+  ghost-parse-file FILE
+
+  Parse everything in the FILE, and convert them into atomese.
 "
   (test-parse-file FILE)
   (process-rule-stack)
 )
 
 ; ----------
+(define-public (ghost-parse-files . FILES)
+"
+  ghost-parse-files . FILES
+
+  Parse everything in the FILES, and convert them into atomese.
+"
+  (for-each (lambda (f) (test-parse-file f)) FILES)
+  (process-rule-stack)
+)
+
+; ----------
 (define-public (ghost TXT)
 "
+  ghost TXT
+
   Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
   Should run this with the main OpenPsi loop.
 "

@@ -200,19 +200,28 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
             Handle hWordInstNode = pAS->get_handle(WORD_INSTANCE_NODE, sName);
 
             // no corresponding WordInstanceNode found
-            if (hWordInstNode == Handle::UNDEFINED)
+            if (hWordInstNode == nullptr)
                 continue;
 
             // if no LG link generated for the instance
             if (get_target_neighbors(hWordInstNode, LG_WORD_CSET).empty())
                 continue;
+        } 
+        // n is a concept or predicate node
+        Handle hWordNode;
+        HandleSeq neighbor_win = get_target_neighbors(n, REFERENCE_LINK);
+        if (neighbor_win.size() != 0)
+        {
+            HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
+            hWordNode = neighbor_wn[0];
         }
-
-        std::string sWord = sName.substr(0, sName.find_first_of('@'));
-        Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
-
+        else
+        {
+            std::string sWord = sName.substr(0, sName.find_first_of('@'));
+            hWordNode = pAS->get_handle(WORD_NODE, sWord);
+        }
         // no WordNode found
-        if (hWordNode == Handle::UNDEFINED)
+        if (hWordNode == nullptr)
             continue;
 
         sVars.insert(n);

@@ -238,15 +238,20 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         auto it = m_words.find(hPatNode);
         if (it == m_words.end())
         {
-            std::string sPat = hPatNode->get_name();
-            std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
-            sPatWord = sPatWord.substr(0, sPatWord.find_last_of('.'));
+            HandleSeq neighbor_win = get_target_neighbors(hPatNode, REFERENCE_LINK);
+            
+            if (neighbor_win.size() != 0)
+            {
+                HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
+                hPatWordNode = neighbor_wn[0];
 
-            // Get the WordNode associated with the word
-            // (extracted from "word@1234" convention).
-            hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
-
-            m_words.insert({hPatNode, hPatWordNode});
+            }
+            else
+            {
+                string sPat = hPatNode->get_name();
+                string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
+                hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
+            }
         }
         else hPatWordNode = it->second;
 
@@ -373,11 +378,23 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
         }
 
         std::string sName = kv.first->get_name();
-        std::string sWord = sName.substr(0, sName.find_first_of('@'));
-        sWord = sWord.substr(0, sWord.find_last_of('.'));
-        Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
-        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
 
+        Handle hPatWord;
+        HandleSeq neighbor_win = get_target_neighbors(kv.first, REFERENCE_LINK);
+        if (neighbor_win.size() != 0 )
+        {
+            HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
+            hPatWord = neighbor_wn[0];
+        }
+        else 
+        {
+            string sWord = sName.substr(0, sName.find_first_of('@'));
+            sWord = sWord.substr(0, sWord.find_last_of('.'));
+            hPatWord = m_as->get_handle(WORD_NODE, sWord);
+        }
+        
+        //Handle hSolnWordInst = get_target_neighbors(kv.second, REFERENCE_LINK)[0];
+        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
         // do a disjunct match for PredicateNodes as well
         if (kv.first->get_type() == PREDICATE_NODE and kv.second->get_type() == PREDICATE_NODE)
         {
@@ -415,8 +432,8 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                         continue;
 
                     std::string sName = qOS[0]->get_name();
-                    std::string sWord = sName.substr(0, sName.find_first_of('@'));
-                    sWord = sWord.substr(0, sWord.find_last_of('.'));
+                    std::string sWord = get_target_neighbors(qOS[0], REFERENCE_LINK)[0]->get_name();
+
 
                     // Skip if we have seen it before
                     if (std::find(qChkWords.begin(), qChkWords.end(), sWord) != qChkWords.end())

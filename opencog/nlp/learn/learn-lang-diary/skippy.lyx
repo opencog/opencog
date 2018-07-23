@@ -1,0 +1,2882 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Skip-grams vs.
+ Disjuncts
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+6 July 2018
+\end_layout
+
+\begin_layout Abstract
+This document attempts to compare and contrast the various ways in which
+ (adaptive)-skip-grams and disjuncts are similar, and how they differ.
+ The comparison is not always obvious, as these two representations seem
+ to be quite different, the goals and tasks that each are solving seem to
+ be different, and the methods to obtain each seem to be quite different.
+ In fact, many of these differences are superficial; there is more in common
+ than there might seem.
+ 
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+The introduction here is minimal; it is assumed that the reader is generally
+ conversant with both Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ A slightly more details review of N-gram, neural net
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+ and SkipGram
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013,Mikolov2013a"
+
+\end_inset
+
+ models are given, including AdaGram.
+ It is generally assumed that the reader is generally familair with various
+ concepts employed in the OpenCog language-learning project.
+\end_layout
+
+\begin_layout Subsection*
+Link Grammar
+\end_layout
+
+\begin_layout Standard
+Link Grammar defines a word-disjunct pair as an object of the general form
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	word: A- & B+ & C+ & ...;
+\end_layout
+
+\end_inset
+
+The disjunct is the expression to the right of the colon.
+ The notations A-, B+, C+, etc.
+ are called connectors; they are types that indicate what other (classes
+ of) words the given word can connect to.
+ The minus and plus signs indicate whether the connectors link to the left
+ or to the right.
+ The number of such connectors is variable, depending on the disjunct.
+ The ampersand serves as a reminder that, uring parsing, all connectors
+ must be satisfied; that is, the connectors are conjoined.
+ A given word can have multiple disjuncts associated with it, these are
+ disjoined from one-another, thus the name 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For the language learning project, it is convenient to extend the above
+ to the notion of a pseudo-disjunct, where the connector types are replaced
+ by instances of individual words.
+ For example
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ran: girl- & home+;
+\end_layout
+
+\end_inset
+
+is used to represent the grammatical structure of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+the girl ran home
+\begin_inset Quotes erd
+\end_inset
+
+, namely, that the verb 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ can attach to the word 
+\begin_inset Quotes eld
+\end_inset
+
+girl
+\begin_inset Quotes erd
+\end_inset
+
+ (the subject) on the left, and the word 
+\begin_inset Quotes eld
+\end_inset
+
+home
+\begin_inset Quotes erd
+\end_inset
+
+ (the object) on the right.
+ An early goal of the language learning project is to automatically discern
+ such pseudo-disjuncts; a later goal is to automatically classify such individua
+l-word connectors into word-classes, and so generalizing individual words
+ into connector types, just as in traditional Link Grammar.
+\end_layout
+
+\begin_layout Standard
+The primary learning mechanism is to accumulate observation counts of different
+ disjuncts, thus leading naturally to the idea of word-vectors.
+ For example, one might observe the vector 
+\begin_inset Formula $\vec{v}_{ran}$
+\end_inset
+
+ represented as
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ran: 3(girl- & home+) + 2(girl- & away+);
+\end_layout
+
+\end_inset
+
+that might naturally arise if the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+the girl ran home
+\begin_inset Quotes erd
+\end_inset
+
+ was observed three times, and 
+\begin_inset Quotes eld
+\end_inset
+
+the girl ran away
+\begin_inset Quotes erd
+\end_inset
+
+ was observed twice.
+ Such vectors can be used to judge word-similarity.
+ For example, a different vector 
+\begin_inset Formula $\vec{v}_{walked}$
+\end_inset
+
+ represented as
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	walked: 2(girl- & home+) + 3(girl- & away+);
+\end_layout
+
+\end_inset
+
+suggests that the cosine-product 
+\begin_inset Formula $\cos\left(\vec{v}_{ran},\vec{v}_{walked}\right)$
+\end_inset
+
+ between the two might be used to judge word-similarity: 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+ can be used in syntactically similar ways.
+\end_layout
+
+\begin_layout Standard
+The disjunct representation also allows other kinds of vectors, such as
+ those anchored on connectors.
+ Using the examples above, one also has a vector for the word 
+\begin_inset Quotes eld
+\end_inset
+
+home
+\begin_inset Quotes erd
+\end_inset
+
+, which can be awkwardly written as
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	3(ran: girl- & home+) + 2(walked: girl- & home+)
+\end_layout
+
+\end_inset
+
+Note that the counts, here, of 3 and 2, are identical to the counts above:
+ all of these counts are derived from the same observational dataset.
+ What differs is the choice of the attachment-point for which the vector
+ is to be formed.
+\end_layout
+
+\begin_layout Standard
+A less awkward notation for these two kinds of vectors would be nice; however,
+ for current purposes, it is enough to distinguish them with superscripts
+ D and C: 
+\emph on
+viz
+\emph default
+.
+ write 
+\begin_inset Formula $\vec{v}_{ran}^{D}$
+\end_inset
+
+ for the disjunct-based vector, and 
+\begin_inset Formula $\vec{v}_{home}^{C}$
+\end_inset
+
+ for the connector-based vector.
+ Given any word 
+\begin_inset Formula $w$
+\end_inset
+
+, there will be vectors 
+\begin_inset Formula $\vec{v}_{w}^{D}$
+\end_inset
+
+ and also 
+\begin_inset Formula $\vec{v}_{w}^{C}$
+\end_inset
+
+.
+ These two vectors can be taken together as 
+\begin_inset Formula $\vec{v}_{w}^{D}\oplus\vec{v}_{w}^{C}$
+\end_inset
+
+ and inhabit two orthogonal subspaces of 
+\begin_inset Formula $\vec{V}^{D}\oplus\vec{V}^{C}$
+\end_inset
+
+.
+ There are many interesting relationships between these subspaces; the most
+ important of these, developed in a later section, is that they can be viewed
+ as sections of a sheaf of a graph.
+ 
+\end_layout
+
+\begin_layout Standard
+The correct conceptual model for the observational data is that of a large
+ network graph, with observation counts attached to each vertex.
+ This network graph can be understood as a sheaf (see reference).
+ The above examples show how certain sections of that graph can be made
+ to correspond to vectors.
+ Obviously, these vectors are not independent of one-another, as they are
+ all different slices through the same dataset.
+ Rather, they provide a local, linear view of the language graph, reminiscent
+ of the tangent-space of a manifold.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Statistical Models
+\end_layout
+
+\begin_layout Standard
+The task of langauge learning is commonly taken to be one of estimating
+ the probability of a text, consisting of a sequence of words.
+ One common model assumes that the probability of the text can be approximated
+ by the product of the conditional probabilities of individual words, and
+ specifically, of how each word conditionally depends on all of the previous
+ ones:
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}P\left(w_{t}\left|w_{1}^{t-1}\right.\right)
+\]
+
+\end_inset
+
+Here, the text is presumed to consist of 
+\begin_inset Formula $T$
+\end_inset
+
+ words 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ occuring in sequential order.
+ The notation 
+\begin_inset Formula $w_{i}^{n}$
+\end_inset
+
+ is used to denote a sequence of words, that is, 
+\begin_inset Formula $w_{i}^{n}=\left(w_{i},w_{i+1},\cdots,w_{n}\right)$
+\end_inset
+
+.
+ Thus, the text as a whole is denoted by 
+\begin_inset Formula $w_{1}^{T}$
+\end_inset
+
+, and so 
+\begin_inset Formula $\widehat{P}\left(w_{1}^{T}\right)$
+\end_inset
+
+ is an approximate model for the probability 
+\begin_inset Formula $P\left(w_{1}^{T}\right)$
+\end_inset
+
+ of observing the text (the carat over 
+\begin_inset Formula $P$
+\end_inset
+
+ serving to remind that approximations are being made; that the model is
+ an approximation for the 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ probability.)
+\end_layout
+
+\begin_layout Standard
+Although this statistical model is commonly taken as gospel, it is, of course,
+ wrong: we know, a priori, that sentences are constructed whole before being
+ written, and so the current word also depends on future words, ones that
+ follow it in the text.
+ This is the case not just at the sentence-level, but also at the level
+ of the entire text, as the writer already has a theme in mind.
+ To estimate the probability of a word at a given location, one must look
+ at words to both the left and right of the given location.
+\end_layout
+
+\begin_layout Standard
+At any rate, for 
+\begin_inset Formula $T$
+\end_inset
+
+ greater than a few dozen words, the above becomes computationally intractable,
+ and so instead one approximates the conditional probabilities by limiting
+ the word-sequence to a sliding window of length 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ It is convenient, at this point, to also allow words on the left, as well
+ as those on the right, to determine the conditional probability.
+ Following Mikolov
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013"
+
+\end_inset
+
+, one may write the probability 
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+of observing a word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, at location 
+\begin_inset Formula $t$
+\end_inset
+
+ in the text, as being conditioned on a local context (sliding window) of
+ 
+\begin_inset Formula $N=2c$
+\end_inset
+
+ surrounding words, to the left and right, in the text.
+ The probability of the text is then modelled by
+\begin_inset Formula 
+\[
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+The smaller window does make the computation more tractable.
+ Here, the window is written in a manifestly symmetric fashion; in general,
+ one might poner a window with a different number of words to the left or
+ right.
+\end_layout
+
+\begin_layout Standard
+The above contains another key simplifcation: the total probability is assumed
+ to factor into the product of single-word probabilities, and each single-word
+ probability is translationally invariant; that is, the probability has
+ no explicit dependence on the index 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ This is commonly taken to be a reasonable simplification, but is, of course,
+ 
+\begin_inset Quotes eld
+\end_inset
+
+obviously
+\begin_inset Quotes erd
+\end_inset
+
+ wrong.
+ The words at the end of a text occur with different probabilities than
+ those at the beginning; for example, in a dramatic story, a new character
+ may appear mid-way, or the setting may move from indoors to outdoors, with
+ furniture-words becoming uncommon, while nature-words becoming common.
+ The translational invariance only becomes plausible in the limit of 
+\begin_inset Formula $T\to\infty$
+\end_inset
+
+ where one is considering 
+\begin_inset Quotes eld
+\end_inset
+
+all human language
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This too, is preposterous; first, because not everything that can be said
+ has been said; second, because different individuals speak differently,
+ and third, because new words are invented regularly, as others become archaic.
+ Despite all this, the assumption of translational invariance is entirely
+ appropriate at this level.
+\end_layout
+
+\begin_layout Subsection*
+N-Gram Model
+\end_layout
+
+\begin_layout Standard
+Without any further elaboration, and taken at face value, the above defines
+ what is more-or-less the 
+\begin_inset Quotes eld
+\end_inset
+
+classic
+\begin_inset Quotes erd
+\end_inset
+
+ N-gram model.
+ The general property is that there is a sliding window of 
+\begin_inset Formula $N$
+\end_inset
+
+ words in width, and one is using all of those words to make a prediction.
+ Because of the combinatorial explosion in the size of the vocabulary, 
+\begin_inset Formula $N$
+\end_inset
+
+ is usually kept small: 
+\begin_inset Formula $N=3$
+\end_inset
+
+ (trigrams) or 
+\begin_inset Formula $N=5$
+\end_inset
+
+.
+ That is, for a vocabulary of 
+\begin_inset Formula $W$
+\end_inset
+
+ words, there are 
+\begin_inset Formula $W^{N}$
+\end_inset
+
+ probabilities 
+\begin_inset Formula $p$
+\end_inset
+
+ that must be computed (trained) and remembered.
+ For 
+\begin_inset Formula $W=10^{4}$
+\end_inset
+
+ and 
+\begin_inset Formula $N=3$
+\end_inset
+
+, this requires 
+\begin_inset Formula $W^{N}=10^{12}$
+\end_inset
+
+ probabilities to be maintained: at 8 giga-probabilities, this is clearly
+ near the edge of what is possible with present-day computers.
+\end_layout
+
+\begin_layout Standard
+The model can be made computationally tractable with several variants.
+ One common variant is to blend together, in varying proportions, the models
+ for 
+\begin_inset Formula $N=0$
+\end_inset
+
+, 
+\begin_inset Formula $N=1$
+\end_inset
+
+ and 
+\begin_inset Formula $N=2$
+\end_inset
+
+.
+ The details are of no particular concern to the rest of this essay.
+\end_layout
+
+\begin_layout Subsection*
+Model Building
+\end_layout
+
+\begin_layout Standard
+The combinatorial explosion can be avoided by proposing models that 
+\begin_inset Quotes eld
+\end_inset
+
+guess
+\begin_inset Quotes erd
+\end_inset
+
+, in an 
+\emph on
+a priori
+\emph default
+ fashion, that some of these probabilities are zero, or that they are (approxima
+tely) equal to one-another, or that they can be grouped or summed in some
+ other ways.
+ More correctly, one hypothesizes that the vast majority of the probabilites
+ are either zero or fall into classes where they are equal: say, all but
+ one in ten-thousand, or thereabouts, is the 
+\emph on
+de facto
+\emph default
+ order of magnitude obtained in these models.
+ Alternately, one can hypothesize that certain linear combinations of the
+ probabilities are identical; this is the common tactic of most deep-learning
+ algorithms.
+\end_layout
+
+\begin_layout Standard
+There is a fairly rich variety of models.
+ Reviewed immediately below are two common foundational models: the so-called
+ CBOW model, and the SkipGram model.
+ The general goal of this paper is to demonstrate that Link Grammar, and
+ thus dependency grammars in general, can be understood to also fit into
+ this same class of probabilistic models.
+ What differs is the mechanism by which the models are trained; the Link
+ Grammar training algorithm, already sketched above, is not a hill-climbing/deep
+-learning technique.
+ A proper comparison will be made after the initial review of the CBOW and
+ SkipGram models.
+\end_layout
+
+\begin_layout Subsection*
+CBOW
+\end_layout
+
+\begin_layout Standard
+Mikolov, 
+\emph on
+etal
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013a,Mikolov2013"
+
+\end_inset
+
+
+\emph default
+ propose a model termed as the 
+\begin_inset Quotes eld
+\end_inset
+
+continuous bag-of-words
+\begin_inset Quotes erd
+\end_inset
+
+ model.
+ It is presented as a simplification of neural net models that have been
+ proposed earlier.
+ As a simplification, it makes sense to present it first; neural net models
+ are reviewed below.
+ 
+\end_layout
+
+\begin_layout Standard
+In the CBOW model, each (input) word 
+\begin_inset Formula $w$
+\end_inset
+
+ is represented by an 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ vector 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+ of relatively small dimension.
+ One does the same in an ordinary bag-of-words model, but with much higher
+ dimension.
+ In an ordinary bag-of-words model, one considers a vector space of dimension
+ 
+\begin_inset Formula $W$
+\end_inset
+
+, with 
+\begin_inset Formula $W$
+\end_inset
+
+ being the size of the vocabulary.
+ One then makes frequentist observations, counting how often each word is
+ observed in some text.
+ The result of this counting is a vector living in a 
+\begin_inset Formula $W$
+\end_inset
+
+-dimensional space.
+ Different texts correspond to different vectors.
+ However, nothing about the grammar of individual sentences or words is
+ learned in this process.
+\end_layout
+
+\begin_layout Standard
+In the CBOW model, the dimension of the space in which the vector 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+ lives is set to a much smaller value 
+\begin_inset Formula $D\ll W$
+\end_inset
+
+.
+ Commonly used values for 
+\begin_inset Formula $D$
+\end_inset
+
+ are in the range of 50--300; by contrast, typical vocabulary sizes 
+\begin_inset Formula $W$
+\end_inset
+
+ range from 
+\begin_inset Formula $10^{4}$
+\end_inset
+
+ to 
+\begin_inset Formula $10^{6}$
+\end_inset
+
+.
+ The mismatch of dimensions results in the mapping sometimes being called
+ 
+\begin_inset Quotes eld
+\end_inset
+
+dimensional reduction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+In the CBOW model, the mapping from the space of words to the space of vectors
+ 
+\begin_inset Formula $\vec{v}_{w}$
+\end_inset
+
+ is linear; there are no non-linear functions, as there would be in a neural
+ net.
+ That is, the mapping is given by a matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+ of dimension 
+\begin_inset Formula $D\times W$
+\end_inset
+
+.
+ Maps from higher to lower dimensional spaces are called 
+\begin_inset Quotes eld
+\end_inset
+
+projections
+\begin_inset Quotes erd
+\end_inset
+
+.
+ (The notation of the lower-case greek letter 
+\begin_inset Formula $\pi$
+\end_inset
+
+ for projection is common-place in the mathematical literature, but uncommon
+ in the machine-learning world.
+ It's convenient here, as it avoids burning yet another roman letter.) The
+ projection matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is unknown at the outset; the goal of training is to determine it.
+\end_layout
+
+\begin_layout Standard
+The CBOW is a model of the conditional probability
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+As already mentioned, it projects each word down to a lower-dimensional
+ space.
+ To get the output word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, one has to 
+\begin_inset Quotes eld
+\end_inset
+
+unproject
+\begin_inset Quotes erd
+\end_inset
+
+ back out, which is conventially done with a different projection matrix
+ 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+.
+ To establish some notation: let 
+\begin_inset Formula $\hat{e}_{w}$
+\end_inset
+
+ be a 
+\begin_inset Formula $W$
+\end_inset
+
+-dimensional unit vector that is all-zero, except for a single, solitary
+ 1 in the 
+\begin_inset Formula $w$
+\end_inset
+
+'th position (this is sometimes called the 
+\begin_inset Quotes eld
+\end_inset
+
+one-hot
+\begin_inset Quotes erd
+\end_inset
+
+ vector in machine learning).
+ Then one has that 
+\begin_inset Formula $\vec{v}_{w}=\pi\hat{e}_{w}$
+\end_inset
+
+ is the projection of 
+\begin_inset Formula $w$
+\end_inset
+
+ -- equivalently, it is the 
+\begin_inset Formula $w$
+\end_inset
+
+'th column of the matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+.
+ For the reverse projection, let 
+\begin_inset Formula $\vec{u}_{w}=\pi^{\prime}\hat{e}_{w}$
+\end_inset
+
+.
+ (Many machine-learning texts write 
+\begin_inset Formula $\vec{v}_{w}^{\prime}$
+\end_inset
+
+ for 
+\begin_inset Formula $\vec{u}_{w}$
+\end_inset
+
+; we use a different letter here, instead of a prime, to help maintain distinctn
+ess.
+ Almost all machine-learning texts avoid putting the vector arrow over the
+ letters; here, they serve to remind the reader where the vector is, so
+ as to avoid confusion in later sections.)
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $I$
+\end_inset
+
+ be the set of context (or 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+) word subscript offsets; to be consistent with the above, one would have
+ 
+\begin_inset Formula $I=\left\{ -c,-c+1,\cdots,-1,+1,\cdots,+c\right\} $
+\end_inset
+
+.
+ By abuse of notation, one might also write, for offset 
+\begin_inset Formula $t$
+\end_inset
+
+ or for word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, that 
+\begin_inset Formula $I=\left\{ t-c,t-c+1,\cdots t-1,t+1,\cdots,t+c\right\} $
+\end_inset
+
+ or that 
+\begin_inset Formula $I=w_{I}=\left\{ w_{t-c},w_{t-c+1},\cdots,w_{t-1},w_{t+1},\cdots,w_{t+c}\right\} $
+\end_inset
+
+; exactly which of these sets is intended will hopefully be clear from context.
+\end_layout
+
+\begin_layout Standard
+The CBOW model then uses the Bolztmann distribution obtained from a certain
+ paritition function, sometimes called the 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ model.
+ The model is given by
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{I}\right.\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{j\in W}\exp\,\sum_{i\in I}\vec{u}_{j}\cdot\vec{v}_{i}}
+\]
+
+\end_inset
+
+The sum in the numerator runs over all words in the input set 
+\begin_inset Formula $I$
+\end_inset
+
+; the sum in the denominator runs over all words in the vocabulary 
+\begin_inset Formula $W$
+\end_inset
+
+.
+ The sum in the denominator explicitly normalizes the probability to be
+ a unit probability.
+ That is, for fixed 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+, one has that 
+\begin_inset Formula $1=\sum_{j}p\left(w_{j}\left|w_{I}\right.\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Computation of the matrixes 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ is done by explictly expanding them in the expression above, and then performin
+g hill-climbing, attempting to maximize the probability.
+ To provide a nicer landscape for hill-climbing, it is usually done on the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $E=-\log p\left(w_{t}\left|w_{I}\right.\right)$
+\end_inset
+
+.
+ One works with the gradient 
+\begin_inset Formula $\nabla_{\pi,\pi^{\prime}}E$
+\end_inset
+
+ and takes small steps uphill.
+ The detailed mechanics for doing this does not concern this essay; it is
+ widely covered in many other texts
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Minnaar2015b"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+By convention, 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ are taken to be two distinct projection matrixes.
+ I do not currently know of any theoretical reason nor experimental result
+ why this should be done, instead of taking 
+\begin_inset Formula $\pi=\pi^{\prime}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+SkipGram
+\end_layout
+
+\begin_layout Standard
+The SkipGram model is very similar to the CBOW model, and is commonly presented
+ as it's opposite.
+ It uses essentially the same Boltzmann distribution as CBOW, except that
+ it is now looking at the probability 
+\begin_inset Formula $p\left(w_{I}\left|w_{t}\right.\right)$
+\end_inset
+
+ of the context 
+\begin_inset Formula $I$
+\end_inset
+
+ given the target word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+.
+ Explicitly, the model is given by
+\begin_inset Formula 
+\[
+p\left(w_{I}\left|w_{t}\right.\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{I\in W^{N}}\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}
+\]
+
+\end_inset
+
+That is, the word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ is held fixed, and the sum ranges over all possible 
+\begin_inset Formula $N$
+\end_inset
+
+-tuples 
+\begin_inset Formula $I$
+\end_inset
+
+ in the (now much larger) space 
+\begin_inset Formula $W^{N}$
+\end_inset
+
+ (as always, 
+\begin_inset Formula $N$
+\end_inset
+
+ is the width of the sliding window.
+\end_layout
+
+\begin_layout Standard
+As in the CBOW model, the projection matrixes 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ are computed by means of hill-climbing the loss-function.
+ The important contribution of of Mikolov et al.
+ is not only to describe this model, but also to propse several algorithmic
+ variations to minimize the RAM footprint, and to improve the speed of convergen
+ce.
+ 
+\end_layout
+
+\begin_layout Standard
+Both SkipGram and CBOW are sometimes called 
+\begin_inset Quotes eld
+\end_inset
+
+neural net
+\begin_inset Quotes erd
+\end_inset
+
+ models, but this is perhaps slightly misleading, as neither make use of
+ the sigmoid function that is characteristic of neural nets.
+ Given that the charachteristic commonality is that the probabilities are
+ obtained by hill-climbing, it seems more appropriate to simply call these
+ 
+\begin_inset Quotes eld
+\end_inset
+
+deep learning
+\begin_inset Quotes erd
+\end_inset
+
+ models.
+ The distinction is made more clear in the next section.
+\end_layout
+
+\begin_layout Subsection*
+Perceptrons as Neural Nets 
+\end_layout
+
+\begin_layout Standard
+The neural net model propsed by Bengio
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+ is worth reviewing, as it places the CBOW and SkipGram models in context.
+ It builds on the same basic mechanics, except that it now replaces the
+ dot-product 
+\begin_inset Formula $\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}$
+\end_inset
+
+ by a 
+\begin_inset Quotes eld
+\end_inset
+
+hidden
+\begin_inset Quotes erd
+\end_inset
+
+ feed-forward (perceptron) neural layer.
+ 
+\end_layout
+
+\begin_layout Standard
+The perceptron consists of another projection, this time called the 
+\begin_inset Quotes eld
+\end_inset
+
+weight matrix
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $H$
+\end_inset
+
+, and a non-linear sigmoid function 
+\begin_inset Formula $\sigma\left(x\right)$
+\end_inset
+
+, which is commonly taken to be 
+\begin_inset Formula $\tanh x$
+\end_inset
+
+ or 
+\begin_inset Formula $1/\left(1+e^{-x}\right)$
+\end_inset
+
+ or similar, according to taste.
+\end_layout
+
+\begin_layout Standard
+The input to the weight matrix is the vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ which is a Cartesian product of the input vectors 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+ for the 
+\begin_inset Formula $i\in I$
+\end_inset
+
+.
+ That is,
+\begin_inset Formula 
+\[
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
+\]
+
+\end_inset
+
+where, for illustration, we've taken the same 
+\begin_inset Formula $I$
+\end_inset
+
+ as given in the previous sections.
+ This vector is 
+\begin_inset Formula $ND$
+\end_inset
+
+-dimensional, where, as always, 
+\begin_inset Formula $N$
+\end_inset
+
+ is the cardinality of 
+\begin_inset Formula $I$
+\end_inset
+
+ and 
+\begin_inset Formula $D$
+\end_inset
+
+ is the dimension of the projected space.
+\end_layout
+
+\begin_layout Standard
+The input vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+ is then sent through a weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ to a 
+\begin_inset Quotes eld
+\end_inset
+
+hidden
+\begin_inset Quotes erd
+\end_inset
+
+ neuron layer consisting of 
+\begin_inset Formula $H$
+\end_inset
+
+ neurons.
+ That is, the matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ has dimensions 
+\begin_inset Formula $ND\times H$
+\end_inset
+
+.
+ An offset vector 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ (of dimension 
+\begin_inset Formula $H$
+\end_inset
+
+) is used to properly center the result in the sigmoid.
+ The output of the perceptron is then the 
+\begin_inset Formula $H$
+\end_inset
+
+-dimensional vector 
+\begin_inset Formula 
+\[
+\vec{s}=\sigma\left(h\vec{v}+\vec{d}\right)
+\]
+
+\end_inset
+
+where the sigmoid is understood to act component by component; that is,
+ the 
+\begin_inset Formula $k$
+\end_inset
+
+'th component 
+\begin_inset Formula $\left[\vec{s}\right]_{k}$
+\end_inset
+
+ of the vector 
+\begin_inset Formula $\vec{s}$
+\end_inset
+
+ is given by 
+\begin_inset Formula 
+\[
+\left[\vec{s}\right]_{k}=\sigma\left(\left[h\vec{v}+\vec{d}\right]_{k}\right)
+\]
+
+\end_inset
+
+This is then passed through the 
+\begin_inset Quotes eld
+\end_inset
+
+anti-
+\begin_inset Quotes erd
+\end_inset
+
+projection matrix 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+, as before, except that here, 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ must be 
+\begin_inset Formula $H\times W$
+\end_inset
+
+-dimensional.
+ Maintaining the notation from earlier sections, the perceptron model is
+ then 
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{I}\right.\right)=\frac{\exp\,\vec{u}_{t}\cdot\vec{s}}{\sum_{j\in W}\exp\,\vec{u}_{j}\cdot\vec{s}}
+\]
+
+\end_inset
+
+Just as in the CBOW/SkipGram model, training can be accomplished by hill-climbin
+g, this time by taking not only 
+\begin_inset Formula $\pi$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{\prime}$
+\end_inset
+
+ as free parameters, but also 
+\begin_inset Formula $h$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Typical choices for the dimension 
+\begin_inset Formula $H$
+\end_inset
+
+ is in the 500--1000 range, and is thus comparable to the size of 
+\begin_inset Formula $ND$
+\end_inset
+
+, making the weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ approximately square.
+ That is, the weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ does a minimal amount of, if any at all, of dimensional reduction.
+\end_layout
+
+\begin_layout Section*
+Similarities and Differences
+\end_layout
+
+\begin_layout Standard
+On the face of it, the description given for Link Grammar seems to bear
+ no resemblance to that of the descriptiion of probabilistic neural net
+ models, other than to invoke vectors in some way.
+ The descriptions of language appear to be completely different.
+ There are similarities; they are obscured both by the notation, and the
+ viewpoint.
+\end_layout
+
+\begin_layout Subsection*
+Disjuncts as Context
+\end_layout
+
+\begin_layout Standard
+Consider the probability
+\begin_inset Formula 
+\[
+p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
+\]
+
+\end_inset
+
+This is meant to indicate the probability of observing the word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+, given 
+\begin_inset Formula $c$
+\end_inset
+
+ words that occur before it, and 
+\begin_inset Formula $c$
+\end_inset
+
+ words that occur after it.
+ Let 
+\begin_inset Formula $c=1$
+\end_inset
+
+ and let 
+\begin_inset Formula $w_{t}=ran$
+\end_inset
+
+, 
+\begin_inset Formula $w_{t-1}=girl$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{t+1}=home$
+\end_inset
+
+.
+ This clearly resembles the Link Grammar disjunct 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ran: girl- & home+;
+\end_layout
+
+\end_inset
+
+One difference is the Link Grammar disjunct notation does not provide any
+ location at which to attach a probability.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The Link Grammar software does provide a device, called the 
+\begin_inset Quotes eld
+\end_inset
+
+cost
+\begin_inset Quotes erd
+\end_inset
+
+, which is an additive floating point number that represents the penalty
+ of using a particular disjunct.
+ It can be thought of as being the same thing as 
+\begin_inset Formula $-\log p\left(w|d\right)$
+\end_inset
+
+.
+ The hand-crafted dictionaries provide hand-crafted estimates for this cost/log-
+likelihood.
+\end_layout
+
+\end_inset
+
+ This can be remedied in a straight-forward manner: write 
+\begin_inset Formula $d$
+\end_inset
+
+ for the disjunct, 
+\begin_inset Formula $girl-\&home+$
+\end_inset
+
+ in this example.
+ One can then define the probability
+\begin_inset Formula 
+\[
+p\left(w|d\right)=\frac{p\left(w,d\right)}{p\left(*,d\right)}
+\]
+
+\end_inset
+
+ where 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is the probability of observing the pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+, while 
+\begin_inset Formula 
+\[
+p\left(*,d\right)=\sum_{w=1}^{W}p\left(w,d\right)
+\]
+
+\end_inset
+
+is simply the sum over all words in the vocabulary.
+ 
+\end_layout
+
+\begin_layout Standard
+The resemblance, at this point, should be obvious: the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ plays the role of the N-gram context.
+ Abusing the existing notation, one should should understand that
+\begin_inset Formula 
+\[
+d\approx w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}
+\]
+
+\end_inset
+
+The abuse of notation was partly cured by writing 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ for the 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ words of the CBOW/SkipGram models, so that 
+\begin_inset Formula $I$
+\end_inset
+
+ was a set of relative indexes into the text.
+ The disjunct notation does everything that the index notation can do: it
+ specifies a fixed order of words, to the left, and to the right of the
+ target (
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+) word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+In fact, the disjunct notation can do more: it can also encode parse information.
+ That is, one could take the disjunct as being a sequence of words, with
+ no gaps allowed between the words.
+ If this is done, then the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ becomes fully compatible with the index set 
+\begin_inset Formula $I$
+\end_inset
+
+ and one can legitimately write that 
+\begin_inset Formula $d=w_{I}$
+\end_inset
+
+ are just two notations for saying the same thing.
+ But the disjunt can also do more: it effectively suggests that the index
+ set can be used as parse information.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Skip-Grams and Grammar
+\end_layout
+
+\begin_layout Standard
+The above explicit identification of 
+\begin_inset Formula $d=w_{I}$
+\end_inset
+
+ suggests that CBOW and SkipGram models already encode grammatical information,
+ and that finding it is as simple as re-interpreting 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ as a disjunct.
+ That is, given either form 
+\begin_inset Formula $p\left(w_{t}\left|w_{I}\right.\right)$
+\end_inset
+
+ or 
+\begin_inset Formula $p\left(w_{I}\left|w_{t}\right.\right)$
+\end_inset
+
+, simply re-interpret 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ as specifying left-going and right-going connectors.
+ The Link Grammar cost is nothing other than the 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $E=-\log p\left(w_{t}\left|w_{I}\right.\right)$
+\end_inset
+
+; they are one and the same thing.
+ One could do this immediately, today: given a SkipGram dataset, one can
+ just write an export function, and dump the contents into a Link Grammar
+ dictionary.
+ All that remains would be to evaluate the quality of the results.
+\end_layout
+
+\begin_layout Standard
+Disjuncts are intended to capture the dependency grammar description of
+ a language.
+ A dependency grammar naturally 
+\begin_inset Quotes eld
+\end_inset
+
+skips
+\begin_inset Quotes erd
+\end_inset
+
+ over words, and 
+\begin_inset Quotes eld
+\end_inset
+
+adaptively
+\begin_inset Quotes erd
+\end_inset
+
+ sizes the context to be appropriate.
+ Consider the dependency parse of 
+\begin_inset Quotes eld
+\end_inset
+
+The girl, upset by the taunting, ran home in tears.
+\begin_inset Quotes erd
+\end_inset
+
+ There are four words, and two punctuation symbols separating the word 
+\begin_inset Quotes eld
+\end_inset
+
+girl
+\begin_inset Quotes erd
+\end_inset
+
+ from the word 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Dependency grammars do not have any difficulty in arranging for the attachement
+ of the words 
+\begin_inset Quotes eld
+\end_inset
+
+girl--ran
+\begin_inset Quotes erd
+\end_inset
+
+, skipping over the post-nominal modifier phrase 
+\begin_inset Quotes eld
+\end_inset
+
+upset by the taunting
+\begin_inset Quotes erd
+\end_inset
+
+, which attaches to the noun, and not the verb: it's the girl who is upset,
+ not the running.
+ 
+\end_layout
+
+\begin_layout Standard
+Such long-distance attachements are problematic for CBOW or Skip-Grams,
+ in several ways.
+ One is that the window 
+\begin_inset Formula $N$
+\end_inset
+
+ must be quite large to skip over the post-nominal modifier.
+ Counting punctuation, one must look at least seven words to the right,
+ in the above example.
+ If the window is symmetric about the target word, this calls for 
+\begin_inset Formula $N\ge14$
+\end_inset
+
+, which is a bit larger than currently reported results; for example, Mikolov
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013"
+
+\end_inset
+
+ reports results for 
+\begin_inset Formula $N=5$
+\end_inset
+
+.
+ The point here is that 
+\begin_inset Formula 
+\[
+p\left(w_{t}=\mbox{girl}\left|w_{t-1}=\mbox{the },w_{t+1}=\mbox{ran}\right.\right)
+\]
+
+\end_inset
+
+can be trivially re-interpreted as the dictionary entry
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	girl: the- & ran+;
+\end_layout
+
+\end_inset
+
+However, that is not what is needed to parse 
+\begin_inset Quotes eld
+\end_inset
+
+The girl, upset by the taunting, ran home in tears.
+\begin_inset Quotes erd
+\end_inset
+
+ What is needed, instead, is the dictionary entry 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	girl: the- & upset+ & ran+;
+\end_layout
+
+\end_inset
+
+which is invisible with an 
+\begin_inset Formula $N=5$
+\end_inset
+
+ window.
+ The punctuation is also important for the post-nominal modifier; somewhere
+ one must also find
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	upset: girl- & ,- & by+ & ,+;
+\end_layout
+
+\end_inset
+
+which also does not fit in an 
+\begin_inset Formula $N=5$
+\end_inset
+
+ window; it requires at least 
+\begin_inset Formula $N=9$
+\end_inset
+
+.
+ Long-distance attachements present a problem for the simpler, less sophisticate
+d deep-learning models.
+\end_layout
+
+\begin_layout Standard
+Another difficulty is that dependency grammars are naturally 
+\begin_inset Quotes eld
+\end_inset
+
+adaptive
+\begin_inset Quotes erd
+\end_inset
+
+ by design: verbs tend to have more attachments that nouns, which have more
+ attachments than determiners or adjectives.
+ That is, dependency grammars already 
+\begin_inset Quotes eld
+\end_inset
+
+know
+\begin_inset Quotes erd
+\end_inset
+
+ that the correct size of the context for determiners and adjectives is
+ one: a determiner can typically modify only one noun.
+ One expects the entry
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	the: girl+;
+\end_layout
+
+\end_inset
+
+The size of the context for the word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ is just 
+\begin_inset Formula $N=1$
+\end_inset
+
+; more is not needed.
+ If the deep-learning model fails to explicitly contain an entry of the
+ form 
+\begin_inset Formula 
+\[
+p\left(w_{t}=\mbox{the}\left|w_{t+1}=\mbox{girl}\right.\right)
+\]
+
+\end_inset
+
+with no other context words present, then one will have trouble building
+ a suitable dictionary.
+\end_layout
+
+\begin_layout Standard
+Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
+ problems, but I have not studied it.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Training
+\end_layout
+
+\begin_layout Standard
+One important difference between the earlier description of Link Grammar,
+ and the deep-learning algorithms should be immediately apparent: the Link
+ Grammar probabilities are obtained by direct counting, and not by any training,
+ relaxation or hill-climbing technique.
+ That is, 
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
+\]
+
+\end_inset
+
+so that the probability is properly normalized: 
+\begin_inset Formula $p\left(*,*\right)=1$
+\end_inset
+
+.
+ The 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ is just the observational count of observing the pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ in text; the probabilities is just the frequentist probability.
+ This differs sharply from the probability in the CBOW/SkipGram models,
+ which is obtained by maximizing an objective function (the 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+) built from (defined in terms of) the probabilities.
+\end_layout
+
+\begin_layout Section*
+Model Building and Vector Representations
+\end_layout
+
+\begin_layout Standard
+The key driver behind the deep-learning models is the replacement of untractable
+ probabilistic models by those that are computationally efficient.
+ This is accomplished in several stages.
+ First, the full-text probability function 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+ is replaced by the much simpler probability function 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+.
+ The former probability function is extremely high-diemnsional, whereas
+ the later is less so.
+ Its still computationally infeasible, so there are two directions one can
+ go in.
+ The traditional bag-of-words model replaces 
+\begin_inset Quotes eld
+\end_inset
+
+fulltext
+\begin_inset Quotes erd
+\end_inset
+
+ by 
+\begin_inset Quotes eld
+\end_inset
+
+set of words in the fulltext
+\begin_inset Quotes erd
+\end_inset
+
+ AKA the 
+\begin_inset Quotes eld
+\end_inset
+
+bag
+\begin_inset Quotes erd
+\end_inset
+
+, and so one computes 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ bag}\right.\right)$
+\end_inset
+
+ which is computationally feasible.
+ Algorithms such as TF-IDF, and many others accomplish this.
+ The characteristic idea here is to ignore the (syntactic) structure of
+ the full-text, completely erasing all indication of word-order.
+\end_layout
+
+\begin_layout Standard
+The bag, however, loses syntactic and semantic structure, and so goes to
+ far.
+ An alternate route is to start with 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+ and simplify it by using instead a sliding-window probability function
+ 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ window}\right.\right)$
+\end_inset
+
+, thus giving the N-gram model.
+ The characteristic idea here is to explicitly set 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ other-words}\right.\right)=0$
+\end_inset
+
+ whenever the other-words are not in the window.
+\end_layout
+
+\begin_layout Standard
+The N-gram model is still computationally untractable for 
+\begin_inset Formula $N\ge3$
+\end_inset
+
+ and so the deep-learning models propose that yet more entries in 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ window}\right.\right)$
+\end_inset
+
+ can be ignored or conflated.
+ Conceptually, the models propose computing 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+ with the context being a projection to a low-dimensional space.
+ These ideas can be illustrated more precisely.
+ Let 
+\begin_inset Formula 
+\[
+\vec{v}_{I}=\vec{v}_{t-c}\times\vec{v}_{t-c+1}\times\cdots\times\vec{v}_{t+c}
+\]
+
+\end_inset
+
+be the context, with 
+\begin_inset Formula $\vec{v}_{w}=\pi\hat{e}_{w}$
+\end_inset
+
+ the projection of the unit vector of the word down to the low-dimensional
+ 
+\begin_inset Quotes eld
+\end_inset
+
+hidden layer
+\begin_inset Quotes erd
+\end_inset
+
+ vector space.
+ This projection can be writen as 
+\begin_inset Formula $\vec{v}_{I}=\left[\pi\oplus\cdots\oplus\pi\right]\left(\hat{e}_{t-c}\times\hat{e}_{t-c+1}\times\cdots\times\hat{e}_{t-c}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $\pi\oplus\cdots\oplus\pi$
+\end_inset
+
+ is the block-diagonal matrix 
+\begin_inset Formula 
+\[
+\pi\oplus\cdots\oplus\pi=\begin{bmatrix}\pi & 0\\
+0 & \pi\\
+ &  & \ddots\\
+ &  &  & \pi & 0\\
+ &  &  & 0 & \pi
+\end{bmatrix}
+\]
+
+\end_inset
+
+and so the off-block-diagonal entries are explictly assumed to be zero,
+ as an 
+\emph on
+a priori
+\emph default
+ built-in assumption.
+ Note that the zero entries in this matrix greatly outnumber the non-zero
+ entries.
+ Almost all entries are zero.
+ 
+\end_layout
+
+\begin_layout Standard
+Its useful to keep tabs on these sizes.
+ The matrix 
+\begin_inset Formula $\pi$
+\end_inset
+
+ was 
+\begin_inset Formula $D\times W$
+\end_inset
+
+-dimensional, with 
+\begin_inset Formula $W$
+\end_inset
+
+ the number of vocabulary words (as always) and 
+\begin_inset Formula $D$
+\end_inset
+
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+hidden
+\begin_inset Quotes erd
+\end_inset
+
+ dimension.
+ For a window of size 
+\begin_inset Formula $N$
+\end_inset
+
+, the matrix 
+\begin_inset Formula $\pi\oplus\cdots\oplus\pi$
+\end_inset
+
+ has dimensions 
+\begin_inset Formula $ND\times NW$
+\end_inset
+
+.
+ Of these, only 
+\begin_inset Formula $NDW$
+\end_inset
+
+ are non-zero, the remaining 
+\begin_inset Formula $N\left(N-1\right)DW$
+\end_inset
+
+ are zero.
+ That's a lot of zeros.
+\end_layout
+
+\begin_layout Standard
+One can do one of several things with the vector 
+\begin_inset Formula $\vec{v}_{I}$
+\end_inset
+
+.
+ In the SkipGram and CBOW models, one sums over words; that is, one creates
+ the vector 
+\begin_inset Formula $\sum_{i\in I}\vec{v}_{i}$
+\end_inset
+
+.
+ Its worth writing this out, matrix style.
+ One has that 
+\begin_inset Formula 
+\[
+\sum_{i\in I}\vec{v}_{i}=S\vec{v_{I}}
+\]
+
+\end_inset
+
+where the matrix 
+\begin_inset Formula $S$
+\end_inset
+
+ is a concatenation of identity matrixes.
+ 
+\begin_inset Formula 
+\[
+S=\begin{bmatrix}1 & 0 &  &  & 1 & 0 &  &  &  & 1 & 0\\
+0 & 1 &  &  & 0 & 1 &  &  & \cdots & 0 & 1\\
+ &  & \ddots &  &  &  & \ddots &  & \cdots &  &  & \ddots\\
+ &  &  & 1 &  &  &  & 1 &  &  &  &  & 1
+\end{bmatrix}
+\]
+
+\end_inset
+
+The reason for writing it out in this way to understand that there is another
+ dimensional reduction: again, almost all entries in this matrix are zero.
+ Each identity matrix was 
+\begin_inset Formula $D\times D$
+\end_inset
+
+ dimensional, and there are 
+\begin_inset Formula $N$
+\end_inset
+
+ of them, so that 
+\begin_inset Formula $S$
+\end_inset
+
+ has dimensions 
+\begin_inset Formula $D\times ND$
+\end_inset
+
+.
+ Of these, there are only 
+\begin_inset Formula $ND$
+\end_inset
+
+ non-zero entries; the remaining 
+\begin_inset Formula $ND\left(D-1\right)$
+\end_inset
+
+ are all zero.
+ The reduction is huge.
+ 
+\end_layout
+
+\begin_layout Standard
+For the perceptron model of Bengio, the matrix 
+\begin_inset Formula $S$
+\end_inset
+
+ is replaced by a weight matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ projecting to the perceptron layer.
+ All of the entries in the matrix 
+\begin_inset Formula $h$
+\end_inset
+
+ are, by assumption, non-zero.
+ This perhaps helps make it clear just how much more complex the perceptron
+ model is.
+ Since 
+\begin_inset Formula $h$
+\end_inset
+
+ is an approximately square matrix, this implies a large-number of non-zero
+ entries.
+\end_layout
+
+\begin_layout Standard
+Its worth getting an intuitive feeling for the size of these numbers: following
+ Mikolov, assume that 
+\begin_inset Formula $W=10^{4}$
+\end_inset
+
+ although this sharply underestimates the size of the vocabulary of English.
+ Assume 
+\begin_inset Formula $N=5$
+\end_inset
+
+ and 
+\begin_inset Formula $D=300$
+\end_inset
+
+.
+ The size of the input vector space is thus 
+\begin_inset Formula $W^{N}=10^{20}$
+\end_inset
+
+, this is being modeled by a vector space of size 300.
+ The sparsity is thus 
+\begin_inset Formula 
+\[
+\log_{2}\frac{10^{20}}{300}=31.3\mbox{ bits}
+\]
+
+\end_inset
+
+A truly vast amount of potential information is being discarded by this
+ language model.
+ Of course, the claim is that the English language never carried this much
+ information in the first place: almost all five-word sequences are meaningless
+ non-sense; only a very small number of these are syntactically valid, and
+ somewhat fewer are semantically meaningful.
+\end_layout
+
+\begin_layout Standard
+This exposes the real question: just how meaningful are the CBOW/SkipGram
+ models, and can one find better models that also have 
+\begin_inset Quotes eld
+\end_inset
+
+losts of zero entries
+\begin_inset Quotes erd
+\end_inset
+
+, but distribute them in a more accurate way?
+\end_layout
+
+\begin_layout Subsection*
+Disjunct Vectors
+\end_layout
+
+\begin_layout Standard
+The last question can be answered by noting that the Link Grammar disjunct
+ representation is also a very highly sparse matrix; however, it is sparse
+ in a very different way, and does NOT have the block-diagonal structure
+ of the deep-learning systems.
+ The can be explicitly illustrated and numerically quantified.
+ 
+\end_layout
+
+\begin_layout Standard
+At the end of one stage of training, one obtains a matrix of observation
+ counts 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+, which are easily normalized to probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ This is, in fact, a very sparse matrix.
+ Four datasets can be quoted: for English, the so-called 
+\begin_inset Quotes eld
+\end_inset
+
+en_mtwo
+\begin_inset Quotes erd
+\end_inset
+
+ dataset, and the 
+\begin_inset Quotes eld
+\end_inset
+
+en_cfive
+\begin_inset Quotes erd
+\end_inset
+
+ dataset; for Mandarin, the 
+\begin_inset Quotes eld
+\end_inset
+
+zen
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+zen_three
+\begin_inset Quotes erd
+\end_inset
+
+ datasets.
+ Please refer to the diary for a detailed description of these datasets.
+ The dimensions and sparsity are summarized in the table below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $W$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left|d\right|$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sparsity
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_mtwo
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+137K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6.24M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16.60 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_cfive
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+445K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23.4M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18.32 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zen
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+60K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+602K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.46 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zen_three
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+85K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4.88M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.85 bits
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, as always, 
+\begin_inset Formula $W=\left|w\right|$
+\end_inset
+
+ is the number of observed vocabulary words, 
+\begin_inset Formula $\left|d\right|$
+\end_inset
+
+ is the number of observed disjuncts, and the sparsity is the log of the
+ number of number of non-zero pairs, measured in bits:
+\begin_inset Formula 
+\[
+\mbox{sparsity}=\log_{2}\frac{\left|w\right|\left|d\right|}{\left|\left(w,d\right)\right|}
+\]
+
+\end_inset
+
+Notable in the above report is that the measured sparsity seems to be approximat
+ely langauge-independent, and dataset-size independent.
+\end_layout
+
+\begin_layout Standard
+Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
+ the numbers reported above are much lower.
+ There are several ways to interpret this: the simple disjunct model, as
+ presented above, fails to compress sufficiently well, or the SkipGram model
+ compresses too much.
+ Its likely that both situations are the case.
+\end_layout
+
+\begin_layout Subsection*
+Word Classes
+\end_layout
+
+\begin_layout Standard
+In operational practice, dependency grammars work with word-classes, and
+ not with words.
+ That is, one carves up the set of words into grammatical classes, such
+ as nouns, verbs, adjectives, etc.
+ and then assign words to each.
+ Each grammatical class is associated with a set of disjuncts that indicate
+ how a word in that class can attach to words in other classes.
+ This can be made notationally precise.
+ There is a set of word-classes 
+\begin_inset Formula $C=\left\{ c\right\} $
+\end_inset
+
+ and two projection matrices 
+\begin_inset Formula $\pi^{W}$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi^{D}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\vec{\eta}_{w}=\pi^{W}\hat{e}_{w}$
+\end_inset
+
+ is a vector that classifies the word 
+\begin_inset Formula $w$
+\end_inset
+
+ into one or more word-classes 
+\begin_inset Formula $c$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula $\vec{\eta}_{w}$
+\end_inset
+
+ is a 
+\begin_inset Formula $C$
+\end_inset
+
+-dimensional vector.
+ In many cases, all but one of the entries in 
+\begin_inset Formula $\vec{\eta}_{w}$
+\end_inset
+
+ will be zero: we expect the word 
+\begin_inset Formula $w=\mbox{the}$
+\end_inset
+
+ to belong to only one class, the class of determiners.
+ By contrast, 
+\begin_inset Formula $w=\mbox{saw}$
+\end_inset
+
+ has to belong to at least three classes: the past-tense of the verb 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+, the noun for the cutting tool, and the verb approximately synonymous to
+ the verb for cutting.
+ The hand-built dictionary for English Link Grammar has over a thousand
+ distinct word-classes; one might expect a similar quantity from an unsupervised
+ algorithm.
+\end_layout
+
+\begin_layout Standard
+The projection matrix 
+\begin_inset Formula $\pi^{D}$
+\end_inset
+
+ performs a similar projection for the disjuncts.
+ That is 
+\begin_inset Formula $\vec{\zeta}_{d}=\pi^{D}\hat{e}_{d}$
+\end_inset
+
+, so that each disjunct is associated with a 
+\begin_inset Formula $C$
+\end_inset
+
+-dimensional vector 
+\begin_inset Formula $\vec{\zeta}_{d}$
+\end_inset
+
+.
+ Most of the entries in this vector will likewise be zero.
+ This vector basically states that any give disjunct is typically associated
+ with just one, or a few word classes.
+ So, for example, the disjunct
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	the-
+\end_layout
+
+\end_inset
+
+is always associated with (the class of) common nouns.
+ The only non-zero entry in 
+\begin_inset Formula $\vec{\zeta}_{\mbox{the-}}$
+\end_inset
+
+.
+ will therefore be 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	<common-nouns>: the-;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Given these two projection matrixes, the probability can then be decomposed
+ as an inner product:
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
+\]
+
+\end_inset
+
+The word-classes here play a role analogous to the hidden layer in the CBOW/Skip
+Gram model.
+ Its worth making a more direct comparison.
+ Let ...
+\end_layout
+
+\begin_layout Section*
+Sheaves
+\end_layout
+
+\begin_layout Standard
+The previous section begins by stating that, ideally, one wants to wants
+ to model the probability 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+, but due to the apparent computational intractability, one beats a tactical
+ retreat to computing 
+\begin_inset Formula $P\left(\mbox{word}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+ in the CBOW/SkipGram model, and something analogous in the Link Grammar
+ model.
+ However, by re-casting the problem in terms of disjuncts, however, one
+ can do better.
+ Dependency parsing allows one to easily create low-cost, simple computational
+ models for 
+\begin_inset Formula $P\left(\mbox{phrase}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+ or even 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ context}\right.\right)$
+\end_inset
+
+.
+ This is because disjuncts are compositional: they can be assembled, like
+ jigsaw-puzzle pieces, into larger assemblages.
+ If this is further enhanced with reference resolution, one has a direct
+ path towards a computationally tractable model of 
+\begin_inset Formula $P\left(\mbox{sentence}\left|\mbox{ fulltext}\right.\right)$
+\end_inset
+
+, with, at the outset, seemed hopelessly intractable.
+\end_layout
+
+\begin_layout Standard
+TODO flesh out this section.
+\end_layout
+
+\begin_layout Subsection*
+Gluing axioms
+\end_layout
+
+\begin_layout Standard
+The language-learning task requires one to infer the structure of language
+ from a small number of instances and examples.
+ Bengio 
+\emph on
+etal.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bengio2003"
+
+\end_inset
+
+
+\emph default
+ describe this for continuous probabilistic models.
+ First, one imagines some continuous, uniform space.
+ Example sentences form a training corpus are associated with single points
+ in this space: the probability mass is initially located at a collection
+ of points.
+ One then imagines that generalization consists of smearing out those points
+ over an extended volume, thereby assigning non-zero probability weights
+ to other 
+\begin_inset Quotes eld
+\end_inset
+
+nearby
+\begin_inset Quotes erd
+\end_inset
+
+ sentences.
+ This suggests that there is a choice as to how this smearing-out is done:
+ one can spread the probabilities uniformly, in all 
+\begin_inset Quotes eld
+\end_inset
+
+directions
+\begin_inset Quotes erd
+\end_inset
+
+, or one can preferentially spread probabilities only along certain directions.
+ Bengio suggests that higher-quality learning and generalization can be
+ acheived by finding and appropriately non-uniform way of smearing the probabili
+ty masses from training.
+\end_layout
+
+\begin_layout Standard
+This description seems like a useful and harmless way of guiding one's thoughts.
+ But it leaves open and vague several undefined concepts: that of the 
+\begin_inset Quotes eld
+\end_inset
+
+space
+\begin_inset Quotes erd
+\end_inset
+
+: is this some topolgical space, perhaps linear, or something else? That
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+nearby sentences
+\begin_inset Quotes erd
+\end_inset
+
+: the presumption (the axiom?) that the space is endowed with a metric that
+ measures distances.
+ Finally, the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+direction
+\begin_inset Quotes erd
+\end_inset
+
+, or at least, a local tangent manifold at each point of the space.
+ It seems reasonable to assert that langauge lives on a manifold, but then,
+ the structure of that manifold needs to be elucidated and demonstrated.
+ In particular, the 
+\begin_inset Quotes eld
+\end_inset
+
+non-uniform spreading
+\begin_inset Quotes erd
+\end_inset
+
+ of probability weights suggests confusion or inconsistency: Perhaps the
+ spreading appears to be non-uniform, because the initial metric assigned
+ to the space is incorrect? In geometry, one usually works with normalized
+ tangent vectors, so that when one extends them to geodesics, each geodesic
+ moves with unit velocity.
+ It seems plausible to spread out probability weights the same way: spread
+ them uniformly, and adjust the shape of the underlying space so that this
+ results in a high-quality langauge model.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
