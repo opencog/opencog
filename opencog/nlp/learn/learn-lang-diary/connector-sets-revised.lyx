@@ -354,54 +354,64 @@ key "Vepstas2009"
 
 \end_layout
 
-\begin_layout Subsection*
-Revision History
+\begin_layout Subsection
+Recap
 \end_layout
 
 \begin_layout Standard
-The original report, dated 7 May 2017, was prepared on a painfully small
- dataset, which also (may have?) incorporated a fatal bug in the disjunct
- code: disjuncts were being assembled incorrectly, due to a reversed sign
- in the MI calculations.
- This bug was eventually uncovered, and so it seemed best to entirely discard
- the initial analysis, and instead repeat it with a newer and larger dataset
- that was correctly assembled.
- The revised analysis was done mostly in July.
- Sadly, the discovery of this bug required that multiple large datasets
- be discarded and reconstructed.
- This caused a month of effort to be lost.
+A detailed description of the process of obtaining (pseudo-)disjuncts from
+ large unannotated text corpora is given elsewhere.
+ This section provides a short, informal summary.
+ 
 \end_layout
 
 \begin_layout Standard
-Simultaneously, there was a lot of confusion about the efficacy of the cosine
- similarity measure.
- Initial work on cosine similarity used a filtered dataset, with the goal
- of filtering to reduce 
-\begin_inset Quotes eld
-\end_inset
-
-noise
-\begin_inset Quotes erd
-\end_inset
-
- in the dataset, as well as to manage dataset size.
- It turns out that this filtering also had the undesired side-effect of
- destroying much of the 
-\begin_inset Quotes eld
-\end_inset
-
-signal
-\begin_inset Quotes erd
-\end_inset
-
- as well – it rendered many grammatically unrelated words to be judged to
- be very similar.
- Between the accidental sign reversal, and the excessively strong data cuts,
- it was all very confusing, and has taken another month to recover from
- this – I'm back to where I was in May, just older and wiser, now.
+The story so far: Starting from a large text corpus, the mutual information
+ (MI) of word-pairs are counted.
+ This MI is used to perform a maximum spanning-tree (MST) parse (of a different
+ subset of) the corpus.
+ From each parse, a pseudo-disjunct is extracted for each word.
+ The pseudo-disjunct is like a real LG disjunct, except that each connector
+ in the disjunct is the word at the far end of the link.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Standard
+So, for example, in in idealized world, the MST parse of the sentence "Ben
+ ate pizza" would produce the parse Ben <–> ate <–> pizza and from this,
+ we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
+ Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
+ pizza+) on the word "puked".
+ Since these two disjuncts are the same, we can conclude that the two words
+ "ate" and "puked" are very similar to each other.
+ Considering all of the other disjuncts that arise in this example, we can
+ conclude that these are the only two words that are similar.
+\end_layout
+
+\begin_layout Standard
+Any given word will have many pseudo-disjuncts attached to it.
+ Each disjunct has a count of the number of times it has been observed.
+ Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
+l vector space, which each disjunct being a single basis element.
+ The similarity of two words can be taken to be the cosine-similarity between
+ the disjunct-vectors.
+ Other similarities are possible, and it seems that the entropic similarity,
+ described below, is superior.
+\end_layout
+
+\begin_layout Standard
+Equivalently, the set of disjuncts can be thought of as a weighted set:
+ each disjunct has a weight, corresponding to the number of times it has
+ been observed.
+ A weighted set is more or less the same thing as a vector, and these two
+ are treated as the same, in what follows.
+ Note that the disjunct vectors are sparse: for any given word, almost all
+ coefficients will have a count of zero.
+ For example, the dataset that will be examined next has over a quarter
+ of a million different pseudo-disjuncts in it; most words have fewer than
+ a hundred disjuncts on them.
+\end_layout
+
+\begin_layout Subsection
 Summary of results
 \end_layout
 
@@ -412,7 +422,7 @@ The primary results reported below are these:
 \begin_layout Standard
 * Most scores and metrics that can be assigned to connector sets give a
  (scale-free) Zipfian ranking distribution, and are thus fairly boring.
- Although there are some oddities here and there.
+ There are some oddities here and there.
 \end_layout
 
 \begin_layout Standard
@@ -424,8 +434,12 @@ The primary results reported below are these:
 
 \begin_layout Standard
 * Connector sets can be given a mutual information score.
- The distribution for the MI scores appears to be Gaussian (i.e.
- bell curve).
+ The distribution for the MI scores appears to be Gaussian (
+\emph on
+i.e
+\emph default
+.
+ a Bell curve).
  This comes as a bit of a surprise.
  I am not aware of what kind of network theory gives a natural rise to Gaussians.
 \end_layout
@@ -538,52 +552,75 @@ took
  be contemplated.
 \end_layout
 
+\begin_layout Standard
+* Entropic similarity, essentially, a form of symmetric mutual information
+ between words, appears to be an even better similarity measure.
+ It is particularly appealing because it is naturally additive, and thus
+ fits naturally into network theories derived from thermodynamic partion
+ functions.
+\end_layout
+
+\begin_layout Subsection
+Revision History
+\end_layout
+
+\begin_layout Standard
+The original version of this report, dated 7 May 2017, was prepared on a
+ painfully small dataset, which also (may have?) incorporated a fatal bug
+ in the disjunct code: disjuncts were being assembled incorrectly, due to
+ a reversed sign in the MI calculations.
+ This bug was eventually uncovered, and so it seemed best to entirely discard
+ the initial analysis, and instead repeat it with a newer and larger dataset
+ that was correctly assembled.
+ The revised analysis was done mostly in July 2017.
+ Sadly, the discovery of this bug required that multiple large datasets
+ be discarded and reconstructed.
+ This caused a month of effort to be lost.
+\end_layout
+
+\begin_layout Standard
+Simultaneously, there was a lot of confusion about the efficacy of the cosine
+ similarity measure.
+ Initial work on cosine similarity used a filtered dataset, with the goal
+ of filtering to reduce 
+\begin_inset Quotes eld
+\end_inset
+
+noise
+\begin_inset Quotes erd
+\end_inset
+
+ in the dataset, as well as to manage dataset size.
+ It turns out that this filtering also had the undesired side-effect of
+ destroying much of the 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ as well – it rendered many grammatically unrelated words to be judged to
+ be very similar.
+ Between the accidental sign reversal, and the excessively strong data cuts,
+ it was all very confusing, and has taken another month to recover from
+ this – I'm back to where I was in May, just older and wiser, now.
+ Versions 2 and 3 of this report provide the status quo.
+\end_layout
+
+\begin_layout Standard
+Version 4 of this report expands it by considering an entropic similarity
+ between words, intended to supplant the cosine similarity as an effective
+ graph metric.
+ The entropic similarity is a form of symmetric mutual information between
+ words; it is given this oddball name so as to avoid confusion with a varity
+ of other contexts in which mutual information appears.
+ And so, Version 4 provides additional statistical analysis comparing the
+ entropic similarity to the cosine similarity.
+\end_layout
+
 \begin_layout Subsection*
-Recap
-\end_layout
-
-\begin_layout Standard
-The story so far: Starting from a large text corpus, the mutual information
- (MI) of word-pairs are counted.
- This MI is used to perform a maximum spanning-tree (MST) parse (of a different
- subset of) the corpus.
- From each parse, a pseudo-disjunct is extracted for each word.
- The pseudo-disjunct is like a real LG disjunct, except that each connector
- in the disjunct is the word at the far end of the link.
-\end_layout
-
-\begin_layout Standard
-So, for example, in in idealized world, the MST parse of the sentence "Ben
- ate pizza" would produce the parse Ben <–> ate <–> pizza and from this,
- we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
- Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
- pizza+) on the word "puked".
- Since these two disjuncts are the same, we can conclude that the two words
- "ate" and "puked" are very similar to each other.
- Considering all of the other disjuncts that arise in this example, we can
- conclude that these are the only two words that are similar.
-\end_layout
-
-\begin_layout Standard
-Any given word will have many pseudo-disjuncts attached to it.
- Each disjunct has a count of the number of times it has been observed.
- Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
-l vector space, which each disjunct being a single basis element.
- The similarity of two words can be taken to be the cosine-similarity between
- the disjunct-vectors.
-\end_layout
-
-\begin_layout Standard
-Equivalently, the set of disjuncts can be thought of as a weighted set:
- each disjunct has a weight, corresponding to the number of times it has
- been observed.
- A weighted set is more or less the same thing as a vector, and these two
- are treated as the same, in what follows.
- Note that the disjunct vectors are sparse: for any given word, almost all
- coefficients will have a count of zero.
- For example, the dataset that will be examined next has over a quarter
- of a million different pseudo-disjuncts in it; most words have fewer than
- a hundred disjuncts on them.
+Foo
 \end_layout
 
 \begin_layout Standard
