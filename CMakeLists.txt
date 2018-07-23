@@ -72,21 +72,6 @@ include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 # add the 'lib' dir to cmake's module search path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
-# Cogutil
-FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
-IF (COGUTIL_FOUND)
-        MESSAGE(STATUS "CogUtil found.")
-        ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-        MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
-
-# add the 'cmake' directory from cogutil to search path
-list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
-
-include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
-
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
