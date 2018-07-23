@@ -103,9 +103,14 @@
 	(cog-map-type (lambda (atm) (store-atom atm) #f) 'SimilarityLink))
 
 (define (store-regularly)
-	(sleep 3600)
+	(sleep 1200)
+	(load-atoms-of-type 'SimilarityLink)
+	(sleep 1200)
+	(load-atoms-of-type 'SimilarityLink)
+	(sleep 1200)
 	(store-sims)
 	(format #t "Done storing ~A ~A\n"
 		(cog-count-atoms 'SimilarityLink)
 		(strftime "%c" (localtime (current-time))))
+	(load-atoms-of-type 'SimilarityLink)
 	(store-regularly))

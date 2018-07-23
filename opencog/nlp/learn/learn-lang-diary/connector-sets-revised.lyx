@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{url} 
@@ -15,16 +17,16 @@
 \language_package default
 \inputencoding utf8
 \fontencoding global
-\font_roman times
-\font_sans helvet
-\font_typewriter courier
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -44,15 +46,24 @@
 \pdf_pdfusetitle true
 \papersize default
 \use_geometry false
-\use_amsmath 2
-\use_esint 0
-\use_mhchem 0
-\use_mathdots 1
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 0
 \index Index
 \shortcut idx
@@ -76,11 +87,51 @@
 \begin_body
 
 \begin_layout Title
-Connector Sets (Revised) 
+Connector Set Distributions 
 \end_layout
 
 \begin_layout Author
 Linas Vepstas
+\end_layout
+
+\begin_layout Date
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+Version 1: 11 May 2017
+\begin_inset Newline newline
+\end_inset
+
+Version 2: 6 August 2017
+\begin_inset Newline newline
+\end_inset
+
+Version 3: 12 September 2017
+\begin_inset Newline newline
+\end_inset
+
+Version 4: 23 July 2018
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Abstract
@@ -98,13 +149,62 @@ Extract from the language-learning diary, reporting on an initial dataset
  to be discarded.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Introduction
 \end_layout
 
 \begin_layout Standard
-This is a report on a dataset of disjuncts and connector sets, extracted
- from MST parses of a batch of sentences.
+This report characterizes the statistical distribution of word-disjunct
+ pairs extracted from a large block of text, using unsupervised natural
+ language learning techniques.
+\end_layout
+
+\begin_layout Standard
+A disjunct is a sequence of words, resembling an N-gram, but containing
+ grammatical information.
+ The grammatical information in a disjunct is 
+\begin_inset Quotes eld
+\end_inset
+
+complete
+\begin_inset Quotes erd
+\end_inset
+
+, in the sense that it is sufficient to construct and accurate parser of
+ language.
+ This is unlike the situation encountered with Word2Vec or AdaGram, where
+ one can discover 
+\begin_inset Quotes eld
+\end_inset
+
+important
+\begin_inset Quotes erd
+\end_inset
+
+ sequences of words, but where the route to the creation of a grammar is
+ less clear.
+ The algorithm used to extract disjuncts is also completely different from
+ the neural-net techniques.
+ Despite this, there are exploitable conceptual similarities in building
+ models of natural language.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+ The goal of this report is to provide a fairly detailed statistical analysis
+ of the distribution of disjuncts, thereby characterizing the structure
+ of natural language at a grammatical, syntactic level.
+\end_layout
+
+\begin_layout Standard
+resembles the somewhat 
+\end_layout
+
+\begin_layout Standard
+is a report on a dataset of disjuncts and connector sets, extracted from
+ MST parses of a batch of sentences.
  First, a recap of what these are, then a characterization of the database
  contents, and finally, a report on the grammatical similarity of words
  in the dataset.
@@ -112,7 +212,7 @@ This is a report on a dataset of disjuncts and connector sets, extracted
 \end_layout
 
 \begin_layout Subsection*
-The errors
+Revision History
 \end_layout
 
 \begin_layout Standard
@@ -151,11 +251,11 @@ signal
 \begin_inset Quotes erd
 \end_inset
 
- as well -- it rendered many grammatically unrelated words to be judged
- to be very similar.
+ as well – it rendered many grammatically unrelated words to be judged to
+ be very similar.
  Between the accidental sign reversal, and the excessively strong data cuts,
  it was all very confusing, and has taken another month to recover from
- this -- I'm back to where I was in May, just older and wiser, now.
+ this – I'm back to where I was in May, just older and wiser, now.
 \end_layout
 
 \begin_layout Subsection*
@@ -311,7 +411,7 @@ The story so far: Starting from a large text corpus, the mutual information
 
 \begin_layout Standard
 So, for example, in in idealized world, the MST parse of the sentence "Ben
- ate pizza" would produce the parse Ben <--> ate <--> pizza and from this,
+ ate pizza" would produce the parse Ben <–> ate <–> pizza and from this,
  we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
  Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
  pizza+) on the word "puked".
@@ -582,13 +682,13 @@ reference "sec:Dataset-report"
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -743,15 +843,15 @@ The support and count for the pairs are given below.
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -1025,15 +1125,15 @@ The disjunct stats are these:
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -1376,6 +1476,10 @@ ats.scm file, on the en_pairs_rfive_mtwo database.
  The first follows the canonical Zipf distribution.
  The green line is an eyeballed, approximate fit, of exponent -1.1.
  The second has an exponent of about -0.85.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1462,12 +1566,12 @@ A printing utility for these three is `show-counts` in the `disjunct-stats.scm`
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="6">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -2103,8 +2207,8 @@ The main point of this table is to demonstrate the log-likelihood column.
  At this point, these numbers won't seem to have much meaning; however,
  they provide an overall scale that will be seen, repeatedly, in the analysis
  below.
- The range of magnitudes -- 4 to 7 -- is no accident, and similar ranges
- will be seen later.
+ The range of magnitudes – 4 to 7 – is no accident, and similar ranges will
+ be seen later.
  
 \end_layout
 
@@ -2260,6 +2364,10 @@ op cit
  
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2447,6 +2555,10 @@ Graph of binned-word-counts.dat, generated in disjunct-stats.scm
 \end_inset
 
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2594,6 +2706,10 @@ reference "eq:word-distrib"
 
 which effectively predicts the height and location of the spikes.
  This is clearly demonstrated by the straight green line.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2777,6 +2893,10 @@ Comparing this to the graph above, with logli
  it really does have a slope of 0.5, which is exactly what the Jacobian determina
 nt was telling is it should be.
  Yayy! Declare victory and go home!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2884,7 +3004,7 @@ junk
 \begin_layout Standard
 Thus, it is unclear on what the meaning of this knee in the graph really
  is, and how it should be explained.
- Note that this knee is NOT visible in the Zipfian distribution -- nothing
+ Note that this knee is NOT visible in the Zipfian distribution – nothing
  happens at 
 \begin_inset Formula $N=400$
 \end_inset
@@ -2973,6 +3093,10 @@ The graph on the right expresses an alternate view of the same idea: it
  an average disjunct observation count of less than four.
  It also conveys the sense that when the average disjunct count is greater
  than about four, that this is unusual, and perhaps meaningful in some way.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3054,6 +3178,10 @@ Prince
  The top six disjuncts are just single links, shown in the table below.
  Clearly all are princes.
  This leaves 767 other disjuncts with far fewer counts.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3061,8 +3189,8 @@ Prince
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3224,6 +3352,10 @@ think
  It has 5462 disjuncts in total; only six are observed more than 200 times.
  The last in the list below is the first clear appearance of a transitive
  verb.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3231,8 +3363,8 @@ think
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3393,6 +3525,10 @@ long
  It has 5412 different disjuncts on it; only five are seen more than 200
  times.
  These are:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3400,8 +3536,8 @@ long
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3613,6 +3749,10 @@ Computed with the dj-prince and dj-think etc.
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3643,6 +3783,10 @@ status collapsed
 Computed with the accum-dj-all function in disjunct-stats.scm 
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3721,6 +3865,10 @@ Generated by sorted-support in disjunct-stats.scm
 
  The eye-balled fit has a slope of 0.9, but, from the eyeball-perspective,
  this is not all that different from a slope of 1.0.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3837,6 +3985,10 @@ The RMS size of the set is thus larger not only when more disjuncts have
  Thus, we expect adjectives to appear higher-up on this ranking list, than
  the observation-based list.
  And this might be true, relatively, but certainly not true absolutely.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3945,6 +4097,10 @@ Extracted from ranked-sqlen-norm.dat
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3952,9 +4108,9 @@ Extracted from ranked-sqlen-norm.dat
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -4286,9 +4442,9 @@ own
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -4635,6 +4791,10 @@ Prince
 
 \begin_layout Standard
 The distribution, shown below, is a power-law.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4722,6 +4882,10 @@ These are graphed by binned-cset-mi and weighted-cset-mi in the disjunct-stats.s
 m file.
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -4944,6 +5108,10 @@ reference "logli distribution graph"
  as compared to 0.23 for the non-marginal MI distribution above.
  The difference between 0.24 and 0.23 seems to be significant: changing one
  to the other seems to give a noticeably poorer fit.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5040,6 +5208,10 @@ Tomb
 \end_inset
 
  is 40th in the list and has three disjuncts observed more than twice:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5047,8 +5219,8 @@ Tomb
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -5180,6 +5352,10 @@ prominently
 
  appears 50th in the list, and suggests that it is only used only in a rather
  rigid and formulaic way:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5187,8 +5363,8 @@ prominently
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -5298,6 +5474,10 @@ Corps Diplomatique
 \end_inset
 
 , as witness on the different sign on the disjuncts:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5305,8 +5485,8 @@ Corps Diplomatique
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -5541,6 +5721,10 @@ reference "logli distribution graph"
 
 .
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5645,6 +5829,10 @@ It resembles the graph for the ranked fractional marginal MI, above.
 .
  As before, it has a width of approximately 1/4th.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5755,12 +5943,12 @@ l form of verbs.
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="6">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -6253,6 +6441,10 @@ Computed with sorted-avg-connectors in disjunct-stats.scm
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6508,7 +6700,7 @@ Given the earlier Zipfian results on the average degree
 Disjunct Cosine Similarity
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Disjunct-Cosine-Similarity"
+name "subsec:Disjunct-Cosine-Similarity"
 
 \end_inset
 
@@ -6588,6 +6780,10 @@ See the good-sims and ranked-sims in disjunct-stats.scm file.
 \end_inset
 
  They are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6638,6 +6834,10 @@ There are 427 words observed 256 or more times, these form
 
  pairs.
  The ranking of these are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6680,6 +6880,10 @@ Produced by binned-good-sims.
 
 .
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6695,7 +6899,11 @@ Produced by binned-good-sims.
 
 \begin_layout Standard
 Similar graphs are produced for a bigger set.
- In this case, once can consider
+ In this case, one can consider
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6784,9 +6992,9 @@ The first non-capitalized word-pair appears at position ten.
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7200,9 +7408,9 @@ The table below shows several more pairs worth closer examination.
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7483,10 +7691,10 @@ Print the disjuncts with the `print-disjuncts` function.
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7859,12 +8067,12 @@ The list above contains the pairs 'guess ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="6">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -8465,10 +8673,10 @@ Some more verbs are worth looking at.
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -8912,10 +9120,10 @@ The pair 'believe ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -9350,10 +9558,10 @@ The first prepositions in the list are 'in ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -9776,14 +9984,14 @@ The pair 'would ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="8">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -10487,14 +10695,14 @@ The words 'city', 'house', 'village' and 'world' are all similar.
 \begin_inset Tabular
 <lyxtabular version="3" rows="12" columns="8">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -11414,6 +11622,10 @@ The similarity above is predicated on the frequent pairing of a word with
  They were clearly high enough to allow the MST parse to move forward, but
  are not otherwise terribly promising.
  They are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -11421,8 +11633,8 @@ The similarity above is predicated on the frequent pairing of a word with
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -12193,7 +12405,7 @@ This suggests a modified form of overlap similarity, by normalizing to a
 \begin_inset Formula $K\left(w_{1},d\right)=N\left(w_{1},d\right)N\left(w_{2},*\right)/N\left(w_{1},*\right)$
 \end_inset
 
- -- this makes the counts on 
+ – this makes the counts on 
 \begin_inset Formula $w_{1}$
 \end_inset
 
@@ -12593,14 +12805,14 @@ en_pairs_rfive_mtwo
  dataset as above, and examined in detail in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Disjunct-Cosine-Similarity"
+reference "subsec:Disjunct-Cosine-Similarity"
 
 \end_inset
 
 
 \begin_inset CommandInset ref
 LatexCommand vpageref
-reference "sub:Disjunct-Cosine-Similarity"
+reference "subsec:Disjunct-Cosine-Similarity"
 
 \end_inset
 
@@ -12610,6 +12822,10 @@ reference "sub:Disjunct-Cosine-Similarity"
  Note that cosine similarity is symmetric; this figure is necessarily symmetric
  about the diagonal.
  The diagonal can be seen as a red line, representing a similarity of 1.0.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -12622,7 +12838,7 @@ status open
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Cosine similarity scatterplot
@@ -12692,6 +12908,10 @@ Computed with the `dranked` function, and the `dranked-long` list graphed,
  upper-left.
  The pairs least-similar to anything else end up on the lower-right.
  The color scheme is as before.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -12703,7 +12923,7 @@ status open
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Quasi-diagonal cosine similarity
@@ -12747,7 +12967,7 @@ reference "tab:Block-ranked-words"
 
 .
  Its sort of interesting to read.
- So, the word that is most similar to the LEFT-WALL is the double-dash --
+ So, the word that is most similar to the LEFT-WALL is the double-dash –
  perhaps not to surprising, as the double dash is often used to start new
  sentence phrases.
  That various forms of punctuation follow is not surprising.
@@ -12757,7 +12977,7 @@ reference "tab:Block-ranked-words"
 \begin_layout Standard
 After this are various capitalized words.
  As noted previously, capitalized words are observed far less frequently
- than their u-capitalized counterparts -- usually only one capitalized word
+ than their u-capitalized counterparts – usually only one capitalized word
  per sentence! Thus, capitalized words have far fewer disjuncts on them,
  thus making it easier for them to appear superficially similar, when they
  really should not be.
@@ -12815,6 +13035,10 @@ nothing
  is best left unasked.
  But we'll ask anyway.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -12825,7 +13049,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Block-ranked words
@@ -12844,7 +13068,7 @@ name "tab:Block-ranked-words"
 \end_layout
 
 \begin_layout Plain Layout
-LEFT-WALL -- ...
+LEFT-WALL – ...
  ..
  ....
  *** Two Bit - The “ And But So Perhaps Though When As Then While If Have
@@ -12956,8 +13180,8 @@ Created with the `prt-sim` function.
 \begin_inset Tabular
 <lyxtabular version="3" rows="23" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -13531,7 +13755,14 @@ signal
 \end_layout
 
 \begin_layout Section*
-The End
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
