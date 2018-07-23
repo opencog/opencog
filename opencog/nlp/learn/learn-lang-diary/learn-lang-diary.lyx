@@ -2283,7 +2283,7 @@ Boltzmann Entropy
 \begin_inset Formula $S_{B}$
 \end_inset
 
- is the shanon entropy of the microcanonical ensemble: it maximizes the
+ is the Shanon entropy of the microcanonical ensemble: it maximizes the
  entropy (MaxEnt) for a fixed value of the energy.
  (MaxEnt: not the energy, but for a fixed set of constraints).
  (viz, 
@@ -2299,7 +2299,7 @@ Boltzmann Entropy
 \end_inset
 
  a constant of dimension energy to make arg of the log dimensionless.) (MaxEnt:
- replace E by the individual constaints.
+ replace E by the individual constraints.
  This suggests that there are many Boltzmann entropies: one for each constraint
  that is applied!)
 \end_layout
@@ -22234,7 +22234,14 @@ Size The dimensions of the array.
 \end_layout
 
 \begin_layout Description
-Left-Right The left and right entropies, as defined previously.
+\begin_inset Formula $H_{left}$
+\end_inset
+
+,
+\begin_inset Formula $H_{right}$
+\end_inset
+
+ The left and right entropies, as defined previously.
  Note that 
 \begin_inset Formula $MI=H-H_{left}-H_{right}$
 \end_inset

@@ -873,7 +873,7 @@ The word-pair dataset, and other similar datasets are summarized in the
  language learning diary
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Vepstas2014"
+key "Vepstas2013"
 
 \end_inset
 
@@ -1621,7 +1621,68 @@ en_pairs_rfive
 \end_layout
 
 \begin_layout Standard
-The disjunct stats are these:
+The disjunct dataset is obtained by collecting statistics on MST parses
+ obtained from the tables above.
+ MST parsing is performed by considering the set of all-possible planar
+ trees connecting the words in a sentence.
+ One then selects the one single tree which maximizes the sum of the MI
+ values between all word-pairs.
+ This is the MST parse.
+ Given an MST parts, one then 
+\begin_inset Quotes eld
+\end_inset
+
+cuts
+\begin_inset Quotes erd
+\end_inset
+
+ each link, and labels the cut end of the link with the word that it was
+ previously connected to.
+ The disjunct is then the collection of these cut, labelled half-edges.
+ A word-disjunct pair is then the word, and the dangling links that go with
+ it.
+ The dataset is created by accumulating counts for a large number of these
+ word-disjunct pairs.
+\end_layout
+
+\begin_layout Standard
+Just as before, the dataset of pair-counts can be viewed as a sparse matrix.
+ The rows correspond to words, the columns to disjuncts.
+ The table below summarizes this dataset.
+ The table caption is the same as before, with the following addtional values
+ being reported:
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $H_{left}$
+\end_inset
+
+,
+\begin_inset Formula $H_{right}$
+\end_inset
+
+ The left and right entropies.
+ These are defined as 
+\begin_inset Formula $H_{right}=-\sum_{w}p(w,*)\log_{2}p(w,*)$
+\end_inset
+
+ and 
+\begin_inset Formula $H_{left}=-\sum_{d}p(*,d)\log_{2}p(*,d)$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $MI=H-H_{left}-H_{right}$
+\end_inset
+
+ holds, by definition.
+ The left and right entropies were not reported for the word-pairs table,
+ because these two are nearly equal, and are equal to half the difference
+ between the entropy and the MI.
+\end_layout
+
+\begin_layout Standard
+The table is then characterized as:
 \begin_inset VSpace defskip
 \end_inset
 
@@ -1736,7 +1797,11 @@ Dataset
 \begin_inset Text
 
 \begin_layout Plain Layout
-137K x 6.24M
+137K
+\begin_inset Formula $\times$
+\end_inset
+
+6.24M
 \end_layout
 
 \end_inset
@@ -1825,9 +1890,20 @@ en_pairs_rfive_mtwo
 
 \end_layout
 
+\begin_layout Subsection
+Dataset Analysis
+\end_layout
+
 \begin_layout Standard
-The dataset contains 851964 words.
- Of these, 137078 words that have disjuncts attached to them.
+The word-pair dataset contains 851964 words.
+ Not all of these were observe during the subsequent MST parsing, as the
+ size of the MST-parsed corpuse was smaller.
+ However, since the MST corpus was a subset of the word-pair corpus, it
+ does not contain any words that were not previously observed.
+\end_layout
+
+\begin_layout Standard
+The MST dataset has 137078 words that have disjuncts attached to them.
  These words have been observed a total of 18489594  times, for an average
  of 18489594/137078 = 21.70 observations per word.
  This dataset contains 6239997 different, unique disjuncts, for an average
@@ -1836,27 +1912,52 @@ The dataset contains 851964 words.
 \end_layout
 
 \begin_layout Standard
-The period appears 849354.0 times, suggesting that this many sentences were
- observed.
+The period (the punctuation mark denoting end-of-sentence) appears 849354.0
+ times, suggesting that this many sentences were observed.
  Each sentence thus has an average of 18489594 / 849354 = 21.77 words per
  sentence.
- 
+ The precise statistics, however, are governed by the end-of-sentence detector,
+ which ignores common abbreviations such as 
+\begin_inset Quotes eld
+\end_inset
+
+Mr.
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+Mrs.
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\emph on
+etc
+\emph default
+.
+ but may make mistakes for uncommon abbreviations, and for non-prose text,
+ such as tables and charts.
 \end_layout
 
 \begin_layout Standard
-The dataset contains 6239997 unique connector-sets, for an average of 18489594
- / 6239997 = 2.96 observations per cset.
+The dataset contains 6239997 unique disjuncts, for an average of 18489594
+ / 6239997 = 2.96 observations per disjunct.
  This last number that makes this dataset feel thin and sparse.
  Its not clear how accurate that perception is: an earlier dataset was about
  one-tenth to one-twentieth the size, in the number of words, disjuncts
  and observations, yet it had a ratio of 1.5 observations per cset.
  That is, making more than ten times the number of observations only doubled
  the observations per cset.
- 
+ This suggests that the distribution is Zipfian, so that large increases
+ in observations result in only small changes to averages.
 \end_layout
 
 \begin_layout Standard
-The dataset is sparse in a completely different sense: viewing 
+The dataset is sparse, in a completely different sense from the above.
+ Viewing 
 \begin_inset Formula $N(w,d)$
 \end_inset
 
@@ -1864,7 +1965,8 @@ The dataset is sparse in a completely different sense: viewing
 \begin_inset Formula $851964\times6239997$
 \end_inset
 
-, but only a very small number of these is non-zero: this is 
+, there are only a very small number of counts that are non-zero.
+ Specifically, the fraction is 
 \begin_inset Formula $8629163/(851964\times6239997)=1.623\times10^{-6}$
 \end_inset
 
@@ -1873,7 +1975,11 @@ The dataset is sparse in a completely different sense: viewing
 \begin_inset Formula $-\log_{2}$
 \end_inset
 
- of this number, which is 16.60.
+ of this number; here, it is 
+\begin_inset Formula $-\log_{2}1.623\times10^{-6}\approx16.60$
+\end_inset
+
+.
  The sparsity appears to increase with the number of observations: the previous,
  ten-times-smaller dataset had a sparsity of 15.
 \end_layout
@@ -1898,23 +2004,23 @@ status collapsed
 \begin_layout Plain Layout
 This and the following entropies were measured with the word-entropy-bits,
  disjunct-entropy-bits, etc.
- functions in disjunct-stats.scm Alternately, the print-matrix-summary-report
- now reports this.
+ functions in 'disjunct-stats.scm' Alternately, the 'print-matrix-summary-report'
+ function now reports this.
 \end_layout
 
 \end_inset
 
- The total connector-set entropy is much larger.
+ The total entropy is much larger.
  It is defined as
 \begin_inset Formula 
 \[
-H_{cset}=-\sum_{w,d}p(w,d)\log_{2}p(w,d)
+H_{total}=-\sum_{w,d}p(w,d)\log_{2}p(w,d)
 \]
 
 \end_inset
 
 and is measured to be 
-\begin_inset Formula $H_{cset}=20.96$
+\begin_inset Formula $H_{total}=20.96$
 \end_inset
 
  bits.
@@ -1934,7 +2040,7 @@ and is measured to be
  The total mutual information between the words and disjuncts is then 
 \begin_inset Formula 
 \[
-MI_{cset}=\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=H_{word}+H_{disjunct}-H_{cset}
+MI_{cset}=\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=H_{word}+H_{disjunct}-H_{total}
 \]
 
 \end_inset
