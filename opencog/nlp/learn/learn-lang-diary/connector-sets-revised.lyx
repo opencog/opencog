@@ -1152,7 +1152,7 @@ For
 \begin_inset Formula $p=2$
 \end_inset
 
-, this is simply the (Hilbert-space) 
+, this is simply the (Euclidean) 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1639,8 +1639,14 @@ cuts
  each link, and labels the cut end of the link with the word that it was
  previously connected to.
  The disjunct is then the collection of these cut, labelled half-edges.
+ The collection is ordered, left-to-right, and a plus/minus indicator is
+ used to half-edge as having been originally left going (minus) or right-going
+ (plus).
  A word-disjunct pair is then the word, and the dangling links that go with
- it.
+ it; the word can be thought of as sitting in the middle of the left-going
+ connectors, and the right-going connectors.
+ (In this sense, a word-disjunct pair resembles an N-gram, except that N
+ is not fixed, and there might be skipped intermediate words).
  The dataset is created by accumulating counts for a large number of these
  word-disjunct pairs.
 \end_layout
@@ -2052,7 +2058,98 @@ and is measured to be
  bits.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Standard
+It is interesting to compare 
+\begin_inset Formula $MI_{cset}$
+\end_inset
+
+ to 
+\begin_inset Formula $MI_{word-pair}$
+\end_inset
+
+.
+ The former is much larger, by just over 6 bits.
+ There are several ways to think about this.
+ Clearly, the connector-set database contains 
+\begin_inset Quotes eld
+\end_inset
+
+more information
+\begin_inset Quotes erd
+\end_inset
+
+; one might say that it is a distillation, an extraction.
+ It is an amplification, but done so that the signal-to-noise ratio is much
+ improved.
+ MST parsing is clearly picking out some sort of structure from natural
+ language.
+ Consider it this way: 
+\begin_inset Formula $2^{1.84}=3.58$
+\end_inset
+
+ and so the word-pair dataset contains on average 1.84 more bits of information
+ than what one would expect to observe in a completely random, uniformly-distrib
+uted word-salad, for which we expect 
+\begin_inset Formula $MI=0$
+\end_inset
+
+.
+ The word-disjunct dataset takes a large step in extracting signal from
+ the noise: one gets 
+\begin_inset Formula $7.897-1.84=6.057$
+\end_inset
+
+ more bits of information, for a factor of 
+\begin_inset Formula $2^{6.057}=66.5$
+\end_inset
+
+.
+ That is a respectable amount of noise reduction.
+\end_layout
+
+\begin_layout Section
+Distributions
+\end_layout
+
+\begin_layout Standard
+The previous section characterized the dataset in terms of its total size,
+ entropy, and related single-number values that can be extracted from it.
+ More interesting is the distribution of columns and rows, that is, the
+ distribution of the words and the disjuncts.
+ These result in various graphs, almost all of which are Zipfian in nature;
+ and some that very much are not.
+ The distributions obtained here can be contrasted with the distributions
+ obtained from word-pair counts.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2009"
+
+\end_inset
+
+ They are similar in many ways, and also strikingly different.
+\end_layout
+
+\begin_layout Standard
+In the following, the term 
+\begin_inset Quotes eld
+\end_inset
+
+connector set
+\begin_inset Quotes erd
+\end_inset
+
+ is taken as a synonym for 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
 Connector-set distribution
 \end_layout
 
@@ -3121,7 +3218,7 @@ high quality
  and its disjunct; this is explored later.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Word distribution
 \end_layout
 
@@ -3638,7 +3735,7 @@ reference "graph word frequency"
 , and does not continue past there! This seems to be a fairly subtle effect.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Ranked average observations per disjunct
 \end_layout
 
@@ -4287,7 +4384,7 @@ The skewness appears to be very sharp.
  Again, this is done on a log-log graph, in a Zipfian way.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct count distribution
 \end_layout
 
@@ -4425,7 +4522,7 @@ Its kind of a strange graph.
  this mean? This is covered in the next section.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct Support Distribution
 \end_layout
 
@@ -4519,7 +4616,7 @@ without
  multiplicity.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Ranked Euclidean length (RMS Size)
 \end_layout
 
@@ -4646,7 +4743,7 @@ concentrated
 The slope appears to be exactly -1.0, continuing the scale-free trend.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Mean-square to size ratio
 \end_layout
 
@@ -5444,7 +5541,7 @@ Neither of these variations seem promising; they seem to offer up more of
  A larger and more refined dataset might reveal otherwise.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Mutual information
 \end_layout
 
@@ -5629,7 +5726,7 @@ Both graphs show an eyeballed fit in green.
 , it's clearly missing a large excess in the middle of the graph.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Marginal Mutual Information of Words
 \end_layout
 
@@ -6266,8 +6363,8 @@ These samplings of disjuncts are sharply reminiscent of the technique of
  In this case, it is used to obtain grammatical structure.
 \end_layout
 
-\begin_layout Subsection*
-Mutual information of disjuncts
+\begin_layout Subsection
+Mutual Information of Disjuncts
 \end_layout
 
 \begin_layout Standard
@@ -6357,7 +6454,7 @@ The origin of the noise that seems to build up for MI<10 is unclear.
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Fractional Entropy
 \end_layout
 
@@ -6986,7 +7083,7 @@ many possibilities
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsubsection*
 More terms
 \end_layout
 
@@ -7004,7 +7101,7 @@ MI_{word}(w)=H_{word}(w)+\log_{2}p(w,*)+\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}p(*,
  The last term is bizarre...
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Vertex degrees and hubiness
 \end_layout
 
@@ -7276,7 +7373,7 @@ So: bigger datasets, and an urgent need for non-Wikipedia content.
  of tables and lists masquerading as sentences.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Hubiness
 \end_layout
 
@@ -7308,6 +7405,10 @@ Given the earlier Zipfian results on the average degree
 
  to some ten or twenty percent.
  
+\end_layout
+
+\begin_layout Section
+Similarity
 \end_layout
 
 \begin_layout Subsection*
