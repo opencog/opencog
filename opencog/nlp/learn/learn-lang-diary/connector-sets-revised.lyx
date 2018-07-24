@@ -12983,11 +12983,119 @@ mutual exclusion
 \begin_inset Quotes eld
 \end_inset
 
-quality cosine
+entropic similarity
 \begin_inset Quotes erd
 \end_inset
 
 , given below.
+\end_layout
+
+\begin_layout Subsection
+Entropic Similarity
+\end_layout
+
+\begin_layout Standard
+A similarity between two words, taking the form of the symmetric mutal informati
+on between them, can be defined by working with the matrix product.
+ Let 
+\begin_inset Formula $M=\left[p\left(w,d\right)\right]$
+\end_inset
+
+ be the matrix whose rows correspond to words, and columns correspond to
+ disjuncts.
+ The value of any given matrix entry is then the frequency 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ The matrix 
+\begin_inset Formula $MM^{T}$
+\end_inset
+
+then has matrix entries
+\begin_inset Formula 
+\[
+\left[MM^{T}\right]\left(w_{1},w_{2}\right)=\sum_{d}p\left(w_{1},d\right)p\left(w_{2},d\right)
+\]
+
+\end_inset
+
+Here, the notation 
+\begin_inset Formula $M^{T}$
+\end_inset
+
+ denotes the matrix-transpose.
+ Note that 
+\begin_inset Formula $MM^{T}$
+\end_inset
+
+ is a symmetric matrix: 
+\begin_inset Formula 
+\[
+\left[MM^{T}\right]\left(w_{1},w_{2}\right)=\left[MM^{T}\right]\left(w_{2},w_{1}\right)
+\]
+
+\end_inset
+
+A symmetric mutual information can be built by normalizing this matrix,
+ defining a matrix 
+\begin_inset Formula $Q$
+\end_inset
+
+ such that
+\begin_inset Formula 
+\begin{equation}
+Q\left(w_{1},w_{2}\right)=\frac{\left[MM^{T}\right]\left(w_{1},w_{2}\right)}{\sum_{u,v}\left[MM^{T}\right]\left(u,v\right)}=\frac{\left[MM^{T}\right]\left(w_{1},w_{2}\right)}{\left[MM^{T}\right]\left(*,*\right)}\label{eq:symmetric transpose}
+\end{equation}
+
+\end_inset
+
+The entropic similarity can then be defined as
+\begin_inset Formula 
+\[
+\mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}
+\]
+
+\end_inset
+
+Written in this fashion, this is clearly a form of mutual information between
+ two words; its called 
+\begin_inset Quotes eld
+\end_inset
+
+entropic similarity
+\begin_inset Quotes erd
+\end_inset
+
+ here, to avoid confuision with other uses of the words 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+ in this text.
+\end_layout
+
+\begin_layout Subsection
+Stuff
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Other Similarity Scores
+\end_layout
+
+\begin_layout Standard
+There are a number of diferrent ways of juding similarity between a pair
+ of words.
+ It seems that these are limited only by the imagination.
+ A variety of different similarity measures are given below.
+ Each of these can be justified, to some degree, by hand-waving arguments
+ and appeals to taste and conceptions of mathematical beauty.
+ How to properly anchor these measures more firmly in a consistent framework
+ is unclear.
 \end_layout
 
 \begin_layout Subsection
@@ -13070,11 +13178,6 @@ But what if the high quality is based on a pathetically small number of
 \end_inset
 
  The suitability of these different means of judging similarity is not clear.
-\end_layout
-
-\begin_layout Section
-\start_of_appendix
-Other Similarity cores
 \end_layout
 
 \begin_layout Subsection
@@ -13519,7 +13622,7 @@ The point here is that this measure treats words as similar with they link,
 \end_layout
 
 \begin_layout Subsection
-Cosine Information
+Symmetric Cosine Information
 \end_layout
 
 \begin_layout Standard
@@ -13557,19 +13660,55 @@ Comparing this to the expression for mutual information suggests that using
 
 \end_inset
 
-Perhaps the following is closer to the 
+Written this way, it resembles a kind of mutual information.
+\end_layout
+
+\begin_layout Subsection
+Symmetric Mutual Information
+\end_layout
+
+\begin_layout Standard
+The symmetric mutual information, and related quantities, can be considiered
+ by working with the symmetric matrix 
+\begin_inset Formula $Q$
+\end_inset
+
+ defined in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:symmetric transpose"
+
+\end_inset
+
+.
+ This can be more closely related to the cosine by noting that it shares
+ the vector dot product as a basic building block.
+ That it, let 
+\begin_inset Formula 
+\[
+\mbox{dot}(w_{1},w_{2})=\sum_{d}p(w_{1},d)p(w_{2},d)
+\]
+
+\end_inset
+
+define a process between two 
 \begin_inset Quotes eld
 \end_inset
 
-original intent
+independent
 \begin_inset Quotes erd
 \end_inset
 
- of mutual information: let 
-\begin_inset Formula $\mbox{dot}(w_{1},w_{2})=\sum_{d}p(w_{1},d)p(w_{2},d)$
+ processes 
+\begin_inset Formula $w_{1}$
 \end_inset
 
- 
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+.
+ Looked at this way, the cannonical mutual information would then be 
 \begin_inset Formula 
 \[
 \mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{dot}(w_{1},w_{2})\mbox{dot}(*,*)}{\mbox{dot}(w_{1},*)\mbox{dot}(*,w_{2})}
@@ -13577,7 +13716,9 @@ original intent
 
 \end_inset
 
-Or even
+One can normalize the process using the cosine similarity; the resulting
+ process is different, and thus has a different value for the mutual information
+:
 \begin_inset Formula 
 \[
 \mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}
@@ -13595,8 +13736,8 @@ The
 \end_inset
 
 .
- Some experiments cmi were performed, and it quickly became apparent that
- cmi does 
+ Some experiments using cmi were performed, and it quickly became apparent
+ that cmi does 
 \begin_inset Quotes eld
 \end_inset
 
@@ -13618,6 +13759,10 @@ against
  tail-end of the sim distribution.
 \end_layout
 
+\begin_layout Subsection
+Mutual Length
+\end_layout
+
 \begin_layout Standard
 One can be inspired to write some crazy concoctions: 
 \begin_inset Formula 
@@ -13627,10 +13772,6 @@ One can be inspired to write some crazy concoctions:
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 I don't know what to call these; the first seems to be some kind of 
 \begin_inset Quotes eld
 \end_inset
