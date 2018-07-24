@@ -114,19 +114,35 @@ backgroundcolor "none"
 status open
 
 \begin_layout Plain Layout
-Version 1: 11 May 2017
+Version 1: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 11 May 2017
 \begin_inset Newline newline
 \end_inset
 
-Version 2: 6 August 2017
+Version 2: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 6 August 2017
 \begin_inset Newline newline
 \end_inset
 
-Version 3: 12 September 2017
+Version 3: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 12 September 2017
 \begin_inset Newline newline
 \end_inset
 
-Version 4: 23 July 2018
+Version 4: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 23 July 2018
 \end_layout
 
 \end_inset
@@ -14602,7 +14618,7 @@ signal
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "lang"
-options "plain"
+options "tufte"
 
 \end_inset
 
