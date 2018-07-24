@@ -36,6 +36,3 @@ INSTALL (FILES
 	StochasticImportanceDiffusion.h
 	DESTINATION "include/opencog/attentionbank"
 )
-
-set(atomspace_libs ${atomspace_libs} attentionbank PARENT_SCOPE)
-
