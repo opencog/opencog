@@ -7485,6 +7485,61 @@ mutual information
  
 \end_layout
 
+\begin_layout Standard
+A related, but very important task, when judging the similarity of words,
+ and attempting to classify them into distinct grammatical classes is that
+ sometimes the same word, 
+\emph on
+viz
+\emph default
+, the same text-string can belonng to two different parts of speech.
+ A casual perusal of any dictionary will show that many words can be used
+ both as nouns, and as verbs.
+ Other words can be nouns or adjectives; yet others can be subclasses: 
+\emph on
+e.g.
+
+\emph default
+ transitive and intransitive verbs.
+ Disjuncts can be thought of as hyper-fine-grained parts-of-speech identifiers,
+ and so one task of categroization is to place them into larger, less crude
+ categories.
+ Another important realization is to observe that different disjuncts correlate
+ strongly with different semantic meanings; for a particularly brutal example,
+ the noun 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ has a semantic meaning that is unrelated to the past tense of the verb
+ 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Which is intended is readily discerned from context; disjuncts encode content.
+\end_layout
+
+\begin_layout Standard
+A more extensive discussion of the relationship between meaning and disjuncts
+ is given elsewhere;
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ it is touched on only breifly below, as it informs what properties of a
+ similarity metric are desirable, and which are not.
+\end_layout
+
 \begin_layout Subsection
 Disjunct Cosine Similarity
 \begin_inset CommandInset label
@@ -12635,7 +12690,7 @@ The above suggests that using the raw observation count to compute the cosine
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Score Cosine
 \end_layout
 
@@ -12702,7 +12757,7 @@ Why is this a reasonable thing to do? Well, the previous two tables already
  Perhaps the sos cosine score would be more sensitive to those processes.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Prototype Theory
 \end_layout
 
@@ -12905,7 +12960,7 @@ quality cosine
 , given below.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Quality Cosine
 \end_layout
 
@@ -12987,7 +13042,7 @@ But what if the high quality is based on a pathetically small number of
  The suitability of these different means of judging similarity is not clear.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Overlap Similarity
 \end_layout
 
@@ -13276,7 +13331,7 @@ with
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct Subsets
 \end_layout
 
@@ -13306,7 +13361,7 @@ This re-affirms the previous observation: we expect connector-sets to behave
  in a set-like fashion, not a vector-like fashion.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Quality Overlaps
 \end_layout
 
@@ -13320,7 +13375,7 @@ Overlap alone may be too weak: again, some of the observed disjuncts may
  MI values).
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Connector Similarity
 \end_layout
 
@@ -13345,7 +13400,7 @@ where each pseudo-connector is a word, and a direction indicator.
 There are some practical difficulties of writing code to discern this.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Word-Pair Cosine Similarity
 \end_layout
 
@@ -13428,7 +13483,7 @@ The point here is that this measure treats words as similar with they link,
  it: it captures more complex relationships between the words in a sentence.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Cosine Information
 \end_layout
 
@@ -13560,7 +13615,7 @@ mutual length
  device.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section
 Cosine Similarity scatterplots
 \end_layout
 
