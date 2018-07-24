@@ -12,6 +12,11 @@
 \newunicodechar{‐}{-}
 \end_preamble
 \use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
 \maintain_unincluded_children false
 \language english
 \language_package default
@@ -45,7 +50,7 @@
 \pdf_backref false
 \pdf_pdfusetitle true
 \papersize default
-\use_geometry false
+\use_geometry true
 \use_package amsmath 2
 \use_package amssymb 2
 \use_package cancel 1
@@ -69,8 +74,8 @@
 \shortcut idx
 \color #008000
 \end_index
-\secnumdepth 3
-\tocdepth 3
+\secnumdepth 2
+\tocdepth 2
 \paragraph_separation indent
 \paragraph_indentation default
 \quotes_language english
@@ -12773,6 +12778,15 @@ Why is this a reasonable thing to do? Well, the previous two tables already
  Perhaps the sos cosine score would be more sensitive to those processes.
 \end_layout
 
+\begin_layout Section
+Word Senses
+\end_layout
+
+\begin_layout Standard
+Word, considered as text strings, often correspond to multiple senses.
+ 
+\end_layout
+
 \begin_layout Subsection
 Prototype Theory
 \end_layout
@@ -13056,6 +13070,11 @@ But what if the high quality is based on a pathetically small number of
 \end_inset
 
  The suitability of these different means of judging similarity is not clear.
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Other Similarity cores
 \end_layout
 
 \begin_layout Subsection
@@ -14614,7 +14633,7 @@ signal
  Careful data analysis is needed; blind trust is not enough.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "lang"
