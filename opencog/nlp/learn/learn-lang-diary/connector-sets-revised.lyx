@@ -7636,7 +7636,7 @@ reference "graph: ranked length"
  pairs.
  These can be sorted and ranked.
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 See the good-sims and ranked-sims in disjunct-stats.scm file.

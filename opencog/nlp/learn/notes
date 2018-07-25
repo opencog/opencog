@@ -14585,6 +14585,13 @@ Done computing 24213074 pair MI's in 23091 secs
 Going to do column and row subtotals
 Finished left entropy subtotals in 405905 secs
 Finished right entropy subtotals in 6812 secs
+Finished left MI subtotals in 433689 secs
+Finished right MI subtotals in 7360 secs
+Going to compute the left, right and total entropy
+Done computing totals; start saving wildcards
+FATAL:  terminating connection due to administrator command
+
+fuckig apt-get fucked me again. Fixed in pull req #1846
 
 
 ----------------
