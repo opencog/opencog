@@ -212,7 +212,11 @@
 		; for the cross-connector. These are needed to hold marginal
 		; counts; left-marginals cannot be computed without these.
 		;
-		; Conceptually, these are of the form:
+		; This does not need to be done, if restoring from the database;
+		; viz if the marginals were previously stored, and now have been
+		; fetched with 'fetch-pairs above.
+		;
+		; Conceptually, the left-stars are of the form:
 		; (Section (Word "foo") (ConnectorSeq
 		;     (Connector (Word "bar") (ConnectorDir "-))
 		;     (Connector (Variable $X) (ConnectorDir "-))))

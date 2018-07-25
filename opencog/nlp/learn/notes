@@ -14592,6 +14592,9 @@ Done computing totals; start saving wildcards
 FATAL:  terminating connection due to administrator command
 
 fuckig apt-get fucked me again. Fixed in pull req #1846
+(cra 'fetch-pairs)
+(load "/tmp/fail.scm")
+(rebatch-all-pair-mi cra)
 
 
 ----------------
