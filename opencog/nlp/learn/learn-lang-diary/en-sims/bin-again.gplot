@@ -82,3 +82,20 @@ plot "ranked-dj-mi-sims.dat" using 1:2 with lines linewidth 5 title "", \
       with lines linewidth 5 title "10.2 - 0.5 log_2(rank)"
 
 #################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'ranked-dj-cos.eps'
+set logscale x
+set format x "10^{%L}"
+set yrange [0:1]
+set key left bottom
+set title "Cosine Similarity from Disjuncts"
+set ylabel "Cosine Similarity"
+set xlabel "Rank"
+plot "ranked-dj-cos-sims.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-dj-cos-sims.dat" using \
+      1:(1-(log($1)*log($1)/160)) \
+      with lines linewidth 5 title "1 - log(rank)^2/160"
+
+#################################################

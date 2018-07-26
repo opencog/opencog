@@ -13217,16 +13217,45 @@ Heres a ranked variant:
 \end_inset
 
 
+\begin_inset Graphics
+	filename en-sims/ranked-dj-cos.eps
+	width 49col%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Clearly, the similarity drops off a cliff, for high ranking.
+On the left is ranking according to pair-MI.
+ Clearly, the similarity drops off a cliff, for high ranking.
  But in the meanwhile, it is very linear, going as 
 \begin_inset Formula $MI=const.-\log_{2}\sqrt{rank}$
 \end_inset
 
 .
  Interesting.
+\end_layout
+
+\begin_layout Standard
+On the right is effectively the same ranking for cosine similarity, as given
+ in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+ It even uses the curve fit.
+ This dataset is a good bit larger, but it also does not have the high-observati
+on-count cuttoff.
+ Thus, presumably, there are some disjuncts with very low observation counts
+ that are polluting the data, and distorting what was previously a very
+ nice graph.
+\end_layout
+
+\begin_layout Standard
+All very intersting, I think.
 \end_layout
 
 \begin_layout Section
