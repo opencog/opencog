@@ -54,8 +54,10 @@ plot "ranked-dj-cos-sims.dat" using 2:3 with lines linewidth 5 title ""
 #
 set term postscript eps enhanced color 28
 set out 'scatter-dj-mi-cos.eps'
-set xrange [-20:10]
-set yrange [0:1]
+set xrange [-15:10]
+set yrange [1e-6:1]
+set format y "10^{%L}"
+set logscale y
 set title "Similarity from Disjuncts"
 set xlabel "Entropic Similarity"
 set ylabel "Cosine Similarity"
