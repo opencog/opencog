@@ -7930,8 +7930,14 @@ Produced by binned-good-sims.
 \end_layout
 
 \begin_layout Standard
-Similar graphs are produced for a bigger set.
- In this case, one can consider
+One can also be less restrictive.
+ The graph below shows the distribution of 1058120 pairs, with the length
+ restriction loosened to 
+\begin_inset Formula $4<\mbox{len}(w)$
+\end_inset
+
+.
+ It is, however, an incomplete dataset; not all possible pairs were considered.
 \begin_inset Separator latexpar
 \end_inset
 
@@ -7950,13 +7956,19 @@ Similar graphs are produced for a bigger set.
 \end_layout
 
 \begin_layout Standard
-I'm not sure what the above graph is.
- Its a bigger dataset.
- I lost the description of it ...
+It has a rather different structure to it.
+ Its not clear what this means; this may be an artifact of it being an incomplet
+e dataset...
+ 
 \end_layout
 
 \begin_layout Subsubsection
-Vectors
+Top Ten Lists
+\end_layout
+
+\begin_layout Standard
+Its worth getting an idea of what the most similar words are, and why they
+ are considered similar.
 \end_layout
 
 \begin_layout Standard
@@ -8706,9 +8718,18 @@ word-pair
 
 \end_layout
 
+\begin_layout Subsubsection
+Vector Structure
+\end_layout
+
 \begin_layout Standard
-It is worth looking at a few of these, to see how they work out.
- The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
+It is worth looking at a few of the vectors, to see what form they actually
+ have.
+ 
+\end_layout
+
+\begin_layout Standard
+The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
  disjuncts.
  The table below shows the top-ranked disjuncts for each.
  It makes quite clear why the two have a high similarity.

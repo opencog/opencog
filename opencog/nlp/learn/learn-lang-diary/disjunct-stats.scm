@@ -691,6 +691,10 @@
 
 (length all-sims)    ;  317206 for the (797 * 796)/2 pairs
 (length all-sims)    ;  1457522 for all pairs in rfive_mtwo with sim > 0.1
+                     ; Umm, no there are 1058120 pairs with sim > 0.1
+                     ; and 1457522 with sim values on them ... 
+                     ; I'm confused, below we report 2172114 pairs
+                     ; that are length>4 wtf...
 
 (define (sim-cosine SIM)
 	(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
