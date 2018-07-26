@@ -15306,6 +15306,9 @@ OK, so now redo the graphs.
  good-sims and ranked-sims in disjunct-stats.scm
 
 (define good-sims
+(sim-cosine (Similarity (Word "this")(Word "that")))
+
+section 4.1
 
 
 

@@ -7783,6 +7783,12 @@ Similar graphs are produced for a bigger set.
 \end_layout
 
 \begin_layout Standard
+I'm not sure what the above graph is.
+ Its a bigger dataset.
+ I lost the description of it ...
+\end_layout
+
+\begin_layout Standard
 The top-ten similarity pairs (for which 
 \begin_inset Formula $128<\mbox{len}(w)$
 \end_inset
@@ -13080,6 +13086,44 @@ mutual information
 
 \begin_layout Subsection
 Stuff
+\end_layout
+
+\begin_layout Standard
+Ths redoes the graphs from section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+First graph: top most frequently-obseved 640 words, all pairs, for a total
+ of N(N-1)/2=204480 pairs; all pairs shown.
+ The fit is eye-balled
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/binned-sims-dj-cosine.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It resembles the earlier figure in section 4.1 and not the mystery figure
+ ...
+ 
+\end_layout
+
+\begin_layout Standard
+and next we have the ecntropy score.
 \end_layout
 
 \begin_layout Section

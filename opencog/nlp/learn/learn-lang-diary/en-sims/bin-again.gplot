@@ -1,0 +1,21 @@
+# set term png small color
+# set term png small
+# set out 'binned.png'
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-sims-dj-cosine.eps'
+set xrange [0:1]
+set yrange [1:]
+set logscale y
+set format y "10^{%L}"
+set title "Cosine Similarity from Disjuncts"
+set xlabel "Cosine Similarity"
+set ylabel "Number of pairs of words"
+plot "binned-sims-dj-cosine.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-sims-dj-cosine.dat" using 2:(6e2*exp(-5*$2)) with lines linewidth 5 \
+      title "exp(-5 cos)"
+
+#################################################
