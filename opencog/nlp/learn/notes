@@ -15300,6 +15300,7 @@ OK, so got to 920.... stop there.
 
 (map (lambda (n) (bco 'batch-compute n)) (iota 7 640 40))
 (map (lambda (n) (bco 'batch-compute n)) (iota 6 680 40))
+(map (lambda (n) (bco 'batch-compute n)) (iota 5 720 40))
 
 =========================================================================
 OK, so now redo the graphs.

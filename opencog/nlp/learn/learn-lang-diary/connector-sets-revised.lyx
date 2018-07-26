@@ -7245,6 +7245,13 @@ grammar
 
 \begin_layout Subsubsection*
 Vertex degree in Wikipedia
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Vertex-degree-in"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -7603,15 +7610,24 @@ where
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-The current dataset being analyzed (the 
+This section explores the distribution of the cosine similarity for the
+ 
 \noun on
 en_pairs_rfive_mtwo
 \noun default
- dataset, same as above) contains 797 words whose length is greater than
+ dataset (same as above).
+\end_layout
+
+\begin_layout Subsubsection
+Rank distribution
+\end_layout
+
+\begin_layout Standard
+The 
+\noun on
+en_pairs_rfive_mtwo
+\noun default
+ dataset (same as above) contains 797 words whose length is greater than
  or equal to 128.
  The ranking-by-length was already shown up above, in the graph 
 \begin_inset CommandInset ref
@@ -7676,8 +7692,159 @@ Well, that's new! The similarity ranking is very well fit by a parabola
 
 \end_layout
 
+\begin_layout Subsubsection
+Hyperbolic space
+\end_layout
+
 \begin_layout Standard
-There are 427 words observed 256 or more times, these form 
+Recall that
+\begin_inset Formula 
+\[
+\cos\theta=1-\frac{\theta^{2}}{2}+\frac{\theta^{4}}{4!}-\cdots
+\]
+
+\end_inset
+
+and so the above graph is stating that 
+\begin_inset Formula $\theta\approx\log\left(rank\right)/8.9$
+\end_inset
+
+ is a reasonable approximation for the similarity angle, for the first thousand
+ pairs, or so.
+ Lest there be any hope that the graph as a whole is sine-wave-like, the
+ high-rank tail goes as the cube of the log, not the square.
+ 
+\end_layout
+
+\begin_layout Standard
+The similarity angle can be taken as a metric or as a distance.
+ If the relationships between words is thought of as a network graph, one
+ can ask how many nearest neighbors there are, as a function of the distance.
+ Since the rank is effectively a count of nearest neighbors, and since 
+\begin_inset Formula $\theta$
+\end_inset
+
+ is effectively a distance, one has that 
+\begin_inset Formula 
+\[
+V\sim e^{r}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $V$
+\end_inset
+
+ is the number of nearest neighbors (the 
+\begin_inset Quotes eld
+\end_inset
+
+volume
+\begin_inset Quotes erd
+\end_inset
+
+) and 
+\begin_inset Formula $r$
+\end_inset
+
+ is the distance (so 
+\begin_inset Formula $r=\theta$
+\end_inset
+
+ is just a change of notation).
+ This volume-to-radius relationship should be compared to the volume-to-radius
+ relationships for flat spaces for fixed dimension.
+ For flat, Euclidean two-dimensional space, one has 
+\begin_inset Formula $A=\pi r^{2}$
+\end_inset
+
+ the area of a circle.
+ In three dimensions, 
+\begin_inset Formula $V=4\pi r^{3}/3$
+\end_inset
+
+.
+ For flat 
+\begin_inset Formula $N$
+\end_inset
+
+-dimensional space, 
+\begin_inset Formula $V\sim r^{N}$
+\end_inset
+
+.
+ Clearly, the 
+\begin_inset Quotes eld
+\end_inset
+
+space
+\begin_inset Quotes erd
+\end_inset
+
+ of the network graph cannot be flat.
+ This is in contrast to spaces with constant negative curvature, where the
+ volume does grow exponentially as a function of the radius.
+ Thus, one can hypothesize that the language graph can be mapped (almost)
+ isometrically to a hyperbolic surface (for example, the Poincaré disk).
+\end_layout
+
+\begin_layout Standard
+This conjecture promptly poses various questions: does the network graph
+ have constant negative curvature, or is it bumpy? Numerically, what is
+ the curvature? Does it embed better into hyperbolic 3-space or hyperbolic
+ 4-space? There is no such thing as a hyperbolic 
+\begin_inset Formula $N$
+\end_inset
+
+-space for classical Riemann spaces, for 
+\begin_inset Formula $N<2$
+\end_inset
+
+; yet, for the network graph, presumably one has 
+\begin_inset Formula $N=0$
+\end_inset
+
+.
+ How should this be described? 
+\end_layout
+
+\begin_layout Subsubsection
+Size Cutoffs
+\end_layout
+
+\begin_layout Standard
+The network graph has some nodes and links that are observed very frequently,
+ while others are observed only very rarely, sometimes only once or twice.
+ As mentioned in the section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Vertex-degree-in"
+
+\end_inset
+
+ on the vertex degree, the rarely-observed disjuncts appear to be associated
+ with bad parses of lists, tables (such as tables of contents, product tables,
+ pricing tables) and indexes.
+ Therefore, it is appealing to imagine that by removing this 
+\begin_inset Quotes eld
+\end_inset
+
+crud
+\begin_inset Quotes erd
+\end_inset
+
+, one could improve the quality of the dataset.
+ One obvious way of performing a cleanup is to banish infrequently-observed
+ words.
+\end_layout
+
+\begin_layout Standard
+In the 
+\noun on
+en_pairs_rfive_mtwo
+\noun default
+ dataset, there are 427 words observed 256 or more times, these form 
 \begin_inset Formula $427\times426/2=90951$
 \end_inset
 
@@ -7786,6 +7953,10 @@ Similar graphs are produced for a bigger set.
 I'm not sure what the above graph is.
  Its a bigger dataset.
  I lost the description of it ...
+\end_layout
+
+\begin_layout Subsubsection
+Vectors
 \end_layout
 
 \begin_layout Standard
