@@ -19,3 +19,18 @@ plot "binned-sims-dj-cosine.dat" using 2:3 with lines linewidth 5 title "", \
       title "exp(-5 cos)"
 
 #################################################
+
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-sims-dj-mi.eps'
+set xrange [-20:10]
+set yrange [1:20000]
+set logscale y
+set format y "10^{%L}"
+set title "Entropic Similarity from Disjuncts"
+set xlabel "Entropic Similarity"
+set ylabel "Number of pairs of words"
+plot "binned-sims-dj-mi.dat" using 2:3 with lines linewidth 5 title ""
+
+#################################################

@@ -49,7 +49,10 @@
 	; Rank so that the commonest items are first in the list.
 	(sort basis (lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
 )
-(define top-items (take (get-sorted-basis pca) 640))
+(define sorted-words (get-sorted-basis pca))
+
+(define top-640-items (take sorted-words 640))
+(define top-920-items (take sorted-words 920))
 
 ; Create a list of similarity pairs.
 (define (mksims items)
@@ -59,8 +62,11 @@
 				(append lst (map (lambda (oit) (Similarity item oit)) rest)))))
 	(mkpr (car items) (cdr items) '()))
 
-(define good-sims (mksims top-items))
-(length good-sims) ;; 204480 - as expected.
+(define good-640-sims (mksims top-640-items))
+(length good-640-sims) ;; 204480 - as expected.
+
+(define good-920-sims (mksims top-920-items))
+(length good-920-sims)  ;; 422740
 
 (cog-keys (car good-sims))
 
@@ -75,18 +81,25 @@
 
 (define (sim-dj-mi SIM)
 	(define mi-key (PredicateNode "*-SimKey pseudo-cset MI-*"))
-   (cog-value-ref (cog-value SIM mi-key) 0))
+   (define mi-kv (cog-value SIM mi-key))
+   (define mi-val (if (null? mi-kv)
+		-500 (cog-value-ref (cog-value SIM mi-key) 0)))
+	; (if (null? mi-kv) (format #t "wtf ~A" SIM))
+	; -inf MI is OK, it means zero overlap (cosine=0)
+	;; (if (inf? mi-val) (format #t "wtf ~A" SIM))
+	(if (inf? mi-val) (if (< 0 mi-val) 500 -500) mi-val))
 
 (define ranked-dj-cos-sims
-	(sort good-sims
+	(sort good-640-sims
 		(lambda (a b) (> (sim-dj-cosine a) (sim-dj-cosine b)))))
 
 (define ranked-dj-mi-sims
-	(sort good-sims
+	(sort good-920-sims
 		(lambda (a b) (> (sim-dj-mi a) (sim-dj-mi b)))))
 
-(define scored-sims (score sim-dj-mi good-sims))
-(define binned-sims (bin-count-simple scored-sims 300))
+(define scored-sims (score sim-dj-cosine good-640-sims))
+(define scored-sims (score sim-dj-mi good-920-sims))
+(define binned-sims (bin-count-simple scored-sims 300 -20 +10))
 
 (let ((outport (open-file "/tmp/binned-sims.dat" "w")))
 	(print-bincounts-tsv binned-sims outport)

@@ -15308,7 +15308,10 @@ OK, so now redo the graphs.
 (define good-sims
 (sim-cosine (Similarity (Word "this")(Word "that")))
 
-section 4.1
+section 4.1   748
+wtf (SimilarityLink (WordNode "Your") (WordNode "indeed"))
+(bmi 'compute-similarity (WordNode "hour") (WordNode "Let"))
+
 
 
 

@@ -13121,7 +13121,7 @@ It resembles the earlier figure in section 4.1 and not the mystery figure
  ...
  .
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See the `(mksims top-items)` and `sim-dj-cosine` in disjunct-stats.scm file.
@@ -13134,6 +13134,31 @@ See the `(mksims top-items)` and `sim-dj-cosine` in disjunct-stats.scm file.
 
 \begin_layout Standard
 and next we have the ecntropy score.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/binned-sims-dj-mi.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This one is based on a dataset of the top 920 words, for a total of 
+\begin_inset Formula $N\left(N-1\right)/2=422740$
+\end_inset
+
+ pairs.
+ The lone spike at the far left corresponds to an 
+\begin_inset Formula $MI=-\infty$
+\end_inset
+
+, as appropriate for disjuncts with zero overlap (the cosine would be zero,
+ too) For this dataset, this bin holds 14334 items.
 \end_layout
 
 \begin_layout Section
