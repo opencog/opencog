@@ -7636,7 +7636,7 @@ reference "graph: ranked length"
  pairs.
  These can be sorted and ranked.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See the good-sims and ranked-sims in disjunct-stats.scm file.
@@ -13119,6 +13119,16 @@ First graph: top most frequently-obseved 640 words, all pairs, for a total
 \begin_layout Standard
 It resembles the earlier figure in section 4.1 and not the mystery figure
  ...
+ .
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See the `(mksims top-items)` and `sim-dj-cosine` in disjunct-stats.scm file.
+\end_layout
+
+\end_inset
+
  
 \end_layout
 

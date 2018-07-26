@@ -2,7 +2,7 @@
 ; disjunct-stats.scm
 ;
 ; Assorted ad-hoc collection of tools for understanding the
-; word-simillarity obtained via pseudo-disjunct overlap.
+; word-similarity obtained via pseudo-disjunct overlap.
 ;
 ; These were used to create the section "Connetor Sets 7 May 2017"
 ; in the diary. These can ONLY be used by hand, by cutting and pasting
@@ -10,6 +10,8 @@
 ; more of a kind-of work-log of what was needed to generate those
 ; pictures, than anything else. Of course, this can be recycled for
 ; other datasets, too.
+;
+; See disjunct-cross.scm for the 2018 version of this.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -712,43 +714,6 @@
 
 (define good-sims (filter-sim))
 (length good-sims)   ; 1058120
-
-; -------------
-; OK, so above provides filtered sim scores. That's old-school.
-; Let's try it unfiltered. We have computes sims for the 640 most
-; ferequently observed words ... make that word list
-(define (get-sorted-basis LLOBJ)
-	(define wldobj (add-pair-stars LLOBJ))
-	(define basis (wldobj 'left-basis))
-	(define supp-obj (add-support-api wldobj))
-	(define (nobs ITEM) (supp-obj 'right-count ITEM))
-
-	; Rank so that the commonest items are first in the list.
-	(sort basis (lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
-)
-(define top-items (take (get-sorted-basis pca) 640))
-
-; Create a list of similarity pairs.
-(define (mksims items)
-	(define (mkpr item rest lst)
-		(if (null? rest) lst
-			(mkpr (car rest) (cdr rest)
-				(append lst (map (lambda (oit) (Similarity item oit)) rest)))))
-	(mkpr (car items) (cdr items) '()))
-
-(define good-sims (mksims top-items))
-(length good-sims) ;; 204480 - as expected.
-
-(cog-keys e)
-
-(PredicateNode "*-SimKey Cross Cosine-*")
- (PredicateNode "*-SimKey pseudo-cset Cosine-*")
- (PredicateNode "*-SimKey Cross MI-*")
- (PredicateNode "*-SimKey pseudo-cset MI-*")
-
-(define (sim-cosine SIM)
-	(define cos-key (PredicateNode "*-SimKey pseudo-cset Cosine-*"))
-   (cog-value-ref (cog-value SIM cos-key) 0))
 
 ; -------------
 (define ranked-sims
