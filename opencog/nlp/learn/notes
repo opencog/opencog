@@ -15312,6 +15312,20 @@ section 4.1   748
 wtf (SimilarityLink (WordNode "Your") (WordNode "indeed"))
 (bmi 'compute-similarity (WordNode "hour") (WordNode "Let"))
 
+(define (prt-sim sim port)
+   (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
+      (cog-name (gar sim)) (cog-name (gdr sim))))
+      
+(let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
+   (define cnt 0) 
+   (for-each (lambda (sim)
+         (set! cnt (+ cnt 1))
+         (format outport "~A  " cnt)
+         (prt-sim sim outport))
+      ranked-sims)
+   (close outport))
+
+
 
 
 

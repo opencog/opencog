@@ -89,6 +89,17 @@
 	;; (if (inf? mi-val) (format #t "wtf ~A" SIM))
 	(if (inf? mi-val) (if (< 0 mi-val) 500 -500) mi-val))
 
+(define scored-sims (score sim-dj-cosine good-640-sims))
+(define scored-sims (score sim-dj-mi good-920-sims))
+(define binned-sims (bin-count-simple scored-sims 300 -20 +10))
+
+(let ((outport (open-file "/tmp/binned-sims.dat" "w")))
+	(print-bincounts-tsv binned-sims outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; Non-binned, ranked plots...
+
 (define ranked-dj-cos-sims
 	(sort good-640-sims
 		(lambda (a b) (> (sim-dj-cosine a) (sim-dj-cosine b)))))
@@ -97,12 +108,31 @@
 	(sort good-920-sims
 		(lambda (a b) (> (sim-dj-mi a) (sim-dj-mi b)))))
 
-(define scored-sims (score sim-dj-cosine good-640-sims))
-(define scored-sims (score sim-dj-mi good-920-sims))
-(define binned-sims (bin-count-simple scored-sims 300 -20 +10))
+(define (prt-sim sim port)
+	(format port "~A  ~A  '~A .. ~A'\n"
+		(sim-dj-cosine sim) (sim-dj-mi sim)
+		(cog-name (gar sim)) (cog-name (gdr sim))))
 
-(let ((outport (open-file "/tmp/binned-sims.dat" "w")))
-	(print-bincounts-tsv binned-sims outport)
+(define (prt-mi-sim sim port)
+	(format port "~A  '~A .. ~A'\n" (sim-dj-mi sim)
+		(cog-name (gar sim)) (cog-name (gdr sim))))
+
+(let ((outport (open-file "/tmp/ranked-dj-cos-sims.dat" "w")))
+	(define cnt 0) 
+	(for-each (lambda (sim)
+			(set! cnt (+ cnt 1))
+			(format outport "~A  " cnt)
+			(prt-sim sim outport))
+		ranked-dj-cos-sims) 
+	(close outport))
+
+(let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
+	(define cnt 0) 
+	(for-each (lambda (sim)
+			(set! cnt (+ cnt 1))
+			(format outport "~A  " cnt)
+			(prt-mi-sim sim outport))
+		ranked-dj-mi-sims) 
 	(close outport))
 
 ; ---------------------------------------------------------------------

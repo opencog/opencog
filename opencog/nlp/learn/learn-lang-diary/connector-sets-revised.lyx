@@ -13166,6 +13166,27 @@ The smooth parabolic line is an eyeballed fit - a Gaussian, centered at
  an MI value of -3.5, and having a standard deviation of 3.
 \end_layout
 
+\begin_layout Standard
+What's the relationship between MI and cosines? Here itis: the top 640,
+ which have both:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/scatter-dj-cos-mi.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Noisey.
+ But clearly the negative MI values correspond to extremely low cosine values.
+\end_layout
+
 \begin_layout Section
 \start_of_appendix
 Other Similarity Scores

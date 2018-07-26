@@ -38,3 +38,16 @@ plot "binned-sims-dj-mi.dat" using 2:3 with lines linewidth 5 title "", \
      with lines linewidth 5 title "exp(-0.5(x+3.5)^2/9)"
 
 #################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'scatter-dj-cos-mi.eps'
+set xrange [0:1]
+set yrange [-20:10]
+set key left
+set title "Similarity from Disjuncts"
+set ylabel "Entropic Similarity"
+set xlabel "Cosine"
+plot "ranked-dj-cos-sims.dat" using 2:3 with lines linewidth 5 title ""
+
+#################################################
