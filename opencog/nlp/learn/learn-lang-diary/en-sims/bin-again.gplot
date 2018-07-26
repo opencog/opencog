@@ -66,3 +66,19 @@ set ylabel "Cosine Similarity"
 plot "ranked-dj-640-mi-sims.dat" using 3:2 with lines linewidth 5 title ""
 
 #################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'ranked-dj-mi.eps'
+set logscale x
+set format x "10^{%L}"
+set yrange [-10:11]
+set title "Entropic Similarity from Disjuncts"
+set ylabel "Entropic Similarity"
+set xlabel "Rank"
+plot "ranked-dj-mi-sims.dat" using 1:2 with lines linewidth 5 title "", \
+     "ranked-dj-mi-sims.dat" using \
+      1:(10.2 - log(sqrt($1))/ log(2.0)) \
+      with lines linewidth 5 title "10.2 - 0.5 log_2(rank)"
+
+#################################################
