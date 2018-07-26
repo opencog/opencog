@@ -13167,7 +13167,7 @@ The smooth parabolic line is an eyeballed fit - a Gaussian, centered at
 \end_layout
 
 \begin_layout Standard
-What's the relationship between MI and cosines? Here itis: the top 640,
+What's the relationship between MI and cosines? Here it is: the top 640,
  which have both:
 \end_layout
 
@@ -13175,11 +13175,24 @@ What's the relationship between MI and cosines? Here itis: the top 640,
 \align center
 \begin_inset Graphics
 	filename en-sims/scatter-dj-cos-mi.eps
-	width 70col%
+	width 49col%
 
 \end_inset
 
 
+\begin_inset Graphics
+	filename en-sims/scatter-dj-mi-cos.eps
+	width 49col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Both graphs show the same data, but rotated by 90 degrees.
+ The left graph sorts the data by cosine similarity; the right graph sorts
+ it by MI.
 \end_layout
 
 \begin_layout Standard

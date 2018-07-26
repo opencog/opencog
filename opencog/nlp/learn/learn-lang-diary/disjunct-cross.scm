@@ -104,6 +104,10 @@
 	(sort good-640-sims
 		(lambda (a b) (> (sim-dj-cosine a) (sim-dj-cosine b)))))
 
+(define ranked-dj-640-mi-sims
+	(sort good-640-sims
+		(lambda (a b) (> (sim-dj-mi a) (sim-dj-mi b)))))
+
 (define ranked-dj-mi-sims
 	(sort good-920-sims
 		(lambda (a b) (> (sim-dj-mi a) (sim-dj-mi b)))))
@@ -117,6 +121,7 @@
 	(format port "~A  '~A .. ~A'\n" (sim-dj-mi sim)
 		(cog-name (gar sim)) (cog-name (gdr sim))))
 
+; rank by cosine, print cosine and mi.
 (let ((outport (open-file "/tmp/ranked-dj-cos-sims.dat" "w")))
 	(define cnt 0) 
 	(for-each (lambda (sim)
@@ -126,6 +131,7 @@
 		ranked-dj-cos-sims) 
 	(close outport))
 
+; rank by mi, print only mi
 (let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
 	(define cnt 0) 
 	(for-each (lambda (sim)
@@ -133,6 +139,16 @@
 			(format outport "~A  " cnt)
 			(prt-mi-sim sim outport))
 		ranked-dj-mi-sims) 
+	(close outport))
+
+; rank by mi, print cosine and mi
+(let ((outport (open-file "/tmp/ranked-dj-640-mi-sims.dat" "w")))
+	(define cnt 0) 
+	(for-each (lambda (sim)
+			(set! cnt (+ cnt 1))
+			(format outport "~A  " cnt)
+			(prt-sim sim outport))
+		ranked-dj-640-mi-sims) 
 	(close outport))
 
 ; ---------------------------------------------------------------------

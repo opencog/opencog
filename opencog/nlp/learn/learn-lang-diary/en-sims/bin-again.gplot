@@ -44,10 +44,21 @@ set term postscript eps enhanced color 28
 set out 'scatter-dj-cos-mi.eps'
 set xrange [0:1]
 set yrange [-20:10]
-set key left
 set title "Similarity from Disjuncts"
 set ylabel "Entropic Similarity"
 set xlabel "Cosine"
 plot "ranked-dj-cos-sims.dat" using 2:3 with lines linewidth 5 title ""
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'scatter-dj-mi-cos.eps'
+set xrange [-20:10]
+set yrange [0:1]
+set title "Similarity from Disjuncts"
+set xlabel "Entropic Similarity"
+set ylabel "Cosine Similarity"
+plot "ranked-dj-640-mi-sims.dat" using 3:2 with lines linewidth 5 title ""
 
 #################################################
