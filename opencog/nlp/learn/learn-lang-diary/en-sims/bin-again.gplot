@@ -42,8 +42,10 @@ plot "binned-sims-dj-mi.dat" using 2:3 with lines linewidth 5 title "", \
 #
 set term postscript eps enhanced color 28
 set out 'scatter-dj-cos-mi.eps'
-set xrange [0:1]
-set yrange [-20:10]
+set xrange [1e-6:1]
+set logscale x
+set format x "10^{%L}"
+set yrange [-15:10]
 set title "Similarity from Disjuncts"
 set ylabel "Entropic Similarity"
 set xlabel "Cosine"
