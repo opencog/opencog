@@ -13161,6 +13161,11 @@ This one is based on a dataset of the top 920 words, for a total of
  too) For this dataset, this bin holds 14334 items.
 \end_layout
 
+\begin_layout Standard
+The smooth parabolic line is an eyeballed fit - a Gaussian, centered at
+ an MI value of -3.5, and having a standard deviation of 3.
+\end_layout
+
 \begin_layout Section
 \start_of_appendix
 Other Similarity Scores

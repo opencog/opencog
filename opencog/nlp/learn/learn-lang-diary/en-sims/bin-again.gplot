@@ -28,9 +28,13 @@ set xrange [-20:10]
 set yrange [1:20000]
 set logscale y
 set format y "10^{%L}"
+set key left
 set title "Entropic Similarity from Disjuncts"
 set xlabel "Entropic Similarity"
 set ylabel "Number of pairs of words"
-plot "binned-sims-dj-mi.dat" using 2:3 with lines linewidth 5 title ""
+plot "binned-sims-dj-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-sims-dj-mi.dat" using \
+     2:(5e3*exp(-0.5*($2+3.5)*($2+3.5)/(3*3))) \
+     with lines linewidth 5 title "exp(-0.5(x+3.5)^2/9)"
 
 #################################################
