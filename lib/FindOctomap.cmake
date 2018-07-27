@@ -1,5 +1,5 @@
 set(OCTOMAP_LIBPATH
-	/opt/ros/indigo/lib
+	/opt/ros/kinetic/lib
 	/usr/lib
 	/usr/local/lib)
 
@@ -17,7 +17,7 @@ set(OCTOMAP_LIBRARIES
 INCLUDE (CheckIncludeFiles)
 
 find_path(OCTOMAP_INCLUDE_DIR octomap/octomap.h
-	PATH /usr/include /opt/ros/indigo/include
+	PATH /usr/include /opt/ros/kinetic/include
 	/usr/local/include
 )
 
