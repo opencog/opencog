@@ -107,7 +107,7 @@ struct TimeSlice
     // Get the atom at location
     T get_atom_at_location(const point3d& location) {
         OcTreeNode* result = map_tree.search(location);
-        if (result == nullptr) return T(); //FIXME
+        if (result == nullptr or not map_tree.isNodeOccupied(result)) return T(); //FIXME
         return (static_cast<AtomOcTreeNode<T>*>(result))->getData();
     }
 
