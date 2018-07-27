@@ -201,7 +201,6 @@ void CogServer::serverLoop()
 
     // No way to process requests. Stop accepting network connections.
     disableNetworkServer();
-    _systemActivityTable.halt();
 }
 
 void CogServer::runLoopStep(void)
