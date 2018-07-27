@@ -60,6 +60,7 @@ public:
 		}
 
 		eval.eval("(add-to-load-path \"/usr/local/share\")");
+		eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 		eval.eval("(use-modules (opencog))");
 		eval.eval("(use-modules (opencog attention-bank))");
 		eval.eval("(use-modules (opencog query))");
