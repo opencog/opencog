@@ -2986,10 +2986,16 @@ In a neural net matrix factorization, one replaces the inner product
 \end_inset
 
 -dimensional vector.
- This model is discussed in greater detail in reference xx, but does not
- seem, at this point, to merit the extra complexity, and is not further
- considered here.
- 
+ This model is discussed in greater detail in reference 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dzuigaite2015"
+
+\end_inset
+
+.
+ There is nothing in the current problem that suggests this as an appropriate
+ model of language.
 \end_layout
 
 \begin_layout Subsubsection*
