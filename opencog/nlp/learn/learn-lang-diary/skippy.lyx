@@ -2661,16 +2661,36 @@ p\left(w,d\right)\approx\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)
 
 \end_inset
 
-There are several ways to understand this factorization problem.
- In the extreme case of there being only one grammatical category, then
- the above is just the outer product (or tensor product) of two vectors.
- Of course, such a factorization would be very inaccurate: the approximate
- equality would be very broken.
+Ideally, the size of the set 
+\begin_inset Formula $G$
+\end_inset
+
+ is minimal, in some way, so that the matrixes 
+\begin_inset Formula $p(w,g)$
+\end_inset
+
+ and 
+\begin_inset Formula $p(g,d)$
+\end_inset
+
+ are of low rank.
+ In the extreme case of 
+\begin_inset Formula $G$
+\end_inset
+
+ having onloy one element, total, the factorization would results in the
+ outer product, or tensor product, of two vectors.
+\end_layout
+
+\begin_layout Standard
+Factorizations of this sort are not uncommon in machine learning.
+ A common tactic is to minimze the Frobenius norm of the difference of the
+ left and right sides.
 \end_layout
 
 \begin_layout Standard
 To guide the factorization, and to maximize the agreement between the left
- and teh right sides, one can appeal to Tegmark's formulation of Tononi
+ and the right sides, one can appeal to Tegmark's formulation of Tononi
  integrated information.
  That is, one wishes to factorize in such a way that the total amount of
  information in the factors is maximized, so that the 
