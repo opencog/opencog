@@ -2836,8 +2836,160 @@ and then, after fixing the dimension
  that minimize the objective function.
 \end_layout
 
+\begin_layout Standard
+The primary drawbacks of probabilistic matrix factorization is that it does
+ not provide any guarantees or machanizm to keep the factor 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ sparse.
+ It's also not information-theoretic: it is not leveraging the idea that
+ the 
+\begin_inset Formula $p$
+\end_inset
+
+'s are probabilities; it does not consider the information content of the
+ problem.
+ From first principles, it would seem that information maximization would
+ be a desirable property.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Factorization Ambiguity
+\end_layout
+
+\begin_layout Standard
+The sum 
+\begin_inset Formula $\sum_{g\in G}$
+\end_inset
+
+ can be seen as a specific function, 
+\emph on
+viz
+\emph default
+, the inner product of two vectors 
+\begin_inset Formula $\left(\vec{w}\right)_{g}=p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(\vec{d}\right)_{g}=p\left(g,d\right)$
+\end_inset
+
+.
+ Aside from considering just 
+\begin_inset Formula $\vec{w}\cdot\vec{d}$
+\end_inset
+
+, one might consider other functions 
+\begin_inset Formula $f\left(\vec{w},\vec{d}\right)$
+\end_inset
+
+ of 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+ A single-layer feed-forward linear neural net would consist of a 
+\begin_inset Formula $\left|G\right|\times\left|G\right|$
+\end_inset
+
+-dimensional weight matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ so that 
+\begin_inset Formula 
+\[
+f\left(\vec{w},\vec{d}\right)=\vec{w}^{T}\cdot M\cdot\vec{d}
+\]
+
+\end_inset
+
+This, in itself, because it is linear, does not accomplish much, because
+ the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ can be re-composed on the left or the right, to re-define the vectors 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ or 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+ That is, one may write 
+\begin_inset Formula $\vec{w}^{\prime}=M^{T}\vec{w}$
+\end_inset
+
+ or 
+\begin_inset Formula $\vec{d}^{\prime}=M\vec{d}$
+\end_inset
+
+.
+ Written in in components:
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+\]
+
+\end_inset
+
+and so one can contract 
+\begin_inset Formula $M$
+\end_inset
+
+ either to the left or to the right.
+ This shows that the factorization is ambiguous; as long as 
+\begin_inset Formula $M$
+\end_inset
+
+ is Markovian, preserving the sums of probablities over rows and columns,
+ it can be contracted to the left or the right.
+ Thus, one can ligitimately introcude aonther constraint: given the freedom
+ in 
+\begin_inset Formula $M$
+\end_inset
+
+, choose it so that 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ is maximally sparse.
+\end_layout
+
 \begin_layout Subsubsection*
 Neural Net Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+In a neural net matrix factorization, one replaces the inner product 
+\begin_inset Formula $\vec{w}\cdot\vec{d}$
+\end_inset
+
+ by a function 
+\begin_inset Formula $f\left(\left(\vec{wd}\right)_{g}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $\left(\vec{wd}\right)_{g}=p\left(w,g\right)p\left(g,d\right)$
+\end_inset
+
+ is a component of a 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+-dimensional vector.
+ This model is discussed in greater detail in reference xx, but does not
+ seem, at this point, to merit the extra complexity, and is not further
+ considered here.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
