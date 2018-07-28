@@ -2619,11 +2619,24 @@ Given a word
 \end_inset
 
 .
- Writing the probability of that assignment as 
+ The probability of this usage is 
 \begin_inset Formula $p(w,d,g)$
 \end_inset
 
-, one then must have that 
+, and it should factorize into two distinct parts:
+\begin_inset Formula 
+\[
+p\left(w,d,g\right)=p\left(w,g\right)p\left(g,d\right)
+\]
+
+\end_inset
+
+None of the three probabilities above are known, a priori, and not even
+ the number of grammatical classes are known at the outset.
+ Instead, one has the observational data, that 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
 p\left(w,d\right)=p\left(w,d,*\right)=\sum_{g\in G}p\left(w,d,g\right)
@@ -2636,7 +2649,40 @@ where
 \end_inset
 
  is the set of all grammatical classes.
- Typically, any given 
+ The goal is then to determine the set 
+\begin_inset Formula $G$
+\end_inset
+
+ and to perform the matrix factorization
+\begin_inset Formula 
+\[
+p\left(w,d\right)\approx\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)
+\]
+
+\end_inset
+
+There are several ways to understand this factorization problem.
+ In the extreme case of there being only one grammatical category, then
+ the above is just the outer product (or tensor product) of two vectors.
+ Of course, such a factorization would be very inaccurate: the approximate
+ equality would be very broken.
+\end_layout
+
+\begin_layout Standard
+To guide the factorization, and to maximize the agreement between the left
+ and teh right sides, one can appeal to guidance from the principle of Tononi
+ integrated information.
+ That is, one wishes maximize the amount of information that is preserved,
+ when performing the factorization.
+ 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+Typically, any given 
 \begin_inset Formula $\left(w,d\right)$
 \end_inset
 
