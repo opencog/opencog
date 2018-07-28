@@ -2682,38 +2682,18 @@ Ideally, the size of the set
  outer product, or tensor product, of two vectors.
 \end_layout
 
-\begin_layout Standard
-Factorizations of this sort are not uncommon in machine learning.
- A common tactic is to minimze the Frobenius norm of the difference of the
- left and right sides.
+\begin_layout Subsubsection*
+Learning Word Senses
 \end_layout
 
 \begin_layout Standard
-To guide the factorization, and to maximize the agreement between the left
- and the right sides, one can appeal to Tegmark's formulation of Tononi
- integrated information.
- That is, one wishes to factorize in such a way that the total amount of
- information in the factors is maximized, so that the 
-\begin_inset Quotes eld
-\end_inset
-
-cut
-\begin_inset Quotes erd
-\end_inset
-
- is done where the mutual information is weakest.
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-Typically, any given 
+The goal of the factorization is to capture semantic information along with
+ syntactic information.
+ Typically, any given 
 \begin_inset Formula $\left(w,d\right)$
 \end_inset
 
- pair can belong to only one grammatical category.
+ pair might belong to only one grammatical category.
  So, for example, the pair
 \begin_inset listings
 inline false
@@ -2727,12 +2707,32 @@ status open
 \end_inset
 
 would be associated with 
-\begin_inset Formula $g=\mathtt{<common-nouns>}$
+\begin_inset Formula $g=\mathtt{<common-count-nouns>}$
 \end_inset
 
 .
- The assignment need not always be unambiguous; suppose one had classes
- 
+ This captures the idea that girls, boys, houses and birds fall into the
+ same class, and require the use of a determiner when being directly referenced.
+ This is distinct from mass nouns, which do not require determiners.
+ This suggests that, to a large degree, the factorization might be approximately
+ block-diagonal, at least for the words; that 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ might usually have only one non-zero entry for a fixed word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+But this assumption should break down, the larger the size of the set 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ Suppose one had classes 
 \begin_inset Formula $g=\mathtt{<cutting-actions>}$
 \end_inset
 
@@ -2757,38 +2757,111 @@ would have non-zero probabilities for both
 \end_inset
 
 's.
+ For a large number of classes, one might expect to find many distinctions:
+ girls and boys differ from houses and birds, and one even might expect
+ to find sex differences: girls pout, and boys punch, while houses and birds
+ do neither.
  
 \end_layout
 
 \begin_layout Standard
-The correct assignment of a pair 
-\begin_inset Formula $\left(w,d\right)$
+Put differently, one expects different classes to not only differentiate
+ crud syntactic structure, but also to indicate intensional properties.
+ Based on practical experience, we expect that most words would fall into
+ at most ten, almost always less than twenty different classes: this can
+ be seen by cracking open any dictionary, and counting the number of word
+ senses for a given word.
+ Likewise for intentional properties: birds sing, tweet and fly and a few
+ other verbs.
+ Houses mostly are, or get something (get built, get destroyed).
+ That is, we expect 
+\begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
- is not known, a priori.
- Solving this problem can be done in a fashion similar to the previous examples.
- Associate to each pair 
-\begin_inset Formula $\left(w,d\right)$
+ to be sparse: there might be thousands (or more!) elements in 
+\begin_inset Formula $G$
 \end_inset
 
- a vector 
-\begin_inset Formula $\vec{m}_{w,d}$
+, but no more than a few dozen 
+\begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
- whose individual vector components are the (unknown) probabilities 
-\begin_inset Formula $p(w,d,g)$
+, and often much less, will be non-zero, for a fixed word 
+\begin_inset Formula $w$
 \end_inset
 
 .
- That is, 
+\end_layout
+
+\begin_layout Subsubsection*
+Probabilistic Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Factorizations of this sort are not uncommon in machine learning.
+ A variety of techniques for performing it have been developed.
+ 
+\end_layout
+
+\begin_layout Standard
+Probabilistic matrix factorization (PMF) assumes that the observation counts
+ 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ are normally distributed (i.e.
+ are Gaussian).
+ The factorization is then obtained by minimzing the Frobenius norm of the
+ difference of the left and right sides.
+ That is, one defines the objective function 
 \begin_inset Formula 
 \[
-\left[\vec{m}_{w,d}\right]_{g}=p(w,d,g)
+U=\sum_{w,d}\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|^{2}
 \]
 
 \end_inset
 
+and then, after fixing the dimension 
+\begin_inset Formula $\left|G\right|$
+\end_inset
 
+, one searches for the matrixes 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+ that minimize the objective function.
+\end_layout
+
+\begin_layout Subsubsection*
+Neural Net Matrix Factorization
+\end_layout
+
+\begin_layout Subsubsection*
+Information Maximizing Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+To guide the factorization, and to maximize the agreement between the left
+ and the right sides, one can appeal to Tegmark's formulation of Tononi
+ integrated information.
+ That is, one wishes to factorize in such a way that the total amount of
+ information in the factors is maximized, so that the 
+\begin_inset Quotes eld
+\end_inset
+
+cut
+\begin_inset Quotes erd
+\end_inset
+
+ is done where the mutual information is weakest.
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
