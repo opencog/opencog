@@ -14637,7 +14637,7 @@ make-compute-freq  calls 'set-size
 (define rtc (make-central-compute btc))
 (rtc 'cache-left) because ... left-marginals were cmputed
 left margs loop over right-basis which is get-col-fun
-wich are the ceche-lefts.
+which are the cache-lefts.
 
 WTF....
 
@@ -15291,6 +15291,8 @@ bmi:
 Done 10/148 Frac=2.526% Time: 6786 Done: 13.1% Rate=0.005 prs/sec (188.5 sec/pr)
 
 (map (lambda (n) (bci 'batch-compute n)) (iota 70 150 5)) ; goes to 290
+(map (lambda (n) (bci 'batch-compute n)) (iota 17 205 5)) ; goes to 290
+
 
 co:
 Done 920/920 Frac=8.153% Time: 15516 Done: 100.% Rate=6.429 prs/sec (0.156 sec/pr)
@@ -15310,8 +15312,12 @@ OK, so now redo the graphs.
 (sim-cosine (Similarity (Word "this")(Word "that")))
 
 section 4.1   748
-wtf (SimilarityLink (WordNode "Your") (WordNode "indeed"))
+wtf
+(SimilarityLink (WordNode "Your") (WordNode "indeed"))
 (bmi 'compute-similarity (WordNode "hour") (WordNode "Let"))
+ahh its -infity
+(FloatValue -inf)
+
 
 (define (prt-sim sim port)
    (format port "~A  '~A .. ~A'\n" (sim-cosine sim)

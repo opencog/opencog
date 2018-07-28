@@ -44,13 +44,15 @@
 ; Done 70/72 frac=97.42% Time: 23066 Done: 100.0% rate=0.108 prs/sec
 
 ; -------------
+(define minus-inf (- 0 (inf)))
+
 ; FMI between words, using dj's -- below works
 (define pcam (make-pseudo-cset-api))
 (define psam (add-pair-stars pcam))
 (define ptam (add-transpose-api psam))
 (define pmi (add-symmetric-mi-compute psam))
 (define bmi
-	(batch-similarity ptam #f "pseudo-cset MI-*" -999.0
+	(batch-similarity ptam #f "pseudo-cset MI-*" minus-inf
 		(lambda (wa wb) (pmi 'mmt-fmi wa wb))))
 
 ; (pmi 'mmt-fmi (Word "other") (Word "same")) ; 4.123194356470049
@@ -87,7 +89,7 @@
 
 (define cmi (add-symmetric-mi-compute crsm))
 (define bci
-	(batch-similarity crtm #f "Cross MI-*" -999.0
+	(batch-similarity crtm #f "Cross MI-*" minus-inf
 		(lambda (wa wb) (cmi 'mmt-fmi wa wb))))
 
 ; (cmi 'mmt-fmi (Word "other") (Word "same")) ; 3.2194667964612314
