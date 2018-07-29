@@ -2995,36 +2995,103 @@ Neural Net Matrix Factorization
 \end_layout
 
 \begin_layout Standard
-In a neural net matrix factorization, one replaces the inner product 
-\begin_inset Formula $\vec{w}\cdot\vec{d}$
+The factorization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)
+\]
+
 \end_inset
 
- by a function 
-\begin_inset Formula $f\left(\left(\vec{wd}\right)_{g}\right)$
+ can be viewed as just one special function of the vector components indexed
+ by 
+\begin_inset Formula $g$
 \end_inset
 
- where 
-\begin_inset Formula $\left(\vec{wd}\right)_{g}=p\left(w,g\right)p\left(g,d\right)$
+.
+ More generally, one can consider the function
+\begin_inset Formula 
+\[
+f\left(a_{1},a_{2},\cdots,a_{n}\right)
+\]
+
 \end_inset
 
- is a component of a 
-\begin_inset Formula $\left|G\right|$
+where 
+\begin_inset Formula $a_{g}=p\left(w,g\right)p\left(g,d\right)$
 \end_inset
 
--dimensional vector.
- This model is discussed in greater detail in reference 
+ and 
+\begin_inset Formula $n=\left|G\right|$
+\end_inset
+
+ the number of elements in 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ Thus, the matrix factorization is just the function 
+\begin_inset Formula $f\left(a_{1},a_{2},\cdots,a_{n}\right)=a_{1}+a_{2}+\cdots+a_{n}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The neural net matrix factorization
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dzuigaite2015"
 
 \end_inset
 
-.
- There is nothing in the current problem that suggests this as an appropriate
- model of language.
+ replaces the simple sum by a multi-layer feed-forward neural net.
+ 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Standard
+There is nothing in the current formulation of the problem that suggests
+ this as an appropriate model of language.
+ See, however, the next section, on factorization ambiguity, that suggests
+ that the 
+\begin_inset Quotes eld
+\end_inset
+
+shape
+\begin_inset Quotes erd
+\end_inset
+
+ of language consists of a tight, highly-interconnected nucleus, attached
+ to sparse feeder trees.
+ It might make sense to model the tight cnetral nucleus as a neural network
+ of some sort.
+\end_layout
+
+\begin_layout Subsubsection
+Other factorizations
+\end_layout
+
+\begin_layout Standard
+Other facorizations, including LLORMA, NTN, also
+\end_layout
+
+\begin_layout Standard
+also I-RBM
+\end_layout
+
+\begin_layout Standard
+also I-AutoRec
+\end_layout
+
+\begin_layout Standard
+etc.
+\end_layout
+
+\begin_layout Subsection
 Factorization Ambiguity
 \end_layout
 
@@ -3222,14 +3289,6 @@ key "Lee2016"
  is neccessarily sparse; however, it is also clear that much of the sparsity
  comes from an insufficient number of observations of the input text.
  
-\end_layout
-
-\begin_layout Standard
-also I-RBM
-\end_layout
-
-\begin_layout Standard
-also I-AutoRec
 \end_layout
 
 \begin_layout Subsubsection*
