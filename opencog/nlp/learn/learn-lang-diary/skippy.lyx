@@ -2827,7 +2827,7 @@ Factorizations of this sort are not uncommon in machine learning.
 \begin_inset Formula $G$
 \end_inset
 
- -- it is the rank of the factorization.
+ -- it is the rank of the matrixes in the factorization.
  The factorization is only an approximation to the original data; thus,
  one says LRMA and not LRMF.
 \end_layout
@@ -2851,15 +2851,23 @@ Probabilistic matrix factorization (PMF) assumes that the observation counts
  are Gaussian).
  The factorization is then obtained by minimzing the Frobenius norm of the
  difference of the left and right sides.
- That is, one defines the objective function 
+ That is, one defines the error matrix 
 \begin_inset Formula 
 \[
-U=\sum_{w,d}\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|^{2}
+E\left(w,d\right)=\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|
 \]
 
 \end_inset
 
-and then, after fixing the dimension 
+and from this, the objective function 
+\begin_inset Formula 
+\[
+U=\sum_{w,d}\left|E\left(w,d\right)\right|^{2}
+\]
+
+\end_inset
+
+After fixing the dimension 
 \begin_inset Formula $\left|G\right|$
 \end_inset
 
@@ -2876,13 +2884,13 @@ and then, after fixing the dimension
 
 \begin_layout Standard
 The primary drawbacks of probabilistic matrix factorization is that it does
- not provide any guarantees or machanizm to keep the factor 
+ not provide any guarantees or mechanism to keep the factor 
 \begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
  sparse.
- It's also not information-theoretic: it is not leveraging the idea that
- the 
+ It's not built on information-theoretic infrastructure: it is not leveraging
+ the idea that the 
 \begin_inset Formula $p$
 \end_inset
 
@@ -2891,6 +2899,129 @@ The primary drawbacks of probabilistic matrix factorization is that it does
  From first principles, it would seem that information maximization would
  be a desirable property.
  
+\end_layout
+
+\begin_layout Subsubsection
+Nuclear Norm
+\end_layout
+
+\begin_layout Standard
+Whenever the error matrix 
+\begin_inset Formula $E\left(w,d\right)$
+\end_inset
+
+ can be decomposed into a set 
+\begin_inset Formula $\left\{ \sigma_{i}\right\} $
+\end_inset
+
+ of singular values, then the trace of the decomposition is 
+\begin_inset Formula $t=\sum_{i}\sigma_{i}$
+\end_inset
+
+.
+ The trace can be treated as the objective function to be minimized, leading
+ to a valid factorization, differeing from that obtained by PMF.
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+nuclear
+\begin_inset Quotes erd
+\end_inset
+
+ comes from operator theory, where the definition of a nuclear operator
+ as one that is of trace-class, i.e.
+ having a trace that is invariant under orthogonal or unitary transformations.
+ In such cases, there is an explicit assumption that the operator lives
+ in some homogenouos space, where orthogonal or unitary transformations
+ can be applied.
+ In machine learning, the spaces are always finite dimensional, and are
+ usually explicity assumed to be real Euclidean space 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ -- that is, the spaces behave like actual vector spaces, so that concepts
+ like SVD apply.
+\end_layout
+
+\begin_layout Standard
+A subtle point here is that the space in which 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ lives is 
+\emph on
+not
+\emph default
+ 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ (nor is it 
+\begin_inset Formula $\mathbb{R}^{\left|W\right|\times\left|D\right|}$
+\end_inset
+
+, if one is a stickler about dimensions).
+ Rather, 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is contrained to live inside of a simplex (of dimension 
+\begin_inset Formula $\left|W\right|\times\left|D\right|$
+\end_inset
+
+).
+ Sure, one can blur one's eyes and imagine that this simplex is a subspace
+ of 
+\begin_inset Formula $\mathbb{R}^{\left|W\right|\times\left|D\right|}$
+\end_inset
+
+, and that is not entirely wrong.
+ However, the only transformations that can be applied to points in a simplex,
+ that keep the points inside the simplex, are Markov matrixes.
+ Any other transformations will typically move points from the outside,
+ into the inside, and move inside points out.
+ In particular, rotations (orthogonal transformations) cannot be applied
+ to a probability, with the result still being a probability.
+ Applying the notion of a trace, which is implcitly defined in terms of
+ orthogonal transformations, is inappropriate for the problem at hand.
+\end_layout
+
+\begin_layout Subsubsection
+Neural Net Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+In a neural net matrix factorization, one replaces the inner product 
+\begin_inset Formula $\vec{w}\cdot\vec{d}$
+\end_inset
+
+ by a function 
+\begin_inset Formula $f\left(\left(\vec{wd}\right)_{g}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $\left(\vec{wd}\right)_{g}=p\left(w,g\right)p\left(g,d\right)$
+\end_inset
+
+ is a component of a 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+-dimensional vector.
+ This model is discussed in greater detail in reference 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dzuigaite2015"
+
+\end_inset
+
+.
+ There is nothing in the current problem that suggests this as an appropriate
+ model of language.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -3061,48 +3192,6 @@ If one has such a factorization, so that
  are low-density feeder branches that connect into this tightly-coupled
  kernel.
  
-\end_layout
-
-\begin_layout Subsubsection*
-Low Rank Matrix Factorization
-\end_layout
-
-\begin_layout Standard
-So
-\end_layout
-
-\begin_layout Subsubsection*
-Neural Net Matrix Factorization
-\end_layout
-
-\begin_layout Standard
-In a neural net matrix factorization, one replaces the inner product 
-\begin_inset Formula $\vec{w}\cdot\vec{d}$
-\end_inset
-
- by a function 
-\begin_inset Formula $f\left(\left(\vec{wd}\right)_{g}\right)$
-\end_inset
-
- where 
-\begin_inset Formula $\left(\vec{wd}\right)_{g}=p\left(w,g\right)p\left(g,d\right)$
-\end_inset
-
- is a component of a 
-\begin_inset Formula $\left|G\right|$
-\end_inset
-
--dimensional vector.
- This model is discussed in greater detail in reference 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Dzuigaite2015"
-
-\end_inset
-
-.
- There is nothing in the current problem that suggests this as an appropriate
- model of language.
 \end_layout
 
 \begin_layout Subsubsection*
