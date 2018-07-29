@@ -3093,6 +3093,127 @@ shape
 \end_layout
 
 \begin_layout Subsubsection
+Local Low Rank Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Local Low Rank Matrix Factorization (LLORMA)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lee2016"
+
+\end_inset
+
+ is a matrix factorization algorithm exhibiting accuracy and performance
+ at near state-of-the-art levels.
+ It uses a combination of two techniques: kernel smoothing
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Kernel-smoother"
+
+\end_inset
+
+ and local regression (LOESS)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Local-regression"
+
+\end_inset
+
+ to obtain smooth estimates for the two factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The use of the smoothing techniques is driven by the fact that the input
+ dataset 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is both noisey and incomplete.
+ It is noisey because the sample size is not sufficiently large to adequately
+ approach a large-sample-size limit.
+ Reaching this limit is fundamentally impossible, from first principles,
+ if one assumes the Zipf distribution (as is the case here).
+ For a Zipf distribution, half the dataset necessarily consists of hapax
+ legomena.
+ Another 15% to 20% are dis and tris legomena.
+ Increasing the number of observations do not change these ratios: the more
+ one observes, the more singular phenomena one will find.
+ Noise in the dataset is unavoidable.
+ Furthermore, implicit in this is that the dataset is necesssarily incomplete:
+ if half the dataset consists of events that were observed just once; there
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+even more
+\begin_inset Quotes erd
+\end_inset
+
+ events, that were never observed.
+\end_layout
+
+\begin_layout Standard
+Consider, for example, the set of short sentences.
+ One might think that, if one was able to observe every sentence ever spoken
+ or written, one might eventually observe ever grammatically valid noun-verb
+ combination.
+ This is not so.
+ The sentence 
+\begin_inset Quotes eld
+\end_inset
+
+green ideas sleep furiously
+\begin_inset Quotes erd
+\end_inset
+
+ is quite common, as it is a stock example sentence in linguistics.
+ However, the similar sentence 
+\begin_inset Quotes eld
+\end_inset
+
+blue concepts wilt skillfully
+\begin_inset Quotes erd
+\end_inset
+
+ probably has never been written down before, until just now.
+ The law of large numbers does not apply to the Zipfian distribution.
+ The matrix 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is necessarily noisey and incomplete, no mater how large the sample size.
+ What is not clear is 
+\end_layout
+
+\begin_layout Standard
+designed for recommendation systems.
+ The basic assumption of such systems is that a matrix, such as 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is known only incompletely, and it is sparse only due to a lack of data,
+ and not because the matrix itself is necessaily sparse.
+ Thus, the recommendation task is to guess at the missing entries.
+ This has some overlap with the current task: we know, from first principles,
+ that 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is neccessarily sparse; however, it is also clear that much of the sparsity
+ comes from an insufficient number of observations of the input text.
+ 
+\end_layout
+
+\begin_layout Subsubsection
 Other factorizations
 \end_layout
 
@@ -3550,36 +3671,6 @@ prima facie
 viz
 \emph default
 ., that the graph contains bipartite cliques.
- 
-\end_layout
-
-\begin_layout Subsubsection*
-Local Low Rank Matrix Factorization
-\end_layout
-
-\begin_layout Standard
-Local Low Rank Matrix Factorization (LLORMA)
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Lee2016"
-
-\end_inset
-
- is a matrix factorization algorithm designed for recommendation systems.
- The basic assumption of such systems is that a matrix, such as 
-\begin_inset Formula $p\left(w,d\right)$
-\end_inset
-
- is known only incompletely, and it is sparse only due to a lack of data,
- and not because the matrix itself is necessaily sparse.
- Thus, the recommendation task is to guess at the missing entries.
- This has some overlap with the current task: we know, from first principles,
- that 
-\begin_inset Formula $p\left(w,d\right)$
-\end_inset
-
- is neccessarily sparse; however, it is also clear that much of the sparsity
- comes from an insufficient number of observations of the input text.
  
 \end_layout
 
