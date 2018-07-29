@@ -2649,7 +2649,7 @@ Given a word
 , and it should factorize into two distinct parts:
 \begin_inset Formula 
 \[
-p\left(w,d,g\right)=p\left(w,g\right)p\left(g,d\right)
+p\left(w,d,g\right)=p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
 \]
 
 \end_inset
@@ -2679,7 +2679,7 @@ where
  and to perform the matrix factorization
 \begin_inset Formula 
 \[
-p\left(w,d\right)\approx\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)
+p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
 \]
 
 \end_inset
@@ -2689,11 +2689,11 @@ Ideally, the size of the set
 \end_inset
 
  is minimal, in some way, so that the matrixes 
-\begin_inset Formula $p(w,g)$
+\begin_inset Formula $p^{\prime}(w,g)$
 \end_inset
 
  and 
-\begin_inset Formula $p(g,d)$
+\begin_inset Formula $p^{\prime\prime}(g,d)$
 \end_inset
 
  are of low rank.
@@ -2701,8 +2701,29 @@ Ideally, the size of the set
 \begin_inset Formula $G$
 \end_inset
 
- having onloy one element, total, the factorization would results in the
+ having only one element, total, the factorization would results in the
  outer product, or tensor product, of two vectors.
+\end_layout
+
+\begin_layout Standard
+In the following, the prime-superscripts are dropped, and the probabilities
+ are written as 
+\begin_inset Formula $p(w,g)$
+\end_inset
+
+ and 
+\begin_inset Formula $p(g,d)$
+\end_inset
+
+.
+ These are two different probabilities; which in turn are not the same as
+ 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ Which is which should be apparent from context.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -3258,7 +3279,133 @@ If one has such a factorization, so that
 
  are low-density feeder branches that connect into this tightly-coupled
  kernel.
- 
+ This is visualized in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Factorization
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Factorization"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename skimage/factor.eps
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This figure attempts to illustrate the process of factorization.
+ The left-most image is meant to illustrate 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ as a sparse matrix.
+ Not every 
+\begin_inset Formula $w$
+\end_inset
+
+ is connected to every 
+\begin_inset Formula $d$
+\end_inset
+
+, but there are a sufficient number of connections that the overall graph
+ is confused and tangled.
+ The middle image is meant to illustrate the factorization 
+\begin_inset Formula $\sum_{g}p\left(w,g\right)p\left(g,d\right)$
+\end_inset
+
+.
+ In this factorization, the matrix 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ not only becomes more sparse, but has a very low out-degree for fixed 
+\begin_inset Formula $w$
+\end_inset
+
+: only one or a handful of entries in 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ are non-zero for fixed 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ The rightmost image attempts to illustrate the factorization 
+\begin_inset Formula $\sum_{g,g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)$
+\end_inset
+
+.
+ Here, the factor 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ has low in-degree for any fixed 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ All of the tangle and interconnectedness has been factored ouot into the
+ matrix 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ connecting word-classes to disjunct-classes.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This
 \end_layout
 
 \begin_layout Subsubsection*
