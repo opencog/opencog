@@ -3404,8 +3404,153 @@ height "1pt"
 
 \end_layout
 
+\begin_layout Subsubsection
+Factorization in Link Grammar
+\end_layout
+
 \begin_layout Standard
-This
+This factorization is 
+\emph on
+de facto
+\emph default
+ observed in the hand-built dictionaries for Link Grammar.
+ Examination of the 
+\family typewriter
+`4.0.dict`
+\family default
+ file in the Link Grammar file distribution will clearly show how words
+ are grouped into word-classes.
+ For example, 
+\family typewriter
+`words.n.2.s`
+\family default
+ is a list of plural count-nouns.
+ The Link Grammar costs are rough approximations for the log liklihood 
+\begin_inset Formula $-\log p$
+\end_inset
+
+, and so the contents of 
+\family typewriter
+`words.n.2.s`
+\family default
+ is effectively a representation of the matrix 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g=\left\langle \mbox{plural-count-nouns}\right\rangle $
+\end_inset
+
+and a uniform probability across this class.
+ The file 
+\family typewriter
+`4.0.dict`
+\family default
+ also defines a large number of 
+\begin_inset Quotes eld
+\end_inset
+
+macros
+\begin_inset Quotes erd
+\end_inset
+
+, with names such as 
+\family typewriter
+`<noun-main-p>`
+\family default
+.
+ These macros are stand-ins for lists of disjuncts, often given equal weight,
+ but also not uncommonly assigned different costs.
+ In essence, 
+\family typewriter
+`<noun-main-p>`
+\family default
+ should be understood as an example of 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g^{\prime}=\mbox{\left\langle noun-main-p\right\rangle }$
+\end_inset
+
+.
+ It appears multiple times throughout the file.
+ In one case, it is associated with the word-list 
+\family typewriter
+`words.n.2.s`
+\family default
+, which makes sense, as 
+\family typewriter
+`<noun-main-p>`
+\family default
+ is describing one of the linkage behaviors of plural common nouns.
+ The contents of the file 
+\family typewriter
+`4.0.dict`
+\family default
+ should be understood to be a specification of 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+, although it is not so cleanly organized: it also includes all of the 
+\begin_inset Quotes eld
+\end_inset
+
+macros
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ and also includes word-lists when these are small.
+\end_layout
+
+\begin_layout Standard
+A more careful examination of the use of the macros in 
+\family typewriter
+`4.0.dict`
+\family default
+ shows that these are often cascaded into one-another.
+ For example, 
+\family typewriter
+`<noun-main-s>`
+\family default
+ is used in the definition of 
+\family typewriter
+`<proper-names>`,
+\family default
+ 
+\family typewriter
+`<entity-entire>`
+\family default
+ and 
+\family typewriter
+`<common-noun>`
+\family default
+, each of which service word classes that are similar and yet differ syntactical
+ly and semantically.
+ This is not just some strange artifact of hand-building a dictionary encoding
+ grammar.
+ It is 
+\emph on
+prima facie
+\emph default
+ evidence of important substructures inside of 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+, essentially pointing at the idea that 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ can be factored into smaller, tightly-connected blocks; 
+\emph on
+viz
+\emph default
+., that the graph contains bipartite cliques.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
