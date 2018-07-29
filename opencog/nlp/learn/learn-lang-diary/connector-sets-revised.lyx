@@ -7436,7 +7436,7 @@ Given the earlier Zipfian results on the average degree
 \end_layout
 
 \begin_layout Section
-Similarity
+Grammatical Classes
 \end_layout
 
 \begin_layout Standard
@@ -7520,7 +7520,7 @@ A related, but very important task, when judging the similarity of words,
 \emph on
 viz
 \emph default
-, the same text-string can belonng to two different parts of speech.
+, the same text-string can belong to two different parts of speech.
  A casual perusal of any dictionary will show that many words can be used
  both as nouns, and as verbs.
  Other words can be nouns or adjectives; yet others can be subclasses: 
@@ -7530,7 +7530,7 @@ e.g.
 \emph default
  transitive and intransitive verbs.
  Disjuncts can be thought of as hyper-fine-grained parts-of-speech identifiers,
- and so one task of categroization is to place them into larger, less crude
+ and so one task of categorization is to place them into larger, less crude
  categories.
  Another important realization is to observe that different disjuncts correlate
  strongly with different semantic meanings; for a particularly brutal example,
@@ -7569,6 +7569,102 @@ key "Vepstas2018stiching"
 \end_layout
 
 \begin_layout Subsection
+Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+One can pose the problem of organizing words into grammatical categories
+ as a matrix factorization problem.
+ In the current framework, this means factorizing the matrix
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
+\]
+
+\end_inset
+
+so that 
+\begin_inset Formula $p^{\prime}\left(w,g\right)$
+\end_inset
+
+ gives the probability that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ belongs to the grammatical category 
+\begin_inset Formula $g$
+\end_inset
+
+, while 
+\begin_inset Formula $p^{\prime\prime}\left(g,d\right)$
+\end_inset
+
+ gives the probability that the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ is appriopriate for use with the grammatical category 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ This factorization feeds back into itself, as the disjuncts are necessarily
+ composed of words, which must now be reassigned into classes.
+ 
+\end_layout
+
+\begin_layout Standard
+There are many widely discussed algorithms for performig the above factoriztion,
+ falling under the general name of 
+\begin_inset Quotes eld
+\end_inset
+
+low-rank matrix approzimation
+\begin_inset Quotes erd
+\end_inset
+
+ (LRMA) techniques.
+ These are discussed in greater detail by another document in this directory
+ (skippy.pdf) XXX give formal ref.
+ 
+\end_layout
+
+\begin_layout Subsection
+Clustering
+\end_layout
+
+\begin_layout Standard
+An alternative to applying LRMA techniques, one can try to guess at the
+ grammatical categories by looking for words that are similar to each other,
+ and so invoke clustering algorithms to obtain grammatical categories.
+ As clustering is inherently point-wise and not global, it is a generally
+ weaker technique.
+ That is, clustering generally looks at just pairs of words, and 
+\begin_inset Quotes eld
+\end_inset
+
+ignores
+\begin_inset Quotes erd
+\end_inset
+
+ other evidence in making the decision as to whether two words might go
+ into the same grammatical cateogory.
+ Worse, if the clustering problem is posed naively, then it has a naive
+ and incorrect answer: each word can belong to only one class.
+ This ignores the fact that a word might belong to multiple classes 
+\emph on
+viz.
+
+\emph default
+ that class membership is a probability 
+\begin_inset Formula $p^{\prime}\left(w,g\right)$
+\end_inset
+
+.
+ It also ignores the possibility that an observed word-vector 
+\end_layout
+
+\begin_layout Section
 Disjunct Cosine Similarity
 \begin_inset CommandInset label
 LatexCommand label
@@ -12981,8 +13077,10 @@ Word Senses
 \end_layout
 
 \begin_layout Standard
-Word, considered as text strings, often correspond to multiple senses.
- 
+Words, considered as text strings, often correspond to multiple senses.
+ Conversely, many words have similar senses.
+ One would like to induce what these senses and word categories are, based
+ on the observed counts.
 \end_layout
 
 \begin_layout Subsection
