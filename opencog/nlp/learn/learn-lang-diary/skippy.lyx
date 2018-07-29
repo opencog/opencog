@@ -2286,6 +2286,13 @@ losts of zero entries
 
 \begin_layout Subsection*
 Disjunct Vectors
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Disjunct-Vectors"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2578,6 +2585,29 @@ Here, as always,
 
 Notable in the above report is that the measured sparsity seems to be approximat
 ely langauge-independent, and dataset-size independent.
+\end_layout
+
+\begin_layout Standard
+Some of the observed sparsity is due to a lack of a sufficient number of
+ observations of language use.
+ Some of the sparsity is due to the fact that certain combinations really
+ are forbidden: one really cannot string words in arbitrary order.
+ What fraction of the sparsity is due to which effect is unclear.
+ Curiosly, increasing the number of observations (en_cfive vs.
+ en_mtwo) increased the sparsity; but this could also be due to the much
+ larger vocabulary, which is now even more rarely observed.
+ A significant part of the expanded vocabulary includes Latin and other
+ foreign-language words, which, of necessity, will be very infrequent, and
+ when they occur, they will be in set phrases that readers are expected
+ to recognize.
+ The point here is that one cannot induce a foreign-langauge grammar from
+ a small number of set phrases embedded in English text.
+ A major portion of the expanded vocabulary are geographical place names,
+ product names and the like, which are also inherently sparse.
+ Unlik the foreign phrases, this does not mean that they are inflexible
+ in grammatical usage: one can use the name of a small town in a vast number
+ of sentences, even if the observed corpus uses it in only a few.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -3035,7 +3065,22 @@ key "Lee2016"
 
 \end_inset
 
+ is a matrix factorization algorithm designed for recommendation systems.
+ The basic assumption of such systems is that a matrix, such as 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
 
+ is known only incompletely, and it is sparse only due to a lack of data,
+ and not because the matrix itself is necessaily sparse.
+ Thus, the recommendation task is to guess at the missing entries.
+ This has some overlap with the current task: we know, from first principles,
+ that 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is neccessarily sparse; however, it is also clear that much of the sparsity
+ comes from an insufficient number of observations of the input text.
+ 
 \end_layout
 
 \begin_layout Standard
