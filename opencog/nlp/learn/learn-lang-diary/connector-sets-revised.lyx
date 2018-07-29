@@ -7661,7 +7661,48 @@ viz.
 \end_inset
 
 .
- It also ignores the possibility that an observed word-vector 
+ It also ignores the possibility that an observed word-vector might be the
+ sum of observations of two very different words that just happen to have
+ the same spelling: a canonical example being 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+, which can be the past tense of 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+, the noun that is a cutting tool, and the verb that is the cutting action.
+ Although in call cases, one has 
+\begin_inset Formula $w=\mbox{saw}$
+\end_inset
+
+, the collection of disjuncts associated to each are likely to be very different.
+ That is, the distribution 
+\begin_inset Formula $p^{\prime\prime}\left(g,d\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g=\mbox{`cutting tool`}$
+\end_inset
+
+ will be very different from 
+\begin_inset Formula $p^{\prime\prime}\left(g,d\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g=\mbox{`past-tense-observation`}$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Section
