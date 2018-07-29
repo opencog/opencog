@@ -2277,7 +2277,7 @@ This exposes the real question: just how meaningful are the CBOW/SkipGram
 \begin_inset Quotes eld
 \end_inset
 
-losts of zero entries
+lots of zero entries
 \begin_inset Quotes erd
 \end_inset
 
@@ -2285,7 +2285,7 @@ losts of zero entries
 \end_layout
 
 \begin_layout Subsection
-Disjunct Vectors
+Sparsity
 \end_layout
 
 \begin_layout Standard
@@ -2597,7 +2597,7 @@ Some of the observed sparsity is due to a lack of a sufficient number of
  a small number of set phrases embedded in English text.
  A major portion of the expanded vocabulary are geographical place names,
  product names and the like, which are also inherently sparse.
- Unlik the foreign phrases, this does not mean that they are inflexible
+ Unlike the foreign phrases, this does not mean that they are inflexible
  in grammatical usage: one can use the name of a small town in a vast number
  of sentences, even if the observed corpus uses it in only a few.
  
@@ -2610,6 +2610,94 @@ Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
  presented above, fails to compress sufficiently well, or the SkipGram model
  compresses too much.
  Its likely that both situations are the case.
+\end_layout
+
+\begin_layout Subsubsection
+Zipfs Law; Noise and Incompleteness
+\end_layout
+
+\begin_layout Standard
+Ignoring 
+\begin_inset Quotes eld
+\end_inset
+
+natural
+\begin_inset Quotes erd
+\end_inset
+
+ sparsity due to forbidden grammatical constructions, it is also the case
+ that the input dataset 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is both noisey and incomplete.
+ It is noisey because the sample size is not sufficiently large to adequately
+ approach a large-sample-size limit.
+ Reaching this limit is fundamentally impossible, from first principles,
+ if one assumes the Zipf distribution (as is the case here).
+ For a Zipf distribution, half the dataset necessarily consists of 
+\emph on
+hapax legomena
+\emph default
+.
+ Another 15% to 20% are 
+\emph on
+dis
+\emph default
+ and 
+\emph on
+tris legomena
+\emph default
+.
+ Increasing the number of observations do not change these ratios: the more
+ one observes, the more singular phenomena one will find.
+ Noise in the dataset is unavoidable.
+ Furthermore, implicit in this is that the dataset is necesssarily incomplete:
+ if half the dataset consists of events that were observed just once; there
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+even more
+\begin_inset Quotes erd
+\end_inset
+
+ events, that were never observed.
+\end_layout
+
+\begin_layout Standard
+Consider, for example, the set of short sentences.
+ One might think that, if one was able to observe every sentence ever spoken
+ or written, one might eventually observe ever grammatically valid noun-verb
+ combination.
+ This is not so.
+ The sentence 
+\begin_inset Quotes eld
+\end_inset
+
+green ideas sleep furiously
+\begin_inset Quotes erd
+\end_inset
+
+ is quite common, as it is a stock example sentence in linguistics.
+ However, the similar sentence 
+\begin_inset Quotes eld
+\end_inset
+
+blue concepts wilt skillfully
+\begin_inset Quotes erd
+\end_inset
+
+ probably has never been written down before, until just now.
+ The law of large numbers does not apply to the Zipfian distribution.
+ The matrix 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is necessarily noisey and incomplete, no mater how large the sample size.
+ What is not clear is what fraction of the sparsity is due to the Zipf distribut
+ion, and what fraction is the sparsity is due to forbidden grammatical construct
+ions.
 \end_layout
 
 \begin_layout Subsection
