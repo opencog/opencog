@@ -2952,7 +2952,7 @@ and so one can contract
 
  is Markovian, preserving the sums of probablities over rows and columns,
  it can be contracted to the left or the right.
- Thus, one can ligitimately introcude aonther constraint: given the freedom
+ Thus, one can legitimately introduce another constraint: given the freedom
  in 
 \begin_inset Formula $M$
 \end_inset
@@ -2962,6 +2962,31 @@ and so one can contract
 \end_inset
 
  is maximally sparse.
+\end_layout
+
+\begin_layout Standard
+A matrix can be Markovian on the left side, the right side, or both.
+ It is Markovian on the right if 
+\begin_inset Formula 
+\[
+1=\sum_{g}M\left(g,g^{\prime}\right)\mbox{ for all }g^{\prime}
+\]
+
+\end_inset
+
+This assures that 
+\begin_inset Formula 
+\[
+p^{\prime}\left(g,d\right)=\sum_{g^{\prime}}M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+\]
+
+\end_inset
+
+is still a valid probability distribution; namely, that 
+\begin_inset Formula $p^{\prime}\left(*,*\right)=1$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection*
