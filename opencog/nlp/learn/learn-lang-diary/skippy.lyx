@@ -3024,6 +3024,29 @@ key "Dzuigaite2015"
 \end_layout
 
 \begin_layout Subsubsection*
+Local Low Rank Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Local Low Rank Matrix Factorization (LLORMA)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lee2016"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+also I-RBM
+\end_layout
+
+\begin_layout Standard
+also I-AutoRec
+\end_layout
+
+\begin_layout Subsubsection*
 Information Maximizing Matrix Factorization
 \end_layout
 
