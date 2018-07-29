@@ -83,7 +83,7 @@ This document attempts to compare and contrast the various ways in which
  
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Introduction
 \end_layout
 
@@ -116,7 +116,7 @@ key "Mikolov2013,Mikolov2013a"
  concepts employed in the OpenCog language-learning project.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Link Grammar
 \end_layout
 
@@ -378,7 +378,7 @@ The correct conceptual model for the observational data is that of a large
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Statistical Models
 \end_layout
 
@@ -560,7 +560,7 @@ all human language
  appropriate at this level.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 N-Gram Model
 \end_layout
 
@@ -641,7 +641,7 @@ The model can be made computationally tractable with several variants.
  The details are of no particular concern to the rest of this essay.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Model Building
 \end_layout
 
@@ -687,7 +687,7 @@ There is a fairly rich variety of models.
  SkipGram models.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 CBOW
 \end_layout
 
@@ -1067,7 +1067,7 @@ By convention,
 .
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 SkipGram
 \end_layout
 
@@ -1161,7 +1161,7 @@ deep learning
  The distinction is made more clear in the next section.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Perceptrons as Neural Nets 
 \end_layout
 
@@ -1409,7 +1409,7 @@ Typical choices for the dimension
  does a minimal amount of, if any at all, of dimensional reduction.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Similarities and Differences
 \end_layout
 
@@ -1422,7 +1422,7 @@ On the face of it, the description given for Link Grammar seems to bear
  viewpoint.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjuncts as Context
 \end_layout
 
@@ -1612,7 +1612,7 @@ In fact, the disjunct notation can do more: it can also encode parse information
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Skip-Grams and Grammar
 \end_layout
 
@@ -1888,7 +1888,7 @@ Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Training
 \end_layout
 
@@ -1931,7 +1931,7 @@ loss function
 ) built from (defined in terms of) the probabilities.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Model Building and Vector Representations
 \end_layout
 
@@ -2284,15 +2284,8 @@ losts of zero entries
 , but distribute them in a more accurate way?
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct Vectors
-\begin_inset CommandInset label
-LatexCommand label
-name "sub:Disjunct-Vectors"
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -2619,7 +2612,7 @@ Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
  Its likely that both situations are the case.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Word Classes
 \end_layout
 
@@ -2712,7 +2705,7 @@ Ideally, the size of the set
  outer product, or tensor product, of two vectors.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Learning Word Senses
 \end_layout
 
@@ -2823,14 +2816,29 @@ Put differently, one expects different classes to not only differentiate
 .
 \end_layout
 
-\begin_layout Subsubsection*
-Probabilistic Matrix Factorization
+\begin_layout Subsection
+Low Rank Matrix Approximation
 \end_layout
 
 \begin_layout Standard
 Factorizations of this sort are not uncommon in machine learning.
- A variety of techniques for performing it have been developed.
- 
+ They generally go under the name of Low Rank Matrix Approximation (LRMA).
+ The rank refers to the size of the set 
+\begin_inset Formula $G$
+\end_inset
+
+ -- it is the rank of the factorization.
+ The factorization is only an approximation to the original data; thus,
+ one says LRMA and not LRMF.
+\end_layout
+
+\begin_layout Standard
+A variety of techniques for performing this factorization have been developed.
+ A lightning review is given below.
+\end_layout
+
+\begin_layout Subsubsection
+Probabilistic Matrix Factorization
 \end_layout
 
 \begin_layout Standard
@@ -2980,7 +2988,7 @@ and so one can contract
 \begin_inset Formula $M$
 \end_inset
 
- is Markovian, preserving the sums of probablities over rows and columns,
+ is Markovian, preserving the sums of probabilities over rows and columns,
  it can be contracted to the left or the right.
  Thus, one can legitimately introduce another constraint: given the freedom
  in 
@@ -2991,7 +2999,11 @@ and so one can contract
 \begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
- is maximally sparse.
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are both maximally sparse.
 \end_layout
 
 \begin_layout Standard
@@ -3017,6 +3029,46 @@ is still a valid probability distribution; namely, that
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+If one has such a factorization, so that 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are maximally sparse, then the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ will likely be very highly connectected, i.e.
+ will have many or most of its matrix entries be non-zero.
+ Conceptually, one can visualize the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ as a highly connected graph, while the factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are low-density feeder branches that connect into this tightly-coupled
+ kernel.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Low Rank Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+So
 \end_layout
 
 \begin_layout Subsubsection*
