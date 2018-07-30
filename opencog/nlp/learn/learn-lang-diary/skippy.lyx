@@ -1428,7 +1428,7 @@ Typical choices for the dimension
 \end_layout
 
 \begin_layout Section
-Similarities and Differences
+Similarities and Differences 
 \begin_inset CommandInset label
 LatexCommand label
 name "sec:Similarities-and-Differences"
@@ -1914,15 +1914,44 @@ Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
 \end_layout
 
 \begin_layout Subsection
-Training
+Graph Algorithms vs.
+ Gradient Descent 
 \end_layout
 
 \begin_layout Standard
-One important difference between the earlier description of Link Grammar,
- and the deep-learning algorithms should be immediately apparent: the Link
- Grammar probabilities are obtained by direct counting, and not by any training,
- relaxation or hill-climbing technique.
- That is, 
+The biggest difference between the two approaches is the nature of the training
+ algorithm.
+ The disjunct counting can be said to be a form of a 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithm
+\begin_inset Quotes erd
+\end_inset
+
+, whereas the deep-learning algorithms, proceeding by relaxation or hill-climbin
+g, can be said to be a form of 
+\begin_inset Quotes eld
+\end_inset
+
+gradient descent
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One is local, the other is global in it's view of relationships.
+ One is greedy, and exposes graphical structure immediately; the other exposes
+ a graph only if some sort of thresholding is applied to eliminate weak
+ links.
+\end_layout
+
+\begin_layout Standard
+The disjunct probabilities are obtained by direct counting.
+ That is, after obtaining an observational count 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ one computes a normalized frequency of observations 
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
@@ -1930,7 +1959,7 @@ p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
 
 \end_inset
 
-so that the probability is properly normalized: 
+so that the frequency is properly normalized: 
 \begin_inset Formula $p\left(*,*\right)=1$
 \end_inset
 
@@ -1943,9 +1972,50 @@ so that the probability is properly normalized:
 \begin_inset Formula $\left(w,d\right)$
 \end_inset
 
- in text; the probabilities is just the frequentist probability.
- This differs sharply from the probability in the CBOW/SkipGram models,
- which is obtained by maximizing an objective function (the 
+ in text; the probability is just the frequentist probability.
+ 
+\end_layout
+
+\begin_layout Standard
+By contrast, the CBOW/SkipGram models obtain a probability similar to 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+, but using a different technique and a different notation; for example,
+ 
+\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
+\end_inset
+
+.
+ The sections above point out that 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ is a lot like 
+\begin_inset Formula $d$
+\end_inset
+
+; for some purposes (many purposes?) they can be treated as being the same
+ thing.
+ The big difference is that 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ is lacking the graph structure of 
+\begin_inset Formula $d$
+\end_inset
+
+; there is some buried graph-like structure in 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ but it is not overt, and one must work to make it overt.
+ The other big difference is that 
+\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
+\end_inset
+
+ is treated as an unknown, and arrived at by gradient descent algorithms
+ applied to an objective function (the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1953,7 +2023,104 @@ loss function
 \begin_inset Quotes erd
 \end_inset
 
-) built from (defined in terms of) the probabilities.
+), rather than by direct observational counting.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider again the mechanism used to obtain the counts 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+.
+ The first half of this mechanism is commonly called MST parsing (Maximum
+ Spanning Tree parsing), and is described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+.
+ It is a form of a greedy graph algorithm.
+ One begins by considering the graph clique, wherein every word in the sentence
+ is related (joined by an edge) to every other word in a sentence.
+ Each edge is associated with a metric, that defines the length or size
+ of the edge.
+ In traditional MST, this metric is the mutual information of the word-pair.
+ One can proceed in three ways from here: 
+\end_layout
+
+\begin_layout Itemize
+Apply a thresholding, and discard all edges that have a weak, low quality
+ connection.
+ 
+\end_layout
+
+\begin_layout Itemize
+Apply a greedy algorithm, and keep only the edges of the highest quality,
+ until a spanning tree is found, spanning all words in the sentence.
+\end_layout
+
+\begin_layout Itemize
+A combination of the two.
+\end_layout
+
+\begin_layout Standard
+The last may be the best.
+ In traditional linguistics, one is interested in a parse tree that connects
+ all of the words in a sentence, and thus indicates which words are related
+ to which.
+ More connections than what is in the spanning tree just confuse the issue,
+ at least for traditional linguistics.
+\end_layout
+
+\begin_layout Standard
+For disjunct counting, insisting on a spanning tree might be too strong
+ a condition.
+ For disjunct counting, one is only interested in how words connect to other
+ words: one is interested in extracting and counting the 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw puzzle pieces
+\begin_inset Quotes erd
+\end_inset
+
+ that represent how words can connect to other words.
+ To obtain these jigsaw-puzzle pieces, one does not need a tree that spans
+ all words in the sentence; it is acceptable that some words might be omitted.
+ Nor is it strictly necessary that the parse graph be a tree: it is OK if
+ it has cycles, since these cycles often indicate important grammatical
+ relations.
+\end_layout
+
+\begin_layout Standard
+The net result is that by observing disjuncts, one is observing an explicit
+ graphical structure.
+ The disjunct is overt, in the foreground, explicitly demonstrated.
+ It is obtained by explicitly searching for a graphical structure.
+ 
+\end_layout
+
+\begin_layout Standard
+Because every graph has a corresponding adjacency matrix, one can always
+ approach the problem from the other direction: given a matrix, declare
+ it to be a graph, with the matrix entries being 
+\begin_inset Quotes eld
+\end_inset
+
+weights
+\begin_inset Quotes erd
+\end_inset
+
+ on the graph edges.
+ This is the approach taken by the neural net, deep-learning models.
+ They clearly have taken the world by storm, and are quite succesful in
+ what they do.
+ The disadvantage is that they obscure the explict graphical structure of
+ natural langauge.
+ 
 \end_layout
 
 \begin_layout Section
@@ -2839,71 +3006,18 @@ In the following, the prime-superscripts are dropped, and the probabilities
  
 \end_layout
 
-\begin_layout Subsubsection
-Clustering
-\end_layout
-
 \begin_layout Standard
-A side effect of the factorization of eqn 
+There are two ways of performing the factorization of eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:factorize"
 
 \end_inset
 
- is that it is a 
-\emph on
-de facto
-\emph default
- form of clustering.
- Whenever one has 
-\begin_inset Formula $p(w,g)>0$
-\end_inset
-
-, one can effectively say 
-\begin_inset Quotes eld
-\end_inset
-
-word 
-\begin_inset Formula $w$
-\end_inset
-
- has been assigned to cluster 
-\begin_inset Formula $g$
-\end_inset
-
-
-\begin_inset Quotes erd
-\end_inset
-
-.
- Thus, solving eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:factorize"
-
-\end_inset
-
- can be seen as an alternative to deploying a clustering algorithm to assign
- words to word classes.
-\end_layout
-
-\begin_layout Standard
-One important distinction between traditional clustering and matrix factorizatio
-n is that traditional clustering algorithms naively assign a word to only
- a single cluster, whereas here, one can have multiple 
-\begin_inset Formula $p(w,g)>0$
-\end_inset
-
-.
- One can partly overcome this difficulty with traditional clustering by
- decomposing the input vector into two: a component parallel to the cluster
- centroid, and a perpendicular component, and assigning the parallel component
- to the cluster, while leaving behind the perpendicular component to be
- assigned to other clusters.
- It may be possible to increase the quality by making the decomposition
- can be less strict about parallelism: one need merge only the component
- within some angle (or distance) of the cluster centroid.
+: by applying graphical methods (such as clustering) or by applying gradient
+ descent methods (typically associated with neural net algorithms).
+ These two approaches are explored below.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -3015,6 +3129,85 @@ Put differently, one expects different classes to not only differentiate
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection
+Clustering
+\end_layout
+
+\begin_layout Standard
+A side effect of the matrix factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ is that it is a 
+\emph on
+de facto
+\emph default
+ form of clustering.
+ Whenever one has 
+\begin_inset Formula $p(w,g)>0$
+\end_inset
+
+, one can effectively say 
+\begin_inset Quotes eld
+\end_inset
+
+word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been assigned to cluster 
+\begin_inset Formula $g$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, solving eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ can be seen as an alternative to deploying a clustering algorithm to assign
+ words to word classes.
+\end_layout
+
+\begin_layout Standard
+One important distinction between traditional clustering and matrix factorizatio
+n is that traditional clustering algorithms naively assign a word to only
+ a single cluster, whereas here, one can have multiple 
+\begin_inset Formula $p(w,g)>0$
+\end_inset
+
+.
+ One can partly overcome this difficulty with traditional clustering by
+ decomposing the input vector into two: a component parallel to the cluster
+ centroid, and a perpendicular component, and assigning the parallel component
+ to the cluster, while leaving behind the perpendicular component to be
+ assigned to other clusters.
+ The decomposition need not be strict about parallelism: one might choose
+ to merge the component that lies within some angle (or distance) of the
+ cluster centroid.
+ Each such merge then gradually shifts the centroid over.
+ If the left-over perpendicular component is sufficiently small, it can
+ be discarded as noise, or treated as an anomaly awaiting additional data.
+\end_layout
+
+\begin_layout Subsubsection
+Clustering as a graph algorithm
+\end_layout
+
+\begin_layout Standard
+The greedy assignment of a vector to a cluster can be seen as a form of
+ a graph algorithm.
 \end_layout
 
 \begin_layout Subsection
