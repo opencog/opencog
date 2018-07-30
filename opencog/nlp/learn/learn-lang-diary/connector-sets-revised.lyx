@@ -272,7 +272,7 @@ key "Sleator1991,Sleator1993"
  can be algorithmically converted into other kinds of dependencies, as well
  as into phrase-structure grammars.
  In Link Grammar, a disjunct is defined as an ordered sequence of connectors;
- those connectors indicate how a word can attach or connect to othe words,
+ those connectors indicate how a word can attach or connect to other words,
  forming links.
  A reasonable conceptual model for a disjunct is to think of it as a jigsaw-puzz
 le piece; the connectors correspond to the tabs and slots on the jigsaw-puzzle
@@ -319,19 +319,19 @@ object
 \end_layout
 
 \begin_layout Standard
-A bridge can be built between the the unlabelled MST representation of a
- parsed sentence, and the labelled Link Grammar parse of a sentence.
+A bridge can be built between the the unlabeled MST representation of a
+ parsed sentence, and the labeled Link Grammar parse of a sentence.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Goertzel2014"
 
 \end_inset
 
- This is done by starting with an unlabelled MST parse of a sentence, and
+ This is done by starting with an unlabeled MST parse of a sentence, and
  then applying a label to each link, that label consisting of the word-pair,
  itself.
  In effect, one obtains a jigsaw-puzzle piece, where each tab and slot is
- labelled by the word that the tab/slot is allowed to connect to.
+ labeled by the word that the tab/slot is allowed to connect to.
  After accumulating a large database of statistics on such jigsaw-puzzle
  pieces, one can compare them, looking for similarity.
  By clustering together similar pieces, one is effectively creating a dictionary
@@ -372,7 +372,7 @@ key "Vepstas2017sheaves"
 \begin_layout Standard
 This report examines one specific dataset of word-disjunct pairs.
  It explores the overall distribution of words and disjuncts, which are
- unsuprisingly Zipfian in nature.
+ unsurprisingly Zipfian in nature.
  It explores various different measures of similarity between words, such
  as cosine distance and entropic distance, either of which are employable
  for discerning the grammatical classes into which the word-disjunct pairs
@@ -380,7 +380,7 @@ This report examines one specific dataset of word-disjunct pairs.
  In effect, this provides the background needed for understanding how words
  are assigned to grammatical categories, in practice.
  It characterizes the nature and structure of natural language, when viewed
- from the path of disjuncts derived from MST parses derived from the mututal
+ from the path of disjuncts derived from MST parses derived from the mutual
  information (MI) distribution of word pairs.
  The analysis is similar in spirit to an earlier analysis of the statistics
  of word-pairs.
@@ -595,7 +595,7 @@ took
 * Entropic similarity, essentially, a form of symmetric mutual information
  between words, appears to be an even better similarity measure.
  It is particularly appealing because it is naturally additive, and thus
- fits naturally into network theories derived from thermodynamic partion
+ fits naturally into network theories derived from thermodynamic partition
  functions.
 \end_layout
 
@@ -657,7 +657,7 @@ Version 4 of this report expands it by considering an entropic similarity
  between words, intended to supplant the cosine similarity as an effective
  graph metric.
  The entropic similarity is a form of symmetric mutual information between
- words; it is given this oddball name so as to avoid confusion with a varity
+ words; it is given this oddball name so as to avoid confusion with a variety
  of other contexts in which mutual information appears.
  And so, Version 4 provides additional statistical analysis comparing the
  entropic similarity to the cosine similarity.
@@ -897,7 +897,7 @@ random-tree parsing
  For each link in such a parse, one simply records the two words at each
  end of the link, and increments the count of that particular word pair
  by one.
- The random-tree method for obtaining word-pair counts results in subtley
+ The random-tree method for obtaining word-pair counts results in subtly
  different statistics than what would be obtained by a sliding window of
  some fixed width.
  In particular, the random-tree method will occasionally count long-distance
@@ -1023,7 +1023,7 @@ Pairs
 \begin_inset Text
 
 \begin_layout Plain Layout
-Obs'ns
+Obsn's
 \end_layout
 
 \end_inset
@@ -1155,7 +1155,7 @@ The diary provides reports for other word-pair datasets, of varying sizes,
 \end_layout
 
 \begin_layout Standard
-A collection of pairs can be thought of as a sparse matrix; the rows ot
+A collection of pairs can be thought of as a sparse matrix; the rows of
  the matrix can be taken to be vectors, as can the columns.
  As vectors, they can be thought of as inhabiting some Banach space, having
  an 
@@ -1235,7 +1235,7 @@ count
 \begin_inset Formula $\hat{e}_{n}$
 \end_inset
 
- correspond to words, eithr to words on the left of a pair, or on the right.
+ correspond to words, either to words on the left of a pair, or on the right.
  Thus, the table caption below is given by:
 \end_layout
 
@@ -1264,7 +1264,7 @@ support
 \end_inset
 
  of a (row or column) vector.
- Formaly, this is the 
+ Formally, this is the 
 \begin_inset Formula $l_{0}$
 \end_inset
 
@@ -1677,7 +1677,7 @@ cuts
 
  each link, and labels the cut end of the link with the word that it was
  previously connected to.
- The disjunct is then the collection of these cut, labelled half-edges.
+ The disjunct is then the collection of these cut, labeled half-edges.
  The collection is ordered, left-to-right, and a plus/minus indicator is
  used to half-edge as having been originally left going (minus) or right-going
  (plus).
@@ -1694,8 +1694,8 @@ cuts
 Just as before, the dataset of pair-counts can be viewed as a sparse matrix.
  The rows correspond to words, the columns to disjuncts.
  The table below summarizes this dataset.
- The table caption is the same as before, with the following addtional values
- being reported:
+ The table caption is the same as before, with the following additional
+ values being reported:
 \end_layout
 
 \begin_layout Description
@@ -1942,7 +1942,7 @@ Dataset Analysis
 \begin_layout Standard
 The word-pair dataset contains 851964 words.
  Not all of these were observe during the subsequent MST parsing, as the
- size of the MST-parsed corpuse was smaller.
+ size of the MST-parsed corpus was smaller.
  However, since the MST corpus was a subset of the word-pair corpus, it
  does not contain any words that were not previously observed.
 \end_layout
@@ -7582,7 +7582,7 @@ key "Vepstas2018stiching"
 
 \end_inset
 
- it is touched on only breifly below, as it informs what properties of a
+ it is touched on only briefly below, as it informs what properties of a
  similarity metric are desirable, and which are not.
 \end_layout
 
@@ -7621,7 +7621,7 @@ so that
 \begin_inset Formula $d$
 \end_inset
 
- is appriopriate for use with the grammatical category 
+ is appropriate for use with the grammatical category 
 \begin_inset Formula $g$
 \end_inset
 
@@ -7632,19 +7632,24 @@ so that
 \end_layout
 
 \begin_layout Standard
-There are many widely discussed algorithms for performig the above factoriztion,
- falling under the general name of 
+There are many widely discussed algorithms for performing the above factorizatio
+n, falling under the general name of 
 \begin_inset Quotes eld
 \end_inset
 
-low-rank matrix approzimation
+low-rank matrix approximation
 \begin_inset Quotes erd
 \end_inset
 
  (LRMA) techniques.
- These are discussed in greater detail by another document in this directory
- (skippy.pdf) XXX give formal ref.
- 
+ These are discussed in greater detail in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -7666,7 +7671,7 @@ ignores
 \end_inset
 
  other evidence in making the decision as to whether two words might go
- into the same grammatical cateogory.
+ into the same grammatical category.
  Worse, if the clustering problem is posed naively, then it has a naive
  and incorrect answer: each word can belong to only one class.
  This ignores the fact that a word might belong to multiple classes 
@@ -13213,7 +13218,7 @@ meaning
 
  of an otherwise flat description of the extensional and intensional qualities
  of a set.
- To create a brige to the statistical tools available here, one might say
+ To create a bridge to the statistical tools available here, one might say
  that an intensional or an extensional description of a class is a flat,
  unweighted collection of features or members.
  In fact, some features or members are more important than others, so that
@@ -13261,7 +13266,7 @@ robins
 
  are more prototypical of birds simply because cultural English speakers
  (Americans, Europeans) see robins more frequently than penguins, and so
- are aculturated to this prototype.
+ are acculturated to this prototype.
  The MI approach means that robins are more prototypical of birds because
  they have a high MI, when correlating intensional and extensional qualities.
  That is, a large value for 
@@ -13288,7 +13293,7 @@ where the individual MI score was computed over all pairs (thing, feature)
 \end_layout
 
 \begin_layout Standard
-What determines a category itself? Wikipedia summerizes this aptly:
+What determines a category itself? Wikipedia summarizes this aptly:
 \end_layout
 
 \begin_layout Itemize
@@ -13317,7 +13322,7 @@ member
 \begin_inset Quotes erd
 \end_inset
 
- to be a word, this suggests that a grammatical category is a coolection
+ to be a word, this suggests that a grammatical category is a collection
  of words that share many disjuncts (large overlap, large cosine similarity),
  while minimizing the disjuncts shared with other words (large MI).
 \end_layout
@@ -13350,8 +13355,8 @@ Entropic Similarity
 \end_layout
 
 \begin_layout Standard
-A similarity between two words, taking the form of the symmetric mutal informati
-on between them, can be defined by working with the matrix product.
+A similarity between two words, taking the form of the symmetric mutual
+ information between them, can be defined by working with the matrix product.
  Let 
 \begin_inset Formula $M=\left[p\left(w,d\right)\right]$
 \end_inset
@@ -13422,7 +13427,7 @@ entropic similarity
 \begin_inset Quotes erd
 \end_inset
 
- here, to avoid confuision with other uses of the words 
+ here, to avoid confusion with other uses of the words 
 \begin_inset Quotes eld
 \end_inset
 
@@ -13438,7 +13443,7 @@ Stuff
 \end_layout
 
 \begin_layout Standard
-Ths redoes the graphs from section 
+This redoes the graphs from section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "subsec:Disjunct-Cosine-Similarity"
@@ -13449,7 +13454,7 @@ reference "subsec:Disjunct-Cosine-Similarity"
 \end_layout
 
 \begin_layout Standard
-First graph: top most frequently-obseved 640 words, all pairs, for a total
+First graph: top most frequently-observed 640 words, all pairs, for a total
  of N(N-1)/2=204480 pairs; all pairs shown.
  The fit is eye-balled
 \end_layout
@@ -13482,7 +13487,7 @@ See the `(mksims top-items)` and `sim-dj-cosine` in disjunct-stats.scm file.
 \end_layout
 
 \begin_layout Standard
-and next we have the ecntropy score.
+and next we have the entropy score.
 \end_layout
 
 \begin_layout Standard
@@ -13547,10 +13552,10 @@ Both graphs show the same data, but rotated by 90 degrees.
 \end_layout
 
 \begin_layout Standard
-Noisey.
+Noisy.
  Clearly there is a linear relationship between the log of the cosine similarity
 , and the MI.
- But its very noisey.
+ But its very noisy.
 \end_layout
 
 \begin_layout Standard
@@ -13597,14 +13602,14 @@ reference "subsec:Disjunct-Cosine-Similarity"
 
  It even uses the curve fit.
  This dataset is a good bit larger, but it also does not have the high-observati
-on-count cuttoff.
+on-count cutoff.
  Thus, presumably, there are some disjuncts with very low observation counts
  that are polluting the data, and distorting what was previously a very
  nice graph.
 \end_layout
 
 \begin_layout Standard
-All very intersting, I think.
+All very interesting, I think.
 \end_layout
 
 \begin_layout Section
@@ -13613,7 +13618,7 @@ Other Similarity Scores
 \end_layout
 
 \begin_layout Standard
-There are a number of diferrent ways of juding similarity between a pair
+There are a number of different ways of judging similarity between a pair
  of words.
  It seems that these are limited only by the imagination.
  A variety of different similarity measures are given below.
@@ -14193,7 +14198,7 @@ Symmetric Mutual Information
 \end_layout
 
 \begin_layout Standard
-The symmetric mutual information, and related quantities, can be considiered
+The symmetric mutual information, and related quantities, can be considered
  by working with the symmetric matrix 
 \begin_inset Formula $Q$
 \end_inset
@@ -14233,7 +14238,7 @@ independent
 \end_inset
 
 .
- Looked at this way, the cannonical mutual information would then be 
+ Looked at this way, the canonical mutual information would then be 
 \begin_inset Formula 
 \[
 \mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{dot}(w_{1},w_{2})\mbox{dot}(*,*)}{\mbox{dot}(w_{1},*)\mbox{dot}(*,w_{2})}
