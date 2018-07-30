@@ -441,16 +441,7 @@
 			(set! start-time now)
 			(set! run-time run))))
 
-; ---------------------------------------------------------------------
-(define-public (observe-text plain-text)
-"
- observe-text -- wrapper to call observe-text-mode.
- Allows backwards compatibility by calling the function with the default 
- observing mode (lg) and number of link-grammar parses to observe (24).
-"
-	(observe-text-mode plain-text "lg" 24))
-
-; ---------------------------------------------------------------------
+; --------------------------------------------------------------------
 (define-public (observe-text-mode plain-text observe-mode count-reach)
 "
  observe-text -- update word and word-pair counts by observing raw text.
@@ -467,6 +458,29 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
+	; try-catch wrapper around the counters. Due to a buggy RelEx
+	; (see documentation for `word-inst-get-word`), the function
+	; `update-clique-pair-counts` might throw.  If it does throw,
+	; then avoid doing any counting at all for this sentence.
+	;
+	; Note: update-clique-pair-counts commented out. If you want this,
+	; then uncomment it, and adjust the length.
+	; Note: update-disjunct-counts commented out. It generates some
+	; data, but none of it will be interesting to most people.
+	(define (update-counts sent)
+		(catch 'wrong-type-arg
+			(lambda () (begin
+				; 6 == max distance between words to count.
+				; See docs above for explanation.
+				; (update-clique-pair-counts sent 6 #f)
+				(update-word-counts sent)
+				(update-lg-link-counts sent)
+				; If you uncomment this, be sure to also uncomment
+				; LgParseLink below, because LgParseMinimal is not enough.
+				; (update-disjunct-counts sent)
+			))
+			(lambda (key . args) #f)))
+
 	; Count the atoms in the sentence, according to the counting method
 	; passed as argument, then delete the sentence.
 	(define (process-sent SENT cnt-mode win-size)
