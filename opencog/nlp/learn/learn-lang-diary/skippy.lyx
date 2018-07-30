@@ -1411,6 +1411,13 @@ Typical choices for the dimension
 
 \begin_layout Section
 Similarities and Differences
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Similarities-and-Differences"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3242,7 +3249,7 @@ Other facorizations, including NTN, also
 \end_layout
 
 \begin_layout Standard
-also I-RBM
+also I-RBM (Restricted Boltzmann Machine)
 \end_layout
 
 \begin_layout Standard
@@ -3690,7 +3697,83 @@ viz
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection
+Gradient Descent vs.
+ Graph Algorithms
+\end_layout
+
+\begin_layout Standard
+The goal of the matrix factorization, illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+, is to not only obtain the three factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+, but to obtain them such that the first and last components contain essentially
+ no bipartite cliques, and all of the structural complexity is limited to
+ 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+.
+ A naive gradient descent does not seem to acheive this.
+ The situation is analogous to that discussed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Similarities-and-Differences"
+
+\end_inset
+
+: naive gradient descent, such as SkipGram/CBOW, do not provide the needed
+ grammatical graph structure.
+ By contrast, the MST parsing algorithm does provide that structure.
+ 
+\end_layout
+
+\begin_layout Standard
+The gradient descent methods do provide one advantage: they provide a means
+ of global optimization; by contrast, graph techniques, such as MST, work
+ to identify local graph structure.
+ The goal of this section is to use this insight, and provide a graph-based
+ technique to obtain the factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+, as graphs, rather than matricies.
+ It is the graph strcture that is the most important; the actual numerical
+ values associated with each edge are far less important.
+ They are nice, and useful for improviing accuracy and parse ranking, but
+ provide little insight in and of themselves.
+ The graph structure dominates.
+\end_layout
+
+\begin_layout Standard
+TODO: work all this out in detail.
+ This section, and the rest, are all under construction.
+\end_layout
+
+\begin_layout Subsection
 Information Maximizing Matrix Factorization
 \end_layout
 
