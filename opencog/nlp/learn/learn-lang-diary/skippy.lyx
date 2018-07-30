@@ -2052,9 +2052,10 @@ key "Yuret1998"
 \end_layout
 
 \begin_layout Itemize
-Apply a thresholding, and discard all edges that have a weak, low quality
+Apply thresholding, and discard all edges that have a weak, low quality
  connection.
- 
+ The result may be a disconnected graph, or a multiply-connected graph.
+ A fixed threshold might reject too much, or it might reject too little.
 \end_layout
 
 \begin_layout Itemize
@@ -2093,6 +2094,21 @@ jigsaw puzzle pieces
  Nor is it strictly necessary that the parse graph be a tree: it is OK if
  it has cycles, since these cycles often indicate important grammatical
  relations.
+\end_layout
+
+\begin_layout Standard
+A spanning-tree algorithm can be thought of as a kind-of thresholding algorithm,
+ but with a local, dynamically-adjustable threshold.
+ When a word has very strong connections to all other words, one might consider
+ dynamically adjusting a threshold to a high value; when a word has only
+ weak connections to all other words, one might dynamically adjust the threshold
+ to a low value.
+ This type of dynamically-adjustable thresholding can be confusing to define
+ and difficult to optimize; by contrast, the spanning tree is simple and
+ direct.
+ At an abstract level, though, the differences can be imagined to be less
+ than they first appear.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -4016,8 +4032,33 @@ graph algorithms
 \end_layout
 
 \begin_layout Standard
-The greedy assignment of a vector to a cluster can be seen as a form of
- a graph algorithm.
+The difference can be highlighted by noticing that cluster assignment is
+ essentially a form of greedy algorithm: One looks for the best-fitting
+ cluster, and accepts that first, effectively ignoring all of the other
+ clusters.
+ The relationship of word-to-cluster is explicit and overt; by contrast,
+ the matrix factorization is only implicit: a cluster relationship exists
+ whenever a matrix element is large.
+\end_layout
+
+\begin_layout Standard
+In the current state of the art, the gradient-descent algorithms tend to
+ outperform the clustering algorithms.
+ This may be due to the clustering algos being 
+\begin_inset Quotes eld
+\end_inset
+
+too greedy
+\begin_inset Quotes erd
+\end_inset
+
+, applying too strong a discrimination.
+ This may also be due to the way that compute cycles are arranged in arriving
+ at the results.
+ One advantage of the clustering approach is that, since it makes the graph
+ structure explicit, it provides a mechanism for controlling the shape of
+ the graph.
+ This is exhibited below.
 \end_layout
 
 \begin_layout Subsection
