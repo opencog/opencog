@@ -63,7 +63,7 @@ set logscale y
 set title "Similarity from Disjuncts"
 set xlabel "Entropic Similarity"
 set ylabel "Cosine Similarity"
-plot "ranked-dj-640-mi-sims.dat" using 3:2 with lines linewidth 5 title ""
+plot "ranked-dj-640-mi-sims.dat" using 3:2 with lines title ""
 
 #################################################
 # Used to generate the binned average observations
