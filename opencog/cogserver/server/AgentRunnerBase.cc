@@ -40,7 +40,7 @@ struct equal_to_id: public std::binary_function<AgentPtr, const std::string&, bo
 };
 
 AgentRunnerBase::AgentRunnerBase(std::string runner_name): name(runner_name),
-        cycle_count(1)
+        sat(nullptr), cycle_count(1)
 {
 }
 
@@ -73,7 +73,7 @@ void AgentRunnerBase::remove_agent(AgentPtr a)
     AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), a);
     if (ai != agents.end()) {
         agents.erase(ai);
-        cogserver().systemActivityTable().clearActivity(a);
+        sat->clearActivity(a);
         a->stop();
         logger().debug("[CogServer::%s] stopped agent \"%s\"", name.c_str(),
             a->to_string().c_str());
@@ -87,8 +87,8 @@ void AgentRunnerBase::remove_all_agents(const std::string& id)
         std::partition(agents.begin(), agents.end(),
                        std::bind(equal_to_id(), std::placeholders::_1, id));
 
-    std::for_each(last, agents.end(), [] (AgentPtr &a) {
-        cogserver().systemActivityTable().clearActivity(a);
+    std::for_each(last, agents.end(), [this] (AgentPtr &a) {
+        this->sat->clearActivity(a);
         a->stop();
     });
 
@@ -102,7 +102,7 @@ void AgentRunnerBase::remove_all_agents(const std::string& id)
 void AgentRunnerBase::remove_all_agents()
 {
     for (auto &a : agents) {
-        cogserver().systemActivityTable().clearActivity(a);
+        sat->clearActivity(a);
         a->stop();
     }
     agents.clear();
@@ -146,7 +146,7 @@ void AgentRunnerBase::run_agent(AgentPtr a)
             a->classinfo().id.c_str(), elapsed_secs, mem_used, atoms_used,
             cycle_count);
 
-    cogserver().systemActivityTable().logActivity(a, elapsed, mem_used,
+    sat->logActivity(a, elapsed, mem_used,
         atoms_used);
 }
 
