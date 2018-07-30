@@ -83,6 +83,20 @@ This document attempts to compare and contrast the various ways in which
  
 \end_layout
 
+\begin_layout Abstract
+More generally it tries to develop and contrast the differences between
+ graphical methods and gradient-descent methods in deeper layers of language
+ abstraction.
+ In particular it begins to compare the extraction of semantic meaning using
+ gradient descent algorithms, such as Low Rank Matrix Approximations, to
+ graphical factorizations driven by information-theoretic metrics.
+\end_layout
+
+\begin_layout Abstract
+This is a work in progress.
+ It's approximately half-done, I think.
+\end_layout
+
 \begin_layout Section
 Introduction
 \end_layout
