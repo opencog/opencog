@@ -944,7 +944,7 @@ Pairs The total number of distinct word-pairs observed.
 \end_layout
 
 \begin_layout Description
-Obsn's The total number of observations of these pairs.
+Obs'ns The total number of observations of these pairs.
  Most pairs will be observed more than once.
  Distributions are typically Zipfian.
 \end_layout
@@ -1023,7 +1023,7 @@ Pairs
 \begin_inset Text
 
 \begin_layout Plain Layout
-Obsn's
+Obs'ns
 \end_layout
 
 \end_inset

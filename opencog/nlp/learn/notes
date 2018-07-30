@@ -14595,6 +14595,10 @@ fuckig apt-get fucked me again. Fixed in pull req #1846
 (cra 'fetch-pairs)
 (load "/tmp/fail.scm")
 (rebatch-all-pair-mi cra)
+Support: found num left= 137078 num right= 18265271 in 42 secs
+Total count N(*,*) = 47444396.0 = 47444396.0
+Going to do column and row subtotals
+Finished left entropy subtotals in 427085 secs
 
 xxxxxxxxxxxxxxxxxxxx <<< here
 
