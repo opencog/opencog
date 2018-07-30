@@ -2791,9 +2791,9 @@ where
 
  and to perform the matrix factorization
 \begin_inset Formula 
-\[
-p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
-\]
+\begin{equation}
+p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)\label{eq:factorize}
+\end{equation}
 
 \end_inset
 
@@ -2814,8 +2814,8 @@ Ideally, the size of the set
 \begin_inset Formula $G$
 \end_inset
 
- having only one element, total, the factorization would results in the
- outer product, or tensor product, of two vectors.
+ having only one element, total, the factorization is the same as the outer
+ product, or tensor product, of two vectors.
 \end_layout
 
 \begin_layout Standard
@@ -2837,6 +2837,73 @@ In the following, the prime-superscripts are dropped, and the probabilities
 .
  Which is which should be apparent from context.
  
+\end_layout
+
+\begin_layout Subsubsection
+Clustering
+\end_layout
+
+\begin_layout Standard
+A side effect of the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ is that it is a 
+\emph on
+de facto
+\emph default
+ form of clustering.
+ Whenever one has 
+\begin_inset Formula $p(w,g)>0$
+\end_inset
+
+, one can effectively say 
+\begin_inset Quotes eld
+\end_inset
+
+word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been assigned to cluster 
+\begin_inset Formula $g$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, solving eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ can be seen as an alternative to deploying a clustering algorithm to assign
+ words to word classes.
+\end_layout
+
+\begin_layout Standard
+One important distinction between traditional clustering and matrix factorizatio
+n is that traditional clustering algorithms naively assign a word to only
+ a single cluster, whereas here, one can have multiple 
+\begin_inset Formula $p(w,g)>0$
+\end_inset
+
+.
+ One can partly overcome this difficulty with traditional clustering by
+ decomposing the input vector into two: a component parallel to the cluster
+ centroid, and a perpendicular component, and assigning the parallel component
+ to the cluster, while leaving behind the perpendicular component to be
+ assigned to other clusters.
+ It may be possible to increase the quality by making the decomposition
+ can be less strict about parallelism: one need merge only the component
+ within some angle (or distance) of the cluster centroid.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2964,6 +3031,20 @@ Factorizations of this sort are not uncommon in machine learning.
  -- it is the rank of the matrices in the factorization.
  The factorization is only an approximation to the original data; thus,
  one says LRMA and not LRMF.
+\end_layout
+
+\begin_layout Standard
+Closely related is the concept of non-negative matrix factorization (NMF
+ or NNMF),
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-NNMF"
+
+\end_inset
+
+ where the focus is on keeping matrix entries positive, as would be appropriate
+ for probabilities.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -3276,6 +3357,10 @@ also I-RBM (Restricted Boltzmann Machine)
 
 \begin_layout Standard
 also I-AutoRec
+\end_layout
+
+\begin_layout Subsection
+Clustering and Other Properties
 \end_layout
 
 \begin_layout Subsection
