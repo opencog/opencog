@@ -3201,15 +3201,6 @@ n is that traditional clustering algorithms naively assign a word to only
  be discarded as noise, or treated as an anomaly awaiting additional data.
 \end_layout
 
-\begin_layout Subsubsection
-Clustering as a graph algorithm
-\end_layout
-
-\begin_layout Standard
-The greedy assignment of a vector to a cluster can be seen as a form of
- a graph algorithm.
-\end_layout
-
 \begin_layout Subsection
 Low Rank Matrix Approximation
 \end_layout
@@ -3550,10 +3541,6 @@ also I-RBM (Restricted Boltzmann Machine)
 
 \begin_layout Standard
 also I-AutoRec
-\end_layout
-
-\begin_layout Subsection
-Clustering and Other Properties
 \end_layout
 
 \begin_layout Subsection
@@ -3996,6 +3983,41 @@ viz
 \emph default
 ., that the graph contains bipartite cliques.
  
+\end_layout
+
+\begin_layout Subsection
+Graph Algorithms vs.
+ Gradient Descent
+\end_layout
+
+\begin_layout Standard
+In the previous section, the Word2Vec style algorithms were characterized
+ as 
+\begin_inset Quotes eld
+\end_inset
+
+gradient descent algorithms
+\begin_inset Quotes erd
+\end_inset
+
+, and contrasted with 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithms
+\begin_inset Quotes erd
+\end_inset
+
+ that explicitly and overtly focus on the graphical relationships between
+ items.
+ The same contrast can be made here: clustering is a form of a graph algorithm,
+ whereas the matrix factorization algorithms are all driven by a form of
+ gradient descent.
+\end_layout
+
+\begin_layout Standard
+The greedy assignment of a vector to a cluster can be seen as a form of
+ a graph algorithm.
 \end_layout
 
 \begin_layout Subsection
