@@ -69,6 +69,35 @@ plot "ranked-dj-640-mi-sims.dat" using 3:2 with lines linewidth 5 title ""
 # Used to generate the binned average observations
 #
 set term postscript eps enhanced color 28
+set out 'scatter-dj-cos-mi-dots.eps'
+set xrange [1e-6:1]
+set logscale x
+set format x "10^{%L}"
+set yrange [-15:10]
+set title "Similarity from Disjuncts"
+set ylabel "Entropic Similarity"
+set xlabel "Cosine"
+set style data points
+plot "ranked-dj-cos-sims.dat" using 2:3 with dots title ""
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'scatter-dj-mi-cos-dots.eps'
+set xrange [-15:10]
+set yrange [1e-6:1]
+set format y "10^{%L}"
+set logscale y
+set title "Similarity from Disjuncts"
+set xlabel "Entropic Similarity"
+set ylabel "Cosine Similarity"
+plot "ranked-dj-cos-sims.dat" using 3:2 with dots title ""
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
 set out 'ranked-dj-mi.eps'
 set logscale x
 set format x "10^{%L}"

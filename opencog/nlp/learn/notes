@@ -14599,6 +14599,7 @@ Support: found num left= 137078 num right= 18265271 in 42 secs
 Total count N(*,*) = 47444396.0 = 47444396.0
 Going to do column and row subtotals
 Finished left entropy subtotals in 427085 secs
+Finished right entropy subtotals in 7285 secs
 
 xxxxxxxxxxxxxxxxxxxx <<< here
 
