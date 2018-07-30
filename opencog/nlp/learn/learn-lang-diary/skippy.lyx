@@ -3853,6 +3853,13 @@ height "1pt"
 
 \begin_layout Subsubsection
 Factorization in Link Grammar
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Factorization-in-Link"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4099,36 +4106,38 @@ reference "fig:Factorization"
 \end_inset
 
  values to zero as possible.
+ In keeping with the general trend: the goal here is to set as many matrix
+ entries to zero as possible, thereby getting the greatest amount of data
+ compression as possible.
+ Yet, fidelity has to be maintained: just the right entries should be non-zero.
 \end_layout
 
 \begin_layout Standard
-The gradient descent methods do provide one advantage: they provide a means
- of global optimization; by contrast, graph techniques, such as MST, work
- to identify local graph structure.
- The goal of this section is to use this insight, and provide a graph-based
- technique to obtain the factors 
-\begin_inset Formula $p\left(w,g\right)$
-\end_inset
-
-, 
-\begin_inset Formula $M\left(g,g^{\prime}\right)$
-\end_inset
-
- and 
-\begin_inset Formula $p\left(g^{\prime},d\right)$
-\end_inset
-
-, as graphs, rather than matrices.
- It is the graph structure that is the most important; the actual numerical
- values associated with each edge are far less important.
+The point here is that it is the graph structure that is the most important;
+ the actual numerical values associated with each edge are far less important.
  They are nice, and useful for improving accuracy and parse ranking, but
  provide little insight in and of themselves.
  The graph structure dominates.
+ This is made clear in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Factorization-in-Link"
+
+\end_inset
+
+, where a huge amount of progress can be made by means of manual factorization,
+ and setting all edge weights to essentially just one value: present or
+ absent.
+ 
 \end_layout
 
 \begin_layout Standard
-TODO: work all this out in detail.
- This section, and the rest, are all under construction.
+Greedy clustering essentially provides a mechanism for controlling this
+ structure: it inherently limits the number of grammatical classes that
+ a word can belong to.
+ It dis-incentivizes the partitioning of a word into a large number of grammatic
+al categories.
+ 
 \end_layout
 
 \begin_layout Subsection
