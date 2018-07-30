@@ -156,18 +156,20 @@ Version 4:
 \end_layout
 
 \begin_layout Abstract
-Extract from the language-learning diary, reporting on an initial dataset
- containing connector sets.
- This is a revised (6 August 2017) version of the original 11 May 2017 report.
- It re-analyzes and expands the original analysis on a newer, larger dataset.
- This was motivated in part due to several errors found and fixed in the
- processing pipeline in late June/early July.
- In retrospect, it appears these errors mostly did not affect the earlier
- analysis, as the most significant error was introduced after the inital
- analysis was made.
- None-the-less, it seemed prudent to redo the report.
- Sadly, several months were lost in the confusion, requiring large datasets
- to be discarded.
+This report reviews the statistical distributions of disjuncts and disjunct
+ vectors obtained from a large statistical sampling of MST-parsed sentences.
+ The goal of this report is to survey the general statistical landscape
+ of these structures, with the aim of using these as input data to graph
+ algorithms that can extract grammatical classes and perform word-sense
+ disambiguation.
+\end_layout
+
+\begin_layout Abstract
+This is a revised version of earlier reports.
+ It provides a better overview, and provides additional results.
+ This is not yet the final version; I'm still waiting for additional computation
+s to complete.
+ 
 \end_layout
 
 \begin_layout Section
@@ -218,7 +220,8 @@ important
  sequences of words, but where the route to the creation of a grammar is
  less clear.
  The algorithm used to extract disjuncts is also completely different from
- the neural-net techniques.
+ the neural-net techniques; it is a graph technique, as opposed to a gradient-de
+scent technique.
  Despite this, there are exploitable conceptual similarities in building
  models of natural language.
 \begin_inset CommandInset citation
@@ -230,6 +233,21 @@ key "Vepstas2018skippy"
  The goal of this report is to provide a fairly detailed statistical analysis
  of the distribution of disjuncts, thereby characterizing the structure
  of natural language at a grammatical, syntactic level.
+\end_layout
+
+\begin_layout Standard
+The need for this report is to characterize the structure of the disjunct
+ dataset to a sufficient degree that it can be used as input to other graph-base
+d methods to extract grammatical classes and to perform word-sense disambiguatio
+n.
+ These techniques and algorithms are presented in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
