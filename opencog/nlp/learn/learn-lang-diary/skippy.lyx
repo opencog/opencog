@@ -83,7 +83,21 @@ This document attempts to compare and contrast the various ways in which
  
 \end_layout
 
-\begin_layout Section*
+\begin_layout Abstract
+More generally it tries to develop and contrast the differences between
+ graphical methods and gradient-descent methods in deeper layers of language
+ abstraction.
+ In particular it begins to compare the extraction of semantic meaning using
+ gradient descent algorithms, such as Low Rank Matrix Approximations, to
+ graphical factorizations driven by information-theoretic metrics.
+\end_layout
+
+\begin_layout Abstract
+This is a work in progress.
+ It's approximately half-done, I think.
+\end_layout
+
+\begin_layout Section
 Introduction
 \end_layout
 
@@ -112,11 +126,11 @@ key "Mikolov2013,Mikolov2013a"
 \end_inset
 
  models are given, including AdaGram.
- It is generally assumed that the reader is generally familair with various
+ It is generally assumed that the reader is generally familiar with various
  concepts employed in the OpenCog language-learning project.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Link Grammar
 \end_layout
 
@@ -140,7 +154,7 @@ The disjunct is the expression to the right of the colon.
  The minus and plus signs indicate whether the connectors link to the left
  or to the right.
  The number of such connectors is variable, depending on the disjunct.
- The ampersand serves as a reminder that, uring parsing, all connectors
+ The ampersand serves as a reminder that, during parsing, all connectors
  must be satisfied; that is, the connectors are conjoined.
  A given word can have multiple disjuncts associated with it, these are
  disjoined from one-another, thus the name 
@@ -378,12 +392,12 @@ The correct conceptual model for the observational data is that of a large
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Statistical Models
 \end_layout
 
 \begin_layout Standard
-The task of langauge learning is commonly taken to be one of estimating
+The task of language learning is commonly taken to be one of estimating
  the probability of a text, consisting of a sequence of words.
  One common model assumes that the probability of the text can be approximated
  by the product of the conditional probabilities of individual words, and
@@ -411,7 +425,7 @@ Here, the text is presumed to consist of
 \begin_inset Formula $w_{t}$
 \end_inset
 
- occuring in sequential order.
+ occurring in sequential order.
  The notation 
 \begin_inset Formula $w_{i}^{n}$
 \end_inset
@@ -503,7 +517,7 @@ of observing a word
 \end_inset
 
  surrounding words, to the left and right, in the text.
- The probability of the text is then modelled by
+ The probability of the text is then modeled by
 \begin_inset Formula 
 \[
 \widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
@@ -513,15 +527,15 @@ of observing a word
 
 The smaller window does make the computation more tractable.
  Here, the window is written in a manifestly symmetric fashion; in general,
- one might poner a window with a different number of words to the left or
- right.
+ one might ponder a window with a different number of words to the left
+ or right.
 \end_layout
 
 \begin_layout Standard
-The above contains another key simplifcation: the total probability is assumed
- to factor into the product of single-word probabilities, and each single-word
- probability is translationally invariant; that is, the probability has
- no explicit dependence on the index 
+The above contains another key simplification: the total probability is
+ assumed to factor into the product of single-word probabilities, and each
+ single-word probability is translationally invariant; that is, the probability
+ has no explicit dependence on the index 
 \begin_inset Formula $t$
 \end_inset
 
@@ -560,7 +574,7 @@ all human language
  appropriate at this level.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 N-Gram Model
 \end_layout
 
@@ -641,7 +655,7 @@ The model can be made computationally tractable with several variants.
  The details are of no particular concern to the rest of this essay.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Model Building
 \end_layout
 
@@ -661,7 +675,7 @@ a priori
  fashion, that some of these probabilities are zero, or that they are (approxima
 tely) equal to one-another, or that they can be grouped or summed in some
  other ways.
- More correctly, one hypothesizes that the vast majority of the probabilites
+ More correctly, one hypothesizes that the vast majority of the probabilities
  are either zero or fall into classes where they are equal: say, all but
  one in ten-thousand, or thereabouts, is the 
 \emph on
@@ -687,7 +701,7 @@ There is a fairly rich variety of models.
  SkipGram models.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 CBOW
 \end_layout
 
@@ -827,7 +841,7 @@ projections
 \end_inset
 
 .
- (The notation of the lower-case greek letter 
+ (The notation of the lower-case Greek letter 
 \begin_inset Formula $\pi$
 \end_inset
 
@@ -864,7 +878,7 @@ unproject
 \begin_inset Quotes erd
 \end_inset
 
- back out, which is conventially done with a different projection matrix
+ back out, which is conventionally done with a different projection matrix
  
 \begin_inset Formula $\pi^{\prime}$
 \end_inset
@@ -968,8 +982,8 @@ input
 \end_layout
 
 \begin_layout Standard
-The CBOW model then uses the Bolztmann distribution obtained from a certain
- paritition function, sometimes called the 
+The CBOW model then uses the Boltzmann distribution obtained from a certain
+ partition function, sometimes called the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1009,7 +1023,7 @@ The sum in the numerator runs over all words in the input set
 \end_layout
 
 \begin_layout Standard
-Computation of the matrixes 
+Computation of the matrices 
 \begin_inset Formula $\pi$
 \end_inset
 
@@ -1017,8 +1031,8 @@ Computation of the matrixes
 \begin_inset Formula $\pi^{\prime}$
 \end_inset
 
- is done by explictly expanding them in the expression above, and then performin
-g hill-climbing, attempting to maximize the probability.
+ is done by explicitly expanding them in the expression above, and then
+ performing hill-climbing, attempting to maximize the probability.
  To provide a nicer landscape for hill-climbing, it is usually done on the
  
 \begin_inset Quotes eld
@@ -1058,7 +1072,7 @@ By convention,
 \begin_inset Formula $\pi^{\prime}$
 \end_inset
 
- are taken to be two distinct projection matrixes.
+ are taken to be two distinct projection matrices.
  I do not currently know of any theoretical reason nor experimental result
  why this should be done, instead of taking 
 \begin_inset Formula $\pi=\pi^{\prime}$
@@ -1067,7 +1081,7 @@ By convention,
 .
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 SkipGram
 \end_layout
 
@@ -1120,7 +1134,7 @@ That is, the word
 \end_layout
 
 \begin_layout Standard
-As in the CBOW model, the projection matrixes 
+As in the CBOW model, the projection matrices 
 \begin_inset Formula $\pi$
 \end_inset
 
@@ -1129,8 +1143,12 @@ As in the CBOW model, the projection matrixes
 \end_inset
 
  are computed by means of hill-climbing the loss-function.
- The important contribution of of Mikolov et al.
- is not only to describe this model, but also to propse several algorithmic
+ The important contribution of of Mikolov 
+\emph on
+et al
+\emph default
+.
+ is not only to describe this model, but also to propose several algorithmic
  variations to minimize the RAM footprint, and to improve the speed of convergen
 ce.
  
@@ -1147,7 +1165,7 @@ neural net
 
  models, but this is perhaps slightly misleading, as neither make use of
  the sigmoid function that is characteristic of neural nets.
- Given that the charachteristic commonality is that the probabilities are
+ Given that the characteristic commonality is that the probabilities are
  obtained by hill-climbing, it seems more appropriate to simply call these
  
 \begin_inset Quotes eld
@@ -1161,12 +1179,12 @@ deep learning
  The distinction is made more clear in the next section.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Perceptrons as Neural Nets 
 \end_layout
 
 \begin_layout Standard
-The neural net model propsed by Bengio
+The neural net model proposed by Bengio
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bengio2003"
@@ -1409,20 +1427,27 @@ Typical choices for the dimension
  does a minimal amount of, if any at all, of dimensional reduction.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Similarities and Differences
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Similarities-and-Differences"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 On the face of it, the description given for Link Grammar seems to bear
- no resemblance to that of the descriptiion of probabilistic neural net
- models, other than to invoke vectors in some way.
+ no resemblance to that of the description of probabilistic neural net models,
+ other than to invoke vectors in some way.
  The descriptions of language appear to be completely different.
  There are similarities; they are obscured both by the notation, and the
  viewpoint.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjuncts as Context
 \end_layout
 
@@ -1607,12 +1632,12 @@ In fact, the disjunct notation can do more: it can also encode parse information
 \end_inset
 
  are just two notations for saying the same thing.
- But the disjunt can also do more: it effectively suggests that the index
+ But the disjunct can also do more: it effectively suggests that the index
  set can be used as parse information.
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Skip-Grams and Grammar
 \end_layout
 
@@ -1704,7 +1729,7 @@ ran
 \end_inset
 
 .
- Dependency grammars do not have any difficulty in arranging for the attachement
+ Dependency grammars do not have any difficulty in arranging for the attachment
  of the words 
 \begin_inset Quotes eld
 \end_inset
@@ -1727,8 +1752,8 @@ upset by the taunting
 \end_layout
 
 \begin_layout Standard
-Such long-distance attachements are problematic for CBOW or Skip-Grams,
- in several ways.
+Such long-distance attachments are problematic for CBOW or Skip-Grams, in
+ several ways.
  One is that the window 
 \begin_inset Formula $N$
 \end_inset
@@ -1819,8 +1844,8 @@ which also does not fit in an
 \end_inset
 
 .
- Long-distance attachements present a problem for the simpler, less sophisticate
-d deep-learning models.
+ Long-distance attachments present a problem for the simpler, less sophisticated
+ deep-learning models.
 \end_layout
 
 \begin_layout Standard
@@ -1888,7 +1913,7 @@ Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Training
 \end_layout
 
@@ -1931,12 +1956,12 @@ loss function
 ) built from (defined in terms of) the probabilities.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Model Building and Vector Representations
 \end_layout
 
 \begin_layout Standard
-The key driver behind the deep-learning models is the replacement of untractable
+The key driver behind the deep-learning models is the replacement of intractable
  probabilistic models by those that are computationally efficient.
  This is accomplished in several stages.
  First, the full-text probability function 
@@ -1948,7 +1973,7 @@ The key driver behind the deep-learning models is the replacement of untractable
 \end_inset
 
 .
- The former probability function is extremely high-diemnsional, whereas
+ The former probability function is extremely high-dimensional, whereas
  the later is less so.
  Its still computationally infeasible, so there are two directions one can
  go in.
@@ -2007,7 +2032,7 @@ The bag, however, loses syntactic and semantic structure, and so goes to
 \end_layout
 
 \begin_layout Standard
-The N-gram model is still computationally untractable for 
+The N-gram model is still computationally intractable for 
 \begin_inset Formula $N\ge3$
 \end_inset
 
@@ -2044,7 +2069,7 @@ hidden layer
 \end_inset
 
  vector space.
- This projection can be writen as 
+ This projection can be written as 
 \begin_inset Formula $\vec{v}_{I}=\left[\pi\oplus\cdots\oplus\pi\right]\left(\hat{e}_{t-c}\times\hat{e}_{t-c+1}\times\cdots\times\hat{e}_{t-c}\right)$
 \end_inset
 
@@ -2065,7 +2090,7 @@ hidden layer
 
 \end_inset
 
-and so the off-block-diagonal entries are explictly assumed to be zero,
+and so the off-block-diagonal entries are explicitly assumed to be zero,
  as an 
 \emph on
 a priori
@@ -2154,15 +2179,25 @@ where the matrix
 \begin_inset Formula $S$
 \end_inset
 
- is a concatenation of identity matrixes.
- 
+ is a concatenation of identity matrices.
 \begin_inset Formula 
 \[
-S=\begin{bmatrix}1 & 0 &  &  & 1 & 0 &  &  &  & 1 & 0\\
-0 & 1 &  &  & 0 & 1 &  &  & \cdots & 0 & 1\\
- &  & \ddots &  &  &  & \ddots &  & \cdots &  &  & \ddots\\
- &  &  & 1 &  &  &  & 1 &  &  &  &  & 1
-\end{bmatrix}
+S=\left[\left|\begin{array}{cccc}
+1 & 0\\
+0 & 1\\
+ &  & \ddots\\
+ &  &  & 1
+\end{array}\right|\left|\begin{array}{cccc}
+1 & 0\\
+0 & 1\\
+ &  & \ddots\\
+ &  &  & 1
+\end{array}\right|\cdots\left|\begin{array}{cccc}
+1 & 0\\
+0 & 1\\
+ &  & \ddots\\
+ &  &  & 1
+\end{array}\right|\right]
 \]
 
 \end_inset
@@ -2267,15 +2302,15 @@ This exposes the real question: just how meaningful are the CBOW/SkipGram
 \begin_inset Quotes eld
 \end_inset
 
-losts of zero entries
+lots of zero entries
 \begin_inset Quotes erd
 \end_inset
 
 , but distribute them in a more accurate way?
 \end_layout
 
-\begin_layout Subsection*
-Disjunct Vectors
+\begin_layout Subsection
+Sparsity
 \end_layout
 
 \begin_layout Standard
@@ -2567,7 +2602,30 @@ Here, as always,
 \end_inset
 
 Notable in the above report is that the measured sparsity seems to be approximat
-ely langauge-independent, and dataset-size independent.
+ely language-independent, and dataset-size independent.
+\end_layout
+
+\begin_layout Standard
+Some of the observed sparsity is due to a lack of a sufficient number of
+ observations of language use.
+ Some of the sparsity is due to the fact that certain combinations really
+ are forbidden: one really cannot string words in arbitrary order.
+ What fraction of the sparsity is due to which effect is unclear.
+ Curiously, increasing the number of observations (en_cfive vs.
+ en_mtwo) increased the sparsity; but this could also be due to the much
+ larger vocabulary, which is now even more rarely observed.
+ A significant part of the expanded vocabulary includes Latin and other
+ foreign-language words, which, of necessity, will be very infrequent, and
+ when they occur, they will be in set phrases that readers are expected
+ to recognize.
+ The point here is that one cannot induce a foreign-language grammar from
+ a small number of set phrases embedded in English text.
+ A major portion of the expanded vocabulary are geographical place names,
+ product names and the like, which are also inherently sparse.
+ Unlike the foreign phrases, this does not mean that they are inflexible
+ in grammatical usage: one can use the name of a small town in a vast number
+ of sentences, even if the observed corpus uses it in only a few.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2579,7 +2637,95 @@ Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
  Its likely that both situations are the case.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsubsection
+Zipf's Law; Noise and Incompleteness
+\end_layout
+
+\begin_layout Standard
+Ignoring 
+\begin_inset Quotes eld
+\end_inset
+
+natural
+\begin_inset Quotes erd
+\end_inset
+
+ sparsity due to forbidden grammatical constructions, it is also the case
+ that the input dataset 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is both noisy and incomplete.
+ It is noisy because the sample size is not sufficiently large to adequately
+ approach a large-sample-size limit.
+ Reaching this limit is fundamentally impossible, from first principles,
+ if one assumes the Zipf distribution (as is the case here).
+ For a Zipf distribution, half the dataset necessarily consists of 
+\emph on
+hapax legomena
+\emph default
+.
+ Another 15% to 20% are 
+\emph on
+dis
+\emph default
+ and 
+\emph on
+tris legomena
+\emph default
+.
+ Increasing the number of observations do not change these ratios: the more
+ one observes, the more singular phenomena one will find.
+ Noise in the dataset is unavoidable.
+ Furthermore, implicit in this is that the dataset is necessarily incomplete:
+ if half the dataset consists of events that were observed just once; there
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+even more
+\begin_inset Quotes erd
+\end_inset
+
+ events, that were never observed.
+\end_layout
+
+\begin_layout Standard
+Consider, for example, the set of short sentences.
+ One might think that, if one was able to observe every sentence ever spoken
+ or written, one might eventually observe ever grammatically valid noun-verb
+ combination.
+ This is not so.
+ The sentence 
+\begin_inset Quotes eld
+\end_inset
+
+green ideas sleep furiously
+\begin_inset Quotes erd
+\end_inset
+
+ is quite common, as it is a stock example sentence in linguistics.
+ However, the similar sentence 
+\begin_inset Quotes eld
+\end_inset
+
+blue concepts wilt skillfully
+\begin_inset Quotes erd
+\end_inset
+
+ probably has never been written down before, until just now.
+ The law of large numbers does not apply to the Zipfian distribution.
+ The matrix 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is necessarily noisy and incomplete, no mater how large the sample size.
+ What is not clear is what fraction of the sparsity is due to the Zipf distribut
+ion, and what fraction is the sparsity is due to forbidden grammatical construct
+ions.
+\end_layout
+
+\begin_layout Subsection
 Word Classes
 \end_layout
 
@@ -2592,7 +2738,1193 @@ In operational practice, dependency grammars work with word-classes, and
  Each grammatical class is associated with a set of disjuncts that indicate
  how a word in that class can attach to words in other classes.
  This can be made notationally precise.
- There is a set of word-classes 
+\end_layout
+
+\begin_layout Standard
+Given a word 
+\begin_inset Formula $w$
+\end_inset
+
+ and the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ it was observed with, the goal is to classify it into some grammatical
+ category 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ The probability of this usage is 
+\begin_inset Formula $p(w,d,g)$
+\end_inset
+
+, and it should factorize into two distinct parts:
+\begin_inset Formula 
+\[
+p\left(w,d,g\right)=p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
+\]
+
+\end_inset
+
+None of the three probabilities above are known, a priori, and not even
+ the number of grammatical classes are known at the outset.
+ Instead, one has the observational data, that 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p\left(w,d\right)=p\left(w,d,*\right)=\sum_{g\in G}p\left(w,d,g\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $G$
+\end_inset
+
+ is the set of all grammatical classes.
+ The goal is then to determine the set 
+\begin_inset Formula $G$
+\end_inset
+
+ and to perform the matrix factorization
+\begin_inset Formula 
+\[
+p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
+\]
+
+\end_inset
+
+Ideally, the size of the set 
+\begin_inset Formula $G$
+\end_inset
+
+ is minimal, in some way, so that the matrices 
+\begin_inset Formula $p^{\prime}(w,g)$
+\end_inset
+
+ and 
+\begin_inset Formula $p^{\prime\prime}(g,d)$
+\end_inset
+
+ are of low rank.
+ In the extreme case of 
+\begin_inset Formula $G$
+\end_inset
+
+ having only one element, total, the factorization would results in the
+ outer product, or tensor product, of two vectors.
+\end_layout
+
+\begin_layout Standard
+In the following, the prime-superscripts are dropped, and the probabilities
+ are written as 
+\begin_inset Formula $p(w,g)$
+\end_inset
+
+ and 
+\begin_inset Formula $p(g,d)$
+\end_inset
+
+.
+ These are two different probabilities; which in turn are not the same as
+ 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ Which is which should be apparent from context.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Learning Word Senses
+\end_layout
+
+\begin_layout Standard
+The goal of the factorization is to capture semantic information along with
+ syntactic information.
+ Typically, any given 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ pair might belong to only one grammatical category.
+ So, for example, the pair
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	girl: the-;
+\end_layout
+
+\end_inset
+
+would be associated with 
+\begin_inset Formula $g=\mathtt{<common-count-nouns>}$
+\end_inset
+
+.
+ This captures the idea that girls, boys, houses and birds fall into the
+ same class, and require the use of a determiner when being directly referenced.
+ This is distinct from mass nouns, which do not require determiners.
+ This suggests that, to a large degree, the factorization might be approximately
+ block-diagonal, at least for the words; that 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ might usually have only one non-zero entry for a fixed word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+But this assumption should break down, the larger the size of the set 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ Suppose one had classes 
+\begin_inset Formula $g=\mathtt{<cutting-actions>}$
+\end_inset
+
+ and 
+\begin_inset Formula $g=\mathtt{<looking-verbs>}$
+\end_inset
+
+; the assignment of 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	saw: I- & wood+;
+\end_layout
+
+\end_inset
+
+would have non-zero probabilities for both 
+\begin_inset Formula $g$
+\end_inset
+
+'s.
+ For a large number of classes, one might expect to find many distinctions:
+ girls and boys differ from houses and birds, and one even might expect
+ to find sex differences: girls pout, and boys punch, while houses and birds
+ do neither.
+ 
+\end_layout
+
+\begin_layout Standard
+Put differently, one expects different classes to not only differentiate
+ crud syntactic structure, but also to indicate intensional properties.
+ Based on practical experience, we expect that most words would fall into
+ at most ten, almost always less than twenty different classes: this can
+ be seen by cracking open any dictionary, and counting the number of word
+ senses for a given word.
+ Likewise for intentional properties: birds sing, tweet and fly and a few
+ other verbs.
+ Houses mostly are, or get something (get built, get destroyed).
+ That is, we expect 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ to be sparse: there might be thousands (or more!) elements in 
+\begin_inset Formula $G$
+\end_inset
+
+, but no more than a few dozen 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, and often much less, will be non-zero, for a fixed word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Low Rank Matrix Approximation
+\end_layout
+
+\begin_layout Standard
+Factorizations of this sort are not uncommon in machine learning.
+ They generally go under the name of Low Rank Matrix Approximation (LRMA).
+ The rank refers to the size of the set 
+\begin_inset Formula $G$
+\end_inset
+
+ -- it is the rank of the matrices in the factorization.
+ The factorization is only an approximation to the original data; thus,
+ one says LRMA and not LRMF.
+\end_layout
+
+\begin_layout Standard
+A variety of techniques for performing this factorization have been developed.
+ A lightning review is given below.
+\end_layout
+
+\begin_layout Subsubsection
+Probabilistic Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Probabilistic matrix factorization (PMF) assumes that the observation counts
+ 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ are normally distributed (i.e.
+ are Gaussian).
+ The factorization is then obtained by minimizing the Frobenius norm of
+ the difference of the left and right sides.
+ That is, one defines the error matrix 
+\begin_inset Formula 
+\[
+E\left(w,d\right)=\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|
+\]
+
+\end_inset
+
+and from this, the objective function 
+\begin_inset Formula 
+\[
+U=\sum_{w,d}\left|E\left(w,d\right)\right|^{2}
+\]
+
+\end_inset
+
+After fixing the dimension 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+, one searches for the matrices 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+ that minimize the objective function.
+\end_layout
+
+\begin_layout Standard
+The primary drawbacks of probabilistic matrix factorization is that it does
+ not provide any guarantees or mechanism to keep the factor 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ sparse.
+ It's not built on information-theoretic infrastructure: it is not leveraging
+ the idea that the 
+\begin_inset Formula $p$
+\end_inset
+
+'s are probabilities; it does not consider the information content of the
+ problem.
+ From first principles, it would seem that information maximization would
+ be a desirable property.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Nuclear Norm
+\end_layout
+
+\begin_layout Standard
+Whenever the error matrix 
+\begin_inset Formula $E\left(w,d\right)$
+\end_inset
+
+ can be decomposed into a set 
+\begin_inset Formula $\left\{ \sigma_{i}\right\} $
+\end_inset
+
+ of singular values, then the trace of the decomposition is 
+\begin_inset Formula $t=\sum_{i}\sigma_{i}$
+\end_inset
+
+.
+ The trace can be treated as the objective function to be minimized, leading
+ to a valid factorization, differing from that obtained by PMF.
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+nuclear
+\begin_inset Quotes erd
+\end_inset
+
+ comes from operator theory, where the definition of a nuclear operator
+ as one that is of trace-class, i.e.
+ having a trace that is invariant under orthogonal or unitary transformations.
+ In such cases, there is an explicit assumption that the operator lives
+ in some homogeneous space, where orthogonal or unitary transformations
+ can be applied.
+ In machine learning, the spaces are always finite dimensional, and are
+ usually explicitly assumed to be real Euclidean space 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ -- that is, the spaces behave like actual vector spaces, so that concepts
+ like SVD apply.
+\end_layout
+
+\begin_layout Standard
+A subtle point here is that the space in which 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ lives is 
+\emph on
+not
+\emph default
+ 
+\begin_inset Formula $\mathbb{R}^{n}$
+\end_inset
+
+ (nor is it 
+\begin_inset Formula $\mathbb{R}^{\left|W\right|\times\left|D\right|}$
+\end_inset
+
+, if one is a stickler about dimensions).
+ Rather, 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is constrained to live inside of a simplex (of dimension 
+\begin_inset Formula $\left|W\right|\times\left|D\right|$
+\end_inset
+
+).
+ Sure, one can blur one's eyes and imagine that this simplex is a subspace
+ of 
+\begin_inset Formula $\mathbb{R}^{\left|W\right|\times\left|D\right|}$
+\end_inset
+
+, and that is not entirely wrong.
+ However, the only transformations that can be applied to points in a simplex,
+ that keep the points inside the simplex, are Markov matrices.
+ Any other transformations will typically move points from the outside,
+ into the inside, and move inside points out.
+ In particular, rotations (orthogonal transformations) cannot be applied
+ to a probability, with the result still being a probability.
+ Applying the notion of a trace, which is implicitly defined in terms of
+ orthogonal transformations, is inappropriate for the problem at hand.
+\end_layout
+
+\begin_layout Subsubsection
+Neural Net Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+The factorization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)
+\]
+
+\end_inset
+
+ can be viewed as just one special function of the vector components indexed
+ by 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ More generally, one can consider the function
+\begin_inset Formula 
+\[
+f\left(a_{1},a_{2},\cdots,a_{n}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $a_{g}=p\left(w,g\right)p\left(g,d\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $n=\left|G\right|$
+\end_inset
+
+ the number of elements in 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ Thus, the matrix factorization is just the function 
+\begin_inset Formula $f\left(a_{1},a_{2},\cdots,a_{n}\right)=a_{1}+a_{2}+\cdots+a_{n}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The neural net matrix factorization
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dzuigaite2015"
+
+\end_inset
+
+ replaces the simple sum by a multi-layer feed-forward neural net.
+ 
+\end_layout
+
+\begin_layout Standard
+There is nothing in the current formulation of the problem that suggests
+ this as an appropriate model of language.
+ See, however, the next section, on factorization ambiguity, that suggests
+ that the 
+\begin_inset Quotes eld
+\end_inset
+
+shape
+\begin_inset Quotes erd
+\end_inset
+
+ of language consists of a tight, highly-interconnected nucleus, attached
+ to sparse feeder trees.
+ It might make sense to model the tight central nucleus as a neural network
+ of some sort.
+\end_layout
+
+\begin_layout Subsubsection
+Local Low Rank Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Local Low Rank Matrix Factorization (LLORMA)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lee2016"
+
+\end_inset
+
+ is a matrix factorization algorithm exhibiting accuracy and performance
+ at near state-of-the-art levels.
+ It uses a combination of two techniques: kernel smoothing
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Kernel-smoother"
+
+\end_inset
+
+ and local regression (LOESS)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Local-regression"
+
+\end_inset
+
+ to obtain smooth estimates for the two factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The use of the smoothing techniques seems highly appropriate, given that
+ the input dataset 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is both noisy and incomplete, as discussed previously.
+ Unfortunately, the use of LLORMA, as strictly described, seems inappropriate,
+ but only because the use of the Frobenius norm or the nuclear norm is inappropr
+iate for this dataset.
+ The correct norm appears to be an information-theoretic norm, as discussed
+ in upcoming sections.
+\end_layout
+
+\begin_layout Subsubsection
+Other factorizations
+\end_layout
+
+\begin_layout Standard
+Other factorizations, including 
+\end_layout
+
+\begin_layout Standard
+NTN (Neural Tensor Network)
+\end_layout
+
+\begin_layout Standard
+also I-RBM (Restricted Boltzmann Machine)
+\end_layout
+
+\begin_layout Standard
+also I-AutoRec
+\end_layout
+
+\begin_layout Subsection
+Factorization Ambiguity
+\end_layout
+
+\begin_layout Standard
+The sum 
+\begin_inset Formula $\sum_{g\in G}$
+\end_inset
+
+ can be seen as a specific function, 
+\emph on
+viz
+\emph default
+, the inner product of two vectors 
+\begin_inset Formula $\left(\vec{w}\right)_{g}=p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(\vec{d}\right)_{g}=p\left(g,d\right)$
+\end_inset
+
+.
+ Aside from considering just 
+\begin_inset Formula $\vec{w}\cdot\vec{d}$
+\end_inset
+
+, one might consider other functions 
+\begin_inset Formula $f\left(\vec{w},\vec{d}\right)$
+\end_inset
+
+ of 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+ A single-layer feed-forward linear neural net would consist of a 
+\begin_inset Formula $\left|G\right|\times\left|G\right|$
+\end_inset
+
+-dimensional weight matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ so that 
+\begin_inset Formula 
+\[
+f\left(\vec{w},\vec{d}\right)=\vec{w}^{T}\cdot M\cdot\vec{d}
+\]
+
+\end_inset
+
+This, in itself, because it is linear, does not accomplish much, because
+ the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ can be re-composed on the left or the right, to re-define the vectors 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ or 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+.
+ That is, one may write 
+\begin_inset Formula $\vec{w}^{\prime}=M^{T}\vec{w}$
+\end_inset
+
+ or 
+\begin_inset Formula $\vec{d}^{\prime}=M\vec{d}$
+\end_inset
+
+.
+ Written in in components:
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+\]
+
+\end_inset
+
+and so one can contract 
+\begin_inset Formula $M$
+\end_inset
+
+ either to the left or to the right.
+ This shows that the factorization is ambiguous; as long as 
+\begin_inset Formula $M$
+\end_inset
+
+ is Markovian, preserving the sums of probabilities over rows and columns,
+ it can be contracted to the left or the right.
+ Thus, one can legitimately introduce another constraint: given the freedom
+ in 
+\begin_inset Formula $M$
+\end_inset
+
+, choose it so that 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are both maximally sparse.
+\end_layout
+
+\begin_layout Standard
+A matrix can be Markovian on the left side, the right side, or both.
+ It is Markovian on the right if 
+\begin_inset Formula 
+\[
+1=\sum_{g}M\left(g,g^{\prime}\right)\mbox{ for all }g^{\prime}
+\]
+
+\end_inset
+
+This assures that 
+\begin_inset Formula 
+\[
+p^{\prime}\left(g,d\right)=\sum_{g^{\prime}}M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+\]
+
+\end_inset
+
+is still a valid probability distribution; namely, that 
+\begin_inset Formula $p^{\prime}\left(*,*\right)=1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If one has such a factorization, so that 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are maximally sparse, then the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ will likely be very highly connected, i.e.
+ will have many or most of its matrix entries be non-zero.
+ Conceptually, one can visualize the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ as a highly connected graph, while the factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are low-density feeder branches that connect into this tightly-coupled
+ kernel.
+ This is visualized in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Factorization
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Factorization"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename skimage/factor.eps
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This figure attempts to illustrate the process of factorization.
+ The left-most image is meant to illustrate 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ as a sparse matrix.
+ Not every 
+\begin_inset Formula $w$
+\end_inset
+
+ is connected to every 
+\begin_inset Formula $d$
+\end_inset
+
+, but there are a sufficient number of connections that the overall graph
+ is confused and tangled.
+ The middle image is meant to illustrate the factorization 
+\begin_inset Formula $\sum_{g}p\left(w,g\right)p\left(g,d\right)$
+\end_inset
+
+.
+ In this factorization, the matrix 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ not only becomes more sparse, but has a very low out-degree for fixed 
+\begin_inset Formula $w$
+\end_inset
+
+: only one or a handful of entries in 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ are non-zero for fixed 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ The rightmost image attempts to illustrate the factorization 
+\begin_inset Formula $\sum_{g,g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)$
+\end_inset
+
+.
+ Here, the factor 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ has low in-degree for any fixed 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ All of the tangle and interconnectedness has been factored out into the
+ matrix 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ connecting word-classes to disjunct-classes.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Factorization in Link Grammar
+\end_layout
+
+\begin_layout Standard
+This factorization is 
+\emph on
+de facto
+\emph default
+ observed in the hand-built dictionaries for Link Grammar.
+ Examination of the 
+\family typewriter
+`4.0.dict`
+\family default
+ file in the Link Grammar file distribution will clearly show how words
+ are grouped into word-classes.
+ For example, 
+\family typewriter
+`words.n.2.s`
+\family default
+ is a list of plural count-nouns.
+ The Link Grammar costs are rough approximations for the log likelihood
+ 
+\begin_inset Formula $-\log p$
+\end_inset
+
+, and so the contents of 
+\family typewriter
+`words.n.2.s`
+\family default
+ is effectively a representation of the matrix 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g=\left\langle \mbox{plural-count-nouns}\right\rangle $
+\end_inset
+
+and a uniform probability across this class.
+ The file 
+\family typewriter
+`4.0.dict`
+\family default
+ also defines a large number of 
+\begin_inset Quotes eld
+\end_inset
+
+macros
+\begin_inset Quotes erd
+\end_inset
+
+, with names such as 
+\family typewriter
+`<noun-main-p>`
+\family default
+.
+ These macros are stand-ins for lists of disjuncts, often given equal weight,
+ but also not uncommonly assigned different costs.
+ In essence, 
+\family typewriter
+`<noun-main-p>`
+\family default
+ should be understood as an example of 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g^{\prime}=\mbox{\left\langle noun-main-p\right\rangle }$
+\end_inset
+
+.
+ It appears multiple times throughout the file.
+ In one case, it is associated with the word-list 
+\family typewriter
+`words.n.2.s`
+\family default
+, which makes sense, as 
+\family typewriter
+`<noun-main-p>`
+\family default
+ is describing one of the linkage behaviors of plural common nouns.
+ The contents of the file 
+\family typewriter
+`4.0.dict`
+\family default
+ should be understood to be a specification of 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+, although it is not so cleanly organized: it also includes all of the 
+\begin_inset Quotes eld
+\end_inset
+
+macros
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ and also includes word-lists when these are small.
+\end_layout
+
+\begin_layout Standard
+A more careful examination of the use of the macros in 
+\family typewriter
+`4.0.dict`
+\family default
+ shows that these are often cascaded into one-another.
+ For example, 
+\family typewriter
+`<noun-main-s>`
+\family default
+ is used in the definition of 
+\family typewriter
+`<proper-names>`,
+\family default
+ 
+\family typewriter
+`<entity-entire>`
+\family default
+ and 
+\family typewriter
+`<common-noun>`
+\family default
+, each of which service word classes that are similar and yet differ syntactical
+ly and semantically.
+ This is not just some strange artifact of hand-building a dictionary encoding
+ grammar.
+ It is 
+\emph on
+prima facie
+\emph default
+ evidence of important substructures inside of 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+, essentially pointing at the idea that 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ can be factored into smaller, tightly-connected blocks; 
+\emph on
+viz
+\emph default
+., that the graph contains bipartite cliques.
+ 
+\end_layout
+
+\begin_layout Subsection
+Gradient Descent vs.
+ Graph Algorithms
+\end_layout
+
+\begin_layout Standard
+The goal of the matrix factorization, illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+, is to not only obtain the three factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+, but to obtain them such that the first and last components contain essentially
+ no bipartite cliques, and all of the structural complexity is limited to
+ 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+.
+ A naive gradient descent does not seem to achieve this.
+ The situation is analogous to that discussed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Similarities-and-Differences"
+
+\end_inset
+
+: naive gradient descent, such as SkipGram/CBOW, do not provide the needed
+ grammatical graph structure.
+ By contrast, the MST parsing algorithm does provide that structure.
+ 
+\end_layout
+
+\begin_layout Standard
+The gradient descent methods do provide one advantage: they provide a means
+ of global optimization; by contrast, graph techniques, such as MST, work
+ to identify local graph structure.
+ The goal of this section is to use this insight, and provide a graph-based
+ technique to obtain the factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+, as graphs, rather than matrices.
+ It is the graph structure that is the most important; the actual numerical
+ values associated with each edge are far less important.
+ They are nice, and useful for improving accuracy and parse ranking, but
+ provide little insight in and of themselves.
+ The graph structure dominates.
+\end_layout
+
+\begin_layout Standard
+TODO: work all this out in detail.
+ This section, and the rest, are all under construction.
+\end_layout
+
+\begin_layout Subsection
+Information Maximizing Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+To guide the factorization, and to maximize the agreement between the left
+ and the right sides, one can appeal to Tegmark's formulation of Tononi
+ integrated information.
+ That is, one wishes to factorize in such a way that the total amount of
+ information in the factors is maximized, so that the 
+\begin_inset Quotes eld
+\end_inset
+
+cut
+\begin_inset Quotes erd
+\end_inset
+
+ is done where the mutual information is weakest.
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+xxxx
+\end_layout
+
+\begin_layout Standard
+, although it requires some background theory.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider again the nature of the hidden layer (the layer in which the vectors
+ live) in the CBOW/SkipGram model.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ formulation allows the conditional probabilities to be written a certain
+ way; the corresponding unconditional probability is 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p\left(w_{t},w_{I}\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}}
+\]
+
+\end_inset
+
+This quantity is not normally available or computed in the CBOW/Skipgram
+ models; here, it is written here as a theoretical quantity.
+ It can be obtained from the partition function 
+\begin_inset Formula 
+\[
+Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)
+\]
+
+\end_inset
+
+by applying the variational principle to one of the many 
+\begin_inset Quotes eld
+\end_inset
+
+sources
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $J_{w_{t},I}$
+\end_inset
+
+.
+ This yields the standard Boltzmann distribution: 
+\begin_inset Formula 
+\[
+p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t},I}}\right|_{J=0}
+\]
+
+\end_inset
+
+In other words, CBOW/SkipGram fit squarely into the standard maximum entropy
+ theoretical framework.
+ This is no accident, of course; the 
+\begin_inset Quotes eld
+\end_inset
+
+softmax
+\begin_inset Quotes erd
+\end_inset
+
+ function was used precisely because it gives the maximum entropy distribution.
+\end_layout
+
+\begin_layout Standard
+There is no particular reason to diverge from the principle of maximum entropy
+ when working with word classes.
+ Specifically, this suggests that the word-disjunct pairs be viewed in the
+ frame of the 
+\begin_inset Quotes eld
+\end_inset
+
+loss function
+\begin_inset Quotes erd
+\end_inset
+
+ (equivalently, the Hamiltonian or energy):
+\begin_inset Formula 
+\[
+H\left(w,d\right)=-\log p\left(w,d\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+is suggests that the 
+\end_layout
+
+\begin_layout Standard
+There is a set of word-classes 
 \begin_inset Formula $C=\left\{ c\right\} $
 \end_inset
 
@@ -2710,19 +4042,16 @@ status open
 \end_layout
 
 \begin_layout Standard
-Given these two projection matrixes, the probability can then be decomposed
+Given these two projection matrices, the probability can then be decomposed
  as an inner product:
 \begin_inset Formula 
 \[
-p\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
+E\left(w,d\right)=\vec{\eta}_{w}\cdot\vec{\zeta}_{d}
 \]
 
 \end_inset
 
-The word-classes here play a role analogous to the hidden layer in the CBOW/Skip
-Gram model.
- Its worth making a more direct comparison.
- Let ...
+The word-classes 
 \end_layout
 
 \begin_layout Section*
@@ -2813,7 +4142,7 @@ directions
 
 , or one can preferentially spread probabilities only along certain directions.
  Bengio suggests that higher-quality learning and generalization can be
- acheived by finding and appropriately non-uniform way of smearing the probabili
+ achieved by finding and appropriately non-uniform way of smearing the probabili
 ty masses from training.
 \end_layout
 
@@ -2827,7 +4156,7 @@ space
 \begin_inset Quotes erd
 \end_inset
 
-: is this some topolgical space, perhaps linear, or something else? That
+: is this some topological space, perhaps linear, or something else? That
  of 
 \begin_inset Quotes eld
 \end_inset
@@ -2847,7 +4176,7 @@ direction
 \end_inset
 
 , or at least, a local tangent manifold at each point of the space.
- It seems reasonable to assert that langauge lives on a manifold, but then,
+ It seems reasonable to assert that language lives on a manifold, but then,
  the structure of that manifold needs to be elucidated and demonstrated.
  In particular, the 
 \begin_inset Quotes eld
@@ -2864,7 +4193,7 @@ non-uniform spreading
  moves with unit velocity.
  It seems plausible to spread out probability weights the same way: spread
  them uniformly, and adjust the shape of the underlying space so that this
- results in a high-quality langauge model.
+ results in a high-quality language model.
 \end_layout
 
 \begin_layout Standard
