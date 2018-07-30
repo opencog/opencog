@@ -51,16 +51,15 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
-			cur_dir = cur_ppp_dir + "/tests/pln/rules";
-		vector<string> load_paths = {cur_ppp_dir, cur_dir};
+			cur_dir = cur_ppp_dir + "/tests/pln/rules",
+			src_rule_dir = cur_ppp_dir + "/opencog/pln/rules";
+		vector<string> load_paths = {cur_ppp_dir, cur_dir, src_rule_dir};
 		for (string& p : load_paths)
 		{
 			string eval_str = string("(add-to-load-path \"") + p + string("\")");
 			eval.eval(eval_str);
 		}
 
-		eval.eval("(add-to-load-path \"/usr/local/share\")");
-		eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 		eval.eval("(use-modules (opencog))");
 		eval.eval("(use-modules (opencog attention-bank))");
 		eval.eval("(use-modules (opencog query))");
