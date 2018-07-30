@@ -14583,8 +14583,20 @@ Done 10000 of 137078 outer loops in 1074 secs, pairs=1319927 (1229.0 pairs/sec)
 Done 130000 of 137078 outer loops in 2877 secs, pairs=22949051 (949.64 pairs/sec)
 Done computing 24213074 pair MI's in 23091 secs
 Going to do column and row subtotals
+Finished left entropy subtotals in 405905 secs
+Finished right entropy subtotals in 6812 secs
+Finished left MI subtotals in 433689 secs
+Finished right MI subtotals in 7360 secs
+Going to compute the left, right and total entropy
+Done computing totals; start saving wildcards
+FATAL:  terminating connection due to administrator command
 
+fuckig apt-get fucked me again. Fixed in pull req #1846
+(cra 'fetch-pairs)
+(load "/tmp/fail.scm")
+(rebatch-all-pair-mi cra)
 
+xxxxxxxxxxxxxxxxxxxx <<< here
 
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
@@ -14625,7 +14637,7 @@ make-compute-freq  calls 'set-size
 (define rtc (make-central-compute btc))
 (rtc 'cache-left) because ... left-marginals were cmputed
 left margs loop over right-basis which is get-col-fun
-wich are the ceche-lefts.
+which are the cache-lefts.
 
 WTF....
 
@@ -15087,8 +15099,309 @@ prs
 compcnt
 savecnt
 
+=========================================================================
+
+(define ara (make-connector-vec-api))
+(define ars (add-pair-stars ara))
+(define art (add-transpose-api ars))
+(define aco (add-pair-cosine-compute art))
+(define acr
+   (batch-similarity art #f "Cross Cosine-*" 0.0
+      (lambda (wa wb) (aco 'right-cosine wa wb))))
+(map (lambda (n) (acr 'batch-compute n))
+	(list-tabulate 100 (lambda (n) (+ n 38))))
+
+(map (lambda (n) (acr 'batch-compute n)) (iota 100 38 1))
+(map (lambda (n) (bcr 'batch-compute n)) (iota 100 38 1))
+(map (lambda (n) (bcr 'batch-compute n)) (iota 100 140 2))
 
 
+(define fra (make-connector-vec-api))
+(define frs (add-pair-stars fra))
+(define frt (add-transpose-api frs))
+(define fco (add-pair-cosine-compute frt))
+(define fcr
+   (batch-similarity frt #f "Cross Cosine-*" 0.0
+      (lambda (wa wb) (fco 'right-cosine wa wb))))
+
+(use-modules (statprof))
+(statprof (lambda ()
+	(fcr 'compute-similarity (Word "this")(Word "that")) #f))
+
+(bci 'batch-compute 22)
+(bci 'batch-compute 24)
+(bci 'batch-compute 26)
+
+(map (lambda (n) (bci 'batch-compute n)) (iota 30 52 4))
+(map (lambda (n) (bci 'batch-compute n)) (iota 222 170 5))
+
+(load "/tmp/similarity-api.scm")
+
+(define bco
+   (qbatch-similarity pta #f "pseudo-cset Cosine-*" 0.0
+      (lambda (wa wb) (pco 'right-cosine wa wb))))
+
+(map (lambda (n) (bco 'batch-compute n))
+	(list-tabulate 10 (lambda (n) (+ (* n 30) 370))))
+
+(map (lambda (n) (bco 'batch-compute n)) (iota 4 550 30))
+
+co:
+509.1 657.0 567.5 551.7 528.8 645.8 632.7 501.0 525.4 546.8 697.3
+
+348.4 258.8 312.3 253.7 283.6 279.9 272.6 261.8 276.3 348.6 288.3 249.2 320.3
+
+win 1 co - 20 to 40   now at 31
+win 2 co - 144 to 440 now at 440 Done!
+win 2 mi - 144 to 440
+win 3 mi - 17 to 58   now at 42
+
+crash:
+win 1: (bcr 'batch-compute 34) and more
+
+win 2:
+(map (lambda (n) (bmi 'batch-compute n))
+   (list-tabulate 10 (lambda (n) (+ (* n 30) 370))))
+
+win3: died at 44, start 45 next.
+
+FATAL:  terminating connection due to administrator command
+FATAL:  terminating connection due to administrator command
+terminate called after throwing an instance of
+'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/linas/src/novamente/src/atomspace-git/openc
+og/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+Aborted
+
+Fuck postgres stabbed me!
+
+1) rebuild/install
+2) guile -l x-mtwo.scm
+3) similarity.scm by hand
+cog-count-atoms 'SimilarityLink)
+94954
+
+(sqrt (* 2 (- (- 94954 (* 33 16)) (* 44 22))))
+   432.3378308684078
+
+oh nooo major loss
+(cra 'fetch-pairs)
+Elapsed time to load word sections: 3412 seconds
+Elapsed time to load cross-marginals: 2840 seconds
+(pca 'fetch-pairs)
+Elapsed time to load csets: 2285 secs
+
+(define bmi
+   (qbatch-similarity pta #f "pseudo-cset MI-*" -999.0
+      (lambda (wa wb) (pmi 'mmt-fmi wa wb))))
+
+(map (lambda (n) (bmi 'batch-compute n))
+	(list-tabulate 16 (lambda (n) (+ (* n 30) 190))))
+
+(map (lambda (n) (bmi 'batch-compute n))
+	(list-tabulate 16 (lambda (n) (+ (* n 40) 640))))
+
+
+14167
+15013
+
+(bci 'batch-compute 144)
+
+binned-sims-all.eps is missing
+
+(define all-sims '())
+(cog-map-type
+   (lambda (ato)
+      (define val (cog-value ato cos-key))
+      (if (not (null? val))
+         (set! all-sims (cons ato all-sims)))
+       #f)
+   'SimilarityLink)
+
+7421 Sep  1  2017 en-dj/binned-sims-all.dat
+what is this?
+
+terminate called after throwing an instance of 'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+Aborted
+
+
+[2018-07-25 05:32:07:048] [WARN] PQresult message:
+[2018-07-25 05:32:07:048] [WARN] PQ query was: BEGIN;
+   6: exceptions.cc:142   opencog::RuntimeException::RuntimeException(char const*,
+char const*, ...)
+   7: ll-pg-cxx.cc:47     LLPGConnection::LLPGConnection(char const*)
+   8: gthr-default.h:747   __gthread_mutex_lock()
+   9: SQLResponse.h:305
+opencog::SQLAtomStorage::Response::get_value_column_cb(char const*, char const*)
+   10: stl_tree.h:1636    std::_Rb_tree<unsigned long, unsigned long,
+std::_Identity<unsigned long>, std::less<unsigned long>, std::allocator<unsigned
+long> >::_M_erase(std::_Rb_tree_node<unsigned long>*)
+
+----
+[2018-07-25 12:13:03:800] [WARN] PQresult message: ERROR:  duplicate key value
+violates unique constraint "valuations_key_atom_key"
+DETAIL:  Key (key, atom)=(104758323, 105104585) already exists.
+[2018-07-25 12:13:03:800] [WARN] PQ query was: INSERT INTO Valuations (key, atom,
+type, floatvalue) VALUES (104758323, 105104585, 1, '{    1.11100380697404}');
+[2018-07-25 12:13:04:165] [WARN] PQresult message: ERROR:  current transaction is
+aborted, commands ignored until end of transaction block
+
+[2018-07-25 12:13:04:165] [WARN] PQ query was: BEGIN;
+
+PSQLException
+SQLAtomStorage::
+
+ try
+ catch (const SilentException& ex)
+
+(sql-open "postgres:///langtest?user=linas&password=asdf")
+throw opencog::RuntimeException(TRACE_INFO,
+
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE pid <> pg_backend_pid() AND datname = 'langtest';
+
+because its in a diffrent thread ....
+connected
+kill_data
+extract_callback
+      Handle getNode(Type, const char *);
+      Handle getLink(Type, const HandleSeq&);
+      void getIncomingSet(AtomTable&, const Handle&);
+      void getIncomingByType(AtomTable&, const Handle&, Type t);
+      void getValuations(AtomTable&, const Handle&, bool get_all);
+      void storeAtom(const Handle&, bool synchronous = false);
+      void removeAtom(const Handle&, bool recursive);
+      void loadType(AtomTable&, Type);
+      void flushStoreQueue();
+
+      // Large-scale loads and saves
+      void load(AtomTable &); // Load entire contents of DB
+      void store(const AtomTable &); // Store entire contents of AtomTable
+
+bcr:
+Done 80/87 Frac=1.801% Time: 5462 Done: 99.4% Rate=0.021 prs/sec (48.70 sec/pr)
+
+(map (lambda (n) (bcr 'batch-compute n)) (iota 100 88 2))  ; goes to 288
+
+bmi:
+Done 10/148 Frac=2.526% Time: 6786 Done: 13.1% Rate=0.005 prs/sec (188.5 sec/pr)
+
+(map (lambda (n) (bci 'batch-compute n)) (iota 70 150 5)) ; goes to 290
+(map (lambda (n) (bci 'batch-compute n)) (iota 17 205 5)) ; goes to 290
+
+
+co:
+Done 920/920 Frac=8.153% Time: 15516 Done: 100.% Rate=6.429 prs/sec (0.156 sec/pr)
+
+OK, so got to 920.... stop there.
+(bmi 'batch-compute 920) --- done cleanly.
+
+(map (lambda (n) (bco 'batch-compute n)) (iota 7 640 40))
+(map (lambda (n) (bco 'batch-compute n)) (iota 6 680 40))
+(map (lambda (n) (bco 'batch-compute n)) (iota 5 720 40))
+
+=========================================================================
+OK, so now redo the graphs.
+ good-sims and ranked-sims in disjunct-stats.scm
+
+(define good-sims
+(sim-cosine (Similarity (Word "this")(Word "that")))
+
+section 4.1   748
+wtf
+(SimilarityLink (WordNode "Your") (WordNode "indeed"))
+(bmi 'compute-similarity (WordNode "hour") (WordNode "Let"))
+ahh its -infity
+(FloatValue -inf)
+
+
+(define (prt-sim sim port)
+   (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
+      (cog-name (gar sim)) (cog-name (gdr sim))))
+      
+(let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
+   (define cnt 0) 
+   (for-each (lambda (sim)
+         (set! cnt (+ cnt 1))
+         (format outport "~A  " cnt)
+         (prt-sim sim outport))
+      ranked-sims)
+   (close outport))
+
+
+
+
+
+=========================================================================
+(statprof (lambda ()
+   (fcr 'compute-similarity (Word "this")(Word "that")) #f))
+
+
+%     cumulative   self
+time   seconds     seconds  procedure
+ 39.78     30.06     30.06  cog-link
+ 11.86      8.96      8.96  cog-outgoing-atom
+ 10.93      8.26      8.26  cog-outgoing-set
+  5.63     13.41      4.26  opencog/nlp/learn/connector-vec.scm:135:24:not-var?
+  4.63      3.50      3.50  cog-handle
+  3.36      2.54      2.54  opencog/matrix/transpose.scm:132:8
+  3.28      2.48      2.48  cog-count
+  2.61      1.97      1.97  opencog/matrix/object-api.scm:513:24
+  2.44     10.61      1.84  srfi/srfi-1.scm:729:0:take-while
+  1.93     50.14      1.46  opencog/nlp/learn/connector-vec.scm:131:16:get-pair
+  1.60 6840244.56      1.21  srfi/srfi-1.scm:590:5:map1
+  1.51      1.14      1.14  opencog/base/utilities.scm:134:0:gar
+  1.35      4.51      1.02  opencog/base/atom-cache.scm:84:8:atom-hash
+  1.18      5.78      0.89  srfi/srfi-1.scm:760:0:drop-while
+  1.01      0.95      0.76  srfi/srfi-1.scm:586:2:map
+  1.01      0.76      0.76  opencog/nlp/learn/connector-vec.scm:362:16
+  0.84      0.64      0.64  equal?
+  0.50      0.38      0.38  *
+  0.42      0.32      0.32  opencog/base/atom-cache.scm:86:22
+  0.34      6.23      0.25  srfi/srfi-1.scm:458:2:fold
+  0.34      3.11      0.25  opencog/matrix/fold-api.scm:233:16:get-func-count
+  0.34      0.25      0.25  opencog/matrix/fold-api.scm:226:32
+  0.34      0.25      0.25  procedure?
+  0.34      0.25      0.25  opencog/base/utilities.scm:142:0:gdr
+  0.34      0.25      0.25  opencog/base/atom-cache.scm:85:8:atom-assoc
+  0.34      0.25      0.25  opencog/matrix/fold-api.scm:186:32
+  0.25      0.19      0.19  list?
+  0.25      0.19      0.19  opencog/base/atom-cache.scm:93:40
+  0.25      0.19      0.19  opencog/matrix/fold-api.scm:251:16
+  0.17      2.29      0.13  opencog/matrix/support.scm:308:40
+  0.17      0.13      0.13  cog-atomspace-clear
+  0.17      0.13      0.13  opencog-extension
+  0.17      0.13      0.13  opencog/matrix/fold-api.scm:236:40
+  0.08      5.66      0.06  hashx-set!
+  0.08      0.25      0.06  opencog/base/atom-cache.scm:88:8
+  0.08      0.06      0.06  cog-new-link
+  0.08      0.06      0.06  opencog/nlp/learn/connector-vec.scm:124:16:get-count
+  0.00     75.57      0.00  ice-9/eval.scm:618:6
+  0.00     75.57      0.00  opencog/matrix/similarity-api.scm:193:16:compute-sim
+  0.00     75.50      0.00  opencog/matrix/cosine.scm:128:16:compute-right-cosine
+  0.00     68.89      0.00  opencog/matrix/support.scm:300:16:sum-right-count
+  0.00     11.44      0.00  srfi/srfi-1.scm:634:2:for-each
+  0.00      5.91      0.00  opencog/matrix/fold-api.scm:224:16:right-star-union
+  0.00      3.69      0.00  opencog/matrix/support.scm:291:32
+  0.00      2.73      0.00  opencog/matrix/support.scm:319:16:sum-right-length
+  0.00      0.83      0.00  find
+  0.00      0.76      0.00  ice-9/boot-9.scm:834:2:with-throw-handler
+  0.00      0.38      0.00  opencog/matrix/object-api.scm:387:32
+  0.00      0.38      0.00  opencog/matrix/object-api.scm:404:32
+  0.00      0.38      0.00  opencog/matrix/object-api.scm:418:16:do-run-query
+  0.00      0.19      0.00  hash-for-each-handle
+---
+Sample count: 1189
+Total time: 75.565334546 seconds (128.369109622 seconds in GC)
+#f
+
+GC Warning: Repeated allocation of very large block (appr. size 536875008):
+        May lead to memory leak and poor performance
+wtf!? o profilig
 
 
 =========================================================================

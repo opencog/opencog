@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{url} 
@@ -10,21 +12,26 @@
 \newunicodechar{‐}{-}
 \end_preamble
 \use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
 \maintain_unincluded_children false
 \language english
 \language_package default
 \inputencoding utf8
 \fontencoding global
-\font_roman times
-\font_sans helvet
-\font_typewriter courier
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -43,23 +50,32 @@
 \pdf_backref false
 \pdf_pdfusetitle true
 \papersize default
-\use_geometry false
-\use_amsmath 2
-\use_esint 0
-\use_mhchem 0
-\use_mathdots 1
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 0
 \index Index
 \shortcut idx
 \color #008000
 \end_index
-\secnumdepth 3
-\tocdepth 3
+\secnumdepth 2
+\tocdepth 2
 \paragraph_separation indent
 \paragraph_indentation default
 \quotes_language english
@@ -76,89 +92,365 @@
 \begin_body
 
 \begin_layout Title
-Connector Sets (Revised) 
+Connector Set Distributions 
 \end_layout
 
 \begin_layout Author
 Linas Vepstas
 \end_layout
 
-\begin_layout Abstract
-Extract from the language-learning diary, reporting on an initial dataset
- containing connector sets.
- This is a revised (6 August 2017) version of the original 11 May 2017 report.
- It re-analyzes and expands the original analysis on a newer, larger dataset.
- This was motivated in part due to several errors found and fixed in the
- processing pipeline in late June/early July.
- In retrospect, it appears these errors mostly did not affect the earlier
- analysis, as the most significant error was introduced after the inital
- analysis was made.
- None-the-less, it seemed prudent to redo the report.
- Sadly, several months were lost in the confusion, requiring large datasets
- to be discarded.
+\begin_layout Date
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+Version 1: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 11 May 2017
+\begin_inset Newline newline
+\end_inset
+
+Version 2: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 6 August 2017
+\begin_inset Newline newline
+\end_inset
+
+Version 3: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 12 September 2017
+\begin_inset Newline newline
+\end_inset
+
+Version 4: 
+\begin_inset space \hfill{}
+\end_inset
+
+ 23 July 2018
 \end_layout
 
-\begin_layout Section*
+\end_inset
+
+
+\end_layout
+
+\begin_layout Abstract
+This report reviews the statistical distributions of disjuncts and disjunct
+ vectors obtained from a large statistical sampling of MST-parsed sentences.
+ The goal of this report is to survey the general statistical landscape
+ of these structures, with the aim of using these as input data to graph
+ algorithms that can extract grammatical classes and perform word-sense
+ disambiguation.
+\end_layout
+
+\begin_layout Abstract
+This is a revised version of earlier reports.
+ It provides a better overview, and provides additional results.
+ This is not yet the final version; I'm still waiting for additional computation
+s to complete.
+ 
+\end_layout
+
+\begin_layout Section
 Introduction
 \end_layout
 
 \begin_layout Standard
-This is a report on a dataset of disjuncts and connector sets, extracted
- from MST parses of a batch of sentences.
- First, a recap of what these are, then a characterization of the database
- contents, and finally, a report on the grammatical similarity of words
- in the dataset.
+This report characterizes the statistical distribution of word-disjunct
+ pairs extracted from a large block of text, using unsupervised natural
+ language learning techniques.
+\end_layout
+
+\begin_layout Standard
+A disjunct is a sequence of words, resembling an N-gram, but containing
+ grammatical information.
+ The grammatical information in a disjunct is 
+\begin_inset Quotes eld
+\end_inset
+
+complete
+\begin_inset Quotes erd
+\end_inset
+
+, in the sense that it is sufficient to construct and accurate parser of
+ language.
+ This is unlike the situation encountered with Word2Vec
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013a"
+
+\end_inset
+
+ or AdaGram
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bartunov2015"
+
+\end_inset
+
+, where one can discover 
+\begin_inset Quotes eld
+\end_inset
+
+important
+\begin_inset Quotes erd
+\end_inset
+
+ sequences of words, but where the route to the creation of a grammar is
+ less clear.
+ The algorithm used to extract disjuncts is also completely different from
+ the neural-net techniques; it is a graph technique, as opposed to a gradient-de
+scent technique.
+ Despite this, there are exploitable conceptual similarities in building
+ models of natural language.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+ The goal of this report is to provide a fairly detailed statistical analysis
+ of the distribution of disjuncts, thereby characterizing the structure
+ of natural language at a grammatical, syntactic level.
+\end_layout
+
+\begin_layout Standard
+The need for this report is to characterize the structure of the disjunct
+ dataset to a sufficient degree that it can be used as input to other graph-base
+d methods to extract grammatical classes and to perform word-sense disambiguatio
+n.
+ These techniques and algorithms are presented in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The origin of the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+ comes from the Link Grammar theory of semantic-syntactic parsing.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ Link Grammar is a form of dependency grammar; it is essentially equivalent
+ to other forms of dependency grammar, in that Link Grammar dependencies
+ can be algorithmically converted into other kinds of dependencies, as well
+ as into phrase-structure grammars.
+ In Link Grammar, a disjunct is defined as an ordered sequence of connectors;
+ those connectors indicate how a word can attach or connect to other words,
+ forming links.
+ A reasonable conceptual model for a disjunct is to think of it as a jigsaw-puzz
+le piece; the connectors correspond to the tabs and slots on the jigsaw-puzzle
+ piece.
+ Parsing a sentence then consists of assembling jigsaw pieces together,
+ in such a way that there are no unconnected tabs or slots at the end of
+ the process.
+ The links between words then indicate the syntactic and semantic relationships
+ between them.
+\end_layout
+
+\begin_layout Standard
+A similar relationship between words can be obtained by performing a maximum-spa
+nning-tree (MST) parse, where links between words are the ones that maximize
+ the mutual information between the word-pairs.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+ The MST approach to natural language grammar has been well-explored, and
+ provides a reasonable accurate model.
+ The primary issue is that, when interpreted naively, it does not provide
+ any labels that describe the relationships between words, such as 
+\begin_inset Quotes eld
+\end_inset
+
+subject
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+object
+\begin_inset Quotes erd
+\end_inset
+
+ relationships, which are considered to be key to the symbolic, linguistic
+ grammatical structure of a language.
  
 \end_layout
 
-\begin_layout Subsection*
-The errors
+\begin_layout Standard
+A bridge can be built between the the unlabeled MST representation of a
+ parsed sentence, and the labeled Link Grammar parse of a sentence.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+ This is done by starting with an unlabeled MST parse of a sentence, and
+ then applying a label to each link, that label consisting of the word-pair,
+ itself.
+ In effect, one obtains a jigsaw-puzzle piece, where each tab and slot is
+ labeled by the word that the tab/slot is allowed to connect to.
+ After accumulating a large database of statistics on such jigsaw-puzzle
+ pieces, one can compare them, looking for similarity.
+ By clustering together similar pieces, one is effectively creating a dictionary
+ or lexis of grammatical categories (parts of speech) together with the
+ grammatical information as to how these can be assembled into grammatically
+ correct, semantically meaningful sentences.
 \end_layout
 
 \begin_layout Standard
-The original report, dated 7 May 2017, was prepared on a painfully small
- dataset, which also (may have?) incorporated a fatal bug in the disjunct
- code: disjuncts were being assembled incorrectly, due to a reversed sign
- in the MI calculations.
- This bug was eventually uncovered, and so it seemed best to entirely discard
- the initial analysis, and instead repeat it with a newer and larger dataset
- that was correctly assembled.
- The revised analysis was done mostly in July.
- Sadly, the discovery of this bug required that multiple large datasets
- be discarded and reconstructed.
- This caused a month of effort to be lost.
+This approach appears to be sufficient to distinguish between different
+ meanings associated with a word.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ The final outcome is not dissimilar to popular neural-net techniques, although
+ the path taken is entirely different.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+ The overall approach of discerning graph structure from large bodies of
+ statistical data is hypothesized to be generalizable to domains far outside
+ of linguistics, including genomics and proteomics.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017sheaves"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Simultaneously, there was a lot of confusion about the efficacy of the cosine
- similarity measure.
- Initial work on cosine similarity used a filtered dataset, with the goal
- of filtering to reduce 
-\begin_inset Quotes eld
+This report examines one specific dataset of word-disjunct pairs.
+ It explores the overall distribution of words and disjuncts, which are
+ unsurprisingly Zipfian in nature.
+ It explores various different measures of similarity between words, such
+ as cosine distance and entropic distance, either of which are employable
+ for discerning the grammatical classes into which the word-disjunct pairs
+ can be assigned.
+ In effect, this provides the background needed for understanding how words
+ are assigned to grammatical categories, in practice.
+ It characterizes the nature and structure of natural language, when viewed
+ from the path of disjuncts derived from MST parses derived from the mutual
+ information (MI) distribution of word pairs.
+ The analysis is similar in spirit to an earlier analysis of the statistics
+ of word-pairs.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2009"
+
 \end_inset
 
-noise
-\begin_inset Quotes erd
-\end_inset
 
- in the dataset, as well as to manage dataset size.
- It turns out that this filtering also had the undesired side-effect of
- destroying much of the 
-\begin_inset Quotes eld
-\end_inset
-
-signal
-\begin_inset Quotes erd
-\end_inset
-
- as well -- it rendered many grammatically unrelated words to be judged
- to be very similar.
- Between the accidental sign reversal, and the excessively strong data cuts,
- it was all very confusing, and has taken another month to recover from
- this -- I'm back to where I was in May, just older and wiser, now.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
+Recap
+\end_layout
+
+\begin_layout Standard
+A detailed description of the process of obtaining (pseudo-)disjuncts from
+ large unannotated text corpora is given elsewhere.
+ This section provides a short, informal summary.
+ 
+\end_layout
+
+\begin_layout Standard
+The story so far: Starting from a large text corpus, the mutual information
+ (MI) of word-pairs are counted.
+ This MI is used to perform a maximum spanning-tree (MST) parse (of a different
+ subset of) the corpus.
+ From each parse, a pseudo-disjunct is extracted for each word.
+ The pseudo-disjunct is like a real LG disjunct, except that each connector
+ in the disjunct is the word at the far end of the link.
+\end_layout
+
+\begin_layout Standard
+So, for example, in in idealized world, the MST parse of the sentence "Ben
+ ate pizza" would produce the parse Ben <–> ate <–> pizza and from this,
+ we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
+ Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
+ pizza+) on the word "puked".
+ Since these two disjuncts are the same, we can conclude that the two words
+ "ate" and "puked" are very similar to each other.
+ Considering all of the other disjuncts that arise in this example, we can
+ conclude that these are the only two words that are similar.
+\end_layout
+
+\begin_layout Standard
+Any given word will have many pseudo-disjuncts attached to it.
+ Each disjunct has a count of the number of times it has been observed.
+ Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
+l vector space, which each disjunct being a single basis element.
+ The similarity of two words can be taken to be the cosine-similarity between
+ the disjunct-vectors.
+ Other similarities are possible, and it seems that the entropic similarity,
+ described below, is superior.
+\end_layout
+
+\begin_layout Standard
+Equivalently, the set of disjuncts can be thought of as a weighted set:
+ each disjunct has a weight, corresponding to the number of times it has
+ been observed.
+ A weighted set is more or less the same thing as a vector, and these two
+ are treated as the same, in what follows.
+ Note that the disjunct vectors are sparse: for any given word, almost all
+ coefficients will have a count of zero.
+ For example, the dataset that will be examined next has over a quarter
+ of a million different pseudo-disjuncts in it; most words have fewer than
+ a hundred disjuncts on them.
+\end_layout
+
+\begin_layout Subsection
 Summary of results
 \end_layout
 
@@ -169,7 +461,7 @@ The primary results reported below are these:
 \begin_layout Standard
 * Most scores and metrics that can be assigned to connector sets give a
  (scale-free) Zipfian ranking distribution, and are thus fairly boring.
- Although there are some oddities here and there.
+ There are some oddities here and there.
 \end_layout
 
 \begin_layout Standard
@@ -181,8 +473,12 @@ The primary results reported below are these:
 
 \begin_layout Standard
 * Connector sets can be given a mutual information score.
- The distribution for the MI scores appears to be Gaussian (i.e.
- bell curve).
+ The distribution for the MI scores appears to be Gaussian (
+\emph on
+i.e
+\emph default
+.
+ a Bell curve).
  This comes as a bit of a surprise.
  I am not aware of what kind of network theory gives a natural rise to Gaussians.
 \end_layout
@@ -295,62 +591,90 @@ took
  be contemplated.
 \end_layout
 
-\begin_layout Subsection*
-Recap
+\begin_layout Standard
+* Entropic similarity, essentially, a form of symmetric mutual information
+ between words, appears to be an even better similarity measure.
+ It is particularly appealing because it is naturally additive, and thus
+ fits naturally into network theories derived from thermodynamic partition
+ functions.
+\end_layout
+
+\begin_layout Subsection
+Revision History
 \end_layout
 
 \begin_layout Standard
-The story so far: Starting from a large text corpus, the mutual information
- (MI) of word-pairs are counted.
- This MI is used to perform a maximum spanning-tree (MST) parse (of a different
- subset of) the corpus.
- From each parse, a pseudo-disjunct is extracted for each word.
- The pseudo-disjunct is like a real LG disjunct, except that each connector
- in the disjunct is the word at the far end of the link.
+The original version of this report, dated 7 May 2017, was prepared on a
+ painfully small dataset, which also (may have?) incorporated a fatal bug
+ in the disjunct code: disjuncts were being assembled incorrectly, due to
+ a reversed sign in the MI calculations.
+ This bug was eventually uncovered, and so it seemed best to entirely discard
+ the initial analysis, and instead repeat it with a newer and larger dataset
+ that was correctly assembled.
+ The revised analysis was done mostly in July 2017.
+ Sadly, the discovery of this bug required that multiple large datasets
+ be discarded and reconstructed.
+ This caused a month of effort to be lost.
+ Version 1 can be accessed by digging in git, and pulling up commit 27a66643a52c
+0985adc5b38caf94fc25f5e2e684 (or maybe a bit earlier, circa late June 2017,
+ as that is when the bug was spotted.).
 \end_layout
 
 \begin_layout Standard
-So, for example, in in idealized world, the MST parse of the sentence "Ben
- ate pizza" would produce the parse Ben <--> ate <--> pizza and from this,
- we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
- Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
- pizza+) on the word "puked".
- Since these two disjuncts are the same, we can conclude that the two words
- "ate" and "puked" are very similar to each other.
- Considering all of the other disjuncts that arise in this example, we can
- conclude that these are the only two words that are similar.
+Simultaneously, there was a lot of confusion about the efficacy of the cosine
+ similarity measure.
+ Initial work on cosine similarity used a filtered dataset, with the goal
+ of filtering to reduce 
+\begin_inset Quotes eld
+\end_inset
+
+noise
+\begin_inset Quotes erd
+\end_inset
+
+ in the dataset, as well as to manage dataset size.
+ It turns out that this filtering also had the undesired side-effect of
+ destroying much of the 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ as well – it rendered many grammatically unrelated words to be judged to
+ be very similar.
+ Between the accidental sign reversal, and the excessively strong data cuts,
+ it was all very confusing, and has taken another month to recover from
+ this – I'm back to where I was in May, just older and wiser, now.
+ Versions 2 and 3 of this report provide the status quo.
+ They can be found at commit bc48712d3c2ab71383961f4a50dd6b3b4c6fd75f in
+ git.
 \end_layout
 
 \begin_layout Standard
-Any given word will have many pseudo-disjuncts attached to it.
- Each disjunct has a count of the number of times it has been observed.
- Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
-l vector space, which each disjunct being a single basis element.
- The similarity of two words can be taken to be the cosine-similarity between
- the disjunct-vectors.
+Version 4 of this report expands it by considering an entropic similarity
+ between words, intended to supplant the cosine similarity as an effective
+ graph metric.
+ The entropic similarity is a form of symmetric mutual information between
+ words; it is given this oddball name so as to avoid confusion with a variety
+ of other contexts in which mutual information appears.
+ And so, Version 4 provides additional statistical analysis comparing the
+ entropic similarity to the cosine similarity.
 \end_layout
 
-\begin_layout Standard
-Equivalently, the set of disjuncts can be thought of as a weighted set:
- each disjunct has a weight, corresponding to the number of times it has
- been observed.
- A weighted set is more or less the same thing as a vector, and these two
- are treated as the same, in what follows.
- Note that the disjunct vectors are sparse: for any given word, almost all
- coefficients will have a count of zero.
- For example, the dataset that will be examined next has over a quarter
- of a million different pseudo-disjuncts in it; most words have fewer than
- a hundred disjuncts on them.
+\begin_layout Section
+Dataset Characterization
 \end_layout
 
 \begin_layout Standard
 Some terminology and notation are introduced next, followed by a characterizatio
 n of the dataset.
- This is followed by a statistical analysis of the word-disjunct pairs,
- and is followed by an analysis of the resulting word-similarity.
+ This is followed by a statistical analysis of the word-disjunct pairs.
+ The analysis of word-similarity is left for a later section.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Terminology
 \end_layout
 
@@ -515,8 +839,7 @@ tly of any observations; let
 \end_inset
 
  is almost always either zero or one; however, a connector can appear more
- than once in a disjunct, so this count can rise to 2 or 3 or very rarely
- higher.
+ than once in a disjunct, so this count can rise to 2 or 3 or higher.
  The wild-card sum 
 \begin_inset Formula $C(d,*)=\sum_{c}C(d,c)$
 \end_inset
@@ -534,43 +857,131 @@ tly of any observations; let
  as the total number of right-linking and left-linking connectors.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Dataset characterization
 \end_layout
 
 \begin_layout Standard
-This section was originally written in May 2017 and used to report data
- for a different dataset.
- However, a serious flaw was found in the code: all MI values had a minus
- sign in them, and thus all computed disjuncts were maximally-bad.
- The statistical analysis of this maximally-bad data wasn't horrible: it
- did behave reasonably.
- However, in the end, its still bad data, and so all charts and graphs are
- being revised with a new dataset.
- The old dataset was also terribly tiny.
- The new dataset is much larger.
- You can get the old version by digging in git, and pulling up commit 27a66643a5
-2c0985adc5b38caf94fc25f5e2e684 (or maybe a bit earlier, circa late June
- 2017 as that is when the bug was spotted.).
+The rest of this report is based on a single dataset, called 'en_pairs_rfive_mtw
+o'.
+ It was built by performing MST parsing of of text from tranche-1 and 2,
+ using word-pair statistics gathered from random parses of text from tranche-1,2
+,3,4,5.
 \end_layout
 
 \begin_layout Standard
-The following charts and analyses are derived from a single dataset, called
- 'en_pairs_rfive_mtwo'.
- It contains data for word-pair statistics derived from parsing text from
- tranche-1,2,3,4,5 (See the download.sh scripts), followed by MST parsing
- of tranche-1 and 2.
- The word-pair statistics were obtained by applying random-tree parsing
- to entire sentences.
- The dataset is summarized in section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Dataset-report"
+These 
+\begin_inset Quotes eld
+\end_inset
+
+tranches
+\begin_inset Quotes erd
+\end_inset
+
+ consist of unannotated text corpora downloaded from the net; the specific
+ download scripts that were used are the 'download.sh' scripts located in
+ github, at https://github.com/opencog/opencog//opencog/nlp/learn/download.
+ Word-pair statistics are obtained by 
+\begin_inset Quotes eld
+\end_inset
+
+random-tree parsing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A random-tree parse is generated by creating a random planar parse tree
+ for a sentence; it is planar in the sense that no links cross.
+ It is random in the sense that a uniform distribution is assumed on the
+ space of all possible planar parses.
+ For each link in such a parse, one simply records the two words at each
+ end of the link, and increments the count of that particular word pair
+ by one.
+ The random-tree method for obtaining word-pair counts results in subtly
+ different statistics than what would be obtained by a sliding window of
+ some fixed width.
+ In particular, the random-tree method will occasionally count long-distance
+ links, longer than what would be seen in a sliding window.
+ The difference in statistics between random-tree and sliding-window methods
+ has not been characterized.
+ It is presumed to be minor, and probably immaterial to subsequent results.
+\end_layout
+
+\begin_layout Standard
+The word-pair dataset, and other similar datasets are summarized in the
+ language learning diary
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2013"
 
 \end_inset
 
- and repeated here.
- The column labels are explained there.
+, in the section titled 
+\begin_inset Quotes erd
+\end_inset
+
+Dataset report 3 June 2017
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is repeated here, as it gives a hint of the foundation for the MST parses.
+ The column labels in the table below are the same as those explained there.
+ They are:
+\end_layout
+
+\begin_layout Description
+Size The dimensions of the array.
+ This is the number of unique, distinct words observed occurring on the
+ left-side of a word pair, times the number of words occurring on the right.
+ We expect the dimensions to be approximately equal, as most words will
+ typically occur on both the left and right side of a pair.
+ 
+\end_layout
+
+\begin_layout Description
+Pairs The total number of distinct word-pairs observed.
+\end_layout
+
+\begin_layout Description
+Obsn's The total number of observations of these pairs.
+ Most pairs will be observed more than once.
+ Distributions are typically Zipfian.
+\end_layout
+
+\begin_layout Description
+Obs/pr The average number of times each word-pair was observed.
+\end_layout
+
+\begin_layout Description
+Entropy The total entropy of these pairs in this dataset.
+ Denote a word-pair as 
+\begin_inset Formula $(w_{L},w_{R})$
+\end_inset
+
+ and 
+\begin_inset Formula $p(w_{L},w_{R})$
+\end_inset
+
+ as the probability (normalized count) for observing the word-pair.
+ The total entropy is then 
+\begin_inset Formula $H=-\sum_{w_{L},w_{R}}p(w_{L},w_{R})\log_{2}p(w_{L},w_{R})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+MI The total mutual information for the pairs in this dataset, defined as:
+ 
+\begin_inset Formula $MI=\sum_{w_{L},w_{R}}p(w_{L},w_{R})\log_{2}\left[p(w_{L},w_{R})/p(w_{L},*)p(*,w_{R})\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 'en_pairs_rfive' word-pair dataset can then be summarized as:
 \begin_inset VSpace defskip
 \end_inset
 
@@ -582,13 +993,13 @@ reference "sec:Dataset-report"
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -612,7 +1023,7 @@ Pairs
 \begin_inset Text
 
 \begin_layout Plain Layout
-Obs'ns
+Obsn's
 \end_layout
 
 \end_inset
@@ -659,7 +1070,11 @@ Dataset
 \begin_inset Text
 
 \begin_layout Plain Layout
-839K x 851K
+839K
+\begin_inset Formula $\times$
+\end_inset
+
+851K
 \end_layout
 
 \end_inset
@@ -731,6 +1146,238 @@ en_pairs_rfive
 \end_layout
 
 \begin_layout Standard
+\noindent
+The diary provides reports for other word-pair datasets, of varying sizes,
+ and some for other languages.
+ Perhaps the most interesting and surprising result is that the MI value
+ is nearly independent of the size of the dataset, and the language, varying
+ between about 1.8 and 3.0.
+\end_layout
+
+\begin_layout Standard
+A collection of pairs can be thought of as a sparse matrix; the rows of
+ the matrix can be taken to be vectors, as can the columns.
+ As vectors, they can be thought of as inhabiting some Banach space, having
+ an 
+\begin_inset Formula $l_{p}$
+\end_inset
+
+-norm.
+ Given a vector 
+\begin_inset Formula $\vec{v}=\sum_{n}a_{n}\hat{e}_{n}$
+\end_inset
+
+ decomposed into basis elements 
+\begin_inset Formula $\hat{e}_{n}$
+\end_inset
+
+ and real-number-valued coefficients 
+\begin_inset Formula $a_{n}$
+\end_inset
+
+, the 
+\begin_inset Formula $l_{p}$
+\end_inset
+
+-norm is defined as
+\begin_inset Formula 
+\[
+l_{p}\left(\vec{v}\right)=\sqrt[p]{\sum_{n}\left|a_{n}\right|^{p}}
+\]
+
+\end_inset
+
+For 
+\begin_inset Formula $p=2$
+\end_inset
+
+, this is simply the (Euclidean) 
+\begin_inset Quotes eld
+\end_inset
+
+length
+\begin_inset Quotes erd
+\end_inset
+
+ of the vector.
+ The 
+\begin_inset Formula $p=1$
+\end_inset
+
+ norm is sometimes called the 
+\begin_inset Quotes eld
+\end_inset
+
+Manhattan distance
+\begin_inset Quotes erd
+\end_inset
+
+; here called simply the 
+\begin_inset Quotes eld
+\end_inset
+
+count
+\begin_inset Quotes erd
+\end_inset
+
+.
+ For 
+\begin_inset Formula $p=0$
+\end_inset
+
+, one is simply measuring the support of the vector; that is, the number
+ of coefficients 
+\begin_inset Formula $a_{n}$
+\end_inset
+
+ that are non-zero.
+ In what follows, the 
+\begin_inset Formula $\hat{e}_{n}$
+\end_inset
+
+ correspond to words, either to words on the left of a pair, or on the right.
+ Thus, the table caption below is given by:
+\end_layout
+
+\begin_layout Description
+Size The left and right dimensions, as before.
+ 
+\emph on
+Videlicet
+\emph default
+, the number of unique, distinctly different words observed on the left
+ and the right side of a pair.
+ Viewed as a matrix, this is the number of columns and rows in the matrix.
+\end_layout
+
+\begin_layout Description
+Support The support is the average number of word-pairs that a word participates
+ in (on the left, or on the right).
+ Viewed as a matrix, this is the average number of non-zero entries in each
+ row or column.
+ Viewed as (row or column) vectors, this is the 
+\begin_inset Quotes eld
+\end_inset
+
+support
+\begin_inset Quotes erd
+\end_inset
+
+ of a (row or column) vector.
+ Formally, this is the 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+ norm of each vector: 
+\begin_inset Formula $\left|(w_{L},*)\right|=\sum_{w_{R}}\left(0<N(w_{L},w_{R})\right)$
+\end_inset
+
+ and likewise 
+\begin_inset Formula $\left|(*,w_{R})\right|=\sum_{w_{L}}\left(0<N(w_{L},w_{R})\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+Count The count is the average number of observations that a word-pair was
+ observed, for a given word.
+ Viewed as a matrix, this is the average value of each non-zero entry (averaged
+ over rows, or columns).
+ Viewed as vectors, this is the 
+\begin_inset Formula $l_{1}$
+\end_inset
+
+ norm divided by the 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+ norm.
+ The 
+\begin_inset Formula $l_{1}$
+\end_inset
+
+ norm is just the wild-card counts 
+\begin_inset Formula $N(w_{L},*)$
+\end_inset
+
+ and 
+\begin_inset Formula $N(*,w_{R})$
+\end_inset
+
+, where as always, the wild-card counts are defined as 
+\begin_inset Formula $N(w_{L},*)=\sum_{w_{R}}N(w_{L},w_{R})$
+\end_inset
+
+.
+ The count shown in the table is then the average count: 
+\begin_inset Formula $N(w_{L},*)/\left|(w_{L},*)\right|$
+\end_inset
+
+ for the rows, and likewise for the columns.
+\end_layout
+
+\begin_layout Description
+Length The length is the average length of the row and column vectors.
+ This is the 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+ norm divided by the 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+ norm.
+ The 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+ norm is just the standard concept of the length of a vector in Euclidean
+ space.
+ Here, 
+\begin_inset Formula $L(w_{L},*)=\sqrt{\sum_{w_{R}}N^{2}(w_{L},w_{R})}$
+\end_inset
+
+, and likewise 
+\begin_inset Formula $L(*,w_{R})=\sqrt{\sum_{w_{L}}N^{2}(w_{L},w_{R})}$
+\end_inset
+
+.
+ The length is interesting, because it 
+\begin_inset Quotes eld
+\end_inset
+
+penalizes
+\begin_inset Quotes erd
+\end_inset
+
+ word-pairs with only a small number of counts.
+ The act of squaring the count has the effect of giving much higher 
+\begin_inset Quotes eld
+\end_inset
+
+confidence
+\begin_inset Quotes erd
+\end_inset
+
+ to large observation counts: a word-pair observed twice as often is given
+ four times the credit.
+ The length shown in this table is the 
+\begin_inset Quotes eld
+\end_inset
+
+average
+\begin_inset Quotes erd
+\end_inset
+
+ length: it is 
+\begin_inset Formula $L(w_{L},*)/\left|(w_{L},*)\right|$
+\end_inset
+
+ for the rows, and likewise for the columns.
+\end_layout
+
+\begin_layout Standard
 The support and count for the pairs are given below.
 \begin_inset VSpace defskip
 \end_inset
@@ -743,15 +1390,15 @@ The support and count for the pairs are given below.
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -1013,7 +1660,74 @@ en_pairs_rfive
 \end_layout
 
 \begin_layout Standard
-The disjunct stats are these:
+The disjunct dataset is obtained by collecting statistics on MST parses
+ obtained from the tables above.
+ MST parsing is performed by considering the set of all-possible planar
+ trees connecting the words in a sentence.
+ One then selects the one single tree which maximizes the sum of the MI
+ values between all word-pairs.
+ This is the MST parse.
+ Given an MST parts, one then 
+\begin_inset Quotes eld
+\end_inset
+
+cuts
+\begin_inset Quotes erd
+\end_inset
+
+ each link, and labels the cut end of the link with the word that it was
+ previously connected to.
+ The disjunct is then the collection of these cut, labeled half-edges.
+ The collection is ordered, left-to-right, and a plus/minus indicator is
+ used to half-edge as having been originally left going (minus) or right-going
+ (plus).
+ A word-disjunct pair is then the word, and the dangling links that go with
+ it; the word can be thought of as sitting in the middle of the left-going
+ connectors, and the right-going connectors.
+ (In this sense, a word-disjunct pair resembles an N-gram, except that N
+ is not fixed, and there might be skipped intermediate words).
+ The dataset is created by accumulating counts for a large number of these
+ word-disjunct pairs.
+\end_layout
+
+\begin_layout Standard
+Just as before, the dataset of pair-counts can be viewed as a sparse matrix.
+ The rows correspond to words, the columns to disjuncts.
+ The table below summarizes this dataset.
+ The table caption is the same as before, with the following additional
+ values being reported:
+\end_layout
+
+\begin_layout Description
+\begin_inset Formula $H_{left}$
+\end_inset
+
+,
+\begin_inset Formula $H_{right}$
+\end_inset
+
+ The left and right entropies.
+ These are defined as 
+\begin_inset Formula $H_{right}=-\sum_{w}p(w,*)\log_{2}p(w,*)$
+\end_inset
+
+ and 
+\begin_inset Formula $H_{left}=-\sum_{d}p(*,d)\log_{2}p(*,d)$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $MI=H-H_{left}-H_{right}$
+\end_inset
+
+ holds, by definition.
+ The left and right entropies were not reported for the word-pairs table,
+ because these two are nearly equal, and are equal to half the difference
+ between the entropy and the MI.
+\end_layout
+
+\begin_layout Standard
+The table is then characterized as:
 \begin_inset VSpace defskip
 \end_inset
 
@@ -1025,15 +1739,15 @@ The disjunct stats are these:
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -1117,7 +1831,7 @@ MI
 \begin_inset Text
 
 \begin_layout Plain Layout
-Notes
+Dataset
 \end_layout
 
 \end_inset
@@ -1128,7 +1842,11 @@ Notes
 \begin_inset Text
 
 \begin_layout Plain Layout
-137K x 6.24M
+137K
+\begin_inset Formula $\times$
+\end_inset
+
+6.24M
 \end_layout
 
 \end_inset
@@ -1217,9 +1935,20 @@ en_pairs_rfive_mtwo
 
 \end_layout
 
+\begin_layout Subsection
+Dataset Analysis
+\end_layout
+
 \begin_layout Standard
-The dataset contains 851964 words.
- Of these, 137078 words that have disjuncts attached to them.
+The word-pair dataset contains 851964 words.
+ Not all of these were observe during the subsequent MST parsing, as the
+ size of the MST-parsed corpus was smaller.
+ However, since the MST corpus was a subset of the word-pair corpus, it
+ does not contain any words that were not previously observed.
+\end_layout
+
+\begin_layout Standard
+The MST dataset has 137078 words that have disjuncts attached to them.
  These words have been observed a total of 18489594  times, for an average
  of 18489594/137078 = 21.70 observations per word.
  This dataset contains 6239997 different, unique disjuncts, for an average
@@ -1228,27 +1957,52 @@ The dataset contains 851964 words.
 \end_layout
 
 \begin_layout Standard
-The period appears 849354.0 times, suggesting that this many sentences were
- observed.
+The period (the punctuation mark denoting end-of-sentence) appears 849354.0
+ times, suggesting that this many sentences were observed.
  Each sentence thus has an average of 18489594 / 849354 = 21.77 words per
  sentence.
- 
+ The precise statistics, however, are governed by the end-of-sentence detector,
+ which ignores common abbreviations such as 
+\begin_inset Quotes eld
+\end_inset
+
+Mr.
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+Mrs.
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\emph on
+etc
+\emph default
+.
+ but may make mistakes for uncommon abbreviations, and for non-prose text,
+ such as tables and charts.
 \end_layout
 
 \begin_layout Standard
-The dataset contains 6239997 unique connector-sets, for an average of 18489594
- / 6239997 = 2.96 observations per cset.
+The dataset contains 6239997 unique disjuncts, for an average of 18489594
+ / 6239997 = 2.96 observations per disjunct.
  This last number that makes this dataset feel thin and sparse.
  Its not clear how accurate that perception is: an earlier dataset was about
  one-tenth to one-twentieth the size, in the number of words, disjuncts
  and observations, yet it had a ratio of 1.5 observations per cset.
  That is, making more than ten times the number of observations only doubled
  the observations per cset.
- 
+ This suggests that the distribution is Zipfian, so that large increases
+ in observations result in only small changes to averages.
 \end_layout
 
 \begin_layout Standard
-The dataset is sparse in a completely different sense: viewing 
+The dataset is sparse, in a completely different sense from the above.
+ Viewing 
 \begin_inset Formula $N(w,d)$
 \end_inset
 
@@ -1256,7 +2010,8 @@ The dataset is sparse in a completely different sense: viewing
 \begin_inset Formula $851964\times6239997$
 \end_inset
 
-, but only a very small number of these is non-zero: this is 
+, there are only a very small number of counts that are non-zero.
+ Specifically, the fraction is 
 \begin_inset Formula $8629163/(851964\times6239997)=1.623\times10^{-6}$
 \end_inset
 
@@ -1265,7 +2020,11 @@ The dataset is sparse in a completely different sense: viewing
 \begin_inset Formula $-\log_{2}$
 \end_inset
 
- of this number, which is 16.60.
+ of this number; here, it is 
+\begin_inset Formula $-\log_{2}1.623\times10^{-6}\approx16.60$
+\end_inset
+
+.
  The sparsity appears to increase with the number of observations: the previous,
  ten-times-smaller dataset had a sparsity of 15.
 \end_layout
@@ -1290,23 +2049,23 @@ status collapsed
 \begin_layout Plain Layout
 This and the following entropies were measured with the word-entropy-bits,
  disjunct-entropy-bits, etc.
- functions in disjunct-stats.scm Alternately, the print-matrix-summary-report
- now reports this.
+ functions in 'disjunct-stats.scm' Alternately, the 'print-matrix-summary-report'
+ function now reports this.
 \end_layout
 
 \end_inset
 
- The total connector-set entropy is much larger.
+ The total entropy is much larger.
  It is defined as
 \begin_inset Formula 
 \[
-H_{cset}=-\sum_{w,d}p(w,d)\log_{2}p(w,d)
+H_{total}=-\sum_{w,d}p(w,d)\log_{2}p(w,d)
 \]
 
 \end_inset
 
 and is measured to be 
-\begin_inset Formula $H_{cset}=20.96$
+\begin_inset Formula $H_{total}=20.96$
 \end_inset
 
  bits.
@@ -1326,7 +2085,7 @@ and is measured to be
  The total mutual information between the words and disjuncts is then 
 \begin_inset Formula 
 \[
-MI_{cset}=\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=H_{word}+H_{disjunct}-H_{cset}
+MI_{cset}=\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=H_{word}+H_{disjunct}-H_{total}
 \]
 
 \end_inset
@@ -1338,7 +2097,98 @@ and is measured to be
  bits.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Standard
+It is interesting to compare 
+\begin_inset Formula $MI_{cset}$
+\end_inset
+
+ to 
+\begin_inset Formula $MI_{word-pair}$
+\end_inset
+
+.
+ The former is much larger, by just over 6 bits.
+ There are several ways to think about this.
+ Clearly, the connector-set database contains 
+\begin_inset Quotes eld
+\end_inset
+
+more information
+\begin_inset Quotes erd
+\end_inset
+
+; one might say that it is a distillation, an extraction.
+ It is an amplification, but done so that the signal-to-noise ratio is much
+ improved.
+ MST parsing is clearly picking out some sort of structure from natural
+ language.
+ Consider it this way: 
+\begin_inset Formula $2^{1.84}=3.58$
+\end_inset
+
+ and so the word-pair dataset contains on average 1.84 more bits of information
+ than what one would expect to observe in a completely random, uniformly-distrib
+uted word-salad, for which we expect 
+\begin_inset Formula $MI=0$
+\end_inset
+
+.
+ The word-disjunct dataset takes a large step in extracting signal from
+ the noise: one gets 
+\begin_inset Formula $7.897-1.84=6.057$
+\end_inset
+
+ more bits of information, for a factor of 
+\begin_inset Formula $2^{6.057}=66.5$
+\end_inset
+
+.
+ That is a respectable amount of noise reduction.
+\end_layout
+
+\begin_layout Section
+Distributions
+\end_layout
+
+\begin_layout Standard
+The previous section characterized the dataset in terms of its total size,
+ entropy, and related single-number values that can be extracted from it.
+ More interesting is the distribution of columns and rows, that is, the
+ distribution of the words and the disjuncts.
+ These result in various graphs, almost all of which are Zipfian in nature;
+ and some that very much are not.
+ The distributions obtained here can be contrasted with the distributions
+ obtained from word-pair counts.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2009"
+
+\end_inset
+
+ They are similar in many ways, and also strikingly different.
+\end_layout
+
+\begin_layout Standard
+In the following, the term 
+\begin_inset Quotes eld
+\end_inset
+
+connector set
+\begin_inset Quotes erd
+\end_inset
+
+ is taken as a synonym for 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
 Connector-set distribution
 \end_layout
 
@@ -1376,6 +2226,10 @@ ats.scm file, on the en_pairs_rfive_mtwo database.
  The first follows the canonical Zipf distribution.
  The green line is an eyeballed, approximate fit, of exponent -1.1.
  The second has an exponent of about -0.85.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1462,12 +2316,12 @@ A printing utility for these three is `show-counts` in the `disjunct-stats.scm`
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="6">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -2103,8 +2957,8 @@ The main point of this table is to demonstrate the log-likelihood column.
  At this point, these numbers won't seem to have much meaning; however,
  they provide an overall scale that will be seen, repeatedly, in the analysis
  below.
- The range of magnitudes -- 4 to 7 -- is no accident, and similar ranges
- will be seen later.
+ The range of magnitudes – 4 to 7 – is no accident, and similar ranges will
+ be seen later.
  
 \end_layout
 
@@ -2263,6 +3117,10 @@ op cit
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2399,7 +3257,7 @@ high quality
  and its disjunct; this is explored later.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Word distribution
 \end_layout
 
@@ -2447,6 +3305,10 @@ Graph of binned-word-counts.dat, generated in disjunct-stats.scm
 \end_inset
 
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2594,6 +3456,10 @@ reference "eq:word-distrib"
 
 which effectively predicts the height and location of the spikes.
  This is clearly demonstrated by the straight green line.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2777,6 +3643,10 @@ Comparing this to the graph above, with logli
  it really does have a slope of 0.5, which is exactly what the Jacobian determina
 nt was telling is it should be.
  Yayy! Declare victory and go home!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2884,7 +3754,7 @@ junk
 \begin_layout Standard
 Thus, it is unclear on what the meaning of this knee in the graph really
  is, and how it should be explained.
- Note that this knee is NOT visible in the Zipfian distribution -- nothing
+ Note that this knee is NOT visible in the Zipfian distribution – nothing
  happens at 
 \begin_inset Formula $N=400$
 \end_inset
@@ -2904,7 +3774,7 @@ reference "graph word frequency"
 , and does not continue past there! This seems to be a fairly subtle effect.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Ranked average observations per disjunct
 \end_layout
 
@@ -2973,6 +3843,10 @@ The graph on the right expresses an alternate view of the same idea: it
  an average disjunct observation count of less than four.
  It also conveys the sense that when the average disjunct count is greater
  than about four, that this is unusual, and perhaps meaningful in some way.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3054,6 +3928,10 @@ Prince
  The top six disjuncts are just single links, shown in the table below.
  Clearly all are princes.
  This leaves 767 other disjuncts with far fewer counts.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3061,8 +3939,8 @@ Prince
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3224,6 +4102,10 @@ think
  It has 5462 disjuncts in total; only six are observed more than 200 times.
  The last in the list below is the first clear appearance of a transitive
  verb.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3231,8 +4113,8 @@ think
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3393,6 +4275,10 @@ long
  It has 5412 different disjuncts on it; only five are seen more than 200
  times.
  These are:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3400,8 +4286,8 @@ long
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3537,7 +4423,7 @@ The skewness appears to be very sharp.
  Again, this is done on a log-log graph, in a Zipfian way.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct count distribution
 \end_layout
 
@@ -3613,6 +4499,10 @@ Computed with the dj-prince and dj-think etc.
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3646,6 +4536,10 @@ Computed with the accum-dj-all function in disjunct-stats.scm
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3667,7 +4561,7 @@ Its kind of a strange graph.
  this mean? This is covered in the next section.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct Support Distribution
 \end_layout
 
@@ -3721,6 +4615,10 @@ Generated by sorted-support in disjunct-stats.scm
 
  The eye-balled fit has a slope of 0.9, but, from the eyeball-perspective,
  this is not all that different from a slope of 1.0.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3757,7 +4655,7 @@ without
  multiplicity.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Ranked Euclidean length (RMS Size)
 \end_layout
 
@@ -3837,6 +4735,10 @@ The RMS size of the set is thus larger not only when more disjuncts have
  Thus, we expect adjectives to appear higher-up on this ranking list, than
  the observation-based list.
  And this might be true, relatively, but certainly not true absolutely.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3880,7 +4782,7 @@ concentrated
 The slope appears to be exactly -1.0, continuing the scale-free trend.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Mean-square to size ratio
 \end_layout
 
@@ -3945,6 +4847,10 @@ Extracted from ranked-sqlen-norm.dat
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3952,9 +4858,9 @@ Extracted from ranked-sqlen-norm.dat
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -4286,9 +5192,9 @@ own
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -4635,6 +5541,10 @@ Prince
 
 \begin_layout Standard
 The distribution, shown below, is a power-law.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4670,7 +5580,7 @@ Neither of these variations seem promising; they seem to offer up more of
  A larger and more refined dataset might reveal otherwise.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Mutual information
 \end_layout
 
@@ -4722,6 +5632,10 @@ These are graphed by binned-cset-mi and weighted-cset-mi in the disjunct-stats.s
 m file.
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -4851,7 +5765,7 @@ Both graphs show an eyeballed fit in green.
 , it's clearly missing a large excess in the middle of the graph.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Marginal Mutual Information of Words
 \end_layout
 
@@ -4944,6 +5858,10 @@ reference "logli distribution graph"
  as compared to 0.23 for the non-marginal MI distribution above.
  The difference between 0.24 and 0.23 seems to be significant: changing one
  to the other seems to give a noticeably poorer fit.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5040,6 +5958,10 @@ Tomb
 \end_inset
 
  is 40th in the list and has three disjuncts observed more than twice:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5047,8 +5969,8 @@ Tomb
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -5180,6 +6102,10 @@ prominently
 
  appears 50th in the list, and suggests that it is only used only in a rather
  rigid and formulaic way:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5187,8 +6113,8 @@ prominently
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -5298,6 +6224,10 @@ Corps Diplomatique
 \end_inset
 
 , as witness on the different sign on the disjuncts:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5305,8 +6235,8 @@ Corps Diplomatique
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -5472,8 +6402,8 @@ These samplings of disjuncts are sharply reminiscent of the technique of
  In this case, it is used to obtain grammatical structure.
 \end_layout
 
-\begin_layout Subsection*
-Mutual information of disjuncts
+\begin_layout Subsection
+Mutual Information of Disjuncts
 \end_layout
 
 \begin_layout Standard
@@ -5541,6 +6471,10 @@ reference "logli distribution graph"
 
 .
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5559,7 +6493,7 @@ The origin of the noise that seems to build up for MI<10 is unclear.
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Fractional Entropy
 \end_layout
 
@@ -5645,6 +6579,10 @@ It resembles the graph for the ranked fractional marginal MI, above.
 .
  As before, it has a width of approximately 1/4th.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5755,12 +6693,12 @@ l form of verbs.
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="6">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -6184,7 +7122,7 @@ many possibilities
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsubsection*
 More terms
 \end_layout
 
@@ -6202,7 +7140,7 @@ MI_{word}(w)=H_{word}(w)+\log_{2}p(w,*)+\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}p(*,
  The last term is bizarre...
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Vertex degrees and hubiness
 \end_layout
 
@@ -6250,6 +7188,10 @@ status collapsed
 Computed with sorted-avg-connectors in disjunct-stats.scm 
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -6321,6 +7263,13 @@ grammar
 
 \begin_layout Subsubsection*
 Vertex degree in Wikipedia
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Vertex-degree-in"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6470,7 +7419,7 @@ So: bigger datasets, and an urgent need for non-Wikipedia content.
  of tables and lists masquerading as sentences.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Hubiness
 \end_layout
 
@@ -6504,11 +7453,286 @@ Given the earlier Zipfian results on the average degree
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section
+Grammatical Classes
+\end_layout
+
+\begin_layout Standard
+The primary intended use of the connector set dataset is to provide input
+ to the measurement of the syntactic (and semantic) similarity of words,
+ so that they can be organized into grammatical classes (colloquially, into
+ parts of speech).
+ Two words are grammatically similar if they share many disjuncts in common,
+ that is, if they are used in sentences in much the same walk.
+ Thus, for example, one might imagine that the words 
+\begin_inset Quotes eld
+\end_inset
+
+run
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+trot
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+jog
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+walk
+\begin_inset Quotes erd
+\end_inset
+
+ might get used in similar ways, sometimes being almost interchangeable.
+ Thus, it is interesting to develop metrics by which similarity might be
+ gauged.
+\end_layout
+
+\begin_layout Standard
+A number of different metrics are possible, and many are proposed in the
+ section that follows.
+ Two are of particular interest.
+ The first is the cosine similarity; this is interesting, if for no other
+ reason than that it is widely defined and used.
+ The second is the entropic similarity.
+ Thus lurks in many contexts under the name of 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+; however, the term 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+ has already been heavily used in the previous sections, and the entropic
+ similarity is something different; it resembles the cosine similarity,
+ but has much nicer properties, when one is concerned with maximizing the
+ information content over large datasets.
+ 
+\end_layout
+
+\begin_layout Standard
+A related, but very important task, when judging the similarity of words,
+ and attempting to classify them into distinct grammatical classes is that
+ sometimes the same word, 
+\emph on
+viz
+\emph default
+, the same text-string can belong to two different parts of speech.
+ A casual perusal of any dictionary will show that many words can be used
+ both as nouns, and as verbs.
+ Other words can be nouns or adjectives; yet others can be subclasses: 
+\emph on
+e.g.
+
+\emph default
+ transitive and intransitive verbs.
+ Disjuncts can be thought of as hyper-fine-grained parts-of-speech identifiers,
+ and so one task of categorization is to place them into larger, less crude
+ categories.
+ Another important realization is to observe that different disjuncts correlate
+ strongly with different semantic meanings; for a particularly brutal example,
+ the noun 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ has a semantic meaning that is unrelated to the past tense of the verb
+ 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Which is intended is readily discerned from context; disjuncts encode content.
+\end_layout
+
+\begin_layout Standard
+A more extensive discussion of the relationship between meaning and disjuncts
+ is given elsewhere;
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ it is touched on only briefly below, as it informs what properties of a
+ similarity metric are desirable, and which are not.
+\end_layout
+
+\begin_layout Subsection
+Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+One can pose the problem of organizing words into grammatical categories
+ as a matrix factorization problem.
+ In the current framework, this means factorizing the matrix
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
+\]
+
+\end_inset
+
+so that 
+\begin_inset Formula $p^{\prime}\left(w,g\right)$
+\end_inset
+
+ gives the probability that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ belongs to the grammatical category 
+\begin_inset Formula $g$
+\end_inset
+
+, while 
+\begin_inset Formula $p^{\prime\prime}\left(g,d\right)$
+\end_inset
+
+ gives the probability that the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ is appropriate for use with the grammatical category 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ This factorization feeds back into itself, as the disjuncts are necessarily
+ composed of words, which must now be reassigned into classes.
+ 
+\end_layout
+
+\begin_layout Standard
+There are many widely discussed algorithms for performing the above factorizatio
+n, falling under the general name of 
+\begin_inset Quotes eld
+\end_inset
+
+low-rank matrix approximation
+\begin_inset Quotes erd
+\end_inset
+
+ (LRMA) techniques.
+ These are discussed in greater detail in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018skippy"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Clustering
+\end_layout
+
+\begin_layout Standard
+An alternative to applying LRMA techniques, one can try to guess at the
+ grammatical categories by looking for words that are similar to each other,
+ and so invoke clustering algorithms to obtain grammatical categories.
+ As clustering is inherently point-wise and not global, it is a generally
+ weaker technique.
+ That is, clustering generally looks at just pairs of words, and 
+\begin_inset Quotes eld
+\end_inset
+
+ignores
+\begin_inset Quotes erd
+\end_inset
+
+ other evidence in making the decision as to whether two words might go
+ into the same grammatical category.
+ Worse, if the clustering problem is posed naively, then it has a naive
+ and incorrect answer: each word can belong to only one class.
+ This ignores the fact that a word might belong to multiple classes 
+\emph on
+viz.
+
+\emph default
+ that class membership is a probability 
+\begin_inset Formula $p^{\prime}\left(w,g\right)$
+\end_inset
+
+.
+ It also ignores the possibility that an observed word-vector might be the
+ sum of observations of two very different words that just happen to have
+ the same spelling: a canonical example being 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+, which can be the past tense of 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+, the noun that is a cutting tool, and the verb that is the cutting action.
+ Although in call cases, one has 
+\begin_inset Formula $w=\mbox{saw}$
+\end_inset
+
+, the collection of disjuncts associated to each are likely to be very different.
+ That is, the distribution 
+\begin_inset Formula $p^{\prime\prime}\left(g,d\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g=\mbox{`cutting tool`}$
+\end_inset
+
+ will be very different from 
+\begin_inset Formula $p^{\prime\prime}\left(g,d\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $g=\mbox{`past-tense-observation`}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
 Disjunct Cosine Similarity
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Disjunct-Cosine-Similarity"
+name "subsec:Disjunct-Cosine-Similarity"
 
 \end_inset
 
@@ -6546,15 +7770,24 @@ where
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-The current dataset being analyzed (the 
+This section explores the distribution of the cosine similarity for the
+ 
 \noun on
 en_pairs_rfive_mtwo
 \noun default
- dataset, same as above) contains 797 words whose length is greater than
+ dataset (same as above).
+\end_layout
+
+\begin_layout Subsubsection
+Rank distribution
+\end_layout
+
+\begin_layout Standard
+The 
+\noun on
+en_pairs_rfive_mtwo
+\noun default
+ dataset (same as above) contains 797 words whose length is greater than
  or equal to 128.
  The ranking-by-length was already shown up above, in the graph 
 \begin_inset CommandInset ref
@@ -6588,6 +7821,10 @@ See the good-sims and ranked-sims in disjunct-stats.scm file.
 \end_inset
 
  They are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6615,8 +7852,159 @@ Well, that's new! The similarity ranking is very well fit by a parabola
 
 \end_layout
 
+\begin_layout Subsubsection
+Hyperbolic space
+\end_layout
+
 \begin_layout Standard
-There are 427 words observed 256 or more times, these form 
+Recall that
+\begin_inset Formula 
+\[
+\cos\theta=1-\frac{\theta^{2}}{2}+\frac{\theta^{4}}{4!}-\cdots
+\]
+
+\end_inset
+
+and so the above graph is stating that 
+\begin_inset Formula $\theta\approx\log\left(rank\right)/8.9$
+\end_inset
+
+ is a reasonable approximation for the similarity angle, for the first thousand
+ pairs, or so.
+ Lest there be any hope that the graph as a whole is sine-wave-like, the
+ high-rank tail goes as the cube of the log, not the square.
+ 
+\end_layout
+
+\begin_layout Standard
+The similarity angle can be taken as a metric or as a distance.
+ If the relationships between words is thought of as a network graph, one
+ can ask how many nearest neighbors there are, as a function of the distance.
+ Since the rank is effectively a count of nearest neighbors, and since 
+\begin_inset Formula $\theta$
+\end_inset
+
+ is effectively a distance, one has that 
+\begin_inset Formula 
+\[
+V\sim e^{r}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $V$
+\end_inset
+
+ is the number of nearest neighbors (the 
+\begin_inset Quotes eld
+\end_inset
+
+volume
+\begin_inset Quotes erd
+\end_inset
+
+) and 
+\begin_inset Formula $r$
+\end_inset
+
+ is the distance (so 
+\begin_inset Formula $r=\theta$
+\end_inset
+
+ is just a change of notation).
+ This volume-to-radius relationship should be compared to the volume-to-radius
+ relationships for flat spaces for fixed dimension.
+ For flat, Euclidean two-dimensional space, one has 
+\begin_inset Formula $A=\pi r^{2}$
+\end_inset
+
+ the area of a circle.
+ In three dimensions, 
+\begin_inset Formula $V=4\pi r^{3}/3$
+\end_inset
+
+.
+ For flat 
+\begin_inset Formula $N$
+\end_inset
+
+-dimensional space, 
+\begin_inset Formula $V\sim r^{N}$
+\end_inset
+
+.
+ Clearly, the 
+\begin_inset Quotes eld
+\end_inset
+
+space
+\begin_inset Quotes erd
+\end_inset
+
+ of the network graph cannot be flat.
+ This is in contrast to spaces with constant negative curvature, where the
+ volume does grow exponentially as a function of the radius.
+ Thus, one can hypothesize that the language graph can be mapped (almost)
+ isometrically to a hyperbolic surface (for example, the Poincaré disk).
+\end_layout
+
+\begin_layout Standard
+This conjecture promptly poses various questions: does the network graph
+ have constant negative curvature, or is it bumpy? Numerically, what is
+ the curvature? Does it embed better into hyperbolic 3-space or hyperbolic
+ 4-space? There is no such thing as a hyperbolic 
+\begin_inset Formula $N$
+\end_inset
+
+-space for classical Riemann spaces, for 
+\begin_inset Formula $N<2$
+\end_inset
+
+; yet, for the network graph, presumably one has 
+\begin_inset Formula $N=0$
+\end_inset
+
+.
+ How should this be described? 
+\end_layout
+
+\begin_layout Subsubsection
+Size Cutoffs
+\end_layout
+
+\begin_layout Standard
+The network graph has some nodes and links that are observed very frequently,
+ while others are observed only very rarely, sometimes only once or twice.
+ As mentioned in the section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Vertex-degree-in"
+
+\end_inset
+
+ on the vertex degree, the rarely-observed disjuncts appear to be associated
+ with bad parses of lists, tables (such as tables of contents, product tables,
+ pricing tables) and indexes.
+ Therefore, it is appealing to imagine that by removing this 
+\begin_inset Quotes eld
+\end_inset
+
+crud
+\begin_inset Quotes erd
+\end_inset
+
+, one could improve the quality of the dataset.
+ One obvious way of performing a cleanup is to banish infrequently-observed
+ words.
+\end_layout
+
+\begin_layout Standard
+In the 
+\noun on
+en_pairs_rfive_mtwo
+\noun default
+ dataset, there are 427 words observed 256 or more times, these form 
 \begin_inset Formula $427\times426/2=90951$
 \end_inset
 
@@ -6638,6 +8026,10 @@ There are 427 words observed 256 or more times, these form
 
  pairs.
  The ranking of these are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6680,6 +8072,10 @@ Produced by binned-good-sims.
 
 .
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6694,8 +8090,18 @@ Produced by binned-good-sims.
 \end_layout
 
 \begin_layout Standard
-Similar graphs are produced for a bigger set.
- In this case, once can consider
+One can also be less restrictive.
+ The graph below shows the distribution of 1058120 pairs, with the length
+ restriction loosened to 
+\begin_inset Formula $4<\mbox{len}(w)$
+\end_inset
+
+.
+ It is, however, an incomplete dataset; not all possible pairs were considered.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6707,6 +8113,22 @@ Similar graphs are produced for a bigger set.
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+It has a rather different structure to it.
+ Its not clear what this means; this may be an artifact of it being an incomplet
+e dataset...
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Top Ten Lists
+\end_layout
+
+\begin_layout Standard
+Its worth getting an idea of what the most similar words are, and why they
+ are considered similar.
 \end_layout
 
 \begin_layout Standard
@@ -6784,9 +8206,9 @@ The first non-capitalized word-pair appears at position ten.
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7200,9 +8622,9 @@ The table below shows several more pairs worth closer examination.
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7456,9 +8878,18 @@ word-pair
 
 \end_layout
 
+\begin_layout Subsubsection
+Vector Structure
+\end_layout
+
 \begin_layout Standard
-It is worth looking at a few of these, to see how they work out.
- The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
+It is worth looking at a few of the vectors, to see what form they actually
+ have.
+ 
+\end_layout
+
+\begin_layout Standard
+The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
  disjuncts.
  The table below shows the top-ranked disjuncts for each.
  It makes quite clear why the two have a high similarity.
@@ -7483,10 +8914,10 @@ Print the disjuncts with the `print-disjuncts` function.
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7859,12 +9290,12 @@ The list above contains the pairs 'guess ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="6">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -8465,10 +9896,10 @@ Some more verbs are worth looking at.
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -8912,10 +10343,10 @@ The pair 'believe ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -9350,10 +10781,10 @@ The first prepositions in the list are 'in ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -9776,14 +11207,14 @@ The pair 'would ..
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="8">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -10487,14 +11918,14 @@ The words 'city', 'house', 'village' and 'world' are all similar.
 \begin_inset Tabular
 <lyxtabular version="3" rows="12" columns="8">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -11414,6 +12845,10 @@ The similarity above is predicated on the frequent pairing of a word with
  They were clearly high enough to allow the MST parse to move forward, but
  are not otherwise terribly promising.
  They are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -11421,8 +12856,8 @@ The similarity above is predicated on the frequent pairing of a word with
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -11634,7 +13069,7 @@ The above suggests that using the raw observation count to compute the cosine
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Score Cosine
 \end_layout
 
@@ -11701,7 +13136,18 @@ Why is this a reasonable thing to do? Well, the previous two tables already
  Perhaps the sos cosine score would be more sensitive to those processes.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section
+Word Senses
+\end_layout
+
+\begin_layout Standard
+Words, considered as text strings, often correspond to multiple senses.
+ Conversely, many words have similar senses.
+ One would like to induce what these senses and word categories are, based
+ on the observed counts.
+\end_layout
+
+\begin_layout Subsection
 Prototype Theory
 \end_layout
 
@@ -11772,7 +13218,7 @@ meaning
 
  of an otherwise flat description of the extensional and intensional qualities
  of a set.
- To create a brige to the statistical tools available here, one might say
+ To create a bridge to the statistical tools available here, one might say
  that an intensional or an extensional description of a class is a flat,
  unweighted collection of features or members.
  In fact, some features or members are more important than others, so that
@@ -11820,7 +13266,7 @@ robins
 
  are more prototypical of birds simply because cultural English speakers
  (Americans, Europeans) see robins more frequently than penguins, and so
- are aculturated to this prototype.
+ are acculturated to this prototype.
  The MI approach means that robins are more prototypical of birds because
  they have a high MI, when correlating intensional and extensional qualities.
  That is, a large value for 
@@ -11847,7 +13293,7 @@ where the individual MI score was computed over all pairs (thing, feature)
 \end_layout
 
 \begin_layout Standard
-What determines a category itself? Wikipedia summerizes this aptly:
+What determines a category itself? Wikipedia summarizes this aptly:
 \end_layout
 
 \begin_layout Itemize
@@ -11876,7 +13322,7 @@ member
 \begin_inset Quotes erd
 \end_inset
 
- to be a word, this suggests that a grammatical category is a coolection
+ to be a word, this suggests that a grammatical category is a collection
  of words that share many disjuncts (large overlap, large cosine similarity),
  while minimizing the disjuncts shared with other words (large MI).
 \end_layout
@@ -11897,14 +13343,292 @@ mutual exclusion
 \begin_inset Quotes eld
 \end_inset
 
-quality cosine
+entropic similarity
 \begin_inset Quotes erd
 \end_inset
 
 , given below.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
+Entropic Similarity
+\end_layout
+
+\begin_layout Standard
+A similarity between two words, taking the form of the symmetric mutual
+ information between them, can be defined by working with the matrix product.
+ Let 
+\begin_inset Formula $M=\left[p\left(w,d\right)\right]$
+\end_inset
+
+ be the matrix whose rows correspond to words, and columns correspond to
+ disjuncts.
+ The value of any given matrix entry is then the frequency 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ The matrix 
+\begin_inset Formula $MM^{T}$
+\end_inset
+
+then has matrix entries
+\begin_inset Formula 
+\[
+\left[MM^{T}\right]\left(w_{1},w_{2}\right)=\sum_{d}p\left(w_{1},d\right)p\left(w_{2},d\right)
+\]
+
+\end_inset
+
+Here, the notation 
+\begin_inset Formula $M^{T}$
+\end_inset
+
+ denotes the matrix-transpose.
+ Note that 
+\begin_inset Formula $MM^{T}$
+\end_inset
+
+ is a symmetric matrix: 
+\begin_inset Formula 
+\[
+\left[MM^{T}\right]\left(w_{1},w_{2}\right)=\left[MM^{T}\right]\left(w_{2},w_{1}\right)
+\]
+
+\end_inset
+
+A symmetric mutual information can be built by normalizing this matrix,
+ defining a matrix 
+\begin_inset Formula $Q$
+\end_inset
+
+ such that
+\begin_inset Formula 
+\begin{equation}
+Q\left(w_{1},w_{2}\right)=\frac{\left[MM^{T}\right]\left(w_{1},w_{2}\right)}{\sum_{u,v}\left[MM^{T}\right]\left(u,v\right)}=\frac{\left[MM^{T}\right]\left(w_{1},w_{2}\right)}{\left[MM^{T}\right]\left(*,*\right)}\label{eq:symmetric transpose}
+\end{equation}
+
+\end_inset
+
+The entropic similarity can then be defined as
+\begin_inset Formula 
+\[
+\mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}
+\]
+
+\end_inset
+
+Written in this fashion, this is clearly a form of mutual information between
+ two words; its called 
+\begin_inset Quotes eld
+\end_inset
+
+entropic similarity
+\begin_inset Quotes erd
+\end_inset
+
+ here, to avoid confusion with other uses of the words 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+ in this text.
+\end_layout
+
+\begin_layout Subsection
+Stuff
+\end_layout
+
+\begin_layout Standard
+This redoes the graphs from section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+First graph: top most frequently-observed 640 words, all pairs, for a total
+ of N(N-1)/2=204480 pairs; all pairs shown.
+ The fit is eye-balled
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/binned-sims-dj-cosine.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It resembles the earlier figure in section 4.1 and not the mystery figure
+ ...
+ .
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See the `(mksims top-items)` and `sim-dj-cosine` in disjunct-stats.scm file.
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+and next we have the entropy score.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/binned-sims-dj-mi.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This one is based on a dataset of the top 920 words, for a total of 
+\begin_inset Formula $N\left(N-1\right)/2=422740$
+\end_inset
+
+ pairs.
+ The lone spike at the far left corresponds to an 
+\begin_inset Formula $MI=-\infty$
+\end_inset
+
+, as appropriate for disjuncts with zero overlap (the cosine would be zero,
+ too) For this dataset, this bin holds 14334 items.
+\end_layout
+
+\begin_layout Standard
+The smooth parabolic line is an eyeballed fit - a Gaussian, centered at
+ an MI value of -3.5, and having a standard deviation of 3.
+\end_layout
+
+\begin_layout Standard
+What's the relationship between MI and cosines? Here it is: the top 640,
+ which have both:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/scatter-dj-cos-mi.eps
+	lyxscale 50
+	display false
+	width 49col%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename en-sims/scatter-dj-mi-cos.eps
+	width 49col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Both graphs show the same data, but rotated by 90 degrees.
+ The left graph sorts the data by cosine similarity; the right graph sorts
+ it by MI.
+\end_layout
+
+\begin_layout Standard
+Noisy.
+ Clearly there is a linear relationship between the log of the cosine similarity
+, and the MI.
+ But its very noisy.
+\end_layout
+
+\begin_layout Standard
+Heres a ranked variant:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-sims/ranked-dj-mi.eps
+	width 49col%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename en-sims/ranked-dj-cos.eps
+	width 49col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On the left is ranking according to pair-MI.
+ Clearly, the similarity drops off a cliff, for high ranking.
+ But in the meanwhile, it is very linear, going as 
+\begin_inset Formula $MI=const.-\log_{2}\sqrt{rank}$
+\end_inset
+
+.
+ Interesting.
+\end_layout
+
+\begin_layout Standard
+On the right is effectively the same ranking for cosine similarity, as given
+ in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+ It even uses the curve fit.
+ This dataset is a good bit larger, but it also does not have the high-observati
+on-count cutoff.
+ Thus, presumably, there are some disjuncts with very low observation counts
+ that are polluting the data, and distorting what was previously a very
+ nice graph.
+\end_layout
+
+\begin_layout Standard
+All very interesting, I think.
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Other Similarity Scores
+\end_layout
+
+\begin_layout Standard
+There are a number of different ways of judging similarity between a pair
+ of words.
+ It seems that these are limited only by the imagination.
+ A variety of different similarity measures are given below.
+ Each of these can be justified, to some degree, by hand-waving arguments
+ and appeals to taste and conceptions of mathematical beauty.
+ How to properly anchor these measures more firmly in a consistent framework
+ is unclear.
+\end_layout
+
+\begin_layout Subsection
 Quality Cosine
 \end_layout
 
@@ -11986,7 +13710,7 @@ But what if the high quality is based on a pathetically small number of
  The suitability of these different means of judging similarity is not clear.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Overlap Similarity
 \end_layout
 
@@ -12193,7 +13917,7 @@ This suggests a modified form of overlap similarity, by normalizing to a
 \begin_inset Formula $K\left(w_{1},d\right)=N\left(w_{1},d\right)N\left(w_{2},*\right)/N\left(w_{1},*\right)$
 \end_inset
 
- -- this makes the counts on 
+ – this makes the counts on 
 \begin_inset Formula $w_{1}$
 \end_inset
 
@@ -12275,7 +13999,7 @@ with
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Disjunct Subsets
 \end_layout
 
@@ -12305,7 +14029,7 @@ This re-affirms the previous observation: we expect connector-sets to behave
  in a set-like fashion, not a vector-like fashion.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Quality Overlaps
 \end_layout
 
@@ -12319,7 +14043,7 @@ Overlap alone may be too weak: again, some of the observed disjuncts may
  MI values).
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Connector Similarity
 \end_layout
 
@@ -12344,7 +14068,7 @@ where each pseudo-connector is a word, and a direction indicator.
 There are some practical difficulties of writing code to discern this.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Word-Pair Cosine Similarity
 \end_layout
 
@@ -12427,8 +14151,8 @@ The point here is that this measure treats words as similar with they link,
  it: it captures more complex relationships between the words in a sentence.
 \end_layout
 
-\begin_layout Subsection*
-Cosine Information
+\begin_layout Subsection
+Symmetric Cosine Information
 \end_layout
 
 \begin_layout Standard
@@ -12466,19 +14190,55 @@ Comparing this to the expression for mutual information suggests that using
 
 \end_inset
 
-Perhaps the following is closer to the 
+Written this way, it resembles a kind of mutual information.
+\end_layout
+
+\begin_layout Subsection
+Symmetric Mutual Information
+\end_layout
+
+\begin_layout Standard
+The symmetric mutual information, and related quantities, can be considered
+ by working with the symmetric matrix 
+\begin_inset Formula $Q$
+\end_inset
+
+ defined in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:symmetric transpose"
+
+\end_inset
+
+.
+ This can be more closely related to the cosine by noting that it shares
+ the vector dot product as a basic building block.
+ That it, let 
+\begin_inset Formula 
+\[
+\mbox{dot}(w_{1},w_{2})=\sum_{d}p(w_{1},d)p(w_{2},d)
+\]
+
+\end_inset
+
+define a process between two 
 \begin_inset Quotes eld
 \end_inset
 
-original intent
+independent
 \begin_inset Quotes erd
 \end_inset
 
- of mutual information: let 
-\begin_inset Formula $\mbox{dot}(w_{1},w_{2})=\sum_{d}p(w_{1},d)p(w_{2},d)$
+ processes 
+\begin_inset Formula $w_{1}$
 \end_inset
 
- 
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+.
+ Looked at this way, the canonical mutual information would then be 
 \begin_inset Formula 
 \[
 \mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{dot}(w_{1},w_{2})\mbox{dot}(*,*)}{\mbox{dot}(w_{1},*)\mbox{dot}(*,w_{2})}
@@ -12486,7 +14246,9 @@ original intent
 
 \end_inset
 
-Or even
+One can normalize the process using the cosine similarity; the resulting
+ process is different, and thus has a different value for the mutual information
+:
 \begin_inset Formula 
 \[
 \mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}
@@ -12504,8 +14266,8 @@ The
 \end_inset
 
 .
- Some experiments cmi were performed, and it quickly became apparent that
- cmi does 
+ Some experiments using cmi were performed, and it quickly became apparent
+ that cmi does 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12527,6 +14289,10 @@ against
  tail-end of the sim distribution.
 \end_layout
 
+\begin_layout Subsection
+Mutual Length
+\end_layout
+
 \begin_layout Standard
 One can be inspired to write some crazy concoctions: 
 \begin_inset Formula 
@@ -12536,10 +14302,6 @@ One can be inspired to write some crazy concoctions:
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 I don't know what to call these; the first seems to be some kind of 
 \begin_inset Quotes eld
 \end_inset
@@ -12559,7 +14321,7 @@ mutual length
  device.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section
 Cosine Similarity scatterplots
 \end_layout
 
@@ -12593,14 +14355,14 @@ en_pairs_rfive_mtwo
  dataset as above, and examined in detail in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Disjunct-Cosine-Similarity"
+reference "subsec:Disjunct-Cosine-Similarity"
 
 \end_inset
 
 
 \begin_inset CommandInset ref
 LatexCommand vpageref
-reference "sub:Disjunct-Cosine-Similarity"
+reference "subsec:Disjunct-Cosine-Similarity"
 
 \end_inset
 
@@ -12610,6 +14372,10 @@ reference "sub:Disjunct-Cosine-Similarity"
  Note that cosine similarity is symmetric; this figure is necessarily symmetric
  about the diagonal.
  The diagonal can be seen as a red line, representing a similarity of 1.0.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -12622,7 +14388,7 @@ status open
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Cosine similarity scatterplot
@@ -12692,6 +14458,10 @@ Computed with the `dranked` function, and the `dranked-long` list graphed,
  upper-left.
  The pairs least-similar to anything else end up on the lower-right.
  The color scheme is as before.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -12703,7 +14473,7 @@ status open
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Quasi-diagonal cosine similarity
@@ -12747,7 +14517,7 @@ reference "tab:Block-ranked-words"
 
 .
  Its sort of interesting to read.
- So, the word that is most similar to the LEFT-WALL is the double-dash --
+ So, the word that is most similar to the LEFT-WALL is the double-dash –
  perhaps not to surprising, as the double dash is often used to start new
  sentence phrases.
  That various forms of punctuation follow is not surprising.
@@ -12757,7 +14527,7 @@ reference "tab:Block-ranked-words"
 \begin_layout Standard
 After this are various capitalized words.
  As noted previously, capitalized words are observed far less frequently
- than their u-capitalized counterparts -- usually only one capitalized word
+ than their u-capitalized counterparts – usually only one capitalized word
  per sentence! Thus, capitalized words have far fewer disjuncts on them,
  thus making it easier for them to appear superficially similar, when they
  really should not be.
@@ -12815,6 +14585,10 @@ nothing
  is best left unasked.
  But we'll ask anyway.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -12825,7 +14599,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Block-ranked words
@@ -12844,7 +14618,7 @@ name "tab:Block-ranked-words"
 \end_layout
 
 \begin_layout Plain Layout
-LEFT-WALL -- ...
+LEFT-WALL – ...
  ..
  ....
  *** Two Bit - The “ And But So Perhaps Though When As Then While If Have
@@ -12956,8 +14730,8 @@ Created with the `prt-sim` function.
 \begin_inset Tabular
 <lyxtabular version="3" rows="23" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -13530,8 +15304,15 @@ signal
  Careful data analysis is needed; blind trust is not enough.
 \end_layout
 
-\begin_layout Section*
-The End
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
 \end_layout
 
 \end_body

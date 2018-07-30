@@ -194,5 +194,21 @@ plot "binned-good-sims.dat" using 2:3 with lines linewidth 5 title "", \
      "binned-good-sims.dat" using 2:(3.0e5*exp(-8*$2)) with lines linewidth 5 \
       title "exp(-8 cos)"
 
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-sims-all.eps'
+set xrange [0.1:]
+set yrange [1:]
+set logscale y
+set format y "10^{%L}"
+set title "Cosine similarity distribution"
+set xlabel "Cosine Similarity"
+set ylabel "Number of pairs of words"
+plot "binned-sims-all.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-sims-all.dat" using 2:(4e4*exp(-12*($2-0.1))) with lines linewidth 5 \
+      title "exp(-12 cos)"
+
 # plot "binned-good-sims.dat" using (1-(2*acos($2)/3.14159)):3 with lines linewidth 2 title "acos"
 #################################################

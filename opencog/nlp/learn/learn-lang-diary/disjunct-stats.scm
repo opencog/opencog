@@ -2,7 +2,7 @@
 ; disjunct-stats.scm
 ;
 ; Assorted ad-hoc collection of tools for understanding the
-; word-simillarity obtained via pseudo-disjunct overlap.
+; word-similarity obtained via pseudo-disjunct overlap.
 ;
 ; These were used to create the section "Connetor Sets 7 May 2017"
 ; in the diary. These can ONLY be used by hand, by cutting and pasting
@@ -10,6 +10,8 @@
 ; more of a kind-of work-log of what was needed to generate those
 ; pictures, than anything else. Of course, this can be recycled for
 ; other datasets, too.
+;
+; See disjunct-cross.scm for the 2018 version of this.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -689,6 +691,10 @@
 
 (length all-sims)    ;  317206 for the (797 * 796)/2 pairs
 (length all-sims)    ;  1457522 for all pairs in rfive_mtwo with sim > 0.1
+                     ; Umm, no there are 1058120 pairs with sim > 0.1
+                     ; and 1457522 with sim values on them ... 
+                     ; I'm confused, below we report 2172114 pairs
+                     ; that are length>4 wtf...
 
 (define (sim-cosine SIM)
 	(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
@@ -713,6 +719,7 @@
 (define good-sims (filter-sim))
 (length good-sims)   ; 1058120
 
+; -------------
 (define ranked-sims
 	(sort good-sims
 		(lambda (a b) (> (sim-cosine a) (sim-cosine b)))))
@@ -732,7 +739,8 @@
 
 ; ------ again, but binned.
 
-(define scored-sims (score sim-cosine all-sims)) 
+(define scored-sims (score sim-cosine all-sims))
+(define scored-sims (score sim-cosine good-sims))
 
 (define binned-sims (bin-count-simple scored-sims 300))
 
