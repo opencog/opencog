@@ -4058,12 +4058,11 @@ too greedy
  One advantage of the clustering approach is that, since it makes the graph
  structure explicit, it provides a mechanism for controlling the shape of
  the graph.
- This is exhibited below.
+ 
 \end_layout
 
-\begin_layout Subsection
-Gradient Descent vs.
- Graph Algorithms
+\begin_layout Subsubsection
+Control of Graphical Structure
 \end_layout
 
 \begin_layout Standard
@@ -4093,18 +4092,13 @@ reference "fig:Factorization"
 \end_inset
 
 .
- A naive gradient descent does not seem to achieve this.
- The situation is analogous to that discussed in section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Similarities-and-Differences"
-
+ A naive gradient descent does not seem to achieve this; it will provide
+ numerical values, but will not go out of its way to maximally set as many
+ of the 
+\begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
-: naive gradient descent, such as SkipGram/CBOW, do not provide the needed
- grammatical graph structure.
- By contrast, the MST parsing algorithm does provide that structure.
- 
+ values to zero as possible.
 \end_layout
 
 \begin_layout Standard
