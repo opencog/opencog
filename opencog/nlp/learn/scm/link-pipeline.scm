@@ -441,7 +441,16 @@
 			(set! start-time now)
 			(set! run-time run))))
 
-; --------------------------------------------------------------------
+; ---------------------------------------------------------------------
+(define-public (observe-text plain-text)
+"
+ observe-text -- wrapper to call observe-text-mode.
+ Allows backwards compatibility by calling the function with the default 
+ observing mode (lg) and number of link-grammar parses to observe (24).
+"
+	(observe-text-mode plain-text "lg" 24))
+
+; ---------------------------------------------------------------------
 (define-public (observe-text-mode plain-text observe-mode count-reach)
 "
  observe-text -- update word and word-pair counts by observing raw text.
