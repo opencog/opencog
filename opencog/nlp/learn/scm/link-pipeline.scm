@@ -441,42 +441,30 @@
 			(set! start-time now)
 			(set! run-time run))))
 
-; ---------------------------------------------------------------------
-(define-public (observe-text plain-text)
+; --------------------------------------------------------------------
+(define-public (observe-text-mode plain-text observe-mode count-reach)
 "
  observe-text -- update word and word-pair counts by observing raw text.
+ 
+ There are currently two observing modes, set by observe-mode, both taking
+ an integer parameter:
+ - lg: counts pairs of words linked by the LG parser in 'any' language.
+ 	   'count-reach' specifies how many linkages from LG-parser to use.
+ - clique: pairs each word with all neighboring words located less than
+           'count-reach' spaces away.
 
  This is the first part of the learning algo: simply count the words
  and word-pairs observed in incoming text. This takes in raw text, gets
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
-	; try-catch wrapper around the counters. Due to a buggy RelEx
-	; (see documentation for `word-inst-get-word`), the function
-	; `update-clique-pair-counts` might throw.  If it does throw,
-	; then avoid doing any counting at all for this sentence.
-	;
-	; Note: update-clique-pair-counts commented out. If you want this,
-	; then uncomment it, and adjust the length.
-	; Note: update-disjunct-counts commented out. It generates some
-	; data, but none of it will be interesting to most people.
-	(define (update-counts sent)
-		(catch 'wrong-type-arg
-			(lambda () (begin
-				; 6 == max distance between words to count.
-				; See docs above for explanation.
-				; (update-clique-pair-counts sent 6 #f)
-				(update-word-counts sent)
-				(update-lg-link-counts sent)
-				; If you uncomment this, be sure to also uncomment
-				; LgParseLink below, because LgParseMinimal is not enough.
-				; (update-disjunct-counts sent)
-			))
-			(lambda (key . args) #f)))
-
-	; Count the atoms in the sentence, and then delete it.
-	(define (process-sent SENT)
-		(update-counts SENT)
+	; Count the atoms in the sentence, according to the counting method
+	; passed as argument, then delete the sentence.
+	(define (process-sent SENT cnt-mode win-size)
+		(update-word-counts SENT)
+		(if (equal? cnt-mode "lg")
+			(update-lg-link-counts SENT)
+			(update-clique-pair-counts SENT win-size #f))
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
@@ -533,8 +521,8 @@
 		(maybe-gc) ;; need agressive gc to keep RAM under control.
 	)
 
-	; Process the text locally (in RAM), using the LG API link.
-	(define (local-process TXT)
+	; Process the text locally (in RAM), with the LG API link or clique-count.
+	(define (local-process TXT obs-mode cnt-reach)
 		; try-catch wrapper for duplicated text. Here's the problem:
 		; If this routine is called in rapid succession with the same
 		; block of text, then only one PhraseNode and LgParseLink will
@@ -546,11 +534,12 @@
 		(catch #t
 			(lambda ()
 				(let* ((phr (Phrase TXT))
-						;(lgn (LgParseLink phr (LgDict "any") (Number 24)))
-						(lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+						; needs at least one linkage for tokenization
+						(num-parses (if (equal? obs-mode "lg") cnt-reach 1))
+						(lgn (LgParseMinimal phr (LgDict "any") (Number num-parses)))
 						(sent (cog-execute! lgn))
 					)
-					(process-sent sent)
+					(process-sent sent obs-mode cnt-reach)
 					; Remove crud so it doesn't build up.
 					(cog-extract lgn)
 					(cog-extract phr)
@@ -562,7 +551,7 @@
 	; (relex-process plain-text)
 
 	; Handle the plain-text locally
-	(local-process plain-text)
+	(local-process plain-text observe-mode count-reach)
 )
 
 ; ---------------------------------------------------------------------
