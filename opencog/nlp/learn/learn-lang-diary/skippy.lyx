@@ -3244,7 +3244,24 @@ key "WP-NNMF"
 
  where the focus is on keeping matrix entries positive, as would be appropriate
  for probabilities.
- 
+ Furthermore a matrix of probabilities is not just non-negative; it also
+ has non-negative rank; 
+\emph on
+viz
+\emph default
+.
+ every non-negative linear combination of the rows or columns must also
+ be non-negative.
+\end_layout
+
+\begin_layout Standard
+It is known that the factorization of non-negative matrices with non-negative
+ rank is an NP-hard problem.
+ Factorization generalizes 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, which is known to be NP-complete.
 \end_layout
 
 \begin_layout Standard
@@ -3266,7 +3283,7 @@ Probabilistic matrix factorization (PMF) assumes that the observation counts
  are Gaussian).
  The factorization is then obtained by minimizing the Frobenius norm of
  the difference of the left and right sides.
- That is, one defines the error matrix 
+ That is, one defines the error matrix (or residual matrix) 
 \begin_inset Formula 
 \[
 E\left(w,d\right)=\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|
@@ -3403,6 +3420,33 @@ not
  to a probability, with the result still being a probability.
  Applying the notion of a trace, which is implicitly defined in terms of
  orthogonal transformations, is inappropriate for the problem at hand.
+\end_layout
+
+\begin_layout Subsubsection
+Non-Negative Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Non-negative matrix factorization (NMF) is similar to PMF, but with the
+ additional constraint that the result has a non-negative rank.
+ The non-negative rank constraint requires that not only do the factor matrixes
+ have non-negative values in them, but also that non-negative linear combination
+s are also non-negative.
+ This appears be an appropriate restriction for probabilities.
+\end_layout
+
+\begin_layout Standard
+A reasonable review of NMF is given in
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Eggert2004"
+
+\end_inset
+
+, which also describes how one can control the sparsity of the resulting
+ factors.
+ Control over sparsity is one reason that clustering techniques are interesting;
+ something as fast or faster that offers control over sparsity is appealing.
 \end_layout
 
 \begin_layout Subsubsection
