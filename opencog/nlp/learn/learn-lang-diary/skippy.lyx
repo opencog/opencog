@@ -3449,6 +3449,20 @@ key "Eggert2004"
  something as fast or faster that offers control over sparsity is appealing.
 \end_layout
 
+\begin_layout Standard
+NNMF using the Fisher information metric is equivalent to Probabilistic
+ Latent Semantic Indexing (PLSI), although the two commonly used algorithms
+ for each are quite different, and each is able to climb out of local minima
+ of the other.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2008"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 Neural Net Matrix Factorization
 \end_layout
