@@ -3217,6 +3217,27 @@ n is that traditional clustering algorithms naively assign a word to only
  be discarded as noise, or treated as an anomaly awaiting additional data.
 \end_layout
 
+\begin_layout Subsubsection
+Fuzzy Clustering vs.
+ K-means clustering
+\end_layout
+
+\begin_layout Standard
+membership....
+ Fuzzy C-means (FCM) mostly don't want fuzziness; mostly do want factorization.
+\end_layout
+
+\begin_layout Standard
+Equiv of clustering and factorization
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Low Rank Matrix Approximation
 \end_layout
@@ -3848,8 +3869,8 @@ name "fig:Factorization"
 
 \begin_inset Graphics
 	filename skimage/factor.eps
-	lyxscale 50
-	width 100col%
+	lyxscale 65
+	width 90col%
 
 \end_inset
 
@@ -3863,6 +3884,11 @@ This figure attempts to illustrate the process of factorization.
 \end_inset
 
  as a sparse matrix.
+ Edges indicate those values where 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is not zero.
  Not every 
 \begin_inset Formula $w$
 \end_inset
