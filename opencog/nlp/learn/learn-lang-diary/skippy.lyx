@@ -60,8 +60,8 @@
 \begin_body
 
 \begin_layout Title
-Skip-grams vs.
- Disjuncts
+Gradient Descent vs.
+ Graphical Models
 \end_layout
 
 \begin_layout Author
@@ -4253,6 +4253,66 @@ xxx
 
 \begin_layout Standard
 xxxx
+\end_layout
+
+\begin_layout Standard
+Everything below here is incoherent and incomplete.
+ Sorry; under construction.
+\end_layout
+
+\begin_layout Subsubsection
+Surprisal Analysis
+\end_layout
+
+\begin_layout Standard
+The basic idea is this forumla:
+\begin_inset Formula 
+\[
+-\log\frac{P(x)}{P_{0}(x)}=\sum_{\alpha}\lambda_{\alpha}G\left(\alpha\right)
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $G$
+\end_inset
+
+'s are the constraints.
+ The 
+\begin_inset Formula $\lambda$
+\end_inset
+
+'s are the Lagrange multipliers.
+ When there is only one 
+\begin_inset Formula $G$
+\end_inset
+
+, then it is conventionally called 
+\begin_inset Quotes eld
+\end_inset
+
+the energy
+\begin_inset Quotes erd
+\end_inset
+
+, and the 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is called 
+\begin_inset Quotes eld
+\end_inset
+
+the (inverse) temperature
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Partition function
 \end_layout
 
 \begin_layout Standard
