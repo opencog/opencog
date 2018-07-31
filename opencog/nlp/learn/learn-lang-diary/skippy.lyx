@@ -3450,7 +3450,7 @@ key "Eggert2004"
 \end_layout
 
 \begin_layout Standard
-NNMF using the Fisher information metric is equivalent to Probabilistic
+NNMF using the Kullbeck-Leibler divergence is equivalent to Probabilistic
  Latent Semantic Indexing (PLSI), although the two commonly used algorithms
  for each are quite different, and each is able to climb out of local minima
  of the other.
@@ -3461,6 +3461,23 @@ key "Ding2008"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The error term to minimize is the mutual information 
+\begin_inset Formula 
+\[
+E=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)}
+\]
+
+\end_inset
+
+In essence, this indicates the information loss in moving from the full
+ distribution 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ to the factorized version; one wishes to minimize this information loss.
 \end_layout
 
 \begin_layout Subsubsection
