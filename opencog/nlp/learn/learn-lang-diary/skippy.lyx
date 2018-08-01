@@ -4414,181 +4414,6 @@ a priori
 \end_layout
 
 \begin_layout Subsection
-Graph Algorithms vs.
- Gradient Descent
-\end_layout
-
-\begin_layout Standard
-In the previous section, the Word2Vec style algorithms were characterized
- as 
-\begin_inset Quotes eld
-\end_inset
-
-gradient descent algorithms
-\begin_inset Quotes erd
-\end_inset
-
-, and contrasted with 
-\begin_inset Quotes eld
-\end_inset
-
-graph algorithms
-\begin_inset Quotes erd
-\end_inset
-
- that explicitly and overtly focus on the graphical relationships between
- items.
- The same contrast can be made here: clustering is a form of a graph algorithm,
- whereas the matrix factorization algorithms are all driven by a form of
- gradient descent.
-\end_layout
-
-\begin_layout Standard
-The difference can be highlighted by noticing that cluster assignment is
- essentially a form of greedy algorithm: One looks for the best-fitting
- cluster, and accepts that first, effectively ignoring all of the other
- clusters.
- The relationship of word-to-cluster is explicit and overt; by contrast,
- the matrix factorization is only implicit: a cluster relationship exists
- whenever a matrix element is large.
-\end_layout
-
-\begin_layout Standard
-In the current state of the art, the gradient-descent algorithms tend to
- outperform the clustering algorithms.
- This may be due to the clustering algos being 
-\begin_inset Quotes eld
-\end_inset
-
-too greedy
-\begin_inset Quotes erd
-\end_inset
-
-, applying too strong a discrimination.
- This may also be due to the way that compute cycles are arranged in arriving
- at the results.
- One advantage of the clustering approach is that, since it makes the graph
- structure explicit, it provides a mechanism for controlling the shape of
- the graph.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Control of Graphical Structure
-\end_layout
-
-\begin_layout Standard
-The goal of the matrix factorization, illustrated in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Factorization"
-
-\end_inset
-
-, is to not only obtain the three factors 
-\begin_inset Formula $p\left(w,g\right)$
-\end_inset
-
-, 
-\begin_inset Formula $M\left(g,g^{\prime}\right)$
-\end_inset
-
- and 
-\begin_inset Formula $p\left(g^{\prime},d\right)$
-\end_inset
-
-, but to obtain them such that the first and last components contain essentially
- no bipartite cliques, and all of the structural complexity is limited to
- 
-\begin_inset Formula $M\left(g,g^{\prime}\right)$
-\end_inset
-
-.
- A naive gradient descent does not seem to achieve this; it will provide
- numerical values, but will not go out of its way to maximally set as many
- of the 
-\begin_inset Formula $p\left(w,g\right)$
-\end_inset
-
- values to zero as possible.
- In keeping with the general trend: the goal here is to set as many matrix
- entries to zero as possible, thereby getting the greatest amount of data
- compression as possible.
- Yet, fidelity has to be maintained: just the right entries should be non-zero.
-\end_layout
-
-\begin_layout Standard
-The point here is that it is the graph structure that is the most important;
- the actual numerical values associated with each edge are far less important.
- They are nice, and useful for improving accuracy and parse ranking, but
- provide little insight in and of themselves.
- The graph structure dominates.
- This is made clear in section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sub:Factorization-in-Link"
-
-\end_inset
-
-, where a huge amount of progress can be made by means of manual factorization,
- and setting all edge weights to essentially just one value: present or
- absent.
- 
-\end_layout
-
-\begin_layout Standard
-Greedy clustering essentially provides a mechanism for controlling this
- structure: it inherently limits the number of grammatical classes that
- a word can belong to.
- It dis-incentivizes the partitioning of a word into a large number of grammatic
-al categories.
- 
-\end_layout
-
-\begin_layout Section
-Factorizing the language model
-\end_layout
-
-\begin_layout Standard
-The above developments now provide enough background to clearly state the
- problem.
- Inspired by the factorization of eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:factorize"
-
-\end_inset
-
-, one wishes to find a collection of word classes, assigning words to a
- handful of classes, according to the in-context word-sense.
- The proper factorization needs to be of the form of eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:central-decomposition"
-
-\end_inset
-
-, as illustrated in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Factorization"
-
-\end_inset
-
-.
- The appropriate measure of quality is to minnimize the information loss
- in the factorization, as given by eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:KL-MI-factorization-loss"
-
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Subsection
 Clustering as Matrix Factorization
 \end_layout
 
@@ -4893,6 +4718,181 @@ Perform greedy clustering, so as to minimize the number of number of non-zero
 Decompose vectors into components that align with clusters, so that clusters
  correspond to word-senses, and word-sense disamgiguation (WSD) is an inherent,
  inbuilt part of the clustering step.
+\end_layout
+
+\begin_layout Subsection
+Graph Algorithms vs.
+ Gradient Descent
+\end_layout
+
+\begin_layout Standard
+In the previous section, the Word2Vec style algorithms were characterized
+ as 
+\begin_inset Quotes eld
+\end_inset
+
+gradient descent algorithms
+\begin_inset Quotes erd
+\end_inset
+
+, and contrasted with 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithms
+\begin_inset Quotes erd
+\end_inset
+
+ that explicitly and overtly focus on the graphical relationships between
+ items.
+ The same contrast can be made here: clustering is a form of a graph algorithm,
+ whereas the matrix factorization algorithms are all driven by a form of
+ gradient descent.
+\end_layout
+
+\begin_layout Standard
+The difference can be highlighted by noticing that cluster assignment is
+ essentially a form of greedy algorithm: One looks for the best-fitting
+ cluster, and accepts that first, effectively ignoring all of the other
+ clusters.
+ The relationship of word-to-cluster is explicit and overt; by contrast,
+ the matrix factorization is only implicit: a cluster relationship exists
+ whenever a matrix element is large.
+\end_layout
+
+\begin_layout Standard
+In the current state of the art, the gradient-descent algorithms tend to
+ outperform the clustering algorithms.
+ This may be due to the clustering algos being 
+\begin_inset Quotes eld
+\end_inset
+
+too greedy
+\begin_inset Quotes erd
+\end_inset
+
+, applying too strong a discrimination.
+ This may also be due to the way that compute cycles are arranged in arriving
+ at the results.
+ One advantage of the clustering approach is that, since it makes the graph
+ structure explicit, it provides a mechanism for controlling the shape of
+ the graph.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Control of Graphical Structure
+\end_layout
+
+\begin_layout Standard
+The goal of the matrix factorization, illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+, is to not only obtain the three factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+, but to obtain them such that the first and last components contain essentially
+ no bipartite cliques, and all of the structural complexity is limited to
+ 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+.
+ A naive gradient descent does not seem to achieve this; it will provide
+ numerical values, but will not go out of its way to maximally set as many
+ of the 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ values to zero as possible.
+ In keeping with the general trend: the goal here is to set as many matrix
+ entries to zero as possible, thereby getting the greatest amount of data
+ compression as possible.
+ Yet, fidelity has to be maintained: just the right entries should be non-zero.
+\end_layout
+
+\begin_layout Standard
+The point here is that it is the graph structure that is the most important;
+ the actual numerical values associated with each edge are far less important.
+ They are nice, and useful for improving accuracy and parse ranking, but
+ provide little insight in and of themselves.
+ The graph structure dominates.
+ This is made clear in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Factorization-in-Link"
+
+\end_inset
+
+, where a huge amount of progress can be made by means of manual factorization,
+ and setting all edge weights to essentially just one value: present or
+ absent.
+ 
+\end_layout
+
+\begin_layout Standard
+Greedy clustering essentially provides a mechanism for controlling this
+ structure: it inherently limits the number of grammatical classes that
+ a word can belong to.
+ It dis-incentivizes the partitioning of a word into a large number of grammatic
+al categories.
+ 
+\end_layout
+
+\begin_layout Section
+Factorizing the language model
+\end_layout
+
+\begin_layout Standard
+The above developments now provide enough background to clearly state the
+ problem.
+ Inspired by the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, one wishes to find a collection of word classes, assigning words to a
+ handful of classes, according to the in-context word-sense.
+ The proper factorization needs to be of the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+, as illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+.
+ The appropriate measure of quality is to minnimize the information loss
+ in the factorization, as given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KL-MI-factorization-loss"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Subsection
