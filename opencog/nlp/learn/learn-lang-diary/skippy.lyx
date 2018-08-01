@@ -3842,16 +3842,24 @@ This, in itself, because it is linear, does not accomplish much, because
 \begin_inset Formula $\vec{w}^{\prime}=M^{T}\vec{w}$
 \end_inset
 
- or 
+ to get a different product 
+\begin_inset Formula $\vec{w}^{\prime}\cdot\vec{d}$
+\end_inset
+
+, or, alternately 
 \begin_inset Formula $\vec{d}^{\prime}=M\vec{d}$
+\end_inset
+
+ for a product 
+\begin_inset Formula $\vec{w}\cdot\vec{d}^{\prime}$
 \end_inset
 
 .
  Written in in components:
 \begin_inset Formula 
-\[
-p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
-\]
+\begin{equation}
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)\label{eq:central-decomposition}
+\end{equation}
 
 \end_inset
 
@@ -3883,7 +3891,8 @@ and so one can contract
 \end_layout
 
 \begin_layout Standard
-A matrix can be Markovian on the left side, the right side, or both.
+A quick review of the concept of a Markovian matrix is in order.
+ A matrix can be Markovian on the left side, the right side, or both.
  It is Markovian on the right if 
 \begin_inset Formula 
 \[
@@ -3892,7 +3901,7 @@ A matrix can be Markovian on the left side, the right side, or both.
 
 \end_inset
 
-This assures that 
+This assures that a transformed probability 
 \begin_inset Formula 
 \[
 p^{\prime}\left(g,d\right)=\sum_{g^{\prime}}M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
@@ -4353,6 +4362,84 @@ Greedy clustering essentially provides a mechanism for controlling this
  It dis-incentivizes the partitioning of a word into a large number of grammatic
 al categories.
  
+\end_layout
+
+\begin_layout Section
+Factorizing the language model
+\end_layout
+
+\begin_layout Standard
+The above developments now provide enough background to clearly state the
+ problem.
+ Inspired by the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, one wishes to find a collection of word classes, assigning words to a
+ handful of classes, according to the in-context word-sense.
+ The proper factorization needs to be of the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+, as illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+.
+ The appropriate measure of quality is to minnimize the information loss
+ in the factorization, as given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KL-MI-factorization-loss"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The number of word classes must be fairly high, as they must capture not
+ only the predicate-argument structure,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Predicate,WP-Argument"
+
+\end_inset
+
+ but the resulting syntax constraints must force the selection of the predicate-
+argument structure.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Selection"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Akaike Information Criterion
+\end_layout
+
+\begin_layout Standard
+How many grammatical classes should there be? One can make an 
+\emph on
+a priori
+\emph default
+ guess, or one can apply the Akaike information criterion (AIC).
+ Essenetially, the grammatical classes can be taken as the parameters of
+ the model.
+ The AIC can be used to determine how many of them are required.
 \end_layout
 
 \begin_layout Subsection
