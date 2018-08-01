@@ -4406,11 +4406,39 @@ How many word classes and syntactic classes should there be? Aside from
 a priori
 \emph default
  guesses, one can apply the Akaike information criterion (AIC).
- Essenetially, the grammatical classes can be taken as the parameters of
+ Essentially, the grammatical classes can be taken as the parameters of
  the model.
  The AIC can be used as a guide to determine how many of them are required.
  This is easy to say in principle; a computationally efficient mechanism
  is not yet clear.
+\end_layout
+
+\begin_layout Subsubsection
+Information Loss
+\end_layout
+
+\begin_layout Standard
+The goal of the factorization is to minimize the information loss between
+ the input data and the fractorization.
+ The objective function is then The Kullback-Leibler divergence, a minor
+ variant on the previous eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KL-MI-factorization-loss"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)}
+\]
+
+\end_inset
+
+By minimizing this divergence, one minimizes the total loss incurred by
+ the factorization.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -4440,7 +4468,17 @@ key "Ding2005"
  The orthogonality condition can be loosened, as the process of factorization
  is driven by a minimization condition that drives towards approximate orthogona
 lity.
- Ding 
+ In effect, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is a special case of matrix factorization: its factorization
+ with extra constraints.
+ 
+\end_layout
+
+\begin_layout Standard
+Ding 
 \emph on
 et al
 \emph default
@@ -4449,10 +4487,8 @@ et al
 \end_inset
 
 -means clustering.
-\end_layout
-
-\begin_layout Standard
-The simplest form of clustering assigns vectors to clusters, and stops there.
+ The simplest form of clustering assigns vectors to clusters, and stops
+ there.
  This is equivalent to assigning words to word-classes, without making any
  specific statements about what happened to the disjuncts.
  Alternately, one could say that the disjuncts just went along for the ride:
@@ -4474,6 +4510,12 @@ reference "fig:Factorization"
  clustering on the columns, and seperately, the rows.
  This is closer to the desired factorization model for langauge, so the
  proof is reviewed here.
+ It is still 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, just that one performs two clusterings, not one, on the
+ columns, and on the rows.
 \end_layout
 
 \begin_layout Standard
@@ -4664,7 +4706,7 @@ Three previously identified issues arise with the above:
 \begin_layout Itemize
 The hard-clustering assignment of a word to only a single word-class prevents
  words from having multiple meanings, and thus forces word-sense disambiguation
- as an external step.
+ to somehow happen somewhere else.
 \end_layout
 
 \begin_layout Itemize
