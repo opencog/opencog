@@ -4864,7 +4864,7 @@ s of rotational invariance, in the form of orthogonality constraints on
 \end_inset
 
  are interpreted as joint probability distributions.
- An information-theoretic norm is needed.
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -4873,6 +4873,26 @@ There is no room for a matrix
 \end_inset
 
  which can capture the non-sparse complexities of the language.
+\end_layout
+
+\begin_layout Standard
+The proposed fix to these issues is multi-fold: 
+\end_layout
+
+\begin_layout Itemize
+Use an information-theoretic metric, namely, the Kullback-Leibler divergence
+ of the factored solution to the input data.
+\end_layout
+
+\begin_layout Itemize
+Perform greedy clustering, so as to minimize the number of number of non-zero
+ entries in the left and right factor matrixes
+\end_layout
+
+\begin_layout Itemize
+Decompose vectors into components that align with clusters, so that clusters
+ correspond to word-senses, and word-sense disamgiguation (WSD) is an inherent,
+ inbuilt part of the clustering step.
 \end_layout
 
 \begin_layout Subsection
