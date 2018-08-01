@@ -2822,6 +2822,13 @@ Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
 
 \begin_layout Subsubsection
 Zipf's Law; Noise and Incompleteness
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Zipf's-Law;-Noise"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3443,15 +3450,21 @@ nuclear
  as one that is of trace-class, i.e.
  having a trace that is invariant under orthogonal or unitary transformations.
  In such cases, there is an explicit assumption that the operator lives
- in some homogeneous space, where orthogonal or unitary transformations
- can be applied.
+ in some homogeneous space,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Homogenous-space"
+
+\end_inset
+
+ where orthogonal or unitary transformations can be applied.
  In machine learning, the spaces are always finite dimensional, and are
  usually explicitly assumed to be real Euclidean space 
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
 
  -- that is, the spaces behave like actual vector spaces, so that concepts
- like SVD apply.
+ like PCA and SVD apply.
 \end_layout
 
 \begin_layout Standard
@@ -3489,12 +3502,14 @@ not
 , and that is not entirely wrong.
  However, the only transformations that can be applied to points in a simplex,
  that keep the points inside the simplex, are Markov matrices.
- Any other transformations will typically move points from the outside,
- into the inside, and move inside points out.
+ Any other transformations will typically move points into the inside from
+ the outside, and move inside points to the outside.
  In particular, rotations (orthogonal transformations) cannot be applied
- to a probability, with the result still being a probability.
- Applying the notion of a trace, which is implicitly defined in terms of
- orthogonal transformations, is inappropriate for the problem at hand.
+ to a probability, such that the result is still a probability.
+ Applying the notion of a trace, which is implicitly defined as being invariant
+ under orthogonal transformations, is inappropriate for the problem at hand.
+ What would be appropriate is some sort of trace-like invariant that transforms
+ as a scalar under Markov transformations.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3525,7 +3540,7 @@ key "Eggert2004"
 \end_layout
 
 \begin_layout Standard
-NNMF using the Kullbeck-Leibler divergence is equivalent to Probabilistic
+NNMF using the Kullback-Leibler divergence is equivalent to Probabilistic
  Latent Semantic Indexing (PLSI), although the two commonly used algorithms
  for each are quite different, and each is able to climb out of local minima
  of the other.
@@ -3539,20 +3554,23 @@ key "Ding2008"
 \end_layout
 
 \begin_layout Standard
-The error term that needs to be minimized is the mutual information 
+The error term that needs to be minimized is the matrix-factorized form
+ of the mutual information, which is just the Kullback-Leibler divergence
+ between the factored and unfactored matrixes: 
 \begin_inset Formula 
-\[
-MI_{\mbox{factor}}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)}
-\]
+\begin{equation}
+MI_{\mbox{factor}}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)}\label{eq:KL-MI-factorization-loss}
+\end{equation}
 
 \end_inset
 
-In essence, this indicates the information loss in moving from the full
- distribution 
+In essence, this measures the information loss in moving from the full distribut
+ion 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
- to the factorized version; one wishes to minimize this information loss.
+ to the factorized version; for a good factorization, one wishes to minimize
+ this information loss.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3685,20 +3703,50 @@ key "WP-Local-regression"
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
-The use of the smoothing techniques seems highly appropriate, given that
- the input dataset 
+These two techniques, combined, prove to be almost ideal, when faced with
+ incomplete data, and when the data is noisy.
+ Specifically, the idea of incompleteness is that some values of the input
+ dataset 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
- is both noisy and incomplete, as discussed previously.
+ are zero not because they fundamentally should be (i.e.
+ are forbidden by the grammar and syntax of natural langauge), but are zero
+ simply because they have not yet been observed; some appropriate sentence
+ does not occur in the sample dataset.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, the use of the smoothing techniques seems highly appropriate, given
+ that the input dataset 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is both noisy and incomplete, as discussed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Zipf's-Law;-Noise"
+
+\end_inset
+
+.
  Unfortunately, the use of LLORMA, as strictly described, seems inappropriate,
  but only because the use of the Frobenius norm or the nuclear norm is inappropr
 iate for this dataset.
- The correct norm appears to be an information-theoretic norm, as discussed
- in upcoming sections.
+ The correct norm must be that of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KL-MI-factorization-loss"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Subsubsection
