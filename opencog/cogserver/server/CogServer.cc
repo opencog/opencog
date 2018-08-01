@@ -145,6 +145,7 @@ CogServer::CogServer(AtomSpace* as) :
 #endif // HAVE_CYTHON
 
     _systemActivityTable.init(this);
+    agentScheduler.set_activity_table(&_systemActivityTable);
 
     agentsRunning = true;
 }
@@ -329,9 +330,6 @@ void CogServer::stopAllAgents(const std::string& id)
     agentScheduler.remove_all_agents(id);
     for (auto &runner: agentThreads)
         runner->remove_all_agents(id);
-//    // remove statistical record of their activities
-//    for (size_t n = 0; n < to_delete.size(); n++)
-//        _systemActivityTable.clearActivity(to_delete[n]);
 }
 
 void CogServer::startAgentLoop(void)
