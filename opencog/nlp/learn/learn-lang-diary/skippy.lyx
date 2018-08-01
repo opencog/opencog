@@ -4275,6 +4275,144 @@ a priori
  principles.
 \end_layout
 
+\begin_layout Standard
+More careful vocabulary is needed here: one can say that 
+\emph on
+
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+ 
+\emph default
+is the number of 
+\begin_inset Quotes eld
+\end_inset
+
+word classes
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The number of of syntactic usage patterns 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ could be called the number of 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical classes
+\begin_inset Quotes erd
+\end_inset
+
+, although historic usage conflates these two terms.
+ Thus, the term 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic classes
+\begin_inset Quotes erd
+\end_inset
+
+ for 
+\begin_inset Formula $G^{\prime}$
+\end_inset
+
+ seems the most appropriate.
+\end_layout
+
+\begin_layout Standard
+The number of word classes 
+\emph on
+
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+ 
+\emph default
+must surely be fairly high, as they must capture not only the predicate-argument
+ structure,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Predicate,WP-Argument"
+
+\end_inset
+
+ but the resulting syntax constraints must force the selection of the predicate-
+argument structure.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Selection"
+
+\end_inset
+
+ Roughly speaking, the number of word classes should correspond to the number
+ of different synonym classes one might expect to find.
+ This is confused by the situation of common nouns: there are vast numbers
+ of these, and while most are not synonyms, most are syntactically interchangabl
+e, even when forcing predicate-argument agreement.
+\end_layout
+
+\begin_layout Standard
+The appropriate number of syntactic classes 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ is presumably a lot lower.
+ At a minimum, it corresponds to the number of classical head-phrase structure
+ grammar non-terminals, such as 
+\family sans
+S, NP, VP, PP, D, A, V, N,
+\family default
+ 
+\emph on
+etc
+\emph default
+.
+ A more complete set can be found in the dependency grammar relations 
+\family sans
+subj, obj, iobj, det, amod, advmod, psubj, pobj,
+\family default
+ 
+\emph on
+etc
+\emph default
+.
+ but even this seems too low.
+ There are just over 100 different link types in Link Grammar, growing to
+ the thousands, when one considers various subtypes (subscripts).
+ However, the number of distinct macros in the English lexis provides a
+ different lower bound.
+ At any rate, the size of 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ cannot be smaller than 100 for a realistic model of the English language,
+ and an accurate model is likely to require 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ of at least a few thousand.
+\end_layout
+
+\begin_layout Subsubsection
+Akaike Information Criterion
+\end_layout
+
+\begin_layout Standard
+How many word classes and syntactic classes should there be? Aside from
+ making various 
+\emph on
+a priori
+\emph default
+ guesses, one can apply the Akaike information criterion (AIC).
+ Essenetially, the grammatical classes can be taken as the parameters of
+ the model.
+ The AIC can be used as a guide to determine how many of them are required.
+ This is easy to say in principle; a computationally efficient mechanism
+ is not yet clear.
+\end_layout
+
 \begin_layout Subsection
 Graph Algorithms vs.
  Gradient Descent
@@ -4448,41 +4586,6 @@ reference "eq:KL-MI-factorization-loss"
 
 .
  
-\end_layout
-
-\begin_layout Standard
-The number of word classes must be fairly high, as they must capture not
- only the predicate-argument structure,
-\begin_inset CommandInset citation
-LatexCommand cite
-key "WP-Predicate,WP-Argument"
-
-\end_inset
-
- but the resulting syntax constraints must force the selection of the predicate-
-argument structure.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "WP-Selection"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Akaike Information Criterion
-\end_layout
-
-\begin_layout Standard
-How many grammatical classes should there be? One can make an 
-\emph on
-a priori
-\emph default
- guess, or one can apply the Akaike information criterion (AIC).
- Essenetially, the grammatical classes can be taken as the parameters of
- the model.
- The AIC can be used to determine how many of them are required.
 \end_layout
 
 \begin_layout Subsection
