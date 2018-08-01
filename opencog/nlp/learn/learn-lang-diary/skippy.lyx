@@ -4103,23 +4103,23 @@ de facto
  observed in the hand-built dictionaries for Link Grammar.
  Examination of the 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  file in the Link Grammar file distribution will clearly show how words
  are grouped into word-classes.
  For example, 
 \family typewriter
-`words.n.2.s`
+words.n.2.s
 \family default
  is a list of plural count-nouns.
- The Link Grammar costs are rough approximations for the log likelihood
+ The Link Grammar costs are very rough approximations for the log probability
  
 \begin_inset Formula $-\log p$
 \end_inset
 
 , and so the contents of 
 \family typewriter
-`words.n.2.s`
+words.n.2.s
 \family default
  is effectively a representation of the matrix 
 \begin_inset Formula $p\left(w,g\right)$
@@ -4132,7 +4132,7 @@ de facto
 and a uniform probability across this class.
  The file 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  also defines a large number of 
 \begin_inset Quotes eld
@@ -4144,14 +4144,14 @@ macros
 
 , with names such as 
 \family typewriter
-`<noun-main-p>`
+<noun-main-p>
 \family default
 .
  These macros are stand-ins for lists of disjuncts, often given equal weight,
  but also not uncommonly assigned different costs.
  In essence, 
 \family typewriter
-`<noun-main-p>`
+<noun-main-p>
 \family default
  should be understood as an example of 
 \begin_inset Formula $p\left(g^{\prime},d\right)$
@@ -4165,16 +4165,16 @@ macros
  It appears multiple times throughout the file.
  In one case, it is associated with the word-list 
 \family typewriter
-`words.n.2.s`
+words.n.2.s
 \family default
 , which makes sense, as 
 \family typewriter
-`<noun-main-p>`
+<noun-main-p>
 \family default
  is describing one of the linkage behaviors of plural common nouns.
  The contents of the file 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  should be understood to be a specification of 
 \begin_inset Formula $M\left(g,g^{\prime}\right)$
@@ -4198,24 +4198,24 @@ macros
 \begin_layout Standard
 A more careful examination of the use of the macros in 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  shows that these are often cascaded into one-another.
  For example, 
 \family typewriter
-`<noun-main-s>`
+<noun-main-s>
 \family default
  is used in the definition of 
 \family typewriter
-`<proper-names>`,
+<proper-names>,
 \family default
  
 \family typewriter
-`<entity-entire>`
+<entity-entire>
 \family default
  and 
 \family typewriter
-`<common-noun>`
+<common-noun>
 \family default
 , each of which service word classes that are similar and yet differ syntactical
 ly and semantically.
@@ -4233,16 +4233,46 @@ prima facie
 \begin_inset Formula $M\left(g,g^{\prime}\right)$
 \end_inset
 
- can be factored into smaller, tightly-connected blocks; 
+ can be further factored into smaller, tightly-connected blocks; 
 \emph on
 viz
 \emph default
-., that the graph contains bipartite cliques.
+., that the graph of 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ contains strongly-coupled bipartite cliques.
  
 \end_layout
 
 \begin_layout Subsubsection
 Rank and Dimension
+\end_layout
+
+\begin_layout Standard
+Based on the example of the actual English lexis in Link Grammar, there
+ is no need to assume that the number of word classes 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+ should someohow be equal to the number of syntactic usage patterns 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+.
+ Indeed, the dimension of the matrix 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ has to be 
+\begin_inset Formula $\left|G\right|\times\left|G^{\prime}\right|$
+\end_inset
+
+; but these two dimensions are not known from any 
+\emph on
+a priori
+\emph default
+ principles.
 \end_layout
 
 \begin_layout Subsection
