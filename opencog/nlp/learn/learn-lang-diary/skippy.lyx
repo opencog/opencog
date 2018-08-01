@@ -3252,21 +3252,30 @@ oh, maybe it is this, and maybe it is that.
 \end_layout
 
 \begin_layout Subsubsection
-K-means clustering
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering
 \end_layout
 
 \begin_layout Standard
-Clustering, and in particular, K-means clustering, can be shown to be equivalent
- to matrix factoriztion.
+Clustering, and in particular, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, can be shown to be equivalent to matrix factoriztion.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ding2005"
 
 \end_inset
 
- In particular, the equations that define K-means as a relaxation problem,
- of aligning vectors to the closes centroids, can be written explicitly
- as matrixes.
+ In particular, the equations that define 
+\begin_inset Formula $k$
+\end_inset
+
+-means as a relaxation problem, of aligning vectors to the closes centroids,
+ can be written explicitly as matrixes.
  This equivalence is reviewed in the section after the next, after a sufficient
  amount of other mathematical devices have been set up.
  Most important of these is the choice of an appropriate information metric
@@ -4232,6 +4241,10 @@ viz
  
 \end_layout
 
+\begin_layout Subsubsection
+Rank and Dimension
+\end_layout
+
 \begin_layout Subsection
 Graph Algorithms vs.
  Gradient Descent
@@ -4440,6 +4453,62 @@ a priori
  Essenetially, the grammatical classes can be taken as the parameters of
  the model.
  The AIC can be used to determine how many of them are required.
+\end_layout
+
+\begin_layout Subsection
+Clustering as Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Ding 
+\emph on
+et al
+\emph default
+ show that 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is equivalent to a rank-
+\begin_inset Formula $k$
+\end_inset
+
+ matrix decomposition.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+ Key to the proof is a construction of a membership matrix; in the following
+ this is adapted to the requirements of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+ / fig 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+.
+ The dimension 
+\begin_inset Formula $k$
+\end_inset
+
+ is just the rank, that is, the number of word-classes 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+.
+ 
+\begin_inset Formula $k=\left|G\right|$
+\end_inset
+
+ 
 \end_layout
 
 \begin_layout Subsection
