@@ -4605,15 +4605,112 @@ et al
 \begin_inset Formula $k$
 \end_inset
 
- matrix decomposition.
+ matrix decomposition with an extra orthogonality condition enforced.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ding2005"
 
 \end_inset
 
- Key to the proof is a construction of a membership matrix; in the following
- this is adapted to the requirements of eqn 
+ The orthogonality condition can be loosened, as the process of factorization
+ is driven by a minimization condition that drives towards approximate orthogona
+lity.
+ Ding 
+\emph on
+et al
+\emph default
+ examine several forms of 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering.
+\end_layout
+
+\begin_layout Standard
+The simplest form of clustering assigns vectors to clusters, and stops there.
+ This is equivalent to assigning words to word-classes, without making any
+ specific statements about what happened to the disjuncts.
+ Alternately, one could say that the disjuncts just went along for the ride:
+ they were associated with some word before-hand, and they are now still
+ associated with that word, thrown into a bucket with the other disjuncts
+ of similar words.
+\end_layout
+
+\begin_layout Standard
+Bipartite graph clustering recognizes that the input data can be viewed
+ as a bipartite graph (fig 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+, left image), and that one can perform seperate, distinct, but simultaneous
+ clustering on the columns, and seperately, the rows.
+ This is closer to the desired factorization model for langauge, so the
+ proof is reviewed here.
+\end_layout
+
+\begin_layout Standard
+The matrix to be factorized is 
+\begin_inset Formula $B$
+\end_inset
+
+ and desired factorization is 
+\begin_inset Formula $B\approx LR^{T}$
+\end_inset
+
+.
+ Comparing this to the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, the matrix elements of 
+\series bold
+
+\begin_inset Formula $B$
+\end_inset
+
+
+\series default
+ are 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+; those of 
+\begin_inset Formula $L$
+\end_inset
+
+ are 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+; those of 
+\begin_inset Formula $R^{T}$
+\end_inset
+
+ are 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+.
+ Key to the proof is the reinterpretation of 
+\begin_inset Formula $L$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ as membership matrixes, so that 
+\end_layout
+
+\begin_layout Standard
+a construction of a membership matrix; in the below, this is adapted to
+ the requirements of eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:central-decomposition"
@@ -4628,7 +4725,8 @@ reference "fig:Factorization"
 \end_inset
 
 .
- The dimension 
+ Two distinct clustering steps are required, one for the left, and one for
+ the right dimension 
 \begin_inset Formula $k$
 \end_inset
 
