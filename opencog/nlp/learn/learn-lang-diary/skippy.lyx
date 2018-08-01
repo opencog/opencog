@@ -3196,6 +3196,10 @@ reference "eq:factorize"
  words to word classes.
 \end_layout
 
+\begin_layout Subsubsection
+Multiple class membership
+\end_layout
+
 \begin_layout Standard
 One important distinction between traditional clustering and matrix factorizatio
 n is that traditional clustering algorithms naively assign a word to only
@@ -3217,25 +3221,57 @@ n is that traditional clustering algorithms naively assign a word to only
  be discarded as noise, or treated as an anomaly awaiting additional data.
 \end_layout
 
+\begin_layout Standard
+This splitting of a vector into components, and then placing each component
+ in a different cluster might perhaps be reminiscent of fuzzy clustering,
+ where one object may be placed into two clusters.
+ However, what is proposed above is 
+\emph on
+not
+\emph default
+ fuzzy clustering.
+ The goal is disambiguate a word precisely into the intended sense, and
+ to assign that sense to a cluster.
+ The goal is not to say 
+\begin_inset Quotes eld
+\end_inset
+
+oh, maybe it is this, and maybe it is that.
+\begin_inset Quotes erd
+\end_inset
+
+ A more precise formulation of this statement is taken up in a later section.
+ 
+\end_layout
+
 \begin_layout Subsubsection
-Fuzzy Clustering vs.
- K-means clustering
+K-means clustering
 \end_layout
 
 \begin_layout Standard
-membership....
- Fuzzy C-means (FCM) mostly don't want fuzziness; mostly do want factorization.
-\end_layout
-
-\begin_layout Standard
-Equiv of clustering and factorization
+Clustering, and in particular, K-means clustering, can be shown to be equivalent
+ to matrix factoriztion.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ding2005"
 
 \end_inset
 
+ In particular, the equations that define K-means as a relaxation problem,
+ of aligning vectors to the closes centroids, can be written explicitly
+ as matrixes.
+ This equivalence is reviewed in the section after the next, after a sufficient
+ amount of other mathematical devices have been set up.
+ Most important of these is the choice of an appropriate information metric
+ (instead of cosine distance) for the clustering norm, together with a justifica
+tion of why this is necessary.
+ This needs to be coupled to an appropriate mechanism for performing multiple
+ class membership.
+\end_layout
 
+\begin_layout Standard
+Once this is done, clustering can be re-interpreted as more of a graphical
+ method, as opposed to an optimization methd.
 \end_layout
 
 \begin_layout Subsection
@@ -3243,7 +3279,14 @@ Low Rank Matrix Approximation
 \end_layout
 
 \begin_layout Standard
-Factorizations of this sort are not uncommon in machine learning.
+Factorizations of the form of ean 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ are not uncommon in machine learning.
  They generally go under the name of Low Rank Matrix Approximation (LRMA).
  The rank refers to the size of the set 
 \begin_inset Formula $G$
@@ -3265,7 +3308,7 @@ key "WP-NNMF"
 
  where the focus is on keeping matrix entries positive, as would be appropriate
  for probabilities.
- Furthermore a matrix of probabilities is not just non-negative; it also
+ Furthermore, a matrix of probabilities is not just non-negative; it also
  has non-negative rank; 
 \emph on
 viz
@@ -3278,7 +3321,7 @@ viz
 \begin_layout Standard
 It is known that the factorization of non-negative matrices with non-negative
  rank is an NP-hard problem.
- Factorization generalizes 
+ Factorization can be seen as generalizing 
 \begin_inset Formula $k$
 \end_inset
 
@@ -3288,6 +3331,17 @@ It is known that the factorization of non-negative matrices with non-negative
 \begin_layout Standard
 A variety of techniques for performing this factorization have been developed.
  A lightning review is given below.
+ The point of the review is less to edify the reader, than it is to point
+ out which techniques, formulas and metrics are the most appropriate for
+ the present situation, namely, eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ for probabilities, coupled to the need for fairly crisp word-sense disambiguati
+on.
 \end_layout
 
 \begin_layout Subsubsection
