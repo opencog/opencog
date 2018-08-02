@@ -448,7 +448,7 @@
  
  There are currently two observing modes, set by observe-mode, both taking
  an integer parameter:
- - tree: counts pairs of words linked by the LG parser in 'any' language.
+ - any: counts pairs of words linked by the LG parser in 'any' language.
  	   'count-reach' specifies how many linkages from LG-parser to use.
  - clique: itearates over each word in the sentence and pairs it with
            every word located within distance 'count-reach' to its right.
@@ -487,7 +487,7 @@
 	; passed as argument, then delete the sentence.
 	(define (process-sent SENT cnt-mode win-size)
 		(update-word-counts SENT)
-		(if (equal? cnt-mode "tree")
+		(if (equal? cnt-mode "any")
 			(update-lg-link-counts SENT)
 			(update-clique-pair-counts SENT win-size #f))
 		(delete-sentence SENT)
@@ -560,7 +560,7 @@
 			(lambda ()
 				(let* ((phr (Phrase TXT))
 						; needs at least one linkage for tokenization
-						(num-parses (if (equal? obs-mode "tree") cnt-reach 1))
+						(num-parses (if (equal? obs-mode "any") cnt-reach 1))
 						(lgn (LgParseMinimal phr (LgDict "any") (Number num-parses)))
 						(sent (cog-execute! lgn))
 					)
