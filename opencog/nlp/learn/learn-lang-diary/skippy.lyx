@@ -4906,6 +4906,14 @@ Factorizing the language model
 \end_layout
 
 \begin_layout Standard
+Combining all these parts in one go is daunting.
+ Smaller steps towards the ultimate goal can be taken.
+ One easy first step is to perform clustering using an information metric,
+ instead of the cosine distance.
+ This is done in the section below.
+\end_layout
+
+\begin_layout Standard
 The above developments now provide enough background to clearly state the
  problem.
  Inspired by the factorization of eqn 
@@ -4945,10 +4953,18 @@ reference "eq:full-factor-loss"
 \end_layout
 
 \begin_layout Standard
-Combining all these parts in one go is daunting.
- Smaller steps towards the ultimate goal can be taken.
- One easy first step is to perform clustering using an information metric,
- instead of the cosine distance.
+A second step is to replace hard clustering by an algorithm that treats
+ word-vectors as sums of (as yet unknown) distinct word senses.
+ Because this is a substantial topic in itself, this is handled in a distinct
+ tract; see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -5178,7 +5194,7 @@ key "Vepstas2018stiching"
 \end_layout
 
 \begin_layout Subsection
-nformation Maximizing Matrix Factorization
+Information Maximizing Matrix Factorization
 \end_layout
 
 \begin_layout Standard
