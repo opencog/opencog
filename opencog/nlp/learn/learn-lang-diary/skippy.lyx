@@ -4995,7 +4995,19 @@ reference "sub:Clustering-as-Matrix"
 \end_inset
 
 -means clustering can be seen as a special case of matrix factorizing.
- The usual metric for judging similarity is the cosine metric: 
+ This section generalizes to an information metric, as opposed to the usual
+ cosine metric.
+ The first subsection reviews the simpler single-sided form of clustering,
+ as it would be applied to just words, instead of the bipartite clustering.
+ The second subsection presents the information metric.
+\end_layout
+
+\begin_layout Subsubsection
+Cosine clustering
+\end_layout
+
+\begin_layout Standard
+The usual metric for judging similarity is the cosine metric: 
 \begin_inset Formula 
 \[
 \cos\left(\vec{u},\vec{v}\right)=\hat{u}\cdot\hat{v}=\frac{\vec{u}\cdot\vec{v}}{\left\Vert \vec{u}\right\Vert \left\Vert \vec{v}\right\Vert }
@@ -5098,17 +5110,56 @@ U=\sum_{i=1}^{k}\sum_{j\in C_{i}}\left\Vert \vec{v}_{j}-\vec{m}_{i}\right\Vert ^
 
 \end_inset
 
-To replace this by an information metric, one works in the opposite direction:
- the cosine distance is replaced by 
+The centroid 
+\begin_inset Formula $\vec{m}_{i}$
+\end_inset
+
+ is the arithmetic mean of all of the vectors in the 
+\begin_inset Formula $i$
+\end_inset
+
+'th cluster:
 \begin_inset Formula 
 \[
-MI\left(\vec{u},\vec{v}\right)=\log_{2}\frac{\vec{u}\cdot\vec{v}}{\left(\sum_{i=1}^{n}\vec{u}\cdot\vec{v_{i}}\right)\left(\sum_{j=1}^{n}\vec{v}_{j}\cdot\vec{v}\right)}
+\vec{m}_{i}=\frac{1}{\left|C_{i}\right|}\sum_{j\in C_{i}}\vec{v}_{j}
 \]
 
 \end_inset
 
-This can be made slightly more recognizable by changing notation back to
- the joint probabilities 
+where 
+\begin_inset Formula $\left|C_{i}\right|$
+\end_inset
+
+ is the number of members in the 
+\begin_inset Formula $i$
+\end_inset
+
+'th cluster.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Information clustering
+\end_layout
+
+\begin_layout Standard
+The analog to cosine clustering can be arrived at with two changes.
+ The cosine was built from the dot product 
+\begin_inset Formula $\vec{u}\cdot\vec{v}$
+\end_inset
+
+ normalized by the vector lengths.
+ Here, the normalization is changed, so as to use the Kullback-Leibler divergenc
+e: 
+\begin_inset Formula 
+\[
+MI\left(\vec{u},\vec{v}\right)=\log_{2}\frac{\vec{u}\cdot\vec{v}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\vec{v}_{i}\cdot\vec{v}_{j}\right)}{\left(\sum_{i=1}^{n}\vec{u}\cdot\vec{v_{i}}\right)\left(\sum_{j=1}^{n}\vec{v}_{j}\cdot\vec{v}\right)}
+\]
+
+\end_inset
+
+This unusual-looking expression can be made more recognizable by changing
+ notation back to the joint probabilities 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
@@ -5134,10 +5185,10 @@ This can be made slightly more recognizable by changing notation back to
 
 ).
  Write for 
-\begin_inset Formula $S_{ij}$
+\begin_inset Formula $S_{ij}=\vec{v}_{i}\cdot\vec{v}_{j}$
 \end_inset
 
- the equivalent 
+ in the equivalent form 
 \begin_inset Formula 
 \[
 S\left(w_{1},w_{2}\right)=\sum_{d}p\left(w_{1},d\right)p\left(w_{2},d\right)
@@ -5169,11 +5220,43 @@ S\left(w_{1},*\right)=\sum_{w_{2}}S\left(w_{1},w_{2}\right)
 
 \end_inset
 
+By normalizing, one gets an expression that looks just like a joint probability:
+ 
+\begin_inset Formula 
+\[
+Q\left(w_{1},w_{2}\right)=\frac{S\left(w_{1},w_{2}\right)}{S\left(*,*\right)}
+\]
+
+\end_inset
+
+with
+\begin_inset Formula 
+\[
+MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}
+\]
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Standard
-where, of course, the dis
+For the clustering operation, one must replace the arithmetic mean by the
+ geometric mean.
+ The cluster centroid is now given by 
+\begin_inset Formula 
+\[
+m\left(w,d\right)=\sqrt[\frac{1}{\left|g\right|}]{\prod_{w\in g}p\left(w,d\right)}
+\]
+
+\end_inset
+
+The need for the geometric mean can be thought of in two ways: first, probabilit
+ies can only be added if they are truly independent, and here they are not;
+ but probabilities can always be multiplied.
+ More importantly, the logarithm of the geometric mean can be taken.
+ This connects the pair-wise information distance to minimization of cluster
+ sizes.
 \end_layout
 
 \begin_layout Subsection
