@@ -5161,7 +5161,24 @@ where, of course, the dis
 \end_layout
 
 \begin_layout Subsection
-Information Maximizing Matrix Factorization
+WSD-sensitive clustering
+\end_layout
+
+\begin_layout Standard
+Since this paper is already too long, that conversation is moved over to
+ reference 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ Its bare-bones right now.
+\end_layout
+
+\begin_layout Subsection
+nformation Maximizing Matrix Factorization
 \end_layout
 
 \begin_layout Standard
