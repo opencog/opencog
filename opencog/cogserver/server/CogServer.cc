@@ -303,6 +303,7 @@ void CogServer::startAgent(AgentPtr agent, bool dedicated_thread,
         else {
             agentThreads.emplace_back(new AgentRunnerThread);
             runner = agentThreads.back().get();
+            runner->set_activity_table(&_systemActivityTable);
             if (!thread_name.empty())
             {
                 runner->set_name(thread_name);

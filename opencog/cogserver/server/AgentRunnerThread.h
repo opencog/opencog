@@ -75,6 +75,8 @@ class AgentRunnerThread: public AgentRunnerBase
          */
         bool has_agents() const;
 
+        void set_activity_table(SystemActivityTable* sat) { this->sat = sat; };
+
     private:
         /** If running agents is enabled */
         std::atomic_bool running;

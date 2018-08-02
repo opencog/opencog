@@ -46,6 +46,8 @@ class AgentRunnerBase
 
         unsigned long get_cycle_count() const;
 
+        void set_activity_table(SystemActivityTable* sat);
+
     protected:
         /** The runner name; mainly used for logging purposes */
         std::string name;
@@ -75,7 +77,6 @@ class AgentRunnerBase
         /** Run an Agent and log its activity. */
         void run_agent(AgentPtr a);
 
-        void set_activity_table(SystemActivityTable* sat);
 };
 
 
