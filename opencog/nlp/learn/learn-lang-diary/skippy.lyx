@@ -4430,9 +4430,9 @@ reference "eq:KL-MI-factorization-loss"
 
 :
 \begin_inset Formula 
-\[
-MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)}
-\]
+\begin{equation}
+MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)}\label{eq:full-factor-loss}
+\end{equation}
 
 \end_inset
 
@@ -4442,7 +4442,14 @@ By minimizing this divergence, one minimizes the total loss incurred by
 \end_layout
 
 \begin_layout Subsection
-Clustering as Matrix Factorization
+Clustering as Matrix Factorization 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Clustering-as-Matrix"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4925,16 +4932,232 @@ reference "fig:Factorization"
 \end_inset
 
 .
- The appropriate measure of quality is to minnimize the information loss
+ The appropriate measure of quality is to minimize the information loss
  in the factorization, as given by eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "eq:KL-MI-factorization-loss"
+reference "eq:full-factor-loss"
 
 \end_inset
 
 .
  
+\end_layout
+
+\begin_layout Standard
+Combining all these parts in one go is daunting.
+ Smaller steps towards the ultimate goal can be taken.
+ One easy first step is to perform clustering using an information metric,
+ instead of the cosine distance.
+\end_layout
+
+\begin_layout Subsection
+Information-driven Clustering
+\end_layout
+
+\begin_layout Standard
+As shown by Ding 
+\emph on
+et al
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+
+\emph default
+ and reviewed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Clustering-as-Matrix"
+
+\end_inset
+
+, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering can be seen as a special case of matrix factorizing.
+ The usual metric for judging similarity is the cosine metric: 
+\begin_inset Formula 
+\[
+\cos\left(\vec{u},\vec{v}\right)=\hat{u}\cdot\hat{v}=\frac{\vec{u}\cdot\vec{v}}{\left\Vert \vec{u}\right\Vert \left\Vert \vec{v}\right\Vert }
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\Vert \cdot\right\Vert $
+\end_inset
+
+ is the 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+-norm.
+ If the input data is taken as a collection of (row) vectors, then the input
+ can be viewed as a matrix 
+\begin_inset Formula $X=\left[\vec{v}_{1},\vec{v}_{2},\cdots,\vec{v}_{n}\right]$
+\end_inset
+
+.
+ The product matrix 
+\begin_inset Formula $S=XX^{T}$
+\end_inset
+
+ then has matrix entries 
+\begin_inset Formula $S_{ij}=\vec{v}_{i}\cdot\vec{v}_{j}$
+\end_inset
+
+.
+ If the vectors are already normalized, then the matrix entries 
+\begin_inset Formula $S_{ij}$
+\end_inset
+
+ are just the cosine distances between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ This is used to accomplish 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering by finding a 
+\begin_inset Formula $n\times k$
+\end_inset
+
+ matrix membership indicator matrix 
+\begin_inset Formula $F$
+\end_inset
+
+ such that the objective function 
+\begin_inset Formula 
+\[
+U=\mbox{tr}F^{T}SF
+\]
+
+\end_inset
+
+is minimized.
+ Some basic algebra (again, see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+) shows that this is equivalent to minimizing the Frobenius norm 
+\begin_inset Formula 
+\[
+U=\left\Vert X-FF^{T}\right\Vert ^{2}
+\]
+
+\end_inset
+
+which in turn is identical to minimizing the distance between cluster centroids
+ 
+\begin_inset Formula $\vec{m}_{i}$
+\end_inset
+
+ and each member 
+\begin_inset Formula $j\in C_{i}$
+\end_inset
+
+ of the 
+\begin_inset Formula $i$
+\end_inset
+
+'th cluster.
+ 
+\begin_inset Formula 
+\[
+U=\sum_{i=1}^{k}\sum_{j\in C_{i}}\left\Vert \vec{v}_{j}-\vec{m}_{i}\right\Vert ^{2}
+\]
+
+\end_inset
+
+To replace this by an information metric, one works in the opposite direction:
+ the cosine distance is replaced by 
+\begin_inset Formula 
+\[
+MI\left(\vec{u},\vec{v}\right)=\log_{2}\frac{\vec{u}\cdot\vec{v}}{\left(\sum_{i=1}^{n}\vec{u}\cdot\vec{v_{i}}\right)\left(\sum_{j=1}^{n}\vec{v}_{j}\cdot\vec{v}\right)}
+\]
+
+\end_inset
+
+This can be made slightly more recognizable by changing notation back to
+ the joint probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ with disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ (of course, this would also work if the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ was replaced by the 
+\begin_inset Formula $N$
+\end_inset
+
+-gram context of 
+\begin_inset Formula $w$
+\end_inset
+
+).
+ Write for 
+\begin_inset Formula $S_{ij}$
+\end_inset
+
+ the equivalent 
+\begin_inset Formula 
+\[
+S\left(w_{1},w_{2}\right)=\sum_{d}p\left(w_{1},d\right)p\left(w_{2},d\right)
+\]
+
+\end_inset
+
+The information divergence 
+\begin_inset Formula $MI\left(\vec{u},\vec{v}\right)$
+\end_inset
+
+ is then
+\begin_inset Formula 
+\[
+MI\left(w_{1},w_{2}\right)=\log_{2}\frac{S\left(w_{1},w_{2}\right)S\left(*,*\right)}{S\left(w_{1},*\right)S\left(*,w_{2}\right)}
+\]
+
+\end_inset
+
+where, as always, the stars 
+\begin_inset Formula $*$
+\end_inset
+
+ denote the wild-card sums: 
+\begin_inset Formula 
+\[
+S\left(w_{1},*\right)=\sum_{w_{2}}S\left(w_{1},w_{2}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where, of course, the dis
 \end_layout
 
 \begin_layout Subsection
