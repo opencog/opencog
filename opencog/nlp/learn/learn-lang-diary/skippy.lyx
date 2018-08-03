@@ -4531,6 +4531,10 @@ key "Dhillon2003"
 \end_inset
 
  in thier treatment of co-clustering.
+ That reference provides an extensive and detailed review of the factorization
+ problem being addressed in this section, and gives detailed motivation
+ for the formulas, and articulates the relationships between the various
+ factors.
 \end_layout
 
 \begin_layout Subsection
