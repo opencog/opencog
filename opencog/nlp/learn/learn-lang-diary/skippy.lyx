@@ -4575,8 +4575,16 @@ et al
 \end_layout
 
 \begin_layout Standard
-Bipartite graph clustering recognizes that the input data can be viewed
- as a bipartite graph (fig 
+Bipartite graph clustering (aka 
+\begin_inset Quotes eld
+\end_inset
+
+co-clustering
+\begin_inset Quotes erd
+\end_inset
+
+) recognizes that the input data can be viewed as a bipartite graph (fig
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Factorization"
@@ -5054,6 +5062,61 @@ Most use the mutual information between members of a cluster and the cluster
 None of the systems assume that the input data can already be interpreted
  as a probability; rather, the clustering is being performed on data naturally
  occuring in some Euclidean space, typically, some space of low dimension.
+\end_layout
+
+\begin_layout Subsubsection
+Renyi Information Divergence
+\end_layout
+
+\begin_layout Standard
+Gokcay and Principe
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gokcay2002"
+
+\end_inset
+
+ propose the Renyi entropy as an information divergence.
+ It is essentially minus the logarithm of the cosine matric.
+ Given two vectors 
+\begin_inset Formula $\vec{u}$
+\end_inset
+
+ anad 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+, the information divergence is defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+D_{CEF}\left(\vec{u},\vec{v}\right)=-\log\cos\left(\vec{u},\vec{v}\right)=-\log\hat{u}\cdot\hat{v}=-\log\frac{\vec{u}\cdot\vec{v}}{\left\Vert \vec{u}\right\Vert \left\Vert \vec{v}\right\Vert }
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\Vert \cdot\right\Vert $
+\end_inset
+
+ is the 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+-norm.
+ Although this is widely cited in the literature pertaining to information-theor
+etic clustering, there is no particular reason to beleive that it offers
+ any advantage at all over the ordinary cosine metric, when applied to the
+ task of clustering grammatical categories.
+ In particular, it suffers from the same defects previously identified:
+ it contains an inbuilt assumption that the data presents in a Euclidean,
+ rotationally symmetric space, which is very much not the case for the langauge
+ data.
+ The vectors of language data are not Euclidean vectors: they are joint
+ probabilities.
+ They transform not under orthogonal rotations, but under Markov matrices.
 \end_layout
 
 \begin_layout Subsubsection
