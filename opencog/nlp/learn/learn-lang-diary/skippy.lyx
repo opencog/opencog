@@ -4933,6 +4933,30 @@ ies shows this structure clearly.
 \end_layout
 
 \begin_layout Subsubsection
+Tensor Product Factorization
+\end_layout
+
+\begin_layout Standard
+The idea that 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ contains important substructures is important enough to point out a second
+ time.
+ Based on explicit experience with Link Grammar, those substructures are
+ likely to require a tensor product factorization (as opposed to a matrix
+ product factorization) to make sense of them.
+ Its possible to speculate that a Tucker factorization may provide a reasonable
+ first approximation to this factorization.
+ Nothing further on this can be said at this point, until a reliable way
+ to obtain a stable, reproducible and accurate 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ is in hand.
+\end_layout
+
+\begin_layout Subsubsection
 Rank and Dimension
 \end_layout
 
