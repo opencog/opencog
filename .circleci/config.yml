@@ -1,244 +1,88 @@
 version: 2.0
 
 jobs:
-  cogutil:
-    docker:
-      - image: opencog/opencog-build
-    working_directory: /deps/cogutil
-    steps:
-      - run:
-          name: Check commit hash of remote master
-          command: |
-            git ls-remote https://github.com/singnet/cogutil | grep 'refs/heads/master' | awk '{print $1}' > /tmp/head_sha.txt
-      - restore_cache:
-          keys:
-            - cogutil-{{ checksum "/tmp/head_sha.txt" }}
-      - run:
-          name: Git clone or pull
-          command: |
-            git clone https://github.com/singnet/cogutil . 2> /dev/null || (git pull origin master)
-      - run:
-          name: CMake Configure
-          command: |
-            mkdir -p build
-            cd build
-            cmake ..
-      - run:
-          name: Build
-          command: |
-            cd /deps/cogutil/build
-            make -j4
-      - save_cache:
-          key: cogutil-{{ checksum "/tmp/head_sha.txt" }}
-          paths:
-            - /deps/cogutil
-      - run:
-          name: Test
-          command: |
-            cd /deps/cogutil/build
-            make -j4 test
-      - persist_to_workspace:
-          root: /deps
-          paths:
-            - cogutil
-  atomspace:
-    docker:
-      - image: opencog/opencog-build
-    working_directory: /deps/atomspace
-    steps:
-      - attach_workspace:
-          at: /deps
-      - run:
-          name: Install cogutil
-          command: |
-            cd /deps/cogutil/build
-            make -j4 install
-      - run:
-          name: Check commit hash of remote master
-          command: |
-            git ls-remote https://github.com/singnet/atomspace | grep 'refs/heads/master' | awk '{print $1}' > /tmp/head_sha.txt
-      - restore_cache:
-          keys:
-            - atomspace-{{ checksum "/tmp/head_sha.txt" }}
-      - run:
-          name: Git clone or pull
-          command: |
-            git clone https://github.com/singnet/atomspace . 2> /dev/null || (git pull origin master)
-      - run:
-          name: CMake Configure
-          command: |
-            mkdir -p build
-            cd build
-            cmake ..
-      - run:
-          name: Build
-          command: |
-            cd /deps/atomspace/build
-            make -j4
-      - save_cache:
-          key: atomspace-{{ checksum "/tmp/head_sha.txt" }}
-          paths:
-            - /deps/atomspace
-      #- run:
-      #    name: Test
-      #    command: |
-      #      cd /deps/atomspace/build
-      #      make -j4 test
-      - persist_to_workspace:
-          root: /deps
-          paths:
-            - atomspace
-  moses:
-    docker:
-      - image: opencog/opencog-build
-    working_directory: /deps/moses
-    steps:
-      - attach_workspace:
-          at: /deps
-      - run:
-          name: Install cogutil
-          command: |
-            cd /deps/cogutil/build
-            make -j4 install
-      - run:
-          name: Check commit hash of remote master
-          command: |
-            git ls-remote https://github.com/singnet/moses | grep 'refs/heads/master' | awk '{print $1}' > /tmp/head_sha.txt
-      - restore_cache:
-          keys:
-            - moses-{{ checksum "/tmp/head_sha.txt" }}
-      - run:
-          name: Git clone or pull
-          command: |
-            git clone https://github.com/singnet/moses . 2> /dev/null || (git pull origin master)
-      - run:
-          name: CMake Configure
-          command: |
-            mkdir -p build
-            cd build
-            cmake ..
-      - run:
-          name: Build
-          command: |
-            cd /deps/moses/build
-            make -j4
-      - save_cache:
-          key: moses-{{ checksum "/tmp/head_sha.txt" }}
-          paths:
-            - /deps/moses
-      #- run:
-      #    name: Test
-      #    command: |
-      #      cd /deps/moses/build
-      #      make -j4 test
-      - persist_to_workspace:
-          root: /deps
-          paths:
-            - moses
-  link-grammar:
-    docker:
-      - image: opencog/opencog-build
-    working_directory: /deps/link-grammar
-    steps:
-      - attach_workspace:
-          at: /deps
-      - restore_cache:
-          keys:
-            - link-grammar-5.5
-      - run:
-          name: Git clone and autogen if needed
-          command: |
-            if [ ! -d .git ]; then
-              git clone https://github.com/opencog/link-grammar .
-              git checkout link-grammar-5.5.0
-              ./autogen.sh --disable-java-bindings
-            fi
-      - run:
-          name: Configure
-          command: |
-            cd /deps/link-grammar
-            ./configure --disable-java-bindings
-      - run:
-          name: Build
-          command: |
-            cd /deps/link-grammar
-            make -j4
-      - run:
-          name: Make Check
-          command: |
-            cd /deps/link-grammar
-            make check
-      - save_cache:
-          key: link-grammar-5.5
-          paths:
-            - /deps/link-grammar
-      #- run:
-      #    name: Test
-      #    command: |
-      #      cd /deps/link-grammar/build
-      #      make -j4 test
-      - persist_to_workspace:
-          root: /deps
-          paths:
-            - link-grammar
   opencog:
     docker:
-      - image: opencog/opencog-build
-    working_directory: /opencog
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/opencog
+    environment:
+      ORG: singnet
     steps:
       - attach_workspace:
-          at: /deps
+          at: /ws
+      - run:
+          name: Start restoring ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - restore_cache:
+          keys:
+            - ccache-{{ checksum "/tmp/date" }}
+            - ccache-
       - run:
           name: Install cogutil
           command: |
-            cd /deps/cogutil/build
-            make -j4 install
+            git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
+            mkdir -p /ws/cogutil/build
+            cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
+            ldconfig
       - run:
-          name: Install atomspace
+          name: Install AtomSpace
           command: |
-            cd /deps/atomspace/build
-            make -j4 install
-      - run:
-          name: Install moses
-          command: |
-            cd /deps/moses/build
-            make -j4 install
-      - run:
-          name: Install link-grammar
-          command: |
-            cd /deps/link-grammar
-            make -j4 install
+            git clone --depth 1 https://github.com/$ORG/atomspace /ws/atomspace
+            mkdir -p /ws/atomspace/build
+            cd /ws/atomspace/build && cmake .. && make -j4 && make -j4 install
+            ldconfig
       - checkout
       - run:
           name: CMake Configure
-          command: |
-            mkdir -p build
-            cd build
-            cmake ..
+          command: mkdir build && cd build && cmake ..
       - run:
           name: Build
-          command: |
-            cd build
-            make -j4
+          command: cd build && make -j4
       - run:
-          name: Test
-          command: |
-            cd build
-            make -j4 test
+          name: Install AtomSpace
+          command: cd build && make -j4 install && ldconfig
+      - run:
+          name: Build tests
+          command: cd build && make -j4 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j4 test
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - ccache
+
+  package: #Place holder
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+    working_directory: /ws/opencog
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Start storing ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - save_cache:
+          key: ccache-{{ checksum "/tmp/date" }}
+          paths:
+            - /ws/ccache
+
 workflows:
   version: 2
-  build_and_test_opencog:
+  build-test-package:
     jobs:
-      - cogutil
-      - moses:
+      - opencog
+      - package:
           requires:
-            - cogutil
-      - atomspace:
-          requires:
-            - cogutil
-      - link-grammar
-      - opencog:
-          requires:
-            - atomspace
-            - moses
-            - link-grammar
+            - opencog
+          filters:
+            branches:
+              only: master
