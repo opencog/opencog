@@ -3867,11 +3867,7 @@ name "sub:Clustering-as-Matrix"
 \end_layout
 
 \begin_layout Standard
-Ding 
-\emph on
-et al
-\emph default
- show that 
+One may show that 
 \begin_inset Formula $k$
 \end_inset
 
@@ -3879,7 +3875,12 @@ et al
 \begin_inset Formula $k$
 \end_inset
 
- matrix decomposition with an extra orthogonality condition enforced.
+ matrix decomposition with an extra orthogonality condition enforced; this
+ is developed by Ding 
+\emph on
+et al.
+\emph default
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ding2005"
@@ -3937,7 +3938,7 @@ reference "fig:Factorization"
 
 , left image), and that one can perform seperate, distinct, but simultaneous
  clustering on the columns, and seperately, the rows.
- This is closer to the desired factorization model for langauge, so the
+ This is closer to the desired factorization model for language, so the
  proof is reviewed here.
  It is still 
 \begin_inset Formula $k$
@@ -4042,8 +4043,8 @@ L_{ij}=\begin{cases}
 Equivalently, the factorization is
 \begin_inset Formula 
 \[
-p\left(w,g\right)=\begin{cases}
-1 & \mbox{ word }w\mbox{ belongs to wordclass }g\\
+p\left(w|g\right)=\begin{cases}
+1/\left|g\right| & \mbox{ word }w\mbox{ belongs to wordclass }g\\
 0 & \mbox{ otherwise}
 \end{cases}
 \]
@@ -4164,11 +4165,13 @@ s of rotational invariance, in the form of orthogonality constraints on
 \end_layout
 
 \begin_layout Itemize
-There is no room for a matrix 
+There is no room for a central factor matrix 
 \begin_inset Formula $M\left(g,g^{\prime}\right)$
 \end_inset
 
  which can capture the non-sparse complexities of the language.
+ The need; indeeed, the inevitability of such a matrix is developed in the
+ next section.
 \end_layout
 
 \begin_layout Standard
@@ -4220,8 +4223,8 @@ viz
 \end_inset
 
 .
- Aside from considering just 
-\begin_inset Formula $\vec{w}\cdot\vec{d}$
+ Aside from considering just the function 
+\begin_inset Formula $f\left(\vec{w},\vec{d}\right)=\vec{w}\cdot\vec{d}$
 \end_inset
 
 , one might consider other functions 
@@ -4246,7 +4249,7 @@ viz
 \begin_inset Formula $M$
 \end_inset
 
- so that 
+ such that 
 \begin_inset Formula 
 \[
 f\left(\vec{w},\vec{d}\right)=\vec{w}^{T}\cdot M\cdot\vec{d}
@@ -4285,7 +4288,8 @@ This, in itself, because it is linear, does not accomplish much, because
 \end_inset
 
 .
- The point is that the factorization of eqn 
+ The dot-product in the factorization is ambiguous; the point is that the
+ factorization of eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:factorize"
@@ -4297,9 +4301,9 @@ reference "eq:factorize"
 \end_layout
 
 \begin_layout Standard
-The is commonly expressed in the low-rank matrix-factorization literature
- by noting that a dot-product is invariant under orthogonal rotations, and
- so one can choose an arbitrary orthogonal matrix 
+The low-rank matrix-factorization literature expresses this idea by noting
+ that a dot-product is invariant under orthogonal rotations, and so one
+ can choose an arbitrary orthogonal matrix 
 \begin_inset Formula $O$
 \end_inset
 
@@ -4665,7 +4669,16 @@ and is done so that
 
 \end_inset
 
-For the case of hard clustering, where each 
+
+\end_layout
+
+\begin_layout Standard
+The ambiguity of the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ is removed, if one assumes hard clustering.
+ In this case, each 
 \begin_inset Formula $w$
 \end_inset
 
@@ -4681,7 +4694,28 @@ For the case of hard clustering, where each
 \begin_inset Formula $g^{\prime}$
 \end_inset
 
-, such a factorization is called co-clustering.
+, and, once the clusters are chosen, there is no confusion about the left
+ and right factors, and thus, the central factor is fixed.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+In physics, such an ambiguity of factorization is known as a global gauge
+ symmetry; fixing a gauge removes the ambiguity.
+ In natural language, the ambiguity is sponteneously broken: words have
+ only a few senses, and are often sysnonymous, making the left and right
+ factors sparse.
+ For this reason, the analogy to physics is entertaining but mostly pointless.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A factorization of this sort is known as co-clustering, bi-clustering or
+ sometimes block clustering.
  An explicit development of this, including an explicit iterative algorithm
  guaranteed to converge, is given by Dhillon et al.
 \begin_inset CommandInset citation
