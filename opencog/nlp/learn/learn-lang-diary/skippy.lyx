@@ -5119,6 +5119,46 @@ etic clustering, there is no particular reason to beleive that it offers
  They transform not under orthogonal rotations, but under Markov matrices.
 \end_layout
 
+\begin_layout Standard
+There are also some practical, language-related reasons to lose interest
+ in the above information divergence: When examining actual language data,
+ as is done in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017connectors"
+
+\end_inset
+
+, it becomes quite clear that there is a practical, common-sense cutoff
+ for similary.
+ If two words 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ have a similarity of 
+\begin_inset Formula $\cos\left(w_{1},w_{2}\right)\lesssim0.5$
+\end_inset
+
+, they are very nearly unrelated; for a similarity of 
+\begin_inset Formula $\cos\left(w_{1},w_{2}\right)\lesssim0.1$
+\end_inset
+
+, they are fantastically unrelated.
+ It would be crazy to assign these to a commn cluster.
+ Extending the notion of similarity to truly wee values, as the logarithm
+ enables, is meaningless.
+ For cosine values greater than 1/2, the logarithm is essentially linear:
+ 
+\begin_inset Formula $-\log\cos\, x\approx1-\cos\, x$
+\end_inset
+
+ in the region of interest.
+\end_layout
+
 \begin_layout Subsubsection
 Consistency Under Coarse-graining
 \end_layout
