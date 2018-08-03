@@ -3293,7 +3293,47 @@ tion of why this is necessary.
 
 \begin_layout Standard
 Once this is done, clustering can be re-interpreted as more of a graphical
- method, as opposed to an optimization methd.
+ method, as opposed to an optimization method.
+\end_layout
+
+\begin_layout Subsubsection
+MST clustering
+\end_layout
+
+\begin_layout Standard
+MST clustering is a form of greedy clustering, attempting to first connect
+ all points in the dataset with a tree that minimizes the the distance between
+ the points, and then removing some of the longest edges, leaving behind
+ a set of connected components.
+ MST clustering can be fairly efficient, as one can find provisionally minimal
+ trees with a fairly small number of distance evaluations, using a greedy
+ algorithm; the provisional minimal tree can then be adjusted using local
+ relaxation.
+\end_layout
+
+\begin_layout Subsubsection
+Non-issues
+\end_layout
+
+\begin_layout Standard
+There are a variety of criticisms of different clustering algorithms, pointing
+ at various drawbacks.
+ Some of these criticisms do not apply to the current problem, and so are
+ not to be used in selecting a better algorithm.
+\end_layout
+
+\begin_layout Itemize
+Convex clusters.
+ This is a standard criticism levelled against 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering: the clusters can only ever be convex.
+ This is important criticism, when working with low-dimensional data (2D,
+ 3D data) where perhaps most practical examples require clusters that are
+ not convex.
+ For the langauge learning problem, the data lives in an extremely high-dimensio
+nal space, with clusters that are almost surely convex.
 \end_layout
 
 \begin_layout Subsection
