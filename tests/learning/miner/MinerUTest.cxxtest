@@ -521,7 +521,7 @@ void MinerUTest::test_AB_AC()
 
 	// Run URE pattern miner (using _as for testing more diverse
 	// content)
-	Handle ure_results = ure_pm(_as, 2, 10),
+	Handle ure_results = ure_pm(_as, 2, 20),
 		ure_expected = mk_minsup_eval(2, al(LAMBDA_LINK, Y, InhAY));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
