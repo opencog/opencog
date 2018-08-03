@@ -479,12 +479,24 @@ Handle Miner::val_shallow_abstract(const Handle& value)
 	    tt == EVALUATION_LINK or
 	    nameserver().isA(tt, FUNCTION_LINK))
 	{
-		// Wrap variables in UnquoteLink
-		HandleSeq uq_vars;
-		for (Handle& var : rnd_vars)
-			uq_vars.push_back(unquote(var));
+		// TODO: comment out the following lines when issue #1843 on the
+		// atomspace repository has been fixed (see more about that
+		// below).
 
-		return lambda(vardecl, quote(createLink(uq_vars, tt)));
+		// // Wrap variables in UnquoteLink
+		// HandleSeq uq_vars;
+		// for (Handle& var : rnd_vars)
+		// 	uq_vars.push_back(unquote(var));
+
+		// return lambda(vardecl, quote(createLink(uq_vars, tt)));
+
+		// TODO: ignore these links for now!!! In order to support them
+		// we first need to address issue #1843 on the atomspace
+		// repository. That is because otherwise the quotations inside
+		// these patterns get wrongly consumed down the line (especially
+		// while being used in the specialization rule defined in
+		// rules/specialization.scm).
+		return Handle::UNDEFINED;
 	}
 
 	// Links to ignore (till supported)
