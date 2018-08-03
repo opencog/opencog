@@ -4950,16 +4950,23 @@ reference "sub:Sparsity"
 \end_inset
 
 .
- 
+ There are in excess of 
+\begin_inset Formula $10^{5}$
+\end_inset
+
+ words to provisionally assign to clusters, and 
+\begin_inset Formula $10^{7}$
+\end_inset
+
+ or more disjuncts.
+ Each provisional clustering requires extensive recomputation of marginal
+ probabilities.
+ The approach clearly cannot scale to the current datasets; never mind that
+ the assumption of hard clustering breaks word-sense disambiguation.
 \end_layout
 
 \begin_layout Standard
-.
- These are explicitly
-\end_layout
-
-\begin_layout Standard
-as well
+Back to the drawing board.
 \end_layout
 
 \begin_layout Subsection
