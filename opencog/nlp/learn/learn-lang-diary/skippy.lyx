@@ -4716,7 +4716,7 @@ reference "eq:KL-MI-factorization-loss"
 :
 \begin_inset Formula 
 \begin{equation}
-MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)}\label{eq:full-factor-loss}
+MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)}\label{eq:full-factor-loss}
 \end{equation}
 
 \end_inset
@@ -4762,7 +4762,7 @@ For the special case of hard clustering, where each word or disjunct is
  if Dhillon)
 \begin_inset Formula 
 \begin{equation}
-M\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)\label{eq:central matrix}
+p\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)\label{eq:central factor}
 \end{equation}
 
 \end_inset
@@ -4806,10 +4806,11 @@ It is worth reviewing the algorithm that Dhillion
 etal
 \emph default
  present.
- It is an alternation of three steps: the computation of marginals, and
- the assignment of new row clusters, and the assignment of new column clusters.
+ It is an iterative aglorithm, alternating between three steps: the computation
+ of marginals, and the assignment of new row clusters, and the assignment
+ of new column clusters.
  The marginals are recomputed after every reclustering.
- Dhillon provvides a proof that, for hard clustering, the information loss
+ Dhillon provides a proof that, for hard clustering, the information loss
  is monotonically decreasing; viz, that iteration always moves to a better
  solution.
 \end_layout
@@ -4840,24 +4841,81 @@ Given provisional cluster assignments
  The central factor is given by eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "eq:central matrix"
+reference "eq:central factor"
 
 \end_inset
 
 .
- The left and right factors
-\end_layout
-
-\begin_layout Standard
-as well as two marginals:
+ The left and right factors are obtained as marginals:
 \begin_inset Formula 
 \[
-q\left(w|g\right)=\frac{p\left(w,g\right)}{p\left(*,g\right)}
+p\left(w,g\right)=\begin{cases}
+p\left(w,*\right) & \mbox{ if }w\in g\\
+0 & \mbox{ otherwise}
+\end{cases}
 \]
 
 \end_inset
 
+and 
+\begin_inset Formula 
+\[
+p\left(g^{\prime},d\right)=\begin{cases}
+p\left(*,d\right) & \mbox{ if }d\in g^{\prime}\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
 
+\end_inset
+
+The above are always known and well-defined, since, by assumption, the provision
+al cluster assignments 
+\begin_inset Formula $G$
+\end_inset
+
+ and 
+\begin_inset Formula $G^{\prime}$
+\end_inset
+
+ are known at each step of the iteraction.
+ The conditional probabilities are as noted before: 
+\begin_inset Formula 
+\[
+p\left(w|g\right)=\frac{p\left(w,g\right)}{p\left(*,g\right)}
+\]
+
+\end_inset
+
+ and likewise 
+\begin_inset Formula 
+\[
+p\left(d|g^{\prime}\right)=\frac{p\left(g^{\prime},d\right)}{p\left(g^{\prime},*\right)}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $p\left(*,g\right)=\sum_{w\in g}p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},*\right)=\sum_{d\in g^{\prime}}p\left(g^{\prime},d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The new cluster assignments are obtained by
+\end_layout
+
+\begin_layout Standard
+.
+ These are explicitly
+\end_layout
+
+\begin_layout Standard
+as well
 \end_layout
 
 \begin_layout Subsection
