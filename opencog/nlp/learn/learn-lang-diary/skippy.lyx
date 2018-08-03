@@ -5076,6 +5076,36 @@ a priori
 \end_layout
 
 \begin_layout Subsubsection
+Removing Ambiguity in Factorization
+\end_layout
+
+\begin_layout Standard
+As noted in the earlier subsection, the ambiguity in the factorization can
+ be removed by hard clustering.
+ Practical experience with hands-on similarity measures in language data
+ indicate that there should not be much of a problem: most words that are
+ similar are obviously-so, using an appropriate pair-wise similarity function.
+ 
+\end_layout
+
+\begin_layout Standard
+Suppose this was not easily the case? To guide the factorization, and to
+ maximize the sparsity of the left and the right factors, while maximizing
+ the complexity of the central factor, one can appeal to Tegmark's formulation
+ of Tononi integrated information as a guide.
+ That is, one wishes to factorize in such a way that the total amount of
+ integrated information in the left and right factors are minimized, while
+ the integrated information of the central factor is maximized.
+ 
+\end_layout
+
+\begin_layout Standard
+In essence, factorization is a reorganizeation of the graph so as to always
+ maximize the integrated information of an important central core.
+ All edges where mutual information is weak are to be pruned away.
+\end_layout
+
+\begin_layout Subsubsection
 Information Loss
 \end_layout
 
@@ -6099,26 +6129,6 @@ key "Vepstas2018stiching"
 
 \begin_layout Subsection
 Information Maximizing Matrix Factorization
-\end_layout
-
-\begin_layout Standard
-To guide the factorization, and to maximize the agreement between the left
- and the right sides, one can appeal to Tegmark's formulation of Tononi
- integrated information.
- That is, one wishes to factorize in such a way that the total amount of
- information in the factors is maximized, so that the 
-\begin_inset Quotes eld
-\end_inset
-
-cut
-\begin_inset Quotes erd
-\end_inset
-
- is done where the mutual information is weakest.
-\end_layout
-
-\begin_layout Standard
-xxx
 \end_layout
 
 \begin_layout Standard
