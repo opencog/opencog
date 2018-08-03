@@ -73,28 +73,47 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-This document attempts to compare and contrast the various ways in which
- (adaptive)-skip-grams and disjuncts are similar, and how they differ.
- The comparison is not always obvious, as these two representations seem
- to be quite different, the goals and tasks that each are solving seem to
- be different, and the methods to obtain each seem to be quite different.
- In fact, many of these differences are superficial; there is more in common
- than there might seem.
+This tract attempts to provide a broad sketch of the unsupervised language
+ learning problem, as seen from various differing viewpoints.
  
 \end_layout
 
 \begin_layout Abstract
-More generally it tries to develop and contrast the differences between
- graphical methods and gradient-descent methods in deeper layers of language
- abstraction.
- In particular it begins to compare the extraction of semantic meaning using
- gradient descent algorithms, such as Low Rank Matrix Approximations, to
- graphical factorizations driven by information-theoretic metrics.
+The first part compares the operation of deep-learning/neural-net inspired
+ language models to traditional lingistics-inspired language models.
+ It is demonstrated that skip-grams, such as those in the canonical word2vec
+ model, resemble parse rules associated with dependency grammars.
+ This comparison is not obvious, as these two representations seem to be
+ quite different, the tasks that each is intended to solve seem to be quite
+ different, and the algorithms employed are quite different.
+ In fact, many of these differences are superficial; there is more in common
+ than there might seem.
+ The unifying viewpoint is a vector representation of words-in-context.
+ The context is an N-gram, skip-gram or adagram, in the one case, and a
+ dependency linkage disjunct in the other.
+\end_layout
+
+\begin_layout Abstract
+The second part examines the idea of a word+context as a bipartite graph,
+ with words on the left side interconnected to contexts on the right.
+ This bipartite graph can be factored into three parts, with words sorted
+ into buckets of word-sense-disambiguated synonyms on the left, buckets
+ of similar grammatical contexts on the right, and a tightly integrated
+ central factor.
+ Different approaches to factorization are explored, including neural-net-inspir
+ed low-rank matrix factorization algorithms, information-theoretic clustering,
+ and, most importantly coclustering.
+\end_layout
+
+\begin_layout Abstract
+The third examines how to stitch together the different vector spaces (the
+ different grammatical contexts associated with each word) into a unified
+ whole, using concepts from sheaf theory.
 \end_layout
 
 \begin_layout Abstract
 This is a work in progress.
- It's approximately half-done, I think.
+ The third part is incomplete.
 \end_layout
 
 \begin_layout Section
@@ -128,6 +147,12 @@ key "Mikolov2013,Mikolov2013a"
  models are given, including AdaGram.
  It is generally assumed that the reader is generally familiar with various
  concepts employed in the OpenCog language-learning project.
+\end_layout
+
+\begin_layout Standard
+XXX A new introduction needs to be written.
+ Sorry.
+ XXX 
 \end_layout
 
 \begin_layout Subsection
