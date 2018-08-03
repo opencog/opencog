@@ -3297,7 +3297,7 @@ Once this is done, clustering can be re-interpreted as more of a graphical
 \end_layout
 
 \begin_layout Subsubsection
-MST clustering
+MST (Agglomerative) Clustering
 \end_layout
 
 \begin_layout Standard
@@ -3309,6 +3309,26 @@ MST clustering is a form of greedy clustering, attempting to first connect
  trees with a fairly small number of distance evaluations, using a greedy
  algorithm; the provisional minimal tree can then be adjusted using local
  relaxation.
+\end_layout
+
+\begin_layout Standard
+Grygorash 
+\emph on
+et al
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Grygorash2006"
+
+\end_inset
+
+
+\emph default
+ review multiple variants for deciding which edges to remove from an MST
+ graph, and describe several particularly effective variants.
+ Standard MST removes the longest edges; but one can instead remove edges
+ that differ the most from thier neighbors; or one can remove edges that
+ are outliers from the typical edge-length mean.
+ 
 \end_layout
 
 \begin_layout Subsubsection
