@@ -368,8 +368,8 @@ HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned m
 	const SCValuations& var_scv(valuations.get_scvaluations(var));
 
 	////////////////////////////
-    // Shallow abtractions    //
-    ////////////////////////////
+	// Shallow abtractions    //
+	////////////////////////////
 
 	// For each valuation create an abstraction (shallow pattern) of
 	// the value associated to variable, and associate the remaining
@@ -391,8 +391,8 @@ HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned m
 			shabs.insert(shapat.first);
 
 	////////////////////////////////
-    // Variable factorizations    //
-    ////////////////////////////////
+	// Variable factorizations    //
+	////////////////////////////////
 
 	// Add all subsequent factorizable variables
 	HandleSeq remvars(std::next(valuations.variables.varseq.begin()),
