@@ -4697,7 +4697,7 @@ The ambiguity of the matrix
 , and, once the clusters are chosen, there is no confusion about the left
  and right factors, and thus, the central factor is fixed.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 In physics, such an ambiguity of factorization is known as a global gauge
@@ -5163,9 +5163,10 @@ reference "eq:full-factor-loss"
  For hard clustering, the loss can be written in terms of only the left,
  or the right clusters, so that (lemma 4.1 of Dhillon)
 \begin_inset Formula 
-\[
-MI_{Loss}=\sum_{g}\sum_{w\in g}\sum_{d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{p\left(w,*\right)}\,\frac{p\left(g,*\right)}{p\left(g,d\right)}
-\]
+\begin{eqnarray*}
+MI_{Loss} & = & \sum_{g}\sum_{w\in g}p\left(w,*\right)\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\left(d|g\right)}\\
+ & = & \sum_{g}\sum_{w\in g}\sum_{d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{p\left(w,*\right)}\,\frac{p\left(g,*\right)}{p\left(g,d\right)}
+\end{eqnarray*}
 
 \end_inset
 
@@ -5183,9 +5184,9 @@ It is worth reviewing the algorithm that Dhillion
 etal
 \emph default
  present.
- It is an iterative aglorithm, alternating between three steps: the computation
- of marginals, and the assignment of new row clusters, and the assignment
- of new column clusters.
+ It is an iterative hill-climbing algorithm, alternating between three steps:
+ the computation of marginals, and the assignment of new row clusters, and
+ the assignment of new column clusters.
  The marginals are recomputed after every reclustering.
  Dhillon provides a proof that, for hard clustering, the information loss
  is monotonically decreasing; viz, that iteration always moves to a better
@@ -5331,12 +5332,21 @@ reference "sub:Sparsity"
  or more disjuncts.
  Each provisional clustering requires extensive recomputation of marginal
  probabilities.
- The approach clearly cannot scale to the current datasets; never mind that
- the assumption of hard clustering breaks word-sense disambiguation.
+ Exhaustive search for the best clustering clearly cannot scale to the current
+ datasets.
+ One might be able to make some forward progress by means of genetic algorithms,
+ as one is performing hill-climbing on a well-defined utility function.
+ The hard cluster membership can be encoded as a very long bit-string: this
+ is exactly the scenario for which genetic algorithms were designed to solve:
+ optimizing large bit strings, given a utility function on them.
+ 
 \end_layout
 
 \begin_layout Standard
-Back to the drawing board.
+But never mind: the assumption of hard clustering breaks word-sense disambiguati
+on.
+ Generic algorithms are not enough.
+ Back to the drawing board.
 \end_layout
 
 \begin_layout Subsection
@@ -5354,7 +5364,7 @@ gradient descent algorithms
 \begin_inset Quotes erd
 \end_inset
 
-, and contrasted with 
+, and were contrasted with 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5381,8 +5391,10 @@ The difference can be highlighted by noticing that cluster assignment is
 
 \begin_layout Standard
 In the current state of the art, the gradient-descent algorithms tend to
- outperform the clustering algorithms.
- This may be due to the clustering algos being 
+ outperform the clustering algorithms, when the size of hidden layers is
+ limited to a computationally tractable size.
+ This can be interpreted in several ways: for small hidden layers, the clusterin
+g algos just might be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5391,11 +5403,17 @@ too greedy
 \end_inset
 
 , applying too strong a discrimination.
- This may also be due to the way that compute cycles are arranged in arriving
- at the results.
- One advantage of the clustering approach is that, since it makes the graph
+ Gradient descent algorithms also organize compute cycles differently, removing
+ certain repeated calculations out of a tight loop.
+ 
+\end_layout
+
+\begin_layout Standard
+One advantage of the clustering approach is that, since it makes the graph
  structure explicit, it provides a mechanism for controlling the shape of
  the graph.
+ Another is that it seems to perhaps be more scalable, when the size of
+ the hidden layers are not suitably small.
  
 \end_layout
 
@@ -5476,14 +5494,6 @@ Factorizing the language model
 \end_layout
 
 \begin_layout Standard
-Combining all these parts in one go is daunting.
- Smaller steps towards the ultimate goal can be taken.
- One easy first step is to perform clustering using an information metric,
- instead of the cosine distance.
- This is done in the section below.
-\end_layout
-
-\begin_layout Standard
 The above developments now provide enough background to clearly state the
  problem.
  Inspired by the factorization of eqn 
@@ -5523,6 +5533,41 @@ reference "eq:full-factor-loss"
 \end_layout
 
 \begin_layout Standard
+More precisely, the factorization of the language model appears to require
+ three important ingredients:
+\end_layout
+
+\begin_layout Itemize
+A way of decomposing word-vectors into sums of word-sense vectors,
+\end_layout
+
+\begin_layout Itemize
+A way of performing biclustering, so as to split the bipartite graph 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ into left, central and right components, holding the left and right parts
+ to be sparse,
+\end_layout
+
+\begin_layout Itemize
+Using an information-theoretic similarity metric, to preserve the probabilistic
+ interpretation of the contingency table 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Combining all these parts in one go is daunting.
+ Smaller steps towards the ultimate goal can be taken.
+ One easy first step is to perform clustering using an information metric,
+ instead of the cosine distance.
+ This is done in the section below.
+\end_layout
+
+\begin_layout Standard
 A second step is to replace hard clustering by an algorithm that treats
  word-vectors as sums of (as yet unknown) distinct word senses.
  Because this is a substantial topic in itself, this is handled in a distinct
@@ -5542,18 +5587,66 @@ Information-theoretic Clustering
 \end_layout
 
 \begin_layout Standard
-A lighting review of the literature is given here.
+The previous section uses the words 
+\begin_inset Quotes eld
+\end_inset
+
+information theoretic
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+ in close proximity.
+ This is a 
+\begin_inset Quotes eld
+\end_inset
+
+thing
+\begin_inset Quotes erd
+\end_inset
+
+, and so a lighting review of the literature is warrented.
+ Two observations pop out:
+\end_layout
+
+\begin_layout Itemize
+None of the systems dscribed in the literature assume that the input data
+ can already be interpreted as a probability; rather, the clustering is
+ being performed on data naturally occuring in some Euclidean space, typically,
+ some space of low dimension (e.g.
+ two-dimensional image data).
+\end_layout
+
+\begin_layout Itemize
+Most approaches to information-theoretic clustering use the mutual information
+ between members of a cluster and the cluster label.
+ Unfortunately, this has an ambiguity: the information content is conserved
+ by any Markov matrix that reassigns the cluster labels, so, for example,
+ a permutation matrix that just shuffles the cluster labels.
+ Ver Steeg 
+\emph on
+et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VerSteeg2014"
+
+\end_inset
+
+
+\emph default
+ propose a solution to this ambiguity: a return to first principles, requiring
+ that information loss due to coarse-graining be minimized.
 \end_layout
 
 \begin_layout Standard
-Most use the mutual information between members of a cluster and the cluster
- label.
-\end_layout
-
-\begin_layout Standard
-None of the systems assume that the input data can already be interpreted
- as a probability; rather, the clustering is being performed on data naturally
- occuring in some Euclidean space, typically, some space of low dimension.
+Several other notable points are discussed below.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5569,7 +5662,7 @@ key "Gokcay2002"
 \end_inset
 
  propose the Renyi entropy as an information divergence.
- It is essentially minus the logarithm of the cosine matric.
+ It is essentially minus the logarithm of the cosine metric.
  Given two vectors 
 \begin_inset Formula $\vec{u}$
 \end_inset
@@ -5606,8 +5699,8 @@ etic clustering, there is no particular reason to beleive that it offers
  it contains an inbuilt assumption that the data presents in a Euclidean,
  rotationally symmetric space, which is very much not the case for the langauge
  data.
- The vectors of language data are not Euclidean vectors: they are joint
- probabilities.
+ The vectors of in the contingency table that the language data is ogranized
+ in are not Euclidean vectors: they are joint probabilities.
  They transform not under orthogonal rotations, but under Markov matrices.
 \end_layout
 
@@ -5640,7 +5733,8 @@ key "Vepstas2017connectors"
 \end_inset
 
 , they are fantastically unrelated.
- It would be crazy to assign these to a commn cluster.
+ It would be crazy to assign anything with such low similarities to a commn
+ cluster.
  Extending the notion of similarity to truly wee values, as the logarithm
  enables, is meaningless.
  For cosine values greater than 1/2, the logarithm is essentially linear:
@@ -5649,6 +5743,7 @@ key "Vepstas2017connectors"
 \end_inset
 
  in the region of interest.
+ The appearence of the logarithm does nothing to advance the situation.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5656,7 +5751,7 @@ Consistency Under Coarse-graining
 \end_layout
 
 \begin_layout Standard
-Ver Steeg 
+To deal with the problem of factorization ambiguity, Ver Steeg 
 \emph on
 et al
 \begin_inset CommandInset citation
@@ -5667,7 +5762,30 @@ key "VerSteeg2014"
 
 
 \emph default
- define a quality function that requires invariance under coarse-graining.
+ revert to first principles, and propose that the information divergence
+ should be approximately invariant under the coarse-graining of the input
+ data.
+\end_layout
+
+\begin_layout Standard
+There is some appeal in this idea for the langauge problem: a large cluster
+ of approximate synonyms should be factorizable into smaller clusters of
+ more tightly-related synonyms.
+ Conversely, one should be able to consolidate small blocks into bigger
+ ones, with a minimum of information loss.
+ However, based on the explorations in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017connectors"
+
+\end_inset
+
+, this does not appear to be a problem that needs to be externally forced
+ onto the system.
+ Pair-wise word similarities seem to be of high quality; it would take some
+ work to have this wrecked by the clustering algorithm.
+ Still ...
+ additional consideration might be warranted.
 \end_layout
 
 \begin_layout Subsection
