@@ -2494,6 +2494,13 @@ lots of zero entries
 
 \begin_layout Subsection
 Sparsity
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Sparsity"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4906,7 +4913,44 @@ where
 \end_layout
 
 \begin_layout Standard
-The new cluster assignments are obtained by
+The new cluster assignments are obtained by minimizing the information loss,
+ once for the rows, and once for the columns.
+ In one step, one searches for cluster assignments 
+\begin_inset Formula $w\in g$
+\end_inset
+
+ such that
+\begin_inset Formula 
+\[
+MI_{word\, loss}=\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\left(d|g^{\prime}\right)p\left(g^{\prime}|g\right)}
+\]
+
+\end_inset
+
+is minimized.
+ After recomputing marginals, one then reclusters the disjuncts, by seaching
+ for the culstering 
+\begin_inset Formula $d\in g^{\prime}$
+\end_inset
+
+ that minimizes the loss 
+\begin_inset Formula 
+\[
+MI_{disjunct\, loss}=\sum_{w}p\left(w|d\right)\log_{2}\frac{p\left(w|d\right)}{p\left(w|g\right)p\left(g|g^{\prime}\right)}
+\]
+
+\end_inset
+
+This looks like an entirely reasonable algorithm, concrete and specific
+ and implementable, until one refers back to the table in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Sparsity"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
