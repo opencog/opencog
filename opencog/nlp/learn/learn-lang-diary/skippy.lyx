@@ -4045,9 +4045,10 @@ reference "fig:Factorization"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Caption
 
 \begin_layout Plain Layout
@@ -4138,6 +4139,36 @@ This figure attempts to illustrate the process of factorization.
 \end_inset
 
  connecting word-classes to disjunct-classes.
+\end_layout
+
+\begin_layout Plain Layout
+In hard-clustering, these low-degree requirements are automatically satisfied:
+ a word 
+\begin_inset Formula $w$
+\end_inset
+
+ can belong to only one word-cluster 
+\begin_inset Formula $g$
+\end_inset
+
+, and so there is only one line in the figure connecting 
+\begin_inset Formula $w$
+\end_inset
+
+ to anything.
+ Likewise, a disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ can only be assigned to one cluster 
+\begin_inset Formula $g^{\prime}$
+\end_inset
+
+.
+ Due to the fact that words are combinations of word-senses, hard-clustering
+ in this fashion is undesirable; by contrast, it seems that word-senses
+ could be validly hard-clustered.
+ 
 \end_layout
 
 \begin_layout Plain Layout
@@ -4553,9 +4584,9 @@ For the special case of hard clustering, where each word or disjunct is
  assigned to only one word class/grammatical class, one has that (eqn (6)
  if Dhillon)
 \begin_inset Formula 
-\[
-M\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)
-\]
+\begin{equation}
+M\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)\label{eq:central matrix}
+\end{equation}
 
 \end_inset
 
@@ -4598,6 +4629,58 @@ It is worth reviewing the algorithm that Dhillion
 etal
 \emph default
  present.
+ It is an alternation of three steps: the computation of marginals, and
+ the assignment of new row clusters, and the assignment of new column clusters.
+ The marginals are recomputed after every reclustering.
+ Dhillon provvides a proof that, for hard clustering, the information loss
+ is monotonically decreasing; viz, that iteration always moves to a better
+ solution.
+\end_layout
+
+\begin_layout Standard
+Given provisional cluster assignments 
+\begin_inset Formula $G$
+\end_inset
+
+ and 
+\begin_inset Formula $G^{\prime}$
+\end_inset
+
+, so that every word and every disjuncts can be placed into some specific
+ cluster, all three factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are available (are computable) given the cluster assignments.
+ The central factor is given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central matrix"
+
+\end_inset
+
+.
+ The left and right factors
+\end_layout
+
+\begin_layout Standard
+as well as two marginals:
+\begin_inset Formula 
+\[
+q\left(w|g\right)=\frac{p\left(w,g\right)}{p\left(*,g\right)}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
