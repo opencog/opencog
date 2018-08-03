@@ -3856,6 +3856,342 @@ These are not reviewed here.
 \end_layout
 
 \begin_layout Subsection
+Clustering as Matrix Factorization 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Clustering-as-Matrix"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Ding 
+\emph on
+et al
+\emph default
+ show that 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is equivalent to a rank-
+\begin_inset Formula $k$
+\end_inset
+
+ matrix decomposition with an extra orthogonality condition enforced.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+ The orthogonality condition can be loosened, as the process of factorization
+ is driven by a minimization condition that drives towards approximate orthogona
+lity.
+ In effect, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is a special case of matrix factorization: its factorization
+ with extra constraints.
+ 
+\end_layout
+
+\begin_layout Standard
+Ding 
+\emph on
+et al
+\emph default
+ examine several forms of 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering.
+ The simplest form of clustering assigns vectors to clusters, and stops
+ there.
+ This is equivalent to assigning words to word-classes, without making any
+ specific statements about what happened to the disjuncts.
+ Alternately, one could say that the disjuncts just went along for the ride:
+ they were associated with some word before-hand, and they are now still
+ associated with that word, thrown into a bucket with the other disjuncts
+ of similar words.
+\end_layout
+
+\begin_layout Standard
+Bipartite graph clustering (aka 
+\begin_inset Quotes eld
+\end_inset
+
+co-clustering
+\begin_inset Quotes erd
+\end_inset
+
+) recognizes that the input data can be viewed as a bipartite graph (fig
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+, left image), and that one can perform seperate, distinct, but simultaneous
+ clustering on the columns, and seperately, the rows.
+ This is closer to the desired factorization model for langauge, so the
+ proof is reviewed here.
+ It is still 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, just that one performs two clusterings, not one, on the
+ columns, and on the rows.
+\end_layout
+
+\begin_layout Standard
+The matrix to be factorized is 
+\begin_inset Formula $B$
+\end_inset
+
+ and the desired factorization is 
+\begin_inset Formula $B\approx LR^{T}$
+\end_inset
+
+.
+ Comparing this to the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, the matrix elements of 
+\series bold
+
+\begin_inset Formula $B$
+\end_inset
+
+
+\series default
+ are 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+; those of 
+\begin_inset Formula $L$
+\end_inset
+
+ are 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+; those of 
+\begin_inset Formula $R^{T}$
+\end_inset
+
+ are 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+.
+ Key to the proof is the reinterpretation of 
+\begin_inset Formula $L$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ as membership matrixes, so that each row and column indicate the membership
+ of a vector to a cluster.
+ That is 
+\begin_inset Formula $L$
+\end_inset
+
+ consists of column vectors 
+\begin_inset Formula $L=\left[\vec{l}_{1},\vec{l}_{2},\cdots,\vec{l}_{k}\right]$
+\end_inset
+
+ where each column vector is of the form
+\begin_inset Formula 
+\[
+\vec{l}_{j}=\left(0,0,\cdots0,1,1,\cdots,1,0,\cdots,0\right)^{T}
+\]
+
+\end_inset
+
+with the 
+\begin_inset Formula $1$
+\end_inset
+
+'s indicating the cluster membership.
+ That is, the matrix elements of 
+\begin_inset Formula $L$
+\end_inset
+
+ are 
+\begin_inset Formula 
+\[
+L_{ij}=\begin{cases}
+1 & \mbox{ item }i\mbox{ belongs to cluster }j\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+Equivalently, the factorization is
+\begin_inset Formula 
+\[
+p\left(w,g\right)=\begin{cases}
+1 & \mbox{ word }w\mbox{ belongs to wordclass }g\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The normalization is such that every word belongs to some class, with 100%
+ probability (hard clustering).
+ The matrix 
+\begin_inset Formula $R$
+\end_inset
+
+ is presented analogously.
+ 
+\end_layout
+
+\begin_layout Standard
+The optimization problem is then to find the maxima of two objective functions,
+ subject to some constraints:
+\begin_inset Formula 
+\[
+\max_{L\ge0;L^{T}L\sim I}\mbox{tr}L^{T}BB^{T}L\;\mbox{ and }\;\max_{R\ge0;R^{T}R\sim I}\mbox{tr}R^{T}B^{T}BR
+\]
+
+\end_inset
+
+The constraint 
+\begin_inset Formula $L^{T}L\sim I$
+\end_inset
+
+ means that not only should 
+\begin_inset Formula $L^{T}L$
+\end_inset
+
+ be a diagonal matrix, but that it should be a multiple of the identity
+ matrix 
+\begin_inset Formula $I$
+\end_inset
+
+ -- that is, have equal values along the diagonal.
+ Here, the tr operator is the matrix trace.
+ The trace of a matrix is, of course, equal to the sum of the eigenvalues
+ of the matrix; thus, optimizing the above is equivalent to performing a
+ singular value decomposition (SVD) of the traced matrix, and then summing
+ the singular values.
+ This is, of course, just the nuclear norm discussed previously.
+\end_layout
+
+\begin_layout Standard
+With some relatively straightforward algebraic manipulation, the above can
+ be shown to be equivalent to optimizing 
+\begin_inset Formula 
+\[
+\min\left\Vert B-LR^{T}\right\Vert ^{2}
+\]
+
+\end_inset
+
+subject to the same constraints.
+ The norm 
+\begin_inset Formula $\left\Vert \cdot\right\Vert ^{2}$
+\end_inset
+
+ is the Frobenius norm.
+ In this sense, hard 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is identical to matrix factorization.
+ Removing some of the constraints shows that 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is a special case of the more general factorization problem.
+ Ding 
+\emph on
+et al
+\emph default
+ show that if one removes the orthogonality constraints, the resulting factors
+ are still approximately orthogonal, since the Frobenius norm contains terms
+ that drive the factors towards orthogonality.
+ 
+\end_layout
+
+\begin_layout Standard
+Three previously identified issues arise with the above:
+\end_layout
+
+\begin_layout Itemize
+The hard-clustering assignment of a word to only a single word-class prevents
+ words from having multiple meanings, and thus forces word-sense disambiguation
+ to somehow happen somewhere else.
+\end_layout
+
+\begin_layout Itemize
+The use of the Frobenius norm (or the nuclear norm) implicitly forces assumption
+s of rotational invariance, in the form of orthogonality constraints on
+ the membership indicator matrixes 
+\begin_inset Formula $L$
+\end_inset
+
+, 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ As discussed previously, rotational invariance (and thus, orthogonality)
+ is inappropriate when 
+\begin_inset Formula $L$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ are interpreted as joint probability distributions.
+ 
+\end_layout
+
+\begin_layout Itemize
+There is no room for a matrix 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ which can capture the non-sparse complexities of the language.
+\end_layout
+
+\begin_layout Standard
+The proposed fix to these issues is multi-fold: 
+\end_layout
+
+\begin_layout Itemize
+Use an information-theoretic metric, namely, the Kullback-Leibler divergence
+ of the factored solution to the input data.
+\end_layout
+
+\begin_layout Itemize
+Perform greedy clustering, so as to minimize the number of number of non-zero
+ entries in the left and right factor matrixes
+\end_layout
+
+\begin_layout Itemize
+Decompose vectors into components that align with clusters, so that clusters
+ correspond to word-senses, and word-sense disamgiguation (WSD) is an inherent,
+ inbuilt part of the clustering step.
+\end_layout
+
+\begin_layout Subsection
 Factorization Ambiguity
 \end_layout
 
@@ -4967,342 +5303,6 @@ reference "sub:Sparsity"
 
 \begin_layout Standard
 Back to the drawing board.
-\end_layout
-
-\begin_layout Subsection
-Clustering as Matrix Factorization 
-\begin_inset CommandInset label
-LatexCommand label
-name "sub:Clustering-as-Matrix"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Ding 
-\emph on
-et al
-\emph default
- show that 
-\begin_inset Formula $k$
-\end_inset
-
--means clustering is equivalent to a rank-
-\begin_inset Formula $k$
-\end_inset
-
- matrix decomposition with an extra orthogonality condition enforced.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Ding2005"
-
-\end_inset
-
- The orthogonality condition can be loosened, as the process of factorization
- is driven by a minimization condition that drives towards approximate orthogona
-lity.
- In effect, 
-\begin_inset Formula $k$
-\end_inset
-
--means clustering is a special case of matrix factorization: its factorization
- with extra constraints.
- 
-\end_layout
-
-\begin_layout Standard
-Ding 
-\emph on
-et al
-\emph default
- examine several forms of 
-\begin_inset Formula $k$
-\end_inset
-
--means clustering.
- The simplest form of clustering assigns vectors to clusters, and stops
- there.
- This is equivalent to assigning words to word-classes, without making any
- specific statements about what happened to the disjuncts.
- Alternately, one could say that the disjuncts just went along for the ride:
- they were associated with some word before-hand, and they are now still
- associated with that word, thrown into a bucket with the other disjuncts
- of similar words.
-\end_layout
-
-\begin_layout Standard
-Bipartite graph clustering (aka 
-\begin_inset Quotes eld
-\end_inset
-
-co-clustering
-\begin_inset Quotes erd
-\end_inset
-
-) recognizes that the input data can be viewed as a bipartite graph (fig
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Factorization"
-
-\end_inset
-
-, left image), and that one can perform seperate, distinct, but simultaneous
- clustering on the columns, and seperately, the rows.
- This is closer to the desired factorization model for langauge, so the
- proof is reviewed here.
- It is still 
-\begin_inset Formula $k$
-\end_inset
-
--means clustering, just that one performs two clusterings, not one, on the
- columns, and on the rows.
-\end_layout
-
-\begin_layout Standard
-The matrix to be factorized is 
-\begin_inset Formula $B$
-\end_inset
-
- and the desired factorization is 
-\begin_inset Formula $B\approx LR^{T}$
-\end_inset
-
-.
- Comparing this to the factorization of eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:factorize"
-
-\end_inset
-
-, the matrix elements of 
-\series bold
-
-\begin_inset Formula $B$
-\end_inset
-
-
-\series default
- are 
-\begin_inset Formula $p\left(w,d\right)$
-\end_inset
-
-; those of 
-\begin_inset Formula $L$
-\end_inset
-
- are 
-\begin_inset Formula $p\left(w,g\right)$
-\end_inset
-
-; those of 
-\begin_inset Formula $R^{T}$
-\end_inset
-
- are 
-\begin_inset Formula $p\left(g,d\right)$
-\end_inset
-
-.
- Key to the proof is the reinterpretation of 
-\begin_inset Formula $L$
-\end_inset
-
- and 
-\begin_inset Formula $R$
-\end_inset
-
- as membership matrixes, so that each row and column indicate the membership
- of a vector to a cluster.
- That is 
-\begin_inset Formula $L$
-\end_inset
-
- consists of column vectors 
-\begin_inset Formula $L=\left[\vec{l}_{1},\vec{l}_{2},\cdots,\vec{l}_{k}\right]$
-\end_inset
-
- where each column vector is of the form
-\begin_inset Formula 
-\[
-\vec{l}_{j}=\left(0,0,\cdots0,1,1,\cdots,1,0,\cdots,0\right)^{T}
-\]
-
-\end_inset
-
-with the 
-\begin_inset Formula $1$
-\end_inset
-
-'s indicating the cluster membership.
- That is, the matrix elements of 
-\begin_inset Formula $L$
-\end_inset
-
- are 
-\begin_inset Formula 
-\[
-L_{ij}=\begin{cases}
-1 & \mbox{ item }i\mbox{ belongs to cluster }j\\
-0 & \mbox{ otherwise}
-\end{cases}
-\]
-
-\end_inset
-
-Equivalently, the factorization is
-\begin_inset Formula 
-\[
-p\left(w,g\right)=\begin{cases}
-1 & \mbox{ word }w\mbox{ belongs to wordclass }g\\
-0 & \mbox{ otherwise}
-\end{cases}
-\]
-
-\end_inset
-
-The normalization is such that every word belongs to some class, with 100%
- probability (hard clustering).
- The matrix 
-\begin_inset Formula $R$
-\end_inset
-
- is presented analogously.
- 
-\end_layout
-
-\begin_layout Standard
-The optimization problem is then to find the maxima of two objective functions,
- subject to some constraints:
-\begin_inset Formula 
-\[
-\max_{L\ge0;L^{T}L\sim I}\mbox{tr}L^{T}BB^{T}L\;\mbox{ and }\;\max_{R\ge0;R^{T}R\sim I}\mbox{tr}R^{T}B^{T}BR
-\]
-
-\end_inset
-
-The constraint 
-\begin_inset Formula $L^{T}L\sim I$
-\end_inset
-
- means that not only should 
-\begin_inset Formula $L^{T}L$
-\end_inset
-
- be a diagonal matrix, but that it should be a multiple of the identity
- matrix 
-\begin_inset Formula $I$
-\end_inset
-
- -- that is, have equal values along the diagonal.
- Here, the tr operator is the matrix trace.
- The trace of a matrix is, of course, equal to the sum of the eigenvalues
- of the matrix; thus, optimizing the above is equivalent to performing a
- singular value decomposition (SVD) of the traced matrix, and then summing
- the singular values.
- This is, of course, just the nuclear norm discussed previously.
-\end_layout
-
-\begin_layout Standard
-With some relatively straightforward algebraic manipulation, the above can
- be shown to be equivalent to optimizing 
-\begin_inset Formula 
-\[
-\min\left\Vert B-LR^{T}\right\Vert ^{2}
-\]
-
-\end_inset
-
-subject to the same constraints.
- The norm 
-\begin_inset Formula $\left\Vert \cdot\right\Vert ^{2}$
-\end_inset
-
- is the Frobenius norm.
- In this sense, hard 
-\begin_inset Formula $k$
-\end_inset
-
--means clustering is identical to matrix factorization.
- Removing some of the constraints shows that 
-\begin_inset Formula $k$
-\end_inset
-
--means clustering is a special case of the more general factorization problem.
- Ding 
-\emph on
-et al
-\emph default
- show that if one removes the orthogonality constraints, the resulting factors
- are still approximately orthogonal, since the Frobenius norm contains terms
- that drive the factors towards orthogonality.
- 
-\end_layout
-
-\begin_layout Standard
-Three previously identified issues arise with the above:
-\end_layout
-
-\begin_layout Itemize
-The hard-clustering assignment of a word to only a single word-class prevents
- words from having multiple meanings, and thus forces word-sense disambiguation
- to somehow happen somewhere else.
-\end_layout
-
-\begin_layout Itemize
-The use of the Frobenius norm (or the nuclear norm) implicitly forces assumption
-s of rotational invariance, in the form of orthogonality constraints on
- the membership indicator matrixes 
-\begin_inset Formula $L$
-\end_inset
-
-, 
-\begin_inset Formula $R$
-\end_inset
-
-.
- As discussed previously, rotational invariance (and thus, orthogonality)
- is inappropriate when 
-\begin_inset Formula $L$
-\end_inset
-
- and 
-\begin_inset Formula $R$
-\end_inset
-
- are interpreted as joint probability distributions.
- 
-\end_layout
-
-\begin_layout Itemize
-There is no room for a matrix 
-\begin_inset Formula $M\left(g,g^{\prime}\right)$
-\end_inset
-
- which can capture the non-sparse complexities of the language.
-\end_layout
-
-\begin_layout Standard
-The proposed fix to these issues is multi-fold: 
-\end_layout
-
-\begin_layout Itemize
-Use an information-theoretic metric, namely, the Kullback-Leibler divergence
- of the factored solution to the input data.
-\end_layout
-
-\begin_layout Itemize
-Perform greedy clustering, so as to minimize the number of number of non-zero
- entries in the left and right factor matrixes
-\end_layout
-
-\begin_layout Itemize
-Decompose vectors into components that align with clusters, so that clusters
- correspond to word-senses, and word-sense disamgiguation (WSD) is an inherent,
- inbuilt part of the clustering step.
 \end_layout
 
 \begin_layout Subsection
