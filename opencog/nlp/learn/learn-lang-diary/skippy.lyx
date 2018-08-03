@@ -3894,7 +3894,8 @@ viz
 \end_inset
 
 .
- A single-layer feed-forward linear neural net would consist of a 
+ For example, a single-layer feed-forward linear neural net would consist
+ of a 
 \begin_inset Formula $\left|G\right|\times\left|G\right|$
 \end_inset
 
@@ -3941,31 +3942,89 @@ This, in itself, because it is linear, does not accomplish much, because
 \end_inset
 
 .
- Written in in components:
-\begin_inset Formula 
-\begin{equation}
-p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)\label{eq:central-decomposition}
-\end{equation}
+ The point is that the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
 
 \end_inset
 
-and so one can contract 
+ is not unique.
+ 
+\end_layout
+
+\begin_layout Standard
+The is commonly expressed in the low-rank matrix-factorization literature
+ by noting that a dot-product is invariant under orthogonal rotations, and
+ so one can choose an arbitrary orthogonal matrix 
+\begin_inset Formula $O$
+\end_inset
+
+ with 
+\begin_inset Formula $O^{T}O=I$
+\end_inset
+
+ and write 
+\begin_inset Formula 
+\[
+\vec{w}\cdot\vec{d}=\left(\vec{w}O^{T}\right)\cdot\left(O\vec{d}\right)=\vec{w}^{\prime}\cdot\vec{d}^{\prime}
+\]
+
+\end_inset
+
+Since the vectors 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ are naturally probabilities, the above is exactly what we do 
+\emph on
+not
+\emph default
+ what to do! As already noted, orthogonal rotations applied to a probability
+ turn it into something that is not a probability.
+ Instead, we want to stick to a single (ambiguous) matrix 
 \begin_inset Formula $M$
 \end_inset
 
- either to the left or to the right.
- This shows that the factorization is ambiguous; as long as 
+ that is Markovian, so that, when contracted to the left or to the right,
+ the resulting vectors are still probabilities.
+\end_layout
+
+\begin_layout Standard
+This becomes more clear if written in in components:
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+\]
+
+\end_inset
+
+This shows that the factorization is ambiguous; as long as 
 \begin_inset Formula $M$
 \end_inset
 
  is Markovian, preserving the sums of probabilities over rows and columns,
  it can be contracted to the left or the right.
- Thus, one can legitimately introduce another constraint: given the freedom
- in 
+ Indeed: 
 \begin_inset Formula $M$
 \end_inset
 
-, choose it so that 
+ itself can be factored into an arbitrary product of Markovian matrixes,
+ which can then be merged to the left and right.
+\end_layout
+
+\begin_layout Standard
+Thus, to get a meaningful factorization, one can must introduce additional
+ constraints.
+ A seemingly natural one, to be developed later, is to choose 
+\begin_inset Formula $M$
+\end_inset
+
+ such that 
 \begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
@@ -3974,6 +4033,9 @@ and so one can contract
 \end_inset
 
  are both maximally sparse.
+ One would like to assign a word to at most a handful of different word-classes,
+ corresponding to the synonym classes for each word-sense attached to that
+ word.
 \end_layout
 
 \begin_layout Standard
@@ -4029,8 +4091,8 @@ If one has such a factorization, so that
 \begin_inset Formula $p\left(g^{\prime},d\right)$
 \end_inset
 
- are low-density feeder branches that connect into this tightly-coupled
- kernel.
+ are low-density feeder tree-branches that connect into this tightly-coupled
+ central component.
  This is visualized in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -4045,7 +4107,7 @@ reference "fig:Factorization"
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -4192,6 +4254,106 @@ height "1pt"
 
 \end_layout
 
+\begin_layout Standard
+In the above factorization, matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ was made explicitly Markovian, so as to preserve the left and right factors
+ as joint probabilities.
+ However, it seems to be particularly important to the semantic structure
+ of the language: it captures the complexity of language, whereas the left
+ and right factors merely funnel spell-ed-out word-strings into the actual
+ semantic cagtegories.
+ Thus, it is convenient to instead write the left and write factors as Markov
+ matrices, while taking the central factor to be a joint probability.
+ This can be acheived by factoring as
+\begin_inset Formula 
+\begin{equation}
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)\label{eq:central-decomposition}
+\end{equation}
+
+\end_inset
+
+where the left and right factors are conditional probabilities.
+ That is,
+\begin_inset Formula 
+\[
+p\left(w|g\right)=\frac{p\left(w,g\right)}{p\left(*,g\right)}
+\]
+
+\end_inset
+
+and likewise for 
+\begin_inset Formula $p\left(d|g^{\prime}\right)=p\left(g^{\prime},d\right)/p\left(g^{\prime},*\right)$
+\end_inset
+
+.
+ These are explicitly Markovian, in that
+\begin_inset Formula 
+\[
+\sum_{g}p\left(w|g\right)=1
+\]
+
+\end_inset
+
+and likewise 
+\begin_inset Formula $\sum_{g^{\prime}}p\left(d|g^{\prime}\right)$
+\end_inset
+
+.
+ This factorization is just a rescaling of the earlier factorization: 
+\begin_inset Formula 
+\[
+p\left(g,g^{\prime}\right)=p\left(*,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},*\right)
+\]
+
+\end_inset
+
+and is done so that 
+\begin_inset Formula $p\left(g,g^{\prime}\right)$
+\end_inset
+
+ can be seen as a joint probability: 
+\begin_inset Formula 
+\[
+\sum_{g,g^{\prime}}p\left(g,g^{\prime}\right)=1
+\]
+
+\end_inset
+
+For the case of hard clustering, where each 
+\begin_inset Formula $w$
+\end_inset
+
+ can belong to only one 
+\begin_inset Formula $g$
+\end_inset
+
+, and each 
+\begin_inset Formula $d$
+\end_inset
+
+ to just one 
+\begin_inset Formula $g^{\prime}$
+\end_inset
+
+, such a factorization is called co-clustering.
+ An explicit development of this, including an explicit iterative algorithm
+ guaranteed to converge, is given by Dhillon et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dhillon2003"
+
+\end_inset
+
+ and is reviewed in a subsection below.
+ Of course, for natural langauge, we want to decompose words into word-senses,
+ and so naive hard-clustering will not work.
+ It does, however, illuminate the path ahead.
+ 
+\end_layout
+
 \begin_layout Subsubsection
 Factorization in Link Grammar
 \begin_inset CommandInset label
@@ -4237,7 +4399,7 @@ words.n.2.s
 \begin_inset Formula $g=\left\langle \mbox{plural-count-nouns}\right\rangle $
 \end_inset
 
-and a uniform probability across this class.
+ and a uniform probability across this class.
  The file 
 \family typewriter
 4.0.dict
@@ -4351,6 +4513,21 @@ viz
 
  contains strongly-coupled bipartite cliques.
  
+\end_layout
+
+\begin_layout Standard
+This explicit co-clustering in Link Grammar is not driven by any sort of
+ theoretical arguments or foundation.
+ Rather, it is a natural, intuitive outcome of how the linguists who author
+ the dictionaries wish to tackle the problem.
+ A good factorization saves time and effort for the author, and is easier
+ to debug.
+ The urge to factorize is not limited to English: a look at any of the dictionar
+ies shows this structure clearly.
+ It becomes even more pronounced in dictionaries with morphology, e.g.
+ in the Russian dictionaries, where word-stems (which carry most of the
+ meaining) are factored away from the suffixes (which provide the needed
+ tense, gender, number and person agreement across sentences).
 \end_layout
 
 \begin_layout Subsubsection
