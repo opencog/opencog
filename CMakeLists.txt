@@ -69,9 +69,6 @@ list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 
 include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 
-# add the 'lib' dir to cmake's module search path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
-
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
@@ -294,7 +291,7 @@ ENDIF (UUID_FOUND)
 
 
 # MOSES needed for ???
-FIND_PACKAGE(MOSES)
+FIND_PACKAGE(MOSES CONFIG)
 
 IF (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES was found.")
