@@ -3853,7 +3853,14 @@ Factorization Ambiguity
 \end_layout
 
 \begin_layout Standard
-The sum 
+When considering the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, the sum 
 \begin_inset Formula $\sum_{g\in G}$
 \end_inset
 
@@ -4489,7 +4496,7 @@ Information Loss
 
 \begin_layout Standard
 The goal of the factorization is to minimize the information loss between
- the input data and the fractorization.
+ the input data and the factorization.
  The objective function is then The Kullback-Leibler divergence, a minor
  variant on the previous eqn 
 \begin_inset CommandInset ref
@@ -4508,7 +4515,22 @@ MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}\
 
 By minimizing this divergence, one minimizes the total loss incurred by
  the factorization.
+\end_layout
+
+\begin_layout Standard
+The above information loss estimate is identical to that described by Dhillion
  
+\emph on
+et al
+\emph default
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dhillon2003"
+
+\end_inset
+
+ in thier treatment of co-clustering.
 \end_layout
 
 \begin_layout Subsection
