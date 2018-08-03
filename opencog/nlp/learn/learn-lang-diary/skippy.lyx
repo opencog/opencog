@@ -4508,7 +4508,7 @@ reference "eq:KL-MI-factorization-loss"
 :
 \begin_inset Formula 
 \begin{equation}
-MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)}\label{eq:full-factor-loss}
+MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)}\label{eq:full-factor-loss}
 \end{equation}
 
 \end_inset
@@ -4530,11 +4530,74 @@ key "Dhillon2003"
 
 \end_inset
 
- in thier treatment of co-clustering.
+ in thier treatment of hard co-clustering.
  That reference provides an extensive and detailed review of the factorization
- problem being addressed in this section, and gives detailed motivation
- for the formulas, and articulates the relationships between the various
- factors.
+ problem being addressed in this section, with the exception that the current
+ need for word-sense disambiguation violates thier hard-clustering assumption.
+ Words cannot be hard-clustered; word-vectors must be decomposed into word-sense
+ vectors first.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ Nonetheless, many formulas are still relevant, and the reference gives
+ detailed motivation for them, and provides multiple articulations and derivatio
+ns.
+ Various results are recapped here.
+\end_layout
+
+\begin_layout Standard
+For the special case of hard clustering, where each word or disjunct is
+ assigned to only one word class/grammatical class, one has that (eqn (6)
+ if Dhillon)
+\begin_inset Formula 
+\[
+M\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)
+\]
+
+\end_inset
+
+From this, it follows that (eqn (4) of Dhillion)
+\begin_inset Formula 
+\[
+MI_{Loss}=MI\left(W,D\right)-MI\left(G,G^{\prime}\right)
+\]
+
+\end_inset
+
+and so eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:full-factor-loss"
+
+\end_inset
+
+ really is the information loss from factorization.
+ For hard clustering, the loss can be written in terms of only the left,
+ or the right clusters, so that (lemma 4.1 of Dhillon)
+\begin_inset Formula 
+\[
+MI_{Loss}=\sum_{g}\sum_{w\in g}\sum_{d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{p\left(w,*\right)}\,\frac{p\left(g,*\right)}{p\left(g,d\right)}
+\]
+
+\end_inset
+
+This allows an iterative algorithm to be performed, clustering only rows
+ (or only columns), that is, only words (or only disjuncts).
+\end_layout
+
+\begin_layout Subsubsection
+Biclustering
+\end_layout
+
+\begin_layout Standard
+It is worth reviewing the algorithm that Dhillion 
+\emph on
+etal
+\emph default
+ present.
 \end_layout
 
 \begin_layout Subsection
