@@ -6159,11 +6159,20 @@ This global aspect makes this function very different from the cosine distance.
 
 \begin_layout Standard
 A different way to think of the pair-wise MI is that, by incorporating all
- ofther vectors into its value, it is effectively attempting to spread all
+ other vectors into its value, it is effectively attempting to spread all
  of the (other) vectors into as uniform distribution as possible, magnifying
  and expanding those regions where cosine would say there are lots of densely
  packed vectors, while shrinking those regions where there is low density.
  
+\end_layout
+
+\begin_layout Standard
+One way the above can be visualized is to consider two vectors, roughly
+ colinear, and another six hundred, also all roughly colinear, but almost
+ orthogonal to the first two.
+ Consider then the MI values for different pairs chosen from this collection.
+ Two vectors which might have the same cosine angle will have very different
+ MI values, in this kind of dataset.
 \end_layout
 
 \begin_layout Subsubsection
@@ -6171,22 +6180,167 @@ Arithmetic, Geometric and Logarithmic Means
 \end_layout
 
 \begin_layout Standard
-For the clustering operation, one must replace the arithmetic mean by the
- geometric mean.
- The cluster centroid is now given by 
+For vectors obtained from natural language, tehre is good reason to beleive
+ that the natural clusters are convex, rather than being oddly shaped.
+ Therefore, it is meaningful to ask about and talk about the centroid of
+ a cluster.
+\end_layout
+
+\begin_layout Standard
+For a Euclidean space, posessing rotational invariance and some notion of
+ uniform distribution, the arithmetic mean of the vectors in a cluster would
+ be a natural choice for the centroid.
+ However, as is being repeatedly noted, vectors taken from a joint probability
+ distribution do not live in a Euclidean, rotationally symmetric space.
+ The arithmetic mean does not make sense.
+ There are several candidates that are more suitable.
+\end_layout
+
+\begin_layout Standard
+One is the geometric mean.
+ The centroid for word-cluster 
+\begin_inset Formula $g$
+\end_inset
+
+ might be expressed by 
 \begin_inset Formula 
 \[
-m\left(w,d\right)=\sqrt[\frac{1}{\left|g\right|}]{\prod_{w\in g}p\left(w,d\right)}
+m\left(g,d\right)=\sqrt[\frac{1}{\left|g\right|}]{\prod_{w\in g}p\left(w,d\right)}
 \]
 
 \end_inset
 
-The need for the geometric mean can be thought of in two ways: first, probabilit
-ies can only be added if they are truly independent, and here they are not;
- but probabilities can always be multiplied.
- More importantly, the logarithm of the geometric mean can be taken.
- This connects the pair-wise information distance to minimization of cluster
- sizes.
+This has the peculiar property that, if for any word 
+\begin_inset Formula $w$
+\end_inset
+
+ in the cluster, 
+\begin_inset Formula $p\left(w,d\right)=0$
+\end_inset
+
+, then 
+\begin_inset Formula $m\left(g,d\right)=0$
+\end_inset
+
+.
+ The support for the vector 
+\begin_inset Formula $m\left(g,d\right)$
+\end_inset
+
+ is the intersection of the supports for the vectors 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ In itself, this is not terribly objectionable or bad, but for one thing:
+ The 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ are observational data, and are not theoretical distributions.
+ Thus, one might have that 
+\begin_inset Formula $p\left(w,d\right)=0$
+\end_inset
+
+ simply because it has not been observed, and not because it is grammatically
+ forbidden.
+ This was already noted in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Sparsity"
+
+\end_inset
+
+: contingency tables fundamentally cannot distinguish between rare linguistic
+ phenomena and grammatically forbidden phenomena.
+ The Zipfian distribution prohibits this.
+\end_layout
+
+\begin_layout Standard
+One can imagine several work-arounds.
+ One would be to apply some form of kernel smoothing, or to apply some sort
+ of local regression.
+ How this might work is unclear.
+ Consider instead the logarithm of the gemoetric mean:
+\begin_inset Formula 
+\[
+\log_{2}m\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\log_{2}p\left(w,d\right)
+\]
+
+\end_inset
+
+To be consistent with the previous expression, if 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ has not been observed, one should take 
+\begin_inset Formula $\log_{2}p\left(w,d\right)=-\infty$
+\end_inset
+
+.
+ From the missing-data perspective, it would actually be better to take
+ 
+\begin_inset Formula $\log_{2}p\left(w,d\right)=0$
+\end_inset
+
+ -- missing observations contribute nothing.
+ Continuing in this vein for thinking, that infrequently-observed phenomena
+ are being unfairly punished and are not being given due weight, one might
+ consider the centroid to be described by
+\begin_inset Formula 
+\[
+\mu_{\alpha}\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\left(\log_{2}p\left(w,d\right)\right)^{\alpha}
+\]
+
+\end_inset
+
+for some 
+\begin_inset Formula $\alpha\le1$
+\end_inset
+
+, thus effectively making rare pehnomena seem less rare, while common phenomena
+ become less common.
+\end_layout
+
+\begin_layout Standard
+An intuitive feel for the geometric mean can be argued: probabilities can
+ only be added if they are truly independent, and here they are not; but
+ probabilities, taken as discrete events, can always be multiplied.
+ For a a probability distribution 
+\begin_inset Formula $P\left(X\right)$
+\end_inset
+
+ on a space 
+\begin_inset Formula $X$
+\end_inset
+
+, the frequentist interpretation of probability is founded on individual
+ observations in the sequence space (aka the Cantor space) 
+\begin_inset Formula $X^{\omega}=X\times X\times\cdots$
+\end_inset
+
+ that is the Cartesian product of an infinite number of copies of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Frequentist probabilities are sigma-measures on the Borel set of cylinder
+ sets on the Cantor space.
+ Cylinder sets are the elements of the coarse topology on the product space.
+ Cylinder sets correspond to the limits of the pushout diagram 
+\begin_inset Formula $\centerdot\leftarrow\centerdot\rightarrow\centerdot$
+\end_inset
+
+ that defines the Cartesian product.
+\end_layout
+
+\begin_layout Subsubsection
+Agglomerative Clustering
+\end_layout
+
+\begin_layout Standard
+Because the pair-wise information divergence is ...
+ pairwise, it makes the most sense to perform agglomerative clustering.
 \end_layout
 
 \begin_layout Subsection
