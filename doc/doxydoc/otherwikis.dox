@@ -1,0 +1,38 @@
+namespace opencog {
+/**
+
+\page otherwikis Other wiki pages
+
+Here are some other wiki pages not linked from inside these overview pages
+that you may find interesting:
+- <a href="http://wiki.opencog.org/wikihome/index.php?title=Special:AllPages">All wiki pages</a>
+- <a href="http://wiki.opencog.org/w/OpenCogGlossary">Glossary</a>
+- <a href="http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant">Setup OpenCog development environment VM using Vagrant</a>
+- <a href="http://wiki.opencog.org/w/Multithreading">Multithreading</a>
+- <a href="http://wiki.opencog.org/w/OpenCogAtomTypes">OpenCog Atom types</a>
+and <a href="http://wiki.opencog.org/w/Category:Atom_Types">related category</a>
+- <a href="http://wiki.opencog.org/w/Ocpkg">ocpkg</a>
+- <a href="http://wiki.opencog.org/w/OpenCog_Core">OpenCog Core</a>
+- <a href="http://wiki.opencog.org/w/OpenCog_Technical_Information">OpenCog Technical Information</a>
+- <a href="http://wiki.opencog.org/w/Web_Interface">web interface</a>
+- <a href="http://wiki.opencog.org/w/ZeroMQ">ZeroMQ</a>
+- <a href="http://wiki.opencog.org/w/PLN_NLP_Examples">PLN NLP Examples</a>
+- <a href="http://wiki.opencog.org/w/The_Team">The Team</a>
+- <a href="http://wiki.opencog.org/w/OpenCogPrime:Wikibook">WikiBook: A Design for A Thinking Machine</a>
+- <a href="http://blog.opencog.org/2013/03/24/why-hypergraphs/">Blog</a>
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref bldtargets "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref license "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+*/
+} //~namespace opencog

@@ -1,0 +1,76 @@
+namespace opencog {
+/**
+
+\page libspacetime spacetime library
+
+This library (<em>opencog/spacetime</em>) handles the spatio-temporal 
+aspect of the atomspace.
+@code
+make spacetime
+@endcode
+
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_spacetime "the comprehensive overview".
+
+Dependencies:
+- \ref libspatial "SpaceMap"
+- \ref libserver "server"
+- \ref libatomspace "atomspace"
+
+TimeServer is the class used to associate temporal information (timestamps or
+timelags) to atom handles. 
+<a href="http://wiki.opencog.org/w/TimeServer">The wiki entry</a> on
+the time server has indepth description about the functionality of this
+part of opencog.
+
+Temporal class is capable of storing a time stamp and
+two types of timelags (distributions): 
+normal distribution defined by mean and variance and
+uniform distribution is defined by lower and higher bounds.
+It is wrapped by a TemporalEntry for linked lists.It also provides several
+methods to perform operations between lists such as concatenation,
+intersection, and filtering.
+
+HandleTemporalPairEntry wraps a HandleTemporalPair (pair of handle and a
+Temporal value) to make an entry in a linked list. It also provides several
+methods to perform operations between lists such as concatenation.
+
+A TemporalMap (pairs of Temporal instances and pointers) comes with a
+TemporalMapIterator for easy access. It may use an internal mutex for data
+access. The TemporalTable 
+
+SpaceTimeCogServer associates a SpaceServer and a TimeServer.
+\if DOCUMENTATION_TODO
+TNick: I am not sure how this code relates to the one in spatial directory.
+\endif
+
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libspatial "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libattention "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+
+/**
+\defgroup grp_spacetime spacetime library
+
+This library (<em>opencog/spacetime</em>) handles the spatio-temporal 
+aspect of the atomspace.
+To build it type:
+@code
+make spacetime
+@endcode
+
+To read a high level overview of this library head to 
+\ref libspacetime "dedicated page".
+*/
+} //~namespace opencog
+

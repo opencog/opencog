@@ -1,0 +1,32 @@
+
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'dj-size.eps'
+# set term png
+# set out 'dj-size.png'
+set logscale y
+set format y "10^{%4T}"
+set xrange [0:10]
+set title "Number of sections having N connectors"
+set ylabel "Number of sections"
+set xlabel "Number of connectors"
+plot "dj-size.dat" using 1:2 with lines linewidth 5 title "", \
+
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'dj-wsize.eps'
+# set term png
+# set out 'dj-size.png'
+set logscale y
+set format y "10^{%4T}"
+set xrange [0:10]
+set title "Observations of sections having N connectors"
+set ylabel "Observations of sections"
+set xlabel "Number of connectors"
+plot "dj-size.dat" using 1:3 with lines linewidth 5 title "", \
+
+#################################################

@@ -1,0 +1,169 @@
+Atomspace deduplication repair scripts
+--------------------------------------
+
+Due to bugs, the SQL backend can end up with multiple copies of
+atoms. This script will find them, merge them, and sum the counts
+on the associated count truth values.  Its up to you to recompute
+anything else.
+
+The scripts are semi-manual. A lot of manual fiddling is required.
+
+First check for multiple ANY atoms:
+  select * from typecodes where typename='LinkGrammarRelationshipNode';
+
+reports that type=89 is LinkGrammarRelationshipNode)
+Then see how many:
+   select * from atoms where type=89 and name='ANY';
+
+If more than one, start with ./any-merge.scm
+
+Next, edit common.scm and set do-update to #f --
+  -- this will avoid clobbering your data.
+  -- then run ./dedupe-pairs.scm and see what happens..
+  -- dedupe-pairs looks for duplicate ListLinks.
+
+Next, edit common.scm and set do-update to #t --
+  -- this is the actual run.
+
+Next run ./eval-dedupe.scm
+
+Then review contents of and run word-merge.scm
+then delete the duplicate WordNodes by hand.
+
+Then run dedupe-pairs.scm a second time ...
+
+Finally, fix the indexes, manually:
+\di
+DROP INDEX linkidx;
+CREATE UNIQUE INDEX linkidx ON Atoms(type, outgoing);
+DROP INDEX nodeidx;
+CREATE UNIQUE INDEX nodeidx ON Atoms(type, name);
+
+ALTER TABLE atoms ADD UNIQUE (type, outgoing);
+ALTER TABLE atoms ADD UNIQUE (type, name);
+
+
+and then remove duplicates again with ./eval-dedup.scm
+
+After scrubbing, we may end up with Links that specify children that
+are not in the atomspace. Check for these with ./check-oset.scm
+
+Notes
+-----
+ssh -L 5555:localhost:5432  example.org
+
+Working on Rohit's dataset.
+psql simple_pairs
+SELECT Count(*) from atoms; gives 9 230 537 -- that is 9 million or so
+Of these, there are --
+   3 636 569 ListLinks          type=8
+   5 453 952 EvaluationLinks    type=27
+     139 884 WordNodes          type=45
+select count(*) from atoms where type=8;
+
+----
+After first dupe elimination:
+   3 636 568 ListLinks        (one less)
+   3 601 161 EvaluationLinks  (1852791 less) (about right ...)
+---
+
+After word-dedupe:
+   3 389 455 ListLinks
+   3 354 048 EvalLinks
+     139 839 WordNodes
+----
+
+After list dedupe:
+   3 354 804 ListLinks
+   3 328 118 EvalLinks
+
+
+Find the ANY node:
+61 | LinkGrammarRelationshipNode
+select * from atoms where type=61;
+
+arghhh. There are 6 of these...
+(map count-evlinks (list 57 139 140 186 190 270))
+
+These are being handled at the rate of 100 per second.
+so 5.5M 55K seconds == 15 hours!!! ouch.
+
+Relabel any uuid 139 to 57
+Changed uuid count was 833348
+Changed 140 to 57
+Changed uuid count was 623716
+Changed 186 to 57
+Changed uuid count was 1769698
+Changed 190 to 57
+Changed uuid count was 492974
+Changed 270 to 57
+Changed uuid count was 573087
+
+real	349m46.696s
+user	46m10.172s
+sys	22m34.208s
+
+argh do it again:
+Number of bad evals: 588291
+Relabel ANY uuid 139 to 57
+Relabeled uuid count was 101662
+Relabel ANY uuid 140 to 57
+Relabeled uuid count was 311786
+Relabel ANY uuid 186 to 57
+Relabeled uuid count was 39714
+elabel ANY uuid 190 to 57
+Relabeled uuid count was 62779
+Relabel ANY uuid 270 to 57
+Relabeled uuid count was 72350
+
+
+
+
+
+
+select uuid,stv_count from atoms where type=61;
+ uuid | stv_count
+------+-----------
+  186 | 221385260
+   57 |  64865342
+  139 |  64780936
+  270 |  38383732
+  140 |  47758052
+  190 |  20589354
+(6 rows)
+
+select sum(stv_count) from atoms where type=61;
+    sum
+-----------
+ 457762676
+
+UPDATE atoms SET stv_count=457762676 WHERE uuid=57;
+DELETE FROM atoms WHERE uuid=186;
+DELETE FROM atoms WHERE uuid=139;
+DELETE FROM atoms WHERE uuid=270;
+DELETE FROM atoms WHERE uuid=140;
+DELETE FROM atoms WHERE uuid=190;
+
+
+./dedupe says only one!! duplicate EvalLink!?
+select * from atoms where outgoing='{125,131}';
+15138
+15945
+DELETE FROM atoms WHERE uuid=15945;
+
+select uuid,type,stv_count,outgoing from atoms where outgoing='{57,15138}';
+So -- only one ListLink, but lots of Duplicated Evals for that
+ListLink...
+So, run ./eval-dedup.scm
+The duplicate eval list size: 1817384
+
+argh.
+ about 415805 in re1, re2 and 1094637 in re3
+
+----------
+Now run ./word-merge.scm
+
+-- sum the word counts too.
+Done.
+
+Finally, run dedupe-pairs.scm

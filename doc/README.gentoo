@@ -1,0 +1,23 @@
+#######################################################################
+Instalation and dependency resolution for Gentoo (circa Sep. 2008)
+#######################################################################
+
+Opencog depends on the following packages:
+
+  dev-util/cmake dev-libs/boost
+
+You might need to eselect the right boost version as well.
+
+----------------------------------------------------------
+
+Additionally, it depends on the following non-official packages:
+
+  cxxtest
+
+which are available in the 'vendor' directory. To install them, issue
+the following commands:
+
+  prompt# cd <opencog-base-dir>
+  prompt# ebuild vendor/cxxtest/gentoo/dev-cpp/cxxtest/cxxtest*.ebuild install qmerge
+
+----------------------------------------------------------

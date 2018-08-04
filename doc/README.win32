@@ -1,0 +1,42 @@
+###############################################################################
+Installation and dependency resolution for Win32 users
+###############################################################################
+
+- Compiler -
+
+We recommend building with the latest Microsoft's Visual C++ Express Edition
+suite (as of this writing, the latest version is "VC++ 9 - 2008"). It may be
+freely downloaded from: "http://www.microsoft.com/express/download/"
+
+-------------------------------------------------------------------------------
+
+- Dependencies -
+
+Opencog depends on the following packages:
+
+    cmake:             http://www.cmake.org
+    stlport:           http://stlport.sourceforge.net/
+    pthreads:          http://sourceware.org/pthreads-win32/#download
+    boost:             http://www.boost.org/users/download/
+    cxxtest:           http://sourceforge.net/project/showfiles.php?group_id=52834
+
+-------------------------------------------------------------------------------
+
+- Building -
+
+Run the CMake UI: "Start Menu" -> "Program Files" -> "CMake" -> "CMake". Select
+the root of the opencog tree as the source and build directories. Then click on
+"Configure" and select the "Visual Studio 9" as the generator.
+
+A few error messages will show up, complaining about missing INCLUDE dirs and
+LIBRARIES. Select the appropriate paths using the main panel and rerun configure
+until all required paths are found. Finally click on "OK" to generate the build
+files and exit.
+
+A "OPENCOG.sln" file (along with several other ".vcproj" files)
+should be at the root of the opencog tree. Open it using the "Visual Studio"
+application and click on the menu "Build" -> "Build Solution" to compile the main
+"src" tree. Additional targets (such as "test") may be compiled using the
+"Solution Explorer" panel on the left.
+
+-------------------------------------------------------------------------------

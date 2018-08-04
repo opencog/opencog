@@ -1,0 +1,21 @@
+
+#################################################
+# Used to generate distribution of word-class sizes
+#
+set term postscript eps enhanced color 28
+set out 'class-dj-count.eps'
+# set term png
+# set out 'class-dj-count.png'
+set logscale y
+set logscale x
+set xrange [1:50]
+set yrange [1e4:5e6]
+set format y "10^{%4T}"
+set title "Total observations of disjuncts in each word-class"
+set xlabel "Rank"
+set ylabel "Num observations of disjuncts"
+plot "class-dj-count.dat" using 1:2 with lines linewidth 5 title "", \
+     "class-dj-count.dat" using  1:(4.5e6/($1)** 1.4) with lines linewidth 2 \
+      title "4.5x10^6 / N^{1.4}"
+
+#################################################

@@ -1,0 +1,41 @@
+-------------------------------------------------------------------------------
+CODE STYLE
+
+In order to keep the code nice and clean we have a few requirements you'll
+need to stick to in order to get your patch accepted:
+
+- use 4 spaces for indentation
+- use 80 columns max
+- use unix-style end-of-lines (all decent win32 editors support it)
+- use definition-block brackets on a new line and command-block brackets
+  on the same line
+- use spaces between expression operators ("i + 1" instead of "i+1")
+
+To check wheter your code complies with our standard, you may use the tool
+"astyle". Make sure you use the following options:
+
+  prompt-$ astyle --indent=spaces=4 --brackets=linux --indent-labels \
+           --pad=oper --one-line=keep-statements --convert-tabs \
+           --indent-preprocessor file.cc
+  prompt-$ diff file.cc file.cc.orig
+
+See also http://wiki.opencog.org/w/Development_standards
+
+
+-------------------------------------------------------------------------------
+VIM USERS
+
+If you use the VIM editor, you may add the following line to you ".vimrc"
+configuration file to automatically setup your editor to use opencog's style
+when editing a source file from opencog's tree:
+
+autocmd BufNewFile,BufReadPost * if match(expand("%:p:h"), "/opencog") >= 0 && &filetype == "cpp" | set ts=4 sw=4 tw=80 ff=unix cindent expandtab | endif
+
+
+-------------------------------------------------------------------------------
+EMACS USERS
+
+If you use Emacs, you may add the following lines to your ".emacs" as well:
+
+(setq-default indent-tabs-mode nil) ;; use spaces instead of tab
+(setq-default c-basic-offset 4) ;; set c based language indent to 4

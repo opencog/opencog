@@ -1,0 +1,33 @@
+
+                  OpenCog Source Code
+                  -------------------
+
+This directory contains core OpenCog code.  Tests and examples
+are located one directory up from this.
+
+Source code overview:
+
+scm             -- Scheme language bindings.
+python,cython   -- Python language bindings.
+
+nlp             -- English language processing tools.
+                   Includes various chatbots.
+
+ghost           -- A behavior-scripting system.
+
+pln             -- Probabilistic logic reasoner.
+attention       -- ECAN Attention allocation.
+
+cogserver       -- Multi-user network server.
+
+spacetime       -- Tag atoms with 3D spatial and time coordinates.
+                   DEPRECATED. Do not use in new code!
+
+eva             -- Code to control the Hanson Robotics Eva robot.
+                   Includes perception (vision, sound), chat and
+                   behavior subsystems.
+
+learning        -- Misc supervised learning algorithms.
+                   Most importantly, the pattern miner.
+
+visualization   -- Visualization, graphics.

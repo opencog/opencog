@@ -1,0 +1,17 @@
+###############################################################################
+Instalation and dependency resolution for Fedora 9 users
+###############################################################################
+
+Opencog depends on the following packages:
+
+   gcc-c++ cmake boost boost-devel
+
+----------------------------------------------------------
+
+They may be downloaded and installed using the following commands:
+
+   wget http://downloads.sourceforge.net/cxxtest/cxxtest-3.10.1-1.noarch.rpm
+
+   sudo yum --nogpgcheck localinstall cxxtest-3.10.1-1.noarch.rpm 
+
+----------------------------------------------------------
