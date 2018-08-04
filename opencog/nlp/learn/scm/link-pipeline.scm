@@ -441,10 +441,19 @@
 			(set! start-time now)
 			(set! run-time run))))
 
-; ---------------------------------------------------------------------
-(define-public (observe-text plain-text)
+; --------------------------------------------------------------------
+(define-public (observe-text-mode plain-text observe-mode count-reach)
 "
  observe-text -- update word and word-pair counts by observing raw text.
+ 
+ There are currently two observing modes, set by observe-mode, both taking
+ an integer parameter:
+ - any: counts pairs of words linked by the LG parser in 'any' language.
+ 	   'count-reach' specifies how many linkages from LG-parser to use.
+ - clique: itearates over each word in the sentence and pairs it with
+           every word located within distance 'count-reach' to its right.
+           Distance is defined as the difference between words positions
+           in the sentence, so neighboring words have distance of 1.
 
  This is the first part of the learning algo: simply count the words
  and word-pairs observed in incoming text. This takes in raw text, gets
@@ -474,9 +483,13 @@
 			))
 			(lambda (key . args) #f)))
 
-	; Count the atoms in the sentence, and then delete it.
-	(define (process-sent SENT)
-		(update-counts SENT)
+	; Count the atoms in the sentence, according to the counting method
+	; passed as argument, then delete the sentence.
+	(define (process-sent SENT cnt-mode win-size)
+		(update-word-counts SENT)
+		(if (equal? cnt-mode "any")
+			(update-lg-link-counts SENT)
+			(update-clique-pair-counts SENT win-size #f))
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
@@ -533,8 +546,8 @@
 		(maybe-gc) ;; need agressive gc to keep RAM under control.
 	)
 
-	; Process the text locally (in RAM), using the LG API link.
-	(define (local-process TXT)
+	; Process the text locally (in RAM), with the LG API link or clique-count.
+	(define (local-process TXT obs-mode cnt-reach)
 		; try-catch wrapper for duplicated text. Here's the problem:
 		; If this routine is called in rapid succession with the same
 		; block of text, then only one PhraseNode and LgParseLink will
@@ -546,11 +559,12 @@
 		(catch #t
 			(lambda ()
 				(let* ((phr (Phrase TXT))
-						;(lgn (LgParseLink phr (LgDict "any") (Number 24)))
-						(lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+						; needs at least one linkage for tokenization
+						(num-parses (if (equal? obs-mode "any") cnt-reach 1))
+						(lgn (LgParseMinimal phr (LgDict "any") (Number num-parses)))
 						(sent (cog-execute! lgn))
 					)
-					(process-sent sent)
+					(process-sent sent obs-mode cnt-reach)
 					; Remove crud so it doesn't build up.
 					(cog-extract lgn)
 					(cog-extract phr)
@@ -562,7 +576,7 @@
 	; (relex-process plain-text)
 
 	; Handle the plain-text locally
-	(local-process plain-text)
+	(local-process plain-text observe-mode count-reach)
 )
 
 ; ---------------------------------------------------------------------
