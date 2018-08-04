@@ -5334,7 +5334,7 @@ al cluster assignments
 \begin_inset Formula $G^{\prime}$
 \end_inset
 
- are known at each step of the iteraction.
+ are known at each step of the iteration.
  The conditional probabilities are as noted before: 
 \begin_inset Formula 
 \[
@@ -5424,7 +5424,7 @@ reference "sub:Sparsity"
 \begin_layout Standard
 But never mind: the assumption of hard clustering breaks word-sense disambiguati
 on.
- Generic algorithms are not enough.
+ Genetic algorithms are not enough.
  Back to the drawing board.
 \end_layout
 
@@ -6039,18 +6039,18 @@ where
 \end_layout
 
 \begin_layout Subsubsection
-Information clustering
+Pair-wise Information Divergence
 \end_layout
 
 \begin_layout Standard
-The analog to cosine clustering can be arrived at with two changes.
- The cosine was built from the dot product 
+The cosine was built from the dot product 
 \begin_inset Formula $\vec{u}\cdot\vec{v}$
 \end_inset
 
  normalized by the vector lengths.
- Here, the normalization is changed, so as to use the Kullback-Leibler divergenc
-e: 
+ For information-based clustering, the normalization is changed, so as to
+ use the Kullback-Leibler divergence between the vecgor-pair, and the individual
+ vectors: 
 \begin_inset Formula 
 \[
 MI\left(\vec{u},\vec{v}\right)=\log_{2}\frac{\vec{u}\cdot\vec{v}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\vec{v}_{i}\cdot\vec{v}_{j}\right)}{\left(\sum_{i=1}^{n}\vec{u}\cdot\vec{v_{i}}\right)\left(\sum_{j=1}^{n}\vec{v}_{j}\cdot\vec{v}\right)}
@@ -6137,7 +6137,37 @@ MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1}
 
 \end_inset
 
+Intuitively.
+ this can be thought of the information gain of bringing two vectors together,
+ as compared to the entire dataset of all other vectors.
+ 
+\end_layout
 
+\begin_layout Standard
+This global aspect makes this function very different from the cosine distance.
+ The cosine distance is defined independently of all other vectors in the
+ system; it is independent of the number of other vectors, and the directions
+ in which they are pointing.
+ On could have a system with 42 vectors, or with 23 thousand of them: the
+ cosine metric doesn't care.
+ One could have a system with two vectors pointing one way, and another
+ six hundred pointing in the opposite direction: cosine doesn't care.
+ The pair-wise MI above compares two vectors, within the context of what
+ all of the other vectors in the system.
+ 
+\end_layout
+
+\begin_layout Standard
+A different way to think of the pair-wise MI is that, by incorporating all
+ ofther vectors into its value, it is effectively attempting to spread all
+ of the (other) vectors into as uniform distribution as possible, magnifying
+ and expanding those regions where cosine would say there are lots of densely
+ packed vectors, while shrinking those regions where there is low density.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Arithmetic, Geometric and Logarithmic Means
 \end_layout
 
 \begin_layout Standard
