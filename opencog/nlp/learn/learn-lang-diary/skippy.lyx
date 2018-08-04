@@ -60,8 +60,8 @@
 \begin_body
 
 \begin_layout Title
-Skip-grams vs.
- Disjuncts
+Gradient Descent vs.
+ Graphical Models
 \end_layout
 
 \begin_layout Author
@@ -73,28 +73,47 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-This document attempts to compare and contrast the various ways in which
- (adaptive)-skip-grams and disjuncts are similar, and how they differ.
- The comparison is not always obvious, as these two representations seem
- to be quite different, the goals and tasks that each are solving seem to
- be different, and the methods to obtain each seem to be quite different.
- In fact, many of these differences are superficial; there is more in common
- than there might seem.
+This tract attempts to provide a broad sketch of the unsupervised language
+ learning problem, as seen from various differing viewpoints.
  
 \end_layout
 
 \begin_layout Abstract
-More generally it tries to develop and contrast the differences between
- graphical methods and gradient-descent methods in deeper layers of language
- abstraction.
- In particular it begins to compare the extraction of semantic meaning using
- gradient descent algorithms, such as Low Rank Matrix Approximations, to
- graphical factorizations driven by information-theoretic metrics.
+The first part compares the operation of deep-learning/neural-net inspired
+ language models to traditional lingistics-inspired language models.
+ It is demonstrated that skip-grams, such as those in the canonical word2vec
+ model, resemble parse rules associated with dependency grammars.
+ This comparison is not obvious, as these two representations seem to be
+ quite different, the tasks that each is intended to solve seem to be quite
+ different, and the algorithms employed are quite different.
+ In fact, many of these differences are superficial; there is more in common
+ than there might seem.
+ The unifying viewpoint is a vector representation of words-in-context.
+ The context is an N-gram, skip-gram or adagram, in the one case, and a
+ dependency linkage disjunct in the other.
+\end_layout
+
+\begin_layout Abstract
+The second part examines the idea of a word+context as a bipartite graph,
+ with words on the left side interconnected to contexts on the right.
+ This bipartite graph can be factored into three parts, with words sorted
+ into buckets of word-sense-disambiguated synonyms on the left, buckets
+ of similar grammatical contexts on the right, and a tightly integrated
+ central factor.
+ Different approaches to factorization are explored, including neural-net-inspir
+ed low-rank matrix factorization algorithms, information-theoretic clustering,
+ and, most importantly coclustering.
+\end_layout
+
+\begin_layout Abstract
+The third examines how to stitch together the different vector spaces (the
+ different grammatical contexts associated with each word) into a unified
+ whole, using concepts from sheaf theory.
 \end_layout
 
 \begin_layout Abstract
 This is a work in progress.
- It's approximately half-done, I think.
+ The third part is incomplete.
 \end_layout
 
 \begin_layout Section
@@ -128,6 +147,12 @@ key "Mikolov2013,Mikolov2013a"
  models are given, including AdaGram.
  It is generally assumed that the reader is generally familiar with various
  concepts employed in the OpenCog language-learning project.
+\end_layout
+
+\begin_layout Standard
+XXX A new introduction needs to be written.
+ Sorry.
+ XXX 
 \end_layout
 
 \begin_layout Subsection
@@ -1428,7 +1453,7 @@ Typical choices for the dimension
 \end_layout
 
 \begin_layout Section
-Similarities and Differences
+Similarities and Differences 
 \begin_inset CommandInset label
 LatexCommand label
 name "sec:Similarities-and-Differences"
@@ -1914,15 +1939,44 @@ Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
 \end_layout
 
 \begin_layout Subsection
-Training
+Graph Algorithms vs.
+ Gradient Descent 
 \end_layout
 
 \begin_layout Standard
-One important difference between the earlier description of Link Grammar,
- and the deep-learning algorithms should be immediately apparent: the Link
- Grammar probabilities are obtained by direct counting, and not by any training,
- relaxation or hill-climbing technique.
- That is, 
+The biggest difference between the two approaches is the nature of the training
+ algorithm.
+ The disjunct counting can be said to be a form of a 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithm
+\begin_inset Quotes erd
+\end_inset
+
+, whereas the deep-learning algorithms, proceeding by relaxation or hill-climbin
+g, can be said to be a form of 
+\begin_inset Quotes eld
+\end_inset
+
+gradient descent
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One is local, the other is global in it's view of relationships.
+ One is greedy, and exposes graphical structure immediately; the other exposes
+ a graph only if some sort of thresholding is applied to eliminate weak
+ links.
+\end_layout
+
+\begin_layout Standard
+The disjunct probabilities are obtained by direct counting.
+ That is, after obtaining an observational count 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ one computes a normalized frequency of observations 
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
@@ -1930,7 +1984,7 @@ p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
 
 \end_inset
 
-so that the probability is properly normalized: 
+so that the frequency is properly normalized: 
 \begin_inset Formula $p\left(*,*\right)=1$
 \end_inset
 
@@ -1943,9 +1997,50 @@ so that the probability is properly normalized:
 \begin_inset Formula $\left(w,d\right)$
 \end_inset
 
- in text; the probabilities is just the frequentist probability.
- This differs sharply from the probability in the CBOW/SkipGram models,
- which is obtained by maximizing an objective function (the 
+ in text; the probability is just the frequentist probability.
+ 
+\end_layout
+
+\begin_layout Standard
+By contrast, the CBOW/SkipGram models obtain a probability similar to 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+, but using a different technique and a different notation; for example,
+ 
+\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
+\end_inset
+
+.
+ The sections above point out that 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ is a lot like 
+\begin_inset Formula $d$
+\end_inset
+
+; for some purposes (many purposes?) they can be treated as being the same
+ thing.
+ The big difference is that 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ is lacking the graph structure of 
+\begin_inset Formula $d$
+\end_inset
+
+; there is some buried graph-like structure in 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ but it is not overt, and one must work to make it overt.
+ The other big difference is that 
+\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
+\end_inset
+
+ is treated as an unknown, and arrived at by gradient descent algorithms
+ applied to an objective function (the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1953,7 +2048,120 @@ loss function
 \begin_inset Quotes erd
 \end_inset
 
-) built from (defined in terms of) the probabilities.
+), rather than by direct observational counting.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider again the mechanism used to obtain the counts 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+.
+ The first half of this mechanism is commonly called MST parsing (Maximum
+ Spanning Tree parsing), and is described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+.
+ It is a form of a greedy graph algorithm.
+ One begins by considering the graph clique, wherein every word in the sentence
+ is related (joined by an edge) to every other word in a sentence.
+ Each edge is associated with a metric, that defines the length or size
+ of the edge.
+ In traditional MST, this metric is the mutual information of the word-pair.
+ One can proceed in three ways from here: 
+\end_layout
+
+\begin_layout Itemize
+Apply thresholding, and discard all edges that have a weak, low quality
+ connection.
+ The result may be a disconnected graph, or a multiply-connected graph.
+ A fixed threshold might reject too much, or it might reject too little.
+\end_layout
+
+\begin_layout Itemize
+Apply a greedy algorithm, and keep only the edges of the highest quality,
+ until a spanning tree is found, spanning all words in the sentence.
+\end_layout
+
+\begin_layout Itemize
+A combination of the two.
+\end_layout
+
+\begin_layout Standard
+The last may be the best.
+ In traditional linguistics, one is interested in a parse tree that connects
+ all of the words in a sentence, and thus indicates which words are related
+ to which.
+ More connections than what is in the spanning tree just confuse the issue,
+ at least for traditional linguistics.
+\end_layout
+
+\begin_layout Standard
+For disjunct counting, insisting on a spanning tree might be too strong
+ a condition.
+ For disjunct counting, one is only interested in how words connect to other
+ words: one is interested in extracting and counting the 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw puzzle pieces
+\begin_inset Quotes erd
+\end_inset
+
+ that represent how words can connect to other words.
+ To obtain these jigsaw-puzzle pieces, one does not need a tree that spans
+ all words in the sentence; it is acceptable that some words might be omitted.
+ Nor is it strictly necessary that the parse graph be a tree: it is OK if
+ it has cycles, since these cycles often indicate important grammatical
+ relations.
+\end_layout
+
+\begin_layout Standard
+A spanning-tree algorithm can be thought of as a kind-of thresholding algorithm,
+ but with a local, dynamically-adjustable threshold.
+ When a word has very strong connections to all other words, one might consider
+ dynamically adjusting a threshold to a high value; when a word has only
+ weak connections to all other words, one might dynamically adjust the threshold
+ to a low value.
+ This type of dynamically-adjustable thresholding can be confusing to define
+ and difficult to optimize; by contrast, the spanning tree is simple and
+ direct.
+ At an abstract level, though, the differences can be imagined to be less
+ than they first appear.
+ 
+\end_layout
+
+\begin_layout Standard
+The net result is that by observing disjuncts, one is observing an explicit
+ graphical structure.
+ The disjunct is overt, in the foreground, explicitly demonstrated.
+ It is obtained by explicitly searching for a graphical structure.
+ 
+\end_layout
+
+\begin_layout Standard
+Because every graph has a corresponding adjacency matrix, one can always
+ approach the problem from the other direction: given a matrix, declare
+ it to be a graph, with the matrix entries being 
+\begin_inset Quotes eld
+\end_inset
+
+weights
+\begin_inset Quotes erd
+\end_inset
+
+ on the graph edges.
+ This is the approach taken by the neural net, deep-learning models.
+ They clearly have taken the world by storm, and are quite succesful in
+ what they do.
+ The disadvantage is that they obscure the explict graphical structure of
+ natural langauge.
+ 
 \end_layout
 
 \begin_layout Section
@@ -2311,6 +2519,13 @@ lots of zero entries
 
 \begin_layout Subsection
 Sparsity
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Sparsity"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2638,7 +2853,20 @@ Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
 \end_layout
 
 \begin_layout Subsubsection
-Zipf's Law; Noise and Incompleteness
+No Large Data Limit 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Zipf's-Law;-Noise"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Natural language does not have a large-data limit.
+ More generally, Zipf distributions cannot have a large-data limit.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2791,9 +3019,9 @@ where
 
  and to perform the matrix factorization
 \begin_inset Formula 
-\[
-p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
-\]
+\begin{equation}
+p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)\label{eq:factorize}
+\end{equation}
 
 \end_inset
 
@@ -2814,8 +3042,8 @@ Ideally, the size of the set
 \begin_inset Formula $G$
 \end_inset
 
- having only one element, total, the factorization would results in the
- outer product, or tensor product, of two vectors.
+ having only one element, total, the factorization is the same as the outer
+ product, or tensor product, of two vectors.
 \end_layout
 
 \begin_layout Standard
@@ -2836,6 +3064,20 @@ In the following, the prime-superscripts are dropped, and the probabilities
 
 .
  Which is which should be apparent from context.
+ 
+\end_layout
+
+\begin_layout Standard
+There are two ways of performing the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+: by applying graphical methods (such as clustering) or by applying gradient
+ descent methods (typically associated with neural net algorithms).
+ These two approaches are explored below.
  
 \end_layout
 
@@ -2951,11 +3193,214 @@ Put differently, one expects different classes to not only differentiate
 \end_layout
 
 \begin_layout Subsection
+Clustering
+\end_layout
+
+\begin_layout Standard
+A side effect of the matrix factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ is that it is a 
+\emph on
+de facto
+\emph default
+ form of clustering.
+ Whenever one has 
+\begin_inset Formula $p(w,g)>0$
+\end_inset
+
+, one can effectively say 
+\begin_inset Quotes eld
+\end_inset
+
+word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been assigned to cluster 
+\begin_inset Formula $g$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, solving eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ can be seen as an alternative to deploying a clustering algorithm to assign
+ words to word classes.
+\end_layout
+
+\begin_layout Subsubsection
+Multiple class membership
+\end_layout
+
+\begin_layout Standard
+One important distinction between traditional clustering and matrix factorizatio
+n is that traditional clustering algorithms naively assign a word to only
+ a single cluster, whereas here, one can have multiple 
+\begin_inset Formula $p(w,g)>0$
+\end_inset
+
+.
+ One can partly overcome this difficulty with traditional clustering by
+ decomposing the input vector into two: a component parallel to the cluster
+ centroid, and a perpendicular component, and assigning the parallel component
+ to the cluster, while leaving behind the perpendicular component to be
+ assigned to other clusters.
+ The decomposition need not be strict about parallelism: one might choose
+ to merge the component that lies within some angle (or distance) of the
+ cluster centroid.
+ Each such merge then gradually shifts the centroid over.
+ If the left-over perpendicular component is sufficiently small, it can
+ be discarded as noise, or treated as an anomaly awaiting additional data.
+\end_layout
+
+\begin_layout Standard
+This splitting of a vector into components, and then placing each component
+ in a different cluster might perhaps be reminiscent of fuzzy clustering,
+ where one object may be placed into two clusters.
+ However, what is proposed above is 
+\emph on
+not
+\emph default
+ fuzzy clustering.
+ The goal is disambiguate a word precisely into the intended sense, and
+ to assign that sense to a cluster.
+ The goal is not to say 
+\begin_inset Quotes eld
+\end_inset
+
+oh, maybe it is this, and maybe it is that.
+\begin_inset Quotes erd
+\end_inset
+
+ A more precise formulation of this statement is taken up in a later section.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering
+\end_layout
+
+\begin_layout Standard
+Clustering, and in particular, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, can be shown to be equivalent to matrix factoriztion.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+ In particular, the equations that define 
+\begin_inset Formula $k$
+\end_inset
+
+-means as a relaxation problem, of aligning vectors to the closes centroids,
+ can be written explicitly as matrixes.
+ This equivalence is reviewed in the section after the next, after a sufficient
+ amount of other mathematical devices have been set up.
+ Most important of these is the choice of an appropriate information metric
+ (instead of cosine distance) for the clustering norm, together with a justifica
+tion of why this is necessary.
+ This needs to be coupled to an appropriate mechanism for performing multiple
+ class membership.
+\end_layout
+
+\begin_layout Standard
+Once this is done, clustering can be re-interpreted as more of a graphical
+ method, as opposed to an optimization method.
+\end_layout
+
+\begin_layout Subsubsection
+MST (Agglomerative) Clustering
+\end_layout
+
+\begin_layout Standard
+MST clustering is a form of greedy clustering, attempting to first connect
+ all points in the dataset with a tree that minimizes the the distance between
+ the points, and then removing some of the longest edges, leaving behind
+ a set of connected components.
+ MST clustering can be fairly efficient, as one can find provisionally minimal
+ trees with a fairly small number of distance evaluations, using a greedy
+ algorithm; the provisional minimal tree can then be adjusted using local
+ relaxation.
+\end_layout
+
+\begin_layout Standard
+Grygorash 
+\emph on
+et al
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Grygorash2006"
+
+\end_inset
+
+
+\emph default
+ review multiple variants for deciding which edges to remove from an MST
+ graph, and describe several particularly effective variants.
+ Standard MST removes the longest edges; but one can instead remove edges
+ that differ the most from thier neighbors; or one can remove edges that
+ are outliers from the typical edge-length mean.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Non-issues
+\end_layout
+
+\begin_layout Standard
+There are a variety of criticisms of different clustering algorithms, pointing
+ at various drawbacks.
+ Some of these criticisms do not apply to the current problem, and so are
+ not to be used in selecting a better algorithm.
+\end_layout
+
+\begin_layout Itemize
+Convex clusters.
+ This is a standard criticism levelled against 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering: the clusters can only ever be convex.
+ This is important criticism, when working with low-dimensional data (2D,
+ 3D data) where perhaps most practical examples require clusters that are
+ not convex.
+ For the langauge learning problem, the data lives in an extremely high-dimensio
+nal space, with clusters that are almost surely convex.
+\end_layout
+
+\begin_layout Subsection
 Low Rank Matrix Approximation
 \end_layout
 
 \begin_layout Standard
-Factorizations of this sort are not uncommon in machine learning.
+Factorizations of the form of ean 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ are not uncommon in machine learning.
  They generally go under the name of Low Rank Matrix Approximation (LRMA).
  The rank refers to the size of the set 
 \begin_inset Formula $G$
@@ -2967,8 +3412,50 @@ Factorizations of this sort are not uncommon in machine learning.
 \end_layout
 
 \begin_layout Standard
+Closely related is the concept of non-negative matrix factorization (NMF
+ or NNMF),
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-NNMF"
+
+\end_inset
+
+ where the focus is on keeping matrix entries positive, as would be appropriate
+ for probabilities.
+ Furthermore, a matrix of probabilities is not just non-negative; it also
+ has non-negative rank; 
+\emph on
+viz
+\emph default
+.
+ every non-negative linear combination of the rows or columns must also
+ be non-negative.
+\end_layout
+
+\begin_layout Standard
+It is known that the factorization of non-negative matrices with non-negative
+ rank is an NP-hard problem.
+ Factorization can be seen as generalizing 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, which is known to be NP-complete.
+\end_layout
+
+\begin_layout Standard
 A variety of techniques for performing this factorization have been developed.
  A lightning review is given below.
+ The point of the review is less to edify the reader, than it is to point
+ out which techniques, formulas and metrics are the most appropriate for
+ the present situation, namely, eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ for probabilities, coupled to the need for fairly crisp word-sense disambiguati
+on.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2985,7 +3472,7 @@ Probabilistic matrix factorization (PMF) assumes that the observation counts
  are Gaussian).
  The factorization is then obtained by minimizing the Frobenius norm of
  the difference of the left and right sides.
- That is, one defines the error matrix 
+ That is, one defines the error matrix (or residual matrix) 
 \begin_inset Formula 
 \[
 E\left(w,d\right)=\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|
@@ -3070,15 +3557,21 @@ nuclear
  as one that is of trace-class, i.e.
  having a trace that is invariant under orthogonal or unitary transformations.
  In such cases, there is an explicit assumption that the operator lives
- in some homogeneous space, where orthogonal or unitary transformations
- can be applied.
+ in some homogeneous space,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Homogenous-space"
+
+\end_inset
+
+ where orthogonal or unitary transformations can be applied.
  In machine learning, the spaces are always finite dimensional, and are
  usually explicitly assumed to be real Euclidean space 
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
 
  -- that is, the spaces behave like actual vector spaces, so that concepts
- like SVD apply.
+ like PCA and SVD apply.
 \end_layout
 
 \begin_layout Standard
@@ -3116,12 +3609,75 @@ not
 , and that is not entirely wrong.
  However, the only transformations that can be applied to points in a simplex,
  that keep the points inside the simplex, are Markov matrices.
- Any other transformations will typically move points from the outside,
- into the inside, and move inside points out.
+ Any other transformations will typically move points into the inside from
+ the outside, and move inside points to the outside.
  In particular, rotations (orthogonal transformations) cannot be applied
- to a probability, with the result still being a probability.
- Applying the notion of a trace, which is implicitly defined in terms of
- orthogonal transformations, is inappropriate for the problem at hand.
+ to a probability, such that the result is still a probability.
+ Applying the notion of a trace, which is implicitly defined as being invariant
+ under orthogonal transformations, is inappropriate for the problem at hand.
+ What would be appropriate is some sort of trace-like invariant that transforms
+ as a scalar under Markov transformations.
+\end_layout
+
+\begin_layout Subsubsection
+Non-Negative Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+Non-negative matrix factorization (NMF) is similar to PMF, but with the
+ additional constraint that the result has a non-negative rank.
+ The non-negative rank constraint requires that not only do the factor matrixes
+ have non-negative values in them, but also that non-negative linear combination
+s are also non-negative.
+ This appears be an appropriate restriction for probabilities.
+\end_layout
+
+\begin_layout Standard
+A reasonable review of NMF is given in
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Eggert2004"
+
+\end_inset
+
+, which also describes how one can control the sparsity of the resulting
+ factors.
+ Control over sparsity is one reason that clustering techniques are interesting;
+ something as fast or faster that offers control over sparsity is appealing.
+\end_layout
+
+\begin_layout Standard
+NNMF using the Kullback-Leibler divergence is equivalent to Probabilistic
+ Latent Semantic Indexing (PLSI), although the two commonly used algorithms
+ for each are quite different, and each is able to climb out of local minima
+ of the other.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2008"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The error term that needs to be minimized is the matrix-factorized form
+ of the mutual information, which is just the Kullback-Leibler divergence
+ between the factored and unfactored matrixes: 
+\begin_inset Formula 
+\begin{equation}
+MI_{\mbox{factor}}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)}\label{eq:KL-MI-factorization-loss}
+\end{equation}
+
+\end_inset
+
+In essence, this measures the information loss in moving from the full distribut
+ion 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ to the factorized version; for a good factorization, one wishes to minimize
+ this information loss.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3140,7 +3696,7 @@ The factorization
 
 \end_inset
 
- can be viewed as just one special function of the vector components indexed
+can be viewed as just one special function of the vector components indexed
  by 
 \begin_inset Formula $g$
 \end_inset
@@ -3172,11 +3728,7 @@ where
 \end_inset
 
 .
- 
-\end_layout
-
-\begin_layout Standard
-The neural net matrix factorization
+ The neural net matrix factorization
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dzuigaite2015"
@@ -3184,12 +3736,14 @@ key "Dzuigaite2015"
 \end_inset
 
  replaces the simple sum by a multi-layer feed-forward neural net.
- 
 \end_layout
 
 \begin_layout Standard
-There is nothing in the current formulation of the problem that suggests
- this as an appropriate model of language.
+The loss of linearity in this model seems like a rather extreme proposal.
+ The fact that it is effective may in fact be a symptom of unknown, underlying
+ structure.
+ For example, there is nothing in the current formulation of the natural
+ language problem that suggests this as an appropriate model of language.
  See, however, the next section, on factorization ambiguity, that suggests
  that the 
 \begin_inset Quotes eld
@@ -3201,8 +3755,22 @@ shape
 
  of language consists of a tight, highly-interconnected nucleus, attached
  to sparse feeder trees.
- It might make sense to model the tight central nucleus as a neural network
- of some sort.
+ That nucleus itself has additional structure.
+ It might be the case that this complex structure can be captured by an
+ 
+\emph on
+ad hoc
+\emph default
+ model consisting of some non-linear function 
+\begin_inset Formula $f$
+\end_inset
+
+.
+ However, in the end, this just suggests that the function 
+\begin_inset Formula $f$
+\end_inset
+
+ is just hiding or modelling or leaving unexplored some deeper linear structure.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3242,20 +3810,50 @@ key "WP-Local-regression"
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
-The use of the smoothing techniques seems highly appropriate, given that
- the input dataset 
+These two techniques, combined, prove to be almost ideal, when faced with
+ incomplete data, and when the data is noisy.
+ Specifically, the idea of incompleteness is that some values of the input
+ dataset 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
- is both noisy and incomplete, as discussed previously.
+ are zero not because they fundamentally should be (i.e.
+ are forbidden by the grammar and syntax of natural langauge), but are zero
+ simply because they have not yet been observed; some appropriate sentence
+ does not occur in the sample dataset.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, the use of the smoothing techniques seems highly appropriate, given
+ that the input dataset 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is both noisy and incomplete, as discussed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Zipf's-Law;-Noise"
+
+\end_inset
+
+.
  Unfortunately, the use of LLORMA, as strictly described, seems inappropriate,
  but only because the use of the Frobenius norm or the nuclear norm is inappropr
 iate for this dataset.
- The correct norm appears to be an information-theoretic norm, as discussed
- in upcoming sections.
+ The correct norm must be that of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KL-MI-factorization-loss"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -3263,19 +3861,362 @@ Other factorizations
 \end_layout
 
 \begin_layout Standard
-Other factorizations, including 
+There are other techniques for factorization, including 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Itemize
 NTN (Neural Tensor Network)
 \end_layout
 
-\begin_layout Standard
-also I-RBM (Restricted Boltzmann Machine)
+\begin_layout Itemize
+I-RBM (Restricted Boltzmann Machine)
+\end_layout
+
+\begin_layout Itemize
+I-AutoRec
 \end_layout
 
 \begin_layout Standard
-also I-AutoRec
+These are not reviewed here.
+\end_layout
+
+\begin_layout Subsection
+Clustering as Matrix Factorization 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Clustering-as-Matrix"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One may show that 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is equivalent to a rank-
+\begin_inset Formula $k$
+\end_inset
+
+ matrix decomposition with an extra orthogonality condition enforced; this
+ is developed by Ding 
+\emph on
+et al.
+\emph default
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+ The orthogonality condition can be loosened, as the process of factorization
+ is driven by a minimization condition that drives towards approximate orthogona
+lity.
+ In effect, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is a special case of matrix factorization: its factorization
+ with extra constraints.
+ 
+\end_layout
+
+\begin_layout Standard
+Ding 
+\emph on
+et al
+\emph default
+ examine several forms of 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering.
+ The simplest form of clustering assigns vectors to clusters, and stops
+ there.
+ This is equivalent to assigning words to word-classes, without making any
+ specific statements about what happened to the disjuncts.
+ Alternately, one could say that the disjuncts just went along for the ride:
+ they were associated with some word before-hand, and they are now still
+ associated with that word, thrown into a bucket with the other disjuncts
+ of similar words.
+\end_layout
+
+\begin_layout Standard
+Bipartite graph clustering (aka 
+\begin_inset Quotes eld
+\end_inset
+
+co-clustering
+\begin_inset Quotes erd
+\end_inset
+
+) recognizes that the input data can be viewed as a bipartite graph (fig
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+, left image), and that one can perform seperate, distinct, but simultaneous
+ clustering on the columns, and seperately, the rows.
+ This is closer to the desired factorization model for language, so the
+ proof is reviewed here.
+ It is still 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, just that one performs two clusterings, not one, on the
+ columns, and on the rows.
+\end_layout
+
+\begin_layout Standard
+The matrix to be factorized is 
+\begin_inset Formula $B$
+\end_inset
+
+ and the desired factorization is 
+\begin_inset Formula $B\approx LR^{T}$
+\end_inset
+
+.
+ Comparing this to the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, the matrix elements of 
+\series bold
+
+\begin_inset Formula $B$
+\end_inset
+
+
+\series default
+ are 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+; those of 
+\begin_inset Formula $L$
+\end_inset
+
+ are 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+; those of 
+\begin_inset Formula $R^{T}$
+\end_inset
+
+ are 
+\begin_inset Formula $p\left(g,d\right)$
+\end_inset
+
+.
+ Key to the proof is the reinterpretation of 
+\begin_inset Formula $L$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ as membership matrixes, so that each row and column indicate the membership
+ of a vector to a cluster.
+ That is 
+\begin_inset Formula $L$
+\end_inset
+
+ consists of column vectors 
+\begin_inset Formula $L=\left[\vec{l}_{1},\vec{l}_{2},\cdots,\vec{l}_{k}\right]$
+\end_inset
+
+ where each column vector is of the form
+\begin_inset Formula 
+\[
+\vec{l}_{j}=\left(0,0,\cdots0,1,1,\cdots,1,0,\cdots,0\right)^{T}
+\]
+
+\end_inset
+
+with the 
+\begin_inset Formula $1$
+\end_inset
+
+'s indicating the cluster membership.
+ That is, the matrix elements of 
+\begin_inset Formula $L$
+\end_inset
+
+ are 
+\begin_inset Formula 
+\[
+L_{ij}=\begin{cases}
+1 & \mbox{ item }i\mbox{ belongs to cluster }j\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+Equivalently, the factorization is
+\begin_inset Formula 
+\[
+p\left(w|g\right)=\begin{cases}
+1/\left|g\right| & \mbox{ word }w\mbox{ belongs to wordclass }g\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The normalization is such that every word belongs to some class, with 100%
+ probability (hard clustering).
+ The matrix 
+\begin_inset Formula $R$
+\end_inset
+
+ is presented analogously.
+ 
+\end_layout
+
+\begin_layout Standard
+The optimization problem is then to find the maxima of two objective functions,
+ subject to some constraints:
+\begin_inset Formula 
+\[
+\max_{L\ge0;L^{T}L\sim I}\mbox{tr}L^{T}BB^{T}L\;\mbox{ and }\;\max_{R\ge0;R^{T}R\sim I}\mbox{tr}R^{T}B^{T}BR
+\]
+
+\end_inset
+
+The constraint 
+\begin_inset Formula $L^{T}L\sim I$
+\end_inset
+
+ means that not only should 
+\begin_inset Formula $L^{T}L$
+\end_inset
+
+ be a diagonal matrix, but that it should be a multiple of the identity
+ matrix 
+\begin_inset Formula $I$
+\end_inset
+
+ -- that is, have equal values along the diagonal.
+ Here, the tr operator is the matrix trace.
+ The trace of a matrix is, of course, equal to the sum of the eigenvalues
+ of the matrix; thus, optimizing the above is equivalent to performing a
+ singular value decomposition (SVD) of the traced matrix, and then summing
+ the singular values.
+ This is, of course, just the nuclear norm discussed previously.
+\end_layout
+
+\begin_layout Standard
+With some relatively straightforward algebraic manipulation, the above can
+ be shown to be equivalent to optimizing 
+\begin_inset Formula 
+\[
+\min\left\Vert B-LR^{T}\right\Vert ^{2}
+\]
+
+\end_inset
+
+subject to the same constraints.
+ The norm 
+\begin_inset Formula $\left\Vert \cdot\right\Vert ^{2}$
+\end_inset
+
+ is the Frobenius norm.
+ In this sense, hard 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is identical to matrix factorization.
+ Removing some of the constraints shows that 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering is a special case of the more general factorization problem.
+ Ding 
+\emph on
+et al
+\emph default
+ show that if one removes the orthogonality constraints, the resulting factors
+ are still approximately orthogonal, since the Frobenius norm contains terms
+ that drive the factors towards orthogonality.
+ 
+\end_layout
+
+\begin_layout Standard
+Three previously identified issues arise with the above:
+\end_layout
+
+\begin_layout Itemize
+The hard-clustering assignment of a word to only a single word-class prevents
+ words from having multiple meanings, and thus forces word-sense disambiguation
+ to somehow happen somewhere else.
+\end_layout
+
+\begin_layout Itemize
+The use of the Frobenius norm (or the nuclear norm) implicitly forces assumption
+s of rotational invariance, in the form of orthogonality constraints on
+ the membership indicator matrixes 
+\begin_inset Formula $L$
+\end_inset
+
+, 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ As discussed previously, rotational invariance (and thus, orthogonality)
+ is inappropriate when 
+\begin_inset Formula $L$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ are interpreted as joint probability distributions.
+ 
+\end_layout
+
+\begin_layout Itemize
+There is no room for a central factor matrix 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ which can capture the non-sparse complexities of the language.
+ The need; indeeed, the inevitability of such a matrix is developed in the
+ next section.
+\end_layout
+
+\begin_layout Standard
+The proposed fix to these issues is multi-fold: 
+\end_layout
+
+\begin_layout Itemize
+Use an information-theoretic metric, namely, the Kullback-Leibler divergence
+ of the factored solution to the input data.
+\end_layout
+
+\begin_layout Itemize
+Perform greedy clustering, so as to minimize the number of number of non-zero
+ entries in the left and right factor matrixes
+\end_layout
+
+\begin_layout Itemize
+Decompose vectors into components that align with clusters, so that clusters
+ correspond to word-senses, and word-sense disamgiguation (WSD) is an inherent,
+ inbuilt part of the clustering step.
 \end_layout
 
 \begin_layout Subsection
@@ -3283,7 +4224,14 @@ Factorization Ambiguity
 \end_layout
 
 \begin_layout Standard
-The sum 
+When considering the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, the sum 
 \begin_inset Formula $\sum_{g\in G}$
 \end_inset
 
@@ -3300,8 +4248,8 @@ viz
 \end_inset
 
 .
- Aside from considering just 
-\begin_inset Formula $\vec{w}\cdot\vec{d}$
+ Aside from considering just the function 
+\begin_inset Formula $f\left(\vec{w},\vec{d}\right)=\vec{w}\cdot\vec{d}$
 \end_inset
 
 , one might consider other functions 
@@ -3317,7 +4265,8 @@ viz
 \end_inset
 
 .
- A single-layer feed-forward linear neural net would consist of a 
+ For example, a single-layer feed-forward linear neural net would consist
+ of a 
 \begin_inset Formula $\left|G\right|\times\left|G\right|$
 \end_inset
 
@@ -3325,7 +4274,7 @@ viz
 \begin_inset Formula $M$
 \end_inset
 
- so that 
+ such that 
 \begin_inset Formula 
 \[
 f\left(\vec{w},\vec{d}\right)=\vec{w}^{T}\cdot M\cdot\vec{d}
@@ -3351,12 +4300,74 @@ This, in itself, because it is linear, does not accomplish much, because
 \begin_inset Formula $\vec{w}^{\prime}=M^{T}\vec{w}$
 \end_inset
 
- or 
+ to get a different product 
+\begin_inset Formula $\vec{w}^{\prime}\cdot\vec{d}$
+\end_inset
+
+, or, alternately 
 \begin_inset Formula $\vec{d}^{\prime}=M\vec{d}$
 \end_inset
 
+ for a product 
+\begin_inset Formula $\vec{w}\cdot\vec{d}^{\prime}$
+\end_inset
+
 .
- Written in in components:
+ The dot-product in the factorization is ambiguous; the point is that the
+ factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ is not unique.
+ 
+\end_layout
+
+\begin_layout Standard
+The low-rank matrix-factorization literature expresses this idea by noting
+ that a dot-product is invariant under orthogonal rotations, and so one
+ can choose an arbitrary orthogonal matrix 
+\begin_inset Formula $O$
+\end_inset
+
+ with 
+\begin_inset Formula $O^{T}O=I$
+\end_inset
+
+ and write 
+\begin_inset Formula 
+\[
+\vec{w}\cdot\vec{d}=\left(\vec{w}O^{T}\right)\cdot\left(O\vec{d}\right)=\vec{w}^{\prime}\cdot\vec{d}^{\prime}
+\]
+
+\end_inset
+
+Since the vectors 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ are naturally probabilities, the above is exactly what we do 
+\emph on
+not
+\emph default
+ what to do! As already noted, orthogonal rotations applied to a probability
+ turn it into something that is not a probability.
+ Instead, we want to stick to a single (ambiguous) matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ that is Markovian, so that, when contracted to the left or to the right,
+ the resulting vectors are still probabilities.
+\end_layout
+
+\begin_layout Standard
+This becomes more clear if written in in components:
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
@@ -3364,23 +4375,28 @@ p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\
 
 \end_inset
 
-and so one can contract 
-\begin_inset Formula $M$
-\end_inset
-
- either to the left or to the right.
- This shows that the factorization is ambiguous; as long as 
+This shows that the factorization is ambiguous; as long as 
 \begin_inset Formula $M$
 \end_inset
 
  is Markovian, preserving the sums of probabilities over rows and columns,
  it can be contracted to the left or the right.
- Thus, one can legitimately introduce another constraint: given the freedom
- in 
+ Indeed: 
 \begin_inset Formula $M$
 \end_inset
 
-, choose it so that 
+ itself can be factored into an arbitrary product of Markovian matrixes,
+ which can then be merged to the left and right.
+\end_layout
+
+\begin_layout Standard
+Thus, to get a meaningful factorization, one can must introduce additional
+ constraints.
+ A seemingly natural one, to be developed later, is to choose 
+\begin_inset Formula $M$
+\end_inset
+
+ such that 
 \begin_inset Formula $p\left(w,g\right)$
 \end_inset
 
@@ -3389,10 +4405,14 @@ and so one can contract
 \end_inset
 
  are both maximally sparse.
+ One would like to assign a word to at most a handful of different word-classes,
+ corresponding to the synonym classes for each word-sense attached to that
+ word.
 \end_layout
 
 \begin_layout Standard
-A matrix can be Markovian on the left side, the right side, or both.
+A quick review of the concept of a Markovian matrix is in order.
+ A matrix can be Markovian on the left side, the right side, or both.
  It is Markovian on the right if 
 \begin_inset Formula 
 \[
@@ -3401,7 +4421,7 @@ A matrix can be Markovian on the left side, the right side, or both.
 
 \end_inset
 
-This assures that 
+This assures that a transformed probability 
 \begin_inset Formula 
 \[
 p^{\prime}\left(g,d\right)=\sum_{g^{\prime}}M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
@@ -3443,8 +4463,8 @@ If one has such a factorization, so that
 \begin_inset Formula $p\left(g^{\prime},d\right)$
 \end_inset
 
- are low-density feeder branches that connect into this tightly-coupled
- kernel.
+ are low-density feeder tree-branches that connect into this tightly-coupled
+ central component.
  This is visualized in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -3462,6 +4482,7 @@ sideways false
 status collapsed
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Caption
 
 \begin_layout Plain Layout
@@ -3480,8 +4501,8 @@ name "fig:Factorization"
 
 \begin_inset Graphics
 	filename skimage/factor.eps
-	lyxscale 50
-	width 100col%
+	lyxscale 65
+	width 90col%
 
 \end_inset
 
@@ -3495,6 +4516,11 @@ This figure attempts to illustrate the process of factorization.
 \end_inset
 
  as a sparse matrix.
+ Edges indicate those values where 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is not zero.
  Not every 
 \begin_inset Formula $w$
 \end_inset
@@ -3550,6 +4576,36 @@ This figure attempts to illustrate the process of factorization.
 \end_layout
 
 \begin_layout Plain Layout
+In hard-clustering, these low-degree requirements are automatically satisfied:
+ a word 
+\begin_inset Formula $w$
+\end_inset
+
+ can belong to only one word-cluster 
+\begin_inset Formula $g$
+\end_inset
+
+, and so there is only one line in the figure connecting 
+\begin_inset Formula $w$
+\end_inset
+
+ to anything.
+ Likewise, a disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ can only be assigned to one cluster 
+\begin_inset Formula $g^{\prime}$
+\end_inset
+
+.
+ Due to the fact that words are combinations of word-senses, hard-clustering
+ in this fashion is undesirable; by contrast, it seems that word-senses
+ could be validly hard-clustered.
+ 
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset CommandInset line
 LatexCommand rule
 offset "0.5ex"
@@ -3570,8 +4626,145 @@ height "1pt"
 
 \end_layout
 
+\begin_layout Standard
+In the above factorization, matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ was made explicitly Markovian, so as to preserve the left and right factors
+ as joint probabilities.
+ However, it seems to be particularly important to the semantic structure
+ of the language: it captures the complexity of language, whereas the left
+ and right factors merely funnel spell-ed-out word-strings into the actual
+ semantic cagtegories.
+ Thus, it is convenient to instead write the left and write factors as Markov
+ matrices, while taking the central factor to be a joint probability.
+ This can be acheived by factoring as
+\begin_inset Formula 
+\begin{equation}
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)\label{eq:central-decomposition}
+\end{equation}
+
+\end_inset
+
+where the left and right factors are conditional probabilities.
+ That is,
+\begin_inset Formula 
+\[
+p\left(w|g\right)=\frac{p\left(w,g\right)}{p\left(*,g\right)}
+\]
+
+\end_inset
+
+and likewise for 
+\begin_inset Formula $p\left(d|g^{\prime}\right)=p\left(g^{\prime},d\right)/p\left(g^{\prime},*\right)$
+\end_inset
+
+.
+ These are explicitly Markovian, in that
+\begin_inset Formula 
+\[
+\sum_{g}p\left(w|g\right)=1
+\]
+
+\end_inset
+
+and likewise 
+\begin_inset Formula $\sum_{g^{\prime}}p\left(d|g^{\prime}\right)$
+\end_inset
+
+.
+ This factorization is just a rescaling of the earlier factorization: 
+\begin_inset Formula 
+\[
+p\left(g,g^{\prime}\right)=p\left(*,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},*\right)
+\]
+
+\end_inset
+
+and is done so that 
+\begin_inset Formula $p\left(g,g^{\prime}\right)$
+\end_inset
+
+ can be seen as a joint probability: 
+\begin_inset Formula 
+\[
+\sum_{g,g^{\prime}}p\left(g,g^{\prime}\right)=1
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The ambiguity of the matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ is removed, if one assumes hard clustering.
+ In this case, each 
+\begin_inset Formula $w$
+\end_inset
+
+ can belong to only one 
+\begin_inset Formula $g$
+\end_inset
+
+, and each 
+\begin_inset Formula $d$
+\end_inset
+
+ to just one 
+\begin_inset Formula $g^{\prime}$
+\end_inset
+
+, and, once the clusters are chosen, there is no confusion about the left
+ and right factors, and thus, the central factor is fixed.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In physics, such an ambiguity of factorization is known as a global gauge
+ symmetry; fixing a gauge removes the ambiguity.
+ In natural language, the ambiguity is sponteneously broken: words have
+ only a few senses, and are often sysnonymous, making the left and right
+ factors sparse.
+ For this reason, the analogy to physics is entertaining but mostly pointless.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A factorization of this sort is known as co-clustering, bi-clustering or
+ sometimes block clustering.
+ An explicit development of this, including an explicit iterative algorithm
+ guaranteed to converge, is given by Dhillon et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dhillon2003"
+
+\end_inset
+
+ and is reviewed in a subsection below.
+ Of course, for natural langauge, we want to decompose words into word-senses,
+ and so naive hard-clustering will not work.
+ It does, however, illuminate the path ahead.
+ 
+\end_layout
+
 \begin_layout Subsubsection
 Factorization in Link Grammar
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Factorization-in-Link"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3582,23 +4775,23 @@ de facto
  observed in the hand-built dictionaries for Link Grammar.
  Examination of the 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  file in the Link Grammar file distribution will clearly show how words
  are grouped into word-classes.
  For example, 
 \family typewriter
-`words.n.2.s`
+words.n.2.s
 \family default
  is a list of plural count-nouns.
- The Link Grammar costs are rough approximations for the log likelihood
+ The Link Grammar costs are very rough approximations for the log probability
  
 \begin_inset Formula $-\log p$
 \end_inset
 
 , and so the contents of 
 \family typewriter
-`words.n.2.s`
+words.n.2.s
 \family default
  is effectively a representation of the matrix 
 \begin_inset Formula $p\left(w,g\right)$
@@ -3608,10 +4801,10 @@ de facto
 \begin_inset Formula $g=\left\langle \mbox{plural-count-nouns}\right\rangle $
 \end_inset
 
-and a uniform probability across this class.
+ and a uniform probability across this class.
  The file 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  also defines a large number of 
 \begin_inset Quotes eld
@@ -3623,14 +4816,14 @@ macros
 
 , with names such as 
 \family typewriter
-`<noun-main-p>`
+<noun-main-p>
 \family default
 .
  These macros are stand-ins for lists of disjuncts, often given equal weight,
  but also not uncommonly assigned different costs.
  In essence, 
 \family typewriter
-`<noun-main-p>`
+<noun-main-p>
 \family default
  should be understood as an example of 
 \begin_inset Formula $p\left(g^{\prime},d\right)$
@@ -3644,16 +4837,16 @@ macros
  It appears multiple times throughout the file.
  In one case, it is associated with the word-list 
 \family typewriter
-`words.n.2.s`
+words.n.2.s
 \family default
 , which makes sense, as 
 \family typewriter
-`<noun-main-p>`
+<noun-main-p>
 \family default
  is describing one of the linkage behaviors of plural common nouns.
  The contents of the file 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  should be understood to be a specification of 
 \begin_inset Formula $M\left(g,g^{\prime}\right)$
@@ -3677,24 +4870,24 @@ macros
 \begin_layout Standard
 A more careful examination of the use of the macros in 
 \family typewriter
-`4.0.dict`
+4.0.dict
 \family default
  shows that these are often cascaded into one-another.
  For example, 
 \family typewriter
-`<noun-main-s>`
+<noun-main-s>
 \family default
  is used in the definition of 
 \family typewriter
-`<proper-names>`,
+<proper-names>,
 \family default
  
 \family typewriter
-`<entity-entire>`
+<entity-entire>
 \family default
  and 
 \family typewriter
-`<common-noun>`
+<common-noun>
 \family default
 , each of which service word classes that are similar and yet differ syntactical
 ly and semantically.
@@ -3712,17 +4905,599 @@ prima facie
 \begin_inset Formula $M\left(g,g^{\prime}\right)$
 \end_inset
 
- can be factored into smaller, tightly-connected blocks; 
+ can be further factored into smaller, tightly-connected blocks; 
 \emph on
 viz
 \emph default
-., that the graph contains bipartite cliques.
+., that the graph of 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ contains strongly-coupled bipartite cliques.
  
 \end_layout
 
+\begin_layout Standard
+This explicit co-clustering in Link Grammar is not driven by any sort of
+ theoretical arguments or foundation.
+ Rather, it is a natural, intuitive outcome of how the linguists who author
+ the dictionaries wish to tackle the problem.
+ A good factorization saves time and effort for the author, and is easier
+ to debug.
+ The urge to factorize is not limited to English: a look at any of the dictionar
+ies shows this structure clearly.
+ It becomes even more pronounced in dictionaries with morphology, e.g.
+ in the Russian dictionaries, where word-stems (which carry most of the
+ meaining) are factored away from the suffixes (which provide the needed
+ tense, gender, number and person agreement across sentences).
+\end_layout
+
+\begin_layout Subsubsection
+Tensor Product Factorization
+\end_layout
+
+\begin_layout Standard
+The idea that 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ contains important substructures is important enough to point out a second
+ time.
+ Based on explicit experience with Link Grammar, those substructures are
+ likely to require a tensor product factorization (as opposed to a matrix
+ product factorization) to make sense of them.
+ Its possible to speculate that a Tucker factorization may provide a reasonable
+ first approximation to this factorization.
+ Nothing further on this can be said at this point, until a reliable way
+ to obtain a stable, reproducible and accurate 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ is in hand.
+\end_layout
+
+\begin_layout Subsubsection
+Rank and Dimension
+\end_layout
+
+\begin_layout Standard
+Based on the example of the actual English lexis in Link Grammar, there
+ is no need to assume that the number of word classes 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+ should someohow be equal to the number of syntactic usage patterns 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+.
+ Indeed, the dimension of the matrix 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ has to be 
+\begin_inset Formula $\left|G\right|\times\left|G^{\prime}\right|$
+\end_inset
+
+; but these two dimensions are not known from any 
+\emph on
+a priori
+\emph default
+ principles.
+\end_layout
+
+\begin_layout Standard
+More careful vocabulary is needed here: one can say that 
+\emph on
+
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+ 
+\emph default
+is the number of 
+\begin_inset Quotes eld
+\end_inset
+
+word classes
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The number of of syntactic usage patterns 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ could be called the number of 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical classes
+\begin_inset Quotes erd
+\end_inset
+
+, although historic usage conflates these two terms.
+ Thus, the term 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic classes
+\begin_inset Quotes erd
+\end_inset
+
+ for 
+\begin_inset Formula $G^{\prime}$
+\end_inset
+
+ seems the most appropriate.
+\end_layout
+
+\begin_layout Standard
+The number of word classes 
+\emph on
+
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+ 
+\emph default
+must surely be fairly high, as they must capture not only the predicate-argument
+ structure,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Predicate,WP-Argument"
+
+\end_inset
+
+ but the resulting syntax constraints must force the selection of the predicate-
+argument structure.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Selection"
+
+\end_inset
+
+ Roughly speaking, the number of word classes should correspond to the number
+ of different synonym classes one might expect to find.
+ This is confused by the situation of common nouns: there are vast numbers
+ of these, and while most are not synonyms, most are syntactically interchangabl
+e, even when forcing predicate-argument agreement.
+\end_layout
+
+\begin_layout Standard
+The appropriate number of syntactic classes 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ is presumably a lot lower.
+ At a minimum, it corresponds to the number of classical head-phrase structure
+ grammar non-terminals, such as 
+\family sans
+S, NP, VP, PP, D, A, V, N,
+\family default
+ 
+\emph on
+etc
+\emph default
+.
+ A more complete set can be found in the dependency grammar relations 
+\family sans
+subj, obj, iobj, det, amod, advmod, psubj, pobj,
+\family default
+ 
+\emph on
+etc
+\emph default
+.
+ but even this seems too low.
+ There are just over 100 different link types in Link Grammar, growing to
+ the thousands, when one considers various subtypes (subscripts).
+ However, the number of distinct macros in the English lexis provides a
+ different lower bound.
+ At any rate, the size of 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ cannot be smaller than 100 for a realistic model of the English language,
+ and an accurate model is likely to require 
+\begin_inset Formula $\left|G^{\prime}\right|$
+\end_inset
+
+ of at least a few thousand.
+\end_layout
+
+\begin_layout Subsubsection
+Akaike Information Criterion
+\end_layout
+
+\begin_layout Standard
+How many word classes and syntactic classes should there be? Aside from
+ making various 
+\emph on
+a priori
+\emph default
+ guesses, one can apply the Akaike information criterion (AIC).
+ Essentially, the grammatical classes can be taken as the parameters of
+ the model.
+ The AIC can be used as a guide to determine how many of them are required.
+ This is easy to say in principle; a computationally efficient mechanism
+ is not yet clear.
+\end_layout
+
+\begin_layout Subsubsection
+Removing Ambiguity in Factorization
+\end_layout
+
+\begin_layout Standard
+As noted in the earlier subsection, the ambiguity in the factorization can
+ be removed by hard clustering.
+ Practical experience with hands-on similarity measures in language data
+ indicate that there should not be much of a problem: most words that are
+ similar are obviously-so, using an appropriate pair-wise similarity function.
+ 
+\end_layout
+
+\begin_layout Standard
+Suppose this was not easily the case? To guide the factorization, and to
+ maximize the sparsity of the left and the right factors, while maximizing
+ the complexity of the central factor, one can appeal to Tegmark's formulation
+ of Tononi integrated information as a guide.
+ That is, one wishes to factorize in such a way that the total amount of
+ integrated information in the left and right factors are minimized, while
+ the integrated information of the central factor is maximized.
+ 
+\end_layout
+
+\begin_layout Standard
+In essence, factorization is a reorganizeation of the graph so as to always
+ maximize the integrated information of an important central core.
+ All edges where mutual information is weak are to be pruned away.
+\end_layout
+
+\begin_layout Subsubsection
+Information Loss
+\end_layout
+
+\begin_layout Standard
+The goal of the factorization is to minimize the information loss between
+ the input data and the factorization.
+ The objective function is then The Kullback-Leibler divergence, a minor
+ variant on the previous eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KL-MI-factorization-loss"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{equation}
+MI_{Loss}=\sum_{w,d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{\sum_{g\in G}\sum_{g^{\prime}\in G^{\prime}}p\left(w|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)}\label{eq:full-factor-loss}
+\end{equation}
+
+\end_inset
+
+By minimizing this divergence, one minimizes the total loss incurred by
+ the factorization.
+\end_layout
+
+\begin_layout Standard
+The above information loss estimate is identical to that described by Dhillion
+ 
+\emph on
+et al
+\emph default
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dhillon2003"
+
+\end_inset
+
+ in thier treatment of hard co-clustering.
+ That reference provides an extensive and detailed review of the factorization
+ problem being addressed in this section, with the exception that the current
+ need for word-sense disambiguation violates thier hard-clustering assumption.
+ Words cannot be hard-clustered; word-vectors must be decomposed into word-sense
+ vectors first.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ Nonetheless, many formulas are still relevant, and the reference gives
+ detailed motivation for them, and provides multiple articulations and derivatio
+ns.
+ Various results are recapped here.
+\end_layout
+
+\begin_layout Standard
+For the special case of hard clustering, where each word or disjunct is
+ assigned to only one word class/grammatical class, one has that (eqn (6)
+ if Dhillon)
+\begin_inset Formula 
+\begin{equation}
+p\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)\label{eq:central factor}
+\end{equation}
+
+\end_inset
+
+From this, it follows that (eqn (4) of Dhillion)
+\begin_inset Formula 
+\[
+MI_{Loss}=MI\left(W,D\right)-MI\left(G,G^{\prime}\right)
+\]
+
+\end_inset
+
+and so eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:full-factor-loss"
+
+\end_inset
+
+ really is the information loss from factorization.
+ For hard clustering, the loss can be written in terms of only the left,
+ or the right clusters, so that (lemma 4.1 of Dhillon)
+\begin_inset Formula 
+\begin{eqnarray*}
+MI_{Loss} & = & \sum_{g}\sum_{w\in g}p\left(w,*\right)\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\left(d|g\right)}\\
+ & = & \sum_{g}\sum_{w\in g}\sum_{d}p\left(w,d\right)\log_{2}\frac{p\left(w,d\right)}{p\left(w,*\right)}\,\frac{p\left(g,*\right)}{p\left(g,d\right)}
+\end{eqnarray*}
+
+\end_inset
+
+This allows an iterative algorithm to be performed, clustering only rows
+ (or only columns), that is, only words (or only disjuncts).
+\end_layout
+
+\begin_layout Subsubsection
+Biclustering
+\end_layout
+
+\begin_layout Standard
+It is worth reviewing the algorithm that Dhillion 
+\emph on
+etal
+\emph default
+ present.
+ It is an iterative hill-climbing algorithm, alternating between three steps:
+ the computation of marginals, and the assignment of new row clusters, and
+ the assignment of new column clusters.
+ The marginals are recomputed after every reclustering.
+ Dhillon provides a proof that, for hard clustering, the information loss
+ is monotonically decreasing; viz, that iteration always moves to a better
+ solution.
+\end_layout
+
+\begin_layout Standard
+Given provisional cluster assignments 
+\begin_inset Formula $G$
+\end_inset
+
+ and 
+\begin_inset Formula $G^{\prime}$
+\end_inset
+
+, so that every word and every disjuncts can be placed into some specific
+ cluster, all three factors 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+, 
+\begin_inset Formula $M\left(g,g^{\prime}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},d\right)$
+\end_inset
+
+ are available (are computable) given the cluster assignments.
+ The central factor is given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central factor"
+
+\end_inset
+
+.
+ The left and right factors are obtained as marginals:
+\begin_inset Formula 
+\[
+p\left(w,g\right)=\begin{cases}
+p\left(w,*\right) & \mbox{ if }w\in g\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+p\left(g^{\prime},d\right)=\begin{cases}
+p\left(*,d\right) & \mbox{ if }d\in g^{\prime}\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The above are always known and well-defined, since, by assumption, the provision
+al cluster assignments 
+\begin_inset Formula $G$
+\end_inset
+
+ and 
+\begin_inset Formula $G^{\prime}$
+\end_inset
+
+ are known at each step of the iteraction.
+ The conditional probabilities are as noted before: 
+\begin_inset Formula 
+\[
+p\left(w|g\right)=\frac{p\left(w,g\right)}{p\left(*,g\right)}
+\]
+
+\end_inset
+
+ and likewise 
+\begin_inset Formula 
+\[
+p\left(d|g^{\prime}\right)=\frac{p\left(g^{\prime},d\right)}{p\left(g^{\prime},*\right)}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $p\left(*,g\right)=\sum_{w\in g}p\left(w,g\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $p\left(g^{\prime},*\right)=\sum_{d\in g^{\prime}}p\left(g^{\prime},d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The new cluster assignments are obtained by minimizing the information loss,
+ once for the rows, and once for the columns.
+ In one step, one searches for cluster assignments 
+\begin_inset Formula $w\in g$
+\end_inset
+
+ such that
+\begin_inset Formula 
+\[
+MI_{word\, loss}=\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\left(d|g^{\prime}\right)p\left(g^{\prime}|g\right)}
+\]
+
+\end_inset
+
+is minimized.
+ After recomputing marginals, one then reclusters the disjuncts, by seaching
+ for the culstering 
+\begin_inset Formula $d\in g^{\prime}$
+\end_inset
+
+ that minimizes the loss 
+\begin_inset Formula 
+\[
+MI_{disjunct\, loss}=\sum_{w}p\left(w|d\right)\log_{2}\frac{p\left(w|d\right)}{p\left(w|g\right)p\left(g|g^{\prime}\right)}
+\]
+
+\end_inset
+
+This looks like an entirely reasonable algorithm, concrete and specific
+ and implementable, until one refers back to the table in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Sparsity"
+
+\end_inset
+
+.
+ There are in excess of 
+\begin_inset Formula $10^{5}$
+\end_inset
+
+ words to provisionally assign to clusters, and 
+\begin_inset Formula $10^{7}$
+\end_inset
+
+ or more disjuncts.
+ Each provisional clustering requires extensive recomputation of marginal
+ probabilities.
+ Exhaustive search for the best clustering clearly cannot scale to the current
+ datasets.
+ One might be able to make some forward progress by means of genetic algorithms,
+ as one is performing hill-climbing on a well-defined utility function.
+ The hard cluster membership can be encoded as a very long bit-string: this
+ is exactly the scenario for which genetic algorithms were designed to solve:
+ optimizing large bit strings, given a utility function on them.
+ 
+\end_layout
+
+\begin_layout Standard
+But never mind: the assumption of hard clustering breaks word-sense disambiguati
+on.
+ Generic algorithms are not enough.
+ Back to the drawing board.
+\end_layout
+
 \begin_layout Subsection
-Gradient Descent vs.
- Graph Algorithms
+Graph Algorithms vs.
+ Gradient Descent
+\end_layout
+
+\begin_layout Standard
+In the previous section, the Word2Vec style algorithms were characterized
+ as 
+\begin_inset Quotes eld
+\end_inset
+
+gradient descent algorithms
+\begin_inset Quotes erd
+\end_inset
+
+, and were contrasted with 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithms
+\begin_inset Quotes erd
+\end_inset
+
+ that explicitly and overtly focus on the graphical relationships between
+ items.
+ The same contrast can be made here: clustering is a form of a graph algorithm,
+ whereas the matrix factorization algorithms are all driven by a form of
+ gradient descent.
+\end_layout
+
+\begin_layout Standard
+The difference can be highlighted by noticing that cluster assignment is
+ essentially a form of greedy algorithm: One looks for the best-fitting
+ cluster, and accepts that first, effectively ignoring all of the other
+ clusters.
+ The relationship of word-to-cluster is explicit and overt; by contrast,
+ the matrix factorization is only implicit: a cluster relationship exists
+ whenever a matrix element is large.
+\end_layout
+
+\begin_layout Standard
+In the current state of the art, the gradient-descent algorithms tend to
+ outperform the clustering algorithms, when the size of hidden layers is
+ limited to a computationally tractable size.
+ This can be interpreted in several ways: for small hidden layers, the clusterin
+g algos just might be 
+\begin_inset Quotes eld
+\end_inset
+
+too greedy
+\begin_inset Quotes erd
+\end_inset
+
+, applying too strong a discrimination.
+ Gradient descent algorithms also organize compute cycles differently, removing
+ certain repeated calculations out of a tight loop.
+ 
+\end_layout
+
+\begin_layout Standard
+One advantage of the clustering approach is that, since it makes the graph
+ structure explicit, it provides a mechanism for controlling the shape of
+ the graph.
+ Another is that it seems to perhaps be more scalable, when the size of
+ the hidden layers are not suitably small.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Control of Graphical Structure
 \end_layout
 
 \begin_layout Standard
@@ -3752,48 +5527,653 @@ reference "fig:Factorization"
 \end_inset
 
 .
- A naive gradient descent does not seem to achieve this.
- The situation is analogous to that discussed in section 
+ A naive gradient descent does not seem to achieve this; it will provide
+ numerical values, but will not go out of its way to maximally set as many
+ of the 
+\begin_inset Formula $p\left(w,g\right)$
+\end_inset
+
+ values to zero as possible.
+ In keeping with the general trend: the goal here is to set as many matrix
+ entries to zero as possible, thereby getting the greatest amount of data
+ compression as possible.
+ Yet, fidelity has to be maintained: just the right entries should be non-zero.
+\end_layout
+
+\begin_layout Standard
+The point here is that it is the graph structure that is the most important;
+ the actual numerical values associated with each edge are far less important.
+ They are nice, and useful for improving accuracy and parse ranking, but
+ provide little insight in and of themselves.
+ The graph structure dominates.
+ This is made clear in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sec:Similarities-and-Differences"
+reference "sub:Factorization-in-Link"
 
 \end_inset
 
-: naive gradient descent, such as SkipGram/CBOW, do not provide the needed
- grammatical graph structure.
- By contrast, the MST parsing algorithm does provide that structure.
+, where a huge amount of progress can be made by means of manual factorization,
+ and setting all edge weights to essentially just one value: present or
+ absent.
  
 \end_layout
 
 \begin_layout Standard
-The gradient descent methods do provide one advantage: they provide a means
- of global optimization; by contrast, graph techniques, such as MST, work
- to identify local graph structure.
- The goal of this section is to use this insight, and provide a graph-based
- technique to obtain the factors 
-\begin_inset Formula $p\left(w,g\right)$
-\end_inset
+Greedy clustering essentially provides a mechanism for controlling this
+ structure: it inherently limits the number of grammatical classes that
+ a word can belong to.
+ It dis-incentivizes the partitioning of a word into a large number of grammatic
+al categories.
+ 
+\end_layout
 
-, 
-\begin_inset Formula $M\left(g,g^{\prime}\right)$
-\end_inset
-
- and 
-\begin_inset Formula $p\left(g^{\prime},d\right)$
-\end_inset
-
-, as graphs, rather than matrices.
- It is the graph structure that is the most important; the actual numerical
- values associated with each edge are far less important.
- They are nice, and useful for improving accuracy and parse ranking, but
- provide little insight in and of themselves.
- The graph structure dominates.
+\begin_layout Section
+Factorizing the language model
 \end_layout
 
 \begin_layout Standard
-TODO: work all this out in detail.
- This section, and the rest, are all under construction.
+The above developments now provide enough background to clearly state the
+ problem.
+ Inspired by the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, one wishes to find a collection of word classes, assigning words to a
+ handful of classes, according to the in-context word-sense.
+ The proper factorization needs to be of the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+, as illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Factorization"
+
+\end_inset
+
+.
+ The appropriate measure of quality is to minimize the information loss
+ in the factorization, as given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:full-factor-loss"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+More precisely, the factorization of the language model appears to require
+ three important ingredients:
+\end_layout
+
+\begin_layout Itemize
+A way of decomposing word-vectors into sums of word-sense vectors,
+\end_layout
+
+\begin_layout Itemize
+A way of performing biclustering, so as to split the bipartite graph 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ into left, central and right components, holding the left and right parts
+ to be sparse,
+\end_layout
+
+\begin_layout Itemize
+Using an information-theoretic similarity metric, to preserve the probabilistic
+ interpretation of the contingency table 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Combining all these parts in one go is daunting.
+ Smaller steps towards the ultimate goal can be taken.
+ One easy first step is to perform clustering using an information metric,
+ instead of the cosine distance.
+ This is done in the section below.
+\end_layout
+
+\begin_layout Standard
+A second step is to replace hard clustering by an algorithm that treats
+ word-vectors as sums of (as yet unknown) distinct word senses.
+ Because this is a substantial topic in itself, this is handled in a distinct
+ tract; see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Information-theoretic Clustering
+\end_layout
+
+\begin_layout Standard
+The previous section uses the words 
+\begin_inset Quotes eld
+\end_inset
+
+information theoretic
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+ in close proximity.
+ This is a 
+\begin_inset Quotes eld
+\end_inset
+
+thing
+\begin_inset Quotes erd
+\end_inset
+
+, and so a lighting review of the literature is warrented.
+ Two observations pop out:
+\end_layout
+
+\begin_layout Itemize
+None of the systems dscribed in the literature assume that the input data
+ can already be interpreted as a probability; rather, the clustering is
+ being performed on data naturally occuring in some Euclidean space, typically,
+ some space of low dimension (e.g.
+ two-dimensional image data).
+\end_layout
+
+\begin_layout Itemize
+Most approaches to information-theoretic clustering use the mutual information
+ between members of a cluster and the cluster label.
+ Unfortunately, this has an ambiguity: the information content is conserved
+ by any Markov matrix that reassigns the cluster labels, so, for example,
+ a permutation matrix that just shuffles the cluster labels.
+ Ver Steeg 
+\emph on
+et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VerSteeg2014"
+
+\end_inset
+
+
+\emph default
+ propose a solution to this ambiguity: a return to first principles, requiring
+ that information loss due to coarse-graining be minimized.
+\end_layout
+
+\begin_layout Standard
+Several other notable points are discussed below.
+\end_layout
+
+\begin_layout Subsubsection
+Renyi Information Divergence
+\end_layout
+
+\begin_layout Standard
+Gokcay and Principe
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gokcay2002"
+
+\end_inset
+
+ propose the Renyi entropy as an information divergence.
+ It is essentially minus the logarithm of the cosine metric.
+ Given two vectors 
+\begin_inset Formula $\vec{u}$
+\end_inset
+
+ anad 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+, the information divergence is defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+D_{CEF}\left(\vec{u},\vec{v}\right)=-\log\cos\left(\vec{u},\vec{v}\right)=-\log\hat{u}\cdot\hat{v}=-\log\frac{\vec{u}\cdot\vec{v}}{\left\Vert \vec{u}\right\Vert \left\Vert \vec{v}\right\Vert }
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\Vert \cdot\right\Vert $
+\end_inset
+
+ is the 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+-norm.
+ Although this is widely cited in the literature pertaining to information-theor
+etic clustering, there is no particular reason to beleive that it offers
+ any advantage at all over the ordinary cosine metric, when applied to the
+ task of clustering grammatical categories.
+ In particular, it suffers from the same defects previously identified:
+ it contains an inbuilt assumption that the data presents in a Euclidean,
+ rotationally symmetric space, which is very much not the case for the langauge
+ data.
+ The vectors of in the contingency table that the language data is ogranized
+ in are not Euclidean vectors: they are joint probabilities.
+ They transform not under orthogonal rotations, but under Markov matrices.
+\end_layout
+
+\begin_layout Standard
+There are also some practical, language-related reasons to lose interest
+ in the above information divergence: When examining actual language data,
+ as is done in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017connectors"
+
+\end_inset
+
+, it becomes quite clear that there is a practical, common-sense cutoff
+ for similary.
+ If two words 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ have a similarity of 
+\begin_inset Formula $\cos\left(w_{1},w_{2}\right)\lesssim0.5$
+\end_inset
+
+, they are very nearly unrelated; for a similarity of 
+\begin_inset Formula $\cos\left(w_{1},w_{2}\right)\lesssim0.1$
+\end_inset
+
+, they are fantastically unrelated.
+ It would be crazy to assign anything with such low similarities to a commn
+ cluster.
+ Extending the notion of similarity to truly wee values, as the logarithm
+ enables, is meaningless.
+ For cosine values greater than 1/2, the logarithm is essentially linear:
+ 
+\begin_inset Formula $-\log\cos\, x\approx1-\cos\, x$
+\end_inset
+
+ in the region of interest.
+ The appearence of the logarithm does nothing to advance the situation.
+\end_layout
+
+\begin_layout Subsubsection
+Consistency Under Coarse-graining
+\end_layout
+
+\begin_layout Standard
+To deal with the problem of factorization ambiguity, Ver Steeg 
+\emph on
+et al
+\begin_inset CommandInset citation
+LatexCommand cite
+key "VerSteeg2014"
+
+\end_inset
+
+
+\emph default
+ revert to first principles, and propose that the information divergence
+ should be approximately invariant under the coarse-graining of the input
+ data.
+\end_layout
+
+\begin_layout Standard
+There is some appeal in this idea for the langauge problem: a large cluster
+ of approximate synonyms should be factorizable into smaller clusters of
+ more tightly-related synonyms.
+ Conversely, one should be able to consolidate small blocks into bigger
+ ones, with a minimum of information loss.
+ However, based on the explorations in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017connectors"
+
+\end_inset
+
+, this does not appear to be a problem that needs to be externally forced
+ onto the system.
+ Pair-wise word similarities seem to be of high quality; it would take some
+ work to have this wrecked by the clustering algorithm.
+ Still ...
+ additional consideration might be warranted.
+\end_layout
+
+\begin_layout Subsection
+Information-driven Clustering
+\end_layout
+
+\begin_layout Standard
+As shown by Ding 
+\emph on
+et al
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+
+\emph default
+ and reviewed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Clustering-as-Matrix"
+
+\end_inset
+
+, 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering can be seen as a special case of matrix factorizing.
+ This section generalizes to an information metric, as opposed to the usual
+ cosine metric.
+ The first subsection reviews the simpler single-sided form of clustering,
+ as it would be applied to just words, instead of the bipartite clustering.
+ The second subsection presents the information metric.
+\end_layout
+
+\begin_layout Subsubsection
+Cosine clustering
+\end_layout
+
+\begin_layout Standard
+The usual metric for judging similarity is the cosine metric: 
+\begin_inset Formula 
+\[
+\cos\left(\vec{u},\vec{v}\right)=\hat{u}\cdot\hat{v}=\frac{\vec{u}\cdot\vec{v}}{\left\Vert \vec{u}\right\Vert \left\Vert \vec{v}\right\Vert }
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\Vert \cdot\right\Vert $
+\end_inset
+
+ is the 
+\begin_inset Formula $l_{2}$
+\end_inset
+
+-norm.
+ If the input data is taken as a collection of (row) vectors, then the input
+ can be viewed as a matrix 
+\begin_inset Formula $X=\left[\vec{v}_{1},\vec{v}_{2},\cdots,\vec{v}_{n}\right]$
+\end_inset
+
+.
+ The product matrix 
+\begin_inset Formula $S=XX^{T}$
+\end_inset
+
+ then has matrix entries 
+\begin_inset Formula $S_{ij}=\vec{v}_{i}\cdot\vec{v}_{j}$
+\end_inset
+
+.
+ If the vectors are already normalized, then the matrix entries 
+\begin_inset Formula $S_{ij}$
+\end_inset
+
+ are just the cosine distances between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ This is used to accomplish 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering by finding a 
+\begin_inset Formula $n\times k$
+\end_inset
+
+ matrix membership indicator matrix 
+\begin_inset Formula $F$
+\end_inset
+
+ such that the objective function 
+\begin_inset Formula 
+\[
+U=\mbox{tr}F^{T}SF
+\]
+
+\end_inset
+
+is minimized.
+ Some basic algebra (again, see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ding2005"
+
+\end_inset
+
+) shows that this is equivalent to minimizing the Frobenius norm 
+\begin_inset Formula 
+\[
+U=\left\Vert X-FF^{T}\right\Vert ^{2}
+\]
+
+\end_inset
+
+which in turn is identical to minimizing the distance between cluster centroids
+ 
+\begin_inset Formula $\vec{m}_{i}$
+\end_inset
+
+ and each member 
+\begin_inset Formula $j\in C_{i}$
+\end_inset
+
+ of the 
+\begin_inset Formula $i$
+\end_inset
+
+'th cluster.
+ 
+\begin_inset Formula 
+\[
+U=\sum_{i=1}^{k}\sum_{j\in C_{i}}\left\Vert \vec{v}_{j}-\vec{m}_{i}\right\Vert ^{2}
+\]
+
+\end_inset
+
+The centroid 
+\begin_inset Formula $\vec{m}_{i}$
+\end_inset
+
+ is the arithmetic mean of all of the vectors in the 
+\begin_inset Formula $i$
+\end_inset
+
+'th cluster:
+\begin_inset Formula 
+\[
+\vec{m}_{i}=\frac{1}{\left|C_{i}\right|}\sum_{j\in C_{i}}\vec{v}_{j}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left|C_{i}\right|$
+\end_inset
+
+ is the number of members in the 
+\begin_inset Formula $i$
+\end_inset
+
+'th cluster.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Information clustering
+\end_layout
+
+\begin_layout Standard
+The analog to cosine clustering can be arrived at with two changes.
+ The cosine was built from the dot product 
+\begin_inset Formula $\vec{u}\cdot\vec{v}$
+\end_inset
+
+ normalized by the vector lengths.
+ Here, the normalization is changed, so as to use the Kullback-Leibler divergenc
+e: 
+\begin_inset Formula 
+\[
+MI\left(\vec{u},\vec{v}\right)=\log_{2}\frac{\vec{u}\cdot\vec{v}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\vec{v}_{i}\cdot\vec{v}_{j}\right)}{\left(\sum_{i=1}^{n}\vec{u}\cdot\vec{v_{i}}\right)\left(\sum_{j=1}^{n}\vec{v}_{j}\cdot\vec{v}\right)}
+\]
+
+\end_inset
+
+This unusual-looking expression can be made more recognizable by changing
+ notation back to the joint probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ with disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ (of course, this would also work if the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ was replaced by the 
+\begin_inset Formula $N$
+\end_inset
+
+-gram context of 
+\begin_inset Formula $w$
+\end_inset
+
+).
+ Write for 
+\begin_inset Formula $S_{ij}=\vec{v}_{i}\cdot\vec{v}_{j}$
+\end_inset
+
+ in the equivalent form 
+\begin_inset Formula 
+\[
+S\left(w_{1},w_{2}\right)=\sum_{d}p\left(w_{1},d\right)p\left(w_{2},d\right)
+\]
+
+\end_inset
+
+The information divergence 
+\begin_inset Formula $MI\left(\vec{u},\vec{v}\right)$
+\end_inset
+
+ is then
+\begin_inset Formula 
+\[
+MI\left(w_{1},w_{2}\right)=\log_{2}\frac{S\left(w_{1},w_{2}\right)S\left(*,*\right)}{S\left(w_{1},*\right)S\left(*,w_{2}\right)}
+\]
+
+\end_inset
+
+where, as always, the stars 
+\begin_inset Formula $*$
+\end_inset
+
+ denote the wild-card sums: 
+\begin_inset Formula 
+\[
+S\left(w_{1},*\right)=\sum_{w_{2}}S\left(w_{1},w_{2}\right)
+\]
+
+\end_inset
+
+By normalizing, one gets an expression that looks just like a joint probability:
+ 
+\begin_inset Formula 
+\[
+Q\left(w_{1},w_{2}\right)=\frac{S\left(w_{1},w_{2}\right)}{S\left(*,*\right)}
+\]
+
+\end_inset
+
+with
+\begin_inset Formula 
+\[
+MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the clustering operation, one must replace the arithmetic mean by the
+ geometric mean.
+ The cluster centroid is now given by 
+\begin_inset Formula 
+\[
+m\left(w,d\right)=\sqrt[\frac{1}{\left|g\right|}]{\prod_{w\in g}p\left(w,d\right)}
+\]
+
+\end_inset
+
+The need for the geometric mean can be thought of in two ways: first, probabilit
+ies can only be added if they are truly independent, and here they are not;
+ but probabilities can always be multiplied.
+ More importantly, the logarithm of the geometric mean can be taken.
+ This connects the pair-wise information distance to minimization of cluster
+ sizes.
+\end_layout
+
+\begin_layout Subsection
+WSD-sensitive clustering
+\end_layout
+
+\begin_layout Standard
+Since this paper is already too long, that conversation is moved over to
+ reference 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ Its bare-bones right now.
 \end_layout
 
 \begin_layout Subsection
@@ -3801,27 +6181,67 @@ Information Maximizing Matrix Factorization
 \end_layout
 
 \begin_layout Standard
-To guide the factorization, and to maximize the agreement between the left
- and the right sides, one can appeal to Tegmark's formulation of Tononi
- integrated information.
- That is, one wishes to factorize in such a way that the total amount of
- information in the factors is maximized, so that the 
+xxxx
+\end_layout
+
+\begin_layout Standard
+Everything below here is incoherent and incomplete.
+ Sorry; under construction.
+\end_layout
+
+\begin_layout Subsubsection
+Surprisal Analysis
+\end_layout
+
+\begin_layout Standard
+The basic idea is this forumla:
+\begin_inset Formula 
+\[
+-\log\frac{P(x)}{P_{0}(x)}=\sum_{\alpha}\lambda_{\alpha}G\left(\alpha\right)
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $G$
+\end_inset
+
+'s are the constraints.
+ The 
+\begin_inset Formula $\lambda$
+\end_inset
+
+'s are the Lagrange multipliers.
+ When there is only one 
+\begin_inset Formula $G$
+\end_inset
+
+, then it is conventionally called 
 \begin_inset Quotes eld
 \end_inset
 
-cut
+the energy
 \begin_inset Quotes erd
 \end_inset
 
- is done where the mutual information is weakest.
+, and the 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is called 
+\begin_inset Quotes eld
+\end_inset
+
+the (inverse) temperature
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
 \end_layout
 
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-xxxx
+\begin_layout Subsubsection
+Partition function
 \end_layout
 
 \begin_layout Standard
