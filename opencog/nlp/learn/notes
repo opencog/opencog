@@ -14600,7 +14600,34 @@ Total count N(*,*) = 47444396.0 = 47444396.0
 Going to do column and row subtotals
 Finished left entropy subtotals in 427085 secs
 Finished right entropy subtotals in 7285 secs
+Finished left MI subtotals in 439375 secs
+Finished right MI subtotals in 7270 secs
+Done storing 18265271 left-wilds in 10806 secs
+Done storing 137078 right-wilds in 85 secs
+Finished with MI computations; this took 248. hours
 
+scheme@(guile-user)> (print-matrix-summary-report cra)
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 47444396)
+   (AnyNode "cross-connector word")
+   (AnyNode "cross-connector section")
+)
+Rows: 137078 Columns: 18265271
+Size: 24213074 non-zero entries of 2503766818138 possible
+Fraction non-zero: 9.6707E-6 Sparsity (-log_2): 16.658
+Total observations: 47444396.0  Avg obs per pair: 1.9595
+Entropy Total: 23.188   Left: 21.192   Right: +nan.0
+Total MI: 9.0983
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1422.        1.2051E+5
+Count   (l_1)  2.7318E+4    2.3690E+5     19.21        1.966
+Length  (l_2)  3114.        6763.         2.190        5.6123E-2
+RMS Count      3092.        +nan.0        2.174        +nan.0
+
+What's with the NaN's ?
 xxxxxxxxxxxxxxxxxxxx <<< here
 
 ----------------
