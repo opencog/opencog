@@ -6176,6 +6176,40 @@ One way the above can be visualized is to consider two vectors, roughly
 \end_layout
 
 \begin_layout Subsubsection
+Scale invariance
+\end_layout
+
+\begin_layout Standard
+The information divergence 
+\begin_inset Formula $MI\left(w_{1},w_{2}\right)$
+\end_inset
+
+ is scale invariant: replacing 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ by 
+\begin_inset Formula $kp\left(w,d\right)$
+\end_inset
+
+ for some constant 
+\begin_inset Formula $k$
+\end_inset
+
+ does not alter the divergence.
+ In particular, replacing the joint probability 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ by the conditional probability 
+\begin_inset Formula $p\left(d|w\right)=p\left(w,d\right)/p\left(w,*\right)$
+\end_inset
+
+ does not alter the information divergence.
+ 
+\end_layout
+
+\begin_layout Subsubsection
 Arithmetic, Geometric and Logarithmic Means
 \end_layout
 
