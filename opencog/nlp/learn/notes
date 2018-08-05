@@ -14606,6 +14606,10 @@ Done storing 18265271 left-wilds in 10806 secs
 Done storing 137078 right-wilds in 85 secs
 Finished with MI computations; this took 248. hours
 
+this is for
+postgres:///en_dj_etwo?user=linas&password=asdf
+x-mclean.scm
+
 scheme@(guile-user)> (print-matrix-summary-report cra)
 Summary Report for Correlation Matrix Cross-section Words
 Left type: WordNode    Right Type: EvaluationLink    Pair Type: Section
@@ -14628,8 +14632,176 @@ Length  (l_2)  3114.        6763.         2.190        5.6123E-2
 RMS Count      3092.        +nan.0        2.174        +nan.0
 
 What's with the NaN's ?
-xxxxxxxxxxxxxxxxxxxx <<< here
 
+((add-report-api cra) 'right-entropy)
+(cog-value
+ (List (Any "cross-connector word") (Any "cross-connector section"))
+ (Predicate "*-Total Entropy Key-*"))
+(FloatValue 21.192079534319085 -nan 23.187774484654337)
+(compute-right-entropy)
+
+ (define (right-sum FN)
+    (fold (lambda (left-item sum) (+ sum (FN left-item)))
+        0 (cra 'left-basis)))
+
+ (define (compute-right-entropy)
+   (define frqobj (add-pair-freq-api cra))
+     (right-sum
+        (lambda (x)
+            ; (if (not (finite?  (frqobj 'right-wild-freq x))) (format #t "foo ~A\n" x))
+            (if (equal? 0.0  (frqobj 'right-wild-freq x)) (format #t "foo ~A\n" x))
+               (*
+              (frqobj 'right-wild-freq x)
+              (frqobj 'right-wild-logli x)))))
+
+ (define (compute-right-entropy)
+   (define frqobj (add-pair-freq-api cra))
+     (right-sum
+        (lambda (x)
+            (define lli (frqobj 'right-wild-logli x))
+            (if (finite? lli)
+               (* (frqobj 'right-wild-freq x) lli) 0.0))))
+
+11.210368083166648
+(- (+ 21.192079534319085 11.210368083166648) 23.187774484654337)
+$25 = 9.214673132831397
+
+OK, great, but that is not the total MI ... Why ???
+which is 
+(cog-value (List (Any "cross-connector word") (Any "cross-connector section"))
+(PredicateNode "*-Total MI Key-*"))
+$34 = (FloatValue 9.0982793869337666)
+
+(right-sum (lambda (x) (frqobj 'right-wild-mi x))) $35 = 9.098279386856897
+(left-sum (lambda (x) (frqobj 'left-wild-mi x)))   $36 = 9.098279386933767
+
+(right-sum (lambda (x) (frqobj 'right-wild-freq x))) $38 = 1.0000000000003544
+(left-sum (lambda (x) (frqobj 'left-wild-freq x))) $39 = 1.000000000122195
+
+(define supobj (add-support-api cra))
+(right-sum (lambda (x) (supobj 'right-count x)))  $41 = 47444396.0
+(left-sum (lambda (x) (supobj 'left-count x))) $42 = 47444396.0
+
+w 
+p(x,*) ln p(x,*) =  1.0327767416155317e-6
+(define (plp  w) (* (frqobj 'right-wild-freq w) (frqobj 'right-wild-logli w)))
+
+sum_y p(x,y)ln p(x,y) = 1.074931351403376e-6
+(define (rent w) (frqobj 'right-wild-entropy w))
+
+sum_y p(x,y)ln p(x,y) - p(x,*) ln p(x,*) =  (- (rent w) (plp w)) = 4.215460978784417e-8
+sum_y p(x,y)ln [p(x,y) / p(x,*)] =
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] + sum_y p(x,y) ln p(*,y)
+
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = 3.17694535835089e-7
+(define (rim w) (frqobj 'right-wild-mi w))
+
+sum_y p(x,y) ln p(*,y) = 3.5984914562293424e-7
+(define (poo w)
+	(define (prd dual)
+		; given a dual, and the item, create the pair ....
+		(define sect (cra 'get-pair w dual))
+		(* (frqobj 'pair-freq sect) (frqobj 'left-wild-logli dual)))
+
+	(fold (lambda (dual sum) (+ sum (prd dual))) 0.0 (crs 'right-duals w)))
+
+(define (zero w) (- (- (poo w) (rim w)) (- (rent  w) (plp w))))
+
+(fold (lambda (w sum) (+ sum (zero w))) 0.0 (crs 'left-basis))
+(fold (lambda (w sum) (format #t "so ~A ~A" sum w) (+ sum (zero w))) 0.0 (crs 'left-basis))
+(fold (lambda (w sum) 
+	(define z (zero w)) 
+	(if (< 1.0e-8 z) (format #t "bad ~A ~A" z w) (format #t "good ~A ~A" z w))
+	(+ sum z)) 0.0 (crs 'left-basis))
+
+(WordNode "Croker")
+(define w (WordNode "Cuddles"))
+(define w (WordNode "Dormez"))
+
+-p(x,*) ln p(x,*) =  plp = 1.9812442636553735e-6  OK checks
+-sum_y p(x,y) ln p(x,y) = rent = 2.149862702806752e-6   OK checks
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = rim =  1.3691988899449898e-6 seems bad.
+sum_y p(x,y) ln p(*,y) = poo = 1.5742713752273321e-6
+
+(- (poo w) (rim w)) = 2.0507248528234232e-7
+(- (rent  w) (plp w)) = 1.6861843915137838e-7
+
+so what is wrong?
+p(x,*) = 8.43092195756904e-8
+(fold (lambda (s sum) (+ sum (frqobj 'pair-freq s))) 0.0 (crs 'right-stars w))
+(frqobj 'right-wild-freq  w) == same as above. OK 
+
+(define (crent w)   ; OK< gives same asnwer as rent
+  (fold (lambda (s sum)
+	 (define p (frqobj 'pair-freq s))
+ 	 (+ sum (* p (l2 p)))) 0.0 (crs 'right-stars w)))
+
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = rim = 
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - sum_y p(x,y)ln p(x,*)  = 
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) sum_y p(x,y)  = 
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) p(x,*)  = 
+sum_y p(x,y)ln [p(x,y)] - sum_y p(x,y) ln [p(*,y)] - p(x,*) ln p(x,*)
+
+sum_y p(x,y)ln [p(x,y)] = - (frqobj 'right-wild-entropy w) = -2.149862702806752e-6
+- sum_y p(x,y)ln [p(*,y)] =  (poo w) = 1.5742713752273321e-6
+- p(x,*) ln p(x,*) = 1.9812442636553735e-6 which checked before
+
+So: (+ -2.149862702806752e-6 (poo w)  1.9812442636553735e-6) = 1.4056529360759538e-6
+which is NOT  rim.  So what's up with rim?
+
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = 
+(define (rim w) (frqobj 'right-wild-mi w))
+
+(define (crim w)
+	(define (mi s) (frqobj 'pair-mi s))
+  (fold (lambda (s sum) (+ sum (mi s)))
+ 	  0.0 (crs 'right-stars w)))
+(crim w) = 1.3691988899449898e-6 agrees with rim. 
+
+(define (drim w)
+	(define (mi d) (frqobj 'pair-mi (cra 'get-pair w d)))
+  (fold (lambda (d sum) (+ sum (mi d)))
+ 	  0.0 (crs 'right-duals w)))
+(drim w) $103 = 1.3691988899449898e-6
+
+(map (lambda (d) (cra 'get-pair w d)) (crs 'right-duals w))
+
+(define (cdrim w)
+	(define prs (frqobj 'right-wild-freq w))
+	(define (mi d)
+		(define s (cra 'get-pair w d))
+		(define p (frqobj 'pair-freq s))
+		(define pls (frqobj 'left-wild-freq d))
+		(* p (l2 (/ p (* prs pls)))))
+  (fold (lambda (d sum) (+ sum (mi d)))
+ 	  0.0 (crs 'right-duals w)))
+
+(cdrim w) $104 = 1.4056529360759508e-6  there we are... 
+
+(define (cdrim w)
+	(define prs (frqobj 'right-wild-freq w))
+	(define (mi d)
+		(define s (cra 'get-pair w d))
+		(define p (frqobj 'pair-freq s))
+		(define pls (frqobj 'left-wild-freq d))
+		(define hmi (* p (l2 (/ p (* prs pls)))))
+		(define cmi (frqobj 'pair-mi s))
+		(format #t "its ~A == ~A ~A" hmi cmi s)
+		hmi)
+  (fold (lambda (d sum) (+ sum (mi d)))
+ 	  0.0 (crs 'right-duals w)))
+
+Ah ha. Some crazy multiplicity thing, again.
+
+
+
+
+
+
+
+
+
+xxxxxxxxxxxxxxxxxxxx <<< here
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
 We only need ....
