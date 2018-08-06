@@ -15314,17 +15314,31 @@ store-right-marginals
 
 $ guile -l x-mtwo.scm
 scheme@(guile-user)> (hva 'fetch-pairs)
+Elapsed time to load word sections: 2610 seconds
 scheme@(guile-user)> (hva 'explode-sections)
+Elapsed time to create shapes: 1523 secs
 scheme@(guile-user)> (hst 'store-pairs (cog-incoming-set (Predicate "*-word-shape pair-*")))
+Hang on .. that is not really needed ... is it?  What's the point?
 scheme@(guile-user)> (bhv 'mmt-marginals)
 
 
 $ guile -l x-mmore.scm
 scheme@(guile-user)> (pca 'fetch-pairs)
+Elapsed time to load csets: 2832 secs
 scheme@(guile-user)> (btp 'mmt-marginals)
+Finished left norm marginals in 35885 secs   <<< same as last time.
+Finished left totals in 233 secs
+Finished column (left) norm averages in 1187 secs
+Done storing 6239997 left-wilds in 4504 secs
+Finished mmt norm marginals in 800 secs
+Finished mmt totals in 4 secs
+Done storing 137078 right-wilds in 113 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
 
 yyyyyyyyyyyyyyyyyyyyyyyyyy
 
+dropdb en_dj_etwo
 =========================================================================
 OK, so where were we? We want
 * cosines between words, using dj's
