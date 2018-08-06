@@ -164,6 +164,10 @@
 		(define (get-pair L-ATOM R-ATOM)
 			(cog-link 'EvaluationLink pair-pred L-ATOM R-ATOM))
 
+		; As above, but force the creation of it
+		(define (make-pair L-ATOM R-ATOM)
+			(EvaluationLink pair-pred L-ATOM R-ATOM))
+
 		; Create the section corresponding to the word-shape pair.
 		; That is, unexplode (implode?) the word-shape pair back
 		; into a section, again. This is a projection from the
@@ -439,7 +443,7 @@ around for a while.
 				((pair-count)       get-pair-count)
 				((get-pair)         get-pair)
 				((get-count)        get-count)
-				((make-pair)        get-pair)
+				((make-pair)        make-pair)
 				((left-wildcard)    get-left-wildcard)
 				((right-wildcard)   get-right-wildcard)
 				((wild-wild)        get-wild-wild)
