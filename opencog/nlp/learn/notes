@@ -14854,6 +14854,18 @@ dropdb en_dj_two_sim
 was guile -l x-mtwo.scm
 guile -l x-mmore.scm
 
+guile -l x-test.scm
+(define hva (make-shape-vec-api))
+(define hvs (add-pair-stars hva))
+(define hvp (add-support-api hvs))
+(define bth (batch-transpose hva))
+
+(hva 'explode-sections)
+(store-referers (Predicate "*-word-shape pair-*"))
+(bth 'mmt-marginals)
+
+OK, the new system works
+
 
 
 xxxxxxxxxxxxxxxxxxxx <<< here
@@ -15186,9 +15198,10 @@ word pairs removed, and and only the disjuncts left). This one adds the
 transpose marginals, viz (batch-transpose (make-connector-vec-api)
 'mmt-marginals) that are needed for fast entropy-similarities.
 
-STATUS: OK, but not quite good...
-REASON: Missing right marginals on cross-connectors, which are needed
-        for similarity computations.
+STATUS: BAD.
+REASON: Holds incorrect word-shape pairs. Wrong implementation.
+        Also, missing right marginals on cross-connectors, which are
+        needed for similarity computations. Fixed in en_dj_qtwo below.
 DATE: 15 July 2018
 
 en_dj_ptwo=> \dt+
@@ -15242,7 +15255,9 @@ are:
 * left and right marginals for the cross-conector structures
 * 'mmt-marginals for both of the above.
 
-STATUS: Good.
+
+STATUS: BAD.
+REASON: Holds incorrect word-shape pairs. Wrong implementation.
 DATE: 16 July 2018
 
 en_dj_qtwo=> \dt+
@@ -15283,6 +15298,32 @@ RMS Count      3092.        +nan.0        2.174        +nan.0
 
 7593d2c6bf14216b42da77c8f6024cad  en_dj_qtwo.sql
 8cf228f8e7b5a80072d60cf87e77a592  en_dj_qtwo.sql.bz2
+
+=========================================================================
+
+Restart again midnight exactly Sun 5 August 2018
+dropdb en_dj_two_sim
+createdb en_sh_two 
+time bzcat en_dj_mtwo.sql.bz2 | psql en_sh_two
+real	16m18.544s
+user	3m55.964s
+sys	0m14.484s
+
+store-wildcards
+store-right-marginals
+
+$ guile -l x-mtwo.scm
+scheme@(guile-user)> (hva 'fetch-pairs)
+scheme@(guile-user)> (hva 'explode-sections)
+scheme@(guile-user)> (hst 'store-pairs (cog-incoming-set (Predicate "*-word-shape pair-*")))
+scheme@(guile-user)> (bhv 'mmt-marginals)
+
+
+$ guile -l x-mmore.scm
+scheme@(guile-user)> (pca 'fetch-pairs)
+scheme@(guile-user)> (btp 'mmt-marginals)
+
+yyyyyyyyyyyyyyyyyyyyyyyyyy
 
 =========================================================================
 OK, so where were we? We want
