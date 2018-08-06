@@ -78,7 +78,7 @@
                             ; know the number of shallow abstractions,
                             ; thus we cannot build the Set. Need to
                             ; support ConsLink, or ConsSetLink or
-                            ; such.
+                            ; such. Or perhaps use Glob.
         minsup-g)))))
 
 ;; Shallow abstraction formula
