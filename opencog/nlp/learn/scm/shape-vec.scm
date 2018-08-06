@@ -1,7 +1,7 @@
 ;
-; connector-vec.scm
+; shape-vec.scm
 ;
-; Representing connector-words as vectors over shapes.
+; Representing connector-words as vectors over shapes (word-shape pairs)
 ;
 ; Copyright (c) 2018 Linas Vepstas
 ;
@@ -165,6 +165,11 @@
 			(cog-link 'EvaluationLink pair-pred L-ATOM R-ATOM))
 
 		; Create the section corresponding to the word-shape pair.
+		; That is, unexplode (implode?) the word-shape pair back
+		; into a section, again. This is a projection from the
+		; entire space of exploded word-shape pairs to the
+		; base-space of sections.
+		;
 		; Disassemble the SHAPE, insert WORD into the variable
 		; location, and return the Section. Note that a Section
 		; always exists, because it was impossible to make a shape,
@@ -183,8 +188,8 @@
 			(define dir (gdr (car rest)))
 			(define end (cdr rest))
 			(define ctcr (Connector WORD dir))
-			(define conseq (ConnectorSeq begn ctcr end))
-			(Section point conseq))
+			(define cseq (ConnectorSeq begn ctcr end))
+			(Section point cseq))
 
 		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
@@ -434,16 +439,17 @@ around for a while.
 				((pair-count)       get-pair-count)
 				((get-pair)         get-pair)
 				((get-count)        get-count)
-				((make-pair)        make-pair)
+				((make-pair)        get-pair)
 				((left-wildcard)    get-left-wildcard)
 				((right-wildcard)   get-right-wildcard)
 				((wild-wild)        get-wild-wild)
 				((fetch-pairs)      fetch-sections)
 
 				; Custom call. These need to be explicitly made.
-				((make-left-stars)  explode-sections)
+				((explode-sections) explode-sections)
+				((get-section)      get-section)
 
-				((provides)         provides)
+				((provides)         (lambda (symb) #f))
 				((filters?)         (lambda () #f))
 				(else (error "Bad method call on cross-section:" message)))
 			args))
