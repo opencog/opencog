@@ -475,9 +475,11 @@ Handle Miner::val_shallow_abstract(const Handle& value)
 	}
 
 	// Links wrapped with QuoteLink and UnquoteLinks
-	if (tt == BIND_LINK or
+	if (tt == BIND_LINK or       // TODO: should probabably be replaced
+                                // by scope link and its subtypes
 	    tt == EVALUATION_LINK or
-	    nameserver().isA(tt, FUNCTION_LINK))
+	    nameserver().isA(tt, FUNCTION_LINK) or
+	    nameserver().isA(tt, VIRTUAL_LINK))
 	{
 		// TODO: comment out the following lines when issue #1843 on the
 		// atomspace repository has been fixed (see more about that
