@@ -127,12 +127,9 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-(define-public (make-connector-vec-api)
+(define-public (make-shape-vec-api)
 "
-  make-connector-vec-api -- API for cross-section word-pairs.
-
-  Due to the unusual nature of the structures that this is covering,
-  this provides it's own pair-stars API.
+  make-shape-vec-api -- API for cross-section word-shape pairs.
 
   A more detailed description is at the top of this file.
 "

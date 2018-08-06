@@ -14845,9 +14845,14 @@ Size: 24213074 non-zero entries == 24M
 
 (cog-delete-recursive (Variable "$connector-word"))
 (cog-delete-recursive (PredicateNode "*-connector left stars-*"))
-(delete (AnyNode "cross-connector word"))
-(AnyNode "cross-connector section")
+(cog-delete-recursive (AnyNode "cross-connector word"))
+(cog-delete-recursive (AnyNode "cross-connector section"))
 
+(cog-new-ctv 1 0 CNT)))
+
+dropdb en_dj_two_sim
+was guile -l x-mtwo.scm
+guile -l x-mmore.scm
 
 
 
