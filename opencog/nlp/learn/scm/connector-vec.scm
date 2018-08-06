@@ -8,10 +8,10 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; This file provide the "matrix-object" API that allows words to be
-; treated as vectors, with the word taken to live in a connector, and
-; the vector basis ranging over all sections (that contain that word in
-; a connector).
+; This file provides a "matrix-object" API that allows words to be
+; treated as vectors, with the word taken to live inside of a connector,
+; and the vector basis ranging over all sections (that contain that word
+; in a connector).
 ;
 ; A key idea in grammatical classification is that words can be treated
 ; as vectors, and thus, vector-style algorithms can be applied to them.
@@ -79,6 +79,35 @@
 ;
 ; Its convenient to give these the name of "shape".
 ;
+; Pairs
+; -----
+; In order to track statistics, including the entropies and the mutual
+; information, pairs consisting of a word, and the left wild-card
+; ("shape") must be created. The section will not do for this purpose,
+; because the section is ambiguous as to the pairing: multiple
+; word-shape pairs correspond to a single section.  Basically, if a
+; connector sequence has N connectors in it, there are N shapes, and
+; N word-shape pairs, but only one associated section.
+;
+; Using the above example: the shape will be
+;
+;    (Evaluation
+;       (PredicateNode "*-shape-*")
+;       (WordNode "playing")
+;       (Connector
+;          (Variable "$wildcard")
+;          (ConnectorDir "-"))
+;       (Connector
+;          (WordNode "field")
+;          (ConnectorDir "+"))))
+;
+; and the word-shape pair will be
+;
+;    (Evaluation
+;       (Predicate "*-word-shape pair-*")
+;       (WordNode "level")
+;       (the above shape))
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -109,43 +138,37 @@
 		)
 
 		(define star-wild (Variable "$connector-word"))
-		(define predno (Predicate "*-connector left stars-*"))
+		(define shape-pred (Predicate "*-shape-*"))
+		(define pair-pred (Predicate "*-word-shape pair-*"))
 
-		(define any-left (AnyNode "cross-connector word"))
-		(define any-right (AnyNode "cross-connector section"))
+		(define any-left (AnyNode "shape word"))
+		(define any-right (AnyNode "shape section"))
 
 		; Well, left-type can also be a WordClassNode, but we lie
 		; about that, here.
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'EvaluationLink)
-		(define (get-pair-type) 'Section)
+		(define (get-pair-type) 'EvaluationLink)
+		(define (get-section-type) 'Section)
 
-		; Get the observational count on Section SECT
-		(define (get-count SECT) (cog-count SECT))
+		; Get the observational count on the word-shape pair
+		(define (get-count SHAPE-PR) (cog-count SHAPE-PR))
 
-		; L-ATOM is a WordNode. R-ATOM is a wild-card.
-		; Disassemble the R-ATOM, insert L-ATOM into the variable
-		; location, and return the atom, if it exists.
-		; See (create-connector-left-stars) below for documentation
-		; about the structure of the R-ATOM.
+		; L-ATOM is a WordNode. R-ATOM is a shape.
 		(define (get-pair L-ATOM R-ATOM)
-			(define tmpl (cdr (cog-outgoing-set R-ATOM)))
-			(define point (car tmpl))
-			(define conseq (cdr tmpl))
-			(define (not-var? ITEM) (not (equal? (gar ITEM) star-wild)))
-			(define begn (take-while not-var? conseq))
-			(define rest (drop-while not-var? conseq))
-			(define dir (gdr (car rest)))
-			(define end (cdr rest))
-			(define ctcr (cog-link 'Connector L-ATOM dir))
-			(if (null? ctcr) '()
-				(let ((conseq (cog-link 'ConnectorSeq begn ctcr end)))
-					(if (null? conseq) '()
-						(cog-link 'Section point conseq)))))
+			(cog-link 'EvaluationLink pair-pred L-ATOM R-ATOM))
 
-		; Same as above, but actually create the thing.
-		(define (make-pair L-ATOM R-ATOM)
-			(define tmpl (cdr (cog-outgoing-set R-ATOM)))
+		; Create the section corresponding to the word-shape pair.
+		; Disassemble the SHAPE, insert WORD into the variable
+		; location, and return the Section. Note that a Section
+		; always exists, because it was impossible to make a shape,
+		; without having had the underlying section that it reduces to.
+		; See (create-connector-left-stars) below for documentation
+		; about the structure of the shape.
+		(define (get-section SHAPE-PR)
+			(define WORD (second SHAPE-PR))
+			(define SHAPE (third SHAPE-PR))
+			(define tmpl (cdr (cog-outgoing-set SHAPE)))
 			(define point (car tmpl))
 			(define conseq (cdr tmpl))
 			(define (not-var? ITEM) (not (equal? (gar ITEM) star-wild)))
@@ -153,8 +176,9 @@
 			(define rest (drop-while not-var? conseq))
 			(define dir (gdr (car rest)))
 			(define end (cdr rest))
-			(Section point (ConnectorSeq
-				begn (Connector L-ATOM dir) end)))
+			(define ctcr (Connector WORD dir))
+			(define conseq (ConnectorSeq begn ctcr end))
+			(Section point conseq))
 
 		; Get the count, if the pair exists.
 		(define (get-pair-count L-ATOM R-ATOM)
@@ -165,8 +189,10 @@
 		(define (get-right-wildcard WORD)
 			(ListLink WORD any-right))
 
-		; The only reasonable left-wildcard that I can think of is
-		; aready the wildcard. So this is a no-op.
+		; The left-wildcard really should be
+		; (ListLink any-left R-ATOM) but we've already
+		; blown too much storage creating atoms, so keep
+		; it simple, here.
 		(define (get-left-wildcard R-ATOM) R-ATOM)
 
 		(define (get-wild-wild)
@@ -183,8 +209,8 @@
 			(format #t "Elapsed time to load word sections: ~A seconds\n"
 				(- (current-time) start-time))
 			(set! start-time (current-time))
-			(fetch-incoming-set predno)
-			(format #t "Elapsed time to load cross-marginals: ~A seconds\n"
+			(fetch-incoming-set pair-pred)
+			(format #t "Elapsed time to load word-shape pairs: ~A seconds\n"
 				(- (current-time) start-time)))
 
 		; -------------------------------------------------------
@@ -196,7 +222,7 @@
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis) (set! r-basis (cog-incoming-set predno)))
+			(if (null? r-basis) (set! r-basis (cog-incoming-set pair-pred)))
 			r-basis)
 
 		(define (get-left-size)
@@ -207,6 +233,7 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
+xxxxxxxxx
 		; -------------------------------------------------------
 		; Create all of the atoms that correspond to the left-stars
 		; for the cross-connector. These are needed to hold marginal
@@ -250,7 +277,7 @@
 				(define (insert-wild N)
 					(define back (drop cncts N))
 					(define dir (gdr (car back)))
-					(Evaluation predno point
+					(Evaluation shape-pred point
 							(take cncts N) (Connector star-wild dir) (cdr back)))
 
 				; Create all the wild-cards for this section.
@@ -307,7 +334,7 @@
 
 			; We use the DontExec hack, as otherwise the execution of
 			; this attempts to evaluate the resulting EvaluationLink.
-			(define shape (DontExec (Evaluation predno
+			(define shape (DontExec (Evaluation shape-pred
 				(Variable "$point")
 				(Glob "$begin")
 				(Connector star-wild (Variable "$dir"))

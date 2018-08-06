@@ -14598,9 +14598,9 @@ fuckig apt-get fucked me again. Fixed in pull req #1846
 Support: found num left= 137078 num right= 18265271 in 42 secs
 Total count N(*,*) = 47444396.0 = 47444396.0
 Going to do column and row subtotals
-Finished left entropy subtotals in 427085 secs
+Finished left entropy subtotals in 427085 secs  <<<  42.767 per second
 Finished right entropy subtotals in 7285 secs
-Finished left MI subtotals in 439375 secs
+Finished left MI subtotals in 439375 secs    <<< 41.571 per second
 Finished right MI subtotals in 7270 secs
 Done storing 18265271 left-wilds in 10806 secs
 Done storing 137078 right-wilds in 85 secs
@@ -14712,7 +14712,14 @@ sum_y p(x,y) ln p(*,y) = 3.5984914562293424e-7
 (fold (lambda (w sum) 
 	(define z (zero w)) 
 	(if (< 1.0e-8 z) (format #t "bad ~A ~A" z w) (format #t "good ~A ~A" z w))
-	(+ sum z)) 0.0 (crs 'left-basis))
+	(+ sum z)) 0.0 (take (crs 'left-basis) 20))
+
+(define (audit-mi MANY)
+(fold (lambda (w sum) 
+	(define z (zero w)) 
+	(+ sum 
+		(if (< 1.0e-8 z) (begin (format #t "bad ~A ~A" z w) 1) 0)))
+	0 (take (crs 'left-basis) MANY)))
 
 (WordNode "Croker")
 (define w (WordNode "Cuddles"))
@@ -14792,11 +14799,53 @@ sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] =
  	  0.0 (crs 'right-duals w)))
 
 Ah ha. Some crazy multiplicity thing, again.
+set-pair-mi
 
+here'a a bad one:
+(Section
+   (WordNode "The")
+   (ConnectorSeq
+      (Connector (WordNode "###LEFT-WALL###") (ConnectorDir "-"))
+      (Connector (WordNode "Dormez") (ConnectorDir "+"))))
 
+Here's it's dual:
+ (EvaluationLink
+   (PredicateNode "*-connector left stars-*")
+   (WordNode "The")
+   (Connector (WordNode "###LEFT-WALL###") (ConnectorDir "-"))
+   (Connector (VariableNode "$connector-word") (ConnectorDir "+")))
 
+(frqobj 'left-wild-logli  d) $116 = 10.0013214122192
+(frqobj 'right-wild-logli w) $117 = 23.4997343543985
+(frqobj 'pair-logli s) $118 = 25.4997343543985
+(- (+ 10.0013214122192 23.4997343543985) 25.4997343543985) = 8.001321412219198
+(frqobj 'pair-fmi s) 5.27178121177972  <<<<< bad how ??
 
+(cdrim (WordNode "Frollo/Harry"))
+Oh, hang on ... silly goose. Cannot hand MI on the sections. Of course.
+Since the pairs are not correctly identified. 
+There are three fmi's:
+word-to-conseq
+word-to first-con
+word-to-second-con
 
+Crap. Pair needs to be:
+(CrossLink
+   (WordNode foo)
+   (Dual ..))
+
+The duals are missing counts -- well no, they do have marginals...
+
+Rows: 137078 Columns: 18265271
+Size: 24213074 non-zero entries == 24M
+268594 Connectors == approx 2x words
+18265271 == 18M EvaluationLinks == number of duals
+6239997 == 6.2M ConnectorSeq
+8629163 = 8.6M Sections
+
+(cog-delete-recursive! (PredicateNode "*-connector left stars-*"))
+(delete (AnyNode "cross-connector word"))
+(AnyNode "cross-connector section")
 
 
 
@@ -15613,13 +15662,22 @@ wtf!? o profilig
 =========================================================================
 NEW TODO LIST
 
+* Fix bug re cross-connector MI's
+  -- there are C+1 MI's:
+     * word to connector-seq
+     * word-to-first-connector
+     * word-to-second-connector
+     * ...
+     * word to C'th connector. Dohhh.
+     And distinct marginals for each.
+
 * Finish elimination of 'left-element, 'right-element in filters.
 
 -- Copy en_dj_ptwo and start running cosines, entropies, etc.
    for the top 1K's for both disjuncts and for cross connectors.
    - IN PROGRESS
 
--- start old-style MI cross-marginal in dj_etwo IN PROGRESS
+-- start old-style MI cross-marginal in dj_etwo BROKEN. See above.
 -- save en_dj_etwo after cross-marginals
 
 -- show graph distribution of mi of word-dj pairs in mtwo
@@ -15633,7 +15691,7 @@ NEW TODO LIST
 
 (1b) scatterplot for cosine vs entropy
 
-(2a) graphs, for the corsses, too
+(2a) graphs, for the crosses, too
 
 (3) Scatterplot of pseudo-cset MI vs. cross-MI.
 
