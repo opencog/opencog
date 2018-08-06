@@ -1,7 +1,7 @@
 ;
 ; connector-vec.scm
 ;
-; Representing connector-words as vectors.
+; Representing connector-words as vectors over shapes.
 ;
 ; Copyright (c) 2018 Linas Vepstas
 ;
@@ -10,8 +10,8 @@
 ; --------
 ; This file provides a "matrix-object" API that allows words to be
 ; treated as vectors, with the word taken to live inside of a connector,
-; and the vector basis ranging over all sections (that contain that word
-; in a connector).
+; and the vector basis ranging over all section-shapes (that contain
+; that word in a connector).
 ;
 ; A key idea in grammatical classification is that words can be treated
 ; as vectors, and thus, vector-style algorithms can be applied to them.
@@ -108,6 +108,11 @@
 ;       (WordNode "level")
 ;       (the above shape))
 ;
+; TODO: with appropriate redesign, this probably should be moved
+; to the atomspace (opencog matrix) module.  That is because it
+; generically explodes a section into all of it's constituent
+; connector-shape pairs, which is presumably something everyone
+; will want to do.
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -163,7 +168,7 @@
 		; location, and return the Section. Note that a Section
 		; always exists, because it was impossible to make a shape,
 		; without having had the underlying section that it reduces to.
-		; See (create-connector-left-stars) below for documentation
+		; See (explode-sections) below for documentation
 		; about the structure of the shape.
 		(define (get-section SHAPE-PR)
 			(define WORD (second SHAPE-PR))
@@ -233,33 +238,41 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
-xxxxxxxxx
 		; -------------------------------------------------------
-		; Create all of the atoms that correspond to the left-stars
-		; for the cross-connector. These are needed to hold marginal
-		; counts; left-marginals cannot be computed without these.
+		; Create all of the word-shape pairs that correspond to a
+		; section. This explodes a section into all of the word-shape
+		; pairs that cover it (in the sense of a "covering space").
+		; Basically, given a Section, it walks over the ConnectorSeq
+		; inside of it, replaces each word with a variable (to define
+		; the shape) and then creates a pair consisting of that word,
+		; and that shape.  We fudge the observation count, by taking
+		; the observation count on the secion, and distributing it
+		; uniformly over each word-shape pair.
+		;
+		; Note that the shapes will hold marginal counts.
 		;
 		; This does not need to be done, if restoring from the database;
-		; viz if the marginals were previously stored, and now have been
+		; viz if the pairs were previously stored, and now have been
 		; fetched with 'fetch-pairs above.
 		;
-		; Conceptually, the left-stars are of the form:
+		; Conceptually, the shapes (left-stars) are of the form:
 		; (Section (Word "foo") (ConnectorSeq
-		;     (Connector (Word "bar") (ConnectorDir "-))
+		;     (Connector (Word "bar") (ConnectorDir "-"))
 		;     (Connector (Variable $X) (ConnectorDir "-))))
 		; where (Variable $X) is the wildcard.  However, we want to
 		; avoid using both ConnectorSeq and Section directly, because
 		; these pollute the space of data. So, the above gets encoded
 		; as
-		; (Evaluation (Predicate "stars") (Word "foo")
-		;     (Connector (Word "bar") (ConnectorDir "-))
+		; (Evaluation (Predicate "shape") (Word "foo")
+		;     (Connector (Word "bar") (ConnectorDir "-"))
 		;     (Connector (Variable $X) (ConnectorDir "-)))
 		; with the left-word "foo" heading up the list.
 		; This can be easily dis-assembled to run actual queries against
 		; the atomspace.
-		(define (create-connector-left-stars)
+		(define (explode-sections)
 
 			(define start-time (current-time))
+xxxxxxxxxxxxx
 
 			; Walk over a section, and insert a wild-card.
 			(define (create-wilds-for-section SEC)
@@ -285,10 +298,17 @@ xxxxxxxxx
 			)
 
 			(for-each create-wilds-for-section (cog-get-atoms 'Section))
-			(format #t "Elapsed time to compute left-stars: ~A secs\n"
+			(format #t "Elapsed time to create shapes: ~A secs\n"
 				(- (current-time) start-time))
 		)
 
+#! ========================  XXX THE CODE BELOW IS DEAD CODE
+I'm going to keep this code here for a while, because it does some
+interesting pattern matching to mine out section wild-cards that
+correspond to words, and to shapes. However, this is no longer
+needed, in the current implementation. It might be needed in the
+future, and it was tricky to write and debug, so I am keeping it
+around for a while.
 		; -------------------------------------------------------
 		; The right-stars of a WordNode are all of the Sections in
 		; which that Word appears in some Connector. A BindLink is
@@ -385,9 +405,11 @@ xxxxxxxxx
 				((left-dual-pattern)  left-duals-query)
 				((right-dual-pattern) right-duals-query)
 
-				((make-left-stars)    create-connector-left-stars)
+				((make-left-stars)    explode-sections)
 				(else #f)
 		))
+========================  XXX THE CODE ABOVE IS DEAD CODE
+!#
 
 		; Methods on the object
 		(lambda (message . args)
@@ -406,18 +428,8 @@ xxxxxxxxx
 				((wild-wild)        get-wild-wild)
 				((fetch-pairs)      fetch-sections)
 
-				; Methods provided for the add-pair-stars API
-				((left-basis)         get-left-basis)
-				((right-basis)        get-right-basis)
-				((left-basis-size)    get-left-size)
-				((right-basis-size)   get-right-size)
-				((left-star-pattern)  left-stars-query)
-				((right-star-pattern) right-stars-query)
-				((left-dual-pattern)  left-duals-query)
-				((right-dual-pattern) right-duals-query)
-
 				; Custom call. These need to be explicitly made.
-				((make-left-stars)  create-connector-left-stars)
+				((make-left-stars)  explode-sections)
 
 				((provides)         provides)
 				((filters?)         (lambda () #f))
