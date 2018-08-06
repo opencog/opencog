@@ -113,6 +113,10 @@
 ; generically explodes a section into all of it's constituent
 ; connector-shape pairs, which is presumably something everyone
 ; will want to do.
+;
+; TODO: Create ShapeLink in the atomspace, and create the
+; CrossSection so that its a word-shape pair.
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -272,32 +276,43 @@
 		(define (explode-sections)
 
 			(define start-time (current-time))
-xxxxxxxxxxxxx
 
 			; Walk over a section, and insert a wild-card.
-			(define (create-wilds-for-section SEC)
+			(define (explode-section SEC)
 				; The root-point of the seed
 				(define point (gar SEC))
 				; The list of connectors
 				(define cncts (cog-outgoing-set (gdr SEC)))
 				(define num-cncts (length cncts))
 
+				; Count on section uniformly distributed across
+				; each of the cross-sections.
+				(define weight (cog-new-ctv 1 0
+					(/ (cog-count SEC) (exact->inexact num-cncts))))
+
 				; Place the wild-card into the N'th location of the section.
 				; Of course, this creates the section, if it does not yet
-				; exist. Well, we don't want to crete actual sections; that
+				; exist. Well, we don't want to create actual sections; that
 				; would screw up other code that expects sections to not
-				; have wildcards in them.
+				; have wildcards in them. So we are creating EvaluationLinks
+				; instead. This should be renamed...
 				(define (insert-wild N)
+					(define front (take cncts N))
 					(define back (drop cncts N))
-					(define dir (gdr (car back)))
-					(Evaluation shape-pred point
-							(take cncts N) (Connector star-wild dir) (cdr back)))
+					(define ctr (car back)) ; the connector being exploded
+					(define wrd (gar ctr))  ; the word being exploded
+					(define dir (gdr ctr))  ; the direction being exploded
+					(define wild (Connector star-wild dir))
+					(Evaluation pair-pred wrd
+						(Evaluation shape-pred point front wild (cdr back))
+						weight))
 
 				; Create all the wild-cards for this section.
-				(map insert-wild (list-tabulate num-cncts values))
+				; (map insert-wild (list-tabulate num-cncts values))
+				(for-each insert-wild (list-tabulate num-cncts values))
 			)
 
-			(for-each create-wilds-for-section (cog-get-atoms 'Section))
+			(for-each explode-section (cog-get-atoms 'Section))
 			(format #t "Elapsed time to create shapes: ~A secs\n"
 				(- (current-time) start-time))
 		)

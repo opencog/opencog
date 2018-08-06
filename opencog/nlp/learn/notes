@@ -14843,7 +14843,8 @@ Size: 24213074 non-zero entries == 24M
 6239997 == 6.2M ConnectorSeq
 8629163 = 8.6M Sections
 
-(cog-delete-recursive! (PredicateNode "*-connector left stars-*"))
+(cog-delete-recursive (Variable "$connector-word"))
+(cog-delete-recursive (PredicateNode "*-connector left stars-*"))
 (delete (AnyNode "cross-connector word"))
 (AnyNode "cross-connector section")
 
