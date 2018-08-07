@@ -15360,7 +15360,7 @@ bcr and bci went too fast ....
 (bcr 'compute-similarity (Word "and") (Word "was"))
 (Word "in") (Word "a"))
    (WordNode "and") (WordNode "to")
- (WordNode "to") (WordNode "of")     
+ (WordNode "to") (WordNode "of")
 
 (cog-incoming-by-type (Word "in") 'SimilarityLink)
 
@@ -15408,12 +15408,108 @@ bcr:
 (WordNode "a") -- (WordNode "he") = 0.16861 in 344 secs
 (WordNode "a") -- (WordNode "_") = 0.00080 in 268 secs
 
-goodcnt
-prs
-compcnt
-savecnt
+------------------------
+conditional-similarity
+
+(define smi (add-symmetric-mi-compute pca))
+
+(add-transpose-api  needs to 'mmt-count so that won't work for experiments...
+))
+
+(define pfa (add-pair-freq-api psa)) XXX
+(define psu (add-support-api psa))
+
+; p(*,d) = (pfa 'left-wild-freq d)
+; N(*,d) = (psu 'left-count d)
+
+(psa 'right-duals w)
+
+; return sum_d N(w,d)/N(*,d) = sum_d p(w|d) = sum_d p(w,d)/p(*,d)
+(define (cond-marg w)
+	(fold (lambda (dule sum)
+		 (+ sum (/ (pca 'get-count (pca 'get-pair w dule))
+			(psu 'left-count dule))))
+		0.0 (psa 'right-duals w)))
+
+; return sum_d p(w|d) / N(w,*)
+(define (focus w) (/ (cond-marg w) (psu 'right-count w)))
+
+; return sum_d N(wa|d) N(wb|d) =
+;        sum_d (N(wa,d) / N (*,d)) (N(wb,d) / N (*,d))
+;        sum_d p(wa|d) p(wb|d)
+(define (cond-prod wa wb)
+	(fold (lambda (dule sum)
+		(define prb (pca 'get-pair wb dule))
+		(define cnd (psu 'left-count dule))
+		(define cnds (* cnd cnd))
+		(if (null? prb) sum
+		 (+ sum (/
+			(* (pca 'get-count (pca 'get-pair wa dule))
+				(pca 'get-count prb))
+			cnds))))
+		0.0 (psa 'right-duals wa)))
+
+
+			(* (cond-marg wa) (cond-marg wb))))))
+
+(Word "village")(Word "city")
+
+conclusion: not interesting.
+
+------------------------
+Disambiguation
+(define ppc (add-support-compute (add-tuple-math psa *)))
+(define tpc (add-transpose-api psa))
+(define (log2 x) (/ (log x) (log 2)))
+
+(smi 'mmt-fmi (Word "hear")(Word "book"))  ; -6.275136766789916
+
+; Create a fake ambiguous word from w1, w2
+; return fmi between fake ambig word and w
+(define (fake-amb w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	(define tot (tpc 'total-mmt-count))
+	(define mw1 (tpc 'mmt-count w1))
+	(define mw2 (tpc 'mmt-count w2))
+	(define mfake (+ mw1 mw2))
+	(define mww (tpc 'mmt-count w))
+	(define p1 (ppc 'right-count (list w1 w)))
+	(define p2 (ppc 'right-count (list w2 w)))
+	(define pfake (+ p1 p2))
+	(log2 (/ (* pfake tot) (*  mfake mww))))
+
+(fake-amb (Word "hear"))   ; 3.6272108847937767
+(fake-amb (Word "book"))   ; 2.94067874079421
+
+(smi 'mmt-fmi (Word "hear")(Word "see"))  ; 4.512966599873214
+(fake-amb (Word "see")) ; 3.2969178334833145
+
+(smi 'mmt-fmi (Word "book")(Word "table")) 3.322219311913606
+(fake-amb (Word "table")) 2.5436144926146653
+
+
+; Attempt disambig
+(define (dab-amb w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	(define wr (Word "see"))
+	(define tot (tpc 'total-mmt-count))
+	(define mw1 (tpc 'mmt-count w1))
+	(define mw2 (tpc 'mmt-count w2))
+	(define mfake (+ mw1 mw2))
+	(define mwr (tpc 'mmt-count wr))
+	(define mww (tpc 'mmt-count w))
+	(define p1 (ppc 'right-count (list w1 w)))
+	(define p2 (ppc 'right-count (list w2 w)))
+	(define pfake (+ p1 p2))
+	(define pr (ppc 'right-count (list wr w)))
+	(log2 (/ (* (/ pfake pr) tot) (* (/ mfake mwr) mww))))
+
+OK, well, that's not going anywhere.
 
 =========================================================================
+cross-connector similarities.
 
 (define ara (make-connector-vec-api))
 (define ars (add-pair-stars ara))
@@ -15636,7 +15732,7 @@ ahh its -infity
 (define (prt-sim sim port)
    (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
       (cog-name (gar sim)) (cog-name (gdr sim))))
-      
+
 (let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
    (define cnt 0) 
    (for-each (lambda (sim)
@@ -15723,15 +15819,6 @@ wtf!? o profilig
 =========================================================================
 NEW TODO LIST
 
-* Fix bug re cross-connector MI's
-  -- there are C+1 MI's:
-     * word to connector-seq
-     * word-to-first-connector
-     * word-to-second-connector
-     * ...
-     * word to C'th connector. Dohhh.
-     And distinct marginals for each.
-
 * Finish elimination of 'left-element, 'right-element in filters.
 
 -- Copy en_dj_ptwo and start running cosines, entropies, etc.
@@ -15808,6 +15895,16 @@ Merging minor tasks DONE
 * Start transpose-marginals for crossed in en_dj_ptwo DONE
 * SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
   and with transpose-marginals for both. DONE
+* Fix bug re cross-connector MI's -- DONE
+  -- there are C+1 MI's:
+     * word to connector-seq
+     * word-to-first-connector
+     * word-to-second-connector
+     * ...
+     * word to C'th connector. Dohhh.
+     And distinct marginals for each.
+* products of conditional probabilities. DONE NO GOOD
+
 
 
 
