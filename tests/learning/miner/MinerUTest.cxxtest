@@ -1050,7 +1050,8 @@ void MinerUTest::test_InferenceControl()
 	//       Inheritance
 	//         Concept "a"
 	//         Variable "$X"
-	//       GroundedSchema "scm: conditional-full-instantiation-scope-formula"
+	//       DontExec
+	//         DefinedSchema "conditional-full-instantiation-implication-scope-meta-rule"
 	//     Variable "$B"
 	//   Evaluation
 	//     Predicate "preproof-of"
