@@ -11,26 +11,28 @@
   (icl-logger-debug "Mine control rules")
   (mine-control-rules)
 
-  ;; We ground the control rules first then evaluate all antecedents
-  ;; to allow direct evaluation of the control rules.
-  (icl-logger-debug "Ground control rules")
-  (ground-control-rules)
-  (icl-logger-debug "Evaluate antecedents")
-  (evaluate-antecedents)
+  ;; TODO: reable that when mining control rules works as expected
+  ;; ;; We ground the control rules first then evaluate all antecedents
+  ;; ;; to allow direct evaluation of the control rules.
+  ;; (icl-logger-debug "Ground control rules")
+  ;; (ground-control-rules)
+  ;; (icl-logger-debug "Evaluate antecedents")
+  ;; (evaluate-antecedents)
 
-  ;; Produce inference control rules
-  (ure-logger-flush)                    ; make sure the next message does get mangled
-  (icl-logger-debug "Produce control rules")
-  (let* ((results (produce-control-rules)))
-    ;; Copy inference control rules to the Inference Control Rules
-    ;; atomspace
-    (icl-cp control-as (cog-outgoing-set results)))
+  ;; ;; Produce inference control rules
+  ;; (ure-logger-flush)                    ; make sure the next message does get mangled
+  ;; (icl-logger-debug "Produce control rules")
+  ;; (let* ((results (produce-control-rules)))
+  ;;   ;; Copy inference control rules to the Inference Control Rules
+  ;;   ;; atomspace
+  ;;   (icl-cp control-as (cog-outgoing-set results)))
 
-  ;; Remove informationless rules from control-as
-  (remove-dangling-atoms control-as)
+  ;; ;; Remove informationless rules from control-as
+  ;; (remove-dangling-atoms control-as)
 
-  (icl-logger-debug "Control AtomSpace:")
-  (icl-logger-debug-atomspace control-as))
+  ;; (icl-logger-debug "Control AtomSpace:")
+  ;; (icl-logger-debug-atomspace control-as)
+)
 
 (define (ground-control-rules)
   ;; Load PLN to have access to the PLN rules
