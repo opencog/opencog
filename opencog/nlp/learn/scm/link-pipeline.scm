@@ -453,7 +453,7 @@
 
 (define-public (observe-text-mode plain-text observe-mode count-reach)
 "
- observe-text -- update word and word-pair counts by observing raw text.
+ observe-text-mode -- update word and word-pair counts by observing raw text.
  
  There are currently two observing modes, set by observe-mode, both taking
  an integer parameter:
@@ -476,29 +476,27 @@
 	;
 	; Note: update-clique-pair-counts commented out. If you want this,
 	; then uncomment it, and adjust the length.
-	; Note: update-disjunct-counts commented out. It generates some
-	; data, but none of it will be interesting to most people.
 	(define (update-counts sent)
 		(catch 'wrong-type-arg
 			(lambda () (begin
-				; 6 == max distance between words to count.
-				; See docs above for explanation.
-				; (update-clique-pair-counts sent 6 #f)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
-				; If you uncomment this, be sure to also uncomment
-				; LgParseLink below, because LgParseMinimal is not enough.
-				; (update-disjunct-counts sent)
 			))
 			(lambda (key . args) #f)))
 
 	; Count the atoms in the sentence, according to the counting method
 	; passed as argument, then delete the sentence.
+	
+	; Note: update-disjunct-counts commented out. It generates some
+	; data, but none of it will be interesting to most people.
 	(define (process-sent SENT cnt-mode win-size)
 		(update-word-counts SENT)
 		(if (equal? cnt-mode "any")
 			(update-lg-link-counts SENT)
 			(update-clique-pair-counts SENT win-size #f))
+		; If you uncomment this, be sure to also uncomment
+		; LgParseLink below, because LgParseMinimal is not enough.
+		; (update-disjunct-counts sent)
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
