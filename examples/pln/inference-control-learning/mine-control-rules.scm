@@ -4,6 +4,9 @@
   ;; yet.
   (remove-almost-false-atoms)
 
+  ;; TODO: should do the same for almost true atoms, as to find
+  ;; patterns predicting failure.
+
   ;; Fetch relevant texts and apply the pattern miner to it
   (icl-logger-info "Start mining patterns for control rules")
   (let* ((texts-cpt (mk-texts))
