@@ -7,18 +7,46 @@
   ;; TODO: should do the same for almost true atoms, as to find
   ;; patterns predicting failure.
 
-  ;; Fetch relevant texts and apply the pattern miner to it
-  (icl-logger-info "Start mining patterns for control rules")
-  (let* ((texts-cpt (mk-texts))
-         (mined-patterns
-          (cog-mine texts-cpt 3 #:maxiter 100 #:initpat (initpat))))
+  (icl-logger-info "Mining control rules patterns")
+  (for-each mine-control-rules-for (get-inference-rules)))
+
+;; Like mine-control-rules but only mine the control rules for a given
+;; inference rule
+(define (mine-control-rules-for inference-rule)
+  (icl-logger-info "Mining patterns for ~a" inference-rule)
+
+  (let* ((texts-cpt (mk-texts inference-rule))
+         (ipat (initpat inference-rule))
+         (mined-patterns (cog-mine texts-cpt
+                                   minsup
+                                   #:maxiter maxiter
+                                   #:initpat ipat)))
     (icl-logger-fine "Mined patterns = ~a" mined-patterns)))
+
+;; Get all pln rules potential involved in the traces to mine
+(define (get-inference-rules)
+  (let* ((vardecl (VariableList
+                     (TypedVariable (Variable "$A") (Type "DontExecLink"))
+                     (TypedVariable (Variable "$B") (Type "DontExecLink"))
+                     (TypedVariable (Variable "$R") (Type "DontExecLink"))
+                     (Variable "$L")))
+         (input (List
+                  (Variable "$A")
+                  (Variable "$L")
+                  (Variable "$R")))
+         (pattern (expand input (Variable "$B")))
+         (bind (Bind vardecl pattern (Variable "$R")))
+         (results (cog-execute! bind))
+         (get-first-outgoing (lambda (x) (cog-outgoing-atom x 0))))
+    (map get-first-outgoing (cog-outgoing-set results))))
 
 ;; Create a texts concept and add as members to it all atoms of the form
 ;;
 ;; preproof-of(A, T)
 ;; expand(A, L, R, B)
-(define (mk-texts)
+;;
+;; where R is the given inference rule and A, T, L and B are variables
+(define (mk-texts inference-rule)
   (let* (;; Create texts concept node
          (texts-cpt (random-node 'ConceptNode 8 "texts-"))
 
@@ -34,9 +62,11 @@
          (expand-vardecl (VariableList
                            (TypedVariable (Variable "$A") (Type "DontExecLink"))
                            (TypedVariable (Variable "$B") (Type "DontExecLink"))
-                           (TypedVariable (Variable "$R") (Type "DontExecLink"))
                            (Variable "$L")))
-         (expand-input (List (Variable "$A") (Variable "$L") (Variable "$R")))
+         (expand-input (List
+                         (Variable "$A")
+                         (Variable "$L")
+                         (DontExec inference-rule)))
          (expand-pattern (expand expand-input (Variable "$B")))
          (expand-bind (Bind expand-vardecl expand-pattern expand-pattern))
          (expand-results (cog-execute! expand-bind))
@@ -66,8 +96,8 @@
 ;;
 ;; DontExec
 ;;   DefinedSchema "conditional-full-instantiation-implication-scope-meta-rule"
-(define (initpat)
-  (LambdaLink
+(define (initpat inference-rule)
+(LambdaLink
   (VariableList
     (VariableNode "$T")
     (VariableNode "$A")
@@ -81,9 +111,7 @@
       (ListLink
         (DontExecLink (VariableNode "$A"))
         (VariableNode "$L")
-        (DontExecLink
-          (DefinedSchemaNode "conditional-full-instantiation-implication-scope-meta-rule")
-        )
+        (DontExecLink inference-rule)
       )
       (DontExecLink (VariableNode "$B"))
     )
