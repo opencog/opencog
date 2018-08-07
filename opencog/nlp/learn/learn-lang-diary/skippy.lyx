@@ -2840,7 +2840,26 @@ Some of the observed sparsity is due to a lack of a sufficient number of
  Unlike the foreign phrases, this does not mean that they are inflexible
  in grammatical usage: one can use the name of a small town in a vast number
  of sentences, even if the observed corpus uses it in only a few.
- 
+\end_layout
+
+\begin_layout Standard
+Two more factors compound the confusion.
+ One is that the observed text will neccessarily contain grammatically-incorrect
+ text: the occasional mis-spelled word, the occasional awkwardly worded
+ phrase; omitted determiners, incorrect number, tense agreement.
+ A far more serious issue is that the disjuncts are constructed by means
+ of MST parsing, which has a reasonably large error rate: based on reports
+ from Yuret
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+ and others, one can expect parses that are 80% to 90% accurate; the fraction
+ of incorrect disjuncts may range from 5% to 20%.
+ Incorrect disjuncts decrease the observed sparsity: they make some observations
+ more frequent than they should be, but only because they're wrong.
 \end_layout
 
 \begin_layout Standard
@@ -6210,7 +6229,7 @@ The information divergence
 \end_layout
 
 \begin_layout Subsubsection
-Arithmetic, Geometric and Logarithmic Means
+Arithmetic and Geometric Means
 \end_layout
 
 \begin_layout Standard
@@ -6373,12 +6392,21 @@ Agglomerative Clustering
 \end_layout
 
 \begin_layout Standard
-Because the pair-wise information divergence is ...
- pairwise, it makes the most sense to perform agglomerative clustering.
+The primary reason to propose a pair-wise information divergence is to enable
+ agglomerative clustering.
+ The reason for this was made clear earlier: the sheer scale and quantity
+ of data makes hill-climbing and gradient descent algorithms untenable.
+ The search space is simply too large.
+\end_layout
+
+\begin_layout Standard
+As a corellary, the results of hillclimbing or gradient-descent algorithms
+ are insufficiently sparse; one wishes to approxmate the sparsity that hard-clus
+tering offers, with less overhead and complexity in finding the clusters.
 \end_layout
 
 \begin_layout Subsection
-WSD-sensitive clustering
+Word-Sense Disambiguation
 \end_layout
 
 \begin_layout Standard
