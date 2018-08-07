@@ -1,9 +1,9 @@
 ;; Contain the main inference control learning experiment loop
 
 ;; Set parameters
-(define pss 5)                    ; Problem set size
+(define pss 50)                    ; Problem set size
 (define niter 1)                    ; Number of iterations
-(define piter 10)                   ; Number of iterations used for each problem
+(define piter 20)                   ; Number of iterations used for each problem
 
 ;; Load utils
 (load "icl-utilities.scm")
@@ -15,19 +15,19 @@
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
-(cog-logger-set-level! "info")
+(cog-logger-set-level! "debug")
 (icl-logger-set-level! "fine")
 (ure-logger-set-level! "debug")
 
 ;; Set loggers stdout
-;; (cog-logger-set-stdout! #t)
+(cog-logger-set-stdout! #t)
 (icl-logger-set-stdout! #t)
 ;; (ure-logger-set-stdout! #t)
 
-;; ;; Set loggers sync (for debugging)
-;; (cog-logger-set-sync! #t)
-;; (icl-logger-set-sync! #t)
-;; (ure-logger-set-sync! #t)
+;; Set loggers sync (for debugging)
+(cog-logger-set-sync! #t)
+(icl-logger-set-sync! #t)
+(ure-logger-set-sync! #t)
 
 ;; Clear and reload the kb and rb
 (define (reload)
