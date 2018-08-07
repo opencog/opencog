@@ -18,7 +18,7 @@
 
 ;; Load PLN rule implication direct evaluation
 (add-to-load-path "../../../opencog/pln/rules")
-(load-from-path "implication-direct-evaluation.scm")
+(load-from-path "wip/implication-direct-evaluation.scm")
 
 ;; Convenient fetchers
 (define (get-parse-nodes)

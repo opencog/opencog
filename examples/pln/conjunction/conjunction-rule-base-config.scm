@@ -29,8 +29,8 @@
 ;;;;;;;;;;;;;;;;
 
 ;; Load the fuzzy conjunction rule
-(add-to-load-path "../../../opencog/pln/rules/")
-(load-from-path "fuzzy-conjunction-introduction.scm")
+(add-to-load-path "../../../opencog/pln/rules")
+(load-from-path "propositional/fuzzy-conjunction-introduction.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to the conjunction rule base ;;
@@ -45,7 +45,7 @@
         fuzzy-conjunction-introduction-4ary-rule-name
         fuzzy-conjunction-introduction-5ary-rule-name
   )
-
+)
 ;; Associate rules to the conjunction rule base
 (ure-add-rules conjunction-rule-base rules)
 
