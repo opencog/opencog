@@ -469,24 +469,9 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
-	; try-catch wrapper around the counters. Due to a buggy RelEx
-	; (see documentation for `word-inst-get-word`), the function
-	; `update-clique-pair-counts` might throw.  If it does throw,
-	; then avoid doing any counting at all for this sentence.
-	;
-	; Note: update-clique-pair-counts commented out. If you want this,
-	; then uncomment it, and adjust the length.
-	(define (update-counts sent)
-		(catch 'wrong-type-arg
-			(lambda () (begin
-				(update-word-counts sent)
-				(update-lg-link-counts sent)
-			))
-			(lambda (key . args) #f)))
-
 	; Count the atoms in the sentence, according to the counting method
 	; passed as argument, then delete the sentence.
-	
+
 	; Note: update-disjunct-counts commented out. It generates some
 	; data, but none of it will be interesting to most people.
 	(define (process-sent SENT cnt-mode win-size)
