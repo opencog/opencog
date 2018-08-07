@@ -59,6 +59,9 @@
 ; as a clique of edges drawn between all words. This is explored further
 ; in the diary, in a section devoted to this topic.
 ;
+; Update: Additional counting modes can be requested by calling
+;         observe-text-mode. See function's documentation for details.
+;
 ; The Link Grammar parse also produces and reports the disjuncts that were
 ; used for each word. These are useful in and of themselves; they indicate
 ; the hubbiness (link-multiplicity) of each word. The disjunct counts are
