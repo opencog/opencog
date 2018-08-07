@@ -442,6 +442,15 @@
 			(set! run-time run))))
 
 ; --------------------------------------------------------------------
+
+(define-public (observe-text plain-text)
+"
+ Wrapper to maintain backwards compatibility in NLP pipeline.
+ Passes default parameters to observe-text-mode
+"
+	(observe-text-mode plain-text "any" 24)
+)
+
 (define-public (observe-text-mode plain-text observe-mode count-reach)
 "
  observe-text -- update word and word-pair counts by observing raw text.
