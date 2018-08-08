@@ -15303,7 +15303,7 @@ RMS Count      3092.        +nan.0        2.174        +nan.0
 
 Restart again midnight exactly Sun 5 August 2018
 dropdb en_dj_two_sim
-createdb en_sh_two 
+createdb en_sh_two
 time bzcat en_dj_mtwo.sql.bz2 | psql en_sh_two
 real	16m18.544s
 user	3m55.964s
@@ -15462,6 +15462,17 @@ Disambiguation
 (define tpc (add-transpose-api psa))
 (define (log2 x) (/ (log x) (log 2)))
 
+(define (marg w)
+	(define tot (tpc 'total-mmt-count))
+	(define mw (tpc 'mmt-count w))
+	(- (log2 (/ mw tot))))
+
+(marg (Word "hear")) ; 12.366607806845698
+(marg (Word "see")) 9.54234285794451
+(marg (Word "book")) 11.961124708605812
+(marg (Word "table")) 12.64933707046002
+
+
 (smi 'mmt-fmi (Word "hear")(Word "book"))  ; -6.275136766789916
 
 ; Create a fake ambiguous word from w1, w2
@@ -15489,7 +15500,7 @@ Disambiguation
 (fake-amb (Word "table")) 2.5436144926146653
 
 
-; Attempt disambig
+; Attempt disambig but thsi is bad.
 (define (dab-amb w)
 	(define w1 (Word "hear"))
 	(define w2 (Word "book"))
@@ -15507,6 +15518,127 @@ Disambiguation
 	(log2 (/ (* (/ pfake pr) tot) (* (/ mfake mwr) mww))))
 
 OK, well, that's not going anywhere.
+
+----------------------------
+
+; let p(wab,d) ==  (N(wa,d) + N(wb,d))/ (N(wa,*)+N(wb,*))
+; let p(wc,d) == N(wc,d)/N(wc,*)
+; let q(d) == max(0, p(wab,d)-p(wc,d))
+; so that q(d) is "what's left" after subtracting a-component
+; ... or should it be  r(d) == max(0, p(wc|d)-p(wab|d))  ????
+; let M(wc,d) == N(wc,*) q(d)
+;
+; want:
+: sum_d N(w,d) M(wc,d)
+; sum_d M(wc,d) N(*,d)
+;
+; Return M(wc,d) as defined above.
+; na == N(wa,*) etc
+(define (orth wa wb wc d na nb nc)
+	(define jad (pca 'get-pair wa d))
+	(define jbd (pca 'get-pair wb d))
+	(define jcd (pca 'get-pair wc d))
+	(define nad (if (null? jad) 0.0 (pca 'get-count jad)))
+	(define nbd (if (null? jbd) 0.0 (pca 'get-count jbd)))
+	(define ncd (if (null? jcd) 0.0 (pca 'get-count jcd)))
+	(define nab (+ nad nbd))
+	(define pab (/ nab (+ na nb)))
+	(define pc (/ ncd nc))
+	(max 0 (- pab pc)))
+
+	; (max 0 (- (* nc pab) ncd))))
+	; (max 0 (* nab (- (* nc pab) ncd))))
+
+; Return sum_d N(w,d) M(wc,d)
+(define (dot-ort wa wb wc w)
+	(define na (psu 'right-count wa))
+	(define nb (psu 'right-count wb))
+	(define nc (psu 'right-count wc))
+
+	(fold (lambda (dule sum)
+		(define j (pca 'get-pair w dule))
+		(if (null? j) sum
+		 (+ sum (* (pca 'get-count j) (orth wa wb wc dule na nb nc)))))
+		0.0 (psa 'right-duals w)))
+
+; Return sum_d M(wc,d) N(*,d)
+(define (net wa wb wc)
+	(define na (psu 'right-count wa))
+	(define nb (psu 'right-count wb))
+	(define nc (psu 'right-count wc))
+
+	(fold (lambda (dule sum)
+		(define j (pca 'get-pair wc dule))
+		(if (null? j) sum
+		 (+ sum (* (psu 'left-count dule) (orth wa wb wc dule na nb nc)))))
+		0.0 (psa 'right-duals wc)))
+
+
+(define (dab-perp w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	; (define wr (Word "see"))
+	(define wr (Word "hear"))
+	(define tot (tpc 'total-mmt-count))
+	(define prod (dot-ort w1 w2 wr w))
+	(define mwo (net w1 w2 wr))
+	(define mww (tpc 'mmt-count w))
+	(define dabmi (log2 (/ (* prod tot) (* mwo mww))))
+	(define selfmi (smi 'mmt-fmi wr wr))
+	(- dabmi selfmi))
+
+with (define wr (Word "hear"))
+ (dab-perp (Word "paper")) 3.809849277692443
+ (dab-perp (Word "book")) 4.22468023407624
+ (dab-perp (Word "table")) 3.7956947813077306
+ (dab-perp (Word "pen")) 3.958633526718385
+ (dab-perp (Word "hear")) -6.462882425126517
+ (dab-perp (Word "see")) -6.420968114731355
+ (dab-perp (Word "watch")) 1.3797091767554486
+ (dab-perp (Word "listen")) -4.560170727578292
+ (dab-perp (Word "she")) -0.9675306992488375
+ (dab-perp (Word "he")) -0.8299348927624219
+ (dab-perp (Word "them")) -0.4310170287723736
+ (dab-perp (Word "near")) 0.3093311573173487
+ (dab-perp (Word "next")) 3.3311035025102687
+ (dab-perp (Word "of")) -0.6486492223953286
+ (dab-perp (Word "by")) -3.7167019275587907
+
+looks goood ...
+	(define wr (Word "see"))
+
+ (dab-perp (Word "paper")) 3.681818807262972
+ (dab-perp (Word "book")) 4.098796757749786
+ (dab-perp (Word "table")) 3.6691181735260754
+ (dab-perp (Word "pen")) 3.8310965428109887
+ (dab-perp (Word "hear")) 1.998378910173595
+ (dab-perp (Word "see")) -3.045213408538893
+ (dab-perp (Word "watch")) 1.302745420003867
+ (dab-perp (Word "listen")) -2.253805464075623
+ (dab-perp (Word "she")) -0.9810428066327121
+ (dab-perp (Word "he")) -0.8404681915026306
+ (dab-perp (Word "near")) 0.19356312119336394
+ (dab-perp (Word "next")) 3.2039699189813593
+ (dab-perp (Word "of")) -0.742138952174102
+ (dab-perp (Word "by")) -3.629486231491182
+
+
+looks good
+
+(define (dab-perp-helper w1 w2 wr w)
+	(define tot (tpc 'total-mmt-count))
+	(define prod (dot-ort w1 w2 wr w))
+	(define mwo (net w1 w2 wr))
+	(define mww (tpc 'mmt-count w))
+	(define dabmi (log2 (/ (* prod tot) (* mwo mww))))
+	(define selfmi (smi 'mmt-fmi wr wr))
+	(- dabmi selfmi))
+
+(define (dab-perp w)
+	(define w1 (Word "fall"))
+	(define w2 (Word "car"))
+	(define wr (Word "car"))
+   (dab-perp-helper w1 w2 wr w))
 
 =========================================================================
 cross-connector similarities.
@@ -15734,7 +15866,7 @@ ahh its -infity
       (cog-name (gar sim)) (cog-name (gdr sim))))
 
 (let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
-   (define cnt 0) 
+   (define cnt 0)
    (for-each (lambda (sim)
          (set! cnt (+ cnt 1))
          (format outport "~A  " cnt)
