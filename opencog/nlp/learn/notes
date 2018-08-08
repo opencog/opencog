@@ -14595,9 +14595,280 @@ fuckig apt-get fucked me again. Fixed in pull req #1846
 (cra 'fetch-pairs)
 (load "/tmp/fail.scm")
 (rebatch-all-pair-mi cra)
+Support: found num left= 137078 num right= 18265271 in 42 secs
+Total count N(*,*) = 47444396.0 = 47444396.0
+Going to do column and row subtotals
+Finished left entropy subtotals in 427085 secs  <<<  42.767 per second
+Finished right entropy subtotals in 7285 secs
+Finished left MI subtotals in 439375 secs    <<< 41.571 per second
+Finished right MI subtotals in 7270 secs
+Done storing 18265271 left-wilds in 10806 secs
+Done storing 137078 right-wilds in 85 secs
+Finished with MI computations; this took 248. hours
+
+this is for
+postgres:///en_dj_etwo?user=linas&password=asdf
+x-mclean.scm
+
+scheme@(guile-user)> (print-matrix-summary-report cra)
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 47444396)
+   (AnyNode "cross-connector word")
+   (AnyNode "cross-connector section")
+)
+Rows: 137078 Columns: 18265271
+Size: 24213074 non-zero entries of 2503766818138 possible
+Fraction non-zero: 9.6707E-6 Sparsity (-log_2): 16.658
+Total observations: 47444396.0  Avg obs per pair: 1.9595
+Entropy Total: 23.188   Left: 21.192   Right: +nan.0
+Total MI: 9.0983
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1422.        1.2051E+5
+Count   (l_1)  2.7318E+4    2.3690E+5     19.21        1.966
+Length  (l_2)  3114.        6763.         2.190        5.6123E-2
+RMS Count      3092.        +nan.0        2.174        +nan.0
+
+What's with the NaN's ?
+
+((add-report-api cra) 'right-entropy)
+(cog-value
+ (List (Any "cross-connector word") (Any "cross-connector section"))
+ (Predicate "*-Total Entropy Key-*"))
+(FloatValue 21.192079534319085 -nan 23.187774484654337)
+(compute-right-entropy)
+
+ (define (right-sum FN)
+    (fold (lambda (left-item sum) (+ sum (FN left-item)))
+        0 (cra 'left-basis)))
+
+ (define (compute-right-entropy)
+   (define frqobj (add-pair-freq-api cra))
+     (right-sum
+        (lambda (x)
+            ; (if (not (finite?  (frqobj 'right-wild-freq x))) (format #t "foo ~A\n" x))
+            (if (equal? 0.0  (frqobj 'right-wild-freq x)) (format #t "foo ~A\n" x))
+               (*
+              (frqobj 'right-wild-freq x)
+              (frqobj 'right-wild-logli x)))))
+
+ (define (compute-right-entropy)
+   (define frqobj (add-pair-freq-api cra))
+     (right-sum
+        (lambda (x)
+            (define lli (frqobj 'right-wild-logli x))
+            (if (finite? lli)
+               (* (frqobj 'right-wild-freq x) lli) 0.0))))
+
+11.210368083166648
+(- (+ 21.192079534319085 11.210368083166648) 23.187774484654337)
+$25 = 9.214673132831397
+
+OK, great, but that is not the total MI ... Why ???
+which is 
+(cog-value (List (Any "cross-connector word") (Any "cross-connector section"))
+(PredicateNode "*-Total MI Key-*"))
+$34 = (FloatValue 9.0982793869337666)
+
+(right-sum (lambda (x) (frqobj 'right-wild-mi x))) $35 = 9.098279386856897
+(left-sum (lambda (x) (frqobj 'left-wild-mi x)))   $36 = 9.098279386933767
+
+(right-sum (lambda (x) (frqobj 'right-wild-freq x))) $38 = 1.0000000000003544
+(left-sum (lambda (x) (frqobj 'left-wild-freq x))) $39 = 1.000000000122195
+
+(define supobj (add-support-api cra))
+(right-sum (lambda (x) (supobj 'right-count x)))  $41 = 47444396.0
+(left-sum (lambda (x) (supobj 'left-count x))) $42 = 47444396.0
+
+w 
+p(x,*) ln p(x,*) =  1.0327767416155317e-6
+(define (plp  w) (* (frqobj 'right-wild-freq w) (frqobj 'right-wild-logli w)))
+
+sum_y p(x,y)ln p(x,y) = 1.074931351403376e-6
+(define (rent w) (frqobj 'right-wild-entropy w))
+
+sum_y p(x,y)ln p(x,y) - p(x,*) ln p(x,*) =  (- (rent w) (plp w)) = 4.215460978784417e-8
+sum_y p(x,y)ln [p(x,y) / p(x,*)] =
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] + sum_y p(x,y) ln p(*,y)
+
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = 3.17694535835089e-7
+(define (rim w) (frqobj 'right-wild-mi w))
+
+sum_y p(x,y) ln p(*,y) = 3.5984914562293424e-7
+(define (poo w)
+	(define (prd dual)
+		; given a dual, and the item, create the pair ....
+		(define sect (cra 'get-pair w dual))
+		(* (frqobj 'pair-freq sect) (frqobj 'left-wild-logli dual)))
+
+	(fold (lambda (dual sum) (+ sum (prd dual))) 0.0 (crs 'right-duals w)))
+
+(define (zero w) (- (- (poo w) (rim w)) (- (rent  w) (plp w))))
+
+(fold (lambda (w sum) (+ sum (zero w))) 0.0 (crs 'left-basis))
+(fold (lambda (w sum) (format #t "so ~A ~A" sum w) (+ sum (zero w))) 0.0 (crs 'left-basis))
+(fold (lambda (w sum) 
+	(define z (zero w)) 
+	(if (< 1.0e-8 z) (format #t "bad ~A ~A" z w) (format #t "good ~A ~A" z w))
+	(+ sum z)) 0.0 (take (crs 'left-basis) 20))
+
+(define (audit-mi MANY)
+(fold (lambda (w sum) 
+	(define z (zero w)) 
+	(+ sum 
+		(if (< 1.0e-8 z) (begin (format #t "bad ~A ~A" z w) 1) 0)))
+	0 (take (crs 'left-basis) MANY)))
+
+(WordNode "Croker")
+(define w (WordNode "Cuddles"))
+(define w (WordNode "Dormez"))
+
+-p(x,*) ln p(x,*) =  plp = 1.9812442636553735e-6  OK checks
+-sum_y p(x,y) ln p(x,y) = rent = 2.149862702806752e-6   OK checks
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = rim =  1.3691988899449898e-6 seems bad.
+sum_y p(x,y) ln p(*,y) = poo = 1.5742713752273321e-6
+
+(- (poo w) (rim w)) = 2.0507248528234232e-7
+(- (rent  w) (plp w)) = 1.6861843915137838e-7
+
+so what is wrong?
+p(x,*) = 8.43092195756904e-8
+(fold (lambda (s sum) (+ sum (frqobj 'pair-freq s))) 0.0 (crs 'right-stars w))
+(frqobj 'right-wild-freq  w) == same as above. OK 
+
+(define (crent w)   ; OK< gives same asnwer as rent
+  (fold (lambda (s sum)
+	 (define p (frqobj 'pair-freq s))
+ 	 (+ sum (* p (l2 p)))) 0.0 (crs 'right-stars w)))
+
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = rim = 
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - sum_y p(x,y)ln p(x,*)  = 
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) sum_y p(x,y)  = 
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) p(x,*)  = 
+sum_y p(x,y)ln [p(x,y)] - sum_y p(x,y) ln [p(*,y)] - p(x,*) ln p(x,*)
+
+sum_y p(x,y)ln [p(x,y)] = - (frqobj 'right-wild-entropy w) = -2.149862702806752e-6
+- sum_y p(x,y)ln [p(*,y)] =  (poo w) = 1.5742713752273321e-6
+- p(x,*) ln p(x,*) = 1.9812442636553735e-6 which checked before
+
+So: (+ -2.149862702806752e-6 (poo w)  1.9812442636553735e-6) = 1.4056529360759538e-6
+which is NOT  rim.  So what's up with rim?
+
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = 
+(define (rim w) (frqobj 'right-wild-mi w))
+
+(define (crim w)
+	(define (mi s) (frqobj 'pair-mi s))
+  (fold (lambda (s sum) (+ sum (mi s)))
+ 	  0.0 (crs 'right-stars w)))
+(crim w) = 1.3691988899449898e-6 agrees with rim. 
+
+(define (drim w)
+	(define (mi d) (frqobj 'pair-mi (cra 'get-pair w d)))
+  (fold (lambda (d sum) (+ sum (mi d)))
+ 	  0.0 (crs 'right-duals w)))
+(drim w) $103 = 1.3691988899449898e-6
+
+(map (lambda (d) (cra 'get-pair w d)) (crs 'right-duals w))
+
+(define (cdrim w)
+	(define prs (frqobj 'right-wild-freq w))
+	(define (mi d)
+		(define s (cra 'get-pair w d))
+		(define p (frqobj 'pair-freq s))
+		(define pls (frqobj 'left-wild-freq d))
+		(* p (l2 (/ p (* prs pls)))))
+  (fold (lambda (d sum) (+ sum (mi d)))
+ 	  0.0 (crs 'right-duals w)))
+
+(cdrim w) $104 = 1.4056529360759508e-6  there we are... 
+
+(define (cdrim w)
+	(define prs (frqobj 'right-wild-freq w))
+	(define (mi d)
+		(define s (cra 'get-pair w d))
+		(define p (frqobj 'pair-freq s))
+		(define pls (frqobj 'left-wild-freq d))
+		(define hmi (* p (l2 (/ p (* prs pls)))))
+		(define cmi (frqobj 'pair-mi s))
+		(format #t "its ~A == ~A ~A" hmi cmi s)
+		hmi)
+  (fold (lambda (d sum) (+ sum (mi d)))
+ 	  0.0 (crs 'right-duals w)))
+
+Ah ha. Some crazy multiplicity thing, again.
+set-pair-mi
+
+here'a a bad one:
+(Section
+   (WordNode "The")
+   (ConnectorSeq
+      (Connector (WordNode "###LEFT-WALL###") (ConnectorDir "-"))
+      (Connector (WordNode "Dormez") (ConnectorDir "+"))))
+
+Here's it's dual:
+ (EvaluationLink
+   (PredicateNode "*-connector left stars-*")
+   (WordNode "The")
+   (Connector (WordNode "###LEFT-WALL###") (ConnectorDir "-"))
+   (Connector (VariableNode "$connector-word") (ConnectorDir "+")))
+
+(frqobj 'left-wild-logli  d) $116 = 10.0013214122192
+(frqobj 'right-wild-logli w) $117 = 23.4997343543985
+(frqobj 'pair-logli s) $118 = 25.4997343543985
+(- (+ 10.0013214122192 23.4997343543985) 25.4997343543985) = 8.001321412219198
+(frqobj 'pair-fmi s) 5.27178121177972  <<<<< bad how ??
+
+(cdrim (WordNode "Frollo/Harry"))
+Oh, hang on ... silly goose. Cannot hand MI on the sections. Of course.
+Since the pairs are not correctly identified. 
+There are three fmi's:
+word-to-conseq
+word-to first-con
+word-to-second-con
+
+Crap. Pair needs to be:
+(CrossLink
+   (WordNode foo)
+   (Dual ..))
+
+The duals are missing counts -- well no, they do have marginals...
+
+Rows: 137078 Columns: 18265271
+Size: 24213074 non-zero entries == 24M
+268594 Connectors == approx 2x words
+18265271 == 18M EvaluationLinks == number of duals
+6239997 == 6.2M ConnectorSeq
+8629163 = 8.6M Sections
+
+(cog-delete-recursive (Variable "$connector-word"))
+(cog-delete-recursive (PredicateNode "*-connector left stars-*"))
+(cog-delete-recursive (AnyNode "cross-connector word"))
+(cog-delete-recursive (AnyNode "cross-connector section"))
+
+(cog-new-ctv 1 0 CNT)))
+
+dropdb en_dj_two_sim
+was guile -l x-mtwo.scm
+guile -l x-mmore.scm
+
+guile -l x-test.scm
+(define hva (make-shape-vec-api))
+(define hvs (add-pair-stars hva))
+(define hvp (add-support-api hvs))
+(define bth (batch-transpose hva))
+
+(hva 'explode-sections)
+(store-referers (Predicate "*-word-shape pair-*"))
+(bth 'mmt-marginals)
+
+OK, the new system works
+
+
 
 xxxxxxxxxxxxxxxxxxxx <<< here
-
 ----------------
 OK, we don't need all of pair-MI for the cross-connector calculations.
 We only need ....
@@ -14927,9 +15198,10 @@ word pairs removed, and and only the disjuncts left). This one adds the
 transpose marginals, viz (batch-transpose (make-connector-vec-api)
 'mmt-marginals) that are needed for fast entropy-similarities.
 
-STATUS: OK, but not quite good...
-REASON: Missing right marginals on cross-connectors, which are needed
-        for similarity computations.
+STATUS: BAD.
+REASON: Holds incorrect word-shape pairs. Wrong implementation.
+        Also, missing right marginals on cross-connectors, which are
+        needed for similarity computations. Fixed in en_dj_qtwo below.
 DATE: 15 July 2018
 
 en_dj_ptwo=> \dt+
@@ -14983,7 +15255,9 @@ are:
 * left and right marginals for the cross-conector structures
 * 'mmt-marginals for both of the above.
 
-STATUS: Good.
+
+STATUS: BAD.
+REASON: Holds incorrect word-shape pairs. Wrong implementation.
 DATE: 16 July 2018
 
 en_dj_qtwo=> \dt+
@@ -15026,6 +15300,46 @@ RMS Count      3092.        +nan.0        2.174        +nan.0
 8cf228f8e7b5a80072d60cf87e77a592  en_dj_qtwo.sql.bz2
 
 =========================================================================
+
+Restart again midnight exactly Sun 5 August 2018
+dropdb en_dj_two_sim
+createdb en_sh_two
+time bzcat en_dj_mtwo.sql.bz2 | psql en_sh_two
+real	16m18.544s
+user	3m55.964s
+sys	0m14.484s
+
+store-wildcards
+store-right-marginals
+
+$ guile -l x-mtwo.scm
+scheme@(guile-user)> (hva 'fetch-pairs)
+Elapsed time to load word sections: 2610 seconds
+scheme@(guile-user)> (hva 'explode-sections)
+Elapsed time to create shapes: 1523 secs
+scheme@(guile-user)> (hst 'store-pairs (cog-incoming-set (Predicate "*-word-shape pair-*")))
+Hang on .. that is not really needed ... is it?  What's the point?
+scheme@(guile-user)> (bhv 'mmt-marginals)
+
+
+$ guile -l x-mmore.scm
+scheme@(guile-user)> (pca 'fetch-pairs)
+Elapsed time to load csets: 2832 secs
+scheme@(guile-user)> (btp 'mmt-marginals)
+Finished left norm marginals in 35885 secs   <<< same as last time.
+Finished left totals in 233 secs
+Finished column (left) norm averages in 1187 secs
+Done storing 6239997 left-wilds in 4504 secs
+Finished mmt norm marginals in 800 secs
+Finished mmt totals in 4 secs
+Done storing 137078 right-wilds in 113 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+
+yyyyyyyyyyyyyyyyyyyyyyyyyy
+
+dropdb en_dj_etwo
+=========================================================================
 OK, so where were we? We want
 * cosines between words, using dj's
 * cosines between words, using cross
@@ -15046,7 +15360,7 @@ bcr and bci went too fast ....
 (bcr 'compute-similarity (Word "and") (Word "was"))
 (Word "in") (Word "a"))
    (WordNode "and") (WordNode "to")
- (WordNode "to") (WordNode "of")     
+ (WordNode "to") (WordNode "of")
 
 (cog-incoming-by-type (Word "in") 'SimilarityLink)
 
@@ -15094,12 +15408,256 @@ bcr:
 (WordNode "a") -- (WordNode "he") = 0.16861 in 344 secs
 (WordNode "a") -- (WordNode "_") = 0.00080 in 268 secs
 
-goodcnt
-prs
-compcnt
-savecnt
+------------------------
+conditional-similarity
+
+(define smi (add-symmetric-mi-compute pca))
+
+(add-transpose-api  needs to 'mmt-count so that won't work for experiments...
+))
+
+(define pfa (add-pair-freq-api psa)) XXX
+(define psu (add-support-api psa))
+
+; p(*,d) = (pfa 'left-wild-freq d)
+; N(*,d) = (psu 'left-count d)
+
+(psa 'right-duals w)
+
+; return sum_d N(w,d)/N(*,d) = sum_d p(w|d) = sum_d p(w,d)/p(*,d)
+(define (cond-marg w)
+	(fold (lambda (dule sum)
+		 (+ sum (/ (pca 'get-count (pca 'get-pair w dule))
+			(psu 'left-count dule))))
+		0.0 (psa 'right-duals w)))
+
+; return sum_d p(w|d) / N(w,*)
+(define (focus w) (/ (cond-marg w) (psu 'right-count w)))
+
+; return sum_d N(wa|d) N(wb|d) =
+;        sum_d (N(wa,d) / N (*,d)) (N(wb,d) / N (*,d))
+;        sum_d p(wa|d) p(wb|d)
+(define (cond-prod wa wb)
+	(fold (lambda (dule sum)
+		(define prb (pca 'get-pair wb dule))
+		(define cnd (psu 'left-count dule))
+		(define cnds (* cnd cnd))
+		(if (null? prb) sum
+		 (+ sum (/
+			(* (pca 'get-count (pca 'get-pair wa dule))
+				(pca 'get-count prb))
+			cnds))))
+		0.0 (psa 'right-duals wa)))
+
+
+			(* (cond-marg wa) (cond-marg wb))))))
+
+(Word "village")(Word "city")
+
+conclusion: not interesting.
+
+------------------------
+Disambiguation
+(define ppc (add-support-compute (add-tuple-math psa *)))
+(define tpc (add-transpose-api psa))
+(define (log2 x) (/ (log x) (log 2)))
+
+(define (marg w)
+	(define tot (tpc 'total-mmt-count))
+	(define mw (tpc 'mmt-count w))
+	(- (log2 (/ mw tot))))
+
+(marg (Word "hear")) ; 12.366607806845698
+(marg (Word "see")) 9.54234285794451
+(marg (Word "book")) 11.961124708605812
+(marg (Word "table")) 12.64933707046002
+
+
+(smi 'mmt-fmi (Word "hear")(Word "book"))  ; -6.275136766789916
+
+; Create a fake ambiguous word from w1, w2
+; return fmi between fake ambig word and w
+(define (fake-amb w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	(define tot (tpc 'total-mmt-count))
+	(define mw1 (tpc 'mmt-count w1))
+	(define mw2 (tpc 'mmt-count w2))
+	(define mfake (+ mw1 mw2))
+	(define mww (tpc 'mmt-count w))
+	(define p1 (ppc 'right-count (list w1 w)))
+	(define p2 (ppc 'right-count (list w2 w)))
+	(define pfake (+ p1 p2))
+	(log2 (/ (* pfake tot) (*  mfake mww))))
+
+(fake-amb (Word "hear"))   ; 3.6272108847937767
+(fake-amb (Word "book"))   ; 2.94067874079421
+
+(smi 'mmt-fmi (Word "hear")(Word "see"))  ; 4.512966599873214
+(fake-amb (Word "see")) ; 3.2969178334833145
+
+(smi 'mmt-fmi (Word "book")(Word "table")) 3.322219311913606
+(fake-amb (Word "table")) 2.5436144926146653
+
+
+; Attempt disambig but thsi is bad.
+(define (dab-amb w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	(define wr (Word "see"))
+	(define tot (tpc 'total-mmt-count))
+	(define mw1 (tpc 'mmt-count w1))
+	(define mw2 (tpc 'mmt-count w2))
+	(define mfake (+ mw1 mw2))
+	(define mwr (tpc 'mmt-count wr))
+	(define mww (tpc 'mmt-count w))
+	(define p1 (ppc 'right-count (list w1 w)))
+	(define p2 (ppc 'right-count (list w2 w)))
+	(define pfake (+ p1 p2))
+	(define pr (ppc 'right-count (list wr w)))
+	(log2 (/ (* (/ pfake pr) tot) (* (/ mfake mwr) mww))))
+
+OK, well, that's not going anywhere.
+
+----------------------------
+
+; let p(wab,d) ==  (N(wa,d) + N(wb,d))/ (N(wa,*)+N(wb,*))
+; let p(wc,d) == N(wc,d)/N(wc,*)
+; let q(d) == max(0, p(wab,d)-p(wc,d))
+; so that q(d) is "what's left" after subtracting a-component
+; ... or should it be  r(d) == max(0, p(wc|d)-p(wab|d)) ?
+; ....same diff, since both have common factor p(*,d)
+;
+; Hang on, it should be max(0, p(d|wab)-p(d|wc))
+; where p(d|wc) = p(wc,d) / p(wc,*)  and p(d|wab) = p(wab,d) / p(wab,*)
+; let M(wc,d) == N(wc,*) q(d)
+;
+; want:
+: sum_d N(w,d) M(wc,d)
+; sum_d M(wc,d) N(*,d)
+;
+; Return M(wc,d) as defined above.
+; na == N(wa,*) etc
+(define (orth wa wb wc d na nb nc)
+	(define jad (pca 'get-pair wa d))
+	(define jbd (pca 'get-pair wb d))
+	(define jcd (pca 'get-pair wc d))
+	(define nad (if (null? jad) 0.0 (pca 'get-count jad)))
+	(define nbd (if (null? jbd) 0.0 (pca 'get-count jbd)))
+	(define ncd (if (null? jcd) 0.0 (pca 'get-count jcd)))
+	(define nab (+ nad nbd))
+	(define pab (/ nab (+ na nb)))
+	(define pc (/ ncd nc))
+	(define cab (/ pab (+ na nb)))
+	(define cc (/ pc nc))
+	(max 0 (- pab pc)))  ; this works well
+	; (max 0 (- cab cc)))  ; this works poorly
+
+	; (max 0 (- (* nc pab) ncd))))
+	; (max 0 (* nab (- (* nc pab) ncd))))
+
+; Return sum_d N(w,d) M(wc,d)
+(define (dot-ort wa wb wc w)
+	(define na (psu 'right-count wa))
+	(define nb (psu 'right-count wb))
+	(define nc (psu 'right-count wc))
+
+	(fold (lambda (dule sum)
+		(define j (pca 'get-pair w dule))
+		(if (null? j) sum
+		 (+ sum (* (pca 'get-count j) (orth wa wb wc dule na nb nc)))))
+		0.0 (psa 'right-duals w)))
+
+; Return sum_d M(wc,d) N(*,d)
+(define (net wa wb wc)
+	(define na (psu 'right-count wa))
+	(define nb (psu 'right-count wb))
+	(define nc (psu 'right-count wc))
+
+	(fold (lambda (dule sum)
+		(define j (pca 'get-pair wc dule))
+		(if (null? j) sum
+		 (+ sum (* (psu 'left-count dule) (orth wa wb wc dule na nb nc)))))
+		0.0 (psa 'right-duals wc)))
+
+
+(define (dab-perp w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	; (define wr (Word "see"))
+	(define wr (Word "hear"))
+	(define tot (tpc 'total-mmt-count))
+	(define prod (dot-ort w1 w2 wr w))
+	(define mwo (net w1 w2 wr))
+	(define mww (tpc 'mmt-count w))
+	(define dabmi (log2 (/ (* prod tot) (* mwo mww))))
+	(define selfmi (smi 'mmt-fmi wr wr))
+	(- dabmi selfmi))
+
+with (define wr (Word "hear"))
+ (dab-perp (Word "paper")) 3.809849277692443
+ (dab-perp (Word "book")) 4.22468023407624
+ (dab-perp (Word "table")) 3.7956947813077306
+ (dab-perp (Word "pen")) 3.958633526718385
+ (dab-perp (Word "hear")) -6.462882425126517
+ (dab-perp (Word "see")) -6.420968114731355
+ (dab-perp (Word "watch")) 1.3797091767554486
+ (dab-perp (Word "listen")) -4.560170727578292
+ (dab-perp (Word "she")) -0.9675306992488375
+ (dab-perp (Word "he")) -0.8299348927624219
+ (dab-perp (Word "them")) -0.4310170287723736
+ (dab-perp (Word "near")) 0.3093311573173487
+ (dab-perp (Word "next")) 3.3311035025102687
+ (dab-perp (Word "of")) -0.6486492223953286
+ (dab-perp (Word "by")) -3.7167019275587907
+
+looks goood ...
+	(define wr (Word "see"))
+
+ (dab-perp (Word "paper")) 3.681818807262972
+ (dab-perp (Word "book")) 4.098796757749786
+ (dab-perp (Word "table")) 3.6691181735260754
+ (dab-perp (Word "pen")) 3.8310965428109887
+ (dab-perp (Word "hear")) 1.998378910173595
+ (dab-perp (Word "see")) -3.045213408538893
+ (dab-perp (Word "watch")) 1.302745420003867
+ (dab-perp (Word "listen")) -2.253805464075623
+ (dab-perp (Word "she")) -0.9810428066327121
+ (dab-perp (Word "he")) -0.8404681915026306
+ (dab-perp (Word "near")) 0.19356312119336394
+ (dab-perp (Word "next")) 3.2039699189813593
+ (dab-perp (Word "of")) -0.742138952174102
+ (dab-perp (Word "by")) -3.629486231491182
+
+
+looks good
+
+(define (dab-perp-helper w1 w2 wr w)
+	(define tot (tpc 'total-mmt-count))
+	(define prod (dot-ort w1 w2 wr w))
+	(define mwo (net w1 w2 wr))
+	(define mww (tpc 'mmt-count w))
+	(define dabmi (log2 (/ (* prod tot) (* mwo mww))))
+	; (define selfmi (smi 'mmt-fmi wr wr))
+	dabmi)
+	; (- dabmi selfmi))
+
+(define (dab-perp w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	(define wr (Word "hear"))
+   (dab-perp-helper w1 w2 wr w))
+
+Hmm  slefmi is needed, and the cond is bad
+
+(define (dab-perp w)
+	(define w1 (Word "fall"))
+	(define w2 (Word "car"))
+	(define wr (Word "car"))
+   (dab-perp-helper w1 w2 wr w))
 
 =========================================================================
+cross-connector similarities.
 
 (define ara (make-connector-vec-api))
 (define ars (add-pair-stars ara))
@@ -15322,9 +15880,9 @@ ahh its -infity
 (define (prt-sim sim port)
    (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
       (cog-name (gar sim)) (cog-name (gdr sim))))
-      
+
 (let ((outport (open-file "/tmp/ranked-dj-mi-sims.dat" "w")))
-   (define cnt 0) 
+   (define cnt 0)
    (for-each (lambda (sim)
          (set! cnt (+ cnt 1))
          (format outport "~A  " cnt)
@@ -15415,7 +15973,7 @@ NEW TODO LIST
    for the top 1K's for both disjuncts and for cross connectors.
    - IN PROGRESS
 
--- start old-style MI cross-marginal in dj_etwo IN PROGRESS
+-- start old-style MI cross-marginal in dj_etwo BROKEN. See above.
 -- save en_dj_etwo after cross-marginals
 
 -- show graph distribution of mi of word-dj pairs in mtwo
@@ -15429,7 +15987,7 @@ NEW TODO LIST
 
 (1b) scatterplot for cosine vs entropy
 
-(2a) graphs, for the corsses, too
+(2a) graphs, for the crosses, too
 
 (3) Scatterplot of pseudo-cset MI vs. cross-MI.
 
@@ -15485,6 +16043,16 @@ Merging minor tasks DONE
 * Start transpose-marginals for crossed in en_dj_ptwo DONE
 * SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
   and with transpose-marginals for both. DONE
+* Fix bug re cross-connector MI's -- DONE
+  -- there are C+1 MI's:
+     * word to connector-seq
+     * word-to-first-connector
+     * word-to-second-connector
+     * ...
+     * word to C'th connector. Dohhh.
+     And distinct marginals for each.
+* products of conditional probabilities. DONE NO GOOD
+
 
 
 

@@ -944,7 +944,7 @@ Pairs The total number of distinct word-pairs observed.
 \end_layout
 
 \begin_layout Description
-Obsn's The total number of observations of these pairs.
+Obs'ns The total number of observations of these pairs.
  Most pairs will be observed more than once.
  Distributions are typically Zipfian.
 \end_layout
@@ -1023,7 +1023,7 @@ Pairs
 \begin_inset Text
 
 \begin_layout Plain Layout
-Obsn's
+Obs'ns
 \end_layout
 
 \end_inset
@@ -13528,7 +13528,7 @@ What's the relationship between MI and cosines? Here it is: the top 640,
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename en-sims/scatter-dj-cos-mi.eps
+	filename en-sims/scatter-dj-mi-cos-dots.eps
 	lyxscale 50
 	display false
 	width 49col%
@@ -13546,9 +13546,9 @@ What's the relationship between MI and cosines? Here it is: the top 640,
 \end_layout
 
 \begin_layout Standard
-Both graphs show the same data, but rotated by 90 degrees.
- The left graph sorts the data by cosine similarity; the right graph sorts
- it by MI.
+Both graphs show the same data.
+ The left graph displays it as a point cloud; the right graph sorts the
+ data by MI, and then draws a line through it, in sequential order.
 \end_layout
 
 \begin_layout Standard
