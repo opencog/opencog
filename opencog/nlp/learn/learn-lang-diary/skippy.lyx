@@ -5302,6 +5302,13 @@ This allows an iterative algorithm to be performed, clustering only rows
 
 \begin_layout Subsubsection
 Biclustering
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Biclustering"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5473,6 +5480,235 @@ But never mind: the assumption of hard clustering breaks word-sense disambiguati
 on.
  Genetic algorithms are not enough.
  Back to the drawing board.
+\end_layout
+
+\begin_layout Subsubsection
+Word-Sense Disambiguation
+\end_layout
+
+\begin_layout Standard
+The primary issue with hard clustering is that it fails to correctly disentangle
+ different word senses.
+ There is an opportunity to do better.
+\end_layout
+
+\begin_layout Standard
+A prototype example is given by the word 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It could be the noun, refering to the cutting tool; it could be the verb
+ synonymous to cutting; it could be thw past tense of the verb 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The observational data consists of occurance counts 
+\begin_inset Formula $N\left(\mbox{"saw"},d\right)$
+\end_inset
+
+.
+ The goal of word-sense disambiguation is to somehow factor this into three
+ grammatical classes 
+\begin_inset Formula $g$
+\end_inset
+
+, so that 
+\begin_inset Formula 
+\[
+N\left(\mbox{"saw"},d\right)=N\left(\left\langle \mbox{tool}\right\rangle ,d\right)+N\left(\left\langle \mbox{cutting}\right\rangle ,d\right)+N\left(\left\langle \mbox{seeing}\right\rangle ,d\right)
+\]
+
+\end_inset
+
+The general problem of how to accomplish this, and several tactics are discussed
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ That persentation focuses on cosine distances.
+ This section provides an information-theoretic variant.
+\end_layout
+
+\begin_layout Standard
+The actual observed frequencies 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ are, by definition, sums of word 
+\begin_inset Formula $w$
+\end_inset
+
+ used with every different possible word-sense 
+\begin_inset Formula $s_{k}$
+\end_inset
+
+ that the word could have.
+ That is, explicitly, one has that
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{k}p\left(s_{k},d\right)
+\]
+
+\end_inset
+
+In poetry and in word-play, a word might be used in such a way that multiple
+ senses are simultaneously applied.
+ The assumption above is that this is not the case: that the text assigns
+ only a single meaning to each word use.
+ In any given use, the word 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ is either a noun, or one of the verbs; it cannot be some mixture of all
+ of them.
+ 
+\end_layout
+
+\begin_layout Standard
+Each word-sense can then be hard-clustered into a single grammatical category:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+-the-noun belongs to just one grammatical category, the one that holds synonyms
+ for cutting tools.
+ Thus, the hard-clustering formula applies:
+\begin_inset Formula 
+\[
+p\left(s,g\right)=\begin{cases}
+p\left(s,*\right) & \mbox{ if }s\in g\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The intent of the sense label 
+\begin_inset Formula $s$
+\end_inset
+
+ is that it is uniquely associated with just one word, and no others.
+ The number of word-senses is strictly larger than the vocabulary: every
+ vocabulary word has at least one sense.
+ That is, 
+\begin_inset Formula $p\left(*,s\right)=p\left(w,s\right)$
+\end_inset
+
+ holds for all 
+\begin_inset Formula $s\in w$
+\end_inset
+
+.
+ Thus, the conditional probability is
+\begin_inset Formula 
+\[
+p\left(w|s\right)=\frac{p\left(w,s\right)}{p\left(*,s\right)}=\begin{cases}
+1 & \mbox{ if }s\in w\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The decomposition of words into senses is then (restating the earlier formula
+ in slightly different notation: 
+\begin_inset Formula 
+\begin{eqnarray*}
+p\left(w,d\right) & = & \sum_{s}p\left(w|s\right)p\left(s,d\right)\\
+ & = & \sum_{s\in w}p\left(s,d\right)
+\end{eqnarray*}
+
+\end_inset
+
+To be consistent with the central factorization 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+, one must have
+\begin_inset Formula 
+\[
+\sum_{s\in w}p\left(s,g\right)=p\left(w,g\right)
+\]
+
+\end_inset
+
+and
+\begin_inset Formula 
+\[
+\sum_{s\in w}p\left(s|g\right)=p\left(w|g\right)
+\]
+
+\end_inset
+
+Since a word-sense is associated with just one word, the notation 
+\begin_inset Formula $\sum_{s\in w}$
+\end_inset
+
+ is superflous: one can unambigously write 
+\begin_inset Formula $\sum_{s}$
+\end_inset
+
+ as all other entries are zero.
+\end_layout
+
+\begin_layout Standard
+The central factorization now has the form 
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{s}p\left(s,d\right)=\sum_{s}\sum_{g}\sum_{g^{\prime}}p\left(s|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)
+\]
+
+\end_inset
+
+Not much has changed: the word-senses can now be legitimately hard-clustered;
+ but the decomposition of words into word-senses is unknown.
+ The clustering algorithm reviewed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Biclustering"
+
+\end_inset
+
+ is very nearly unaffected: one replaces the provisional clustering guesses
+ of 
+\begin_inset Formula $w\in g$
+\end_inset
+
+ by provisional guesses 
+\begin_inset Formula $s\in w$
+\end_inset
+
+ and 
+\begin_inset Formula $s\in g$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -6431,214 +6667,6 @@ The primary reason to propose a pair-wise information divergence is to enable
 As a corellary, the results of hillclimbing or gradient-descent algorithms
  are insufficiently sparse; one wishes to approxmate the sparsity that hard-clus
 tering offers, with less overhead and complexity in finding the clusters.
-\end_layout
-
-\begin_layout Subsection
-Word-Sense Disambiguation
-\end_layout
-
-\begin_layout Standard
-The primary issue with hard clustering is that it fails to correctly disentangle
- different word senses.
- There is an opportunity to do better.
-\end_layout
-
-\begin_layout Standard
-A prototype example is given by the word 
-\begin_inset Quotes eld
-\end_inset
-
-saw
-\begin_inset Quotes erd
-\end_inset
-
-.
- It could be the noun, refering to the cutting tool; it could be the verb
- synonymous to cutting; it could be thw past tense of the verb 
-\begin_inset Quotes eld
-\end_inset
-
-to see
-\begin_inset Quotes erd
-\end_inset
-
-.
- The observational data consists of occurance counts 
-\begin_inset Formula $N\left(\mbox{"saw"},d\right)$
-\end_inset
-
-.
- The goal of word-sense disambiguation is to somehow factor this into three
- grammatical classes 
-\begin_inset Formula $g$
-\end_inset
-
-, so that 
-\begin_inset Formula 
-\[
-N\left(\mbox{"saw"},d\right)=N\left(\left\langle \mbox{tool}\right\rangle ,d\right)+N\left(\left\langle \mbox{cutting}\right\rangle ,d\right)+N\left(\left\langle \mbox{seeing}\right\rangle ,d\right)
-\]
-
-\end_inset
-
-The general problem of how to accomplish this, and several tactics are discussed
- in 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Vepstas2018stiching"
-
-\end_inset
-
-.
- That persentation focuses on cosine distances.
- This section provides an information-theoretic variant.
-\end_layout
-
-\begin_layout Standard
-The actual observed frequencies 
-\begin_inset Formula $p\left(w,d\right)$
-\end_inset
-
- are, by definition, sums of word 
-\begin_inset Formula $w$
-\end_inset
-
- used with every different possible word-sense 
-\begin_inset Formula $s_{k}$
-\end_inset
-
- that the word could have.
- That is, explicitly, one has that
-\begin_inset Formula 
-\[
-p\left(w,d\right)=\sum_{k}p\left(s_{k},d\right)
-\]
-
-\end_inset
-
-In poetry and in word-play, a word might be used in such a way that multiple
- senses are simultaneously applied.
- The assumption above is that this is not the case: that the text assigns
- only a single meaning to each word use.
- In any given use, the word 
-\begin_inset Quotes eld
-\end_inset
-
-saw
-\begin_inset Quotes erd
-\end_inset
-
- is either a noun, or one of the verbs; it cannot be some mixture of all
- of them.
- 
-\end_layout
-
-\begin_layout Standard
-Each word-sense can then be hard-clustered into a single grammatical category:
- 
-\begin_inset Quotes eld
-\end_inset
-
-saw
-\begin_inset Quotes erd
-\end_inset
-
--the-noun belongs to just one grammatical category, the one that holds synonyms
- for cutting tools.
- Thus, the hard-clustering formula applies:
-\begin_inset Formula 
-\[
-p\left(s,g\right)=\begin{cases}
-p\left(s,*\right) & \mbox{ if }s\in g\\
-0 & \mbox{ otherwise}
-\end{cases}
-\]
-
-\end_inset
-
-The intent of the sense label 
-\begin_inset Formula $s$
-\end_inset
-
- is that it is uniquely associated with just one word, and no others.
- The number of word-senses is strictly larger than the vocabulary: every
- vocabulary word has at least one sense.
- That is, 
-\begin_inset Formula $p\left(*,s\right)=p\left(w,s\right)$
-\end_inset
-
- holds for all 
-\begin_inset Formula $s\in w$
-\end_inset
-
-.
- Thus, the conditional probability is
-\begin_inset Formula 
-\[
-p\left(w|s\right)=\frac{p\left(w,s\right)}{p\left(*,s\right)}=\begin{cases}
-1 & \mbox{ if }s\in w\\
-0 & \mbox{ otherwise}
-\end{cases}
-\]
-
-\end_inset
-
-The decomposition of words into senses is then (restating the earlier formula
- in slightly different notation: 
-\begin_inset Formula 
-\begin{eqnarray*}
-p\left(w,d\right) & = & \sum_{s}p\left(w|s\right)p\left(s,d\right)\\
- & = & \sum_{s\in w}p\left(s,d\right)
-\end{eqnarray*}
-
-\end_inset
-
-To be consistent with the central factorization 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:central-decomposition"
-
-\end_inset
-
-, one must have
-\begin_inset Formula 
-\[
-\sum_{s\in w}p\left(s,g\right)=p\left(w,g\right)
-\]
-
-\end_inset
-
-and
-\begin_inset Formula 
-\[
-\sum_{s\in w}p\left(s|g\right)=p\left(w|g\right)
-\]
-
-\end_inset
-
-Since a word-sense is associated with just one word, the notation 
-\begin_inset Formula $\sum_{s\in w}$
-\end_inset
-
- is superflous: one can unambigously write 
-\begin_inset Formula $\sum_{s}$
-\end_inset
-
- as all other entries are zero.
-\end_layout
-
-\begin_layout Standard
-The central factorization now has the form 
-\begin_inset Formula 
-\[
-p\left(w,d\right)=\sum_{s}p\left(s,d\right)=\sum_{s}\sum_{g}\sum_{g^{\prime}}p\left(s|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)
-\]
-
-\end_inset
-
-Not much has changed: the word-senses can now be legitimately hard-clustered;
- but the decomposition of words into word-senses is unknown.
- 
 \end_layout
 
 \begin_layout Section
