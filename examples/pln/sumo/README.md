@@ -40,8 +40,7 @@ guile --no-auto-compile -l Merge.scm
 First, set the logger level
 
 ```scheme
-(use-modules (opencog logger))
-(cog-logger-set-level! "debug")
+(ure-logger-set-level! "debug")
 ```
 
 Load PLN

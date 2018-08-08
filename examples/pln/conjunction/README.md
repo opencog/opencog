@@ -16,8 +16,7 @@ $ guile -l conjunction-rule-base-config.scm
 Optionally, set the log level to debug (can be insightful to read):
 
 ```scheme
-(use-modules (opencog logger))
-(cog-logger-set-level! "debug")
+(ure-logger-set-level! "debug")
 ```
 
 Define a conjunction to evaluate:
