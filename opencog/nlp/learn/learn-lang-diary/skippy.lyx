@@ -6318,7 +6318,7 @@ This has the peculiar property that, if for any word
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
- are observational data, and are not theoretical distributions.
+ are observational frequencies, and are not theoretical distributions.
  Thus, one might have that 
 \begin_inset Formula $p\left(w,d\right)=0$
 \end_inset
@@ -6342,7 +6342,7 @@ One can imagine several work-arounds.
  One would be to apply some form of kernel smoothing, or to apply some sort
  of local regression.
  How this might work is unclear.
- Consider instead the logarithm of the gemoetric mean:
+ Consider instead the logarithm of the geometric mean:
 \begin_inset Formula 
 \[
 \log_{2}m\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\log_{2}p\left(w,d\right)
@@ -6365,12 +6365,12 @@ To be consistent with the previous expression, if
 \end_inset
 
  -- missing observations contribute nothing.
- Continuing in this vein for thinking, that infrequently-observed phenomena
+ Continuing in this vein of thinking, that infrequently-observed phenomena
  are being unfairly punished and are not being given due weight, one might
  consider the centroid to be described by
 \begin_inset Formula 
 \[
-\mu_{\alpha}\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\left(\log_{2}p\left(w,d\right)\right)^{\alpha}
+\log_{2}m_{\alpha}\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\left(\log_{2}p\left(w,d\right)\right)^{\alpha}
 \]
 
 \end_inset
