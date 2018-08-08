@@ -6589,9 +6589,9 @@ One can imagine several work-arounds.
  How this might work is unclear.
  Consider instead the logarithm of the geometric mean:
 \begin_inset Formula 
-\[
-\log_{2}m\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\log_{2}p\left(w,d\right)
-\]
+\begin{equation}
+\log_{2}m\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\log_{2}p\left(w,d\right)\label{eq:cluster mean}
+\end{equation}
 
 \end_inset
 
@@ -6815,6 +6815,165 @@ es.
 
 \begin_layout Subsubsection
 Word-sense Similarity
+\end_layout
+
+\begin_layout Standard
+Assume, for a moment, that distinct word senses can be infered from raw
+ text, in an unsupervised fashion.
+ That is, assume that a joint probability 
+\begin_inset Formula $p\left(s,d\right)$
+\end_inset
+
+ can be infered from the text data.
+ It is OK if this probability is of low quality, and generally inaccurate:
+ disappointingly inaccurate, even.
+ If this probability exceeds pure random chance, then the Mihalcea algorithm
+ can be run 
+\begin_inset Quotes eld
+\end_inset
+
+in reverse
+\begin_inset Quotes erd
+\end_inset
+
+, to infer the joint probabilities 
+\begin_inset Formula $p\left(s,s^{\prime}\right)$
+\end_inset
+
+ between different senses 
+\begin_inset Formula $s$
+\end_inset
+
+ and 
+\begin_inset Formula $s^{\prime}$
+\end_inset
+
+.
+ One does so by assuming that, given the specific words in a specific sentence,
+ that the word-senses between them are necessarily highly-related.
+ Given that the sentence can be parsed into a string of disjuncts 
+\begin_inset Formula $d$
+\end_inset
+
+, one can use 
+\begin_inset Formula $p\left(s,d\right)$
+\end_inset
+
+ to assign a provisional probability 
+\begin_inset Formula $s$
+\end_inset
+
+ to each word, and then collect observational statistics 
+\begin_inset Formula $N\left(s,s^{\prime}\right)$
+\end_inset
+
+ on a sentence-by-sentence basis, incrementing 
+\begin_inset Formula $N$
+\end_inset
+
+ by one for each observed pair 
+\begin_inset Formula $\left(s,s^{\prime}\right)$
+\end_inset
+
+ in a sentence.
+ After observing a large number of sentences, one has a (sparse) database
+ of sense-pair frequencies 
+\begin_inset Formula $p\left(s,s^{\prime}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The goal of doing this is to amplify the signal-to-noise ratio.
+ This is in more-or-less complete analogy to the case for word-pairs: given
+ a small number of observations, they are noisey and inaccurate.
+ Increasing the number of observations causes the noise to cancel out, and
+ for a signal to emerge.
+\end_layout
+
+\begin_layout Standard
+At this point, one can start doing some intriguing things: one can attempt
+ to perform maximum-spanning-tree parses, to determine how one given word-sense
+ is related to all other word-senses in a given sentence.
+ That is, one repeats the process of extracting disjuncts, but this time,
+ the connectors on the disjuncts are not words, but word-senses.
+ 
+\end_layout
+
+\begin_layout Standard
+The reason for extracting sense-disjuncts is that they provide the doorway
+ to obtaining the 
+\begin_inset Quotes eld
+\end_inset
+
+Lexical Functions
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Lexical-function"
+
+\end_inset
+
+ of Meaning-Text Theory (MTT).
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mel'cuk1987,Kahane2003"
+
+\end_inset
+
+ From there, one can extract the 
+\series bold
+DSyntR
+\series default
+ structure of a sentence, which provides the natural input into a reasoning
+ system based on formal logic.
+ That is, one can now begin to assemble logical proofs by inferring sequences
+ of deductions applied to sense-disjuncts.
+ Or rather, more importantly, once can now start to infer the set of valid
+ logical deductions that can be applied, rather than taking defferent forms
+ of logical inference as being given 
+\emph on
+a priori
+\emph default
+.
+ To be more blunt: this provides the pathway for inferening the rules of
+ Goertzel's PLN, or for infering the rules Pei Wang's Non-Axiomatic Logic,
+ rather than taking these rules as externally imposed.
+\end_layout
+
+\begin_layout Subsubsection
+Word-sense Factoring
+\end_layout
+
+\begin_layout Standard
+Given a pair-wise information divergence, how can one infere word senses?
+ This is addressed in the companion text.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ However, that text is currently written in terms of the cosine-distance;
+ it needs to be re-expressed using the information divergence, and, in particula
+r, by the use of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cluster mean"
+
+\end_inset
+
+ for the cluster mean.
+\end_layout
+
+\begin_layout Standard
+So XXX TODO.
+ Unfinished things begin here.
 \end_layout
 
 \begin_layout Section
@@ -7152,6 +7311,26 @@ The previous section begins by stating that, ideally, one wants to wants
 
 \begin_layout Standard
 TODO flesh out this section.
+ 
+\end_layout
+
+\begin_layout Standard
+The important parts of the sheaves idea are already covered in the 
+\begin_inset Quotes eld
+\end_inset
+
+stitching
+\begin_inset Quotes erd
+\end_inset
+
+ paper.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ They need to be transcribed here.
 \end_layout
 
 \begin_layout Subsection*
