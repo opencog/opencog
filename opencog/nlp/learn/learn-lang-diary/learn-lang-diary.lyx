@@ -32824,6 +32824,14 @@ Block-5x5
 \end_layout
 
 \begin_layout Section*
+Cross-connector stats
+\end_layout
+
+\begin_layout Standard
+Ran the full cross-connector stats
+\end_layout
+
+\begin_layout Section*
 Entropy-similarity
 \end_layout
 
