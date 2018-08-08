@@ -996,14 +996,22 @@ input
 \end_inset
 
 , that 
-\begin_inset Formula $I=\left\{ t-c,t-c+1,\cdots t-1,t+1,\cdots,t+c\right\} $
+\begin_inset Formula 
+\[
+I=\left\{ t-c,t-c+1,\cdots t-1,t+1,\cdots,t+c\right\} 
+\]
+
 \end_inset
 
- or that 
-\begin_inset Formula $I=w_{I}=\left\{ w_{t-c},w_{t-c+1},\cdots,w_{t-1},w_{t+1},\cdots,w_{t+c}\right\} $
+or that 
+\begin_inset Formula 
+\[
+I=w_{I}=\left\{ w_{t-c},w_{t-c+1},\cdots,w_{t-1},w_{t+1},\cdots,w_{t+c}\right\} 
+\]
+
 \end_inset
 
-; exactly which of these sets is intended will hopefully be clear from context.
+Exactly which of these sets is intended will hopefully be clear from context.
 \end_layout
 
 \begin_layout Standard
@@ -2811,7 +2819,7 @@ Here, as always,
  number of number of non-zero pairs, measured in bits:
 \begin_inset Formula 
 \[
-\mbox{sparsity}=\log_{2}\frac{\left|w\right|\left|d\right|}{\left|\left(w,d\right)\right|}
+\mbox{sparsity}=-\log_{2}\frac{\left|\left(w,d\right)\right|}{\left|w\right|\left|d\right|}
 \]
 
 \end_inset
@@ -3009,7 +3017,7 @@ Given a word
 , and it should factorize into two distinct parts:
 \begin_inset Formula 
 \[
-p\left(w,d,g\right)=p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
+p\left(w,d,g\right)=p^{\prime}\left(w|g\right)p^{\prime\prime}\left(g,d\right)
 \]
 
 \end_inset
@@ -3039,7 +3047,7 @@ where
  and to perform the matrix factorization
 \begin_inset Formula 
 \begin{equation}
-p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)\label{eq:factorize}
+p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w|g\right)p^{\prime\prime}\left(g,d\right)\label{eq:factorize}
 \end{equation}
 
 \end_inset
@@ -3049,7 +3057,7 @@ Ideally, the size of the set
 \end_inset
 
  is minimal, in some way, so that the matrices 
-\begin_inset Formula $p^{\prime}(w,g)$
+\begin_inset Formula $p^{\prime}(w|g)$
 \end_inset
 
  and 
@@ -3083,7 +3091,27 @@ In the following, the prime-superscripts are dropped, and the probabilities
 
 .
  Which is which should be apparent from context.
- 
+ The probability 
+\begin_inset Formula $p\left(w|g\right)$
+\end_inset
+
+ is a conditional probability: 
+\begin_inset Formula $p\left(w|g\right)=p\left(w,g\right)/p\left(*,g\right)$
+\end_inset
+
+.
+ This is used to ensure the proper propagation of the joint probability:
+\begin_inset Formula 
+\begin{eqnarray*}
+p\left(*,d\right) & = & \sum_{w}p\left(w,d\right)\\
+ & = & \sum_{w}\sum_{g}p\left(w|g\right)p\left(g,d\right)\\
+ & = & \sum_{w}\sum_{g}\frac{p\left(w,g\right)}{p\left(*,g\right)}p\left(p,d\right)\\
+ & = & \sum_{g}p\left(g,d\right)
+\end{eqnarray*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
