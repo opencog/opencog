@@ -7,10 +7,9 @@
 ;; Load modules
 (use-modules (opencog exec))
 (use-modules (opencog query))
-(use-modules (opencog logger))
 
-;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-timestamp! #f)
+;; (ure-logger-set-sync! #t)
+;; (ure-logger-set-timestamp! #f)
 
 ;; Load the chatbot (don't forget to run the relex sever)
 (add-to-load-path "../../../opencog/nlp/chatbot-psi")
