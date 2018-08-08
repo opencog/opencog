@@ -15525,7 +15525,11 @@ OK, well, that's not going anywhere.
 ; let p(wc,d) == N(wc,d)/N(wc,*)
 ; let q(d) == max(0, p(wab,d)-p(wc,d))
 ; so that q(d) is "what's left" after subtracting a-component
-; ... or should it be  r(d) == max(0, p(wc|d)-p(wab|d))  ????
+; ... or should it be  r(d) == max(0, p(wc|d)-p(wab|d)) ?
+; ....same diff, since both have common factor p(*,d)
+;
+; Hang on, it should be max(0, p(d|wab)-p(d|wc))
+; where p(d|wc) = p(wc,d) / p(wc,*)  and p(d|wab) = p(wab,d) / p(wab,*)
 ; let M(wc,d) == N(wc,*) q(d)
 ;
 ; want:
@@ -15544,7 +15548,10 @@ OK, well, that's not going anywhere.
 	(define nab (+ nad nbd))
 	(define pab (/ nab (+ na nb)))
 	(define pc (/ ncd nc))
-	(max 0 (- pab pc)))
+	(define cab (/ pab (+ na nb)))
+	(define cc (/ pc nc))
+	(max 0 (- pab pc)))  ; this works well
+	; (max 0 (- cab cc)))  ; this works poorly
 
 	; (max 0 (- (* nc pab) ncd))))
 	; (max 0 (* nab (- (* nc pab) ncd))))
@@ -15631,8 +15638,17 @@ looks good
 	(define mwo (net w1 w2 wr))
 	(define mww (tpc 'mmt-count w))
 	(define dabmi (log2 (/ (* prod tot) (* mwo mww))))
-	(define selfmi (smi 'mmt-fmi wr wr))
-	(- dabmi selfmi))
+	; (define selfmi (smi 'mmt-fmi wr wr))
+	dabmi)
+	; (- dabmi selfmi))
+
+(define (dab-perp w)
+	(define w1 (Word "hear"))
+	(define w2 (Word "book"))
+	(define wr (Word "hear"))
+   (dab-perp-helper w1 w2 wr w))
+
+Hmm  slefmi is needed, and the cond is bad
 
 (define (dab-perp w)
 	(define w1 (Word "fall"))
