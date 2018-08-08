@@ -1,0 +1,78 @@
+/*
+ * tests/nlp/lojban/LojbanModuleTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Author: Roman Treutlein
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/nlp/lojban/LojbanModule.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+using namespace opencog;
+using namespace nlp;
+
+class LojbanModuleTest :  public CxxTest::TestSuite
+{
+private:
+    LojbanModule * _lm;
+public:
+
+    LojbanModuleTest(void)
+    {
+    }
+
+    ~LojbanModuleTest()
+    {
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_simple(void);
+};
+
+void LojbanModuleTest::setUp(void)
+{
+    server(CogServer::createInstance);
+    _lm = new LojbanModule(cogserver());
+}
+
+void LojbanModuleTest::tearDown(void)
+{
+    delete _lm;
+    _lm = NULL;
+}
+
+void LojbanModuleTest::test_simple(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    Request * request = new LojbanModule::do_load_lojbanRequest(cogserver());
+    std::list<std::string> words;
+    words.push_back("mi");
+    words.push_back("jimpe");
+    words.push_back("ti");
+
+    _lm->do_parse_lojban(request,words);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}

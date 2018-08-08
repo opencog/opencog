@@ -1,0 +1,32 @@
+
+Instructions for Apple Mac OSX users
+------------------------------------
+
+The MacPorts installer does not include /opt/local/lib into the shared
+library search path. Thus, any libraries installed there will fail to
+be found.  The search path needs to be fixed manually.  This can be done
+by editing ~/.profile and specifying
+
+  export DYLD_LIBRARY_PATH=/opt/local/lib:$DYLD_LIBRARY_PATH
+
+A dynamic library search path failure will manifest itself with this
+error message:
+
+    ./opencog/cogserver/server/cogserver -c ../lib/development.conf
+    Searching for config in default locations...
+    Found ../lib/opencog.conf
+    loaded configuration from file "../lib/opencog.conf"
+    File: ../opencog/scm/utilities.scm line: 9
+    ERROR: In procedure dynamic-link:
+    ERROR: file: "libguile-srfi-srfi-1-v-3", message: "file not found"
+    ABORT: misc-error
+
+Proper operation can be confirmed with opencog, or by invoking guile on
+the command line:
+
+    $ guile
+    guile> (use-modules (opencog))
+    guile>
+
+The above should not generate any errors when the shared libary load
+path is correctly configured.

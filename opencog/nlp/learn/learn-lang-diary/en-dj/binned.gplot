@@ -1,0 +1,214 @@
+# set term png small color
+set term png small
+set out 'binned.png'
+
+# set data style linespoints
+# set data style points
+
+
+#################################################
+# Used to generate the binned word frequency counts
+
+set term postscript eps enhanced color 28
+set out 'binned-word-counts.eps'
+set xrange [1:400]
+set yrange [1:100000]
+set logscale x
+set logscale y
+set format y "10^{%L}"
+set title "Frequency of word observations"
+set xlabel "Number of observations"
+set ylabel "Number of words"
+# plot "binned-word-counts.dat" using 2:3 with point  pointsize 2 title "obs", \
+
+plot "binned-word-counts.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-counts.dat" using 2:(53076 * $2**(-1.5)) with lines linewidth 5 title "N^{-1.5}"
+
+#################################################
+# Used to generate the binned word-logli counts
+#
+set term postscript eps enhanced color 28
+set out 'binned-word-logli.eps'
+set key left
+set xrange [10:]
+set yrange [1:100000]
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of word Log-liklihoods"
+set xlabel "Log liklihood"
+set ylabel "Number of words"
+plot "binned-word-logli.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-logli.dat" using 2:(2**(1.5*($2-13.7))) with lines linewidth 5 title "2^{1.5(logli-13.7)}", \
+     "binned-word-logli.dat" using 2:(2**(0.8*($2-10))) with lines linewidth 5 title "2^{0.8(logli-10)}"
+
+
+#################################################
+# Used to generate the binned word-logli counts
+#
+set term postscript eps enhanced color 28
+set out 'binned-word-logli-60.eps'
+set key left
+set xrange [10:]
+set yrange [1:100000]
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of word Log-liklihoods"
+set xlabel "Log liklihood"
+set ylabel "Number of words"
+plot "binned-word-logli-60.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-logli-60.dat" using 2:(2**(1.5*($2-13.7))) with lines linewidth 5 title "2^{1.5(logli-13.7)}", \
+     "binned-word-logli-60.dat" using 2:(2**(0.5*($2+2.5))) with lines linewidth 5 title "2^{0.5(logli+2.5)}", \
+     "binned-word-logli-60.dat" using 2:(2**(0.9*($2-5.5))) with lines linewidth 5 title "2^{0.9(logli-5.5)}"
+
+set key right
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-avg.eps'
+set yrange [1:3000]
+set xrange [1:10]
+set xtics (1,2,3,4,5,6,7,8,9,10)
+set logscale x
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of average observations"
+set xlabel "Average observations per disjunct"
+set ylabel "Number of words"
+plot "binned-avg.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-avg.dat" using 2:(1500/($2**5)) with lines linewidth 5 title "<obs>^{-5}"
+
+#################################################
+# Used to generate the binned connector-set MI graphs
+#
+set term postscript eps enhanced color 28
+set out 'binned-cset-mi.eps
+set key left
+set yrange [1:1e6]
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of connector set MI"
+set xlabel "Mutual information of c-set"
+set ylabel "Count"
+plot "binned-cset-mi.dat" using 2:3 with lines linewidth 5 title "", \
+      "binned-cset-mi.dat" using 2:(160000 * exp(-0.5*(0.23*($2-11))**2)) with lines linewidth 5 title "exp-(0.23(mi-11))^2/2"
+
+#     "binned-cset-mi.dat" using 2:(160000 * 2**(-0.038*($2-11)**2)) with lines linewidth 5 title "2^{-0.038(mi-11)^2}"
+
+#     "binned-cset-mi.dat" using 2:(160000 * 2**(-(0.2*($2-11))**2)) with lines linewidth 2 title "1.6e5 2^"
+#
+#################################################
+# Used to generate the weighted binned connector-set counts
+#
+set term postscript eps enhanced color 28
+set out 'weighted-cset-mi.eps'
+# set key left
+set yrange [1.0e-7: 1]
+set logscale y
+set format y "10^{%L}"
+set title "Weighted distribution of connector set MI"
+set xlabel "Mutual information of c-set"
+set ylabel "Count"
+plot "weighted-cset-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "weighted-cset-mi.dat" using 2:(0.0015 * 2**(1.3*$2))  with lines linewidth 5 title "2^{1.3mi}", \
+     "weighted-cset-mi.dat" using 2:(0.006 * exp(-(0.15*($2-12))**2)) with lines linewidth 5 title "exp -(0.15 (MI-12))^2 /2"
+
+
+#################################################
+# Used to generate the binned word marginal MI graph
+#
+set term postscript eps enhanced color 28
+set out 'binned-word-mi.eps'
+set key left
+set xrange [4:23]
+set yrange [1:10000]
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of word fractional marginal MI"
+set xlabel "Fractional marginal MI of word"
+set ylabel "Count"
+plot "binned-word-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-mi.dat" using 2:(1900*exp(-0.5*(0.24*($2-20))**2)) with lines linewidth 5 title "exp -(0.24 (FMMI-20))^2 /2"
+
+#################################################
+# Used to generate the binned disjunct MI counts
+#
+set term postscript eps enhanced color 28
+set out 'binned-dj-mi.eps'
+set xrange [2:23]
+set logscale y
+set format y "10^{%L}"
+set title "Distr. of disjunct fractional marginal MI"
+set xlabel "Fractional marginal MI of disjunct"
+set ylabel "Count"
+plot "binned-dj-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-dj-mi.dat" using 2:(50000*exp(-0.5*(0.27*($2-13.7))**2)) with lines linewidth 5 title "exp -(0.27 (FMMI-13.7))^2 /2"
+
+
+#################################################
+# Used to generate the binned word entropy counts
+#
+set term postscript eps enhanced color 28
+set out 'binned-word-ent.eps'
+set key left
+set xrange [16:24]
+set yrange [1:10000]
+set logscale y
+set format y "10^{%L}"
+set title "Distr. of word fractional marginal entropy"
+set xlabel "Fractional marginal entropy of word"
+set ylabel "Count"
+plot "binned-word-ent.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-ent.dat" using 2:(20*exp(0.5*(0.7*($2-19.5))**2)) with lines linewidth 5 title "exp (0.7 (FE-19.5))^2 /2"
+
+
+#################################################
+# Used to generate the binned squared-len/norm ratio
+#
+set term postscript eps enhanced color 28
+set out 'binned-sqlen-norm.eps'
+set yrange [1:500]
+set xrange [2:1000]
+set logscale y
+set logscale x
+set format x "10^{%L}"
+set format y "10^{%L}"
+set title "Mean-square/size ratio distribution"
+set xlabel "Mean-square to size ratio"
+set ylabel "Number of words"
+plot "binned-sqlen-norm.dat" using (2**$2):3 with lines linewidth 5 title "", \
+     "binned-sqlen-norm.dat" using (2**$2):(900/(2**$2)) with lines linewidth 5 title "ratio^-1.0"
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-sims.eps'
+set logscale y
+set format y "10^{%L}"
+set title "Cosine similarity distribution"
+set xlabel "Cosine Similarity"
+set ylabel "Number of pairs of words"
+plot "binned-good-sims.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-good-sims.dat" using 2:(3.0e5*exp(-8*$2)) with lines linewidth 5 \
+      title "exp(-8 cos)"
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-sims-all.eps'
+set xrange [0.1:]
+set yrange [1:]
+set logscale y
+set format y "10^{%L}"
+set title "Cosine similarity distribution"
+set xlabel "Cosine Similarity"
+set ylabel "Number of pairs of words"
+plot "binned-sims-all.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-sims-all.dat" using 2:(4e4*exp(-12*($2-0.1))) with lines linewidth 5 \
+      title "exp(-12 cos)"
+
+# plot "binned-good-sims.dat" using (1-(2*acos($2)/3.14159)):3 with lines linewidth 2 title "acos"
+#################################################

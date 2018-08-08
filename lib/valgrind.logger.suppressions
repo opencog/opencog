@@ -1,0 +1,44 @@
+{
+   <log_suppress_cond>
+   Memcheck:Cond
+   ...
+   fun:_ZN7opencog6Logger5logvaENS0_5LevelEPKcP13__va_list_tag
+   ...
+}
+{
+   <log_suppression_addr1>
+   Memcheck:Addr1
+   ...
+   fun:_ZN7opencog6Logger5logvaENS0_5LevelEPKcP13__va_list_tag
+   ...
+}
+{
+   <log_suppression_addr2>
+   Memcheck:Addr2
+   ...
+   fun:_ZN7opencog6Logger5logvaENS0_5LevelEPKcP13__va_list_tag
+   ...
+}
+{
+   <log_suppression_addr4>
+   Memcheck:Addr4
+   ...
+   fun:_ZN7opencog6Logger5logvaENS0_5LevelEPKcP13__va_list_tag
+   ...
+}
+{
+   <log_suppression_addr8>
+   Memcheck:Addr8
+   ...
+   fun:_ZN7opencog6Logger5logvaENS0_5LevelEPKcP13__va_list_tag
+   ...
+}
+{
+   <log_thread_cond>
+   Memcheck:Cond
+   ...
+   fun:_ZN7opencog6Logger11writingLoopEv
+   fun:thread_proxy
+   fun:start_thread
+   fun:clone
+}

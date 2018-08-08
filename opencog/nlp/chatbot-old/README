@@ -1,0 +1,102 @@
+
+                       Old Chatbot
+                       -----------
+                  Linas Vepstas April 2008
+
+This directory contains a haphazard collection of tools that were once
+upon-a-time (circa 2008) a functioning question-answering IRC chatbot.
+The code is being kept here because it contains some ideas in some
+README's that Linas wants to revisit and think about some more.
+
+The easiest way to get this code working again is probably to check out
+the code as it was in 2008, run it, and then figure out what changed
+between then and now.  Its probably not worth the effort.
+
+
+Subdirectories (in alphabetical order)
+======================================
+chatbot
+-------
+The chatbot directory contains some crude code to tie opencog NLP
+processing to chat systems, and particularly, to IRC chat.  Provides
+a high-level implementation of a simple, hard-coded question-answering
+system, resting on the foundations of "seme" and "triples".
+
+lexical_attraction
+------------------
+The lexical-attraction directory contains a README file describing some
+ideas for performing pattern recognition to automatically extract
+semantic content, primarily by employing mutual information.
+
+pln
+---
+Misc pln experiments.  Nothing of significance.
+
+question
+--------
+Obsolete; however, the README there is useful for the general
+discussion.
+
+C++ code that implements a basic question-answering algorithm, based on
+matching the NL pattern of a question to the NL pattern of an assertion.
+If the atomspace contains an assertion such as "John threw the ball",
+then this code can correctly answer the question "Who threw the ball?"
+This code is now obsolete, and is not built any more. HOWEVER, the README
+does explain the research results, and provides a general introduction to
+question-answering, and should be kept around indefinitely.
+
+refres
+------
+Some working notes on reference resolution.
+The core problem of reference resolution is determining when two words
+in a text refer to the same concept. Thus, for example, the same noun,
+used in neighboring sentences, probably refers to the same concept.
+Alternately, anaphora (he, she, it, etc.) may also be used to refer to
+the same concept.
+
+This directory is currently empty, it is meant to someday hold an
+implementation of the Hobbs reference resolution algorithm.
+
+See also the "seme" directory, which contains a practical, working
+implementation of reference resolution. See also the "lexical-attraction"
+directory, which outlines a far more general, and hopefully far more
+effective approach.
+
+semcor
+------
+The semcor directory contains some trite SemCor utilities. SemCor
+is a WSJ corpus marked up with word senses.  This directory is nearly
+empty and is not currently used.
+
+seme
+----
+Notes on concept formation and reference resolution from linguistic input.
+Contains a working implementation of basic reference resolution that is
+used by the chatbot.
+
+similarity
+----------
+The similarity directory contains code related to similarity of word
+senses.  Describes plans/code for storing wordnet-derived similarity
+measures within OpenCog.
+
+triples
+-------
+The triples directory contains some experimental code for extracting
+prepositional triples from text. So, for example: "Lisbon is the
+capital of Portugal" would be turned into "capital_of(Portugal,
+Lisbon)".  Such "prepositional relations" extend the usual ontological
+concepts of "is_a", "has_a", "part_of" and "uses" to more general
+relations.
+
+Importantly, this directory contains code to convert plain-text
+IF...THEN... relations into OpenCog ImplicationLinks. This is one
+of the primary achievements of the code here.  Note that the IF...THEN..
+structure used is almost identical to the RelEx Frame rules, and so
+should be usable for porting RelEx frames to OpenCog.
+
+wordnet-import
+--------------
+The wordnet-import directory contains stand-alone code (i.e. not a part
+of opencog) that will walk over the wordnet database, and convert it
+into OpenCog Scheme, which can then be easily loaded into OpenCog.

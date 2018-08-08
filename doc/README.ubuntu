@@ -1,0 +1,156 @@
+OpenCog is very easy to build under Ubuntu. Just follow this page
+
+http://wiki.opencog.org/w/Building_OpenCog_on_Ubuntu
+
+Below is a just copy/paste of it (Nov 18 2010)
+Its also obsolete ...
+
+=========================================================
+
+Building OpenCog on Ubuntu
+From OpenCog
+
+There are two options if you are on Ubuntu, you can either use the setup scripts from the Cogbuntu release, or you can manually download and install the various depedencies...
+Contents
+[hide]
+
+    * 1 Use Cogbuntu scripts
+          o 1.1 Ubuntu 10.10
+          o 1.2 Ubuntu 10.04
+          o 1.3 Ubuntu 9.10
+    * 2 Manually installing depedencies
+          o 2.1 Install version control & build systems
+          o 2.2 Install the core libraries
+          o 2.3 Get the source code
+    * 3 Build the core
+    * 4 Build & run tests
+    * 5 Build the documentation
+
+Use Cogbuntu scripts
+
+Ubuntu 10.10
+
+If you checkout revision 29, you get all you need to install all dependencies for OpenCog on Ubuntu 10.10 So:
+
+bzr branch -r29 lp:~opencog-dev/opencog/cogbuntu cogbuntu-10.10
+cd cogbuntu-10.10
+
+then run
+
+mkdir temp
+sudo ./add-apt-repo.sh && sudo ./install-packages-opencog-dep.sh temp
+
+to install all that opencog needs. Beware that: add-apt-repo.sh is gonna add some Karmic packages repo in /etc/apt/sources.list.
+Ubuntu 10.04
+
+If you checkout revision 26, you get all you need to install all dependencies for OpenCog on Ubuntu 10.04 So:
+
+bzr branch -r26 lp:~opencog-dev/opencog/cogbuntu cogbuntu-10.04
+cd cogbuntu-10.04
+
+then run
+
+mkdir temp
+sudo ./add-apt-repo.sh && sudo ./install-packages-opencog-dep.sh temp
+
+to install all that opencog needs. Beware that: add-apt-repo.sh is gonna add some Karmic packages repo in /etc/apt/sources.list.
+Ubuntu 9.10
+
+If you checkout revision 1, you get all you need to install all dependencies for OpenCog on Ubuntu 9.10. So:
+
+bzr branch -r1 lp:~opencog-dev/opencog/cogbuntu cogbuntu-9.10
+cd cogbuntu-9.10
+
+then run
+
+sudo ./install-packages.sh
+
+These are instructions for a progressive build of OpenCog on Ubuntu 9.10 (karmic) and Ubuntu 10.04 (lucid).
+
+Please report any build issues on the #opencog channel at irc.freenode.net.
+Manually installing depedencies
+
+First insure your repository sources are up to date.
+
+Open a command line, e.g. from Applications > Accessories > Terminal. The boxes below surrounded with dotted lines are commands to be pasted onto the command line.
+
+Update your package repositories
+
+sudo aptitude update
+
+Install version control & build systems
+
+The OpenCog project uses the git source code version control system, and the CMake build system (analogous to GNU autoconf).
+
+sudo aptitude install git cmake
+
+note: the command above will also install necessary dependencies, such as a C compiler and other libraries and tools. If your system hasn't been used before to build software, it may take many minutes to download and install all dependencies.
+Install the core libraries
+
+OpenCog uses the Boost C++ Libraries.
+
+sudo aptitude install libboost-dev
+
+note: the command above will also install necessary dependencies, such as a C++ compiler and other libraries and tools. If your system hasn't been used before to build software, it may take many minutes to download and install all dependencies.
+Get the source code
+
+Build the core
+
+The core includes PLN and MOSES.
+
+Currently parts of OpenCog rely on a hard-coded relative build location, so create your build directory at ochack/bin.
+
+cd ochack; mkdir bin; cd bin
+
+Configure the build
+
+cmake ..
+
+Build OpenCog core
+
+make
+
+Currently the OpenCog build system chooses which components to build based upon the existence of certain development packages installed (or not installed) on your system.
+Build & run tests
+
+OpenCog uses the CxxTest framework (analogous to JUnit).
+
+Only do the next two steps if you didn't install dependencies with the Cogbuntu scripts...
+
+Download the cxxtest package:
+
+wget https://launchpad.net/~dhart/+archive/ppa/+files/cxxtest_3.10.1-0ubuntu1~dhart1_all.deb
+
+Install the cxxtest package
+
+sudo dpkg -i cxxtest_3.10.1-0ubuntu1~dhart1_all.deb
+
+Re-configure the build
+
+cmake ..
+
+Setup OpenCog tests
+
+make
+
+Make & run OpenCog tests
+
+make test
+
+note: tests can be run after building each following section.
+
+Build the documentation
+
+Also available online at http://buildbot.opencog.org/doxygen/
+
+Install the graphviz and doxygen packages.
+
+sudo aptitude install graphviz doxygen
+
+Configure the build
+
+cmake ..
+
+Build OpenCog documentation
+
+make doxygen

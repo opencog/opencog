@@ -1,0 +1,440 @@
+
+                     Eva Chatbot
+                     -----------
+
+Prototype that attaches the chatbot to the behavior psi-rules that
+control the Hanson Robotics Eva robot emulator.
+
+The Eva simulator emulates an animated human head, able to see,
+listen and respond.
+
+Goals
+-----
+Functional goals for this chatbot are:
+
+ * Respond to verbal commands, such as "Turn left" or "Don't
+   look at me." (she's always looking at you)
+
+ * Answer queries about internal state, such as "Can you see me?"
+   "Did you just smile?"
+
+ * Remember things.  e.g. "My name is X"
+
+ * Conduct a reasonably pleasant conversation.
+
+Design goals for this chatbot are:
+
+ * Understand how to convert English sentences into grounded actions.
+   This should be done in some flexible way, by making use of high-level
+   syntactic analysis.
+
+ * Understand how synonymous phrases can be wired in, so that a
+   fairly large set of common expressions can be understood, without
+   having to hard-code each of these, manually.
+
+ * Understand how to perform fuzzy matching, so that at least some
+   basic sense can be picked out of larger, complicated sentences
+   that are not themselves fully understood.
+
+ * Understood how to implement learning, so that actions and responses
+   are refined, as the robot proceeds.  Understand how refinement works.
+
+
+Status
+------
+This is very highly experimental.  Its probably true that most design
+decisions made here are not appropriate, and miss the mark.  There's
+also a bunch of scaffolding, that is meant to be replaced.  Large parts
+may, or may not be redesigned in the (near-term?) future.
+
+A detailed description of the current architecture is given in the
+`architecture` directory.
+
+
+HOWTO
+-----
+There are two ways to run this thing: embodied, and disembodied.
+The disembodied setup is simpler.
+
+## Disembodied HOWTO
+This version does not require the full robotics pipeline (which
+includes 3D visualization via blender): it can be run in IRC, or
+even at the guile prompt.  This version just prints (in English)
+the actions that the robot would perform.  A webcam is recommended,
+so that she can see you.
+
+ * Build and install both the atomspace, and opencog. Ask for help
+   if you don't know how to do this.
+ * Start the RelEx server on port 4444 (`git clone` relex, build it,
+   and run `./opencog-server.sh` in the relex main directory.)
+ * (needed only for IRC) Start the cogita IRC bridge, in the
+   nlp/irc directoy -- the `opencog/nlp/irc/cogita` binary.
+ * Start a guile shell: just say `guile` in this directory.
+ * Enter `(load "run-chatbot.scm")` at the guile prompt.
+ * Talk to her via IRC.  Alternately, from the guile prompt, you
+   can say: `(grounded-talk "Adam" "Look happy!")`
+
+
+## Embodied HOWTO
+There is a fair amount of setup needed to run the fully-embodied
+version.
+
+ * The animation is done in blender; you have to install blender
+   and get the blender rig.
+
+ * Communications is done using ROS. You have to install ROS and
+   catkin and catkin make to build the ROS messages.
+
+ * The bridge between opencog and ROS is in the
+   https://github.com/opencog/ros-behavior-scripting
+   repo. Download and run that.
+
+See the directory https://github.com/opencog/ros-behavior-scripting
+for additional information.  It will give pointers as to how to
+install and configure the above pieces.
+
+
+General sketch
+--------------
+The discussion here assumes familiarity with the simpler "generic"
+chatbot pipeline, in the `nlp/chatbot` directory.  You should study
+that first; otherwise the discussion here will seem disconnected and
+incomplete.
+
+The general technical intent here is to somehow associate nouns and
+verbs with grounded objects and actions. At the most basic level, this
+is relatively "easy": a single word, verb or noun, is associated with a
+single action or item. The first serious challenge comes with modifiers:
+adjectives and adverbs.
+
+Several aproaches are possible. We (currently) reject the simplest and
+easiest one, which is to use simple string-matching to extract verbs
+and actions from strings of words (sentences).  Although this can be
+a very effective way to cobble together a clever-seeming chatbot, it
+does not give insight into the general problem of learning and
+intelligence. Thus, its avoided here, and a more complex path is taken.
+
+The more complex path passes all language through a parser, to extract
+syntactic information from the sentence; the pattern matching is then
+performed at the syntactic level.  language has structure for a reason,
+and one ignores that structure at one's own peril.
+
+The question then becomes: how to ground complex structure? The answer
+that I propose here is use a set of refinements of understanding: what,
+in topology, is called a "filter".  Ideally, an utterance should be
+understood very precisely: every word in the sentence counts, every
+syntactic relation has an effect, every tense, mood and number plays a
+role in the understanding of that sentence.  In practice, the robot is
+stupid, and will be continually encountering sentences that it only
+partly understands.  Thus, the concept of a "filter": the filter is a
+collection of increasingly less-precise understandings of an utterance.
+All of these "understandings" enclose or wrap or encompass the "true"
+meaning of the utterance; just that some understandings are less precise
+than others.  The task is to find the most precise understanding
+possible.
+
+For example: given an utterance, perhaps there is some rule that
+identifies a single word in that sentence: that rule associates a
+grounded meaning to that word.  Perhaps there is another rule that can
+identify two words in the sentence, and can simultaneously ground both
+in a single coherent context for action.  This second rule is then more
+precise than the first.  Whatever meaning there is, whatever action is
+to be taken, it is to be taken under the control of the second rule.
+Unless there is a third rule that is more precise than the second, in
+which case the third rule applies. The "filter" here is simply a chain
+of possible interpretations of an utterance, ordered from least to
+most precise.
+
+If a precise interpretation of a sentence cannot be found, then the
+sentence should be factored into parts, and those parts be combined as
+best as possible.  If one rule recognizes one word, a verb in the
+utterance, and another rule recognizes one word, a noun, but there are
+no rules that recognize two words, then one does as best as one can:
+the sentence is "factored" into parts.  A learning (guessing) subsystem
+does its best to combine the parts into a more precise whole: the more
+parts, the narrower and more refined the understanding.  XXX TODO
+but how does this combination actually work?
+
+The goal of thinking in terms of filters is to think in terms of
+"fallback plans" -- if there is no narrow understanding of an utterance,
+we fall back to some other, more vague understanding, picking the most
+precise one possible, and somehow combining it with any other partial
+understanding from other rules that recognize parts of a sentence.
+
+
+Context
+-------
+Rules should be applied only in relation to the current context.  This
+is for two reasons: one is performance: if we know that a rule is not
+applicable in a certain context, then we don't waste CPU time in
+applying it.  A second reason is that rules can simplify, or factor,
+by not requiring a context to be a part of its specification.  Its not
+clear that the URE can currently handle contexts in this sense. At this
+time, contextualized knowledge seems to be a slightly lower priority.
+
+
+Imperative Architecture
+-----------------------
+The current architecture for handling imperative sentences is in
+`imperative.scm`.  An alternative (failed, incomplete, better)
+architecture is sketched in `imperative-alt.scm`.
+
+At the center of the architecture is the ActionLink. Its a new,
+experimental link type used for holding simplified representations
+of imperatives, intermediate in form from the fully-parsed English
+language input, and the low-level physical motor commands.  That
+is, parsed English is converted into these simplified action structures,
+and then these simplified structures are mapped to actual physical
+actions.
+
+The ActionLink has (for example) the following format:
+
+    ActionLink
+       WordNode "some verb"        ;;; a proto-SchemaNode
+       ListLink
+          ConceptNode "slot value"   ;;; or a WordNode
+
+This is a kind-of flattened or simplified representation of a sentence.
+The "slot value" here is maybe the object of the verb, maybe a
+prepositional adjective, verb modifier, etc. The precise linguistic
+category is not central to this simplified representation.
+
+Some rule will take an input imperative sentence, and boil it down to
+this simplified form.   Another rule will then search for a grounding
+for this.  Groundings are of the form:
+
+    ReferenceLink
+       ActionLink
+          SchemaNode "some verb"   ;;; SchemaNode, or WordNode
+          ListLink
+             ConceptNode "slot value"   ;;; or a WordNode
+       ExecutionOutputLink
+          GroundedPredicateNode "py: some_action"
+          ListLink
+             ConceptNode "argument 1"
+             NumberNode  42
+
+The grounding associates the simplified schema with an explicit
+mechanical/physical action to be taken.  It is currently implemented
+as a one-to-one map.
+
+Future possible enhancement: A given simplified sentence may suggest
+multiple different actions to be taken.  Which, if any of these should
+be taken?  A given input sentence may suggests multiple different
+simplified sentences, and each simplified sentences is suggesting
+multiple different actions. This forms a network.  This network would
+need to be a weighted network, so that, of the large choice of different
+actions, only a few might be selected as the "most likely" and
+performed.
+
+Out of this set of possible actions, some may be contradictory; these
+need to be sorted into subsets that are self-consistent with each other.
+I guess this is a glimmer of an action orchestrater.
+
+
+Action Orchestrator
+-------------------
+Although the above example shows a python call "py: some_action",
+the actual action passes through the "action orchestrator", before
+getting to the robot.  The action orchestrator acts as a multiplexer,
+combining actions from multiple sources, and not just the chatbot.
+That is, other behavior trees and OpenPsi controllers may also be
+vying to express some action; the action orchestrator resolves these.
+
+The action orchestrator is implenented in the `eva/behavior` directory,
+and is loaded as a scheme module `(use-modules (opencog eva-behavior))`
+
+
+Environment Awarenes and Self Awareness
+---------------------------------------
+The `(use-modules (opencog eva-behavior))` contains rudiemntary models
+of the immediate environment (visible human faces) and a model of self
+(maintained after the action orchestroator has resolved any conflicts).
+
+Code to allow question-answering against this grounded knowledge is in
+development.
+
+
+Current defacto implementation
+------------------------------
+Here is how the code is currently organized. It may or may not match
+what other parts of this readme file say.
+
+* imperative.scm -- end-to-end pipeline, converting sentence to action.
+* imperative-rules.scm -- rules to convert English sentences to an
+      intermediate form.
+* semantics.scm -- rules to compare the intermediate form to the
+      knowledgebase of grounded knowledge.
+* knowledge.scm -- ontology of grounded knowledge.
+
+* self-model.scm -- atomspace model of the robot-self.
+* model-query.scm -- querying of self-knowledge (self-awareness)
+
+
+Understanding synonymous phrases
+--------------------------------
+Need to add support for synonyms and synonymous phrases -- e.g. "make a
+happy expression" (which the chatbot currently does not understand) is
+synonymous to "show happiness" (which the chatbot does understand).
+
+Also -- right now "show happiness" and "express happiness" are both
+hard-coded; we would like to have "demonstrate" as a synonym for
+either of these.
+
+Currently, there are a larg number of synonymous verbs and adjectives
+hard-coded in `knowledge.scm`. These should be replaced by a proper
+synonymous-phrase system.
+
+
+Eloquent self-expression (with synonymous phrases)
+--------------------------------------------------
+Currently, any self-awareness queries get rather stiff replies.
+For example, the gaze-direction self-model has "leftwards", "rightwards"
+as possible gaze directions. When asked where she is looking, she
+responds with these self-model words directly.  It would be much
+better if she responded with some synonymous phrase, such as "to the
+left".  Such a choice of wording is part of personality, so the choice
+of synonymous phrases would need to be controlled by some personality
+module.
+
+
+Lack of lexical functions
+-------------------------
+Although the current sureal does a good job of assembling sentences,
+it completely lacks support for "lexicial functions":  there is no
+mechanism to convert infinitives into the proper tense; to take a
+noun and adjust the noun-number as needed, etc.  In other words, the
+input into sureal already has to have the correct tense, noun-number,
+etc. already specified. This severely limits expressiveness, and makes
+it difficult to formulate a good reply.  (XXX This is being fixed by
+Man Hin right now).
+
+
+Modifiers
+---------
+Need to implement modifiers: e.g. "turn a little bit to the left"
+"turn a little bit more", "turn a little bit less", "a little more".
+Not at all clear how to accomplish this.
+
+
+Face awareness
+--------------
+TODO: implement environment awareness: "look at me", "look at him".
+
+TODO: she does not recognize he own name.
+
+TODO: she does not know the names of people.
+
+
+Issues
+------
+Linguistic issues abound.  Consider these sentences: "She looks good",
+"She looks left".  Both have essentially the same syntactic parse, but
+have very different semantics: the first should generate the dependency
+relation _to-be(look, good) while the second should generate the active
+_to-do(look, left). We cannot distinguish these from the syntax alone.
+What should we do?  The only answer I can think of is to learn by
+mutating rules ...
+
+Generalizations: for example, look-rule-1 explicitly looks for the verb
+"look". This needs to be replaced by some word-sense disambiguation WSD
+stage, so that any synonym of "look" is sufficient.  Even more: any
+synonymous command should be enough, not just on the word level, but
+generally.
+
+"Keep smiling" needs to relaunch the smile animation every second or
+so, because it fades away.  Thus, we need some temporal thread to keep
+this going.
+
+
+Bugs
+----
+Sometimes, imperatives get mis-classified as Declaratives. It seems
+random and intermittent and non-reproducible. Not sure what the issue
+is.  e.g. "Eva, turn to the right" "Eva, look up" "Eva, look up"
+after a few of these, on gets marked as declarative.
+
+What works, currently
+---------------------
+Below are examples of sentences that Eva is currently able to
+understand and respond to.  Enter these at the IRC chatbot interface,
+alternately, say this at the guile prompt:
+
+   (grounded-talk "nick" "Look up!")
+
+where "nick" is your chat nick, and "Look up!" is a typical sentence.
+
+Imperatives:
+
+   Eva, look to the right.
+   Look up!
+   Eva, turn to the right.
+   turn left
+   Look down.
+   look straight ahead
+   turn forward
+
+("looking" makes here move her eyes only; turning turns he whole head).
+
+   Smile!
+   frown
+   Look sad
+   Look happy
+   Look surprised
+   Look bored
+   Eva, express boredom
+   Eva, show happiness!
+	Feign amusement
+   Dramatize loathing
+	Portray puzzlement
+	Shake your head
+	Blink!
+	Yawn!
+
+The blender model contains a dozen emotion-expression animations, such
+as fear, disgust, boredom, smiling, surprise and a half-dozen gestures,
+including nodding, blinking and yawning.  Assorted synonmyous verbs and
+adjectives should trigger these.
+
+Self-awareness questions (under construction)
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+      The correct fix is to wire up to the space server.
+   What are you doing?
+   What did you just do?
+   What happened just now?
+
+
+Some mappings:
+--------------
+where are you looking? -> where-look-rule
+waht are you doing? -> what-doing-rule
+
+Idealized replies:
+------------------
+What are you doing?
++ I am looking at you
++ I am looking to the left
++ I am smiling
++ (makes a face) I am frowning.
+
+
+===========================
+TODO
+
+ActionLink could be/should be renamed ExecutionLink
+
+... and have Inheritance to identify it as a kind of action.
+
+
+OpenPsi:
+    ImplicationLink
+        SequentialAndLink
+            Predicate - Is there a new verbal command?
+            ExecuteOutputLink
+                Obey the command
+        Goal- "Obey user"
+
+* Replace rules with psi-rules (or with forward chainer)
+
+* Provide simple string-matching API.

@@ -1,0 +1,160 @@
+//
+// Script for automatic "atom type" generation. For more information,
+// consult the opencog/atomspace/README file.
+//
+// Please note: some of the types below are used only via the scheme
+// bindings. Thus, just because you can comment some of these out, and
+// the code still compiles, that does not mean that these types are
+// unused!  Be sure to grep for the CamelCase names, to see if they
+// show up elsewhere!
+//
+// ====================================================================
+//
+WORD_NODE <- NODE
+ANY_NODE <- NODE    // Explicit wildcard node, used for counting.
+WORD_CLASS_NODE <- NODE  // A signifier of a set of words
+
+REFERENCE_LINK <- ORDERED_LINK
+
+// Imperative command. See chatbot-eva for details.
+// Kind-of-like ExecutionLink, except more like ExecutionOutputLink
+ACTION_LINK <- ORDERED_LINK
+
+// Custom atoms to identify documents, sentences, word instances.
+// These are emitted by RelEx and are used to input text into OpenCog.
+DOCUMENT_NODE <- CONCEPT_NODE
+SENTENCE_NODE <- CONCEPT_NODE
+SENTENCE_LINK <- ASSOCIATIVE_LINK
+PARSE_NODE <- CONCEPT_NODE
+PARSE_LINK <- ASSOCIATIVE_LINK
+WORD_INSTANCE_NODE <- CONCEPT_NODE
+WORD_INSTANCE_LINK <- ASSOCIATIVE_LINK
+
+// These are needed for AIML conversion and dialog/speech handling.
+// Analogous to SENTENCE_NODE and DOCUMENT_NODE, but for speech.
+UTTERANCE_NODE <- CONCEPT_NODE
+DIALOG_NODE <- CONCEPT_NODE
+
+// Ghost (was chatlang) needs a PHRASE_NODE
+PHRASE_NODE <- NODE
+
+// These are used to number the sequence in which words,
+// sentences and documents are observed.  Use these with
+// GreaterThanLink to find out what order things came in.
+SEQUENCE_LINK <- ASSOCIATIVE_LINK
+WORD_SEQUENCE_LINK <- SEQUENCE_LINK
+SENTENCE_SEQUENCE_LINK <- SEQUENCE_LINK
+DOCUMENT_SEQUENCE_LINK <- SEQUENCE_LINK
+
+// Custom atoms to identify features, relations
+// These are not used anywhere, right???
+FEATURE_NODE <- PREDICATE_NODE
+FEATURE_LINK <- ORDERED_LINK
+
+// XXX TODO -- below should be replaced by LG_LINK_NODE
+// This is NOT a connector, its a pair of connected connectors.
+LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX"
+
+// ---------------------------------------------------------------
+// Used to represent RelEx dependency relations
+// Since RelEx is deprecated, thes should eventually go away.
+DEFINED_LINGUISTIC_CONCEPT_NODE <- CONCEPT_NODE // is this used anywhere??
+DEFINED_LINGUISTIC_PREDICATE_NODE <- PREDICATE_NODE
+DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
+PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
+
+// ---------------------------------------------------------------
+// Wordnet-import nodes.
+// See nlp/wordnet-import/README and nlp/wsd/README for details.
+// LEMMA_NODE appears to be currently unused.
+WORD_SENSE_NODE <- CONCEPT_NODE
+WORD_SENSE_LINK <- ASSOCIATIVE_LINK
+PART_OF_SPEECH_NODE <- FEATURE_NODE
+PART_OF_SPEECH_LINK <- FEATURE_LINK
+LEMMA_NODE <- CONCEPT_NODE
+LEMMA_LINK <- ORDERED_LINK
+HOLONYM_LINK <- INHERITANCE_LINK
+
+TENSE_NODE <- CONCEPT_NODE
+TENSE_LINK <- FEATURE_LINK
+
+// Word-sense-disambiguation nodes.
+// See nlp/wsd/README for details.
+COSENSE_LINK <- UNORDERED_LINK
+
+// ---------------------------------------------------------------
+// Concept-formation anchors.
+// See nlp/seme/README for details.
+// These are more-or-less obsolete, and should probably be removed.
+SEME_NODE <- CONCEPT_NODE
+SEMANTIC_RELATION_NODE <- SEME_NODE
+// CONTEXT_NODE <- CONCEPT_NODE // apparently useless
+
+// Atoms to identify different interpretations of a single parse.
+// Added for Relex2Logic processing of meanings in sentences.
+INTERPRETATION_NODE <- NODE
+INTERPRETATION_LINK <- LINK
+SPECIFIC_ENTITY_NODE <- NODE
+
+// ---------------------------------------------------------------
+// Link Grammar dictionary types.
+// See
+// https://github.com/opencog/link-grammar/blob/master/viterbi/README
+// for details on what these mean. These are currently used in the
+// sureal codebase.
+//
+// Dictionary. Holds a reference to an LG Dictionary.
+LG_DICT_NODE <- NODE
+
+// Looks up a single word in the LG dictionary
+LG_DICT_ENTRY <- FUNCTION_LINK
+
+// Parser - parses sentences.
+LG_PARSE_LINK <- FUNCTION_LINK
+LG_PARSE_MINIMAL <- LG_PARSE_LINK
+
+// Connector: same meaning and syntax as in link-grammar, except that
+// the direction and the multi-connector parts get distinct types.
+LG_CONNECTOR_NODE <- PREDICATE_NODE   // e.g. "MX"
+LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
+LG_CONN_DIR_NODE <- NODE    // e.g. "+"
+
+// Consists of the connector node, the direction, and possibly the
+// multi-connector node.
+LG_CONNECTOR <- CONNECTOR   // e.g. "MX+"
+
+// These vaguely resemble AND_LINK and OR_LINK, but DO NOT BE FOOLED!
+// They are not really the same, as they are not boolean; rather they
+// behave like "linear logic" operators.  In particular, LG_OR is an
+// exclusive-OR disjunction (only one choice can be picked).
+// Thus, we create brand-new types here, to avoid having to re-cycle
+// AND_LINK, OR_LINK with different, conflicting meanings.
+//
+LG_SEQ <- LIST_LINK   // Just an ordered sequence, without other semantics.
+LG_AND <- LG_SEQ      // must be ordered! (like SEQUNTIAL_AND_LINK)
+LG_OR  <- OR_LINK     // Exclusive-OR, completely disjunctive.
+
+// Kind-of-like an EvaluationLink but different.
+// First atom must be a WordNode or WordInstanceNode.
+// Second atom must be a "connector set": that is, a collection of
+// LgConnectors, joined with LgOr, LgAnd links.
+// Ideally, these are fully disjoined before use.
+// In the case of WordInstanceNode, it should always be a
+// LgAnd disjunct used in the corresponding sentence.
+LG_WORD_CSET <- CONNECTOR_SEQ
+LG_DISJUNCT <- SECTION
+
+// For LG link instance of a specific parse of a sentence
+// LgLinkInstanceNode will be an instance of LinkGrammarRelationshipNode
+// and LgLinkInstanceLink will link the node to the original connectors
+LG_LINK_INSTANCE_NODE <- PREDICATE_NODE
+LG_LINK_INSTANCE_LINK <- LIST_LINK
+
+// ---------------------------------------------------------------
+// Types used in the Lojban Parser
+// XXX FIXME - these names are excessively generic, and are
+// undocumented. Based on conversations, both of these links appear to
+// be special cases of TypedAtomLink, see discussion at
+// https://github.com/opencog/opencog/pull/3115
+SET_TYPE_LINK <- ORDERED_LINK
+SET_SIZE_LINK <- ORDERED_LINK

@@ -1,0 +1,253 @@
+/*
+ * OpenPsiImplicatorUTest.cxxtest
+ *
+ * Copyright (C) 2017 MindCloud
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <opencog/openpsi/OpenPsiImplicator.h>
+#include <opencog/openpsi/OpenPsiRules.h>
+
+#define OPENPSI_TEST_PATH PROJECT_SOURCE_DIR "/tests/openpsi"
+#define CHKERR \
+    TSM_ASSERT("Caught scm error during eval", \
+        (false == _scm->eval_error()));
+
+using namespace opencog;
+
+class OpenPsiImplicatorUTest : public CxxTest::TestSuite
+{
+private:
+  AtomSpace* _as;
+  SchemeEval* _scm;
+  OpenPsiImplicator* _opi;
+  OpenPsiRules* _opr;
+
+public:
+  OpenPsiImplicatorUTest(): _as(nullptr), _scm(nullptr), _opi(nullptr)
+  {
+    logger().set_level(Logger::DEBUG);
+    logger().set_print_level_flag(true);
+    logger().set_print_to_stdout_flag(true);
+  }
+
+  ~OpenPsiImplicatorUTest()
+  {
+    // Clean Up
+    tearDown();
+
+    // Erase the log file if no assertions failed
+    if(!CxxTest::TestTracker::tracker().suiteFailed())
+        std::remove(logger().get_filename().c_str());
+  }
+
+  void setUp()
+  {
+    // The scheme environment is reset between each test.
+    _as = new AtomSpace();
+    _scm = new SchemeEval(_as);
+    _opi = new OpenPsiImplicator(_as);
+    _opr = new OpenPsiRules(_as);
+
+    // Configure scheme load-paths that are common for all tests.
+    _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    CHKERR
+  }
+
+  void tearDown()
+  {
+    delete _as;
+    _as = nullptr;
+    delete _scm;
+    _scm = nullptr;
+
+    // Reset the caches between each test.
+    delete _opi;
+    _opi = nullptr;
+    delete _opr;
+    _opr = nullptr;
+  }
+
+  // Test OpenPsiImplicator::check_satisfiability
+  void test_check_satisfiability()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Initial Setup
+    TruthValuePtr tv;
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq context_2 = _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq context_4 = _scm->eval_h("(context-4-cpp)")->getOutgoingSet();
+    CHKERR
+    Handle action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle action_2 = _scm->eval_h("action-2");
+    CHKERR
+    Handle goal_1 = _scm->eval_h("goal-1");
+    CHKERR
+
+    Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    PatternLinkPtr query_1 =  _opr->get_query(rule_1);
+    Handle query_body_1 = query_1->get_pattern().body;
+
+    // A Ghost rule.
+    Handle rule_2 = _opr->add_rule(context_2, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    PatternLinkPtr query_2 =  _opr->get_query(rule_2);
+    Handle query_body_2 = query_2->get_pattern().body;
+
+    // A Ghost rule with no variable in the pattern
+    Handle rule_3 = _opr->add_rule(context_4, action_2, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    PatternLinkPtr query_3 = _opr->get_query(rule_3);
+    Handle query_body_3 = query_3->get_pattern().body;
+
+    // Test 1:
+    // Test when there is no grounding.
+    tv = _opi->check_satisfiability(rule_1, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_1));
+
+    tv = _opi->check_satisfiability(rule_2, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_2));
+
+    // Test 2:
+    // Test when there is an alpha-equivalent pattern.
+    _scm->eval("(context-1-alpha-equivalent)");
+    CHKERR
+    tv = _opi->check_satisfiability(rule_1, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_1));
+
+    tv = _opi->check_satisfiability(rule_2, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_2));
+
+    // Test 3:
+    // Test when there is a grounding.
+    _scm->eval("(groundable-content-1)");
+    CHKERR
+    tv = _opi->check_satisfiability(rule_1, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+    TS_ASSERT_DIFFERS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_1));
+
+    tv = _opi->check_satisfiability(rule_2, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+    TS_ASSERT_DIFFERS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_2));
+
+    // Test 4:
+    // Test when there is no variable in the pattern.
+    tv = _opi->check_satisfiability(rule_3, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+
+    // Change the flag, it should return true this time.
+    _scm->eval("(set! test-pred-rtn #t)");
+    tv = _opi->check_satisfiability(rule_3, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+    TSM_ASSERT_EQUALS("Expected _EMPTY_HANDLE_MAP", _opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_3));
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+
+  // Test OpenPsiImplicator::imply and OpenpsiImplicator::was_action_executed.
+  void test_imply()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Initial Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
+    Handle expected_result = _scm->eval_h("(test_imply_solution)");
+    CHKERR
+    _scm->eval_h("(groundable-content-1)");
+    CHKERR
+    HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq context_2 = _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq context_3 = _scm->eval_h("(context-3-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq context_4 = _scm->eval_h("(context-4-cpp)")->getOutgoingSet();
+    CHKERR
+    Handle action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle action_2 = _scm->eval_h("action-2");
+    CHKERR
+    Handle goal_1 = _scm->eval_h("goal-1");
+    CHKERR
+    Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    Handle rule_2 = _opr->add_rule(context_2, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    Handle rule_3 = _opr->add_rule(context_3, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    Handle rule_4 = _opr->add_rule(context_4, action_2, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+
+    // Test 1:
+    // Test when satisfiablity hasn't been checked.
+    TS_ASSERT_THROWS(_opi->imply(rule_1, *_opr), RuntimeException);
+    TS_ASSERT_THROWS(_opi->imply(rule_2, *_opr), RuntimeException);
+    TS_ASSERT_THROWS(_opi->imply(rule_3, *_opr), RuntimeException);
+    TS_ASSERT_THROWS(_opi->imply(rule_4, *_opr), RuntimeException);
+
+    // Test 2:
+    // Test when satisfiablity has been checked.
+    _opi->check_satisfiability(rule_1, *_opr);
+    Handle result_2_1 = _opi->imply(rule_1, *_opr);
+    TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
+      expected_result, result_2_1);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_1), TruthValue::TRUE_TV());
+
+    _opi->check_satisfiability(rule_2, *_opr);
+    Handle result_2_2 = _opi->imply(rule_2, *_opr);
+    TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
+      expected_result, result_2_2);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_2), TruthValue::TRUE_TV());
+
+    _opi->check_satisfiability(rule_3, *_opr);
+    Handle result_2_3 = _opi->imply(rule_3, *_opr);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_2_3);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_3), TruthValue::FALSE_TV());
+
+    _scm->eval("(set! test-pred-rtn #t)");
+    _opi->check_satisfiability(rule_4, *_opr);
+    Handle result_2_4 = _opi->imply(rule_4, *_opr);
+    TS_ASSERT_EQUALS(action_2, result_2_4);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_4), TruthValue::TRUE_TV());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+};

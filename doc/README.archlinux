@@ -1,0 +1,28 @@
+##############################################################################
+Installation and dependency resolution for ArchLinux users
+###############################################################################
+
+There exists a package in the AUR named opencog-bzr found at
+http://aur.archlinux.org/packages.php?ID=35449
+
+To get started with the AUR, please read:
+http://wiki.archlinux.org/index.php/AUR
+
+An AUR helper automates the use of the AUR.
+To use an AUR helper (yaourt) please read:
+http://wiki.archlinux.org/index.php/Yaourt
+
+Note that it's possible you will encounter a linkage error at the end
+OpenCog compiling, this is because the install script uses fakeroot,
+if so just compile it manually and it should work.
+
+----------------------------------------------------------
+
+Opencog depends on the many packages. Some of the more important ones are:
+
+   g++ cmake boost guile cxxtest unixodbc
+
+unixodbc is optional; its neeeed for database persistance.  See the
+main README for details.
+
+----------------------------------------------------------

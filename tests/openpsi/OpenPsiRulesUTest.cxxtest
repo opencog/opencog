@@ -1,0 +1,187 @@
+/*
+ * OpenPsiRulesUTest.cxxtest
+ *
+ * Copyright (C) 2017 MindCloud
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <opencog/openpsi/OpenPsiRules.h>
+
+#define OPENPSI_TEST_PATH PROJECT_SOURCE_DIR "/tests/openpsi"
+#define CHKERR \
+    TSM_ASSERT("Caught scm error during eval", \
+        (false == _scm->eval_error()));
+
+using namespace opencog;
+
+class OpenPsiRulesUTest : public CxxTest::TestSuite
+{
+private:
+  AtomSpace* _as;
+  SchemeEval* _scm;
+  OpenPsiRules* _opr;
+
+public:
+  OpenPsiRulesUTest(): _as(nullptr), _scm(nullptr), _opr(nullptr)
+  {
+    logger().set_level(Logger::DEBUG);
+    logger().set_print_level_flag(true);
+    logger().set_print_to_stdout_flag(true);
+  }
+
+  ~OpenPsiRulesUTest()
+  {
+    // Clean Up
+    tearDown();
+
+    // Erase the log file if no assertions failed
+    if(!CxxTest::TestTracker::tracker().suiteFailed())
+        std::remove(logger().get_filename().c_str());
+  }
+
+  void setUp()
+  {
+    // The scheme environment is reset between each test.
+    _as = new AtomSpace();
+    _scm = new SchemeEval(_as);
+    _opr = new OpenPsiRules(_as);
+
+    // Configure scheme load-paths that are common for all tests.
+    _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    CHKERR
+
+    logger().info("##### Finished setting up to run a test #####");
+  }
+
+  void tearDown()
+  {
+    delete _as;
+    _as = nullptr;
+    delete _scm;
+    _scm = nullptr;
+
+    // Reset the cache between each test.
+    delete _opr;
+    _opr = nullptr;
+  }
+
+  // Check OpenPsiRules::add_rule is addng the openpsi rule properly,
+  // and that OpenPsiRules::is_rule differentiates between rules that
+  // are in index vs that are not.
+  void test_add_rule_and_is_rule()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Common Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
+    CHKERR
+    HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
+    CHKERR
+    Handle action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle goal_1 = _scm->eval_h("goal-1");
+    CHKERR
+
+    // Test 1 :
+    // Check that rules that are defined in the atomspace but are not
+    // added to the index are not considered as a valid rule.
+    Handle declared_rule_1 = _scm->eval_h("(rule-1-cpp)");
+    TS_ASSERT_EQUALS(false, _opr->is_rule(declared_rule_1));
+
+    // Test 2:
+    // Check if the rule is added properly.
+    Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    TS_ASSERT_EQUALS(declared_rule_1, rule_1);
+
+    // Test 3:
+    // Check if rules that are defined using OpenPsiRules::add_rule are
+    // considered as a valid rule.
+    TS_ASSERT_EQUALS(true, _opr->is_rule(declared_rule_1));
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+
+  // Check OpenPsiRules::get_context, OpenPsiRules::get_action,
+  // OpenPsiRules::get_goal, and OpenPsiRules::get_query are behaving
+  // as expected. If the rule is added into the atomspace using
+  // OpenPsiRules::add_rule then it should behave, as tested here.
+  void test_rule_get_functions()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Common Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
+
+    // Test 1:
+    // If the rule isn't added using OpenPsiRules::add_rule then
+    // the index doesn't know about it.
+    Handle rule_1 = _scm->eval_h("(rule-1-cpp)");
+    CHKERR
+    Handle result_1_1 = _opr->get_action(rule_1);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_1_1);
+
+    HandleSeq& result_1_2 = _opr->get_context(rule_1);
+    TS_ASSERT_EQUALS(0, result_1_2.size());
+
+    Handle result_1_3 = _opr->get_goal(rule_1);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_1_3);
+
+    PatternLinkPtr result_1_4 = _opr->get_query(rule_1);
+    TS_ASSERT_EQUALS(nullptr, result_1_4);
+
+    // Test 2:
+    // If the rule is added using OpenPsiRules::add_rule then
+    // the index is aware of it.
+    HandleSeq expected_context_1 = \
+    _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
+    CHKERR
+    Handle expected_action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle expected_goal_1 = _scm->eval_h("goal-1");
+    CHKERR
+    Handle expected_query_1 = _scm->eval_h("(pattern-link-1)");
+    CHKERR
+    _opr->add_rule(expected_context_1, expected_action_1,
+      expected_goal_1, SimpleTruthValue::createSTV(1,1));
+
+    Handle result_2_1 = _opr->get_action(rule_1);
+    TS_ASSERT_EQUALS(expected_action_1, result_2_1);
+
+    HandleSeq& result_2_2 = _opr->get_context(rule_1);
+    // A Link is created so as to use operator==.
+    TS_ASSERT_EQUALS(*LinkCast(createLink(expected_context_1)),
+      *LinkCast(createLink(result_2_2)));
+
+    Handle result_2_3 = _opr->get_goal(rule_1);
+    TS_ASSERT_EQUALS(expected_goal_1, result_2_3);
+
+    PatternLinkPtr result_2_4 = _opr->get_query(rule_1);
+    // Don't know why operator== doesn't work.
+    TS_ASSERT(opencog::content_eq(expected_query_1, result_2_4->get_handle()));
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+};

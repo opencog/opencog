@@ -1,0 +1,39 @@
+
+BLOPEX -- Block Locally Optimal Preconditioned Eigenvalue Xolvers
+-----------------------------------------------------------------
+
+This directory contains a slightly cleaned-up copy of BLOPEX.
+The original blopex project site is at:
+
+   https://code.google.com/p/blopex/
+
+and the original code can be found at:
+
+   http://blopex.googlecode.com/svn/trunk/ blopex-read-only
+
+The cleanups here are mostly to simplify the build system, and thus
+make it easier to use blopex within the OpenCog code base. 
+
+The copying was done because blopex is not a package that can currently
+be found in Ubuntu or RedHat, and thus would be a challenge for users to
+install.
+
+What is BLOPEX?
+---------------
+Block Locally Optimal Preconditioned Eigenvalue Xolvers (BLOPEX) is a
+package, written in C and MATLAB/OCTAVE, that includes an eigensolver
+implemented with the Locally Optimal Block Preconditioned Conjugate
+Gradient Method (LOBPCG). Its main features are: a matrix-free iterative
+method for computing several extreme eigenpairs of symmetric positive
+generalized eigenproblems; a user-defined symmetric positive
+preconditioner; robustness with respect to random initial
+approximations, variable preconditioners, and ill-conditioning of the
+stiffness matrix; and apparently optimal convergence speed.
+
+See also:
+http://en.wikipedia.org/wiki/BLOPEX
+http://en.wikipedia.org/wiki/LOBPCG
+
+Knyazev, Andrew V. (2001), "Toward the Optimal Preconditioned
+Eigensolver: Locally Optimal Block Preconditioned Conjugate Gradient
+Method", SIAM Journal on Scientific Computing 23 (2): 517–541,
