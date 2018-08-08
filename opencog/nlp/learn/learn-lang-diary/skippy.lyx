@@ -6410,8 +6410,51 @@ Word-Sense Disambiguation
 \end_layout
 
 \begin_layout Standard
-Since this paper is already too long, that conversation is moved over to
- reference 
+The primary issue with hard clustering is that it fails to correctly disentangle
+ different word senses.
+ There is an opportunity to do better.
+\end_layout
+
+\begin_layout Standard
+A prototype example is given by the word 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It could be the noun, refering to the cutting tool; it could be the verb
+ synonymous to cutting; it could be thw past tense of the verb 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The observational data consists of occurance counts 
+\begin_inset Formula $N\left(\mbox{"saw"},d\right)$
+\end_inset
+
+.
+ The goal of word-sense disambiguation is to somehow factor this into three
+ grammatical classes 
+\begin_inset Formula $g$
+\end_inset
+
+, so that 
+\begin_inset Formula 
+\[
+N\left(\mbox{"saw"},d\right)=N\left(\left\langle \mbox{tool}\right\rangle ,d\right)+N\left(\left\langle \mbox{cutting}\right\rangle ,d\right)+N\left(\left\langle \mbox{seeing}\right\rangle ,d\right)
+\]
+
+\end_inset
+
+The general problem of how to accomplish this, and several tactics are discussed
+ in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Vepstas2018stiching"
@@ -6419,15 +6462,20 @@ key "Vepstas2018stiching"
 \end_inset
 
 .
- Its bare-bones right now.
-\end_layout
-
-\begin_layout Subsection
-Information Maximizing Matrix Factorization
+ That persentation focuses on cosine distances.
+ This section provides an information-theoretic variant.
 \end_layout
 
 \begin_layout Standard
-xxxx
+Assume, for example, that the actual observed frequencies 
+\begin_inset Formula $p\left(\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Unfinished Thoughts 
 \end_layout
 
 \begin_layout Standard
