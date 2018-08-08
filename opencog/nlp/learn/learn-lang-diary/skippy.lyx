@@ -6467,11 +6467,150 @@ key "Vepstas2018stiching"
 \end_layout
 
 \begin_layout Standard
-Assume, for example, that the actual observed frequencies 
-\begin_inset Formula $p\left(\right)$
+The actual observed frequencies 
+\begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
+ are, by definition, sums of word 
+\begin_inset Formula $w$
+\end_inset
 
+ used with every different possible word-sense 
+\begin_inset Formula $s_{k}$
+\end_inset
+
+ that the word could have.
+ That is, explicitly, one has that
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{k}p\left(s_{k},d\right)
+\]
+
+\end_inset
+
+In poetry and in word-play, a word might be used in such a way that multiple
+ senses are simultaneously applied.
+ The assumption above is that this is not the case: that the text assigns
+ only a single meaning to each word use.
+ In any given use, the word 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ is either a noun, or one of the verbs; it cannot be some mixture of all
+ of them.
+ 
+\end_layout
+
+\begin_layout Standard
+Each word-sense can then be hard-clustered into a single grammatical category:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+-the-noun belongs to just one grammatical category, the one that holds synonyms
+ for cutting tools.
+ Thus, the hard-clustering formula applies:
+\begin_inset Formula 
+\[
+p\left(s,g\right)=\begin{cases}
+p\left(s,*\right) & \mbox{ if }s\in g\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The intent of the sense label 
+\begin_inset Formula $s$
+\end_inset
+
+ is that it is uniquely associated with just one word, and no others.
+ The number of word-senses is strictly larger than the vocabulary: every
+ vocabulary word has at least one sense.
+ That is, 
+\begin_inset Formula $p\left(*,s\right)=p\left(w,s\right)$
+\end_inset
+
+ holds for all 
+\begin_inset Formula $s\in w$
+\end_inset
+
+.
+ Thus, the conditional probability is
+\begin_inset Formula 
+\[
+p\left(w|s\right)=\frac{p\left(w,s\right)}{p\left(*,s\right)}=\begin{cases}
+1 & \mbox{ if }s\in w\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The decomposition of words into senses is then (restating the earlier formula
+ in slightly different notation: 
+\begin_inset Formula 
+\begin{eqnarray*}
+p\left(w,d\right) & = & \sum_{s}p\left(w|s\right)p\left(s,d\right)\\
+ & = & \sum_{s\in w}p\left(s,d\right)
+\end{eqnarray*}
+
+\end_inset
+
+To be consistent with the central factorization 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+, one must have
+\begin_inset Formula 
+\[
+\sum_{s\in w}p\left(s,g\right)=p\left(w,g\right)
+\]
+
+\end_inset
+
+and
+\begin_inset Formula 
+\[
+\sum_{s\in w}p\left(s|g\right)=p\left(w|g\right)
+\]
+
+\end_inset
+
+Since a word-sense is associated with just one word, the notation 
+\begin_inset Formula $\sum_{s\in w}$
+\end_inset
+
+ is superflous: one can unambigously write 
+\begin_inset Formula $\sum_{s}$
+\end_inset
+
+ as all other entries are zero.
+\end_layout
+
+\begin_layout Standard
+The central factorization now has the form 
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{s}p\left(s,d\right)=\sum_{s}\sum_{g}\sum_{g^{\prime}}p\left(s|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)
+\]
+
+\end_inset
+
+Not much has changed: the word-senses can now be legitimately hard-clustered;
+ but the decomposition of words into word-senses is unknown.
+ 
 \end_layout
 
 \begin_layout Section
