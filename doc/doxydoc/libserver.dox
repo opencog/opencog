@@ -157,7 +157,7 @@ ignored by doxygen; used as markers for update-links.py;
 <TABLE width="100%" border="0"><TR>
 <TD>\ref libatomspace "Previous"</TD>
 <TD width="100%"></TD>
-<TD>\ref libspatial "Next"</TD>
+<TD>\ref libspacetime "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
