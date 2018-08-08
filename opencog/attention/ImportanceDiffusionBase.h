@@ -37,6 +37,8 @@
 
 #include "AttentionParamQuery.h"
 
+class ImportanceDiffusionUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -49,6 +51,7 @@ class AttentionBank;
 class ImportanceDiffusionBase : public Agent
 {
 protected:
+    friend class ::ImportanceDiffusionUTest;
     AttentionBank* _bank;
     double maxSpreadPercentage;
     double hebbianMaxAllocationPercentage;
