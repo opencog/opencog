@@ -153,7 +153,7 @@ key "Bengio2003"
  and SkipGram
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013,Mikolov2013a"
+key "Mikolov2013b,Mikolov2013a"
 
 \end_inset
 
@@ -529,7 +529,7 @@ At any rate, for
  Following Mikolov
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013"
+key "Mikolov2013b"
 
 \end_inset
 
@@ -749,7 +749,7 @@ Mikolov,
 etal
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013a,Mikolov2013"
+key "Mikolov2013a,Mikolov2013b"
 
 \end_inset
 
@@ -1814,7 +1814,7 @@ Such long-distance attachments are problematic for CBOW or Skip-Grams, in
 , which is a bit larger than currently reported results; for example, Mikolov
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013"
+key "Mikolov2013b"
 
 \end_inset
 
