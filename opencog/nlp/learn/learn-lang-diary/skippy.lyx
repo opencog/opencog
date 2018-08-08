@@ -4287,7 +4287,7 @@ reference "eq:factorize"
 viz
 \emph default
 , the inner product of two vectors 
-\begin_inset Formula $\left(\vec{w}\right)_{g}=p\left(w,g\right)$
+\begin_inset Formula $\left(\vec{w}\right)_{g}=p\left(w|g\right)$
 \end_inset
 
  and 
@@ -4417,7 +4417,7 @@ not
 This becomes more clear if written in in components:
 \begin_inset Formula 
 \[
-p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w|g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
 \]
 
 \end_inset
@@ -4682,7 +4682,7 @@ In the above factorization, matrix
  as joint probabilities.
  However, it seems to be particularly important to the semantic structure
  of the language: it captures the complexity of language, whereas the left
- and right factors merely funnel spell-ed-out word-strings into the actual
+ and right factors merely funnel spelled-out word-strings into the actual
  semantic cagtegories.
  Thus, it is convenient to instead write the left and write factors as Markov
  matrices, while taking the central factor to be a joint probability.
@@ -4717,7 +4717,7 @@ and likewise for
 \end_inset
 
 and likewise 
-\begin_inset Formula $\sum_{g^{\prime}}p\left(d|g^{\prime}\right)$
+\begin_inset Formula $\sum_{g^{\prime}}p\left(d|g^{\prime}\right)=1$
 \end_inset
 
 .
@@ -4877,7 +4877,7 @@ macros
 \end_inset
 
  for 
-\begin_inset Formula $g^{\prime}=\mbox{\left\langle noun-main-p\right\rangle }$
+\begin_inset Formula $g^{\prime}=\mbox{\left\langle noun\negthinspace-\negthinspace main\negthinspace-\negthinspace p\right\rangle }$
 \end_inset
 
 .
@@ -5262,7 +5262,7 @@ ns.
 \begin_layout Standard
 For the special case of hard clustering, where each word or disjunct is
  assigned to only one word class/grammatical class, one has that (eqn (6)
- if Dhillon)
+ of Dhillon)
 \begin_inset Formula 
 \begin{equation}
 p\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)\label{eq:central factor}
