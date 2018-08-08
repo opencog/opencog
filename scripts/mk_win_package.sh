@@ -23,7 +23,7 @@ PACKAGE_DIR="$2"
 mkdir "$PACKAGE_DIR"
 
 # move all required cygwin dlls
-CYGWIN_FILES=( cygboost_filesystem-mt-1_43.dll cygboost_system-mt-1_43.dll cyggomp-1.dll cygicuuc38.dll cygboost_program_options-mt-1_43.dll cygboost_thread-mt-1_43.dll cygicudata38.dll cygssp-0.dll cygwin1.dll cygboost_regex-mt-1_43.dll cyggcc_s-1.dll cygicui18n38.dll cygstdc++-6.dll )
+CYGWIN_FILES=( cygboost_filesystem-mt-1_43.dll cygboost_system-mt-1_43.dll cyggomp-1.dll cygicuuc38.dll cygboost_thread-mt-1_43.dll cygicudata38.dll cygssp-0.dll cygwin1.dll cygboost_regex-mt-1_43.dll cyggcc_s-1.dll cygicui18n38.dll cygstdc++-6.dll )
 for f in ${CYGWIN_FILES[@]}; do
     cp "/bin/$f" "$PACKAGE_DIR"
 done
