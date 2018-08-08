@@ -5484,6 +5484,13 @@ on.
 
 \begin_layout Subsubsection
 Word-Sense Disambiguation
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Word-Sense-Disambiguation"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5708,7 +5715,9 @@ reference "sub:Biclustering"
 \end_inset
 
 .
- 
+ The feasibility of the algorithm is further challenged by the fact that
+ there are more word-senses than there are words, further increasing the
+ computational space.
 \end_layout
 
 \begin_layout Subsection
@@ -6414,9 +6423,9 @@ Q\left(w_{1},w_{2}\right)=\frac{S\left(w_{1},w_{2}\right)}{S\left(*,*\right)}
 
 with
 \begin_inset Formula 
-\[
-MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}
-\]
+\begin{equation}
+MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}\label{eq:pairwise-info-divergence}
+\end{equation}
 
 \end_inset
 
@@ -6667,6 +6676,145 @@ The primary reason to propose a pair-wise information divergence is to enable
 As a corellary, the results of hillclimbing or gradient-descent algorithms
  are insufficiently sparse; one wishes to approxmate the sparsity that hard-clus
 tering offers, with less overhead and complexity in finding the clusters.
+\end_layout
+
+\begin_layout Subsection
+Word-Sense Disambiguation
+\end_layout
+
+\begin_layout Standard
+The section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Word-Sense-Disambiguation"
+
+\end_inset
+
+ describes the general, global framework for discussing word-senses in the
+ factorization model.
+ The challenge of agglomerative clustering is to obtain some estimate of
+ word-sense assignments, given as a starting point the pairwise information
+ divergence of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:pairwise-info-divergence"
+
+\end_inset
+
+.
+ This is where things start to get truly interesting.
+\end_layout
+
+\begin_layout Subsubsection
+Mihalcea Algorithm
+\end_layout
+
+\begin_layout Standard
+Rada Mihalcea describes a word-sense disambiguation algorithm
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mihalcea2004,Mihalcea2005,Mihalcea2007"
+
+\end_inset
+
+ that fits very naturally with the framework being discussed here.
+ However, it requires whole-sentence contexts.
+ For each instance 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ of the 
+\begin_inset Formula $j$
+\end_inset
+
+'th word in a sentence, one assigns an (unknown) vector of word-senses 
+\begin_inset Formula $p\left(w_{j},s_{k}\right)$
+\end_inset
+
+ with the set of possible senses 
+\begin_inset Formula $s_{k}$
+\end_inset
+
+ given externally, as an 
+\emph on
+a priori
+\emph default
+ set, for example, taken from WordNet.
+ In addition, one also assumes an externally provided 
+\emph on
+a priori
+\emph default
+ measure of similarity 
+\begin_inset Formula $d\left(s_{k},s_{m}\right)$
+\end_inset
+
+ of word-senses; again, this can be provided by WordNet.
+ One then considers the full graph clique of all possible word-senses that
+ might appear in the sentence, and thier relation all other possible word-senses.
+ That is, one considers the graph 
+\begin_inset Formula $M\left(s_{k},s_{m}\right)$
+\end_inset
+
+ with the 
+\begin_inset Formula $k$
+\end_inset
+
+ and 
+\begin_inset Formula $m$
+\end_inset
+
+ indexes corresponding to word-positions in the sentence; the matrix entries
+ are just 
+\begin_inset Formula $d\left(s_{k},s_{m}\right)$
+\end_inset
+
+ normalized so that 
+\begin_inset Formula $M$
+\end_inset
+
+ is a Markov matrix (Markov chain).
+ One then solves this chain to find the stationary vector 
+\begin_inset Formula $\pi$
+\end_inset
+
+.
+ This stationary vector can be interpreted as the desired word-sense assignment
+ 
+\begin_inset Formula $p\left(w_{j},s_{k}\right)$
+\end_inset
+
+ of the probability that the 
+\begin_inset Formula $j$
+\end_inset
+
+'th word has the 
+\begin_inset Formula $k$
+\end_inset
+
+'th sense.
+\end_layout
+
+\begin_layout Standard
+The algorithm readily generalizes to any system that can provide logical
+ inference on concepts: one replaces the similarity-distance 
+\begin_inset Formula $d\left(s_{k},s_{m}\right)$
+\end_inset
+
+ by the likelihood of some particular logical inference performed over the
+ sentence.
+ Taken over multiple sentences, this can provide anaphora resolution and
+ reference resolution.
+\end_layout
+
+\begin_layout Standard
+The primary drawback of this algorithm is that the word senses must be externall
+y supplied.
+ For this project, this is even a fatal drawback: the goal is to infer word-sens
+es.
+\end_layout
+
+\begin_layout Subsubsection
+Word-sense Similarity
 \end_layout
 
 \begin_layout Section
