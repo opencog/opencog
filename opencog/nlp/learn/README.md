@@ -1047,14 +1047,39 @@ altered by the clustering code):
 
   The marginal entropies and the mutual information between words and
   disjuncts can be computed in the same way that it's done for word-
-  pairs:
+  pairs, by using the `(batch-pairs ...)` function. However, that
+  function does more than is strictly needed, and one can save some
+  disk space and CPU time by computing only the word-similarities:
 ```
   (define pca (make-pseudo-cset-api))
   (define psa (add-pair-stars pca))
-  (batch-pairs psa)
+  (define btp (batch-transpose psa))
+  (btp 'mmt-marginals)
 ```
   Again, `(w,d)` is just a pair. Like other pairs, its a matrix, and
   has marginal probabilities associated with it.
+
+
+TODO
+----
+Some things in the pipeline, but unfinished:
+
+* Replace cosine distance in the clustering algos by the information
+  divergence, as explained in the
+  [Graph Models vs. Gradient Descent](https://github.com/opencog/opencog/raw/master/opencog/nlp/learn/learn-lang-diary/skippy.pdf)
+  document.  There's alreaddy code for computing the divergence;
+  to get it, just say
+```
+  (define smi (add-symmetric-mi-compute pca))
+  (smi 'mmt-fmi (Word "foo") (Word "bar"))
+```
+
+* Replace centroid means, as explained above.
+
+* The clustering algos above already perform word-sense factoring.
+  Explicit word-senses can be identified by looking at multi-cluster
+  membership.  These can now start to be used for re-parsing, to
+  obtain word-sense pair-correlation statistics.
 
 
 Exporting a Lexis

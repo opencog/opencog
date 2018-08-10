@@ -1,10 +1,9 @@
 ;; Like moses-pln-synergy-pm.scm but relies on the backward chainer.
 
 ;; Set logger to DEBUG
-(use-modules (opencog logger))
-;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-stdout! #t)
-(cog-logger-set-level! "debug")
+;; (ure-logger-set-sync! #t)
+;; (ure-logger-set-stdout! #t)
+(ure-logger-set-level! "debug")
 
 ;; Load the background knowledge
 (load "kb.scm")

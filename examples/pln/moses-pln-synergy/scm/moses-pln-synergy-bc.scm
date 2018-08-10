@@ -2,11 +2,10 @@
 ;; backward chainer.
 
 ;; Set logger to DEBUG
-(use-modules (opencog logger))
-;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-stdout! #t)
-(cog-logger-set-timestamp! #f)
-(cog-logger-set-level! "debug")
+;; (ure-logger-set-sync! #t)
+;; (ure-logger-set-stdout! #t)
+(ure-logger-set-timestamp! #f)
+(ure-logger-set-level! "debug")
 
 ;; Set random seed
 (use-modules (opencog randgen))

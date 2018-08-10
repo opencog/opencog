@@ -309,6 +309,12 @@ bool Miner::match(const Handle& pattern, const Handle& text) const
 	if (pattern->get_type() != LAMBDA_LINK)
 		return content_eq(pattern, text);
 
+	// Ignore text of these types
+	Type tt = text->get_type();
+	if (tt == DEFINE_LINK or
+	    tt == DEFINED_SCHEMA_NODE)
+		return false;
+
 	// Otherwise see if pattern matches text
 	return (bool)matched_results(pattern, text);
 }
@@ -321,7 +327,7 @@ Handle Miner::matched_results(const Handle& pattern, const Handle& text) const
 	tmp_as.add_atom(text);
 	AtomSpace tmp_pattern_as(&tmp_as);
 	Handle tmp_pattern = tmp_pattern_as.add_atom(pattern),
-		tmp_text = 	tmp_as.add_atom(text),
+		tmp_text = tmp_as.add_atom(quote(text)),
 		ml = tmp_as.add_link(MAP_LINK, tmp_pattern, tmp_text);
 	Instantiator inst(&tmp_as);
 	return HandleCast(inst.execute(ml));
@@ -362,8 +368,8 @@ HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned m
 	const SCValuations& var_scv(valuations.get_scvaluations(var));
 
 	////////////////////////////
-    // Shallow abtractions    //
-    ////////////////////////////
+	// Shallow abtractions    //
+	////////////////////////////
 
 	// For each valuation create an abstraction (shallow pattern) of
 	// the value associated to variable, and associate the remaining
@@ -372,8 +378,11 @@ HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned m
 	// Calculate how many valuations will be encompassed by these
 	// shallow abstractions
 	unsigned val_count = valuations.size() / var_scv.size();
-	for (const HandleSeq& valuation : var_scv.valuations)
-		shapats[val_shallow_abstract(valuation[0])] += val_count;
+	for (const HandleSeq& valuation : var_scv.valuations) {
+		Handle shabs = val_shallow_abstract(valuation[0]);
+		if (shabs)
+			shapats[val_shallow_abstract(valuation[0])] += val_count;
+	}
 
 	// Only consider the shallow abstractions that reach the minimum
 	// support
@@ -382,8 +391,8 @@ HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned m
 			shabs.insert(shapat.first);
 
 	////////////////////////////////
-    // Variable factorizations    //
-    ////////////////////////////////
+	// Variable factorizations    //
+	////////////////////////////////
 
 	// Add all subsequent factorizable variables
 	HandleSeq remvars(std::next(valuations.variables.varseq.begin()),
@@ -458,28 +467,46 @@ Handle Miner::val_shallow_abstract(const Handle& value)
 
 	Type tt = value->get_type();
 	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
-	Handle vardecl = variable_list(rnd_vars),
-		body = createLink(rnd_vars, tt);
+	Handle vardecl = variable_list(rnd_vars);
 
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
-		return lambda(vardecl, local_quote(body));
+		return lambda(vardecl, local_quote(createLink(rnd_vars, tt)));
 	}
+
 	// Links wrapped with QuoteLink and UnquoteLinks
-	if (tt == BIND_LINK or
+	if (tt == BIND_LINK or       // TODO: should probabably be replaced
+                                // by scope link and its subtypes
 	    tt == EVALUATION_LINK or
-	    tt == EXECUTION_OUTPUT_LINK)
+	    nameserver().isA(tt, FUNCTION_LINK) or
+	    nameserver().isA(tt, VIRTUAL_LINK))
 	{
-		// Wrap variables in UnquoteLink
-		HandleSeq uq_vars;
-		for (Handle& var : rnd_vars)
-			uq_vars.push_back(unquote(var));
+		// TODO: comment out the following lines when issue #1843 on the
+		// atomspace repository has been fixed (see more about that
+		// below).
 
-		return lambda(vardecl, quote(body));
+		// // Wrap variables in UnquoteLink
+		// HandleSeq uq_vars;
+		// for (Handle& var : rnd_vars)
+		// 	uq_vars.push_back(unquote(var));
+
+		// return lambda(vardecl, quote(createLink(uq_vars, tt)));
+
+		// TODO: ignore these links for now!!! In order to support them
+		// we first need to address issue #1843 on the atomspace
+		// repository. That is because otherwise the quotations inside
+		// these patterns get wrongly consumed down the line (especially
+		// while being used in the specialization rule defined in
+		// rules/specialization.scm).
+		return Handle::UNDEFINED;
 	}
 
-	// Generic non empty link, let's abstract away all the arguments
-	return lambda(vardecl, body);
+	// Links to ignore (till supported)
+	if (tt == DEFINE_LINK)
+		return Handle::UNDEFINED;
+
+	// Generic non empty link, abstract away all the arguments
+	return lambda(vardecl, createLink(rnd_vars, tt));
 }
 
 Handle Miner::variable_list(const HandleSeq& vars)
