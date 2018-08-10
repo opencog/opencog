@@ -16,8 +16,7 @@
 ;; escape full meta-rule support.
 
 ;; Set logger to debug level
-(use-modules (opencog logger))
-(cog-logger-set-level! "debug")
+(ure-logger-set-level! "debug")
 
 ;; The sumo knowledge base (without compiling)
 (primitive-load "Merge.scm")

@@ -485,6 +485,14 @@ can be obtained by
 ```
 and each function has an online help like `cog-mine`.
 
+TODO
+----
+
+1. Support surprisingness.
+2. Support DefineLink and DefinedSchemaNode (these are ignored for now).
+3. Add heuristic such as incrementally construct n+1-conjucts based on
+   the existing n-conjucts.
+
 References
 ----------
 
