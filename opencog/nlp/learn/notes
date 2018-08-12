@@ -15312,6 +15312,95 @@ sys	0m14.484s
 store-wildcards
 store-right-marginals
 
+en_sh_two
+-----------
+English disjuncts+shapes from rfive-mtwo plus marginals.
+
+Extended from en_dj_mtwo (which was en_pairs_rfive_mtwo but with all
+word pairs removed, and and only the disjuncts left). The extensions
+are:
+* shape structures from (make-shape-api)
+* left and right marginals for the pseudo-csets
+* left and right marginals for the shape structures
+* 'mmt-marginals for both of the above.
+* Note: does not contain shapes, these need to be made by exploding
+
+
+STATUS:  GOOD.
+DATE: 12 August 2018
+
+en_sh_two=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 4256 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 7647 MB    |
+ public | values     | table | linas | 8192 bytes |
+
+ select count(*) from atoms;       40352375 <<<< 40.3 M (19M more)
+ select count(*) from valuations;  76747472 <<<< 76.7 M (19M more)
+
+The above does not contain the exploded sections. After explosion
+it looks like below.
+(cog-report-counts)
+(ListLink . 6514154)
+(EvaluationLink .  42478345
+(Connector . 268594)
+(ConnectorSeq .  6239997)
+(Section . 8629163)
+(WordNode . 137082)
+
+(print-matrix-summary-report hva)
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type:
+EvaluationLink
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "shape word")
+   (AnyNode "shape section")
+)
+Rows: 137075 Columns: 18265271
+Size: 24213074 non-zero entries of 2503712022325 possible
+Fraction non-zero: 9.6709E-6 Sparsity (-log_2): 16.658
+Total observations: 18489594.0  Avg obs per pair: 0.7636
+No MI statistics are present; run compute-mi to get them.
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3568.           n/a
+Count   (l_1)  6.9286E+4       n/a        19.42           n/a
+Length  (l_2)  7782.           n/a        2.181           n/a
+RMS Count      7760.           n/a        2.175           n/a
+
+(print-matrix-summary-report pca)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  145.4        145.4
+Count   (l_1)  3440.        3440.         23.66        23.66
+Length  (l_2)  1773.        1773.         12.19        12.19
+RMS Count      1732.        1732.         11.91        11.91
+
+7007171664 Bytes uncompressed == 7.0GBytes
+
+
+f5dc7a7165911ffbb7ce5f2ac95bf7f1  en_sh_two.sql
+
+=========================================================================
+
 (sql-open "postgres:///en_sh_two?user=linas&password=asdf")
 
 $ guile -l x-mtwo.scm
@@ -15337,27 +15426,6 @@ Stored 120000 of 137075 right-wilds in 24 secs (1667 pairs/sec)
 Done storing 137075 right-wilds in 81 secs
 Done computing and saving sum_y N(x,y) N(*,y)
 
-(print-matrix-summary-report hva)
-
-Summary Report for Correlation Matrix Cross-section Words
-Left type: WordNode    Right Type: EvaluationLink    Pair Type:
-EvaluationLink
-Wildcard: (ListLink (ctv 0 0 18489594)
-   (AnyNode "shape word")
-   (AnyNode "shape section")
-)
-Rows: 137075 Columns: 18265271
-Size: 24213074 non-zero entries of 2503712022325 possible
-Fraction non-zero: 9.6709E-6 Sparsity (-log_2): 16.658
-Total observations: 18489594.0  Avg obs per pair: 0.7636
-No MI statistics are present; run compute-mi to get them.
-
-                 Left         Right     Avg-left     Avg-right
-                 ----         -----     --------     ---------
-Support (l_0)  3568.           n/a
-Count   (l_1)  6.9286E+4       n/a        19.42           n/a
-Length  (l_2)  7782.           n/a        2.181           n/a
-RMS Count      7760.           n/a        2.175           n/a
 
 
 $ guile -l x-mmore.scm
@@ -15373,41 +15441,18 @@ Finished mmt totals in 4 secs
 Done storing 137078 right-wilds in 113 secs
 Done computing and saving sum_y N(x,y) N(*,y)
 
-(print-matrix-summary-report pca)
-Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
-Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
-Wildcard: (ListLink (ctv 0 0 18489594)
-   (AnyNode "cset-word")
-   (AnyNode "cset-disjunct")
-)
-Rows: 137078 Columns: 6239997
-Size: 8629163 non-zero entries of 855366308766 possible
-Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
-Total observations: 18489594.0  Avg obs per pair: 2.1427
-Entropy Total: 20.957   Left: 19.143   Right: 9.7111
-Total MI: 7.8969
+-- dropdb en_dj_etwo
+-- createdb en_sh_mi_two -T en_sh_two
 
-                 Left         Right     Avg-left     Avg-right
-                 ----         -----     --------     ---------
-Support (l_0)  145.4        145.4
-Count   (l_1)  3440.        3440.         23.66        23.66
-Length  (l_2)  1773.        1773.         12.19        12.19
-RMS Count      1732.        1732.         11.91        11.91
-
-(cog-report-counts)
-(ListLink . 6514154)
-(EvaluationLink .  42478345
-(Connector . 268594)
-(ConnectorSeq .  6239997)
-(Section . 8629163)
-(WordNode . 137082)
-
-
+Massive computatinos: 12 August 2018
+guile -l x-mcross.scm
+(hvs 'fetch-pairs)
+(hvs 'explode-sections)
+(batch-all-pair-mi hvs)
 
 
 yyyyyyyyyyyyyyyyyyyyyyyyyy
 
-dropdb en_dj_etwo
 =========================================================================
 OK, so where were we? We want
 * cosines between words, using dj's
@@ -16040,7 +16085,7 @@ NEW TODO LIST
 
 -- Copy en_dj_ptwo and start running cosines, entropies, etc.
    for the top 1K's for both disjuncts and for cross connectors.
-   - IN PROGRESS
+   - KILLED because of bad shapes.
 
 -- start old-style MI cross-marginal in dj_etwo BROKEN. See above.
 -- save en_dj_etwo after cross-marginals
