@@ -1,44 +1,95 @@
 (define (mine-control-rules)
-  ;; Filter history, for now remove all root atoms with TV below
-  ;; 0.1. That is because the pattern miner doesn't support values
-  ;; yet.
-  (remove-almost-false-atoms)
+  (let* ((mine-as (cog-new-atomspace))
+         (old-as (cog-set-atomspace! mine-as)))
+    ;; Copy history-as to the mining atomspace
+    (cp-as history-as mine-as)
 
-  ;; TODO: should do the same for almost true atoms, as to find
-  ;; patterns predicting failure.
+    ;; Filter history, for now remove all root atoms with TV below
+    ;; 0.1. That is because the pattern miner doesn't support values
+    ;; yet.
+    (remove-almost-false-atoms)
 
-  (icl-logger-info "Mining control rules patterns")
-  (for-each mine-control-rules-for (get-inference-rules)))
+    ;; TODO: should do the same for almost true atoms, as to find
+    ;; patterns predicting failure.
+
+    ;; Mine mine-as for control rules
+    (let* ((inference-rules (get-inference-rules history-as))
+           (ctrl-rules-lsts (map mine-control-rules-for inference-rules))
+           (ctrl-rules (apply append ctrl-rules-lsts)))
+
+      (icl-logger-fine "Mined control rules = ~a" ctrl-rules)
+
+      ;; Copy the control rules in the previous atomspace
+      (icl-cp old-as ctrl-rules))
+
+    ;; Pop mine-as
+    (cog-set-atomspace! old-as)))
 
 ;; Like mine-control-rules but only mine the control rules for a given
 ;; inference rule
 (define (mine-control-rules-for inference-rule)
-  (icl-logger-info "Mining patterns for ~a" inference-rule)
+  (icl-logger-debug "Mining patterns for ~a" inference-rule)
 
   (let* ((texts-cpt (mk-texts inference-rule))
          (ipat (initpat inference-rule))
-         (mined-patterns (cog-mine texts-cpt
-                                   minsup
-                                   #:maxiter maxiter
-                                   #:initpat ipat)))
-    (icl-logger-fine "Mined patterns = ~a" mined-patterns)))
+         (patterns (cog-mine texts-cpt
+                             minsup
+                             #:maxiter miter
+                             #:initpat ipat))
+         (patterns-lst (cog-outgoing-set patterns))
+         (ctrl-rules (map pattern->ctrl-rule patterns-lst)))
+    ;; (icl-logger-fine "Mined patterns-lst = ~a" patterns-lst)
+    ;; (icl-logger-fine "Mined ctrl-rules = ~a" ctrl-rules)
+    ctrl-rules))
 
-;; Get all pln rules potential involved in the traces to mine
-(define (get-inference-rules)
-  (let* ((vardecl (VariableList
-                     (TypedVariable (Variable "$A") (Type "DontExecLink"))
-                     (TypedVariable (Variable "$B") (Type "DontExecLink"))
-                     (TypedVariable (Variable "$R") (Type "DontExecLink"))
-                     (Variable "$L")))
-         (input (List
-                  (Variable "$A")
-                  (Variable "$L")
-                  (Variable "$R")))
-         (pattern (expand input (Variable "$B")))
-         (bind (Bind vardecl pattern (Variable "$R")))
-         (results (cog-execute! bind))
-         (get-first-outgoing (lambda (x) (cog-outgoing-atom x 0))))
-    (map get-first-outgoing (cog-outgoing-set results))))
+;; Takes a pattern like
+;;
+;; Lambda
+;;   VariableList T A L B
+;;   And
+;;     preproof-of(DontExec A, T)
+;;     preproof-of(DontExec B, T)
+;;     expand(DontExec A, L, R, DontExec B)
+;;
+;; and turns into a control rule like
+;;
+;; ImplicationScope
+;;   VariableList
+;;     T
+;;     TypedVariable A' DontExec
+;;     L
+;;     TypedVariable B' DontExec
+;;   And
+;;     preproof-of(A', T)
+;;     expand(A', L, R, B')
+;;   preproof-of(B', T)
+;;
+;; NEXT TODO: take care of the DontExec parts
+(define (pattern->ctrl-rule pattern)
+  (let* (;; Get vardecl
+         (vardecl (gar pattern))
+         (clauses (cog-outgoing-set (gdr pattern)))
+
+         ;; Get expand clause
+         (expand-AB? (lambda (x) (equal? (cog-type x) 'ExecutionLink)))
+         (expand-AB (find expand-AB? clauses))
+         (preproof-clauses (remove expand-AB? clauses))
+
+         ;; Get preproof A clause
+         (A (cog-outgoing-atom (cog-outgoing-atom expand-AB 1) 0))
+         (preproof-A? (lambda (x) (equal? A (get-inference x))))
+         (preproof-A (find preproof-A? preproof-clauses))
+
+         ;; Get preproof B clause
+         (B (cog-outgoing-atom expand-AB 2))
+         (preproof-B? (lambda (x) (equal? B (get-inference x))))
+         (preproof-B (find preproof-B? preproof-clauses))
+
+         ;; Rearrenge into implication scope
+         (antecedent (And preproof-A expand-AB))
+         (consequent preproof-B)
+         (implication (ImplicationScope vardecl antecedent consequent)))
+    implication))
 
 ;; Create a texts concept and add as members to it all atoms of the form
 ;;
