@@ -1,17 +1,7 @@
 ;; Contain the main inference control learning experiment loop
 
-;; Set parameters
-(define pss 50)                    ; Problem set size
-(define niter 1)                    ; Number of iterations
-(define piter 20)                   ; Number of iterations used for
-                                    ; each problem
-(define minsup 3)                   ; Minimum support for mining
-                                    ; control rule patterns
-(define maxiter 200)                ; Number of iterations to pattern
-                                    ; mine each inference rule for
-                                    ; control rules
-
 ;; Load utils
+(load "icl-parameters.scm")
 (load "icl-utilities.scm")
 (load "mk-history.scm")
 (load "mk-control-rules.scm")
