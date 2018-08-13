@@ -241,3 +241,27 @@
     (Schema "URE:BC:expand-and-BIT")
     input
     output))
+
+;; Given an atom like (preproof-of A T) return A
+(define (get-inference ppo)
+  (cog-outgoing-atom (cog-outgoing-atom ppo 1) 0))
+
+;; Get all inference rules found in traces stored in as
+(define (get-inference-rules as)
+  (let* ((old-as (cog-set-atomspace! (cog-new-atomspace as)))
+         (vardecl (VariableList
+                     (TypedVariable (Variable "$A") (Type "DontExecLink"))
+                     (TypedVariable (Variable "$B") (Type "DontExecLink"))
+                     (TypedVariable (Variable "$R") (Type "DontExecLink"))
+                     (Variable "$L")))
+         (input (List
+                  (Variable "$A")
+                  (Variable "$L")
+                  (Variable "$R")))
+         (pattern (expand input (Variable "$B")))
+         (bind (Bind vardecl pattern (Variable "$R")))
+         (results (cog-execute! bind))
+         (get-first-outgoing (lambda (x) (cog-outgoing-atom x 0)))
+         (inference-rules (map get-first-outgoing (cog-outgoing-set results))))
+    (cog-set-atomspace! old-as)
+    inference-rules))
