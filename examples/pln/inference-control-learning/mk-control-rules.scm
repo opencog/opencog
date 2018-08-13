@@ -6,32 +6,40 @@
   (clear)
   (cp-as history-as (cog-atomspace))
 
-  ;; [Experimental] Run pattern miner on the history to find frequent
-  ;; patterns for control rules.
-  (icl-logger-debug "Mine control rules")
-  (mine-control-rules)
+  ;; Evaluate all antecedents to allow direct evaluation of the
+  ;; control rules.
+  (icl-logger-debug "Evaluate antecedents")
+  (evaluate-antecedents)
 
-  ;; TODO: reable that when mining control rules works as expected
-  ;; ;; We ground the control rules first then evaluate all antecedents
-  ;; ;; to allow direct evaluation of the control rules.
-  ;; (icl-logger-debug "Ground control rules")
-  ;; (ground-control-rules)
-  ;; (icl-logger-debug "Evaluate antecedents")
-  ;; (evaluate-antecedents)
+  (icl-logger-fine "mk-control-rules (cog-atomspace) [after evaluating antecedents]:")
+  (icl-logger-fine-atomspace (cog-atomspace))
 
-  ;; ;; Produce inference control rules
-  ;; (ure-logger-flush)                    ; make sure the next message does get mangled
-  ;; (icl-logger-debug "Produce control rules")
-  ;; (let* ((results (produce-control-rules)))
-  ;;   ;; Copy inference control rules to the Inference Control Rules
-  ;;   ;; atomspace
-  ;;   (icl-cp control-as (cog-outgoing-set results)))
+  ;; ;; Run pattern miner on the history to find frequent patterns for
+  ;; ;; control rules.
+  ;; (icl-logger-debug "Mine control rules")
+  ;; (mine-control-rules)
 
-  ;; ;; Remove informationless rules from control-as
-  ;; (remove-dangling-atoms control-as)
+  ;; TODO: doesn't work due to conditional-direct-evaluation wrapping quotes around values
+  ;; We ground the control rules first.
+  (icl-logger-debug "Ground control rules")
+  (ground-control-rules)
 
-  ;; (icl-logger-debug "Control AtomSpace:")
-  ;; (icl-logger-debug-atomspace control-as)
+  (icl-logger-fine "mk-control-rules (cog-atomspace) [after mining control rules]:")
+  (icl-logger-fine-atomspace (cog-atomspace))
+
+  ;; Evaluate inference control rules
+  (ure-logger-flush)               ; make sure the next message does not get mangled
+  (icl-logger-debug "Evaluate control rules")
+  (let* ((results (evaluate-control-rules)))
+    ;; Copy inference control rules to the Inference Control Rules
+    ;; atomspace
+    (icl-cp control-as (cog-outgoing-set results)))
+
+  ;; Remove informationless rules from control-as
+  (remove-dangling-atoms control-as)
+
+  (icl-logger-debug "Control AtomSpace:")
+  (icl-logger-debug-atomspace control-as)
 )
 
 (define (ground-control-rules)
@@ -167,9 +175,25 @@
                                 (DontExec (Variable "$A"))
                                 (Variable "$L")
                                 (DontExec (Variable "$Rule")))
-                              (DontExec (Variable "$B"))))))
-    ;; Evaluate all antecedents
-    (pp-icr-bc impl-antecedent)))
+                              (DontExec (Variable "$B")))))
+         ;; Evaluate all antecedents
+         (results (pp-icr-bc impl-antecedent)))
+
+    (icl-logger-fine "evaluate-antecedents = ~a" results)
+
+    ;; Remove query to clean the atomspace
+    (extract-hypergraph impl-antecedent) ; TODO: fix bug should print only (stv 1 1)
+
+    ;; Remove SetLink wrapping the results
+    (cog-extract results)
+
+    ;; Remove informationless atoms
+    (remove-dangling-atoms (cog-atomspace))
+
+    (icl-logger-fine "evaluate-antecedents (cog-atomspace):")
+    (icl-logger-fine-atomspace (cog-atomspace))
+  )
+)
 
 ;; Assumes that the control rules have already been grounded, and all
 ;; antecedent and consequent groundings are evaluated, merely run the
@@ -210,9 +234,12 @@
 ;; TODO: Probably make the arguments as explicit as possible, to
 ;; express the relationships between the different parts, as to make
 ;; sure the variable declarations will reflect these.
-(define (produce-control-rules)
+(define (evaluate-control-rules)
   ;; Load rule base for evaluating the control rules via direct evaluation
   (load "icr-rb.scm")
+
+  (icl-logger-fine "evaluate-control-rules (cog-atomspace):")
+  (icl-logger-fine-atomspace (cog-atomspace))
 
   (let* ((control-rules-vardecl (VariableList
                                   (TypedVariable
@@ -240,6 +267,11 @@
                                        (Unquote (Variable "$expand-output"))))
                                    (preproof-of
                                      (Unquote (Variable "$preproof-B-args")))))))
+
+    (icl-logger-fine "evaluate-control-rules control-rules-vardecl = ~a"
+                     control-rules-vardecl)
+    (icl-logger-fine "evaluate-control-rules control-rules-target = ~a"
+                     control-rules-target)
 
     ;; Produce the inference control rules
     (icr-bc control-rules-target #:vardecl control-rules-vardecl)))
