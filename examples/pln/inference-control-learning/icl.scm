@@ -12,11 +12,11 @@
 
 ;; Set loggers levels
 (cog-logger-set-level! "debug")
-(icl-logger-set-level! "fine")
+(icl-logger-set-level! "debug")
 (ure-logger-set-level! "debug")
 
 ;; Set loggers stdout
-(cog-logger-set-stdout! #t)
+;; (cog-logger-set-stdout! #t)
 (icl-logger-set-stdout! #t)
 ;; (ure-logger-set-stdout! #t)
 
@@ -77,7 +77,7 @@
     (remove-dangling-atoms history-as)
 
     ;; Build inference control rules for the next iteration
-    (icl-logger-info "Build inference control rules from the inference history")
+    (icl-logger-info "Build inference control rules from history-as")
     (mk-control-rules)
 
     ;; Return results for each problem
