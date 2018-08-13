@@ -80,22 +80,21 @@
     ;; Add all fetched expand as members of texts-cpt
     (for-each add-text (cog-outgoing-set expand-results))
 
-    (icl-logger-fine "mk-texts members of texts-cpt = ~a" (get-members texts-cpt))
+    ;; (icl-logger-fine "mk-texts members of texts-cpt = ~a" (get-members texts-cpt))
 
     ;; Return texts concept
     texts-cpt))
 
 ;; Construct initial pattern
 ;;
-;; And
-;;   preproof-of(A, T)
-;;   preproof-of(B, T)
-;;   expand(A, L, R, B)
+;; Lambda
+;;   VariableList T A L B
+;;   And
+;;     preproof-of(A, T)
+;;     preproof-of(B, T)
+;;     expand(A, L, R, B)
 ;;
-;; For now R is hardwired with
-;;
-;; DontExec
-;;   DefinedSchema "conditional-full-instantiation-implication-scope-meta-rule"
+;; where R is inference-rule
 (define (initpat inference-rule)
 (LambdaLink
   (VariableList
