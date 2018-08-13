@@ -32,7 +32,7 @@
 
 (define rule-filenames
   (list "rules/predicate/conditional-direct-evaluation.scm"
-        "rules/propositional/fuzzy-conjunction-introduction.scm"
+        "rules/propositional/crisp-conjunction-introduction.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -42,7 +42,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (ure-add-rule icr-rb conditional-direct-evaluation-implication-scope-rule-name)
-(ure-add-rule pp-icr-rb fuzzy-conjunction-introduction-2ary-rule-name)
+(ure-add-rule pp-icr-rb crisp-conjunction-introduction-2ary-rule-name)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; Other parameters ;;
