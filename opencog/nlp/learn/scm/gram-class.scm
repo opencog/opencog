@@ -689,32 +689,34 @@
 ;
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
+; WORD-B should be a WordNode.
 ;
-; COSOBJ must offer the 'right-cosine method
+; SIM-FUNC must be a function that takes two words (or word-classes)
+; and returns the similarity between them.
 ;
-; This uses cosine-similarity and a cutoff to make the ok-to-merge
-; decision.  The code below would be much simpler and shorter, if it
-; was not glommed up with print statements. These show forward progress.
+; The CUTOFF is used to make the ok-to-merge decision; if the similarity
+; is greater than CUTOFF, then this returns #t else it returns #f.
+;
+; This requires only a single trivial line of code ... but ...
+; The below is a mass of print statements to show forward progress.
 ; The current infrastructure is sufficiently slow, that the prints are
 ; reassuring that the system is not hung.
 ;
-(define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
+(define (is-similar? SIM-FUNC CUTOFF WORD-A WORD-B)
 
-	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
-
-	(define (report-cosine)
+	(define (report-progress)
 		(let* (
-; (foo (format #t "Start cosine ~A \"~A\" -- \"~A\"\n"
+; (foo (format #t "Start distance ~A \"~A\" -- \"~A\"\n"
 ; (if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 ; (cog-name WORD-A) (cog-name WORD-B)))
 				(start-time (get-internal-real-time))
-				(sim (get-cosine))
+				(sim (SIM-FUNC WORD-A WORD-B))
 				(now (get-internal-real-time))
 				(elapsed-time (* 1.0e-9 (- now start-time))))
 
 			; Only print if its time-consuming.
 			(if (< 2.0 elapsed-time)
-				(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
+				(format #t "Dist=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
 					sim
 					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 					(cog-name WORD-A) (cog-name WORD-B)
@@ -722,15 +724,31 @@
 
 			; Print mergers.
 			(if (< CUTOFF sim)
-				(format #t "---------Bingo! Cosine=~6F for ~A \"~A\" -- \"~A\"\n"
+				(format #t "---------Bingo! Dist=~6F for ~A \"~A\" -- \"~A\"\n"
 					sim
 					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 					(cog-name WORD-A) (cog-name WORD-B)
 					))
 			sim))
 
-	; True, if cosine similarity is larger than the cutoff.
-	(< CUTOFF (report-cosine))
+	; True, if similarity is larger than the cutoff.
+	(< CUTOFF (report-progress))
+)
+
+; ---------------------------------------------------------------
+; Is it OK to merge WORD-A and WORD-B into a common vector?
+;
+; Return #t if the two should be merged, else return #f
+; WORD-A might be a WordClassNode or a WordNode.
+;
+; COSOBJ must offer the 'right-cosine method
+;
+; This uses cosine-similarity and a cutoff to make the ok-to-merge
+; decision.
+(define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
+
+	(define (get-cosine wa wb) (COSOBJ 'right-cosine wa wb))
+	(is-similar? get-cosine CUTOFF WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------
