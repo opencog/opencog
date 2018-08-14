@@ -859,18 +859,8 @@ marginals for the pseudo-csets:
   (btr 'mmt-marginals)
 ```
 To obtain the marginals for the cross-connectors, repeat the above
-steps, but this time with `(make-shape-vec-api)` as the base class:
-```
-  (sql-open "postgres:///en_disjuncts?user=linas")
-  (define sva (make-shape-vec-api))
-  (define svs (add-pair-stars sva))
-  (define bsr (batch-transpose svs))
-  (svs 'fetch-pairs)
-  (svs 'explode-sections)
-  (bsr 'mmt-marginals)
-```
+steps, but this time with `(make-shape-vec-api)` as the base class.
 At this time, the need for the cross-connectors (shapes) is optional...
-
 
 The above omputations may take hours or days, depending on the size of
 the disjunct set.  Be sure to make a backup copy of the resulting

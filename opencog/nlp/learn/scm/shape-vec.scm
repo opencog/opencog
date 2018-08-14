@@ -213,21 +213,6 @@
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
 
-		; Fetch (from the database) all sections,
-		; as well as all the marginals.
-		(define (fetch-sections)
-			(define start-time (current-time))
-			; marginals are located on any-left, any-right
-			(fetch-incoming-set any-left)
-			(fetch-incoming-set any-right)
-			(load-atoms-of-type 'Section)
-			(format #t "Elapsed time to load word sections: ~A seconds\n"
-				(- (current-time) start-time))
-			(set! start-time (current-time))
-			(fetch-incoming-set pair-pred)
-			(format #t "Elapsed time to load word-shape pairs: ~A seconds\n"
-				(- (current-time) start-time)))
-
 		; -------------------------------------------------------
 		; Stars API.
 		; Get both the Words and the WordClasses; put WordClasses first.
@@ -431,6 +416,29 @@ around for a while.
 		))
 ========================  XXX THE CODE ABOVE IS DEAD CODE
 !#
+
+		; Fetch (from the database) all sections,
+		; as well as all the marginals.
+		(define (fetch-sections)
+			(define start-time (current-time))
+			; marginals are located on any-left, any-right
+			(fetch-incoming-set any-left)
+			(fetch-incoming-set any-right)
+			(load-atoms-of-type 'Section)
+			(format #t "Elapsed time to load word sections: ~A seconds\n"
+				(- (current-time) start-time))
+			(set! start-time (current-time))
+			(fetch-incoming-set pair-pred)
+			(format #t "Elapsed time to load word-shape pairs: ~A seconds\n"
+				(- (current-time) start-time))
+
+			; It is just to easy for the user to forget to do this,
+			; yet its a very important step for some (but not all)
+			; applications.  If user forgets, its a painful debug
+			; session ahead for the user. If user does not actually
+			; need this, then its just a waste of RAM...
+			(explode-sections)
+		)
 
 		; Methods on the object
 		(lambda (message . args)
