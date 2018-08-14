@@ -740,15 +740,37 @@
 ;
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
+; WORD-B should be a WordNode.
 ;
-; COSOBJ must offer the 'right-cosine method
+; COSOBJ must offer the 'right-cosine method.
 ;
 ; This uses cosine-similarity and a cutoff to make the ok-to-merge
-; decision.
+; decision.  Uses the cosine-similarity between the disjunct-vectors,
+; and not between the shapes.
+;
 (define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
 
 	(define (get-cosine wa wb) (COSOBJ 'right-cosine wa wb))
 	(is-similar? get-cosine CUTOFF WORD-A WORD-B)
+)
+
+; ---------------------------------------------------------------
+; Is it OK to merge WORD-A and WORD-B into a common vector?
+;
+; Return #t if the two should be merged, else return #f
+; WORD-A might be a WordClassNode or a WordNode.
+; WORD-B should be a WordNode.
+;
+; MIOBJ must offer the 'mmt-fmi method.
+;
+; This uses information-similarity and a cutoff to make the ok-to-merge
+; decision. Uses the information-similarity between the
+; disjunct-vectors only (for now!?), and not between the shapes.
+;
+(define (is-info-similar? MIOBJ CUTOFF WORD-A WORD-B)
+
+	(define (get-info-sim wa wb) (MIOBJ 'mmt-fmi wa wb))
+	(is-similar? get-info-sim CUTOFF WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------
