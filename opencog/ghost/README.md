@@ -14,11 +14,7 @@ When a GHOST rule is being created, it will firstly be passed to the parser (`cs
 
 The parser will then pass the intermediate interpretations (aka terms) to the translator (`translator.scm`) by calling either `create-rule` / `create-concept` / `create-topic` for creating a psi-rule / concept / topic respectively. Those terms will be converted into OpenCog atoms (defined in `terms.scm`) and stored in the AtomSpace.
 
-Action selector is implemented in `matcher.scm`, which is responsible for selecting a rule that is applicable to a given context in each psi-step. When a textual input is received, it will be converted into a list of WordNodes, wrapped in a `DualLink` and passed to the Recognizer for finding candidates that may satisfy the current context. A full context evaluation will then be done for each of the candidates. Action selector will pick one of them based on their satisfiability and their truth value.
-
-This approach has its own limitation -- it doesn't work well with predicates (e.g. a rule that is triggered only by some sensory input other than words) because right now there is no way to find those rules with efficiency comparable to `DualLink`. As a workaround, those rules will be identified and evaluated in each psi-step, which will consume more computing power than it is needed.
-
-A better yet still experimental approach is to use ECAN to help with rule discovery. When sensory input is received, certain atoms, which can be `WordNodes`, `PredicateNodes`, or some other types of atoms, will be stimulated, results in an increase in their importance value. For now, we focus on the short-term importance (STI) only. The [Importance Diffusion Agent](https://github.com/opencog/opencog/blob/master/opencog/attention/ImportanceDiffusionBase.h) will then diffuse the STI from the atoms being stimulated to their neighboring atoms and, depending on the situation, may bring some actual psi-rules that are potentially applicable to the context to the attentional focus. The action selector in GHOST will look at the attentional focus, pick and evaluate any psi-rules that are in there, and eventually return the most appropriate one that can be executed.
+Action selector is implemented in `matcher.scm`, which is responsible for selecting a rule that is applicable to a given context in each psi-step. ECAN is used to help with rule discovery. When sensory input is received, certain atoms, which can be `WordNodes`, `PredicateNodes`, or some other types of atoms, will be stimulated, results in an increase in their importance value. For now, we focus on the short-term importance (STI) only. The [Importance Diffusion Agent](https://github.com/opencog/opencog/blob/master/opencog/attention/ImportanceDiffusionBase.h) will then diffuse the STI from the atoms being stimulated to their neighboring atoms and, depending on the situation, may bring some actual psi-rules that are potentially applicable to the context to the attentional focus. The action selector in GHOST will look at the attentional focus, pick and evaluate any psi-rules that are in there, and eventually return the most appropriate one that can be executed.
 
 A rule that has been triggered will not be triggered again unless you `^keep()` it (see below), but even if you do, it still won't be triggered again within the refractory period. The default refractory period is 1 second.
 
@@ -109,56 +105,8 @@ goal: (novelty=0.9)
 
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
-
 ## How To Run
 
-1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh).
-
-   Note: You will need to do `(set-relex-server-host)` if you are running it via Docker.
-
-2) Start Guile
-3) Load the needed modules
-
-```
-(use-modules (opencog)
-             (opencog nlp)
-             (opencog nlp relex2logic)
-             (opencog openpsi)
-             (opencog ghost)
-             (opencog ghost procedures))
-```
-
-4) Start authoring
-
-A rule can be created by using `ghost-parse`:
-
-```
-(ghost-parse "u: (hi robot) Hello human")
-```
-
-Similarly for creating concepts:
-
-```
-(ghost-parse "concept: ~young (child kid youngster)")
-```
-
-One can also parse one or more rule files by using `ghost-parse-files`:
-
-```
-(ghost-parse-files "path/to/the/rule/file1" "path/to/the/rule/file2")
-```
-
-5) Send input to GHOST
-
-One can quickly test if a rule can be triggered by using `test-ghost`:
-
-```
-(test-ghost "hi robot good morning")
-```
-
-The output `[INFO] [say] (Hello human)"` will be printed.
-
-## To Run With ECAN (experimental)
 1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh).
 
    Note: You will need to do `(set-relex-server-host)` if you are running it via Docker.
