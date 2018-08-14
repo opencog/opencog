@@ -15313,21 +15313,22 @@ store-wildcards
 store-right-marginals
 
 en_sh_two
------------
+---------
 English disjuncts+shapes from rfive-mtwo plus marginals.
 
 Extended from en_dj_mtwo (which was en_pairs_rfive_mtwo but with all
 word pairs removed, and and only the disjuncts left). The extensions
 are:
-* shape structures from (make-shape-api)
+* shape structures from (make-shape-api) are NOT in this dataset
+  (you must make them manually by (hva 'explode-sections) after loading
+   this dataset.)
 * left and right marginals for the pseudo-csets
-* left and right marginals for the shape structures
+* left and right marginals for the shape structures (make-shape-api)
 * 'mmt-marginals for both of the above.
-* Note: does not contain shapes, these need to be made by exploding
 
 
 STATUS:  GOOD.
-DATE: 12 August 2018
+DATE: 13 August 2018
 
 en_sh_two=> \dt+
                        List of relations
@@ -15339,8 +15340,8 @@ en_sh_two=> \dt+
  public | valuations | table | linas | 7647 MB    |
  public | values     | table | linas | 8192 bytes |
 
- select count(*) from atoms;       40352375 <<<< 40.3 M (19M more)
- select count(*) from valuations;  76747472 <<<< 76.7 M (19M more)
+ select count(*) from atoms;       40352376 <<<< 40.3 M (19M more)
+ select count(*) from valuations;  76884550 <<<< 76.8 M (19M more)
 
 The above does not contain the exploded sections. After explosion
 it looks like below.
@@ -15354,8 +15355,7 @@ it looks like below.
 
 (print-matrix-summary-report hva)
 Summary Report for Correlation Matrix Cross-section Words
-Left type: WordNode    Right Type: EvaluationLink    Pair Type:
-EvaluationLink
+Left type: WordNode    Right Type: EvaluationLink    Pair Type: EvaluationLink
 Wildcard: (ListLink (ctv 0 0 18489594)
    (AnyNode "shape word")
    (AnyNode "shape section")
@@ -15368,10 +15368,10 @@ No MI statistics are present; run compute-mi to get them.
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  3568.           n/a
-Count   (l_1)  6.9286E+4       n/a        19.42           n/a
-Length  (l_2)  7782.           n/a        2.181           n/a
-RMS Count      7760.           n/a        2.175           n/a
+Support (l_0)  3568.        1.1179E+5
+Count   (l_1)  6.9286E+4    8.0072E+4     19.42        .7163
+Length  (l_2)  7782.        6245.         2.181        5.5866E-2
+RMS Count      7760.        6240.         2.175        5.5824E-2
 
 (print-matrix-summary-report pca)
 Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
@@ -15389,15 +15389,16 @@ Total MI: 7.8969
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  145.4        145.4
-Count   (l_1)  3440.        3440.         23.66        23.66
-Length  (l_2)  1773.        1773.         12.19        12.19
-RMS Count      1732.        1732.         11.91        11.91
+Support (l_0)  145.4        4.8875E+4
+Count   (l_1)  3440.        2.2958E+5     23.66        4.697
+Length  (l_2)  1773.        1.3729E+4     12.19        .2809
+RMS Count      1732.        1.3696E+4     11.91        .2802
 
-7007171664 Bytes uncompressed == 7.0GBytes
+7016483834 Bytes uncompressed == 7.0GBytes
+ 779019716 Bytes compressed == 780 MBytes
 
-
-f5dc7a7165911ffbb7ce5f2ac95bf7f1  en_sh_two.sql
+782683944c9dcc2e3ce3d7ec7f89dd84  en_sh_two.sql
+54680d4ffe4378350184d748b841523a  en_sh_two.sql.bz2
 
 =========================================================================
 
@@ -15428,6 +15429,14 @@ Done computing and saving sum_y N(x,y) N(*,y)
 
 
 
+Crapp. The above needs right marginals, too
+(define hvc (add-support-compute hvs))
+(hvc 'right-marginals)
+(define hst (make-store hvs))
+(hst 'store-right-marginals)
+
+
+
 $ guile -l x-mmore.scm
 scheme@(guile-user)> (pca 'fetch-pairs)
 Elapsed time to load csets: 2832 secs
@@ -15444,7 +15453,7 @@ Done computing and saving sum_y N(x,y) N(*,y)
 -- dropdb en_dj_etwo
 -- createdb en_sh_mi_two -T en_sh_two
 
-Massive computatinos: 12 August 2018
+Massive MI computations:
 guile -l x-mcross.scm
 (hvs 'fetch-pairs)
 (hvs 'explode-sections)
@@ -15773,7 +15782,7 @@ Hmm  slefmi is needed, and the cond is bad
 =========================================================================
 cross-connector similarities.
 
-(define ara (make-connector-vec-api))
+(define ara (make-shape-vec-api))
 (define ars (add-pair-stars ara))
 (define art (add-transpose-api ars))
 (define aco (add-pair-cosine-compute art))
@@ -15788,7 +15797,7 @@ cross-connector similarities.
 (map (lambda (n) (bcr 'batch-compute n)) (iota 100 140 2))
 
 
-(define fra (make-connector-vec-api))
+(define fra (make-shape-vec-api))
 (define frs (add-pair-stars fra))
 (define frt (add-transpose-api frs))
 (define fco (add-pair-cosine-compute frt))
@@ -16074,6 +16083,14 @@ Total time: 75.565334546 seconds (128.369109622 seconds in GC)
 GC Warning: Repeated allocation of very large block (appr. size 536875008):
         May lead to memory leak and poor performance
 wtf!? o profilig
+
+
+=========================================================================
+Restart the similarities, this time on en_sh_two_sim
+
+iota:  nsteps start stepsz
+(map (lambda (n) (ami 'batch-compute n)) (iota 30 52 4))
+(map (lambda (n) (bmi 'batch-compute n)) (iota 222 170 5))
 
 
 =========================================================================

@@ -27,9 +27,9 @@
 (define psa (add-pair-stars pca))
 (define pta (add-transpose-api psa))
 
-(load-atoms-of-type 'SimilarityLink)
-(cog-count-atoms 'SimilarityLink)
-(pca 'fetch-pairs)
+; (load-atoms-of-type 'SimilarityLink)
+; (cog-count-atoms 'SimilarityLink)
+; (pca 'fetch-pairs)
 
 (define pco (add-pair-cosine-compute pta))
 (define bco
@@ -62,13 +62,16 @@
 ; Done 10/12 frac=100.0% Time: 1299 Done: 98.5% rate=0.050 prs/sec
 ; Done 70/72 frac=97.42% Time: 13926 Done: 100.0% rate=0.179 prs/sec
 
+(map (lambda (n) (bmi 'batch-compute n)) (iota 10 40 25))
+
+
 ; ============================================
 ; Cosines between words, using crosses
-(define cra (make-connector-vec-api))
+(define cra (make-shape-vec-api))
 (define crs (add-pair-stars cra))
 (define crt (add-transpose-api crs))
 
-(cra 'fetch-pairs)
+; (cra 'fetch-pairs)
 
 (define cco (add-pair-cosine-compute crt))
 (define bcr
@@ -83,20 +86,22 @@
 
 ; -------------
 ; FMI between words, using crossovers -- below works
-(define cram (make-connector-vec-api))
+(define cram (make-shape-vec-api))
 (define crsm (add-pair-stars cram))
 (define crtm (add-transpose-api crsm))
 
 (define cmi (add-symmetric-mi-compute crsm))
-(define bci
-	(batch-similarity crtm #f "Cross MI-*" minus-inf
+(define mib
+	(batch-similarity crtm #f "Shape MI-*" minus-inf
 		(lambda (wa wb) (cmi 'mmt-fmi wa wb))))
 
 ; (cmi 'mmt-fmi (Word "other") (Word "same")) ; 3.2194667964612314
-; (bci 'compute-similarity (Word "other") (Word "same")) ;
+; (mib 'compute-similarity (Word "other") (Word "same")) ;
 
-; (bci 'batch-compute 12)
+; (mib 'batch-compute 12)
 ; Done 10/12 frac=95.38% Time: 20314 Done: 98.5% rate=-0.00 prs/sec
+
+(map (lambda (n) (mib 'batch-compute n)) (iota 4 500 2))
 
 ; -------------
 (cog-count-atoms 'SimilarityLink)
