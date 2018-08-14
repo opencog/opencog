@@ -59,7 +59,9 @@
 ; disjuncts form the basis of the vector space, and the count of
 ; observations of different disjuncts indicating the direction of the
 ; vector. It is the linearity of the observations that implies that
-; such a vector-based linear approach is correct.
+; such a vector-based linear approach is correct. (Footnote: actually,
+; the vector could/should to include subspaces for the sheaf shapes, as
+; well; this is not elaborated on here.)
 ;
 ; The number of grammatical classes that a word might belong to can
 ; vary from a few to a few dozen; in addition, there will be some
@@ -94,7 +96,7 @@
 ; Word Similarity
 ; ---------------
 ; There are several different means of comparing similarity between
-; two words.  The simplest is cosine distance: if the cosine of two
+; two words.  A traditional one is cosine distance: if the cosine of two
 ; word-vectors is greater than a threshold, they should be merged.
 ;
 ; The cosine distance between the two words w_a, w_b is
@@ -103,11 +105,29 @@
 ;
 ; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
 ;
+; If N(w,d) is the count of the number of observations of word w with
+; disjunct d, the dot product is
+;
+;    dot(w_a, w_b) = v_a . v_b = sum_d N(w_a,d) N(w_b,d)
+;
 ; The minimum-allowed cosine-distance is a user-tunable parameter in
 ; the code below; it is currently hard-coded to 0.65.
 ;
-; Other similarity measures are possible, but have not yet been
-; explored.
+; It appears that a better judge of similarity is the information-
+; theoretic divergence between the vectors (the Kullback-Lielber
+; divergence). If N(w,d) is the count of the number of observations of
+; word w with disjunct d, the divergence is:
+;
+;    MI(w_a, w_b) = log_2 [dot(w_a, w_b) dot(*,*) / ent(w_a) ent(w_b)]
+;
+; where
+;
+;    ent(w) = sum_d N(w,d) N(*,d)
+;
+; so that log_2 ent(w) is the entropy of word w (up to a factor of
+; N(*,*) squared. That is, we should be using p(w,d) = N(w,d) / N(*,*)
+; in the defintion. Whatever, this is covered in much greater detail
+; elsewhere.)
 ;
 ;
 ; Merge Algos
@@ -237,13 +257,15 @@
 ; v_b in a different way. What it does is to explicitly orthogonalize
 ; so that the final v_a and v_b are orthogonal to v_merged.  The result
 ; is probably very similar to `merge-project`, but not the same.  In
-; particular, the total number of counts in the system is not preserved
-; (which is maybe a bad thing?)
+; particular, the total number of observation counts in the system is
+; not preserved (which is surely a bad thing, since counts are
+; interpreted as probablity-frequencies.)
 ;
 ; There's no good reason for choosing `merge-ortho` over `merge-project`,
-; and there's a good theoretical reason to not use `merge-ortho`. Its
-; here for historical reasons -- it got coded funky, and that's that.
-; It should probably be eventually removed.
+; and the broken probabilites is a good reason to reject `merge-ortho`.
+; It is currently here for historical reasons -- it got coded funky, and
+; that's that.  It should probably be eventually removed, when
+; experimentation is done with.
 ;
 ;
 ; merge-discrim
@@ -265,14 +287,22 @@
 ; merging to be performed.
 ;
 ;
+; merge-zipf
+; ----------
+; So...
+;
+;
 ; Parameter choices
 ; -----------------
 ; Gut-sense intuition suggests these possible experiments:
 ;
-; * Fuzz: use `merge-project` with hard-coded frac=0.3 and min acceptable
-;   cosine=0.65
+; * Fuzz: use `merge-project` with hard-coded frac=0.3 and cosine
+;   distance with min acceptable cosine=0.65
 ;
 ; * Discrim: use `merge-discrim` with min acceptable cosine = 0.5
+;
+; * Info: use `merge-project` with hard-coded frac=0.3 and information
+;   distance with min acceptable MI=3
 ;
 ;
 ; Broadening
@@ -339,7 +369,7 @@
   only a FRAC fraction of a single, unmatched count is transferred.
 
   If WA is a WordClassNode, and WB is not, then WB is merged into
-  WA. That is, the counts on QA are adjusted only upwards, and those
+  WA. That is, the counts on WA are adjusted only upwards, and those
   on WB only downwards.
 "
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
