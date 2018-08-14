@@ -693,11 +693,10 @@
 ; COSOBJ must offer the 'right-cosine method
 ;
 ; This uses cosine-similarity and a cutoff to make the ok-to-merge
-; decision. (Other forms of similarity measure might also be
-; interesting to explore.) The code is glommed up with print statements
-; in order to show forward progress; this is because the current
-; infrastructure is sufficiently slow, that the prints are reassuring
-; that the system is not hung.
+; decision.  The code below would be much simpler and shorter, if it
+; was not glommed up with print statements. These show forward progress.
+; The current infrastructure is sufficiently slow, that the prints are
+; reassuring that the system is not hung.
 ;
 (define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
 
