@@ -1295,7 +1295,7 @@ Bugg- the utf8 is fucked up.   Fixed. Its a guile-2.1.5 regression
 its ok in the containers ... select * from atoms where type=110;
 (cog-get-atoms 'WordInstanceNode)
 
-but guile-2.2 fucks up. 
+but guile-2.2 fucks up.
 (string-append "a" "係" "c") is OK.
 (Concept "係") is broken
 scm_c_eval_string
@@ -15453,7 +15453,7 @@ Done computing and saving sum_y N(x,y) N(*,y)
 -- dropdb en_dj_etwo
 -- createdb en_sh_mi_two -T en_sh_two
 
-Massive MI computations:
+Massive MI computations:  started 13 aug 20:00 CDT
 guile -l x-mcross.scm
 (hvs 'fetch-pairs)
 (hvs 'explode-sections)
@@ -16100,12 +16100,22 @@ NEW TODO LIST
 
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- Copy en_dj_ptwo and start running cosines, entropies, etc.
-   for the top 1K's for both disjuncts and for cross connectors.
-   - KILLED because of bad shapes.
+-- Copy en_sh_two to en_sh_two_sim and start running cosines,
+   entropies, etc. for the top 1K's for both disjuncts and for
+   cross connectors.
+   - 13 August - In process.
 
--- start old-style MI cross-marginal in dj_etwo BROKEN. See above.
--- save en_dj_etwo after cross-marginals
+-- start old-style MI cross-marginal in en_sh_mi_etwo
+   - 13 August - In process.
+
+-- Explain in the text, what this is:
+  -- there are C+1 MI's:
+     * word to connector-seq
+     * word-to-first-connector
+     * word-to-second-connector
+     * ...
+     * word to C'th connector. Dohhh.
+     And distinct marginals for each.
 
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
@@ -16121,6 +16131,7 @@ NEW TODO LIST
 (2a) graphs, for the crosses, too
 
 (3) Scatterplot of pseudo-cset MI vs. cross-MI.
+    Done, need to add words for this.
 
 (4) show distribution of the sums, above.
 
@@ -16132,11 +16143,6 @@ While waiting for above, write code for:
   just with independent parameter.
   `merge-disambig` uses cosines to do fractionals.
   Should this use MI in some way?
-
-* XXX mmt-marginals is using the support obj, but all it needs
-  are the marginal counts .. wtf I'm confused.
-  supports are done with add-support-compute
-  well, it uses the supports, because it does a support variant.
 
 * The cosines do need the supports, right? (does it actually
   use them, or does it ignore them?)
@@ -16175,14 +16181,13 @@ Merging minor tasks DONE
 * SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
   and with transpose-marginals for both. DONE
 * Fix bug re cross-connector MI's -- DONE
-  -- there are C+1 MI's:
-     * word to connector-seq
-     * word-to-first-connector
-     * word-to-second-connector
-     * ...
-     * word to C'th connector. Dohhh.
-     And distinct marginals for each.
 * products of conditional probabilities. DONE NO GOOD
+* XXX mmt-marginals is using the support obj, but all it needs
+  are the marginal counts .. wtf I'm confused.
+  supports are done with add-support-compute
+  well, it uses the supports, because it does a support variant.
+  Ohh, both left and right supports were needed. DONE
+
 
 
 
@@ -16200,7 +16205,7 @@ LREC 2006
 Above uses a training set, and then attempts to parse the test set to
 obtain coverage.  So, here:  statistically:
 1) given a dict, what fraction of the test set is parseable?
-2) earlier queston: what portion was parsable by MST Any skipped words?
+2) earlier question: what portion was parsable by MST Any skipped words?
 2a) What fraction of MST clique has zero counts on the training data?
 
 =========================================================================
