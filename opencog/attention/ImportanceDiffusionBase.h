@@ -80,7 +80,6 @@ protected:
     double calculateIncidentDiffusionPercentage(Handle);
 
     void tradeSTI(DiffusionEventType);
-    void updateMaxSpreadPercentage();
 
     void diffuseAtom(Handle);
     virtual void spreadImportance() = 0;
