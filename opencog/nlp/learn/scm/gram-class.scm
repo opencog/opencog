@@ -289,7 +289,15 @@
 ;
 ; merge-zipf
 ; ----------
-; So...
+; The distribution of disjuncts on words is necessarily Zipfian. That
+; is, the vectors could be called "Zipf vectors", in that the vector
+; coefficients follow a Zipfian distribution. This suggests that,
+; during merge, low-frequency observation counts should be merged in
+; thier entirety.  For example, if a word is to be merged into a
+; word-class, and disjunct d has been observed 4 times or less, then
+; all of these observation counts should be merged into the word-class.
+; Only high-frequency disjuncts can be considered to be well-known
+; enough to be distinct.
 ;
 ;
 ; Parameter choices
