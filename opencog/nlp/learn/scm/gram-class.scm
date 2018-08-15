@@ -369,7 +369,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (merge-project LLOBJ FRAC WA WB)
+(define (merge-project LLOBJ FRAC ZIPF WA WB)
 "
   merge-project FRAC WA WB - merge WA and WB into a grammatical class.
   Return the merged class.
@@ -380,6 +380,8 @@
      indicating the fraction of a non-shared count to be used.
      Setting this to 1.0 gives the sum of the union of supports;
      setting this to 0.0 gives the sum of the intersection of supports.
+  ZIPF is the smallest observation count, below which counts
+     will not be divided up, if a marge is performed.
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
 
@@ -721,7 +723,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (merge-disambig COSOBJ COS-MIN WA WB)
+(define (merge-disambig COSOBJ COS-MIN ZIPF WA WB)
 "
   merge-disambig COS-MIN WA WB - merge WB into WA, returning the merged
   class.  If WA is a word, and not a class, then a new class is created
@@ -734,7 +736,7 @@
 "
 	(define cosi (COSOBJ 'right-cosine WA WB))
 	(define frac (/ (- cosi COS-MIN)  (- 1.0 COS-MIN)))
-	(merge-project COSOBJ frac WA WB)
+	(merge-project COSOBJ frac ZIPF WA WB)
 )
 
 ; ---------------------------------------------------------------
@@ -809,7 +811,7 @@
 
 ; ---------------------------------------------------------------
 
-(define (make-fuzz CUTOFF UNION-FRAC MIN-CNT)
+(define (make-fuzz CUTOFF UNION-FRAC ZIPF MIN-CNT)
 "
   make-fuzz -- Do projection-merge, with a fixed merge fraction.
 
@@ -820,6 +822,9 @@
 
   UNION-FRAC is the fxied fraction of the union-set of the disjuncts
   that will be merged.
+
+  ZIPF is the smallest observation count, below which counts
+  will not be divided up, if a marge is performed.
 
   MIN-CNT is the minimum count (l1-norm) of the observations of
   disjuncts that a word is allowed to have, to even be considered.
@@ -835,7 +840,7 @@
 			(is-similar? get-cosine CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-project pcos UNION-FRAC WORD-A WORD-B))
+			(merge-project pcos UNION-FRAC ZIPF WORD-A WORD-B))
 
 		(define (is-small-margin? WORD)
 			(< (pss 'right-count WORD) MIN-CNT))
@@ -858,7 +863,7 @@
 
 ; ---------------------------------------------------------------
 
-(define (make-discrim CUTOFF MIN-CNT)
+(define (make-discrim CUTOFF ZIPF MIN-CNT)
 "
   make-discrim -- Do a \"discriminating\" merge.
 
@@ -866,6 +871,9 @@
 
   CUTOFF is the min acceptable cosine, for words to be considered
   mergable.
+
+  ZIPF is the smallest observation count, below which counts
+  will not be divided up, if a marge is performed.
 
   MIN-CNT is the minimum count (l1-norm) of the observations of
   disjuncts that a word is allowed to have, to even be considered.
@@ -881,7 +889,7 @@
 			(is-similar? get-cosine CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-disambig pcos CUTOFF WORD-A WORD-B))
+			(merge-disambig pcos CUTOFF ZIPF WORD-A WORD-B))
 
 		(define (is-small-margin? WORD)
 			(< (pss 'right-count WORD) MIN-CNT))
@@ -932,7 +940,7 @@
 ; (is-cosine-similar? pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
-; (merge-project pcos 0.3 (Word "city") (Word "village"))
+; (merge-project pcos 0.3 4 (Word "city") (Word "village"))
 ;
 ; Verify presence in the database:
 ; select count(*) from atoms where type=22;
