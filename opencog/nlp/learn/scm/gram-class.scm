@@ -231,19 +231,47 @@
 ;
 ;   {e_union} = {e_a} set-union {e_b}
 ;
+;
+; Zipf Tails
+; ----------
+; The distribution of disjuncts on words is necessarily Zipfian. That
+; is, the vectors could be called "Zipf vectors", in that the vector
+; coefficients follow a Zipfian distribution.  There are many reasons
+; why this is so, and multiple effects feed into this.
+;
+; It seems plausible to treat extremely-low frequency observations as
+; a kind of noise, but which might also contain some signal. Thus,
+; during merge, all of a Zipfian tail should be erged in. If its noise,
+; it will tend to cancel during merge; if its signal, it will tend to be
+; additive.
+;
+; That is, during merge, low-frequency observation counts should be
+; merged in thier entirety, rather than split in parts, with one part
+; remaining unmerged.  For example, if a word is to be merged into a
+; word-class, and disjunct d has been observed 4 times or less, then
+; all 4 of these observation counts should be merged into the word-class.
+; Only high-frequency disjuncts can be considered to be well-known
+; enough to be distinct, and thus suitable for fractional merging.
+;
+;
 ; merge-project
 ; -------------
-; The above two merge methods are implemented in the `merge-project`
+; The above merge methods are implemented in the `merge-project`
 ; function. It takes, as an argument, a fractional weight which is
 ; used when the disjunct isn't shared between both words. Setting
 ; the weight to zero gives overlap merging; setting it to one gives
 ; union merging. Setting it to fractional values provides a merge
 ; that is intermediate between the two: an overlap, plus a bit more,
-; viz some of the union.
+; viz some of the union.  A second parameter serves as a cutoff, so
+; that any oservation counts below the cutoff are always merged.
 ;
 ; That is, the merger is given by the vector
 ;
 ;   v_merged = v_overlap + FRAC * (v_union - v_overlap)
+;
+; for those vector components in v_union that have been observed more
+; than the minimum cutoff; else all of the small v_union components
+; are merged.
 ;
 ; If v_a and v_b are both words, then the counts on v_a and v_b are
 ; adjusted to remove the counts that were added into v_merged. If one
@@ -285,19 +313,6 @@
 ;
 ; where cos_min is the minimum cosine acceptable, for any kind of
 ; merging to be performed.
-;
-;
-; merge-zipf
-; ----------
-; The distribution of disjuncts on words is necessarily Zipfian. That
-; is, the vectors could be called "Zipf vectors", in that the vector
-; coefficients follow a Zipfian distribution. This suggests that,
-; during merge, low-frequency observation counts should be merged in
-; thier entirety.  For example, if a word is to be merged into a
-; word-class, and disjunct d has been observed 4 times or less, then
-; all of these observation counts should be merged into the word-class.
-; Only high-frequency disjuncts can be considered to be well-known
-; enough to be distinct.
 ;
 ;
 ; Parameter choices
