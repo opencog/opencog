@@ -444,10 +444,10 @@
 		; But only if we are merging in a word, not a word-class;
 		; we never want to shrink the support of a word-class, here.
 		(define wlc (if
-				(and (null? rsec) (is-word-sect? lsec))
+				(and (null? rsec) (is-word-sect? lsec) (< ZIPF lcnt))
 				(* FRAC lcnt) lcnt))
 		(define wrc (if
-				(and (null? lsec) (is-word-sect? rsec))
+				(and (null? lsec) (is-word-sect? rsec) (< ZIPF rcnt))
 				(* FRAC rcnt) rcnt))
 
 		; Sum them.
