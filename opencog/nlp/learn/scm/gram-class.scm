@@ -372,7 +372,8 @@
 (define (merge-project LLOBJ FRAC ZIPF WA WB)
 "
   merge-project FRAC WA WB - merge WA and WB into a grammatical class.
-  Return the merged class.
+  Return the merged class. This merges the Sections, this does not merge
+  the shapes (connectors).  See `cset-class.scm` for shape merging.
 
   WA should be a WordNode or a WordClassNode.
   WB is expected to be a WordNode.
