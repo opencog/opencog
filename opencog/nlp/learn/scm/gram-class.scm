@@ -772,25 +772,6 @@
 ; WORD-A might be a WordClassNode or a WordNode.
 ; WORD-B should be a WordNode.
 ;
-; COSOBJ must offer the 'right-cosine method.
-;
-; This uses cosine-similarity and a cutoff to make the ok-to-merge
-; decision.  Uses the cosine-similarity between the disjunct-vectors,
-; and not between the shapes.
-;
-(define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
-
-	(define (get-cosine wa wb) (COSOBJ 'right-cosine wa wb))
-	(is-similar? get-cosine CUTOFF WORD-A WORD-B)
-)
-
-; ---------------------------------------------------------------
-; Is it OK to merge WORD-A and WORD-B into a common vector?
-;
-; Return #t if the two should be merged, else return #f
-; WORD-A might be a WordClassNode or a WordNode.
-; WORD-B should be a WordNode.
-;
 ; MIOBJ must offer the 'mmt-fmi method.
 ;
 ; This uses information-similarity and a cutoff to make the ok-to-merge
@@ -826,8 +807,9 @@
 			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
+		(define (get-cosine wa wb) (pcos 'right-cosine wa wb))
 		(define (mpred WORD-A WORD-B)
-			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
+			(is-similar? get-cosine CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
 			(merge-project pcos UNION-FRAC WORD-A WORD-B))
@@ -871,8 +853,9 @@
 			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
+		(define (get-cosine wa wb) (pcos 'right-cosine wa wb))
 		(define (mpred WORD-A WORD-B)
-			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
+			(is-similar? get-cosine CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
 			(merge-disambig pcos CUTOFF WORD-A WORD-B))
