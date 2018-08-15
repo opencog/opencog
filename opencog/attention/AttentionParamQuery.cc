@@ -59,6 +59,8 @@ const std::string AttentionParamQuery::rent_tournament_size = "RENT_TOURNAMENT_S
  */
 AttentionParamQuery::AttentionParamQuery(AtomSpace* as): _as(as)
 {
+    load_default_values();
+    
     parent_param = _as->add_node(CONCEPT_NODE, "ECAN_PARAMS");
 
     Handle var = _as->add_node(VARIABLE_NODE, "__ECAN_PARAM__");

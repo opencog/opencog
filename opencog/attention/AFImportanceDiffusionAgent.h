@@ -28,6 +28,9 @@
 
 #include "ImportanceDiffusionBase.h"
 
+
+class ImportanceDiffusionUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -51,11 +54,11 @@ using namespace opencog::ecan;
  * where an extensive explanation of the algorithm, features and pending
  * work is explained.
  */
-class AFImportanceDiffusionAgent : public ImportanceDiffusionBase
+class AFImportanceDiffusionAgent : public virtual ImportanceDiffusionBase
 {
 
 private:
-    HandleSeq diffusionSourceVector();
+    friend class ::ImportanceDiffusionUTest;
 
     void spreadImportance();
     AttentionValue::sti_t calculateDiffusionAmount(Handle);

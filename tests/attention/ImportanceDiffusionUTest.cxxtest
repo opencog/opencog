@@ -1,0 +1,239 @@
+/*
+ * tests/dynamics/HebbianCreationModuleUTest.cxxtest
+ *
+ * Copyright (C) 2018 Mindcloud
+ * All Rights Reserved
+ *
+ * Written by Msgana Bayetta
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/attention/AttentionParamQuery.h>
+#include <opencog/attention/ImportanceDiffusionBase.h>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomutils/Neighbors.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/cogserver/server/Factory.h>
+
+using namespace opencog;
+#define STANDARD_LIB std
+using namespace STANDARD_LIB;
+
+class DummyImportanceDiffusionAgent;
+
+class ImportanceDiffusionUTest : public CxxTest::TestSuite
+{
+    private:
+        std::shared_ptr<DummyImportanceDiffusionAgent>   _dmyid_agentptr;
+        AtomSpace* _as;
+        CogServer* _cogserver;
+        std::shared_ptr<AttentionParamQuery> _atq;
+        std::shared_ptr<SchemeEval> _eval;
+        Factory<DummyImportanceDiffusionAgent, Agent> DIdCreationFactory;
+
+    protected:
+
+    public:
+        ImportanceDiffusionUTest();
+        ~ImportanceDiffusionUTest();
+        void setUp();
+        void tearDown();
+        void testDiffuseAtom(void);
+        void testTradeSTI(void);
+        void testIncidentAtoms(void);
+        void testHebbianAdjacentAtoms(void);
+        void testProbabilityVectorIncident(void);
+        void testProbabilityVectorHebbianAdjacent(void);
+        void testCombineIncidentAdjacentVectors(void);
+        void testCalculateHebbianDiffusionPercentage(void);
+
+};
+
+#define DIFFUSION_PERCENTAGE 0.3
+class DummyImportanceDiffusionAgent : public virtual ImportanceDiffusionBase{
+    public:
+        DummyImportanceDiffusionAgent(CogServer& cs) :
+            ImportanceDiffusionBase(cs){}
+
+        void run() {}
+        void spreadImportance() {}
+        AttentionValue::sti_t calculateDiffusionAmount(Handle h)
+        {
+            return DIFFUSION_PERCENTAGE*get_sti(h);
+        }
+        virtual const ClassInfo& classinfo() const { return info(); }
+        static const ClassInfo& info() {
+            static const ClassInfo _ci("opencog::DummyImportanceDiffusionAgent");
+            return _ci;
+        }
+};
+
+ImportanceDiffusionUTest::ImportanceDiffusionUTest() {
+    _cogserver = &cogserver();
+    _as = &(_cogserver->getAtomSpace());
+    _eval = make_shared<SchemeEval>(_as);
+    _atq = make_shared<AttentionParamQuery>(_as);
+
+    _cogserver->registerAgent(DummyImportanceDiffusionAgent::info().id,&DIdCreationFactory);
+    AgentPtr afidptr =
+        _cogserver->createAgent(DummyImportanceDiffusionAgent::info().id,false);
+
+    _dmyid_agentptr = std::dynamic_pointer_cast<DummyImportanceDiffusionAgent>(afidptr);
+
+    _cogserver->loadModules();
+}
+
+ImportanceDiffusionUTest::~ImportanceDiffusionUTest(){
+    //delete _eval;
+}
+
+void ImportanceDiffusionUTest::setUp(void){
+    _as->clear();
+    // Create a subhypergraph here
+    const char * sub_hgraph = R"((use-modules (opencog) (opencog attention))
+                                 (use-modules (opencog attention-bank))
+                                 (define src (Node "A"))
+                                 (define target (Node "Y"))
+                                 (AsymmetricHebbianLink (Node "X") target (stv 0.6 0.9))
+                                 (define heblink (AsymmetricHebbianLink src target (stv 0.7 0.9)))
+                                 (define inhlink (InheritanceLink src (Node "B")))
+                                 (define implink (ImplicationLink inhlink (InheritanceLink src (Node "C")))))";
+    std::string evlstr(sub_hgraph);
+    _eval->eval(sub_hgraph);
+    //_cogserver->startAgent(_dmyid_agentptr,false,"AFID");
+}
+
+void ImportanceDiffusionUTest::tearDown(void){
+    //_cogserver->stopAgent(_dmyid_agentptr);
+}
+
+void ImportanceDiffusionUTest::testCalculateHebbianDiffusionPercentage(void){
+    Handle h = _eval->eval_h("heblink");
+    strength_t strength = h->getTruthValue()->get_mean();
+    confidence_t confidence = h->getTruthValue()->get_confidence();
+
+    TS_ASSERT_EQUALS(_dmyid_agentptr->calculateHebbianDiffusionPercentage(h), strength*confidence);
+}
+
+void ImportanceDiffusionUTest::testTradeSTI(void){
+    // Test STI trading function
+    Handle a1 = _eval->eval_h("(Node \"A1\")");
+    Handle a2 = _eval->eval_h("(Node \"A2\")");
+    AttentionBank& ab = attentionbank(_as);
+    ab.stimulate(a1, 50);
+    ab.stimulate(a2, 50);
+
+    AttentionValue::sti_t stia1 =get_sti(a1);
+    AttentionValue::sti_t stia2 =get_sti(a2);
+
+    ImportanceDiffusionBase::DiffusionEventType dt;
+    dt.source = a1;
+    dt.target = a2;
+    dt.amount = 12.12;
+    _dmyid_agentptr->tradeSTI(dt);
+
+    TS_ASSERT_EQUALS(stia1-12.12, get_sti(a1));
+    TS_ASSERT_EQUALS(stia2+12.12, get_sti(a2));
+}
+
+void ImportanceDiffusionUTest::testIncidentAtoms(void){
+    Handle src = _eval->eval_h("src");
+    HandleSeq hseq = _dmyid_agentptr->incidentAtoms(src);
+    
+    TS_ASSERT_EQUALS(2, hseq.size());
+    
+    src = _eval->eval_h("inhlink");
+    hseq = _dmyid_agentptr->incidentAtoms(src);
+    
+    TS_ASSERT_EQUALS(3, hseq.size()); 
+}
+
+void ImportanceDiffusionUTest::testHebbianAdjacentAtoms(void){
+    Handle src = _eval->eval_h("src");
+    HandleSeq hseq = _dmyid_agentptr->hebbianAdjacentAtoms(src);
+    
+    TS_ASSERT_EQUALS(1, hseq.size());
+}
+
+void ImportanceDiffusionUTest::testProbabilityVectorIncident(void){
+    Handle src = _eval->eval_h("src");
+    HandleSeq hseq = _dmyid_agentptr->incidentAtoms(src);
+    std::map<Handle, double> result = _dmyid_agentptr->probabilityVectorIncident(hseq); 
+    
+    for(auto p : result)
+        TS_ASSERT_EQUALS(1.0/2, p.second);
+}
+
+void ImportanceDiffusionUTest::testProbabilityVectorHebbianAdjacent(void){
+    Handle src = _eval->eval_h("src");
+    HandleSeq hseq = get_target_neighbors(src, ASYMMETRIC_HEBBIAN_LINK);
+    std::map<Handle, double> result = _dmyid_agentptr->probabilityVectorHebbianAdjacent(src, hseq);
+    
+    TS_ASSERT_EQUALS(1, result.size());
+    TS_ASSERT_EQUALS(0.7*0.9, result.begin()->second);
+}
+
+void ImportanceDiffusionUTest::testCombineIncidentAdjacentVectors(void){
+    Handle src = _eval->eval_h("src");
+    HandleSeq hseq = _dmyid_agentptr->incidentAtoms(src);
+    std::map<Handle, double> rincident = _dmyid_agentptr->probabilityVectorIncident(hseq); 
+    hseq = get_target_neighbors(src, ASYMMETRIC_HEBBIAN_LINK);
+    std::map<Handle, double> rhebincident = _dmyid_agentptr->probabilityVectorHebbianAdjacent(src, hseq);
+    
+    std::map<Handle, double> combined = _dmyid_agentptr->combineIncidentAdjacentVectors(rincident, rhebincident);
+    
+    TS_ASSERT_EQUALS(3, combined.size());
+}
+
+
+void ImportanceDiffusionUTest::testDiffuseAtom(void){
+    Handle hsrc = _eval->eval_h("src");
+    AttentionBank& ab = attentionbank(_as);
+    ab.stimulate(hsrc, 50);
+    AttentionValue::sti_t sti_begin = get_sti(hsrc);
+    AttentionValue::sti_t diffused_amount = DIFFUSION_PERCENTAGE * sti_begin;
+    
+    _dmyid_agentptr->diffuseAtom(hsrc);
+    std::stack<ImportanceDiffusionBase::DiffusionEventType> diffusionStack = _dmyid_agentptr->diffusionStack;
+    
+    TS_ASSERT_EQUALS(diffusionStack.size(), 3);
+    
+    AttentionValue::sti_t total = 0;
+    std::vector<ImportanceDiffusionBase::DiffusionEventType> devent;
+    for(; not diffusionStack.empty() ; ){
+        auto de = diffusionStack.top(); 
+        total += de.amount;
+        devent.push_back(de);
+        diffusionStack.pop();
+    }
+    
+    TS_ASSERT_EQUALS(diffused_amount, total);
+}
+
+
