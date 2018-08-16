@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/SystemActivityTable.h>
 
 namespace opencog
 {
@@ -45,9 +46,14 @@ class AgentRunnerBase
 
         unsigned long get_cycle_count() const;
 
+        void set_activity_table(SystemActivityTable* sat);
+
     protected:
         /** The runner name; mainly used for logging purposes */
         std::string name;
+
+        /** Pointer to SystemActivityTable, owned by CogServer */
+        SystemActivityTable* sat;
 
         /** Current cycle number (will reset to 0 if reaches max possible value) */
         unsigned long cycle_count;
@@ -70,6 +76,7 @@ class AgentRunnerBase
 
         /** Run an Agent and log its activity. */
         void run_agent(AgentPtr a);
+
 };
 
 
@@ -104,6 +111,8 @@ class SimpleRunner: public AgentRunnerBase
          * frequency \endlink property.
          */
         void process_agents();
+
+        void set_activity_table(SystemActivityTable* sat) { this->sat = sat; };
 };
 
 } /* namespace opencog */

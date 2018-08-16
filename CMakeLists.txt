@@ -8,7 +8,6 @@
 # -- configure various config files.
 # -- print pretty summary
 #
-include(lib/Summary.cmake)
 
 # Seems to work fine with cmake-2.6
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
@@ -53,7 +52,22 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
                 -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
 # add the 'lib' dir to cmake's module search path
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+
+# Cogutil
+FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
+IF (COGUTIL_FOUND)
+    MESSAGE(STATUS "CogUtil found.")
+    ADD_DEFINITIONS(-DHAVE_COGUTIL)
+    SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+    MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
+
+# add the 'cmake' directory from cogutil to search path
+list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
+
+include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
@@ -133,19 +147,8 @@ ENDIF (WIN32)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
-# Check for cogutil first, then check for atomspace
-# Cogutil
-FIND_PACKAGE(CogUtil 2.0.1 REQUIRED)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-	SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
-
 # AtomSpace
-FIND_PACKAGE(AtomSpace 5.0.3 REQUIRED)
+FIND_PACKAGE(AtomSpace 5.0.3 CONFIG REQUIRED)
 IF (ATOMSPACE_FOUND)
 	MESSAGE(STATUS "AtomSpace found.")
 	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
@@ -288,7 +291,7 @@ ENDIF (UUID_FOUND)
 
 
 # MOSES needed for ???
-FIND_PACKAGE(MOSES)
+FIND_PACKAGE(MOSES CONFIG)
 
 IF (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES was found.")
@@ -528,8 +531,8 @@ ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
 SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # include custom opencog cmake macros
-INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogFunctions.cmake")
+INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogFunctions.cmake")
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs

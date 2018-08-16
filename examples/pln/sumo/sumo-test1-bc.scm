@@ -20,8 +20,7 @@
 ;; guile --no-auto-compile -l Merge.scm
 
 ;; Set logger to debug level
-(use-modules (opencog logger))
-(cog-logger-set-level! "debug")
+(ure-logger-set-level! "debug")
 
 ;; Load PLN rule base
 (load "pln-config1.scm")
