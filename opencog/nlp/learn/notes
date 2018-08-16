@@ -16089,7 +16089,12 @@ wtf!? o profilig
 Restart the similarities, this time on en_sh_two_sim
 
 iota:  nsteps start stepsz
-(map (lambda (n) (ami 'batch-compute n)) (iota 30 52 4))
+regular disjuncts mi going to 70+14*72 == 1078
+                           now to (+ 1024 (* 8 64)) == 1536
+regular disjuncts cos going to 10 + 59*25 = 1485
+
+cross mi to ...
+
 (map (lambda (n) (bmi 'batch-compute n)) (iota 222 170 5))
 
 
