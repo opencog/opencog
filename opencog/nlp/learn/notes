@@ -14823,7 +14823,7 @@ Here's it's dual:
 
 (cdrim (WordNode "Frollo/Harry"))
 Oh, hang on ... silly goose. Cannot hand MI on the sections. Of course.
-Since the pairs are not correctly identified. 
+Since the pairs are not correctly identified.
 There are three fmi's:
 word-to-conseq
 word-to first-con
@@ -15780,6 +15780,63 @@ Hmm  slefmi is needed, and the cond is bad
    (dab-perp-helper w1 w2 wr w))
 
 =========================================================================
+Compositionality
+(define pco (add-pair-cosine-compute psa))
+(cog-get-atoms 'ConceptNode)
+(section-vec-sum (Concept "cap-fra") psa 1.0 0.0
+	(Word "capital") (Word "France"))
+
+(pco 'right-cosine (Word "capital") (Word "France")) 0.04255500982730526
+(pco 'right-cosine (Word "Paris") (Word "France")) 0.5596429825328416
+(pco 'right-cosine (Word "capital") (Word "Paris")) 0.05447529708635267
+
+(pco 'right-cosine (Concept "cap-fra") (Word "Paris")) ; 0.40030313552977614
+(pco 'right-cosine (Concept "cap-fra") (Word "France")) 0.6748163062971411
+(pco 'right-cosine (Concept "cap-fra") (Word "capital")) 0.766034032120569
+
+; OK so above is totally lame
+
+(section-vec-sum (Concept "cpfrm") psa 0.0 0.0
+	(Word "capital") (Word "France"))
+
+(pco 'right-cosine (Concept "cpfrm") (Word "Paris")) 0.3810198495859706
+(pco 'right-cosine (Concept "cpfrm") (Word "France")) 0.35398467437926406
+(pco 'right-cosine (Concept "cpfrm") (Word "capital")) 0.16742518929899683
+
+; OK, so that's interesting! similarity to the two components
+is much much lower. But similarity to "paris" is about the same,
+and is now the highest of the three numbers.
+
+(pco 'right-cosine (Concept "cpfrm") (Word "Madrid")) 0
+(length (cog-incoming-by-type (Word "Madrid") 'Section)) 3
+
+(pco 'right-cosine (Concept "cpfrm") (Word "Berlin")) 0
+(length (cog-incoming-by-type (Word "Berlin") 'Section)) 16
+
+(pco 'right-cosine (Concept "cpfrm") (Word "London")) 0.5451708663713439
+(length (cog-incoming-by-type (Word "London") 'Section)) 911
+
+(length (cog-incoming-by-type (Word "Paris") 'Section)) 248
+
+(length (cog-incoming-by-type (Concept "cpfrm") 'Section)) 6
+
+(length (cog-incoming-by-type (Word "France") 'Section)) 267
+(length (cog-incoming-by-type (Word "capital") 'Section)) 300
+
+The 6 sections on "cpfrm" are totally lame --
+They are prepositions, punctuation.
+
+whatever compistionality there mayb be, not enough data in this dataset.
+Probably need to perform clustering first.
+
+
+(pmi 'mmt-fmi (Word "France")(Word "capital")) 0.634246152887463
+(pmi 'mmt-fmi (Word "France")(Word "Paris")) 5.458600057659794
+(pmi 'mmt-fmi (Word "Paris")(Word "capital")) 1.0135814069906335
+
+OK, not too interesting.
+
+=========================================================================
 cross-connector similarities.
 
 (define ara (make-shape-vec-api))
@@ -16093,7 +16150,8 @@ regular disjuncts mi going to 70+14*72 == 1078
                            now to (+ 1024 (* 8 64)) == 1536
 regular disjuncts cos going to 10 + 59*25 = 1485
 
-cross mi to ...
+cross mi to ... 571 + 50*20 = 1571
+(for-each (lambda (n) (mib 'batch-compute n)) (iota 50 571 21))
 
 (map (lambda (n) (bmi 'batch-compute n)) (iota 222 170 5))
 
