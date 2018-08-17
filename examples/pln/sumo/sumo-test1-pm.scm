@@ -19,8 +19,7 @@
 ;;
 ;; guile --no-auto-compile -l Merge.scm
 
-(use-modules (opencog logger))
-(cog-logger-set-level! "debug")
+(ure-logger-set-level! "debug")
 
 (load "pln-config.scm")
 

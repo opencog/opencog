@@ -106,9 +106,9 @@
 
 (define (store-regularly)
 	(sleep 1200)
-	(load-atoms-of-type 'SimilarityLink)
+;	(load-atoms-of-type 'SimilarityLink)
 	(sleep 1200)
-	(load-atoms-of-type 'SimilarityLink)
+;	(load-atoms-of-type 'SimilarityLink)
 	(sleep 1200)
 	(store-sims)
 	(format #t "Done storing ~A ~A\n"

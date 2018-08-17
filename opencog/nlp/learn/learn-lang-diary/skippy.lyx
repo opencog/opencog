@@ -3,6 +3,9 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{url}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language english
@@ -25,7 +28,17 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
-\use_hyperref false
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref page
+\pdf_pdfusetitle true
 \papersize default
 \use_geometry false
 \use_amsmath 1
@@ -140,7 +153,7 @@ key "Bengio2003"
  and SkipGram
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013,Mikolov2013a"
+key "Mikolov2013b,Mikolov2013a"
 
 \end_inset
 
@@ -516,7 +529,7 @@ At any rate, for
  Following Mikolov
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013"
+key "Mikolov2013b"
 
 \end_inset
 
@@ -736,7 +749,7 @@ Mikolov,
 etal
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013a,Mikolov2013"
+key "Mikolov2013a,Mikolov2013b"
 
 \end_inset
 
@@ -996,14 +1009,22 @@ input
 \end_inset
 
 , that 
-\begin_inset Formula $I=\left\{ t-c,t-c+1,\cdots t-1,t+1,\cdots,t+c\right\} $
+\begin_inset Formula 
+\[
+I=\left\{ t-c,t-c+1,\cdots t-1,t+1,\cdots,t+c\right\} 
+\]
+
 \end_inset
 
- or that 
-\begin_inset Formula $I=w_{I}=\left\{ w_{t-c},w_{t-c+1},\cdots,w_{t-1},w_{t+1},\cdots,w_{t+c}\right\} $
+or that 
+\begin_inset Formula 
+\[
+I=w_{I}=\left\{ w_{t-c},w_{t-c+1},\cdots,w_{t-1},w_{t+1},\cdots,w_{t+c}\right\} 
+\]
+
 \end_inset
 
-; exactly which of these sets is intended will hopefully be clear from context.
+Exactly which of these sets is intended will hopefully be clear from context.
 \end_layout
 
 \begin_layout Standard
@@ -1793,7 +1814,7 @@ Such long-distance attachments are problematic for CBOW or Skip-Grams, in
 , which is a bit larger than currently reported results; for example, Mikolov
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Mikolov2013"
+key "Mikolov2013b"
 
 \end_inset
 
@@ -2811,7 +2832,7 @@ Here, as always,
  number of number of non-zero pairs, measured in bits:
 \begin_inset Formula 
 \[
-\mbox{sparsity}=\log_{2}\frac{\left|w\right|\left|d\right|}{\left|\left(w,d\right)\right|}
+\mbox{sparsity}=-\log_{2}\frac{\left|\left(w,d\right)\right|}{\left|w\right|\left|d\right|}
 \]
 
 \end_inset
@@ -2840,7 +2861,26 @@ Some of the observed sparsity is due to a lack of a sufficient number of
  Unlike the foreign phrases, this does not mean that they are inflexible
  in grammatical usage: one can use the name of a small town in a vast number
  of sentences, even if the observed corpus uses it in only a few.
- 
+\end_layout
+
+\begin_layout Standard
+Two more factors compound the confusion.
+ One is that the observed text will neccessarily contain grammatically-incorrect
+ text: the occasional mis-spelled word, the occasional awkwardly worded
+ phrase; omitted determiners, incorrect number, tense agreement.
+ A far more serious issue is that the disjuncts are constructed by means
+ of MST parsing, which has a reasonably large error rate: based on reports
+ from Yuret
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+ and others, one can expect parses that are 80% to 90% accurate; the fraction
+ of incorrect disjuncts may range from 5% to 20%.
+ Incorrect disjuncts decrease the observed sparsity: they make some observations
+ more frequent than they should be, but only because they're wrong.
 \end_layout
 
 \begin_layout Standard
@@ -2990,7 +3030,7 @@ Given a word
 , and it should factorize into two distinct parts:
 \begin_inset Formula 
 \[
-p\left(w,d,g\right)=p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)
+p\left(w,d,g\right)=p^{\prime}\left(w|g\right)p^{\prime\prime}\left(g,d\right)
 \]
 
 \end_inset
@@ -3020,7 +3060,7 @@ where
  and to perform the matrix factorization
 \begin_inset Formula 
 \begin{equation}
-p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w,g\right)p^{\prime\prime}\left(g,d\right)\label{eq:factorize}
+p\left(w,d\right)\approx\sum_{g\in G}p^{\prime}\left(w|g\right)p^{\prime\prime}\left(g,d\right)\label{eq:factorize}
 \end{equation}
 
 \end_inset
@@ -3030,7 +3070,7 @@ Ideally, the size of the set
 \end_inset
 
  is minimal, in some way, so that the matrices 
-\begin_inset Formula $p^{\prime}(w,g)$
+\begin_inset Formula $p^{\prime}(w|g)$
 \end_inset
 
  and 
@@ -3064,7 +3104,27 @@ In the following, the prime-superscripts are dropped, and the probabilities
 
 .
  Which is which should be apparent from context.
- 
+ The probability 
+\begin_inset Formula $p\left(w|g\right)$
+\end_inset
+
+ is a conditional probability: 
+\begin_inset Formula $p\left(w|g\right)=p\left(w,g\right)/p\left(*,g\right)$
+\end_inset
+
+.
+ This is used to ensure the proper propagation of the joint probability:
+\begin_inset Formula 
+\begin{eqnarray*}
+p\left(*,d\right) & = & \sum_{w}p\left(w,d\right)\\
+ & = & \sum_{w}\sum_{g}p\left(w|g\right)p\left(g,d\right)\\
+ & = & \sum_{w}\sum_{g}\frac{p\left(w,g\right)}{p\left(*,g\right)}p\left(p,d\right)\\
+ & = & \sum_{g}p\left(g,d\right)
+\end{eqnarray*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4240,7 +4300,7 @@ reference "eq:factorize"
 viz
 \emph default
 , the inner product of two vectors 
-\begin_inset Formula $\left(\vec{w}\right)_{g}=p\left(w,g\right)$
+\begin_inset Formula $\left(\vec{w}\right)_{g}=p\left(w|g\right)$
 \end_inset
 
  and 
@@ -4370,7 +4430,7 @@ not
 This becomes more clear if written in in components:
 \begin_inset Formula 
 \[
-p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w,g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
+p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w|g\right)M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
 \]
 
 \end_inset
@@ -4635,7 +4695,7 @@ In the above factorization, matrix
  as joint probabilities.
  However, it seems to be particularly important to the semantic structure
  of the language: it captures the complexity of language, whereas the left
- and right factors merely funnel spell-ed-out word-strings into the actual
+ and right factors merely funnel spelled-out word-strings into the actual
  semantic cagtegories.
  Thus, it is convenient to instead write the left and write factors as Markov
  matrices, while taking the central factor to be a joint probability.
@@ -4670,7 +4730,7 @@ and likewise for
 \end_inset
 
 and likewise 
-\begin_inset Formula $\sum_{g^{\prime}}p\left(d|g^{\prime}\right)$
+\begin_inset Formula $\sum_{g^{\prime}}p\left(d|g^{\prime}\right)=1$
 \end_inset
 
 .
@@ -4830,7 +4890,7 @@ macros
 \end_inset
 
  for 
-\begin_inset Formula $g^{\prime}=\mbox{\left\langle noun-main-p\right\rangle }$
+\begin_inset Formula $g^{\prime}=\mbox{\left\langle noun\negthinspace-\negthinspace main\negthinspace-\negthinspace p\right\rangle }$
 \end_inset
 
 .
@@ -5215,7 +5275,7 @@ ns.
 \begin_layout Standard
 For the special case of hard clustering, where each word or disjunct is
  assigned to only one word class/grammatical class, one has that (eqn (6)
- if Dhillon)
+ of Dhillon)
 \begin_inset Formula 
 \begin{equation}
 p\left(g,g^{\prime}\right)=\sum_{w\in g}\sum_{d\in g^{\prime}}p\left(w,d\right)\label{eq:central factor}
@@ -5255,6 +5315,13 @@ This allows an iterative algorithm to be performed, clustering only rows
 
 \begin_layout Subsubsection
 Biclustering
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Biclustering"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5334,7 +5401,7 @@ al cluster assignments
 \begin_inset Formula $G^{\prime}$
 \end_inset
 
- are known at each step of the iteraction.
+ are known at each step of the iteration.
  The conditional probabilities are as noted before: 
 \begin_inset Formula 
 \[
@@ -5424,8 +5491,246 @@ reference "sub:Sparsity"
 \begin_layout Standard
 But never mind: the assumption of hard clustering breaks word-sense disambiguati
 on.
- Generic algorithms are not enough.
+ Genetic algorithms are not enough.
  Back to the drawing board.
+\end_layout
+
+\begin_layout Subsubsection
+Word-Sense Disambiguation
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Word-Sense-Disambiguation"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The primary issue with hard clustering is that it fails to correctly disentangle
+ different word senses.
+ There is an opportunity to do better.
+\end_layout
+
+\begin_layout Standard
+A prototype example is given by the word 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It could be the noun, refering to the cutting tool; it could be the verb
+ synonymous to cutting; it could be thw past tense of the verb 
+\begin_inset Quotes eld
+\end_inset
+
+to see
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The observational data consists of occurance counts 
+\begin_inset Formula $N\left(\mbox{"saw"},d\right)$
+\end_inset
+
+.
+ The goal of word-sense disambiguation is to somehow factor this into three
+ grammatical classes 
+\begin_inset Formula $g$
+\end_inset
+
+, so that 
+\begin_inset Formula 
+\[
+N\left(\mbox{"saw"},d\right)=N\left(\left\langle \mbox{tool}\right\rangle ,d\right)+N\left(\left\langle \mbox{cutting}\right\rangle ,d\right)+N\left(\left\langle \mbox{seeing}\right\rangle ,d\right)
+\]
+
+\end_inset
+
+The general problem of how to accomplish this, and several tactics are discussed
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+.
+ That persentation focuses on cosine distances.
+ This section provides an information-theoretic variant.
+\end_layout
+
+\begin_layout Standard
+The actual observed frequencies 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ are, by definition, sums of word 
+\begin_inset Formula $w$
+\end_inset
+
+ used with every different possible word-sense 
+\begin_inset Formula $s_{k}$
+\end_inset
+
+ that the word could have.
+ That is, explicitly, one has that
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{k}p\left(s_{k},d\right)
+\]
+
+\end_inset
+
+In poetry and in word-play, a word might be used in such a way that multiple
+ senses are simultaneously applied.
+ The assumption above is that this is not the case: that the text assigns
+ only a single meaning to each word use.
+ In any given use, the word 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ is either a noun, or one of the verbs; it cannot be some mixture of all
+ of them.
+ 
+\end_layout
+
+\begin_layout Standard
+Each word-sense can then be hard-clustered into a single grammatical category:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+-the-noun belongs to just one grammatical category, the one that holds synonyms
+ for cutting tools.
+ Thus, the hard-clustering formula applies:
+\begin_inset Formula 
+\[
+p\left(s,g\right)=\begin{cases}
+p\left(s,*\right) & \mbox{ if }s\in g\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The intent of the sense label 
+\begin_inset Formula $s$
+\end_inset
+
+ is that it is uniquely associated with just one word, and no others.
+ The number of word-senses is strictly larger than the vocabulary: every
+ vocabulary word has at least one sense.
+ That is, 
+\begin_inset Formula $p\left(*,s\right)=p\left(w,s\right)$
+\end_inset
+
+ holds for all 
+\begin_inset Formula $s\in w$
+\end_inset
+
+.
+ Thus, the conditional probability is
+\begin_inset Formula 
+\[
+p\left(w|s\right)=\frac{p\left(w,s\right)}{p\left(*,s\right)}=\begin{cases}
+1 & \mbox{ if }s\in w\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+The decomposition of words into senses is then (restating the earlier formula
+ in slightly different notation: 
+\begin_inset Formula 
+\begin{eqnarray*}
+p\left(w,d\right) & = & \sum_{s}p\left(w|s\right)p\left(s,d\right)\\
+ & = & \sum_{s\in w}p\left(s,d\right)
+\end{eqnarray*}
+
+\end_inset
+
+To be consistent with the central factorization 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:central-decomposition"
+
+\end_inset
+
+, one must have
+\begin_inset Formula 
+\[
+\sum_{s\in w}p\left(s,g\right)=p\left(w,g\right)
+\]
+
+\end_inset
+
+and
+\begin_inset Formula 
+\[
+\sum_{s\in w}p\left(s|g\right)=p\left(w|g\right)
+\]
+
+\end_inset
+
+Since a word-sense is associated with just one word, the notation 
+\begin_inset Formula $\sum_{s\in w}$
+\end_inset
+
+ is superflous: one can unambigously write 
+\begin_inset Formula $\sum_{s}$
+\end_inset
+
+ as all other entries are zero.
+\end_layout
+
+\begin_layout Standard
+The central factorization now has the form 
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\sum_{s}p\left(s,d\right)=\sum_{s}\sum_{g}\sum_{g^{\prime}}p\left(s|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)
+\]
+
+\end_inset
+
+Not much has changed: the word-senses can now be legitimately hard-clustered;
+ but the decomposition of words into word-senses is unknown.
+ The clustering algorithm reviewed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Biclustering"
+
+\end_inset
+
+ is very nearly unaffected: one replaces the provisional clustering guesses
+ of 
+\begin_inset Formula $w\in g$
+\end_inset
+
+ by provisional guesses 
+\begin_inset Formula $s\in w$
+\end_inset
+
+ and 
+\begin_inset Formula $s\in g$
+\end_inset
+
+.
+ The feasibility of the algorithm is further challenged by the fact that
+ there are more word-senses than there are words, further increasing the
+ computational space.
 \end_layout
 
 \begin_layout Subsection
@@ -6039,18 +6344,18 @@ where
 \end_layout
 
 \begin_layout Subsubsection
-Information clustering
+Pair-wise Information Divergence
 \end_layout
 
 \begin_layout Standard
-The analog to cosine clustering can be arrived at with two changes.
- The cosine was built from the dot product 
+The cosine was built from the dot product 
 \begin_inset Formula $\vec{u}\cdot\vec{v}$
 \end_inset
 
  normalized by the vector lengths.
- Here, the normalization is changed, so as to use the Kullback-Leibler divergenc
-e: 
+ For information-based clustering, the normalization is changed, so as to
+ use the Kullback-Leibler divergence between the vecgor-pair, and the individual
+ vectors: 
 \begin_inset Formula 
 \[
 MI\left(\vec{u},\vec{v}\right)=\log_{2}\frac{\vec{u}\cdot\vec{v}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\vec{v}_{i}\cdot\vec{v}_{j}\right)}{\left(\sum_{i=1}^{n}\vec{u}\cdot\vec{v_{i}}\right)\left(\sum_{j=1}^{n}\vec{v}_{j}\cdot\vec{v}\right)}
@@ -6131,41 +6436,535 @@ Q\left(w_{1},w_{2}\right)=\frac{S\left(w_{1},w_{2}\right)}{S\left(*,*\right)}
 
 with
 \begin_inset Formula 
-\[
-MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}
-\]
+\begin{equation}
+MI\left(w_{1},w_{2}\right)=\log_{2}\frac{Q\left(w_{1},w_{2}\right)}{Q\left(w_{1},*\right)Q\left(*,w_{2}\right)}\label{eq:pairwise-info-divergence}
+\end{equation}
 
 \end_inset
 
-
+Intuitively.
+ this can be thought of the information gain of bringing two vectors together,
+ as compared to the entire dataset of all other vectors.
+ 
 \end_layout
 
 \begin_layout Standard
-For the clustering operation, one must replace the arithmetic mean by the
- geometric mean.
- The cluster centroid is now given by 
+This global aspect makes this function very different from the cosine distance.
+ The cosine distance is defined independently of all other vectors in the
+ system; it is independent of the number of other vectors, and the directions
+ in which they are pointing.
+ On could have a system with 42 vectors, or with 23 thousand of them: the
+ cosine metric doesn't care.
+ One could have a system with two vectors pointing one way, and another
+ six hundred pointing in the opposite direction: cosine doesn't care.
+ The pair-wise MI above compares two vectors, within the context of what
+ all of the other vectors in the system.
+ 
+\end_layout
+
+\begin_layout Standard
+A different way to think of the pair-wise MI is that, by incorporating all
+ other vectors into its value, it is effectively attempting to spread all
+ of the (other) vectors into as uniform distribution as possible, magnifying
+ and expanding those regions where cosine would say there are lots of densely
+ packed vectors, while shrinking those regions where there is low density.
+ 
+\end_layout
+
+\begin_layout Standard
+One way the above can be visualized is to consider two vectors, roughly
+ colinear, and another six hundred, also all roughly colinear, but almost
+ orthogonal to the first two.
+ Consider then the MI values for different pairs chosen from this collection.
+ Two vectors which might have the same cosine angle will have very different
+ MI values, in this kind of dataset.
+\end_layout
+
+\begin_layout Subsubsection
+Scale invariance
+\end_layout
+
+\begin_layout Standard
+The information divergence 
+\begin_inset Formula $MI\left(w_{1},w_{2}\right)$
+\end_inset
+
+ is scale invariant: replacing 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ by 
+\begin_inset Formula $kp\left(w,d\right)$
+\end_inset
+
+ for some constant 
+\begin_inset Formula $k$
+\end_inset
+
+ does not alter the divergence.
+ In particular, replacing the joint probability 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ by the conditional probability 
+\begin_inset Formula $p\left(d|w\right)=p\left(w,d\right)/p\left(w,*\right)$
+\end_inset
+
+ does not alter the information divergence.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Arithmetic and Geometric Means
+\end_layout
+
+\begin_layout Standard
+For vectors obtained from natural language, tehre is good reason to beleive
+ that the natural clusters are convex, rather than being oddly shaped.
+ Therefore, it is meaningful to ask about and talk about the centroid of
+ a cluster.
+\end_layout
+
+\begin_layout Standard
+For a Euclidean space, posessing rotational invariance and some notion of
+ uniform distribution, the arithmetic mean of the vectors in a cluster would
+ be a natural choice for the centroid.
+ However, as is being repeatedly noted, vectors taken from a joint probability
+ distribution do not live in a Euclidean, rotationally symmetric space.
+ The arithmetic mean does not make sense.
+ There are several candidates that are more suitable.
+\end_layout
+
+\begin_layout Standard
+One is the geometric mean.
+ The centroid for word-cluster 
+\begin_inset Formula $g$
+\end_inset
+
+ might be expressed by 
 \begin_inset Formula 
 \[
-m\left(w,d\right)=\sqrt[\frac{1}{\left|g\right|}]{\prod_{w\in g}p\left(w,d\right)}
+m\left(g,d\right)=\sqrt[\frac{1}{\left|g\right|}]{\prod_{w\in g}p\left(w,d\right)}
 \]
 
 \end_inset
 
-The need for the geometric mean can be thought of in two ways: first, probabilit
-ies can only be added if they are truly independent, and here they are not;
- but probabilities can always be multiplied.
- More importantly, the logarithm of the geometric mean can be taken.
- This connects the pair-wise information distance to minimization of cluster
- sizes.
+This has the peculiar property that, if for any word 
+\begin_inset Formula $w$
+\end_inset
+
+ in the cluster, 
+\begin_inset Formula $p\left(w,d\right)=0$
+\end_inset
+
+, then 
+\begin_inset Formula $m\left(g,d\right)=0$
+\end_inset
+
+.
+ The support for the vector 
+\begin_inset Formula $m\left(g,d\right)$
+\end_inset
+
+ is the intersection of the supports for the vectors 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+ In itself, this is not terribly objectionable or bad, but for one thing:
+ The 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ are observational frequencies, and are not theoretical distributions.
+ Thus, one might have that 
+\begin_inset Formula $p\left(w,d\right)=0$
+\end_inset
+
+ simply because it has not been observed, and not because it is grammatically
+ forbidden.
+ This was already noted in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Sparsity"
+
+\end_inset
+
+: contingency tables fundamentally cannot distinguish between rare linguistic
+ phenomena and grammatically forbidden phenomena.
+ The Zipfian distribution prohibits this.
+\end_layout
+
+\begin_layout Standard
+One can imagine several work-arounds.
+ One would be to apply some form of kernel smoothing, or to apply some sort
+ of local regression.
+ How this might work is unclear.
+ Consider instead the logarithm of the geometric mean:
+\begin_inset Formula 
+\begin{equation}
+\log_{2}m\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\log_{2}p\left(w,d\right)\label{eq:cluster mean}
+\end{equation}
+
+\end_inset
+
+To be consistent with the previous expression, if 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ has not been observed, one should take 
+\begin_inset Formula $\log_{2}p\left(w,d\right)=-\infty$
+\end_inset
+
+.
+ From the missing-data perspective, it would actually be better to take
+ 
+\begin_inset Formula $\log_{2}p\left(w,d\right)=0$
+\end_inset
+
+ -- missing observations contribute nothing.
+ Continuing in this vein of thinking, that infrequently-observed phenomena
+ are being unfairly punished and are not being given due weight, one might
+ consider the centroid to be described by
+\begin_inset Formula 
+\[
+\log_{2}m_{\alpha}\left(g,d\right)=\frac{1}{\left|g\right|}\sum_{w\in g}\left(\log_{2}p\left(w,d\right)\right)^{\alpha}
+\]
+
+\end_inset
+
+for some 
+\begin_inset Formula $\alpha\le1$
+\end_inset
+
+, thus effectively making rare pehnomena seem less rare, while common phenomena
+ become less common.
+\end_layout
+
+\begin_layout Standard
+An intuitive feel for the geometric mean can be argued: probabilities can
+ only be added if they are truly independent, and here they are not; but
+ probabilities, taken as discrete events, can always be multiplied.
+ For a a probability distribution 
+\begin_inset Formula $P\left(X\right)$
+\end_inset
+
+ on a space 
+\begin_inset Formula $X$
+\end_inset
+
+, the frequentist interpretation of probability is founded on individual
+ observations in the sequence space (aka the Cantor space) 
+\begin_inset Formula $X^{\omega}=X\times X\times\cdots$
+\end_inset
+
+ that is the Cartesian product of an infinite number of copies of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Frequentist probabilities are sigma-measures on the Borel set of cylinder
+ sets on the Cantor space.
+ Cylinder sets are the elements of the coarse topology on the product space.
+ Cylinder sets correspond to the limits of the pushout diagram 
+\begin_inset Formula $\centerdot\leftarrow\centerdot\rightarrow\centerdot$
+\end_inset
+
+ that defines the Cartesian product.
+\end_layout
+
+\begin_layout Subsubsection
+Agglomerative Clustering
+\end_layout
+
+\begin_layout Standard
+The primary reason to propose a pair-wise information divergence is to enable
+ agglomerative clustering.
+ The reason for this was made clear earlier: the sheer scale and quantity
+ of data makes hill-climbing and gradient descent algorithms untenable.
+ The search space is simply too large.
+\end_layout
+
+\begin_layout Standard
+As a corellary, the results of hillclimbing or gradient-descent algorithms
+ are insufficiently sparse; one wishes to approxmate the sparsity that hard-clus
+tering offers, with less overhead and complexity in finding the clusters.
 \end_layout
 
 \begin_layout Subsection
-WSD-sensitive clustering
+Word-Sense Disambiguation
 \end_layout
 
 \begin_layout Standard
-Since this paper is already too long, that conversation is moved over to
- reference 
+The section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Word-Sense-Disambiguation"
+
+\end_inset
+
+ describes the general, global framework for discussing word-senses in the
+ factorization model.
+ The challenge of agglomerative clustering is to obtain some estimate of
+ word-sense assignments, given as a starting point the pairwise information
+ divergence of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:pairwise-info-divergence"
+
+\end_inset
+
+.
+ This is where things start to get truly interesting.
+\end_layout
+
+\begin_layout Subsubsection
+Mihalcea Algorithm
+\end_layout
+
+\begin_layout Standard
+Rada Mihalcea describes a word-sense disambiguation algorithm
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mihalcea2004,Mihalcea2005,Mihalcea2007"
+
+\end_inset
+
+ that fits very naturally with the framework being discussed here.
+ However, it requires whole-sentence contexts.
+ For each instance 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ of the 
+\begin_inset Formula $j$
+\end_inset
+
+'th word in a sentence, one assigns an (unknown) vector of word-senses 
+\begin_inset Formula $p\left(w_{j},s_{k}\right)$
+\end_inset
+
+ with the set of possible senses 
+\begin_inset Formula $s_{k}$
+\end_inset
+
+ given externally, as an 
+\emph on
+a priori
+\emph default
+ set, for example, taken from WordNet.
+ In addition, one also assumes an externally provided 
+\emph on
+a priori
+\emph default
+ measure of similarity 
+\begin_inset Formula $d\left(s_{k},s_{m}\right)$
+\end_inset
+
+ of word-senses; again, this can be provided by WordNet.
+ One then considers the full graph clique of all possible word-senses that
+ might appear in the sentence, and thier relation all other possible word-senses.
+ That is, one considers the graph 
+\begin_inset Formula $M\left(s_{k},s_{m}\right)$
+\end_inset
+
+ with the 
+\begin_inset Formula $k$
+\end_inset
+
+ and 
+\begin_inset Formula $m$
+\end_inset
+
+ indexes corresponding to word-positions in the sentence; the matrix entries
+ are just 
+\begin_inset Formula $d\left(s_{k},s_{m}\right)$
+\end_inset
+
+ normalized so that 
+\begin_inset Formula $M$
+\end_inset
+
+ is a Markov matrix (Markov chain).
+ One then solves this chain to find the stationary vector 
+\begin_inset Formula $\pi$
+\end_inset
+
+.
+ This stationary vector can be interpreted as the desired word-sense assignment
+ 
+\begin_inset Formula $p\left(w_{j},s_{k}\right)$
+\end_inset
+
+ of the probability that the 
+\begin_inset Formula $j$
+\end_inset
+
+'th word has the 
+\begin_inset Formula $k$
+\end_inset
+
+'th sense.
+\end_layout
+
+\begin_layout Standard
+The algorithm readily generalizes to any system that can provide logical
+ inference on concepts: one replaces the similarity-distance 
+\begin_inset Formula $d\left(s_{k},s_{m}\right)$
+\end_inset
+
+ by the likelihood of some particular logical inference performed over the
+ sentence.
+ Taken over multiple sentences, this can provide anaphora resolution and
+ reference resolution.
+\end_layout
+
+\begin_layout Standard
+The primary drawback of this algorithm is that the word senses must be externall
+y supplied.
+ For this project, this is even a fatal drawback: the goal is to infer word-sens
+es.
+\end_layout
+
+\begin_layout Subsubsection
+Word-sense Similarity
+\end_layout
+
+\begin_layout Standard
+Assume, for a moment, that distinct word senses can be infered from raw
+ text, in an unsupervised fashion.
+ That is, assume that a joint probability 
+\begin_inset Formula $p\left(s,d\right)$
+\end_inset
+
+ can be infered from the text data.
+ It is OK if this probability is of low quality, and generally inaccurate:
+ disappointingly inaccurate, even.
+ If this probability exceeds pure random chance, then the Mihalcea algorithm
+ can be run 
+\begin_inset Quotes eld
+\end_inset
+
+in reverse
+\begin_inset Quotes erd
+\end_inset
+
+, to infer the joint probabilities 
+\begin_inset Formula $p\left(s,s^{\prime}\right)$
+\end_inset
+
+ between different senses 
+\begin_inset Formula $s$
+\end_inset
+
+ and 
+\begin_inset Formula $s^{\prime}$
+\end_inset
+
+.
+ One does so by assuming that, given the specific words in a specific sentence,
+ that the word-senses between them are necessarily highly-related.
+ Given that the sentence can be parsed into a string of disjuncts 
+\begin_inset Formula $d$
+\end_inset
+
+, one can use 
+\begin_inset Formula $p\left(s,d\right)$
+\end_inset
+
+ to assign a provisional probability 
+\begin_inset Formula $s$
+\end_inset
+
+ to each word, and then collect observational statistics 
+\begin_inset Formula $N\left(s,s^{\prime}\right)$
+\end_inset
+
+ on a sentence-by-sentence basis, incrementing 
+\begin_inset Formula $N$
+\end_inset
+
+ by one for each observed pair 
+\begin_inset Formula $\left(s,s^{\prime}\right)$
+\end_inset
+
+ in a sentence.
+ After observing a large number of sentences, one has a (sparse) database
+ of sense-pair frequencies 
+\begin_inset Formula $p\left(s,s^{\prime}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The goal of doing this is to amplify the signal-to-noise ratio.
+ This is in more-or-less complete analogy to the case for word-pairs: given
+ a small number of observations, they are noisey and inaccurate.
+ Increasing the number of observations causes the noise to cancel out, and
+ for a signal to emerge.
+\end_layout
+
+\begin_layout Standard
+At this point, one can start doing some intriguing things: one can attempt
+ to perform maximum-spanning-tree parses, to determine how one given word-sense
+ is related to all other word-senses in a given sentence.
+ That is, one repeats the process of extracting disjuncts, but this time,
+ the connectors on the disjuncts are not words, but word-senses.
+ 
+\end_layout
+
+\begin_layout Standard
+The reason for extracting sense-disjuncts is that they provide the doorway
+ to obtaining the 
+\begin_inset Quotes eld
+\end_inset
+
+Lexical Functions
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Lexical-function"
+
+\end_inset
+
+ of Meaning-Text Theory (MTT).
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mel'cuk1987,Kahane2003"
+
+\end_inset
+
+ From there, one can extract the 
+\series bold
+DSyntR
+\series default
+ structure of a sentence, which provides the natural input into a reasoning
+ system based on formal logic.
+ That is, one can now begin to assemble logical proofs by inferring sequences
+ of deductions applied to sense-disjuncts.
+ Or rather, more importantly, once can now start to infer the set of valid
+ logical deductions that can be applied, rather than taking defferent forms
+ of logical inference as being given 
+\emph on
+a priori
+\emph default
+.
+ To be more blunt: this provides the pathway for inferening the rules of
+ Goertzel's PLN, or for infering the rules Pei Wang's Non-Axiomatic Logic,
+ rather than taking these rules as externally imposed.
+\end_layout
+
+\begin_layout Subsubsection
+Word-sense Factoring
+\end_layout
+
+\begin_layout Standard
+Given a pair-wise information divergence, how can one infere word senses?
+ This is addressed in the companion text.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Vepstas2018stiching"
@@ -6173,15 +6972,25 @@ key "Vepstas2018stiching"
 \end_inset
 
 .
- Its bare-bones right now.
-\end_layout
+ However, that text is currently written in terms of the cosine-distance;
+ it needs to be re-expressed using the information divergence, and, in particula
+r, by the use of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cluster mean"
 
-\begin_layout Subsection
-Information Maximizing Matrix Factorization
+\end_inset
+
+ for the cluster mean.
 \end_layout
 
 \begin_layout Standard
-xxxx
+So XXX TODO.
+ Unfinished things begin here.
+\end_layout
+
+\begin_layout Section
+Unfinished Thoughts 
 \end_layout
 
 \begin_layout Standard
@@ -6515,6 +7324,26 @@ The previous section begins by stating that, ideally, one wants to wants
 
 \begin_layout Standard
 TODO flesh out this section.
+ 
+\end_layout
+
+\begin_layout Standard
+The important parts of the sheaves idea are already covered in the 
+\begin_inset Quotes eld
+\end_inset
+
+stitching
+\begin_inset Quotes erd
+\end_inset
+
+ paper.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2018stiching"
+
+\end_inset
+
+ They need to be transcribed here.
 \end_layout
 
 \begin_layout Subsection*
