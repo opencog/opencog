@@ -2084,7 +2084,7 @@ softmax
 \end_layout
 
 \begin_layout Subsection
-Ising models of Grammar
+Ising Models of Grammar
 \end_layout
 
 \begin_layout Standard
@@ -2617,11 +2617,98 @@ hip between words matters not so much because of the individual relationships,
 \end_layout
 
 \begin_layout Subsection
-Disjunct models of Language
+Disjunct Models of Language
 \end_layout
 
 \begin_layout Standard
-Sooo...
+Although Yuret's thesis clearly demonstrates that pair-wise word interactions
+ give a reasonable model of natural language, it also demonstrates that
+ the model is imperfect.
+ Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+ provides a much better model of language, and it is anchored on top of
+ half a century of tradition in linguistics research.
+ To place it within the current context, the key leap being taken is to
+ replace the pair-wise word-interactions 
+\begin_inset Formula $J_{ij}=\log p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ by disjuncts 
+\begin_inset Formula $J_{ijk\cdots}=\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)$
+\end_inset
+
+.
+ The notation here is awkward: the idea here is that some word 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ can connect to other words on the left, by means of left-pointing connectors
+ (or links) and it can connect to words on the right, with right-pointing
+ connectors.
+ These are distinct sets, or sequences, since the word-order matters.
+ 
+\end_layout
+
+\begin_layout Standard
+There are multiple ways of overcoming the notational awkwardness of the
+ above; these are reviewed in a later section.
+ In particular, the notation above differs sharply from that used in Link
+ Grammar; this is a notational issue, and not a conceptual issue.
+\end_layout
+
+\begin_layout Standard
+Before proceeding, the remakr of 
+\begin_inset Quotes eld
+\end_inset
+
+resting on a tradition of linguistics
+\begin_inset Quotes erd
+\end_inset
+
+ should be clarified.
+ Link Grammar proposes a dependency-grammar like model of language.
+ Other popular models of language include constituency-tree grammars, such
+ as Head-Phrase Structure Grammar (HPSG).
+ Grammars such as Categorial Grammar (CG) combine aspects of constituency
+ with aspects of dependency.
+ There are others.
+ In principle, each of these different grammar framworks are convertible
+ to one-another by fixed algorithms that terminate in finite time.
+ That is, given a lexis in one grammar framework, there is a purely mechanical
+ means of translating that lexis into the lexis required by a different
+ theoretical framework.
+ This perhaps over-simplifies the situation: different theories of grammar
+ are often founded on subtle distinctions; for example Dick Hudson's Word
+ Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hud84,Hud07"
+
+\end_inset
+
+ replaces the no-links-crossing constraint of dependency grammars by a notion
+ of landmark transitivity.
+ We sweep such details under the rug, for now, wishing to rest on the broader
+ statement that all grammar frameworks can be converted into one-another,
+ while acknowledging that some frameworks give better insight into language
+ than others.
+\end_layout
+
+\begin_layout Standard
+The primary point here is that Link Grammar is interesting because it provides
+ a bridge to both traditional, symbolic linguistics (per above) and while
+ also allowing an interpretation as an Ising model of language.
+ Following Yuret's ansatz, one includes energy terms of not only 
+\begin_inset Formula $J_{ijk\cdots}=\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)$
+\end_inset
+
+ in the Hamiltonian, but also bulk terms, indicating how disjuncts interact
+ in the background 
 \end_layout
 
 \begin_layout Subsection
