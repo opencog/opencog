@@ -9,185 +9,33 @@
 ; OVERVIEW
 ; --------
 ; Vectors in the atomspace are inherently sparse (and you probably
-; should not be using the atomspace to
-; When a pair of words are judged to be grammatically similar, they
-; can be used to create a "grammatical class", containing both the
-; words, and behaving as their average.  Similarly, a word can be
-; compared to an existing grammatical class, to see if it belongs to
-; that class.  This file implements several different systems for
-; comparing the grammatical similarity of words and word-classes.
+; should not be using the atomspace to hold them, if they are not
+; sparse.) The vector coefficients also tend to have a Zipfian
+; distribution.  In many cases, dependencies between basis elements
+; suggests that the atomspace data is more matroid-like, than
+; vector-like.
 ;
-; Representation
-; --------------
-; A grammatical class is represented as
+; This makes the situation confusing: can data be treated like vectors,
+; or not? The code here implements some vector-like operations, but
+; with some strange twists.
 ;
-;     MemberLink
-;         WordNode "wordy"      ; the word itself
-;         WordClassNode "noun"  ; the grammatical class of the word.
+; Currently, just one routine: vector addtion.
+; XXX FIXME This should probably be moved to the atomspace/matrix
+; directory.
 ;
-; Word classes have a designated grammatical behavior, using Sections,
-; behaving just like the pseudo-connectors on single words. Thus, either
-; a WordNode or a WordClassNode can appear in a Connector link, as
-; shown below.
 ;
-;     Section
-;         WordClassNode "noun"
-;         ConnectorSeq
-;             Connector
-;                WordClassNode "verb" ; or possibly a WordNode
-;                LgConnDirNode "+"
-;             Connector
-;                ....
-;
-; The TV on the MemberLink holds a count value; that count equals the
-; total number of section-counts that were transferred from the word, to
-; the word-class, when the word was merged into the class. The sum over
-; all of these counts (on the MemberLinks) should exactly equal the sum
-; over the counts on all Sections for that WordClassNode.  Thus, it can
-; be used to determine what fraction the word contributed to the class.
-;
-; Basic assumptions
+; Combining vectors
 ; -----------------
-; It is assumed that grammatical classes are stepping stones to word
-; meaning; that meaning and grammatical class are at least partly
-; correlated. It is assumed that words can have multiple meanings, and
-; thus can belong to multiple grammatical classes. It is assumed that
-; the sum total number of observations of a word is a linear combination
-; of the different ways that the word was used in the text sample.
-; Thus, the task is to decompose the observed counts on a single word,
-; and assign them to one of several different grammatical classes.
+; One way to "combine" two vectors is to perform simple vector addtion,
+; summing them together component by component.
 ;
-; The above implies that each word should be viewed as a vector; the
-; disjuncts form the basis of the vector space, and the count of
-; observations of different disjuncts indicating the direction of the
-; vector. It is the linearity of the observations that implies that
-; such a vector-based linear approach is correct. (Footnote: actually,
-; the vector could/should to include subspaces for the sheaf shapes, as
-; well; this is not elaborated on here.)
+; Another plausbile combination strategy is to sum them, but only on the
+; basis elements that have common support.  This is a kind-of
+; "intersection" sum, because one takes the intersection of the sets of
+; basis elements to find the common support.  For the non-shared basis
+; elements, one might consider putting only a fraction of them into the
+; final sum.
 ;
-; The number of grammatical classes that a word might belong to can
-; vary from a few to a few dozen; in addition, there will be some
-; unknown amount of "noise": incorrect sections due to incorrect parses.
-;
-; It is assumed that when a word belongs to several grammatical classes,
-; the sets of disjuncts defining those classes are not necessarily
-; disjoint; there may be significant overlap. That is, different
-; grammatical classes are not orthogonal, in general.
-;
-;
-; Semantic disambiguation
-; -----------------------
-; The correct notion of a grammatical class is not so much as a
-; collection of words, but rather as a collection of word-senses.
-; Consider the word "saw": it can be the past tense of the verb
-; "to see", or it can be the cutting tool, a noun.  Thus, the word
-; "saw" should belong to at least two different grammatical classes.
-; The actual word-sense is "hidden", only the actual word is observed.
-; The "hidden" word-sense can be partly (or mostly) discerned by looking
-; at how the word was used: nouns are used differently than verbs.
-; The different usage is reflected in the collection of sections
-; ("disjuncts") that are associated with the word-sense.
-;
-; Thus, the vector associated to the word "saw" is the (linear) sum
-; for a noun-vector (the cutting tool) and two different verb-vector
-; (observing; cutting).  This section describes how the cosine-distance
-; can be used to distinguish between these different forms, how to
-; factor the vector of observation counts into distinct classes.
-;
-;
-; Word Similarity
-; ---------------
-; There are several different means of comparing similarity between
-; two words.  A traditional one is cosine distance: if the cosine of two
-; word-vectors is greater than a threshold, they should be merged.
-;
-; The cosine distance between the two words w_a, w_b is
-;
-;    cos(w_a, w_b) = v_a . v_b / |v_a||v_b|
-;
-; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
-;
-; If N(w,d) is the count of the number of observations of word w with
-; disjunct d, the dot product is
-;
-;    dot(w_a, w_b) = v_a . v_b = sum_d N(w_a,d) N(w_b,d)
-;
-; The minimum-allowed cosine-distance is a user-tunable parameter in
-; the code below; it is currently hard-coded to 0.65.
-;
-; It appears that a better judge of similarity is the information-
-; theoretic divergence between the vectors (the Kullback-Lielber
-; divergence). If N(w,d) is the count of the number of observations of
-; word w with disjunct d, the divergence is:
-;
-;    MI(w_a, w_b) = log_2 [dot(w_a, w_b) dot(*,*) / ent(w_a) ent(w_b)]
-;
-; where
-;
-;    ent(w) = sum_d N(w,d) N(*,d)
-;
-; so that log_2 ent(w) is the entropy of word w (up to a factor of
-; N(*,*) squared. That is, we should be using p(w,d) = N(w,d) / N(*,*)
-; in the defintion. Whatever, this is covered in much greater detail
-; elsewhere.)
-;
-;
-; Merge Algos
-; -----------
-; There are several ways in which two words might be merged into a
-; word-class, or a word added to a word-class.  Some of these are
-; described below.  Additional kind of merges can be imagined; how to
-; accurately judge the quality of different approaches is unclear.
-;
-;
-; Union word-pair merging
-; ------------------------
-; Given two words, add them as vectors, creating a new vector, the
-; word-class. This is purely linear summation. Next, compute the
-; orthogonal components of the words to the word-class, and replace
-; the words by their orthogonal components - i.e. subtract the parallel
-; components. It seems best to avoid negative observation counts, so
-; if any count on any section is negative, it is clamped to zero (i.e.
-; that section is removed, as this is a sparse vector). This last step
-; renders this process only quasi-linear.
-;
-; Note the following properties of this algo:
-; a) The combined vector has strictly equal or larger support than
-;    the parts. This might not be correct, as it seems that it will
-;    mix in disjuncts that should have been assigned to other meanings.
-;    (the SUPPORT issue; discussed further below).
-; b) The process is not quite linear, as orthogonal components with
-;    negative counts are clamped to zero.
-;    (the LEXICAL issue; discussed further, below)
-; c) The number of vectors being tracked in the system is increasing:
-;    before there were two, once for each word, now there are three:
-;    each word remains, with altered counts, as well as their sum.
-;    It might be nice to prune the number of vectors, so that the
-;    dataset does not get outrageously large. Its possible that short
-;    vectors might be mostly noise.
-; d) There is another non-linearity, when a word is assigned to an
-;    existing word-class. This assignment will slightly alter the
-;    direction of the word-class vector, but will not trigger the
-;    recomputation of previous orthogonal components.
-; e) The replacement of word-vectors by their orthogonal components
-;    means that the original word vectors are "lost". This could be
-;    avoided by creating new "left-over" word vectors to hold just
-;    the orthogonal components. However, this increases the size of
-;    the dataset, and does not seem to serve any useful purpose.
-;
-;
-; Overlap merging
-; ---------------
-; Similar to the above, a linear sum is taken, but the sum is only over
-; those disjuncts that both words share in common. This might be more
-; appropriate for disentangling linear combinations of multiple
-; word-senses. It seems like it could be robust even with lower
-; similarity scores (e.g. when using cosine similarity).
-;
-; Overlap merging appears to solve the problem a) above (the SUPPORT
-; issue), but, on the flip side, it also seems to prevent the discovery
-; and broadening of the ways in which a word might be used. (Broadening
-; is discussed in greater detail below.)
 ;
 ; Formal definition
 ; -----------------
