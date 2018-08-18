@@ -2623,10 +2623,6 @@ sideways false
 status collapsed
 
 \begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
 \align center
 \begin_inset Caption
 
@@ -2712,6 +2708,32 @@ where the right-hand side is the sum over mutual information between word-pairs.
  That is, the total mutual information in a parse tree is exactly equivalent
  to the total entropy of that parse tree, taken within the context of the
  entire language model.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset space \qquad{}
+\end_inset
+
+The use of the name of Feynman in this context is not meant to be some vague,
+ hand-waving abuse of terminology, peacock feathering on the part of the
+ author.
+ The rules given here are 
+\emph on
+bona fide
+\emph default
+ Feynman rules, in the strict, straight and narrow sense.
+ They are a set of rules used to give explicit numerical values to a hand-drawn
+ diagram, making express that the diagram is the same thing as a specific
+ equation.
+ Here, by applying the rules, one can see that the diagram is an explict
+ representation of the equation that states that 
+\begin_inset Formula $H_{total}$
+\end_inset
+
+ is the total energy, given as the sum over all arcs in the diagram.
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset CommandInset line
 LatexCommand rule
 offset "0.5ex"
@@ -2756,7 +2778,7 @@ bulk magnetic field
  the point of view of linguistics, it almost seems like tautological nonsense.
  Of course a language model is taken within the context of the language.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 The word 
