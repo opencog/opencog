@@ -2226,9 +2226,30 @@ magnetic field
 \end_inset
 
  between neighbors).
- The Ising model has many generalizations, and has been observed in a broad
- variety of contexts.
- For example, it describes the dsitribution of amino acids in Zebrafish
+ The Ising model is usually taken to be 
+\begin_inset Quotes eld
+\end_inset
+
+translation invariant
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+shift invariant
+\begin_inset Quotes erd
+\end_inset
+
+, dependent only relative positions between points in the lattice, rather
+ than thier absolute position.
+ For the one-dimensional Ising model, where the lattice points are in a
+ linear sequence, the shift invariance implies a number of interesting connectio
+ns to Markov chains, shift sequences, and finite state machines.
+ This, in turn, implies that it, or a variant thereof, occurs in many natural
+ models.
+ As an example, it describes the distribution of amino acids in Zebrafish
  antibodies.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -2240,7 +2261,149 @@ key "Mora2010"
 \end_layout
 
 \begin_layout Standard
-The point to be made here is that
+The point to be made here is that the Ising model also provides a natural
+ way to unify the syntactic structure of language with the syntax-free vector
+ models.
+ The reinterpretation is that lattice position 
+\begin_inset Formula $i$
+\end_inset
+
+ corresponds to the 
+\begin_inset Formula $i$
+\end_inset
+
+'th word in a linear text.
+ The spin 
+\begin_inset Formula $\sigma_{i}$
+\end_inset
+
+ is to be reinterprected as the word instance 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ located there.
+ In natural language, there is no particular need for a position-dependent
+ one-point function 
+\begin_inset Formula $h_{i}$
+\end_inset
+
+, except perhaps to capture a different weighting for the words used in
+ a title or headline, vs.
+ the body of the text (or boilerplate, bibliography, credits at the end
+ of the text).
+ The most interesting part are the two-point functions 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ which need to be generalized into 
+\begin_inset Formula $n$
+\end_inset
+
+-point functions that capture the grammatical relationships between words.
+ Given a sequence of lattice values 
+\begin_inset Formula $\sigma_{i},\sigma_{i+1},\cdots$
+\end_inset
+
+ (that is, a sequence of words 
+\begin_inset Formula $w_{i},w_{i+1},\cdots$
+\end_inset
+
+) one has an 
+\begin_inset Quotes eld
+\end_inset
+
+interaction energy
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
+\end_inset
+
+ that is small when the sequence of words 
+\begin_inset Formula $w_{i},w_{i+1},\cdots$
+\end_inset
+
+ is likely, and is large (or infinite) when the sequence of words is grammatical
+ly incorrect.
+ In effect, 
+\begin_inset Formula 
+\[
+J_{w_{i},w_{i+1},\cdots}=-\log P\left(w_{i},w_{i+1},\cdots\right)
+\]
+
+\end_inset
+
+is the loss function.
+\end_layout
+
+\begin_layout Standard
+The statement that Ising model provides a model of natural language might
+ superfically appear to be content-free, an empty and trite statement (there's
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+so what
+\begin_inset Quotes erd
+\end_inset
+
+ aspect to it: 
+\begin_inset Quotes eld
+\end_inset
+
+show me something I did not already know
+\begin_inset Quotes erd
+\end_inset
+
+, as the Ising model just seems to be a standard maximum entropy model in
+ faint disguise.) What makes it not entirely trivial is the claim that the
+ interaction energies (loss functions) are additive.
+ That is, given a sequence of words 
+\begin_inset Formula $w_{i},w_{i+1},\cdots$
+\end_inset
+
+, the 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical validity
+\begin_inset Quotes erd
+\end_inset
+
+ of that sequence can be described in terms of (statistically) independent,
+ single real-valued numbers 
+\begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
+\end_inset
+
+ which are additive: they are to be summed (and not combined in some other,
+ more complex way).
+\end_layout
+
+\begin_layout Standard
+This view also exposes the limit of this langauge model: we do not speak
+ in a word-salad of grammatically valid sentences; rather, there is always
+ a message conveyed in an utterance.
+ The statistically independent numbers 
+\begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
+\end_inset
+
+ are sufficient to capture the grammar of the language, but not (at this
+ level) to capture the message itself.
+ The 
+\begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
+\end_inset
+
+ are to be taken as the coding of the language, in the sense of 
+\begin_inset Quotes eld
+\end_inset
+
+coding theory
+\begin_inset Quotes erd
+\end_inset
+
+ of signal processing.
+ 
 \end_layout
 
 \begin_layout Subsection
