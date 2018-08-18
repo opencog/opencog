@@ -82,7 +82,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018
+6 July 2018; draft of 18 August 2018
 \end_layout
 
 \begin_layout Abstract
@@ -2899,7 +2899,34 @@ The primary point here is that Link Grammar is interesting because it provides
 \end_inset
 
  in the Hamiltonian, but also bulk terms, indicating how disjuncts interact
- in the background 
+ in the background.
+ In this case, the correct background contribution to a word would seem
+ to be
+\begin_inset Formula 
+\[
+\log_{2}\sum_{d}p\left(w,d\right)p\left(*,d\right)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ being the joint probability of observing disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ on word 
+\begin_inset Formula $w$
+\end_inset
+
+, and the sum ranging over all disjuncts 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Subsection
