@@ -3125,7 +3125,8 @@ s amorphous masses: large blocks of uninterpretable numbers whose precise
 \end_layout
 
 \begin_layout Subsection
-Graph Algorithms and Monte Carlo for Word Pairs
+Graph Algorithms vs.
+ Monte Carlo for Word Pairs
 \end_layout
 
 \begin_layout Standard
@@ -3195,8 +3196,9 @@ more general
  by not contraining to fit the cost function to a probabilistic framework.
 \end_layout
 
-\begin_layout Standard
-um
+\begin_layout Subsection
+Graph Algorithms vs.
+ Gradient Descent for N-grams
 \end_layout
 
 \begin_layout Standard
@@ -3286,22 +3288,27 @@ key "Sleator1991,Sleator1993"
  the task.
 \end_layout
 
-\begin_layout Subsection
-um
-\end_layout
-
 \begin_layout Standard
-By contrast, the CBOW/SkipGram models obtain a probability similar to 
+By contrast, the CBOW/SkipGram models use gradient-descent to obtain a probabili
+ty similar to 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
-, but using a different technique and a different notation; for example,
- 
+.
+ The notation used is different, so that 
 \begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
 \end_inset
 
+ is written, with the N-gram context 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+ as a stand-in for the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
 .
- The sections above point out that 
+ Previous sections above point out that 
 \begin_inset Formula $w_{I}$
 \end_inset
 
@@ -3315,30 +3322,41 @@ By contrast, the CBOW/SkipGram models obtain a probability similar to
 \begin_inset Formula $w_{I}$
 \end_inset
 
- is lacking the graph structure of 
+ is lacking the grammatical structure that 
 \begin_inset Formula $d$
 \end_inset
 
-; there is some buried graph-like structure in 
+ encodes; there is some buried graph-like structure in 
 \begin_inset Formula $w_{I}$
 \end_inset
 
  but it is not overt, and one must work to make it overt.
- The other big difference is that 
+ One can use the disjuncts directly, with a suitable parsing algorithm,
+ to obtain an explicit dependency parse of any given sentence.
+ The actual probability function 
 \begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
 \end_inset
 
- is treated as an unknown, and arrived at by gradient descent algorithms
- applied to an objective function (the 
-\begin_inset Quotes eld
+ is treated as an unknown, to be obtained by gradient descent algorithms,
+ constrained only by the core assumption of either eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CBOW"
+
 \end_inset
 
-loss function
-\begin_inset Quotes erd
+ or eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SkipGram"
+
 \end_inset
 
-), rather than by direct observational counting.
- 
+, so that the resulting probabilities are valid Boltzmann distributions.
+\end_layout
+
+\begin_layout Subsection
+ummmmmm
 \end_layout
 
 \begin_layout Standard
