@@ -1964,28 +1964,22 @@ Statistical Mechanics and the Partition Function
 \end_layout
 
 \begin_layout Standard
-The CBOW and SkipGram models of language are written with explicit Gibbs
- distributions, namely equations 
+The CBOW and SkipGram models of language, namely equations 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:CBOW"
 
 \end_inset
 
- and SkipGram
+ and SkipGram 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:SkipGram"
 
 \end_inset
 
-.
-\end_layout
-
-\begin_layout Standard
-Consider again the nature of the hidden layer (the layer in which the vectors
- live) in the CBOW/SkipGram model.
- The 
+, are commonly discussed in terms of neural nets, and the models are sometimes
+ called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1993,8 +1987,39 @@ softmax
 \begin_inset Quotes erd
 \end_inset
 
- formulation allows the conditional probabilities to be written a certain
- way; the corresponding unconditional probability is 
+ functions, or 
+\begin_inset Quotes eld
+\end_inset
+
+loss functions
+\begin_inset Quotes erd
+\end_inset
+
+.
+ From the point of view of statistical mechanics, these models can also
+ be easily recognized as Gibbs distributions.
+ This allows all of the traditional intuition and tools of statistical mechanics
+ to be brought to bear on the langauge problem.
+ Specifically, the probabilities are obtainable from a partition function.
+\end_layout
+
+\begin_layout Standard
+Given that equations 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CBOW"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SkipGram"
+
+\end_inset
+
+ are conditional probabilities, one can deduce that the joint probability
+ in these models is given by 
 \end_layout
 
 \begin_layout Standard
@@ -2005,9 +2030,8 @@ p\left(w_{t},w_{I}\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{
 
 \end_inset
 
-This quantity is not normally available or computed in the CBOW/Skipgram
- models; here, it is written here as a theoretical quantity.
- It can be obtained from the partition function 
+This can be obtained by applying variational principles to the partition
+ function 
 \begin_inset Formula 
 \[
 Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)
@@ -2015,7 +2039,11 @@ Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{
 
 \end_inset
 
-by applying the variational principle to one of the many 
+The 
+\begin_inset Formula $J_{w_{t},I}$
+\end_inset
+
+ are colloquially called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2023,12 +2051,18 @@ sources
 \begin_inset Quotes erd
 \end_inset
 
- 
-\begin_inset Formula $J_{w_{t},I}$
+, and can be understood as parameters that are nominally zero.
+ That is, they are set to zero 
+\begin_inset Quotes eld
 \end_inset
 
-.
- This yields the standard Boltzmann distribution: 
+in the real world
+\begin_inset Quotes erd
+\end_inset
+
+, but serve as placeholders within the partition function so that variational
+ principles can be applied.
+ Doing so yields the standard Boltzmann distribution: 
 \begin_inset Formula 
 \[
 p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t},I}}\right|_{J=0}
@@ -2047,33 +2081,6 @@ softmax
 \end_inset
 
  function was used precisely because it gives the maximum entropy distribution.
-\end_layout
-
-\begin_layout Standard
-There is no particular reason to diverge from the principle of maximum entropy
- when working with word classes.
- Specifically, this suggests that the word-disjunct pairs be viewed in the
- frame of the 
-\begin_inset Quotes eld
-\end_inset
-
-loss function
-\begin_inset Quotes erd
-\end_inset
-
- (equivalently, the Hamiltonian or energy):
-\begin_inset Formula 
-\[
-H\left(w,d\right)=-\log p\left(w,d\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-is suggests that the 
 \end_layout
 
 \begin_layout Subsection
