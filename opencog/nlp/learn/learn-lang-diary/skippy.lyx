@@ -3047,45 +3047,183 @@ with
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Graph Algorithms vs.
  Gradient Descent 
 \end_layout
 
 \begin_layout Standard
-The biggest difference between the two approaches is the nature of the training
- algorithm.
- The disjunct counting can be said to be a form of a 
+The previous sections illustrate that both the CBOW/SkipGram model, and
+ the disjunct model of natural language are both forms of maximum entropy
+ models.
+ In one case, the word-context is an N-gram; in the other, it is a disjunct;
+ but these are not so unlike one-another, they have mch in common.
+ Both langauge models share a common difficulty: finding an energy functional
+ that correctly models the observed probability distribution.
+\end_layout
+
+\begin_layout Standard
+There are several generic classes of algorithms that can be applied to obtain
+ the energy functional.
+ One class are termed Monte Carlo methods, driving either hill-climbing,
+ gradient descent or 
 \begin_inset Quotes eld
 \end_inset
 
-graph algorithm
+relaxation
 \begin_inset Quotes erd
 \end_inset
 
-, whereas the deep-learning algorithms, proceeding by relaxation or hill-climbin
-g, can be said to be a form of 
+ algorithms; deep learning algorithms fall in this class.
+ The other classs of algorithms can be loosely called 
 \begin_inset Quotes eld
 \end_inset
 
-gradient descent
+graph algorithms
 \begin_inset Quotes erd
 \end_inset
 
 .
- One is local, the other is global in it's view of relationships.
- One is greedy, and exposes graphical structure immediately; the other exposes
- a graph only if some sort of thresholding is applied to eliminate weak
- links.
+ These accumulate frequency counts on low-arity observed relationships,
+ and use the logarithm of these frequencies as a surrogate for the energy
+ functional.
+ 
 \end_layout
 
 \begin_layout Standard
-The disjunct probabilities are obtained by direct counting.
- That is, after obtaining an observational count 
+The class of Mone Carlo methods can be said to be 
+\begin_inset Quotes eld
+\end_inset
+
+global
+\begin_inset Quotes erd
+\end_inset
+
+, in that they are trying to navigate an extremely large energy functional
+ landscape through random sampling.
+ By contrast, the graph algorithms are manifestly local, and re-assemble
+ the global landscape explicitly by means of Feynman diagrams and vacuum
+ contributions, as illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Feynman-Diagrams"
+
+\end_inset
+
+.
+ The graphical algorithms expose the graphical structure immediately; in
+ the above examples, as maximum spanning trees that can be found using greedy
+ algorithms applied to pair-wise relationships.
+ The Monte Carlo algorithms do not provide any manifest graphical structure,
+ although one can be discerned by applying some sort of thresholding to
+ eliminate weak links.
+ Indeed, thresholding, using sigmoid functions to prune unwanted, weak weights
+ from a neural net is a characteristic of most deep-learning models.
+ Even so, the resulting weight vectors and weight matrices tend to be featureles
+s amorphous masses: large blocks of uninterpretable numbers whose precise
+ role and importance seems impossible to discern.
+\end_layout
+
+\begin_layout Subsection
+Graph Algorithms and Monte Carlo for Word Pairs
+\end_layout
+
+\begin_layout Standard
+The difference between graphical and Monte Carlo methods is perhaps best
+ illustrated by example.
+ Yuret assumes an Ising model of natural language, and considers only pair-wise
+ word realtionships.
+ To obtain an energy functional, it suffices to count the frequency 
+\begin_inset Formula $N\left(w_{left},w_{right}\right)$
+\end_inset
+
+ of word-pairs, and then to take for granted that the energy functional
+ is accurately estimated by 
+\begin_inset Formula 
+\[
+E\left(w_{left},w_{right}\right)=-\log_{2}\left[\frac{N\left(w_{left},w_{right}\right)}{N\left(*,*\right)}\right]
+\]
+
+\end_inset
+
+To obtain dependency parses that agree with those deemed acceptable by professio
+nal linguists, maximum spanning trees are constructed, taking into account
+ the important role of the left and right marginal frequencies 
+\begin_inset Formula $N\left(*,w\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $N\left(w,*\right)$
+\end_inset
+
+.
+ The result is an explict dependency graph for every possible sentence.
+ That the ensemble is an explict Boltzmann distribution is a primary point
+ of figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Feynman-Diagrams"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+One could have approached this problem from the Monte Carlo direction as
+ well, as is done by McDonald
+\begin_inset CommandInset citation
+LatexCommand cite
+key "McDonald2005,McDonald2006"
+
+\end_inset
+
+: on trains up a model by defining a cost function, and then performing
+ hill climbing or gradient descent on it.
+ The result is still a pair-wise cost function, and a dependency parse is
+ obtained by search for an MST tree, just as before.
+ For McDonald, there is no overt relationship to the principle of maximum
+ entropy; it is eaither covert, or perhaps one could say its 
+\begin_inset Quotes eld
+\end_inset
+
+more general
+\begin_inset Quotes erd
+\end_inset
+
+ by not contraining to fit the cost function to a probabilistic framework.
+\end_layout
+
+\begin_layout Standard
+um
+\end_layout
+
+\begin_layout Standard
+The OpenCog language learning project
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+ proposes the creation of a disjunct model of natural language by means
+ of graphical algorithms.
+ Specifically, this means that the probabilities of disjuncts are obtained
+ by direct counting.
+ After a large body of text, and obtaining an observational count 
 \begin_inset Formula $N\left(w,d\right)$
 \end_inset
 
- one computes a normalized frequency of observations 
+ of how often the word 
+\begin_inset Formula $w$
+\end_inset
+
+ is assocaited with the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+, one computes a normalized frequency of observations 
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
@@ -3107,7 +3245,49 @@ so that the frequency is properly normalized:
 \end_inset
 
  in text; the probability is just the frequentist probability.
- 
+ The energy functional is explicitly 
+\begin_inset Formula 
+\[
+E\left(w,d\right)=-\log_{2}p\left(w,d\right)
+\]
+
+\end_inset
+
+The enemble of all possible grammatical word-sequences has the form of a
+ sheaf.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017sheaves"
+
+\end_inset
+
+ The most likely relationship between the words in a sentence is the one
+ that maximizes the entropy, including the contribution of the vacuum; and
+ thus looks like a maximization of mutual information.
+ Because disjuncts impose a complex relationship between words, one must
+ use more complex algorithms, generically called 
+\begin_inset Quotes eld
+\end_inset
+
+parsers
+\begin_inset Quotes erd
+\end_inset
+
+, to discover how to attach disjuncts to one-another to obtain a valid nateork
+ graph.
+ The original Link grammar papers
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+ provide an eminently suitable parsing algorithm that is well-suited to
+ the task.
+\end_layout
+
+\begin_layout Subsection
+um
 \end_layout
 
 \begin_layout Standard
