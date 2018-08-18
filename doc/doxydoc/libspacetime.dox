@@ -13,7 +13,6 @@ This page is a high level overview of the library; to dig into the details
 read \ref grp_spacetime "the comprehensive overview".
 
 Dependencies:
-- \ref libspatial "SpaceMap"
 - \ref libserver "server"
 - \ref libatomspace "atomspace"
 
@@ -50,7 +49,7 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref libspatial "Previous"</TD>
+<TD>\ref libserver "Previous"</TD>
 <TD width="100%"></TD>
 <TD>\ref libattention "Next"</TD>
 </TR></TABLE>

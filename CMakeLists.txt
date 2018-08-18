@@ -195,12 +195,6 @@ IF(Boost_FOUND_SAVE)
 	SET(Boost_FOUND 1)
 ENDIF(Boost_FOUND_SAVE)
 
-IF(Boost_PROGRAM_OPTIONS_FOUND)
-	MESSAGE(STATUS "Found Boost::program_options")
-ELSE(Boost_PROGRAM_OPTIONS_FOUND)
-	MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")
-ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
-
 IF(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Found Boost::math")
 ELSE(Boost_MATH_C99_FOUND)
@@ -312,16 +306,6 @@ ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
   SET(OCTOMAP_DIR_MESSAGE "Octomap missing: needed for the SpaceTime map.")
 ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
-
-# OpenGL needed for visualization...
-FIND_PACKAGE(OpenGL)
-
-IF (OPENGL_FOUND)
-	MESSAGE(STATUS "OpenGL was found.")
-ELSE (OPENGL_FOUND)
-	MESSAGE(STATUS "OpenGL missing: needed for space visualization tools (MapExplorer, MapTools, etc.).")
-ENDIF (OPENGL_FOUND)
-
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
 # it is needed for building the ZMQ messaging subsystem.
@@ -424,23 +408,6 @@ ENDIF (HAVE_PY_INTERP)
 
 # -----------------------------------------------------------------------------
 
-# SDL needed for the spatial tools
-FIND_PACKAGE(SDL)
-
-IF (SDL_FOUND)
-	MESSAGE(STATUS "SDL was found.")
-ELSE (SDL_FOUND)
-	MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF (SDL_FOUND)
-
-FIND_PACKAGE(SDL_gfx)
-
-IF (SDLGFX_FOUND)
-	MESSAGE(STATUS "SDL_gfx was found")
-ELSE (SDLGFX_FOUND)
-	MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF (SDLGFX_FOUND)
-
 # Threaded Building Blocks (Intel TBB) library
 FIND_PACKAGE(TBB)
 IF (TBB_FOUND)
@@ -497,10 +464,6 @@ IF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 	SET(HAVE_DIMEMBED 1)
 	SET(HAVE_STATISTICS 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
-
-IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
-	SET(HAVE_SPATIAL_TOOLS 1)
-ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 
 IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
@@ -757,7 +720,6 @@ SUMMARY_ADD("REST Events" "REST Atomspace Event Publisher module"
 	HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("SpaceTime" "3D Space-Time object tracker" HAVE_OCTOMAP)
-SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
 SUMMARY_ADD("PatternMiner" "Pattern Miner" HAVE_ATOMSPACE)

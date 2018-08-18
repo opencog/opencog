@@ -43,7 +43,6 @@ ignored by doxygen; used as markers for update-links.py;
 	- \ref libcogutil
 	- \ref libatomspace
 	- \ref libserver
-	- \ref libspatial
 	- \ref libspacetime
 	- \ref libattention
 	- \ref libsmob
@@ -51,7 +50,6 @@ ignored by doxygen; used as markers for update-links.py;
 	- \ref libcomboreduct
 - \subpage programs
 	- \ref progcogserver
-	- \ref progMapTools
 - \subpage fsstructure
 - \subpage bldtargets
 - \subpage otherwikis

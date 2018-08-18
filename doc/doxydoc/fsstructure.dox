@@ -161,7 +161,7 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref progMapTools "Previous"</TD>
+<TD>\ref progcogserver "Previous"</TD>
 <TD width="100%"></TD>
 <TD>\ref bldtargets "Next"</TD>
 </TR></TABLE>
