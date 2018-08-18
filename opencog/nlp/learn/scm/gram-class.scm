@@ -241,7 +241,7 @@
 ;
 ; It seems plausible to treat extremely-low frequency observations as
 ; a kind of noise, but which might also contain some signal. Thus,
-; during merge, all of a Zipfian tail should be erged in. If its noise,
+; during merge, all of a Zipfian tail should be merged in. If its noise,
 ; it will tend to cancel during merge; if its signal, it will tend to be
 ; additive.
 ;
