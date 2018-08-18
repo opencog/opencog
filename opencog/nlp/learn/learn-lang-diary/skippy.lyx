@@ -2282,20 +2282,26 @@ The point to be made here is that the Ising model also provides a natural
 \end_inset
 
  located there.
- In natural language, there is no particular need for a position-dependent
- one-point function 
+ The correct interpretation of the one-point function 
 \begin_inset Formula $h_{i}$
 \end_inset
 
-, except perhaps to capture a different weighting for the words used in
- a title or headline, vs.
- the body of the text (or boilerplate, bibliography, credits at the end
- of the text).
- The most interesting part are the two-point functions 
+ (the 
+\begin_inset Quotes eld
+\end_inset
+
+magnetic field
+\begin_inset Quotes erd
+\end_inset
+
+) is dexplored in the next section; for now, it can be ignored (taken to
+ be zero).
+ The part of the model responsible for grammar are the two-point functions
+ 
 \begin_inset Formula $J_{ij}$
 \end_inset
 
- which need to be generalized into 
+, which need to be generalized into 
 \begin_inset Formula $n$
 \end_inset
 
@@ -2381,57 +2387,6 @@ grammatical validity
 \end_layout
 
 \begin_layout Standard
-The importance of this assumption is mostly easily illutrating by reverting
- to a two-point model of natural language: that is, by restricting the interacti
-on 
-\begin_inset Formula $J$
-\end_inset
-
- to occur only between pairs of words.
- This effectively gives the MST model of language, exploreed by Yuret
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Yuret1998"
-
-\end_inset
-
- and by McDonald
-\begin_inset CommandInset citation
-LatexCommand cite
-key "McDonald2005,McDonald2006"
-
-\end_inset
-
-.
- Here, the relationship between words is presumed to be entirely pair-wise;
- after obtaining pair-wise word statistics 
-\begin_inset Formula $P\left(w_{left},w_{right}\right)$
-\end_inset
-
- from frequency observations, one constructs a maximum-spanning-tree parse
- so as to maximize the total entropy.
- 
-\end_layout
-
-\begin_layout Standard
-The use of a maximum spanning tree, such as the supervised training models
- of McDonald 
-\emph on
-etal
-\emph default
-.
- is a key insight.
- But Yuret does one better: by maximizing mutual information, the language
- model is concerned not just with a single sentence, but also includes the
- background of all possible grammatical pair relations.
-\end_layout
-
-\begin_layout Standard
-equivalently, one is looking to maximize the mutual information between
- word-pairs, and performing a sum to obtain the most-likely parse tree.
-\end_layout
-
-\begin_layout Standard
 The additive model of grammatical structure also exposes the limit of this
  language model: we do not speak in a word-salad of grammatically valid
  sentences; rather, there is always a message conveyed in an utterance.
@@ -2458,7 +2413,215 @@ coding theory
 \end_layout
 
 \begin_layout Subsection
-MST models of Langauge
+MST models of Language
+\end_layout
+
+\begin_layout Standard
+The importance of the additive aspect of the Ising model of natural langauge
+ is best illustrated by reverting to the simpler two-point model of natural
+ language, by restricting the interaction 
+\begin_inset Formula $J$
+\end_inset
+
+ to occur only between pairs of words.
+ This effectively gives the Maximum Spanning Tree (MST) model of language,
+ exploreed by Yuret
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+ and by McDonald
+\begin_inset CommandInset citation
+LatexCommand cite
+key "McDonald2005,McDonald2006"
+
+\end_inset
+
+.
+ Here, the relationship between words is presumed to be entirely pair-wise;
+ after somehow obtaining pair-wise word statistics 
+\begin_inset Formula $P\left(w_{left},w_{right}\right)$
+\end_inset
+
+, one constructs a maximum-spanning-tree parse so as to maximize the total
+ entropy.
+ 
+\end_layout
+
+\begin_layout Standard
+The use of a maximum spanning tree, such as the supervised training models
+ of McDonald 
+\emph on
+etal
+\emph default
+., is a key insight.
+ McDonald states this in terms of a score 
+\begin_inset Formula $s(x,y)$
+\end_inset
+
+ that the sentence 
+\begin_inset Formula $x$
+\end_inset
+
+ is described by parse tree 
+\begin_inset Formula $y$
+\end_inset
+
+.
+ The score is taken to be additive over word pairs:
+\begin_inset Formula 
+\[
+s\left(x,y\right)=\sum_{\left(i,j\right)\in y}s\left(i,j\right)
+\]
+
+\end_inset
+
+so that the sum ranges over all words-pairs 
+\begin_inset Formula $\left(i,j\right)$
+\end_inset
+
+ occuring in the parse-tree 
+\begin_inset Formula $y$
+\end_inset
+
+ (and the individual words 
+\begin_inset Formula $i,j$
+\end_inset
+
+ being the words of sentence 
+\begin_inset Formula $x$
+\end_inset
+
+).
+ How does one obtain the score 
+\begin_inset Formula $s\left(i,j\right)$
+\end_inset
+
+? McDonald 
+\emph on
+etal.
+
+\emph default
+ propose a supervised training algorithm, where the score is induced by
+ means of a gradient descent from an
+\emph on
+ a priori
+\emph default
+ training corpus of parse trees.
+\end_layout
+
+\begin_layout Standard
+It is here that Yuret does one better: he proposes that the score be given
+ by the mutual information between word-pairs; that is (aligning the different
+ notation)
+\begin_inset Formula 
+\[
+s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}
+\]
+
+\end_inset
+
+How does this square with the Ising model? It seems to be quite different:
+ the Ising model suggests that one should have only pair-wise interactions
+ 
+\begin_inset Formula $J_{ij}=\log p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ whereas the mutual inforamtion has an additional funny denominator.
+ This can be reconciled by saying that there is a bulk interaction: each
+ individual word-site 
+\begin_inset Formula $i$
+\end_inset
+
+ also interacts with the 
+\begin_inset Quotes eld
+\end_inset
+
+bulk
+\begin_inset Quotes erd
+\end_inset
+
+ of all possible other words that could ever occur in some other speakable,
+ grammaitcally correct sentence.
+ 
+\end_layout
+
+\begin_layout Standard
+Put differently, there are two bulk 
+\begin_inset Quotes eld
+\end_inset
+
+magnetic fields
+\begin_inset Quotes erd
+\end_inset
+
+, or one-point interactions 
+\begin_inset Formula $h\left(w_{i},*\right)=-\log_{2}\left(w_{i},*\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $h\left(*,w_{j}\right)=-\log_{2}\left(*,w_{j}\right)$
+\end_inset
+
+ that enter into the Ising model Hamiltonian, so that, for sentence 
+\begin_inset Formula $x$
+\end_inset
+
+ and parse tree 
+\begin_inset Formula $y$
+\end_inset
+
+, one has a 
+\begin_inset Quotes eld
+\end_inset
+
+score
+\begin_inset Quotes erd
+\end_inset
+
+ (following McDonald) or 
+\begin_inset Quotes eld
+\end_inset
+
+energy
+\begin_inset Quotes erd
+\end_inset
+
+ (following statistical physics) of
+\begin_inset Formula 
+\begin{eqnarray*}
+s\left(x,y\right) & = & \sum_{i\in x}h_{i}+\sum_{\left(i,j\right)\in y}s\left(i,j\right)\\
+ & = & \sum_{i\in x}\left[h\left(w_{i},*\right)+h\left(*,w_{i}\right)\right]+\sum_{\left(i,j\right)\in y}\log_{2}p\left(w_{i},w_{j}\right)
+\end{eqnarray*}
+
+\end_inset
+
+When Yuret chooses to look for the spanning tree that maximizes the sum
+ of the mutual information between word-pairs, what he is actually doing
+ is looking for the parse tree that maximizes the entropy within the background
+ context (the 
+\begin_inset Quotes eld
+\end_inset
+
+bulk magnetic field
+\begin_inset Quotes erd
+\end_inset
+
+) of the language model.
+ This is an absolutely key insight of the Ising model of language: the relations
+hip between words matters not so much because of the individual relationships,
+ but because these relationships have to be taken in the background of the
+ entire langauge, itself.
+\end_layout
+
+\begin_layout Subsection
+Disjunct models of Language
+\end_layout
+
+\begin_layout Standard
+Sooo...
 \end_layout
 
 \begin_layout Subsection
