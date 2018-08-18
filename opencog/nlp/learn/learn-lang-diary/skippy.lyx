@@ -2162,7 +2162,7 @@ reference "eq:Partition function"
 
  is zero, one simply does not write it, as it is just a device handy for
  algebraic manipulations, but having no particularly deep significance for
- the langauge model.
+ the language model.
 \end_layout
 
 \begin_layout Standard
@@ -2176,7 +2176,7 @@ Thus, a maximum entropy model of natural language is any model that provides
 \end_inset
 
 .
- Clearly, CBOW/Skipgram is such a model.
+ Clearly, CBOW/SkipGram is such a model.
 \end_layout
 
 \begin_layout Subsection
@@ -2372,7 +2372,7 @@ key "Mora2010"
 
  can be one of twenty different amino acids, and one is interested in describing
  the distribution of wide variety of different sequences a that antibodies
- emply to fight off infection.
+ employ to fight off infection.
 \end_layout
 
 \begin_layout Standard
@@ -2532,7 +2532,7 @@ MST models of Language
 \end_layout
 
 \begin_layout Standard
-The importance of the additive aspect of the Ising model of natural langauge
+The importance of the additive aspect of the Ising model of natural language
  is best illustrated by reverting to the simpler two-point model of natural
  language, by restricting the interaction 
 \begin_inset Formula $J$
@@ -2540,7 +2540,7 @@ The importance of the additive aspect of the Ising model of natural langauge
 
  to occur only between pairs of words.
  This effectively gives the Maximum Spanning Tree (MST) model of language,
- exploreed by Yuret
+ explored by Yuret
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yuret1998"
@@ -2597,7 +2597,7 @@ so that the sum ranges over all words-pairs
 \begin_inset Formula $\left(i,j\right)$
 \end_inset
 
- occuring in the parse-tree 
+ occurring in the parse-tree 
 \begin_inset Formula $y$
 \end_inset
 
@@ -2659,7 +2659,7 @@ bulk
 \end_inset
 
  of all possible other words that could ever occur in some other speakable,
- grammaitcally correct sentence.
+ grammatically correct sentence.
  
 \end_layout
 
@@ -2765,7 +2765,7 @@ name "fig:Feynman-Diagrams"
 \end_layout
 
 \begin_layout Plain Layout
-The arcs above the sentence show the standard unlabelled dependency parse
+The arcs above the sentence show the standard unlabeled dependency parse
  of the sentence.
  It is conventional to consider such a parse as standing alone, implicitly
  with some language model that is not diagrammatically represented.
@@ -2986,7 +2986,7 @@ resting on a tradition of linguistics
  Grammars such as Categorial Grammar (CG) combine aspects of constituency
  with aspects of dependency.
  There are others.
- In principle, each of these different grammar framworks are convertible
+ In principle, each of these different grammar frameworks are convertible
  to one-another by fixed algorithms that terminate in finite time.
  That is, given a lexis in one grammar framework, there is a purely mechanical
  means of translating that lexis into the lexis required by a different
