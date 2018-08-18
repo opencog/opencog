@@ -93,7 +93,7 @@ This tract attempts to provide a broad sketch of the unsupervised language
 
 \begin_layout Abstract
 The first part compares the operation of deep-learning/neural-net inspired
- language models to traditional lingistics-inspired language models.
+ language models to traditional linguistics-inspired language models.
  It is demonstrated that skip-grams, such as those in the canonical word2vec
  model, resemble parse rules associated with dependency grammars.
  This comparison is not obvious, as these two representations seem to be
@@ -115,7 +115,7 @@ The second part examines the idea of a word+context as a bipartite graph,
  central factor.
  Different approaches to factorization are explored, including neural-net-inspir
 ed low-rank matrix factorization algorithms, information-theoretic clustering,
- and, most importantly coclustering.
+ and, most importantly co-clustering.
 \end_layout
 
 \begin_layout Abstract
@@ -1999,7 +1999,7 @@ loss functions
  From the point of view of statistical mechanics, these models can also
  be easily recognized as Gibbs distributions.
  This allows all of the traditional intuition and tools of statistical mechanics
- to be brought to bear on the langauge problem.
+ to be brought to bear on the language problem.
  Specifically, the probabilities are obtainable from a partition function.
 \end_layout
 
@@ -2167,8 +2167,8 @@ ss; they capture some kind of latent structure of language, but how this
 
 \begin_layout Standard
 The notion of the Ising model can be used to bridge this gap.
- In the original formuation of the Ising model, the loss function (the Hamiltoni
-an; the energy) was written as
+ In the original formulation of the Ising model, the loss function (the
+ Hamiltonian; the energy) was written as
 \begin_inset Formula 
 \[
 -\log P\left(\sigma\right)=\sum_{i}h_{i}\sigma_{i}+\sum_{i,j}J_{ij}\sigma_{i}\sigma_{j}
@@ -2243,7 +2243,7 @@ shift invariant
 \end_inset
 
 , dependent only relative positions between points in the lattice, rather
- than thier absolute position.
+ than their absolute position.
  For the one-dimensional Ising model, where the lattice points are in a
  linear sequence, the shift invariance implies a number of interesting connectio
 ns to Markov chains, shift sequences, and finite state machines.
@@ -2277,7 +2277,7 @@ The point to be made here is that the Ising model also provides a natural
 \begin_inset Formula $\sigma_{i}$
 \end_inset
 
- is to be reinterprected as the word instance 
+ is to be reinterpreted as the word instance 
 \begin_inset Formula $w_{i}$
 \end_inset
 
@@ -2339,7 +2339,7 @@ is the loss function.
 
 \begin_layout Standard
 The statement that Ising model provides a model of natural language might
- superfically appear to be content-free, an empty and trite statement (there's
+ superficially appear to be content-free, an empty and trite statement (there's
  a 
 \begin_inset Quotes eld
 \end_inset
@@ -2381,7 +2381,7 @@ grammatical validity
 \end_layout
 
 \begin_layout Standard
-This view also exposes the limit of this langauge model: we do not speak
+This view also exposes the limit of this language model: we do not speak
  in a word-salad of grammatically valid sentences; rather, there is always
  a message conveyed in an utterance.
  The statistically independent numbers 
@@ -2625,10 +2625,10 @@ weights
 
  on the graph edges.
  This is the approach taken by the neural net, deep-learning models.
- They clearly have taken the world by storm, and are quite succesful in
+ They clearly have taken the world by storm, and are quite successful in
  what they do.
- The disadvantage is that they obscure the explict graphical structure of
- natural language.
+ The disadvantage is that they obscure the explicit graphical structure
+ of natural language.
  
 \end_layout
 
@@ -3312,7 +3312,7 @@ Some of the observed sparsity is due to a lack of a sufficient number of
 
 \begin_layout Standard
 Two more factors compound the confusion.
- One is that the observed text will neccessarily contain grammatically-incorrect
+ One is that the observed text will necessarily contain grammatically-incorrect
  text: the occasional mis-spelled word, the occasional awkwardly worded
  phrase; omitted determiners, incorrect number, tense agreement.
  A far more serious issue is that the disjuncts are constructed by means
@@ -3808,7 +3808,7 @@ Clustering, and in particular,
 \begin_inset Formula $k$
 \end_inset
 
--means clustering, can be shown to be equivalent to matrix factoriztion.
+-means clustering, can be shown to be equivalent to matrix factorization.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ding2005"
@@ -3820,7 +3820,7 @@ key "Ding2005"
 \end_inset
 
 -means as a relaxation problem, of aligning vectors to the closes centroids,
- can be written explicitly as matrixes.
+ can be written explicitly as matrices.
  This equivalence is reviewed in the section after the next, after a sufficient
  amount of other mathematical devices have been set up.
  Most important of these is the choice of an appropriate information metric
@@ -3865,7 +3865,7 @@ key "Grygorash2006"
  review multiple variants for deciding which edges to remove from an MST
  graph, and describe several particularly effective variants.
  Standard MST removes the longest edges; but one can instead remove edges
- that differ the most from thier neighbors; or one can remove edges that
+ that differ the most from their neighbors; or one can remove edges that
  are outliers from the typical edge-length mean.
  
 \end_layout
@@ -3883,7 +3883,7 @@ There are a variety of criticisms of different clustering algorithms, pointing
 
 \begin_layout Itemize
 Convex clusters.
- This is a standard criticism levelled against 
+ This is a standard criticism leveled against 
 \begin_inset Formula $k$
 \end_inset
 
@@ -3891,7 +3891,7 @@ Convex clusters.
  This is important criticism, when working with low-dimensional data (2D,
  3D data) where perhaps most practical examples require clusters that are
  not convex.
- For the langauge learning problem, the data lives in an extremely high-dimensio
+ For the language learning problem, the data lives in an extremely high-dimensio
 nal space, with clusters that are almost surely convex.
 \end_layout
 
@@ -3900,7 +3900,7 @@ Low Rank Matrix Approximation
 \end_layout
 
 \begin_layout Standard
-Factorizations of the form of ean 
+Factorizations of the form of eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:factorize"
@@ -4133,7 +4133,7 @@ Non-Negative Matrix Factorization
 \begin_layout Standard
 Non-negative matrix factorization (NMF) is similar to PMF, but with the
  additional constraint that the result has a non-negative rank.
- The non-negative rank constraint requires that not only do the factor matrixes
+ The non-negative rank constraint requires that not only do the factor matrices
  have non-negative values in them, but also that non-negative linear combination
 s are also non-negative.
  This appears be an appropriate restriction for probabilities.
@@ -4170,7 +4170,7 @@ key "Ding2008"
 \begin_layout Standard
 The error term that needs to be minimized is the matrix-factorized form
  of the mutual information, which is just the Kullback-Leibler divergence
- between the factored and unfactored matrixes: 
+ between the factored and unfactored matrices: 
 \begin_inset Formula 
 \begin{equation}
 MI_{\mbox{factor}}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)}\label{eq:KL-MI-factorization-loss}
@@ -4277,7 +4277,7 @@ ad hoc
 \begin_inset Formula $f$
 \end_inset
 
- is just hiding or modelling or leaving unexplored some deeper linear structure.
+ is just hiding or modeling or leaving unexplored some deeper linear structure.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4329,7 +4329,7 @@ These two techniques, combined, prove to be almost ideal, when faced with
 \end_inset
 
  are zero not because they fundamentally should be (i.e.
- are forbidden by the grammar and syntax of natural langauge), but are zero
+ are forbidden by the grammar and syntax of natural language), but are zero
  simply because they have not yet been observed; some appropriate sentence
  does not occur in the sample dataset.
  
@@ -4468,8 +4468,8 @@ reference "fig:Factorization"
 
 \end_inset
 
-, left image), and that one can perform seperate, distinct, but simultaneous
- clustering on the columns, and seperately, the rows.
+, left image), and that one can perform separate, distinct, but simultaneous
+ clustering on the columns, and separately, the rows.
  This is closer to the desired factorization model for language, so the
  proof is reviewed here.
  It is still 
@@ -4534,7 +4534,7 @@ reference "eq:factorize"
 \begin_inset Formula $R$
 \end_inset
 
- as membership matrixes, so that each row and column indicate the membership
+ as membership matrices, so that each row and column indicate the membership
  of a vector to a cluster.
  That is 
 \begin_inset Formula $L$
@@ -4674,7 +4674,7 @@ The hard-clustering assignment of a word to only a single word-class prevents
 \begin_layout Itemize
 The use of the Frobenius norm (or the nuclear norm) implicitly forces assumption
 s of rotational invariance, in the form of orthogonality constraints on
- the membership indicator matrixes 
+ the membership indicator matrices 
 \begin_inset Formula $L$
 \end_inset
 
@@ -4702,7 +4702,7 @@ There is no room for a central factor matrix
 \end_inset
 
  which can capture the non-sparse complexities of the language.
- The need; indeeed, the inevitability of such a matrix is developed in the
+ The need; indeed, the inevitability of such a matrix is developed in the
  next section.
 \end_layout
 
@@ -4717,12 +4717,12 @@ Use an information-theoretic metric, namely, the Kullback-Leibler divergence
 
 \begin_layout Itemize
 Perform greedy clustering, so as to minimize the number of number of non-zero
- entries in the left and right factor matrixes
+ entries in the left and right factor matrices
 \end_layout
 
 \begin_layout Itemize
 Decompose vectors into components that align with clusters, so that clusters
- correspond to word-senses, and word-sense disamgiguation (WSD) is an inherent,
+ correspond to word-senses, and word-sense disambiguation (WSD) is an inherent,
  inbuilt part of the clustering step.
 \end_layout
 
@@ -4892,7 +4892,7 @@ This shows that the factorization is ambiguous; as long as
 \begin_inset Formula $M$
 \end_inset
 
- itself can be factored into an arbitrary product of Markovian matrixes,
+ itself can be factored into an arbitrary product of Markovian matrices,
  which can then be merged to the left and right.
 \end_layout
 
@@ -5143,10 +5143,10 @@ In the above factorization, matrix
  However, it seems to be particularly important to the semantic structure
  of the language: it captures the complexity of language, whereas the left
  and right factors merely funnel spelled-out word-strings into the actual
- semantic cagtegories.
+ semantic categories.
  Thus, it is convenient to instead write the left and write factors as Markov
  matrices, while taking the central factor to be a joint probability.
- This can be acheived by factoring as
+ This can be achieved by factoring as
 \begin_inset Formula 
 \begin{equation}
 p\left(w,d\right)=\sum_{g}\sum_{g^{\prime}}p\left(w|g\right)p\left(g,g^{\prime}\right)p\left(d|g^{\prime}\right)\label{eq:central-decomposition}
@@ -5234,7 +5234,7 @@ status collapsed
 \begin_layout Plain Layout
 In physics, such an ambiguity of factorization is known as a global gauge
  symmetry; fixing a gauge removes the ambiguity.
- In natural language, the ambiguity is sponteneously broken: words have
+ In natural language, the ambiguity is spontaneously broken: words have
  only a few senses, and are often sysnonymous, making the left and right
  factors sparse.
  For this reason, the analogy to physics is entertaining but mostly pointless.
@@ -5257,7 +5257,7 @@ key "Dhillon2003"
 \end_inset
 
  and is reviewed in a subsection below.
- Of course, for natural langauge, we want to decompose words into word-senses,
+ Of course, for natural language, we want to decompose words into word-senses,
  and so naive hard-clustering will not work.
  It does, however, illuminate the path ahead.
  
@@ -5435,7 +5435,7 @@ This explicit co-clustering in Link Grammar is not driven by any sort of
 ies shows this structure clearly.
  It becomes even more pronounced in dictionaries with morphology, e.g.
  in the Russian dictionaries, where word-stems (which carry most of the
- meaining) are factored away from the suffixes (which provide the needed
+ meaning) are factored away from the suffixes (which provide the needed
  tense, gender, number and person agreement across sentences).
 \end_layout
 
@@ -5473,7 +5473,7 @@ Based on the example of the actual English lexis in Link Grammar, there
 \begin_inset Formula $\left|G\right|$
 \end_inset
 
- should someohow be equal to the number of syntactic usage patterns 
+ should somehow be equal to the number of syntactic usage patterns 
 \begin_inset Formula $\left|G^{\prime}\right|$
 \end_inset
 
@@ -5567,8 +5567,8 @@ key "WP-Selection"
  Roughly speaking, the number of word classes should correspond to the number
  of different synonym classes one might expect to find.
  This is confused by the situation of common nouns: there are vast numbers
- of these, and while most are not synonyms, most are syntactically interchangabl
-e, even when forcing predicate-argument agreement.
+ of these, and while most are not synonyms, most are syntactically interchangeab
+le, even when forcing predicate-argument agreement.
 \end_layout
 
 \begin_layout Standard
@@ -5656,7 +5656,7 @@ Suppose this was not easily the case? To guide the factorization, and to
 \end_layout
 
 \begin_layout Standard
-In essence, factorization is a reorganizeation of the graph so as to always
+In essence, factorization is a reorganization of the graph so as to always
  maximize the integrated information of an important central core.
  All edges where mutual information is weak are to be pruned away.
 \end_layout
@@ -5689,7 +5689,7 @@ By minimizing this divergence, one minimizes the total loss incurred by
 \end_layout
 
 \begin_layout Standard
-The above information loss estimate is identical to that described by Dhillion
+The above information loss estimate is identical to that described by Dhillon
  
 \emph on
 et al
@@ -5701,10 +5701,10 @@ key "Dhillon2003"
 
 \end_inset
 
- in thier treatment of hard co-clustering.
+ in their treatment of hard co-clustering.
  That reference provides an extensive and detailed review of the factorization
  problem being addressed in this section, with the exception that the current
- need for word-sense disambiguation violates thier hard-clustering assumption.
+ need for word-sense disambiguation violates their hard-clustering assumption.
  Words cannot be hard-clustered; word-vectors must be decomposed into word-sense
  vectors first.
 \begin_inset CommandInset citation
@@ -5892,8 +5892,8 @@ MI_{word\, loss}=\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\lef
 \end_inset
 
 is minimized.
- After recomputing marginals, one then reclusters the disjuncts, by seaching
- for the culstering 
+ After recomputing marginals, one then reclusters the disjuncts, by searching
+ for the clustering 
 \begin_inset Formula $d\in g^{\prime}$
 \end_inset
 
@@ -5923,7 +5923,7 @@ reference "sub:Sparsity"
 \end_inset
 
  or more disjuncts.
- Each provisional clustering requires extensive recomputation of marginal
+ Each provisional clustering requires extensive re-computation of marginal
  probabilities.
  Exhaustive search for the best clustering clearly cannot scale to the current
  datasets.
@@ -5969,8 +5969,8 @@ saw
 \end_inset
 
 .
- It could be the noun, refering to the cutting tool; it could be the verb
- synonymous to cutting; it could be thw past tense of the verb 
+ It could be the noun, referring to the cutting tool; it could be the verb
+ synonymous to cutting; it could be the past tense of the verb 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5979,7 +5979,7 @@ to see
 \end_inset
 
 .
- The observational data consists of occurance counts 
+ The observational data consists of occurrence counts 
 \begin_inset Formula $N\left(\mbox{"saw"},d\right)$
 \end_inset
 
@@ -6006,7 +6006,7 @@ key "Vepstas2018stiching"
 \end_inset
 
 .
- That persentation focuses on cosine distances.
+ That presentation focuses on cosine distances.
  This section provides an information-theoretic variant.
 \end_layout
 
@@ -6136,7 +6136,7 @@ Since a word-sense is associated with just one word, the notation
 \begin_inset Formula $\sum_{s\in w}$
 \end_inset
 
- is superflous: one can unambigously write 
+ is superfluous: one can unambiguously write 
 \begin_inset Formula $\sum_{s}$
 \end_inset
 
@@ -6443,14 +6443,14 @@ thing
 \begin_inset Quotes erd
 \end_inset
 
-, and so a lighting review of the literature is warrented.
+, and so a lighting review of the literature is warranted.
  Two observations pop out:
 \end_layout
 
 \begin_layout Itemize
-None of the systems dscribed in the literature assume that the input data
+None of the systems described in the literature assume that the input data
  can already be interpreted as a probability; rather, the clustering is
- being performed on data naturally occuring in some Euclidean space, typically,
+ being performed on data naturally occurring in some Euclidean space, typically,
  some space of low dimension (e.g.
  two-dimensional image data).
 \end_layout
@@ -6498,7 +6498,7 @@ key "Gokcay2002"
 \begin_inset Formula $\vec{u}$
 \end_inset
 
- anad 
+ and 
 \begin_inset Formula $\vec{v}$
 \end_inset
 
@@ -6523,14 +6523,14 @@ where
 
 -norm.
  Although this is widely cited in the literature pertaining to information-theor
-etic clustering, there is no particular reason to beleive that it offers
+etic clustering, there is no particular reason to believe that it offers
  any advantage at all over the ordinary cosine metric, when applied to the
  task of clustering grammatical categories.
  In particular, it suffers from the same defects previously identified:
  it contains an inbuilt assumption that the data presents in a Euclidean,
- rotationally symmetric space, which is very much not the case for the langauge
+ rotationally symmetric space, which is very much not the case for the language
  data.
- The vectors of in the contingency table that the language data is ogranized
+ The vectors of in the contingency table that the language data is organized
  in are not Euclidean vectors: they are joint probabilities.
  They transform not under orthogonal rotations, but under Markov matrices.
 \end_layout
@@ -6546,7 +6546,7 @@ key "Vepstas2017connectors"
 \end_inset
 
 , it becomes quite clear that there is a practical, common-sense cutoff
- for similary.
+ for similarlity.
  If two words 
 \begin_inset Formula $w_{1}$
 \end_inset
@@ -6564,7 +6564,7 @@ key "Vepstas2017connectors"
 \end_inset
 
 , they are fantastically unrelated.
- It would be crazy to assign anything with such low similarities to a commn
+ It would be crazy to assign anything with such low similarities to a common
  cluster.
  Extending the notion of similarity to truly wee values, as the logarithm
  enables, is meaningless.
@@ -6574,7 +6574,7 @@ key "Vepstas2017connectors"
 \end_inset
 
  in the region of interest.
- The appearence of the logarithm does nothing to advance the situation.
+ The appearance of the logarithm does nothing to advance the situation.
 \end_layout
 
 \begin_layout Subsubsection
@@ -6599,7 +6599,7 @@ key "VerSteeg2014"
 \end_layout
 
 \begin_layout Standard
-There is some appeal in this idea for the langauge problem: a large cluster
+There is some appeal in this idea for the language problem: a large cluster
  of approximate synonyms should be factorizable into smaller clusters of
  more tightly-related synonyms.
  Conversely, one should be able to consolidate small blocks into bigger
@@ -6801,7 +6801,7 @@ The cosine was built from the dot product
 
  normalized by the vector lengths.
  For information-based clustering, the normalization is changed, so as to
- use the Kullback-Leibler divergence between the vecgor-pair, and the individual
+ use the Kullback-Leibler divergence between the vector-pair, and the individual
  vectors: 
 \begin_inset Formula 
 \[
@@ -6920,7 +6920,7 @@ A different way to think of the pair-wise MI is that, by incorporating all
 
 \begin_layout Standard
 One way the above can be visualized is to consider two vectors, roughly
- colinear, and another six hundred, also all roughly colinear, but almost
+ collinear, and another six hundred, also all roughly collinear, but almost
  orthogonal to the first two.
  Consider then the MI values for different pairs chosen from this collection.
  Two vectors which might have the same cosine angle will have very different
@@ -6966,16 +6966,16 @@ Arithmetic and Geometric Means
 \end_layout
 
 \begin_layout Standard
-For vectors obtained from natural language, tehre is good reason to beleive
+For vectors obtained from natural language, there is good reason to believe
  that the natural clusters are convex, rather than being oddly shaped.
  Therefore, it is meaningful to ask about and talk about the centroid of
  a cluster.
 \end_layout
 
 \begin_layout Standard
-For a Euclidean space, posessing rotational invariance and some notion of
- uniform distribution, the arithmetic mean of the vectors in a cluster would
- be a natural choice for the centroid.
+For a Euclidean space, possessing rotational invariance and some notion
+ of uniform distribution, the arithmetic mean of the vectors in a cluster
+ would be a natural choice for the centroid.
  However, as is being repeatedly noted, vectors taken from a joint probability
  distribution do not live in a Euclidean, rotationally symmetric space.
  The arithmetic mean does not make sense.
@@ -7084,7 +7084,7 @@ for some
 \begin_inset Formula $\alpha\le1$
 \end_inset
 
-, thus effectively making rare pehnomena seem less rare, while common phenomena
+, thus effectively making rare phenomena seem less rare, while common phenomena
  become less common.
 \end_layout
 
@@ -7133,9 +7133,10 @@ The primary reason to propose a pair-wise information divergence is to enable
 \end_layout
 
 \begin_layout Standard
-As a corellary, the results of hillclimbing or gradient-descent algorithms
- are insufficiently sparse; one wishes to approxmate the sparsity that hard-clus
-tering offers, with less overhead and complexity in finding the clusters.
+As a corollary, the results of hill-climbing or gradient-descent algorithms
+ are insufficiently sparse; one wishes to approximate the sparsity that
+ hard-clustering offers, with less overhead and complexity in finding the
+ clusters.
 \end_layout
 
 \begin_layout Subsection
@@ -7210,7 +7211,7 @@ a priori
 
  of word-senses; again, this can be provided by WordNet.
  One then considers the full graph clique of all possible word-senses that
- might appear in the sentence, and thier relation all other possible word-senses.
+ might appear in the sentence, and their relation all other possible word-senses.
  That is, one considers the graph 
 \begin_inset Formula $M\left(s_{k},s_{m}\right)$
 \end_inset
@@ -7278,13 +7279,13 @@ Word-sense Similarity
 \end_layout
 
 \begin_layout Standard
-Assume, for a moment, that distinct word senses can be infered from raw
+Assume, for a moment, that distinct word senses can be inferred from raw
  text, in an unsupervised fashion.
  That is, assume that a joint probability 
 \begin_inset Formula $p\left(s,d\right)$
 \end_inset
 
- can be infered from the text data.
+ can be inferred from the text data.
  It is OK if this probability is of low quality, and generally inaccurate:
  disappointingly inaccurate, even.
  If this probability exceeds pure random chance, then the Mihalcea algorithm
@@ -7347,7 +7348,7 @@ in reverse
 \begin_layout Standard
 The goal of doing this is to amplify the signal-to-noise ratio.
  This is in more-or-less complete analogy to the case for word-pairs: given
- a small number of observations, they are noisey and inaccurate.
+ a small number of observations, they are noisy and inaccurate.
  Increasing the number of observations causes the noise to cancel out, and
  for a signal to emerge.
 \end_layout
@@ -7394,14 +7395,14 @@ DSyntR
  That is, one can now begin to assemble logical proofs by inferring sequences
  of deductions applied to sense-disjuncts.
  Or rather, more importantly, once can now start to infer the set of valid
- logical deductions that can be applied, rather than taking defferent forms
+ logical deductions that can be applied, rather than taking different forms
  of logical inference as being given 
 \emph on
 a priori
 \emph default
 .
- To be more blunt: this provides the pathway for inferening the rules of
- Goertzel's PLN, or for infering the rules Pei Wang's Non-Axiomatic Logic,
+ To be more blunt: this provides the pathway for inferring the rules of
+ Goertzel's PLN, or for inferring the rules Pei Wang's Non-Axiomatic Logic,
  rather than taking these rules as externally imposed.
 \end_layout
 
@@ -7410,7 +7411,7 @@ Word-sense Factoring
 \end_layout
 
 \begin_layout Standard
-Given a pair-wise information divergence, how can one infere word senses?
+Given a pair-wise information divergence, how can one infer word senses?
  This is addressed in the companion text.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -7450,7 +7451,7 @@ Surprisal Analysis
 \end_layout
 
 \begin_layout Standard
-The basic idea is this forumla:
+The basic idea is this formula:
 \begin_inset Formula 
 \[
 -\log\frac{P(x)}{P_{0}(x)}=\sum_{\alpha}\lambda_{\alpha}G\left(\alpha\right)
