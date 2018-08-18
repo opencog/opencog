@@ -2083,6 +2083,102 @@ softmax
  function was used precisely because it gives the maximum entropy distribution.
 \end_layout
 
+\begin_layout Standard
+The last statement can be made even more precise.
+ A language model is a probability distribution 
+\begin_inset Formula $p(w_{1},w_{2},\cdots)$
+\end_inset
+
+ defined over a sequence of words 
+\begin_inset Formula $w_{1},w_{2},\cdots$
+\end_inset
+
+.
+ The set of all such sequences is termed an 
+\begin_inset Quotes eld
+\end_inset
+
+ensemble
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The entropy of a particular language model is a sum over the ensemble
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+S\left[p\right]=-\sum_{w_{1},w_{2},\cdots}p\left(w_{1},w_{2},\cdots\right)\log_{2}p\left(w_{1},w_{2},\cdots\right)
+\]
+
+\end_inset
+
+The principle of maximum entropy states that the above should be solved
+ to find the probability distribution 
+\begin_inset Formula $p$
+\end_inset
+
+ that maximizes the entropy 
+\begin_inset Formula $S\left[p\right]$
+\end_inset
+
+.
+ Standard texts on statistical mechanics exhibit the solution; it is the
+ Boltzmann distribution, namely
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots\right)=\frac{1}{Z}\exp-E\left(w_{1},w_{2},\cdots\right)
+\]
+
+\end_inset
+
+with the partition function 
+\begin_inset Formula $Z$
+\end_inset
+
+ being given by 
+\begin_inset Formula 
+\[
+Z=\sum_{w_{1},w_{2},\cdots}\exp-E\left(w_{1},w_{2},\cdots\right)
+\]
+
+\end_inset
+
+To make ends meet with eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Partition function"
+
+\end_inset
+
+, one writes 
+\begin_inset Formula $Z=Z\left[J=0\right]$
+\end_inset
+
+ so that if the current 
+\begin_inset Formula $J$
+\end_inset
+
+ is zero, one simply does not write it, as it is just a device handy for
+ algebraic manipulations, but having no particularly deep significance for
+ the langauge model.
+\end_layout
+
+\begin_layout Standard
+Thus, a maximum entropy model of natural language is any model that provides
+ an energy function 
+\begin_inset Formula $E\left(w_{1},w_{2},\cdots\right)$
+\end_inset
+
+ for a sequence of words 
+\begin_inset Formula $w_{1},w_{2},\cdots$
+\end_inset
+
+.
+ Clearly, CBOW/Skipgram is such a model.
+\end_layout
+
 \begin_layout Subsection
 Ising Models of Grammar
 \end_layout
@@ -2171,7 +2267,7 @@ The notion of the Ising model can be used to bridge this gap.
  Hamiltonian; the energy) was written as
 \begin_inset Formula 
 \[
--\log P\left(\sigma\right)=\sum_{i}h_{i}\sigma_{i}+\sum_{i,j}J_{ij}\sigma_{i}\sigma_{j}
+E\left(\sigma\right)=\sum_{i}h_{i}\sigma_{i}+\sum_{i,j}J_{ij}\sigma_{i}\sigma_{j}
 \]
 
 \end_inset
@@ -2200,7 +2296,7 @@ lattice position
 \begin_inset Formula $i$
 \end_inset
 
-, and the 
+, the 
 \begin_inset Formula $h_{i}$
 \end_inset
 
@@ -2226,7 +2322,20 @@ magnetic field
 \end_inset
 
  between neighbors).
- The Ising model is usually taken to be 
+ (The 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ used here has no relationship whatsoever to the current 
+\begin_inset Formula $J$
+\end_inset
+
+ of the previous section; rather, there are not enough letters in the alphabet,
+ and by convention, 
+\begin_inset Formula $J$
+\end_inset
+
+ is used for both tasks.) The Ising model is usually taken to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2249,15 +2358,21 @@ shift invariant
 ns to Markov chains, shift sequences, and finite state machines.
  This, in turn, implies that it, or a variant thereof, occurs in many natural
  models.
- As an example, it describes the distribution of amino acids in Zebrafish
- antibodies.
+ As an example, it describes the distribution of sequences of amino acids
+ in Zebrafish antibodies.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mora2010"
 
 \end_inset
 
+ In that model, each 
+\begin_inset Formula $\sigma_{i}$
+\end_inset
 
+ can be one of twenty different amino acids, and one is interested in describing
+ the distribution of wide variety of different sequences a that antibodies
+ emply to fight off infection.
 \end_layout
 
 \begin_layout Standard
@@ -2294,7 +2409,7 @@ magnetic field
 \begin_inset Quotes erd
 \end_inset
 
-) is dexplored in the next section; for now, it can be ignored (taken to
+) is explored in the next section; for now, it can be ignored (taken to
  be zero).
  The part of the model responsible for grammar are the two-point functions
  
@@ -2523,13 +2638,13 @@ s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\ri
 
 \end_inset
 
-How does this square with the Ising model? It seems to be quite different:
- the Ising model suggests that one should have only pair-wise interactions
- 
+How does this square with the Ising model? Superficially, it seems to be
+ quite different: the Ising model suggests that one should have only pair-wise
+ interactions 
 \begin_inset Formula $J_{ij}=\log p\left(w_{i},w_{j}\right)$
 \end_inset
 
- whereas the mutual inforamtion has an additional funny denominator.
+ whereas the mutual information has an additional funny denominator.
  This can be reconciled by saying that there is a bulk interaction: each
  individual word-site 
 \begin_inset Formula $i$
@@ -2558,11 +2673,11 @@ magnetic fields
 \end_inset
 
 , or one-point interactions 
-\begin_inset Formula $h\left(w_{i},*\right)=-\log_{2}\left(w_{i},*\right)$
+\begin_inset Formula $h\left(w_{i},*\right)=-\log_{2}p\left(w_{i},*\right)$
 \end_inset
 
  and 
-\begin_inset Formula $h\left(*,w_{j}\right)=-\log_{2}\left(*,w_{j}\right)$
+\begin_inset Formula $h\left(*,w_{j}\right)=-\log_{2}p\left(*,w_{j}\right)$
 \end_inset
 
  that enter into the Ising model Hamiltonian, so that, for sentence 
@@ -2610,10 +2725,10 @@ bulk magnetic field
 \end_inset
 
 ) of the language model.
- This is an absolutely key insight of the Ising model of language: the relations
-hip between words matters not so much because of the individual relationships,
- but because these relationships have to be taken in the background of the
- entire language, itself.
+ This is an absolutely key, fundamental insight of the Ising model of language:
+ the relationship between words matters not so much because of the individual
+ relationships, but because these relationships have to be taken with regards
+ to the background of the entire language, in full.
 \end_layout
 
 \begin_layout Standard
@@ -2642,7 +2757,7 @@ name "fig:Feynman-Diagrams"
 
 \begin_inset Graphics
 	filename skimage/feynman.eps
-	width 80col%
+	width 60col%
 
 \end_inset
 
@@ -2830,11 +2945,14 @@ key "Sleator1991,Sleator1993"
 \end_inset
 
  by disjuncts 
-\begin_inset Formula $J_{ijk\cdots}=\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)$
+\begin_inset Formula 
+\[
+J_{ijk\cdots}=\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)
+\]
+
 \end_inset
 
-.
- The notation here is awkward: the idea here is that some word 
+The notation above is awkward: the idea here is that some word 
 \begin_inset Formula $w_{i}$
 \end_inset
 
@@ -2853,7 +2971,7 @@ There are multiple ways of overcoming the notational awkwardness of the
 \end_layout
 
 \begin_layout Standard
-Before proceeding, the remakr of 
+Before proceeding, the remark of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2895,7 +3013,7 @@ The primary point here is that Link Grammar is interesting because it provides
  a bridge to both traditional, symbolic linguistics (per above) and while
  also allowing an interpretation as an Ising model of language.
  Following Yuret's ansatz, one includes energy terms of not only 
-\begin_inset Formula $J_{ijk\cdots}=\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)$
+\begin_inset Formula $J_{ijk\cdots}$
 \end_inset
 
  in the Hamiltonian, but also bulk terms, indicating how disjuncts interact
