@@ -2613,7 +2613,176 @@ bulk magnetic field
  This is an absolutely key insight of the Ising model of language: the relations
 hip between words matters not so much because of the individual relationships,
  but because these relationships have to be taken in the background of the
- entire langauge, itself.
+ entire language, itself.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Feynman Diagrams in Language
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Feynman-Diagrams"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename skimage/feynman.eps
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The arcs above the sentence show the standard unlabelled dependency parse
+ of the sentence.
+ It is conventional to consider such a parse as standing alone, implicitly
+ with some language model that is not diagrammatically represented.
+ When drawn stand-alone, the arcs are presumed to have some unspecified
+ cost, such that the desired parse tree is preferentially selected.
+ Here, the arcs are intended to very explicitly correspond to 
+\begin_inset Quotes eld
+\end_inset
+
+propagators
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Feynman rules
+\begin_inset Quotes erd
+\end_inset
+
+ with a value of 
+\begin_inset Formula $h=\log_{2}p\left(w_{i},w_{j}\right)$
+\end_inset
+
+.
+ The two vacuum bubbles below the sentence, and the straight lines connecting
+ each word to each vacuum are used to explicitly represent the language
+ model.
+ The straight lines connecting to the left vacuum are explicitly given by
+ the propagator 
+\begin_inset Formula $h=-\log_{2}p\left(*,w\right)$
+\end_inset
+
+ while those going to right vacuum are given by 
+\begin_inset Formula $h=-\log_{2}p\left(w,*\right)$
+\end_inset
+
+.
+ The total action (Hamiltonian, in this case) is given by 
+\begin_inset Formula $H_{total}=\sum_{arcs}h$
+\end_inset
+
+ with the sum being over all lines and arcs.
+ This summation makes explicit what is otherwise an implicit langauge model:
+ namely, that
+\begin_inset Formula 
+\[
+H_{total}=\sum_{arcs}h=\sum_{\left(w_{i},w_{j}\right)\in tree}MI\left(w_{i},w_{j}\right)
+\]
+
+\end_inset
+
+where the right-hand side is the sum over mutual information between word-pairs.
+ That is, the total mutual information in a parse tree is exactly equivalent
+ to the total entropy of that parse tree, taken within the context of the
+ entire language model.
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Feynman-Diagrams"
+
+\end_inset
+
+ attempts to drive this point home, by explicitly showing the vacuum contributio
+n (the 
+\begin_inset Quotes eld
+\end_inset
+
+bulk magnetic field
+\begin_inset Quotes erd
+\end_inset
+
+ contribution) of the language model.
+ By convention, when linguists draw dependency-parse diagrams, they omit
+ the bottom half of this figure.
+ This is a reasonable omission: it not only clutters the diagram, but, from
+ the point of view of linguistics, it almost seems like tautological nonsense.
+ Of course a language model is taken within the context of the language.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+vacuum
+\begin_inset Quotes erd
+\end_inset
+
+ comes from quantum field theory, where there was a similar realization
+ that the tautologically-empty vacuum is not so empty after all, but has
+ explicit contributions to the probabilities of various physical processes.
+ The vacuum is an implicit context for physical processes, which on occasion
+ must be made explicit in order to get correct predictions.
+ 
+\end_layout
+
+\end_inset
+
+ However, in order to bridge from a purely linguistic model, to a statistical
+ model based on probabilities taken from first principles from Boltzmann
+ distributions derived from partition functions, those implicit terms must
+ be made explicit.
+ The single-point propagators have an explicit numerical effect in the determina
+tion of the best parse tree for a given sentence.
 \end_layout
 
 \begin_layout Subsection
