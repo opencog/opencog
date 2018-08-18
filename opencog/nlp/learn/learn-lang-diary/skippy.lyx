@@ -2381,9 +2381,60 @@ grammatical validity
 \end_layout
 
 \begin_layout Standard
-This view also exposes the limit of this language model: we do not speak
- in a word-salad of grammatically valid sentences; rather, there is always
- a message conveyed in an utterance.
+The importance of this assumption is mostly easily illutrating by reverting
+ to a two-point model of natural language: that is, by restricting the interacti
+on 
+\begin_inset Formula $J$
+\end_inset
+
+ to occur only between pairs of words.
+ This effectively gives the MST model of language, exploreed by Yuret
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+ and by McDonald
+\begin_inset CommandInset citation
+LatexCommand cite
+key "McDonald2005,McDonald2006"
+
+\end_inset
+
+.
+ Here, the relationship between words is presumed to be entirely pair-wise;
+ after obtaining pair-wise word statistics 
+\begin_inset Formula $P\left(w_{left},w_{right}\right)$
+\end_inset
+
+ from frequency observations, one constructs a maximum-spanning-tree parse
+ so as to maximize the total entropy.
+ 
+\end_layout
+
+\begin_layout Standard
+The use of a maximum spanning tree, such as the supervised training models
+ of McDonald 
+\emph on
+etal
+\emph default
+.
+ is a key insight.
+ But Yuret does one better: by maximizing mutual information, the language
+ model is concerned not just with a single sentence, but also includes the
+ background of all possible grammatical pair relations.
+\end_layout
+
+\begin_layout Standard
+equivalently, one is looking to maximize the mutual information between
+ word-pairs, and performing a sum to obtain the most-likely parse tree.
+\end_layout
+
+\begin_layout Standard
+The additive model of grammatical structure also exposes the limit of this
+ language model: we do not speak in a word-salad of grammatically valid
+ sentences; rather, there is always a message conveyed in an utterance.
  The statistically independent numbers 
 \begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
 \end_inset
@@ -2404,6 +2455,10 @@ coding theory
 
  of signal processing.
  
+\end_layout
+
+\begin_layout Subsection
+MST models of Langauge
 \end_layout
 
 \begin_layout Subsection
