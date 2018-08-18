@@ -3356,7 +3356,17 @@ reference "eq:SkipGram"
 \end_layout
 
 \begin_layout Subsection
-ummmmmm
+Avoiding Maximum Entropy Principles
+\end_layout
+
+\begin_layout Standard
+The previous sections explicitly focused on maximum entropy as a guiding
+ principle, emphasizing that it is compatible with both a graphical algorithm
+ approach, as well as a Monte Carlo or gradient descent approach to learning
+ a language model.
+ This guiding principle can be set to the side and ignored; there is nothing
+ specific in either the graph algorithms or the training algorithms that
+ require or assume it.
 \end_layout
 
 \begin_layout Standard
@@ -3380,6 +3390,21 @@ key "Yuret1998"
  Each edge is associated with a metric, that defines the length or size
  of the edge.
  In traditional MST, this metric is the mutual information of the word-pair.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Properly speaking, mutual information is not a metric, since it does not
+ obey the triangle inequality.
+ Thus, it should be called a divergence (it is essentially the Kullback--Liebler
+ dirvergence) in that it distinguishes points by thier divergence, without
+ providing a specific distance betwen them.
+ Despite this, the divergence will be called either a matric or a distance
+ in much of what follows, simply because it rolls off the tongue more easily.
+\end_layout
+
+\end_inset
+
  One can proceed in three ways from here: 
 \end_layout
 
@@ -3441,6 +3466,10 @@ A spanning-tree algorithm can be thought of as a kind-of thresholding algorithm,
  At an abstract level, though, the differences can be imagined to be less
  than they first appear.
  
+\end_layout
+
+\begin_layout Subsection
+Summary
 \end_layout
 
 \begin_layout Standard
