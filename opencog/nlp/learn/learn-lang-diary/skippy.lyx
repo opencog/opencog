@@ -2033,9 +2033,9 @@ p\left(w_{t},w_{I}\right)=\frac{\exp\,\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}}{
 This can be obtained by applying variational principles to the partition
  function 
 \begin_inset Formula 
-\[
-Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)
-\]
+\begin{equation}
+Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}+J_{wI}\right)\label{eq:Partition function}
+\end{equation}
 
 \end_inset
 
@@ -2088,22 +2088,159 @@ Ising models of Grammar
 \end_layout
 
 \begin_layout Standard
-The CBOW and SkipGram models of language are written with explicit Gibbs
- distributions, namely equations 
+The vector product 
+\begin_inset Formula $\sum_{i\in I}\vec{u}_{w}\cdot\vec{v}_{i}$
+\end_inset
+
+ appearing in the partition function 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Partition function"
+
+\end_inset
+
+, and indirectly in the CBOW and SkipGram models 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:CBOW"
 
 \end_inset
 
- and SkipGram
+ and 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:SkipGram"
 
 \end_inset
 
-.
+ is pretty much the grand-total extent or content of these language models.
+ The statement is effectively that vectors provide a pretty good model of
+ natural language, and the vectors are able to capture important features
+ of natural language, including semantics and compositionality (the 
+\begin_inset Quotes eld
+\end_inset
+
+King
+\begin_inset Quotes erd
+\end_inset
+
+ - 
+\begin_inset Quotes eld
+\end_inset
+
+man
+\begin_inset Quotes erd
+\end_inset
+
+ + 
+\begin_inset Quotes eld
+\end_inset
+
+woman
+\begin_inset Quotes erd
+\end_inset
+
+ = 
+\begin_inset Quotes eld
+\end_inset
+
+Queen
+\begin_inset Quotes erd
+\end_inset
+
+ example
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013a,Mikolov2013b"
+
+\end_inset
+
+).
+ This is interesting, because the vectors themselves are effectively structurele
+ss; they capture some kind of latent structure of language, but how this
+ is captured is entirely opaque.
+ This is entirely at odds with traditional theories of syntax, as developed
+ by more than half a century of linguistics research.
+ How can the latent content of the feature vectors be reconciled with structural
+ theories of syntax?
+\end_layout
+
+\begin_layout Standard
+The notion of the Ising model can be used to bridge this gap.
+ In the original formuation of the Ising model, the loss function (the Hamiltoni
+an; the energy) was written as
+\begin_inset Formula 
+\[
+-\log P\left(\sigma\right)=\sum_{i}h_{i}\sigma_{i}+\sum_{i,j}J_{ij}\sigma_{i}\sigma_{j}
+\]
+
+\end_inset
+
+with the 
+\begin_inset Formula $\sigma_{i}$
+\end_inset
+
+ being the value of a 
+\begin_inset Quotes eld
+\end_inset
+
+spin
+\begin_inset Quotes erd
+\end_inset
+
+ at a 
+\begin_inset Quotes eld
+\end_inset
+
+lattice position
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $i$
+\end_inset
+
+, and the 
+\begin_inset Formula $h_{i}$
+\end_inset
+
+ being the 
+\begin_inset Quotes eld
+\end_inset
+
+magnetic field
+\begin_inset Quotes erd
+\end_inset
+
+ (at lattice position 
+\begin_inset Formula $i$
+\end_inset
+
+), and the 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+ being the interaction energy between neighbors (typically, the nearest
+ neighbors, and typically dependent only on the distance 
+\begin_inset Formula $\left|i-j\right|$
+\end_inset
+
+ between neighbors).
+ The Ising model has many generalizations, and has been observed in a broad
+ variety of contexts.
+ For example, it describes the dsitribution of amino acids in Zebrafish
+ antibodies.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mora2010"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The point to be made here is that
 \end_layout
 
 \begin_layout Subsection
