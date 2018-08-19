@@ -267,7 +267,7 @@
 )
 
 (define (update-clique-pair-counts SENT MAX-LEN RECORD-LEN)
-	(update-clique-pair-counts-mode SENT #f MAX-LEN RECORD-LEN)
+	(update-clique-pair-counts-mode SENT #f MAX-LEN RECORD-LEN))
 
 ; See above for explanation.
 (define (update-clique-pair-counts-mode SENT DIST-MODE MAX-LEN RECORD-LEN)
@@ -500,8 +500,8 @@
 		(update-word-counts SENT)
 		(cond
 		 	((equal? cnt-mode "any") (update-lg-link-counts SENT))
-			((equal? cnt-mode "clique") (update-clique-pair-counts SENT #f win-size #f))
-			((equal? cnt-mode "clique-dist") (update-clique-pair-counts SENT #t win-size #f)))
+			((equal? cnt-mode "clique") (update-clique-pair-counts-mode SENT #f win-size #f))
+			((equal? cnt-mode "clique-dist") (update-clique-pair-counts-mode SENT #t win-size #f)))
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
