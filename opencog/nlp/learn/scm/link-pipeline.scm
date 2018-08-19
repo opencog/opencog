@@ -215,7 +215,13 @@
 ; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
 ;            If enabled, see warning about the quantity of data, above.
 ;
-(define (update-pair-counts-once PARSE MAX-LEN RECORD-LEN)
+(define (update-pair-counts-once PARSE DIST-MODE MAX-LEN RECORD-LEN)
+
+	; Function to calculate how many times to count a word-pair
+	(define calc-times
+		(if DIST-MODE
+			(lambda (d) (quotient MAX-LEN d))
+			(lambda (d) 1)))
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)
@@ -227,8 +233,9 @@
 
 		; Only count if the distance is less than the cap.
 		(if (<= dist MAX-LEN)
-			(let ((pare (ListLink (gar left-seq) (gar right-seq))))
-				(count-one-atom (EvaluationLink pair-pred pare))
+			(let ((pare (ListLink (gar left-seq) (gar right-seq)))
+				(counts (calc-times dist)))
+				(count-one-atom-times (EvaluationLink pair-pred pare) counts)
 				(if RECORD-LEN
 					(count-one-atom
 						(ExecutionLink pair-dist pare (NumberNode dist)))))))
@@ -259,13 +266,16 @@
 	(make-pairs word-seq)
 )
 
-; See above for explanation.
 (define (update-clique-pair-counts SENT MAX-LEN RECORD-LEN)
+	(update-clique-pair-counts-mode SENT #f MAX-LEN RECORD-LEN)
+
+; See above for explanation.
+(define (update-clique-pair-counts-mode SENT DIST-MODE MAX-LEN RECORD-LEN)
 	; In most cases, all parses return the same words in the same order.
 	; Thus, counting only requires us to look at only one parse.
 	(update-pair-counts-once
 		(car (sentence-get-parses SENT))
-		MAX-LEN RECORD-LEN)
+		DIST-MODE MAX-LEN RECORD-LEN)
 )
 
 ; ---------------------------------------------------------------------
@@ -490,7 +500,8 @@
 		(update-word-counts SENT)
 		(cond
 		 	((equal? cnt-mode "any") (update-lg-link-counts SENT))
-			((equal? cnt-mode "clique") (update-clique-pair-counts SENT win-size #f)))
+			((equal? cnt-mode "clique") (update-clique-pair-counts SENT #f win-size #f))
+			((equal? cnt-mode "clique-dist") (update-clique-pair-counts SENT #t win-size #f)))
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
