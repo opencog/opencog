@@ -484,12 +484,9 @@
 	; data, but none of it will be interesting to most people.
 	(define (process-sent SENT cnt-mode win-size)
 		(update-word-counts SENT)
-		(if (equal? cnt-mode "any")
-			(update-lg-link-counts SENT)
-			(update-clique-pair-counts SENT win-size #f))
-		; If you uncomment this, be sure to also uncomment
-		; LgParseLink below, because LgParseMinimal is not enough.
-		; (update-disjunct-counts sent)
+		(cond
+		 	((equal? cnt-mode "any") (update-lg-link-counts SENT))
+			((equal? cnt-mode "clique") (update-clique-pair-counts SENT win-size #f)))
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
