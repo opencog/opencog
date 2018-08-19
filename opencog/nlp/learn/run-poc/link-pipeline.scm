@@ -488,9 +488,9 @@
 	; passed as argument, then delete the sentence.
 	(define (process-sent SENT cnt-mode win-size)
 		(update-word-counts SENT)
-		(if (equal? cnt-mode "any")
-			(update-lg-link-counts SENT)
-			(update-clique-pair-counts SENT win-size #f))
+		(cond
+		 	((equal? cnt-mode "any") (update-lg-link-counts SENT))
+			((equal? cnt-mode "clique") (update-clique-pair-counts SENT win-size #f)))
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 
