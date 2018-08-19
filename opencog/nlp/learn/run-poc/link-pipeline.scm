@@ -186,10 +186,8 @@
 ;    this additional traffic can slow down statistics gathering by...
 ;    3x or 4x.
 ;
-; Thus, clique-counting is currently disabled. You can turn it on
-; by uncommenting this routine in the main loop, below.
-;
-; Note that this might throw an exception...
+; Clique-counting can be used by passing "clique" or "clique-dist" 
+; as second argument when calling observe-text-mode.
 ;
 ; The structures that get created and incremented are of the form
 ;
@@ -210,6 +208,10 @@
 ; at least one -- i.e. it is the difference between their ordinals.
 ;
 ; Parameters:
+; DIST-MODE -- booleant #t or #f: enable or disable multiplying each
+; 			   pair-count by a distance weight given by
+;			   (quotient MAX-LEN dist), where dist is the separation between
+;			   the words in the pair.
 ; MAX-LEN -- integer: don't count a pair, if the words are farther apart
 ;            than this.
 ; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
@@ -266,6 +268,7 @@
 	(make-pairs word-seq)
 )
 
+; wrapper for backwards compatibility
 (define (update-clique-pair-counts SENT MAX-LEN RECORD-LEN)
 	(update-clique-pair-counts-mode SENT #f MAX-LEN RECORD-LEN))
 
@@ -457,14 +460,19 @@
 "
  observe-text-public -- update word and word-pair counts by observing raw text.
  
- There are currently two observing modes, set by observe-mode, both taking
- an integer parameter:
+ There are currently three observing modes, set by observe-mode and taking
+ another integer parameter:
  - any: counts pairs of words linked by the LG parser in 'any' language.
- 	   'count-reach' specifies how many linkages from LG-parser to use.
+ 	    In this case, 'count-reach' specifies how many linkages from LG-parser
+ 	    to use.
  - clique: itearates over each word in the sentence and pairs it with
            every word located within distance 'count-reach' to its right.
            Distance is defined as the difference between words positions
            in the sentence, so neighboring words have distance of 1.
+ - clique-dist: same word-pairs as 'clique', but each word-pair is counted
+ 				a number of times determined by the distance between words
+ 				in the pair as:
+ 				(quotient count-reach distance)
 
  This is the first part of the learning algo: simply count the words
  and word-pairs observed in incoming text. This takes in raw text, gets
