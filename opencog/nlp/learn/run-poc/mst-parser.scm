@@ -195,7 +195,11 @@
 ; A list of word-pairs, together with the associated mutual information,
 ; is returned.
 ;
+; wrapper for backwards compatibility
 (define-public (mst-parse-text plain-text)
+	mst-parse-text-mode plain-text "any" #f)
+
+(define-public (mst-parse-text-mode plain-text cnt-mode mst-dist)
 
 	; Tokenize the sentence into a list of words.
 	(define word-strs (tokenize-text plain-text))
@@ -204,8 +208,10 @@
 	(define word-list (map (lambda (str) (WordNode str)) word-strs))
 
 	; Define where the costs are coming from.
-	(define pair-obj (make-any-link-api))
-	; (define pair-obj (make-clique-pair-api))
+	(define pair-obj 
+		(cond 
+			((equal? cnt-mode "any") (make-any-link-api))
+			(else make-clique-pair-api)))
 
 	(define mi-source (add-pair-freq-api pair-obj))
 
@@ -215,8 +221,16 @@
 	; longer than 16. This is a sharp cutoff.
 	; This causes parser to run at O(N^3) for LEN < 16 and
 	; a faster rate, O(N^2.3) for 16<LEN. This should help.
+	; Otherwise, assign modification to scorer depending on
+	; mst-parsing mode. If mst-distance accounting is activated
+	; shift all mi-values by 1/LEN, where LEN is the difference
+	; in positions in a sentence between words in word-pair.
 	(define (trunc-scorer LW RW LEN)
-		(if (< 16 LEN) -2e25 (scorer LW RW LEN)))
+		(if (< 16 LEN) 
+			-2e25
+			(let 
+				((modifier (if mst-dist (/ 1 LEN) 0)))
+				(+ modifier (scorer LW RW LEN)))))
 
 	; Process the list of words.
 	(mst-parse-atom-seq word-list trunc-scorer)
@@ -234,18 +248,24 @@
 	(< 330 (cog-arity (gdr SECTION)))
 )
 
+;wrapper for backwards compatibility
 (define-public (observe-mst plain-text)
+	observe-mst-mode plain-text "any" #f)
+
+(define-public (observe-mst-mode plain-text CNT-MODE MST-DIST)
 "
-  observe-mst -- update pseduo-disjunct counts by observing raw text.
+  observe-mst-mode -- update pseduo-disjunct counts by observing raw text.
 
   This is the second part of the learning algo: simply count how
   often pseudo-disjuncts show up.
-"
+"	
+	(define parse (mst-parse-text-mode plain-text CNT-MODE MST-DIST))
+	
 	; The count-one-atom function fetches from the SQL database,
 	; increments the count by one, and stores the result back
 	(for-each
 		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
-		(make-sections (mst-parse-text plain-text))
+		(make-sections parse)
 	)
 )
 
