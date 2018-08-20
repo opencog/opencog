@@ -34,18 +34,17 @@ rest=`echo $filename | cut -d \/ -f 2-6`
 case $1 in
    pairs)
       subdir=submitted-articles
-      observe="observe-text"
+      observe="observe-text-mode"
       params="$cnt_mode $cnt_reach"
       ;;
    mst)
       subdir=mst-articles
-      observe="observe-mst"
+      observe="observe-mst-mode"
       if [[ "$exp_parses" == "#t" ]]
-         then observe="observe-mst-extra"
          # create parses directory if missing
          mkdir -p $(dirname "$parsesdir/$rest")
       fi
-      params="$cnt_mode $mst_dist"
+      params="$cnt_mode $mst_dist $exp_parses"
       ;;
 esac
 
@@ -74,6 +73,6 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Move article to the done-queue
-mv mst-parses.txt "$parsesdir/${rest}.ull"
+mv mst-parses.ull "$parsesdir/${rest}.ull"
 mv "$splitdir/$rest" "$subdir/$rest"
 rm "$base/$rest"

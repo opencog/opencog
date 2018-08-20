@@ -9,7 +9,7 @@
   (define pair-obj '())
   (define star-obj '())
   (cond
-    ((equal? cnt-mode "lg")
+    ((equal? cnt-mode "any")
     	(set! pair-obj (make-any-link-api)))
 
     ((or (equal? cnt-mode "clique")

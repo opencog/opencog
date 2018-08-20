@@ -24,14 +24,13 @@
 	; uncomment for LG-any counting
         ;(define pair-obj (make-any-link-api))
 	; uncomment for clique-pair-counting
-        (define pair-obj (if (equal? cnt-mode "lg")
+        (define pair-obj (if (equal? cnt-mode "any")
 				(make-any-link-api)
 				(make-clique-pair-api)))
         (define mi-source (add-pair-freq-api pair-obj))
         (define scorer (make-score-fn mi-source 'pair-fmi))
 
         (define file-port-fmi (open-file "mi-pairs.txt" "w"))
-	(define file-port-counts (open-file "negFMI-counts.txt" "w"))
 
         ; Print an mi-pair
         (define (print-mi EL)
@@ -54,5 +53,4 @@
                 (cog-get-atoms 'EvaluationLink))
 
         (close-port file-port-fmi)
-        (close-port file-port-counts)
 )

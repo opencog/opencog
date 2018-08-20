@@ -15,7 +15,7 @@
   (define star-obj '())
   (display "Fetching all word-pairs from the database. This may take a few minutes.\n")
   (cond
-    ((equal? cnt-mode "lg")
+    ((equal? cnt-mode "any")
       (set! pair-obj (make-any-link-api)))
 
     ((or (equal? cnt-mode "clique")
