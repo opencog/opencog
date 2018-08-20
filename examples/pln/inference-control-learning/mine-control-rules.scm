@@ -6,8 +6,8 @@
 )
 
 (define (mine-control-rules negative)
-  (if negative (icl-logger-debug "Mined negative control rules")
-      (icl-logger-debug "Mined positive control rules"))
+  (if negative (icl-logger-debug "Mine negative control rules")
+      (icl-logger-debug "Mine positive control rules"))
 
   (let* ((mine-as (cog-new-atomspace))
          (old-as (cog-set-atomspace! mine-as)))
@@ -194,7 +194,10 @@
     ;; Add all fetched expand as members of texts-cpt
     (for-each add-text (cog-outgoing-set expand-results))
 
-    ;; (icl-logger-fine "mk-texts members of texts-cpt = ~a" (get-members texts-cpt))
+    (let* ((members (get-members texts-cpt))
+           (size (length members)))
+      (icl-logger-fine "mk-texts: size = ~a" size)
+      (icl-logger-fine "mk-texts: members = ~a" members))
 
     ;; Return texts concept
     texts-cpt))

@@ -11,8 +11,8 @@
   (icl-logger-debug "Evaluate antecedents")
   (evaluate-antecedents)
 
-  (icl-logger-fine "mk-control-rules (cog-atomspace) [after evaluating antecedents]:")
-  (icl-logger-fine-atomspace (cog-atomspace))
+  ;; (icl-logger-fine "mk-control-rules (cog-atomspace) [after evaluating antecedents]:")
+  ;; (icl-logger-fine-atomspace (cog-atomspace))
 
   ;; Run pattern miner on the history to find frequent patterns for
   ;; control rules.
@@ -171,7 +171,7 @@
          ;; Evaluate all antecedents
          (results (pp-icr-bc impl-antecedent)))
 
-    (icl-logger-fine "evaluate-antecedents = ~a" results)
+    (icl-logger-fine "evaluate-antecedents results = ~a" results)
 
     ;; Remove query to clean the atomspace
     (extract-hypergraph impl-antecedent) ; TODO: fix bug should print only (stv 1 1)
@@ -182,8 +182,8 @@
     ;; Remove informationless atoms
     (remove-dangling-atoms (cog-atomspace))
 
-    (icl-logger-fine "evaluate-antecedents (cog-atomspace):")
-    (icl-logger-fine-atomspace (cog-atomspace))
+    ;; (icl-logger-fine "evaluate-antecedents (cog-atomspace):")
+    ;; (icl-logger-fine-atomspace (cog-atomspace))
   )
 )
 
