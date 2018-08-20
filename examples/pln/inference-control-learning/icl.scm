@@ -12,7 +12,7 @@
 
 ;; Set loggers levels
 (cog-logger-set-level! "debug")
-(icl-logger-set-level! "debug")
+(icl-logger-set-level! "fine")
 (ure-logger-set-level! "debug")
 
 ;; Set loggers stdout
