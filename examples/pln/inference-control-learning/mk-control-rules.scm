@@ -14,21 +14,21 @@
   (icl-logger-fine "mk-control-rules (cog-atomspace) [after evaluating antecedents]:")
   (icl-logger-fine-atomspace (cog-atomspace))
 
-  ;; ;; Run pattern miner on the history to find frequent patterns for
-  ;; ;; control rules.
-  ;; (icl-logger-debug "Mine control rules")
-  ;; (mine-control-rules)
+  ;; Run pattern miner on the history to find frequent patterns for
+  ;; control rules.
+  (icl-logger-debug "Mine control rules")
+  (mine-all-control-rules)
 
-  ;; TODO: doesn't work due to conditional-direct-evaluation wrapping quotes around values
-  ;; We ground the control rules first.
-  (icl-logger-debug "Ground control rules")
-  (ground-control-rules)
+  ;; ;; We ground the control rules first.
+  ;; (icl-logger-debug "Ground control rules")
+  ;; (ground-control-rules)
 
   (icl-logger-fine "mk-control-rules (cog-atomspace) [after mining control rules]:")
   (icl-logger-fine-atomspace (cog-atomspace))
 
   ;; Evaluate inference control rules
-  (ure-logger-flush)               ; make sure the next message does not get mangled
+  (ure-logger-flush)               ; make sure the next message does
+                                   ; not get mangled
   (icl-logger-debug "Evaluate control rules")
   (let* ((results (evaluate-control-rules)))
     ;; Copy inference control rules to the Inference Control Rules
