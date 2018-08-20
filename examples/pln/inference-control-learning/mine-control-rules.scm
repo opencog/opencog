@@ -1,20 +1,31 @@
-(define (mine-control-rules)
+(define (mine-all-control-rules)
+  ;; Mine positive control rules
+  (mine-control-rules #f)
+  ;; Mine negative control rules
+  (mine-control-rules #t)
+)
+
+(define (mine-control-rules negative)
+  (if negative (icl-logger-debug "Mined negative control rules")
+      (icl-logger-debug "Mined positive control rules"))
+
   (let* ((mine-as (cog-new-atomspace))
          (old-as (cog-set-atomspace! mine-as)))
     ;; Copy history-as to the mining atomspace
     (cp-as history-as mine-as)
 
-    ;; Filter history, for now remove all root atoms with TV below
-    ;; 0.1. That is because the pattern miner doesn't support values
-    ;; yet.
-    (remove-almost-false-atoms)
-
-    ;; TODO: should do the same for almost true atoms, as to find
-    ;; patterns predicting failure.
+    (if negative
+        ;; Wrap Not around almost false preproof-of(A, T) atoms
+        (wrap-not-almost-false-preproof-of)
+        ;; Filter history, for now remove all root atoms with TV below
+        ;; 0.1. That is because the pattern miner doesn't support values
+        ;; yet.
+        (remove-almost-false-atoms))
 
     ;; Mine mine-as for control rules
     (let* ((inference-rules (get-inference-rules history-as))
-           (ctrl-rules-lsts (map mine-control-rules-for inference-rules))
+           (mcrf (lambda (x) (mine-control-rules-for x negative)))
+           (ctrl-rules-lsts (map mcrf inference-rules))
            (ctrl-rules (apply append ctrl-rules-lsts)))
 
       (icl-logger-fine "Mined control rules = ~a" ctrl-rules)
@@ -25,13 +36,13 @@
     ;; Pop mine-as
     (cog-set-atomspace! old-as)))
 
-;; Like mine-control-rules but only mine the control rules for a given
-;; inference rule
-(define (mine-control-rules-for inference-rule)
-  (icl-logger-debug "Mining patterns for ~a" inference-rule)
+;; Like mine-negative-control-rules but only mine the control rules
+;; for a given inference rule
+(define (mine-control-rules-for inference-rule negative)
+  (icl-logger-fine "Mining patterns for ~a" inference-rule)
 
   (let* ((texts-cpt (mk-texts inference-rule))
-         (ipat (initpat inference-rule))
+         (ipat (initpat inference-rule negative))
          (patterns (cog-mine texts-cpt
                              minsup
                              #:maxiter miter
@@ -63,12 +74,11 @@
 ;;     preproof-of(A', T)
 ;;     expand(A', L, R, B')
 ;;   preproof-of(B', T)
-;;
-;; NEXT TODO: take care of the DontExec parts
 (define (pattern->ctrl-rule pattern)
+  ;; (icl-logger-debug "pattern->ctrl-rule pattern = ~a" pattern)
   (let* (;; Get vardecl
          (vardecl (gar pattern))
-         (clauses (cog-outgoing-set (gdr pattern)))
+         (clauses (map rm-dontexec (cog-outgoing-set (gdr pattern))))
 
          ;; Get expand clause
          (expand-AB? (lambda (x) (equal? (cog-type x) 'ExecutionLink)))
@@ -77,24 +87,65 @@
 
          ;; Get preproof A clause
          (A (cog-outgoing-atom (cog-outgoing-atom expand-AB 1) 0))
-         (preproof-A? (lambda (x) (equal? A (get-inference x))))
+         (preproof-A? (lambda (x) (equal? A (preproof-of->inference x))))
          (preproof-A (find preproof-A? preproof-clauses))
 
          ;; Get preproof B clause
          (B (cog-outgoing-atom expand-AB 2))
-         (preproof-B? (lambda (x) (equal? B (get-inference x))))
-         (preproof-B (find preproof-B? preproof-clauses))
+         (preproof-B? (lambda (x) (equal? B (preproof-of->inference x))))
+         (not-preproof-B? (lambda (x) (equal? (cog-type x) 'NotLink)))
+         (preproof-B-or-not? (lambda (x) (or (preproof-B? x)
+                                             (not-preproof-B? x))))
+         (preproof-B-or-not (find preproof-B-or-not? preproof-clauses))
+         (preproof-B (if (not-preproof-B? preproof-B-or-not)
+                         (cog-outgoing-atom preproof-B-or-not 0)
+                         preproof-B-or-not))
+
+         ;; Typed A and B with DontExecLink
+         (de-vardecl (dontexec-vardecl vardecl A B))
 
          ;; Rearrenge into implication scope
          (antecedent (And preproof-A expand-AB))
          (consequent preproof-B)
-         (implication (ImplicationScope vardecl antecedent consequent)))
+         (implication (ImplicationScope
+                        de-vardecl
+                        antecedent
+                        consequent)))
     implication))
+
+;; Take a variable declaration, (DontExec (Variable A)) and (DontExec
+;; (Variable B) and return that save variable declaration where A and
+;; B are typed DontExecLink.
+(define (dontexec-vardecl vardecl A B)
+  (let* ((out (cog-outgoing-set vardecl))
+         (A? (lambda (x) (equal? x A)))
+         (B? (lambda (x) (equal? x B)))
+         (dontexec-type-if (lambda (x) (cond ((A? x) (dontexec-typed A))
+                                             ((B? x) (dontexec-typed B))
+                                             (#t x))))
+         (dontexec-out (map dontexec-type-if out)))
+    (VariableList dontexec-out)))
+
+;; Return #t iff x is of the form (DontExec (Variable ...))
+(define (dontexec-variable? x)
+  (and (equal? (cog-type x) 'DontExecLink)
+       (equal? (cog-type (cog-outgoing-atom x 0)) 'VariableNode)))
+
+;; Recursively remove DontExec links from atom
+(define (rm-dontexec x)
+  (let* ((x-type (cog-type x))
+         (x-out (cog-outgoing-set x)))
+    (cond ((cog-node? x) x)
+          ((dontexec-variable? x) (car x-out))
+          (#t (let* ((rde-x-out (map rm-dontexec x-out)))
+                (cog-new-link x-type rde-x-out))))))
 
 ;; Create a texts concept and add as members to it all atoms of the form
 ;;
 ;; preproof-of(A, T)
 ;; expand(A, L, R, B)
+;;
+;; and possibly (Not preproof-of(A, T)) if negative negative is #t
 ;;
 ;; where R is the given inference rule and A, T, L and B are variables
 (define (mk-texts inference-rule)
@@ -103,16 +154,25 @@
 
          ;; Fetch preproof-of
          (preproof-vardecl (VariableList
-                              (TypedVariable (Variable "$I") (Type "DontExecLink"))
+                              (dontexec-typed (Variable "$I"))
                               (Variable "$T")))
-         (preproof-pattern (preproof-of (List (Variable "$I") (Variable "$T"))))
-         (preproof-bind (Bind preproof-vardecl preproof-pattern preproof-pattern))
+         (preproof-clause (preproof-of (List (Variable "$I") (Variable "$T"))))
+         (preproof-precondition (absolutely-true-eval preproof-clause))
+         (preproof-pattern (and preproof-precondition preproof-clause))
+         (preproof-bind (Bind preproof-vardecl preproof-pattern preproof-clause))
          (preproof-results (cog-execute! preproof-bind))
+
+         ;; Fetch Not preproof-of
+         (not-preproof-clause (Not preproof-clause))
+         (not-preproof-precondition (absolutely-true-eval not-preproof-clause))
+         (not-preproof-pattern (and not-preproof-precondition not-preproof-clause))
+         (not-preproof-bind (Bind preproof-vardecl not-preproof-pattern not-preproof-clause))
+         (not-preproof-results (cog-execute! not-preproof-bind))
 
          ;; Fetch expand
          (expand-vardecl (VariableList
-                           (TypedVariable (Variable "$A") (Type "DontExecLink"))
-                           (TypedVariable (Variable "$B") (Type "DontExecLink"))
+                           (dontexec-typed (Variable "$A"))
+                           (dontexec-typed (Variable "$B"))
                            (Variable "$L")))
          (expand-input (List
                          (Variable "$A")
@@ -127,6 +187,9 @@
 
     ;; Add all fetched preproof-of as members of texts-cpt
     (for-each add-text (cog-outgoing-set preproof-results))
+
+    ;; Add all fetched Not preproof-of as members of texts-cpt
+    (for-each add-text (cog-outgoing-set not-preproof-results))
 
     ;; Add all fetched expand as members of texts-cpt
     (for-each add-text (cog-outgoing-set expand-results))
@@ -145,26 +208,50 @@
 ;;     preproof-of(B, T)
 ;;     expand(A, L, R, B)
 ;;
-;; where R is inference-rule
-(define (initpat inference-rule)
-(LambdaLink
-  (VariableList
-    (VariableNode "$T")
-    (VariableNode "$A")
-    (VariableNode "$L")
-    (VariableNode "$B")
-  )
-  (AndLink
-    (preproof-of (List (DontExecLink (Variable "$A")) (Variable "$T")))
-    (preproof-of (List (DontExecLink (Variable "$B")) (Variable "$T")))
-    (expand
-      (ListLink
-        (DontExecLink (VariableNode "$A"))
-        (VariableNode "$L")
-        (DontExecLink inference-rule)
-      )
-      (DontExecLink (VariableNode "$B"))
-    )
-  )
-)
-)
+;; where R is inference-rule.
+;;
+;; If negative is #t then preproof-of(B, T) is wrapped with a NotLink.
+(define (initpat inference-rule negative)
+  (let* ((T (VariableNode "$T"))
+         (A (VariableNode "$A"))
+         (L (VariableNode "$L"))
+         (B (VariableNode "$B"))
+         (vardecl (VariableList T A L B))
+         (preproof-of-A-T (preproof-of (List (DontExecLink A) T)))
+         (preproof-of-B-T (preproof-of (List (DontExecLink B) T)))
+         (expand-A-L-R-B (expand
+                           (ListLink
+                             (DontExecLink A)
+                             L
+                             (DontExecLink inference-rule))
+                           (DontExecLink B))))
+    (LambdaLink
+      vardecl
+      (AndLink
+        preproof-of-A-T
+        (if negative
+            (Not preproof-of-B-T)
+            preproof-of-B-T)
+        expand-A-L-R-B))))
+
+(define (wrap-not-almost-false-preproof-of)
+  (wrap-not-almost-false-preproof-of-atom-list (get-all-atoms)))
+
+(define (wrap-not-almost-false-preproof-of-atom-list atoms)
+  (for-each wrap-not-almost-false-preproof-of-atom atoms))
+
+(define (almost-false-preproof-of? atom)
+  (and (almost-null-strength? atom)
+       (preproof-of? atom)))
+
+(define (wrap-not-almost-false-preproof-of-atom atom)
+  (if (and (cog-atom? atom)
+           (not (null-confidence? atom))
+           (almost-false-preproof-of? atom))
+      (Not (stv 1 1) atom)))            ; TODO it should be (stv 1 1)
+                                        ; but that methodology is wrong
+                                        ; anyawy. Instead it should
+                                        ; mine observed-preproof-of or
+                                        ; something, that way we dont't
+                                        ; need to worry almost false
+                                        ; things.
