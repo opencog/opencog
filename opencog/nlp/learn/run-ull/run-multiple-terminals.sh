@@ -16,14 +16,11 @@ fi
 
 export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
-if [ $# -lt 2 ]
+if [ $# -lt 3 ]
 then 
-  echo "Usage: ./run-multiple-terminals.sh <mode> <language> [<db_name>] [<username>] [<password>]"
+  echo "Usage: ./run-multiple-terminals.sh <mode> <language> <db_name> [<username>] [<password>]"
   exit 0
 fi
-
-# Get database credentials according to language
-source ./config/det-db-uri.sh $2
 
 # Get port number according to mode and language
 source ./config/det-port-num.sh $1 $2
@@ -33,9 +30,6 @@ launcher=launch-cogserver.scm
 # Call launch-??.scm to start cogserver
 byobu new-session -d -n 'cntl' '$SHELL'
 case $# in
-   2)
-      byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --mode $1 --lang $2 --db $db_name --user $db_user --password $db_pswd; $SHELL"
-      ;;
    3)
       byobu new-window -n 'cogsrv' "nice guile -l $launcher -- --mode $1 --lang $2 --db $3; $SHELL"
       ;;

@@ -1,30 +1,3 @@
-
-Proof-of-concept-style run  scripts
-===================================
-These work differently than the other `run` scripts. Not sure why.
-
-
-```
-  guile -l observe-launch.scm  -- --lang en --db learn-pairs --user your_user --password asdf
-```
-   The --user option is needed only if the database owner is different
-   from the current user.
-   --password is also optional, not needed if no password was setup for
-   the database
-
-
-* `run-server-parse.sh` starts the cogserver and sets a default prompt:
-   set
-   up by default to avoid conflicts and confusion, and to allow multiple
-   languages to be processed at the same time.
-   You need to pass the language and database credentials as arguments;
-   see next step.
-
-* `wiki-ss-en.sh` starts the process of observing the text files
-   contained
-   in the beta-pages folder, more on that later (see Bulk Text Parsing).
-   The rest of the relevant files are explained later.
-
 Here is a brief description of the relevant files for each of the parts
 of the language learning pipeline. They don't need modification by default,
 unless you want to do something unusual.
@@ -33,20 +6,19 @@ Connecting to Cogserver:
 ------------------------
 
  -- `utilities.scm` the functions in this files are used to specify the
-                    command-line arguments for getting processing mode,
-                    language and database details.
-
- -- `det-db-uri.sh` script used to determine the database name, postgres user
-                    and password according to the language given as input
-                      (inside config folder).
+                    command-line arguments for getting language and
+                    database details.
 
  -- `det-port-num.sh` script used to determine the port number for the cogserver,
-                      takes as input the processing mode and the language
+                      takes as language the processing mode and the language
                       (inside config folder).
 
  -- `opencog-pairs-??.conf` contains configuration settings for the cogserver, 
                       including the language-specific port to use (inside
                       config folder).
+
+ -- `opencog-cmi-??.conf` same as above but with particular configurations
+                          for MI computing (inside config folder).
 
  -- `opencog-mst-??.conf` same as above but with particular configurations
                           for MST parsing (inside config folder).
@@ -65,14 +37,14 @@ Text Processing / Parsing:
 
  -- `run-multiple-terminals.sh` the top-level shell script; it opens multiple terminal
                                 sessions with tmux/byobu where you can keep an eye on
-                                the processes. One terminal calls `launch-cogserver.scm`
-                                with guile to start the cogserver, and another one telnets 
+                                the processes. One terminal one of the `launch-??.scm`
+                                scripts to start the cogserver, and another one telnets 
                                 into it using a language-specific port. You need to pass
-                                it the parsing mode (pair, cmi or mst) and the language
-                                of the texts to process. Optionally you can pass the database
-                                credentials as arguments. You can use spare terminals to 
-                                process several corpora at the same time. Use F3 and F4 to 
-                                switch between the different terminals.
+                                it the parsing mode (pair counting or mst), the language
+                                of the text to process and the database credentials as
+                                arguments. You can use spare terminals to process several
+                                languages at the same time. Use F3 and F4 to switch between
+                                the different terminals.
 
  -- `text-process.sh` the top-level parser script; it performs batch processing of
                       input text files in the specified mode and language you pass as
@@ -101,11 +73,48 @@ Text Processing / Parsing:
 Mutual Information of Word Pairs:
 ---------------------------------
 
- -- `compute-mi.scm` this script is used to compute the mutal entropy between the word pairs
-                     registerd in the database. It calls functions defined in `(opencog nlp learn)`.
+ -- `compute-mi.scm` this script defines the function used to compute the mutal entropy between
+                     the word pairs registerd in the database. The function takes as input
+                     the counting mode and it calls functions defined in `(opencog nlp ullparser)`.
                      The actual code for computing word-pair MI is in `batch-word-pair.scm`.
                      It uses the `(opencog matrix)` subsystem to perform the core work.
 
  -- `export-mi.scm` this script is used to export the word-pairs FMI for every possible pair
                     in the corpus to allow analysis of the MI-based MST-parser. For research
                     purposes only, it is not used in the pipeline.
+
+ -- `process-word-pairs.sh` this script is used to pass the intructions to the cogserver for
+                            computing the MI between word pairs or for fetching them if the
+                            last has already been done. You have to pass it the processing
+                            mode and the language.
+
+-- `fetch-word-pairs.scm` this scripts defines the function used to loads the word-pairs and
+                          its counts. The function takes as input the counting mode.
+
+Sentence Splitting
+------------------
+
+Raw text needs to be split up into sentences.  Some distant future day,
+opencog will do this automatically. For now, we hack it.
+
+Currently, splitting is done with the `split-sentences.pl` perl script
+in the this directory.  It was stolen from the `moses-smt` package.
+https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
+It splits French, Polish, Lithuanian, and more.  Its LGPL.
+
+You can verify that it works, like so:
+```
+   cat text-file | ./split-sentences.pl -l en > x
+```
+Replace `en` by the language of your choice.
+
+Some typical sentence-splitting concerns that the above script seems
+to mostly handle correctly:
+
+A question mark or exclamation mark always ends a sentence.  A period
+followed by an upper-case letter generally ends a sentence, but there
+are a number of exceptions.  For example, if the period is part of an
+abbreviated title ("Mr.", "Gen.", ...), it does not end a sentence.
+A period following a single capitalized letter is assumed to be a
+person's initial, and is not considered the end of a sentence.
+
