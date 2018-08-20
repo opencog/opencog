@@ -66,9 +66,7 @@
                      (Variable "$A")
                      (Variable "$T"))))
          (vardecl (VariableList
-                    (TypedVariable
-                      (Variable "$A")
-                      (Type "DontExecLink"))
+                    (dontexec-typed (Variable "$A"))
                     (Variable "$T")))
          ;; Run pep over trace-as
          (results (abp-bc target #:vardecl vardecl)))

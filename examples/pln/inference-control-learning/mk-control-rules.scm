@@ -71,13 +71,9 @@
                     (Type "DefinedSchemaNode")))
          (impl-vardecl (VariableList
                          (Variable "$T")
-                         (TypedVariable
-                           (Variable "$A")
-                           (Type "DontExecLink"))
+                         (dontexec-typed (Variable "$A"))
                          (Variable "$L")
-                         (TypedVariable
-                           (Variable "$B")
-                           (Type "DontExecLink"))))
+                         (dontexec-typed (Variable "$B"))))
          (impl-antecedent (And
                             (preproof-of
                               (List
@@ -118,13 +114,9 @@
                     (Type "DefinedSchemaNode")))
          (impl-vardecl (VariableList
                          (Variable "$T")
-                         (TypedVariable
-                           (Variable "$A")
-                           (Type "DontExecLink"))
+                         (dontexec-typed (Variable "$A"))
                          (Variable "$X")
-                         (TypedVariable
-                           (Variable "$B")
-                           (Type "DontExecLink"))))
+                         (dontexec-typed (Variable "$B"))))
          (impl-antecedent (And
                             (preproof-of
                               (List
