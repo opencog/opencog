@@ -248,18 +248,80 @@
 	(< 330 (cog-arity (gdr SECTION)))
 )
 
+(define-public (export-mst-parse plain-text mstparse filename)
+"
+  Export an MST-parse to a text file named filename, 
+  so that parses can be examined.
+  The format is:
+  [sentence]
+  [word1#] [word1] [word2#] [word2]
+  [word2#] [word2] [word4#] [word4]
+  ...
+"
+	; open output file
+	(define file-port (open-file filename "a"))
+
+	; functions for getting specific parts of the link
+	(define (get-mi link) (cdr link))
+	(define (get-lindex link)
+		(- (car (car (car link))) 1))
+	(define (get-rindex link)
+		(- (car (cdr (car link))) 1))
+	(define (get-lword link)
+		(cog-name (cdr (car (car link)))))
+	(define (get-rword link)
+		(cog-name (cdr (cdr (car link)))))
+
+	; link comparator to use in sort func
+	(define link-comparator
+		(lambda (l1 l2)
+			(< (get-lindex l1) (get-lindex l2))))
+
+	; Print the sentence first
+	(if (not (null? plain-text))
+		(display
+			(format #f "~a\n"
+				plain-text)
+			file-port))
+
+	; Print the links if they are not bad-pair
+	(for-each
+		(lambda (l) ; links
+			(if (> (get-mi l) -1.0e10) ; bad-MI
+				(display
+					(format #f "~a ~a ~a ~a\n"
+						(get-lindex l)
+						(get-lword l)
+						(get-rindex l)
+						(get-rword l))
+				file-port)))
+		(sort mstparse link-comparator)
+	)
+
+	; Add a new line at the end
+	(display "\n" file-port)
+
+	(close-port file-port)
+)
+
 ;wrapper for backwards compatibility
 (define-public (observe-mst plain-text)
-	observe-mst-mode plain-text "any" #f)
+	observe-mst-mode plain-text "any" #f #f)
 
-(define-public (observe-mst-mode plain-text CNT-MODE MST-DIST)
+(define-public (observe-mst-mode plain-text CNT-MODE MST-DIST EXPORT-MST)
 "
   observe-mst-mode -- update pseduo-disjunct counts by observing raw text.
+                      Build mst-parses using MI calculated beforehand.
+                      When MST-DIST is true, word-pair MI values are adjusted
+                      for distance. 
+                      Obtained parses are exported to file if EXPORT-MST 
+                      is true.
 
   This is the second part of the learning algo: simply count how
   often pseudo-disjuncts show up.
 "	
 	(define parse (mst-parse-text-mode plain-text CNT-MODE MST-DIST))
+	(if EXPORT-MST (export-mst-parse plain-text parse "mst-parses.ull"))
 	
 	; The count-one-atom function fetches from the SQL database,
 	; increments the count by one, and stores the result back
