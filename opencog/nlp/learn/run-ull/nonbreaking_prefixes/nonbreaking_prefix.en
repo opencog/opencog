@@ -1,0 +1,238 @@
+#Anything in this file, followed by a period (and an upper-case word), does NOT indicate an end-of-sentence marker.
+#Special cases are included for prefixes that ONLY appear before 0-9 numbers.
+
+#any single upper case letter  followed by a period is not a sentence ender (excluding I occasionally, but we leave it in)
+#usually upper case letters are initials in a name
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+
+# List of titles. These are often followed by upper-case names,
+# but do not indicate sentence breaks
+#
+Abp
+Adj
+Adm
+Adv
+Asst
+Bart
+Bp
+Bldg
+Brig
+Bros
+Capt
+Cmdr
+Col
+Comdr
+Con
+Corp
+Cpl
+DR
+Dr
+Drs
+Ens
+Gen
+Gov
+HON
+Hon
+Hr
+Hosp
+Insp
+Lt
+MM
+MR
+MRS
+MS
+Maj
+Messrs
+Mlle
+Mme
+Mr
+Mrs
+Ms
+Msgr
+Op
+Ord
+Pfc
+Ph
+Prof
+Pvt
+Rep
+Reps
+Res
+Rev
+Rt
+Sen
+Sens
+Sfc
+Sgt
+Sr
+St
+Supt
+Surg
+
+# Abbreviations
+# Arabic Architectural Congregation Historical Society  MSS - manuscipt
+Abstr
+Acad
+Acct
+Accts
+Admin
+Agric
+Amer
+Ar
+Arch
+Assn
+Assoc
+Cong
+Dept
+Econ
+Ed
+Ess
+Evang
+Fr
+Gaz
+Glac
+Gr
+Hist
+Hosp
+Inst
+Jas
+Let
+Lett
+lett
+Libr
+MSS
+mss
+Mt
+Org
+org
+Phys
+Princ
+Proc
+Prod
+Prol
+Prov
+Pt
+pt
+Publ
+publ
+Quot
+quot
+Quots
+quots
+Ref
+ref
+Reg
+reg
+Rep
+Rept
+Rev
+rev
+Roy
+Russ
+Soc
+Tel
+tel
+Ths
+Trad
+trad
+Transl
+transl
+Univ
+Will
+Wk
+wk
+Wkly
+wlky
+Wks
+WM
+Yr
+Zool
+
+
+# misc - odd period-ending items that NEVER indicate breaks (p.m. does NOT
+# fall into this category - it sometimes ends a sentence)
+# mostly Latin abbreviations.
+v
+vs
+i.e
+e.g
+op
+cit
+p.s
+q.v
+viz
+
+# Numbers only. These should only induce breaks when followed by a numeric
+# sequence.  Add NUMERIC_ONLY after the word for this function. This case
+# is mostly for the english "No." which can either be a sentence of its own,
+# or if followed by a number, a non-breaking prefix
+No #NUMERIC_ONLY# 
+Nos
+Art #NUMERIC_ONLY#
+Nr
+pp #NUMERIC_ONLY#
+#  Figure
+FIG
+Fig
+# lower case i: illustration
+i
+ii
+# lower-case p: page
+p
+seq
+Seq
+sp
+spec
+specif
+# Volumes
+Vol
+vol
+Vols
+vols
+
+#month abbreviations
+Jan
+Feb
+Mar
+Apr
+#May is a full word
+Jun
+Jul
+Aug
+Sep
+Oct
+Nov
+Dec
+
+Mon
+Tue
+Wed
+Thu
+Fri
+Sat
+Sun

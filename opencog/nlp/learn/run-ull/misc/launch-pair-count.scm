@@ -7,7 +7,7 @@
 ;
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog cogserver))
-(use-modules (opencog nlp))
+(use-modules (opencog nlp) (opencog nlp ull-parser))
 (use-modules (system repl common))
 (use-modules (system repl server))
 

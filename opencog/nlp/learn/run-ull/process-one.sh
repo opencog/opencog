@@ -17,29 +17,35 @@ coghost="$4"
 cogport=$5
 splitter=./split-sentences.pl
 splitdir=split-articles
+parsesdir=mst-parses
 
-#NOTE: commented out parameters that are not yet incorporated in this commit.
-# Default parameter values 
-# cnt_mode="clique-dist"
-# cnt_reach=6
-# mst_dist="#t"
+# Default parameter values
+cnt_mode="clique-dist"
+cnt_reach=6
+mst_dist="#t"
 exp_parses="#t"
 source ./config/params.txt # overrides default values, if present
+
+# Split the filename into two parts
+base=`echo $filename | cut -d \/ -f 1`
+rest=`echo $filename | cut -d \/ -f 2-6`
 
 # Gets processing mode for the cogserver
 case $1 in
    pairs)
       subdir=submitted-articles
       observe="observe-text"
-      # params="$cnt_mode $cnt_reach"
+      params="$cnt_mode $cnt_reach"
       ;;
    mst)
       subdir=mst-articles
       observe="observe-mst"
       if [[ "$exp_parses" == "#t" ]]
-          then observe="observe-mst-extra"
+         then observe="observe-mst-extra"
+         # create parses directory if missing
+         mkdir -p $(dirname "$parsesdir/$rest")
       fi
-      # params="$cnt_mode $mst_dist"
+      params="$cnt_mode $mst_dist"
       ;;
 esac
 
@@ -48,10 +54,6 @@ haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
-
-# Split the filename into two parts
-base=`echo $filename | cut -d \/ -f 1`
-rest=`echo $filename | cut -d \/ -f 2-6`
 
 echo "Processing file >>>$rest<<<"
 
@@ -63,7 +65,7 @@ mkdir -p $(dirname "$subdir/$rest")
 cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
 
 # Submit the split article
-cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe #$params
+cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe $params
 
 # Punt if the cogserver has crashed (second test, before doing the mv and rm below)
 haveping=`echo foo | nc -N $coghost $cogport`
@@ -72,5 +74,6 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Move article to the done-queue
+mv mst-parses.txt "$parsesdir/${rest}.ull"
 mv "$splitdir/$rest" "$subdir/$rest"
 rm "$base/$rest"
