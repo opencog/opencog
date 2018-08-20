@@ -231,10 +231,18 @@
     (cog-set-atomspace! old-as)
     as-count))
 
+(define (preproof-of-predicate)
+  (Predicate "URE:BC:preproof-of"))
+
 (define (preproof-of arg)
   (Evaluation
-    (Predicate "URE:BC:preproof-of")
+    (preproof-of-predicate)
     arg))
+
+(define (preproof-of? atom)
+  (and (cog-atom? atom)
+       (equal? (cog-type atom) 'EvaluationLink)
+       (equal? (cog-outgoing-atom atom 0) (preproof-of-predicate))))
 
 (define (expand input output)
   (Execution
@@ -243,16 +251,20 @@
     output))
 
 ;; Given an atom like (preproof-of A T) return A
-(define (get-inference ppo)
-  (cog-outgoing-atom (cog-outgoing-atom ppo 1) 0))
+(define (preproof-of->inference ppo)
+  (and (preproof-of? ppo)
+       (cog-outgoing-atom (cog-outgoing-atom ppo 1) 0)))
+
+(define (dontexec-typed x)
+  (TypedVariable x (Type "DontExecLink")))
 
 ;; Get all inference rules found in traces stored in as
 (define (get-inference-rules as)
   (let* ((old-as (cog-set-atomspace! (cog-new-atomspace as)))
          (vardecl (VariableList
-                     (TypedVariable (Variable "$A") (Type "DontExecLink"))
-                     (TypedVariable (Variable "$B") (Type "DontExecLink"))
-                     (TypedVariable (Variable "$R") (Type "DontExecLink"))
+                     (dontexec-typed (Variable "$A"))
+                     (dontexec-typed (Variable "$B"))
+                     (dontexec-typed (Variable "$R"))
                      (Variable "$L")))
          (input (List
                   (Variable "$A")
