@@ -2757,7 +2757,7 @@ name "fig:Feynman-Diagrams"
 
 \begin_inset Graphics
 	filename skimage/feynman.eps
-	width 60col%
+	width 45col%
 
 \end_inset
 
@@ -2765,7 +2765,10 @@ name "fig:Feynman-Diagrams"
 \end_layout
 
 \begin_layout Plain Layout
-The arcs above the sentence show the standard unlabeled dependency parse
+This figure illustrates the energy functional for a particular English langauge
+ sentence, chosen out of the statistical ensemble of all possible English
+ language sentences.
+ The arcs above the sentence show the standard unlabeled dependency parse
  of the sentence.
  It is conventional to consider such a parse as standing alone, implicitly
  with some language model that is not diagrammatically represented.
@@ -2809,7 +2812,7 @@ Feynman rules
 \begin_inset Formula $H_{total}=\sum_{arcs}h$
 \end_inset
 
- with the sum being over all lines and arcs.
+ with the sum being over all lines and arcs (with appropriate multiplicity).
  This summation makes explicit what is otherwise an implicit langauge model:
  namely, that
 \begin_inset Formula 
@@ -2941,13 +2944,13 @@ key "Sleator1991,Sleator1993"
  half a century of tradition in linguistics research.
  To place it within the current context, the key leap being taken is to
  replace the pair-wise word-interactions 
-\begin_inset Formula $J_{ij}=\log p\left(w_{i},w_{j}\right)$
+\begin_inset Formula $J_{ij}=-\log p\left(w_{i},w_{j}\right)$
 \end_inset
 
  by disjuncts 
 \begin_inset Formula 
 \[
-J_{ijk\cdots}=\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)
+J_{ijk\cdots}=-\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)
 \]
 
 \end_inset
@@ -3018,11 +3021,14 @@ The primary point here is that Link Grammar is interesting because it provides
 
  in the Hamiltonian, but also bulk terms, indicating how disjuncts interact
  in the background.
- In this case, the correct background contribution to a word would seem
- to be
+ In practice, what this means is that one should associate to each word-disjunct
+ pair a mutial information
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-\log_{2}\sum_{d}p\left(w,d\right)p\left(*,d\right)
+MI\left(w,d\right)=\log_{2}\frac{p\left(w,d\right)}{p\left(w,*\right)p\left(*,d\right)}
 \]
 
 \end_inset
@@ -3039,12 +3045,62 @@ with
 \begin_inset Formula $w$
 \end_inset
 
-, and the sum ranging over all disjuncts 
-\begin_inset Formula $d$
+.
+ The most likely parse of a sentence is one where the sum over mutual informatio
+n is maximized.
+\end_layout
+
+\begin_layout Standard
+The term 
+\begin_inset Formula $p\left(w,*\right)$
+\end_inset
+
+ looks uneventful, but hides a more complex structure.
+ One has 
+\begin_inset Formula 
+\begin{eqnarray*}
+p\left(w,*\right) & = & \sum_{d}p\left(w,d\right)\\
+ & = & \sum_{c}p\left(w;c\right)+\sum_{c_{1},c_{2}}p\left(w;c_{1},c_{2}\right)+\sum_{c_{1},c_{2},c_{3}}p\left(w;c_{1},c_{2},c_{3}\right)+\cdots
+\end{eqnarray*}
+
+\end_inset
+
+where the sums over 
+\begin_inset Formula $c_{k}$
+\end_inset
+
+ are sums over all connectors appearing in some disjunct.
+ Keep in mind that each connector can connect to the left or to the right:
+ a connector is a word, plus a direction indicator.
+ To bridge the notation back to that of the Ising model, one would write
+ for the loss function
+\begin_inset Formula 
+\[
+J_{ijk\cdots}=-\log_{2}p\left(w,d\right)=-\log_{2}p\left(w;\left(w_{i},x_{i}\right),\left(w_{j},x_{j}\right),\left(w_{k},x_{k}\right),\cdots\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $c_{k}=\left(w_{k},x_{k}\right)$
+\end_inset
+
+ is a connector with word 
+\begin_inset Formula $w_{k}$
+\end_inset
+
+ and direction 
+\begin_inset Formula $x_{k}$
 \end_inset
 
 .
- 
+ Clearly, writing 
+\begin_inset Formula $d$
+\end_inset
+
+ for a disjunct is much simpler than writing out the mass of connectors;
+ yet the notation can be deceiving because it hides the complexity of the
+ model.
 \end_layout
 
 \begin_layout Section
