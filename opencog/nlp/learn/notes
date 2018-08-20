@@ -15459,6 +15459,43 @@ guile -l x-mcross.scm
 (hvs 'explode-sections)
 (batch-all-pair-mi hvs)
 
+Elapsed time to load word sections: 3418 seconds
+Elapsed time to load word-shape pairs: 53 seconds
+Elapsed time to create shapes: 1558 secs
+Start computing the basis
+Support: found num left= 137075 num right= 18265271 in 881 secs
+Finished left norm marginals in 405063 secs  <<<== yikes == 112 hours
+Finished left totals in 455 secs
+Finished right norm marginals in 1229 secs
+Finished right totals in 11 secs
+Done with wild-card count N(x,*) and N(*,y) in 406758 secs
+Total count N(*,*) = 18489593.9998708 = 18489593.99999996
+Finished column (left) norm averages in 2167 secs
+Finished row (right) norm averages in 32 secs
+Going to do individual pair frequencies
+Done computing 24213074 pairs in 3646 secs
+Start computing log P(*,y)
+Done computing 18265271 left-wilds in 598 secs
+Done with -log P(*,y), start -log P(x,*)
+Done computing 137075 right-wilds in 11 secs
+Stored 40000 of 18265271 left-wilds in 31 secs (1290 pairs/sec)
+Stored 80000 of 18265271 left-wilds in 29 secs (1379 pairs/sec)
+....
+Stored 18240000 of 18265271 left-wilds in 16 secs (2500 pairs/sec)
+Done storing 18265271 left-wilds in 7334 secs
+Stored 40000 of 137075 right-wilds in 27 secs (1481 pairs/sec)
+Stored 80000 of 137075 right-wilds in 18 secs (2222 pairs/sec)
+Stored 120000 of 137075 right-wilds in 18 secs (2222 pairs/sec)
+Done storing 137075 right-wilds in 70 secs
+Done computing and saving -log P(x,*) and P(*,y)
+Going to do individual pair MI
+Done 10000 of 137075 outer loops in 2116 secs, pairs=2286405 (1080.5 pairs/sec)
+...
+Done 130000 of 137075 outer loops in 1609 secs, pairs=23270250 (788.97 pairs/sec)
+Done computing 24213074 pair MI's in 21653 secs  << 6 hours
+Going to do column and row subtotals
+
+
 
 yyyyyyyyyyyyyyyyyyyyyyyyyy
 
@@ -16041,6 +16078,11 @@ OK, so got to 920.... stop there.
 (map (lambda (n) (bco 'batch-compute n)) (iota 7 640 40))
 (map (lambda (n) (bco 'batch-compute n)) (iota 6 680 40))
 (map (lambda (n) (bco 'batch-compute n)) (iota 5 720 40))
+
+bmi (normal disjuncts) done to 1536
+cos on normal disjuncts ...
+bmi on shapes
+
 
 =========================================================================
 OK, so now redo the graphs.
