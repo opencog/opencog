@@ -16203,6 +16203,34 @@ cross mi to ... 571 + 50*20 = 1571
 =========================================================================
 NEW TODO LIST
 
+Authoring TODO:
+connector-sets.lyx:
+*) stop saying its logli, call it energy instead.
+*) on page 13, number-of-words == density of states.
+*) explain that density of states is a sum over delta functions
+*) Use curly E for energy
+*) page 16 change 400+ to >400
+*) Compute the smoothed energy P(E) and graph that
+*) smoothed energy  is from this:
+   Zipf’s Law Arises Naturally When There Are
+   Underlying, Unobserved Variables
+   Laurence Aitchison, Nicola Corradi, Peter E. Latha
+*) what is heat capacity?
+*) PEEV from above article vs. number of letters in the word.
+   why is this interesting?
+   Its not but it can maybe discriminate between utility
+   of different latent variables in various cases???
+*) besides word-legnth what other obvious latent variables are there?
+   how are these discovered?
+*) page 23 show MI vs. energy.  Same for page 25 ff
+*) page 28: number of connectors vs. MI
+*) number of connectors vs energy.
+   (i.e. some hope that these have bad MI, and thus would not be used).
+*) page 33ff: cosine similarity vs. energy  of the two words.
+
+
+--------------------------------------------------
+
 * Finish elimination of 'left-element, 'right-element in filters.
 
 -- Copy en_sh_two to en_sh_two_sim and start running cosines,
