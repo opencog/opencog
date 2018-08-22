@@ -3974,7 +3974,14 @@ zen_three
 \end_inset
 
  datasets.
- Please refer to the diary for a detailed description of these datasets.
+ Please refer to the diary
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2013"
+
+\end_inset
+
+ for a detailed description of these datasets.
  The dimensions and sparsity are summarized in the table below.
 \end_layout
 
@@ -4199,8 +4206,12 @@ Here, as always,
 \begin_inset Formula $\left|d\right|$
 \end_inset
 
- is the number of observed disjuncts, and the sparsity is the log of the
- number of number of non-zero pairs, measured in bits:
+ is the number of observed disjuncts, and the sparsity is the log of number
+ of non-zero pairs 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+, measured in bits:
 \begin_inset Formula 
 \[
 \mbox{sparsity}=-\log_{2}\frac{\left|\left(w,d\right)\right|}{\left|w\right|\left|d\right|}
