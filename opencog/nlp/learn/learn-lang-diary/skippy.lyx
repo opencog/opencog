@@ -82,7 +82,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; draft of 18 August 2018
+6 July 2018; draft of 19 August 2018
 \end_layout
 
 \begin_layout Abstract
@@ -2450,7 +2450,7 @@ ly incorrect.
  In effect, 
 \begin_inset Formula 
 \[
-J_{w_{i},w_{i+1},\cdots}=-\log P\left(w_{i},w_{i+1},\cdots\right)
+J_{w_{i},w_{i+1},\cdots}=-\log p\left(w_{i},w_{i+1},\cdots\right)
 \]
 
 \end_inset
@@ -2557,7 +2557,7 @@ key "McDonald2005,McDonald2006"
 .
  Here, the relationship between words is presumed to be entirely pair-wise;
  after somehow obtaining pair-wise word statistics 
-\begin_inset Formula $P\left(w_{left},w_{right}\right)$
+\begin_inset Formula $p\left(w_{left},w_{right}\right)$
 \end_inset
 
 , one constructs a maximum-spanning-tree parse so as to maximize the total
