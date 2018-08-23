@@ -16195,7 +16195,11 @@ regular disjuncts cos going to 10 + 59*25 = 1485
 cross mi to ... 571 + 50*20 = 1571
 (for-each (lambda (n) (mib 'batch-compute n)) (iota 50 571 21))
 
-(map (lambda (n) (bmi 'batch-compute n)) (iota 222 170 5))
+; below got to 30 + 99*14 = 1416
+(map (lambda (n) (mid 'batch-compute n)) (iota 100 30 14))
+;this should get to 1536:
+(for-each (lambda (n) (mid 'batch-compute n)) (iota 7 1416 20))
+
 
 
 =========================================================================
