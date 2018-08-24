@@ -4469,8 +4469,8 @@ Ideally, the size of the set
 \end_layout
 
 \begin_layout Standard
-In the following, the prime-superscripts are dropped, and the probabilities
- are written as 
+In the following, the prime-superscripts are dropped, and the joint probabilitie
+s are written as 
 \begin_inset Formula $p(w,g)$
 \end_inset
 
@@ -4485,7 +4485,7 @@ In the following, the prime-superscripts are dropped, and the probabilities
 \end_inset
 
 .
- Which is which should be apparent from context.
+ Which one is which should be apparent from context.
  The probability 
 \begin_inset Formula $p\left(w|g\right)$
 \end_inset
@@ -4495,7 +4495,14 @@ In the following, the prime-superscripts are dropped, and the probabilities
 \end_inset
 
 .
- This is used to ensure the proper propagation of the joint probability:
+ This is used to ensure that the factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+, as well as the factors, all behave correctly as a joint probabilities:
 \begin_inset Formula 
 \begin{eqnarray*}
 p\left(*,d\right) & = & \sum_{w}p\left(w,d\right)\\
@@ -4506,7 +4513,11 @@ p\left(*,d\right) & = & \sum_{w}p\left(w,d\right)\\
 
 \end_inset
 
+and all joint probabilites normalize correctly: 
+\begin_inset Formula $p\left(*,*\right)=1$
+\end_inset
 
+.
 \end_layout
 
 \begin_layout Standard
@@ -4917,7 +4928,7 @@ Probabilistic matrix factorization (PMF) assumes that the observation counts
  That is, one defines the error matrix (or residual matrix) 
 \begin_inset Formula 
 \[
-E\left(w,d\right)=\left|p\left(w,d\right)-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)\right|
+E\left(w,d\right)=\left|p\left(w,d\right)-\sum_{g\in G}p\left(w|g\right)p\left(g,d\right)\right|
 \]
 
 \end_inset
@@ -4935,7 +4946,7 @@ After fixing the dimension
 \end_inset
 
 , one searches for the matrices 
-\begin_inset Formula $p\left(w,g\right)$
+\begin_inset Formula $p\left(w|g\right)$
 \end_inset
 
  and 
@@ -4948,7 +4959,7 @@ After fixing the dimension
 \begin_layout Standard
 The primary drawbacks of probabilistic matrix factorization is that it does
  not provide any guarantees or mechanism to keep the factor 
-\begin_inset Formula $p\left(w,g\right)$
+\begin_inset Formula $p\left(w|g\right)$
 \end_inset
 
  sparse.
@@ -4962,6 +4973,13 @@ The primary drawbacks of probabilistic matrix factorization is that it does
  From first principles, it would seem that information maximization would
  be a desirable property.
  
+\end_layout
+
+\begin_layout Standard
+The assumption that the matrix entries are normally distributed are also
+ in a direct collision course with the known fact that the distribution
+ of the matrix entries are Zipfian.
+ The Frobenius norm seems less than ideal for the problem at hand.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5007,17 +5025,19 @@ key "WP-Homogenous-space"
 \end_inset
 
  where orthogonal or unitary transformations can be applied.
+ From an initial, naive point of view, this seems appropriate for machine
+ learning.
  In machine learning, the spaces are always finite dimensional, and are
  usually explicitly assumed to be real Euclidean space 
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
 
  -- that is, the spaces behave like actual vector spaces, so that concepts
- like PCA and SVD apply.
+ like PCA and SVD can be applied.
 \end_layout
 
 \begin_layout Standard
-A subtle point here is that the space in which 
+The subtle point here is that the space in which 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
