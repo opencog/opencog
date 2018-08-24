@@ -5109,7 +5109,7 @@ key "Eggert2004"
 \end_layout
 
 \begin_layout Standard
-NNMF using the Kullback-Leibler divergence is equivalent to Probabilistic
+NMF using the Kullback-Leibler divergence is equivalent to Probabilistic
  Latent Semantic Indexing (PLSI), although the two commonly used algorithms
  for each are quite different, and each is able to climb out of local minima
  of the other.
@@ -5128,7 +5128,7 @@ The error term that needs to be minimized is the matrix-factorized form
  between the factored and unfactored matrices: 
 \begin_inset Formula 
 \begin{equation}
-MI_{\mbox{factor}}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)}\label{eq:KL-MI-factorization-loss}
+MI_{\mbox{factor}}=\sum_{w,d}p\left(w,d\right)\log\frac{p\left(w,d\right)}{\sum_{g\in G}p\left(w|g\right)p\left(g,d\right)}\label{eq:KL-MI-factorization-loss}
 \end{equation}
 
 \end_inset
@@ -5153,7 +5153,7 @@ The factorization
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\sum_{g\in G}p\left(w,g\right)p\left(g,d\right)
+\sum_{g\in G}p\left(w|g\right)p\left(g,d\right)
 \]
 
 \end_inset
@@ -5173,7 +5173,7 @@ f\left(a_{1},a_{2},\cdots,a_{n}\right)
 \end_inset
 
 where 
-\begin_inset Formula $a_{g}=p\left(w,g\right)p\left(g,d\right)$
+\begin_inset Formula $a_{g}=p\left(w|g\right)p\left(g,d\right)$
 \end_inset
 
  and 
@@ -5315,7 +5315,10 @@ reference "eq:KL-MI-factorization-loss"
 \end_inset
 
 .
- 
+ It seems reasonable to beleive that combining kernel smoothing with local
+ regression and the information-theoretic norm might yeild an excellent
+ algorithm for factoring joint probabilities.
+ As an algorithm, it belongs to the gradient-descent class.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5425,8 +5428,8 @@ reference "fig:Factorization"
 
 , left image), and that one can perform separate, distinct, but simultaneous
  clustering on the columns, and separately, the rows.
- This is closer to the desired factorization model for language, so the
- proof is reviewed here.
+ This is closer to the desired factorization model for language, and so
+ the proof is reviewed here.
  It is still 
 \begin_inset Formula $k$
 \end_inset
@@ -5469,7 +5472,7 @@ reference "eq:factorize"
 \end_inset
 
  are 
-\begin_inset Formula $p\left(w,g\right)$
+\begin_inset Formula $p\left(w|g\right)$
 \end_inset
 
 ; those of 
