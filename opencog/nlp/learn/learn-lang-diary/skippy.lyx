@@ -4507,7 +4507,7 @@ reference "eq:factorize"
 \begin{eqnarray*}
 p\left(*,d\right) & = & \sum_{w}p\left(w,d\right)\\
  & = & \sum_{w}\sum_{g}p\left(w|g\right)p\left(g,d\right)\\
- & = & \sum_{w}\sum_{g}\frac{p\left(w,g\right)}{p\left(*,g\right)}p\left(p,d\right)\\
+ & = & \sum_{w}\sum_{g}\frac{p\left(w,g\right)}{p\left(*,g\right)}p\left(g,d\right)\\
  & = & \sum_{g}p\left(g,d\right)
 \end{eqnarray*}
 
@@ -5530,24 +5530,33 @@ L_{ij}=\begin{cases}
 
 \end_inset
 
-Equivalently, the factorization is
+Hard clustering means that any given 
+\begin_inset Formula $i$
+\end_inset
+
+ belongs to only one 
+\begin_inset Formula $j$
+\end_inset
+
+, and so one trivially has that 
+\begin_inset Formula $\sum_{j}L_{ij}=1$
+\end_inset
+
+, which is a key property of a Markov matrix.
+ That is, hard clustering has the Markov property.
+ Equivalently, the factorization for the hard-clustering of words into single
+ classes is
 \begin_inset Formula 
 \[
 p\left(w|g\right)=\begin{cases}
-1/\left|g\right| & \mbox{ word }w\mbox{ belongs to wordclass }g\\
+1 & \mbox{ word }w\mbox{ belongs to wordclass }g\\
 0 & \mbox{ otherwise}
 \end{cases}
 \]
 
 \end_inset
 
-The normalization is such that every word belongs to some class, with 100%
- probability (hard clustering).
- The matrix 
-\begin_inset Formula $R$
-\end_inset
-
- is presented analogously.
+That is, every word belongs to some class, with 100% probability.
  
 \end_layout
 
@@ -5669,7 +5678,7 @@ The proposed fix to these issues is multi-fold:
 \end_layout
 
 \begin_layout Itemize
-Use an information-theoretic metric, namely, the Kullback-Leibler divergence
+Use an information-theoretic similarity, namely, the Kullback-Leibler divergence
  of the factored solution to the input data.
 \end_layout
 
@@ -5886,7 +5895,7 @@ A quick review of the concept of a Markovian matrix is in order.
 
 \end_inset
 
-This assures that a transformed probability 
+This assures that a transformed joint probability 
 \begin_inset Formula 
 \[
 p^{\prime}\left(g,d\right)=\sum_{g^{\prime}}M\left(g,g^{\prime}\right)p\left(g^{\prime},d\right)
@@ -5894,7 +5903,7 @@ p^{\prime}\left(g,d\right)=\sum_{g^{\prime}}M\left(g,g^{\prime}\right)p\left(g^{
 
 \end_inset
 
-is still a valid probability distribution; namely, that 
+is still a valid joint probability distribution; namely, that 
 \begin_inset Formula $p^{\prime}\left(*,*\right)=1$
 \end_inset
 
