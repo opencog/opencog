@@ -59,33 +59,33 @@
 
 \begin_body
 
-\begin_layout Standard
-Diary-more-merge later.
-\end_layout
-
-\begin_layout Standard
-Merge is defered due to lyx incompatibility
-\end_layout
-
-\begin_layout Subsection*
+\begin_layout Title
 Entropy
 \end_layout
 
-\begin_layout Standard
-See 
-\begin_inset Quotes eld
-\end_inset
+\begin_layout Abstract
+The language-learning diary entertains a recurring theme of entropy and
+ various related principles.
+ Although there are many many many sources for these concepts, it is convenient
+ to put them here in an overview form.
+ The content here is extracted from varioustexts.
+\end_layout
 
-Zipf ’s law and criticality in multivariate data without fine-tuning
-\begin_inset Quotes erd
-\end_inset
-
- David J.
- Schwab, Ilya Nemenman, Pankaj Mehta, https://arxiv.org/pdf/1310.0448.pdf
+\begin_layout Section
+Fast Overview
 \end_layout
 
 \begin_layout Standard
-Notes:
+A generic fast overview.
+ See Wikipedia 
+\begin_inset Quotes eld
+\end_inset
+
+Partition function (mathematics)
+\begin_inset Quotes erd
+\end_inset
+
+ for more.
 \end_layout
 
 \begin_layout Itemize
@@ -180,7 +180,7 @@ where there are
 \begin_inset Formula $g_{i}$
 \end_inset
 
- called order parameters, lagrange multipliers, etc.
+ called order parameters, Lagrange multipliers, etc.
  and the 
 \begin_inset Formula $O_{i}\left(\sigma\right)$
 \end_inset
@@ -198,6 +198,27 @@ Z\left(g\right)=\sum_{\sigma}\exp-N\sum_{i}g_{i}O_{i}\left(\sigma\right)
 \end_inset
 
 
+\end_layout
+
+\begin_layout Itemize
+If the order paramter
+\end_layout
+
+\begin_layout Subsection
+Zipf's Law
+\end_layout
+
+\begin_layout Standard
+See 
+\begin_inset Quotes eld
+\end_inset
+
+Zipf ’s law and criticality in multivariate data without fine-tuning
+\begin_inset Quotes erd
+\end_inset
+
+ David J.
+ Schwab, Ilya Nemenman, Pankaj Mehta, https://arxiv.org/pdf/1310.0448.pdf
 \end_layout
 
 \end_body
