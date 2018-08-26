@@ -66,9 +66,10 @@ Entropy
 \begin_layout Abstract
 The language-learning diary entertains a recurring theme of entropy and
  various related principles.
- Although there are many many many sources for these concepts, it is convenient
- to put them here in an overview form.
- The content here is extracted from varioustexts.
+ Although there are many, many, many resources for these concepts, it seems
+ convenient to put them here, all in one place, in an overview form, as
+ a handy quick-reference and refresher.
+ The content here is extracted from various texts.
 \end_layout
 
 \begin_layout Section
@@ -105,17 +106,7 @@ States denoted by
 \begin_inset Formula $p\left(\sigma\right)$
 \end_inset
 
-...
- there are 
-\begin_inset Formula $N\gg1$
-\end_inset
-
- i.e.
- 
-\begin_inset Formula $N\to\infty$
-\end_inset
-
- states.
+.
  
 \end_layout
 
@@ -129,24 +120,83 @@ In machine learning, one writes
 \end_inset
 
 .
+ In probability theory, one writes 
+\begin_inset Formula $X=x$
+\end_inset
+
+ for 
+\begin_inset Formula $\sigma$
+\end_inset
+
+, where 
+\begin_inset Formula $X$
+\end_inset
+
+ is distribution, and 
+\begin_inset Formula $x$
+\end_inset
+
+ is a specific sampling of that distribution.
+ That is, 
+\begin_inset Formula $p\left(\sigma\right)$
+\end_inset
+
+ is the same thing as 
+\begin_inset Formula $P\left(X=x\right)$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $\sigma$
 \end_inset
 
- is a vector, 
+ is an indexed set, with
 \begin_inset Formula $N$
 \end_inset
 
--dimensional
-\end_layout
+ elements.
+ As such, one can pretend that it is an 
+\begin_inset Formula $N$
+\end_inset
 
-\begin_layout Itemize
+-dimensional vector, which is fine 
 \begin_inset Quotes eld
 \end_inset
 
-Energy
+for most practical purposes
+\begin_inset Quotes erd
+\end_inset
+
+, but in rare cases can lead to confusion.
+\end_layout
+
+\begin_layout Itemize
+One is often (usually) interested in the large-
+\begin_inset Formula $N$
+\end_inset
+
+ limit, i.e.
+ 
+\begin_inset Formula $N\gg1$
+\end_inset
+
+ i.e.
+ 
+\begin_inset Formula $N\to\infty$
+\end_inset
+
+ states.
+ 
+\end_layout
+
+\begin_layout Itemize
+The 
+\begin_inset Quotes eld
+\end_inset
+
+energy
 \begin_inset Quotes erd
 \end_inset
 
@@ -158,7 +208,7 @@ Energy
 \end_layout
 
 \begin_layout Itemize
-Density of states: 
+The density of states is: 
 \begin_inset Formula $\rho(E)=\sum_{\sigma}\delta(E-E(\sigma))$
 \end_inset
 
@@ -166,7 +216,7 @@ Density of states:
 \end_layout
 
 \begin_layout Itemize
-Total Entropy is 
+Total entropy is 
 \begin_inset Formula $S\left(E\right)=\log\rho\left(E\right)$
 \end_inset
 
@@ -174,12 +224,12 @@ Total Entropy is
 \end_layout
 
 \begin_layout Itemize
-Both contain have leading large-
+Both the energy and the entropy contain leading large-
 \begin_inset Formula $N$
 \end_inset
 
  term i.e.
- are extensive properties.
+ they are extensive properties.
  
 \end_layout
 
@@ -207,6 +257,15 @@ where there are
 
  are constants of motion.
  
+\begin_inset Quotes eld
+\end_inset
+
+Without loss of generality
+\begin_inset Quotes erd
+\end_inset
+
+ means that any probability distribution can always be written in the above
+ form.
 \end_layout
 
 \begin_layout Itemize
@@ -239,7 +298,7 @@ In machine learning, one often writes
 \end_inset
 
 .
- Then, 
+ In this case, 
 \begin_inset Formula $w$
 \end_inset
 
@@ -283,13 +342,38 @@ pure state
 \end_layout
 
 \begin_layout Subsection
-Mixed States and Saddle point methods
+Zipf's Law, Hidden variable models 
 \end_layout
 
 \begin_layout Standard
-Often the order parameters do not have a sharp value, and one must instead
- assume a mixture model, where the order paramters have some distribution.
- 
+Zipf's law can arise whenever one has that some (not necessarily all) of
+ the order parameters are 
+\begin_inset Quotes eld
+\end_inset
+
+rapidly fluctuating
+\begin_inset Quotes erd
+\end_inset
+
+ and must be 
+\begin_inset Quotes eld
+\end_inset
+
+averaged over
+\begin_inset Quotes erd
+\end_inset
+
+ to obtain a distribution.
+ The reference for this section is 
+\begin_inset Quotes eld
+\end_inset
+
+Zipf’s law and criticality in multivariate data without fine-tuning
+\begin_inset Quotes erd
+\end_inset
+
+ David J.
+ Schwab, Ilya Nemenman, Pankaj Mehta, https://arxiv.org/pdf/1310.0448.pdf
 \end_layout
 
 \begin_layout Itemize
@@ -329,7 +413,7 @@ where the integral is over the
 \end_layout
 
 \begin_layout Standard
-With some mild assumptions, one can make approximations
+With some mild assumptions, one can approximate the above integral
 \end_layout
 
 \begin_layout Itemize
@@ -393,29 +477,124 @@ Note that
 .
 \end_layout
 
+\begin_layout Itemize
+The microcanonical entropy is given by
+\begin_inset Formula 
+\[
+S\left(\left\{ H_{i}\left(\sigma\right)\right\} \right)=\inf_{\beta}\left[\sum_{i}\beta_{i}H_{i}\left(x\right)+c\left(\beta\right)\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+The 
+\begin_inset Quotes eld
+\end_inset
+
+multi-dimensional form of the Gartner-Ellis theorem
+\begin_inset Quotes eld
+\end_inset
+
+ (see reference) states that the microcanonical ensemble is given as the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Legendre-Fenchel transform of the cumulant generating function
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+The cumulant generating function is
+\begin_inset Formula 
+\[
+c\left(\beta\right)=\lim_{N\to\infty}\frac{1}{N}\log Z\left(\beta\right)-C
+\]
+
+\end_inset
+
+ where 
+\begin_inset Formula $C=\frac{1}{N}\log\int d\sigma$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Up to the overall constant 
+\begin_inset Formula $C$
+\end_inset
+
+, one thus has Zipf's law
+\begin_inset Formula 
+\[
+S\left(\left\{ H_{i}\left(\sigma\right)\right\} \right)=E\left(\sigma\right)
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+The above passes through even when (especially when) only some of the 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ are variable, while others remain sharp.
+ In this case, the varying 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ are called 
+\begin_inset Quotes eld
+\end_inset
+
+hidden variables
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Zipf's law arises when there are one or more hidden variables, allowing
+ the energy to be written as a mixture of multiple different 
+\begin_inset Quotes eld
+\end_inset
+
+models
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $H_{i}\left(\sigma\right)$
+\end_inset
+
+, each of which might not, in itself, be Zipfian.
+ 
+\end_layout
+
 \begin_layout Subsection
 Ising Models and Markov Random Fields
 \end_layout
 
-\begin_layout Subsection
-Zipf's Law
+\begin_layout Standard
+Sooo
 \end_layout
 
 \begin_layout Standard
-See 
-\begin_inset Quotes eld
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "plain"
+
 \end_inset
 
-Zipf ’s law and criticality in multivariate data without fine-tuning
-\begin_inset Quotes erd
-\end_inset
 
- David J.
- Schwab, Ilya Nemenman, Pankaj Mehta, https://arxiv.org/pdf/1310.0448.pdf
-\end_layout
-
-\begin_layout Standard
-This paper provides a proof that Zipf's law arises whenve
 \end_layout
 
 \end_body
