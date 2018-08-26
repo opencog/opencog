@@ -362,6 +362,14 @@ unknown
 \begin_inset Quotes erd
 \end_inset
 
+, or are 
+\begin_inset Quotes eld
+\end_inset
+
+latent
+\begin_inset Quotes erd
+\end_inset
+
  and must be 
 \begin_inset Quotes eld
 \end_inset
@@ -371,7 +379,11 @@ averaged over
 \end_inset
 
  to obtain a distribution.
- The reference for this section is Schwab, et al, 
+ The primary reference for this section is Schwab, 
+\emph on
+et al
+\emph default
+, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -386,7 +398,122 @@ key "Schwab2014"
 
 \end_inset
 
+ See also Aitchison 
+\emph on
+et al
+\emph default
+., 
+\begin_inset Quotes eld
+\end_inset
 
+Zipf's Law Arises Naturally When There Are Underlying, Unobserved Variables
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Aitchison2016"
+
+\end_inset
+
+ for a less physics-oriented exposition.
+\end_layout
+
+\begin_layout Itemize
+A 
+\begin_inset Quotes eld
+\end_inset
+
+latent variable
+\begin_inset Quotes erd
+\end_inset
+
+ (or variables) are hidden paramters that govern the observed distribution;
+ namely, that 
+\begin_inset Formula 
+\[
+p\left(\sigma\right)=\int d\theta\, p\left(\sigma|\theta\right)p\left(\theta\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Zipf's law is the statement that 
+\begin_inset Formula $p\left(\sigma\right)\sim1/\mbox{rank}\left(\sigma\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+The rank can be most directly understood as the number of states 
+\begin_inset Formula $n\left(E\right)$
+\end_inset
+
+ with energy less than 
+\begin_inset Formula $E=E\left(\sigma\right)$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula 
+\[
+\mbox{rank}\left(\sigma\right)=n\left(E\left(\sigma\right)\right)=\int_{-\infty}^{E\left(\sigma\right)}dE^{\prime}\rho\left(E^{\prime}\right)
+\]
+
+\end_inset
+
+ where 
+\begin_inset Formula $\rho(E)$
+\end_inset
+
+ is the density of states, as before.
+\end_layout
+
+\begin_layout Itemize
+Equivalently, the derivative of the rank is exactly the density of states:
+ 
+\begin_inset Formula 
+\[
+\frac{d\mbox{ rank}\left(E\right)}{dE}=\rho(E)=\sum_{\sigma}\delta(E-E(\sigma))
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+This can be written as 
+\begin_inset Formula 
+\[
+\log\mbox{ rank}\left(E\right)=E+const
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $E=E\left(\sigma\right)=-\log p\left(\sigma\right)$
+\end_inset
+
+ as before.
+\end_layout
+
+\begin_layout Standard
+There are some neat monkey bars here that are worth climbing on:
+\end_layout
+
+\begin_layout Standard
+Tooo
+\end_layout
+
+\begin_layout Itemize
+To re
 \end_layout
 
 \begin_layout Itemize
