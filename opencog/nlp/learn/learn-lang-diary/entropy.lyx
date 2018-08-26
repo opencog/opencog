@@ -131,7 +131,7 @@ Energy
 \end_inset
 
  of a state is 
-\begin_inset Formula $E\left(\sigma\right)=-\log_{2}p\left(\sigma\right)+const.$
+\begin_inset Formula $E\left(\sigma\right)=-\log p\left(\sigma\right)+const.$
 \end_inset
 
  
@@ -147,7 +147,7 @@ Density of states:
 
 \begin_layout Itemize
 Total Entropy is 
-\begin_inset Formula $S\left(E\right)=\log_{2}\rho\left(E\right)$
+\begin_inset Formula $S\left(E\right)=\log\rho\left(E\right)$
 \end_inset
 
 
@@ -167,7 +167,7 @@ Both contain have leading large-
 Without loss of generality, can write the Boltzmann distribution
 \begin_inset Formula 
 \[
-p\left(\sigma|g\right)=\frac{1}{Z\left(g\right)}\exp-N\sum_{i}g_{i}O_{i}\left(\sigma\right)
+p\left(\sigma|g\right)=\frac{1}{Z\left(g\right)}\exp-N\sum_{i}g_{i}H_{i}\left(\sigma\right)
 \]
 
 \end_inset
@@ -182,17 +182,18 @@ where there are
 
  called order parameters, Lagrange multipliers, etc.
  and the 
-\begin_inset Formula $O_{i}\left(\sigma\right)$
+\begin_inset Formula $H_{i}\left(\sigma\right)$
 \end_inset
 
  are constants of motion.
+ 
 \end_layout
 
 \begin_layout Itemize
 The partition function is
 \begin_inset Formula 
 \[
-Z\left(g\right)=\sum_{\sigma}\exp-N\sum_{i}g_{i}O_{i}\left(\sigma\right)
+Z\left(g\right)=\sum_{\sigma}\exp-N\sum_{i}g_{i}H_{i}\left(\sigma\right)
 \]
 
 \end_inset
@@ -201,7 +202,124 @@ Z\left(g\right)=\sum_{\sigma}\exp-N\sum_{i}g_{i}O_{i}\left(\sigma\right)
 \end_layout
 
 \begin_layout Itemize
-If the order paramter
+The above describes a 
+\begin_inset Quotes eld
+\end_inset
+
+pure state
+\begin_inset Quotes erd
+\end_inset
+
+, where the parameters 
+\begin_inset Formula $g_{i}$
+\end_inset
+
+ are fixed constants.
+\end_layout
+
+\begin_layout Itemize
+If the order parameter has some distribution 
+\begin_inset Formula $q\left(g\right)$
+\end_inset
+
+ then one has a 
+\begin_inset Quotes eld
+\end_inset
+
+mixed state
+\begin_inset Quotes erd
+\end_inset
+
+ and must write
+\begin_inset Formula 
+\[
+p\left(\sigma\right)=\int dgq\left(g\right)e^{-N\mathcal{H}\left(\sigma,g\right)}
+\]
+
+\end_inset
+
+where the integral is over the 
+\begin_inset Formula $M$
+\end_inset
+
+ parameters: 
+\begin_inset Formula $\int dg=\int dg_{1}dg_{2}\cdots dg_{M}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathcal{H}\left(\sigma,g\right)=\sum_{i}g_{i}H_{i}\left(\sigma\right)+\frac{1}{N}\log Z\left(g\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Saddle point methods
+\end_layout
+
+\begin_layout Standard
+With some mild assumptions, one can make approximations
+\end_layout
+
+\begin_layout Itemize
+If 
+\begin_inset Formula $q\left(g\right)$
+\end_inset
+
+ is smooth, if 
+\begin_inset Formula $q\left(g\right)$
+\end_inset
+
+ does not depend on 
+\begin_inset Formula $N$
+\end_inset
+
+ and if 
+\begin_inset Formula $q\left(g\right)$
+\end_inset
+
+ has non-vanishing support at the saddle point 
+\begin_inset Formula $g^{*}$
+\end_inset
+
+, then the above can be approximated using saddle-point methods, giving
+ 
+\begin_inset Formula 
+\[
+E\left(\sigma\right)=-\frac{1}{N}\log p\left(\sigma\right)=\sum_{i}g_{i}^{*}H_{i}\left(\sigma\right)+\frac{1}{N}\log Z\left(g^{*}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+The saddle point 
+\begin_inset Formula $g^{*}$
+\end_inset
+
+ is the solution to 
+\begin_inset Formula 
+\[
+\frac{1}{N}\left.\frac{\partial\log Z\left(g\right)}{\partial g_{i}}\right|_{g^{*}}=-H_{i}\left(\sigma\right)
+\]
+
+\end_inset
+
+Note that 
+\begin_inset Formula $g^{*}=g^{*}\left(\sigma\right)$
+\end_inset
+
+ that is, 
+\begin_inset Formula $g^{*}$
+\end_inset
+
+ is a function of 
+\begin_inset Formula $\sigma$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
