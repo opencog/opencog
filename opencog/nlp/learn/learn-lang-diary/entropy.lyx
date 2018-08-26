@@ -420,25 +420,19 @@ key "Aitchison2016"
  for a less physics-oriented exposition.
 \end_layout
 
-\begin_layout Itemize
-A 
-\begin_inset Quotes eld
-\end_inset
+\begin_layout Subsubsection
+Zipf's Law
+\end_layout
 
-latent variable
-\begin_inset Quotes erd
-\end_inset
-
- (or variables) are hidden paramters that govern the observed distribution;
- namely, that 
-\begin_inset Formula 
-\[
-p\left(\sigma\right)=\int d\theta\, p\left(\sigma|\theta\right)p\left(\theta\right)
-\]
+\begin_layout Standard
+A quick articulation of Zipf's law, based on:
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Aitchison2016"
 
 \end_inset
 
-
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -451,7 +445,27 @@ Zipf's law is the statement that
 \end_layout
 
 \begin_layout Itemize
-The rank can be most directly understood as the number of states 
+Converting to energy notation, where 
+\begin_inset Formula $E=E\left(\sigma\right)=-\log p\left(\sigma\right)$
+\end_inset
+
+ as before, one can write Zipf's law as 
+\begin_inset Formula 
+\[
+\log\mbox{ rank}\left(E\right)=E+const
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+The rank of a given, fixed state 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ can directly understood as the number of states 
 \begin_inset Formula $n\left(E\right)$
 \end_inset
 
@@ -477,7 +491,9 @@ The rank can be most directly understood as the number of states
 
 \begin_layout Itemize
 Equivalently, the derivative of the rank is exactly the density of states:
- 
+\end_layout
+
+\begin_layout Itemize
 \begin_inset Formula 
 \[
 \frac{d\mbox{ rank}\left(E\right)}{dE}=\rho(E)=\sum_{\sigma}\delta(E-E(\sigma))
@@ -489,39 +505,128 @@ Equivalently, the derivative of the rank is exactly the density of states:
 \end_layout
 
 \begin_layout Itemize
-This can be written as 
+Combining the above expressions and solving gives that
 \begin_inset Formula 
 \[
-\log\mbox{ rank}\left(E\right)=E+const
+\log\mbox{ rank}\left(E\right)=E+\log P_{s}\left(E\right)
 \]
 
 \end_inset
 
 where 
-\begin_inset Formula $E=E\left(\sigma\right)=-\log p\left(\sigma\right)$
+\begin_inset Formula $P_{s}\left(E\right)=e^{-E}n\left(E\right)$
 \end_inset
 
- as before.
-\end_layout
-
-\begin_layout Standard
-There are some neat monkey bars here that are worth climbing on:
-\end_layout
-
-\begin_layout Standard
-Tooo
+ is a smoothed, energy-weighted probability of states.
+ This relation is exact (i.e.
+ is independent of Zipf's law).
 \end_layout
 
 \begin_layout Itemize
-To re
+Zipf's law can thus be written as 
+\begin_inset Formula 
+\[
+P_{s}\left(E\right)=const.
+\]
+
+\end_inset
+
+ This enables practical calulations on distributions (next section).
 \end_layout
 
 \begin_layout Itemize
-If the order parameter has some distribution 
-\begin_inset Formula $q\left(\beta\right)$
+Equivalently, Zipf's law may be written as 
+\begin_inset Formula 
+\[
+n\left(E\right)\sim\exp E
+\]
+
 \end_inset
 
- then one has a 
+That is, the number of states below energy 
+\begin_inset Formula $E$
+\end_inset
+
+ is exapnding exponentially.
+\end_layout
+
+\begin_layout Subsubsection
+Deriving Zipf's Law
+\end_layout
+
+\begin_layout Standard
+The derivation of Zipf's law from latent variables is given by Schwab etal.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schwab2014"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A 
+\begin_inset Quotes eld
+\end_inset
+
+latent variable
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $\theta$
+\end_inset
+
+ (or a set 
+\begin_inset Formula $\theta_{i}$
+\end_inset
+
+ of them) are hidden parameters that govern the observed distribution; namely,
+ that 
+\begin_inset Formula 
+\[
+p\left(\sigma\right)=\int d\theta\, p\left(\sigma|\theta\right)p\left(\theta\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Assume that some (maybe all, but at least one) of the order parameters 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ is a latent variable 
+\begin_inset Formula $\theta_{i}$
+\end_inset
+
+.
+ That is, write 
+\begin_inset Formula $\theta_{i}$
+\end_inset
+
+ for 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ when 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ is latent.
+ 
+\end_layout
+
+\begin_layout Itemize
+Resuming the notation from the revious section, if the order parameter has
+ some distribution 
+\begin_inset Formula $p\left(\theta\right)$
+\end_inset
+
+, then one has a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -532,17 +637,17 @@ mixed state
  and must write
 \begin_inset Formula 
 \[
-p\left(\sigma\right)=\int d\beta q\left(\beta\right)e^{-N\mathcal{H}\left(\sigma,\beta\right)}
+p\left(\sigma\right)=\int d\theta\, p\left(\theta\right)e^{-N\mathcal{H}\left(\sigma,\beta\right)}
 \]
 
 \end_inset
 
 where the integral is over the 
-\begin_inset Formula $M$
+\begin_inset Formula $K$
 \end_inset
 
- parameters: 
-\begin_inset Formula $\int d\beta=\int d\beta_{1}d\beta{}_{2}\cdots d\beta_{M}$
+ latent parameters: 
+\begin_inset Formula $\int d\theta=\int d\theta_{1}d\theta{}_{2}\cdots d\theta_{K}$
 \end_inset
 
  and 
@@ -558,11 +663,11 @@ With some mild assumptions, one can approximate the above integral
 
 \begin_layout Itemize
 If 
-\begin_inset Formula $q\left(\beta\right)$
+\begin_inset Formula $p\left(\theta\right)$
 \end_inset
 
  is smooth, if 
-\begin_inset Formula $q\left(\beta\right)$
+\begin_inset Formula $p\left(\theta\right)$
 \end_inset
 
  does not depend on 
@@ -570,7 +675,7 @@ If
 \end_inset
 
  and if 
-\begin_inset Formula $q\left(\beta\right)$
+\begin_inset Formula $p\left(\theta\right)$
 \end_inset
 
  has non-vanishing support at the saddle point 
@@ -602,6 +707,19 @@ The saddle point
 
 \end_inset
 
+when 
+\begin_inset Formula $\beta_{i}=\theta_{i}$
+\end_inset
+
+ is one of the hidden variables, and otherwise is just the overt, non-hidden
+ value 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
 Note that 
 \begin_inset Formula $\beta^{*}=\beta^{*}\left(\sigma\right)$
 \end_inset
@@ -615,6 +733,7 @@ Note that
 \end_inset
 
 .
+ This comes from the right-hand-side, above.
 \end_layout
 
 \begin_layout Itemize
@@ -638,8 +757,14 @@ multi-dimensional form of the Gartner-Ellis theorem
 \begin_inset Quotes eld
 \end_inset
 
- (see reference) states that the microcanonical ensemble is given as the
- 
+ (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schwab2014"
+
+\end_inset
+
+) states that the microcanonical ensemble is given as the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -647,7 +772,7 @@ Legendre-Fenchel transform of the cumulant generating function
 \begin_inset Quotes erd
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Itemize
@@ -683,26 +808,9 @@ S\left(\left\{ H_{i}\left(\sigma\right)\right\} \right)=E\left(\sigma\right)
 \end_layout
 
 \begin_layout Standard
-The above passes through even when (especially when) only some of the 
-\begin_inset Formula $\beta_{i}$
-\end_inset
-
- are variable, while others remain sharp.
- In this case, the varying 
-\begin_inset Formula $\beta_{i}$
-\end_inset
-
- are called 
-\begin_inset Quotes eld
-\end_inset
-
-hidden variables
-\begin_inset Quotes erd
-\end_inset
-
-.
- Zipf's law arises when there are one or more hidden variables, allowing
- the energy to be written as a mixture of multiple different 
+The above is a quick proof that Zipf's law arises when there are one or
+ more hidden variables, allowing the energy to be written as a mixture of
+ multiple different 
 \begin_inset Quotes eld
 \end_inset
 
@@ -716,6 +824,14 @@ models
 
 , each of which might not, in itself, be Zipfian.
  
+\end_layout
+
+\begin_layout Subsubsection
+Quality
+\end_layout
+
+\begin_layout Standard
+It depends on 
 \end_layout
 
 \begin_layout Subsection
