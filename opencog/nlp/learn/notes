@@ -15494,6 +15494,8 @@ Done 10000 of 137075 outer loops in 2116 secs, pairs=2286405 (1080.5 pairs/sec)
 Done 130000 of 137075 outer loops in 1609 secs, pairs=23270250 (788.97 pairs/sec)
 Done computing 24213074 pair MI's in 21653 secs  << 6 hours
 Going to do column and row subtotals
+Finished left entropy subtotals in 419208 secs << 116 hours == 5 days
+Finished right entropy subtotals in 1459 secs
 
 
 
@@ -16190,14 +16192,15 @@ Restart the similarities, this time on en_sh_two_sim
 iota:  nsteps start stepsz
 regular disjuncts mi going to 70+14*72 == 1078
                            now to (+ 1024 (* 8 64)) == 1536
-regular disjuncts cos going to 10 + 59*25 = 1485
+regular disjuncts cos going to 10 + 59*25 = 1485 .. done
+(bco 'batch-compute 1536)
 
 cross mi to ... 571 + 50*20 = 1571
 (for-each (lambda (n) (mib 'batch-compute n)) (iota 50 571 21))
 
 ; below got to 30 + 99*14 = 1416
 (map (lambda (n) (mid 'batch-compute n)) (iota 100 30 14))
-;this should get to 1536:
+;this should get to 1536:  ... done actually, got to 1591
 (for-each (lambda (n) (mid 'batch-compute n)) (iota 7 1416 20))
 
 
