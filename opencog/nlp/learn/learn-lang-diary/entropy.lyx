@@ -82,16 +82,15 @@ A generic fast overview.
 \begin_inset Quotes eld
 \end_inset
 
-Partition function (mathematics)
+Partition function
 \begin_inset Quotes erd
 \end_inset
 
- and 
-\begin_inset Quotes eld
-\end_inset
 
-Markov random field
-\begin_inset Quotes erd
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Partition"
+
 \end_inset
 
  for more.
@@ -355,6 +354,14 @@ rapidly fluctuating
 \begin_inset Quotes erd
 \end_inset
 
+, or are 
+\begin_inset Quotes eld
+\end_inset
+
+unknown
+\begin_inset Quotes erd
+\end_inset
+
  and must be 
 \begin_inset Quotes eld
 \end_inset
@@ -364,7 +371,7 @@ averaged over
 \end_inset
 
  to obtain a distribution.
- The reference for this section is 
+ The reference for this section is Schwab, et al, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -372,8 +379,14 @@ Zipf’s law and criticality in multivariate data without fine-tuning
 \begin_inset Quotes erd
 \end_inset
 
- David J.
- Schwab, Ilya Nemenman, Pankaj Mehta, https://arxiv.org/pdf/1310.0448.pdf
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schwab2014"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -583,7 +596,26 @@ Ising Models and Markov Random Fields
 \end_layout
 
 \begin_layout Standard
-Sooo
+See Wikipedia, 
+\begin_inset Quotes eld
+\end_inset
+
+Markov Random Field
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-MarkovField"
+
+\end_inset
+
+ for more.
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
