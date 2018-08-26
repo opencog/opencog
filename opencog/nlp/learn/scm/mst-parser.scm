@@ -248,7 +248,7 @@
 	(< 330 (cog-arity (gdr SECTION)))
 )
 
-(define-public (export-mst-parse plain-text mstparse filename)
+(define (export-mst-parse plain-text mstparse filename)
 "
   Export an MST-parse to a text file named filename, 
   so that parses can be examined.
