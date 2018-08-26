@@ -420,19 +420,50 @@ key "Aitchison2016"
  for a less physics-oriented exposition.
 \end_layout
 
+\begin_layout Standard
+Both Aitchison and also Mora 
+\emph on
+etal
+\emph default
+.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Are biological systems poised at criticality?
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mora2011"
+
+\end_inset
+
+ articulate relationships to Ising models.
+\end_layout
+
 \begin_layout Subsubsection
 Zipf's Law
 \end_layout
 
 \begin_layout Standard
-A quick articulation of Zipf's law, based on:
+A quick articulation of Zipf's law, based on 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Aitchison2016"
 
 \end_inset
 
- 
+ and 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mora2011"
+
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Itemize
