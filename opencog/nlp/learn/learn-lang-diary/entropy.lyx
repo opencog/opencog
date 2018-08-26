@@ -85,6 +85,14 @@ Partition function (mathematics)
 \begin_inset Quotes erd
 \end_inset
 
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Markov random field
+\begin_inset Quotes erd
+\end_inset
+
  for more.
 \end_layout
 
@@ -109,6 +117,18 @@ States denoted by
 
  states.
  
+\end_layout
+
+\begin_layout Itemize
+In machine learning, one writes 
+\begin_inset Formula $x$
+\end_inset
+
+ for 
+\begin_inset Formula $\sigma$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Itemize
@@ -167,7 +187,7 @@ Both contain have leading large-
 Without loss of generality, can write the Boltzmann distribution
 \begin_inset Formula 
 \[
-p\left(\sigma|g\right)=\frac{1}{Z\left(g\right)}\exp-N\sum_{i}g_{i}H_{i}\left(\sigma\right)
+p\left(\sigma|\beta\right)=\frac{1}{Z\left(\beta\right)}\exp-N\sum_{i}\beta_{i}H_{i}\left(\sigma\right)
 \]
 
 \end_inset
@@ -177,7 +197,7 @@ where there are
 \end_inset
 
  parameters 
-\begin_inset Formula $g_{i}$
+\begin_inset Formula $\beta_{i}$
 \end_inset
 
  called order parameters, Lagrange multipliers, etc.
@@ -190,10 +210,55 @@ where there are
 \end_layout
 
 \begin_layout Itemize
+In probability theory and information geometry, one often writes 
+\begin_inset Formula $\theta$
+\end_inset
+
+ instead of 
+\begin_inset Formula $\beta$
+\end_inset
+
+ as the parameter, and 
+\begin_inset Formula $f_{i}$
+\end_inset
+
+ instead of 
+\begin_inset Formula $H_{i}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+In machine learning, one often writes 
+\begin_inset Formula $w$
+\end_inset
+
+ instead of 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ Then, 
+\begin_inset Formula $w$
+\end_inset
+
+ is a 
+\begin_inset Quotes eld
+\end_inset
+
+weight vector
+\begin_inset Quotes erd
+\end_inset
+
+, allowing a neural-net interpretation.
+\end_layout
+
+\begin_layout Itemize
 The partition function is
 \begin_inset Formula 
 \[
-Z\left(g\right)=\sum_{\sigma}\exp-N\sum_{i}g_{i}H_{i}\left(\sigma\right)
+Z\left(\beta\right)=\sum_{\sigma}\exp-N\sum_{i}\beta_{i}H_{i}\left(\sigma\right)
 \]
 
 \end_inset
@@ -211,15 +276,25 @@ pure state
 \end_inset
 
 , where the parameters 
-\begin_inset Formula $g_{i}$
+\begin_inset Formula $\beta{}_{i}$
 \end_inset
 
  are fixed constants.
 \end_layout
 
+\begin_layout Subsection
+Mixed States and Saddle point methods
+\end_layout
+
+\begin_layout Standard
+Often the order parameters do not have a sharp value, and one must instead
+ assume a mixture model, where the order paramters have some distribution.
+ 
+\end_layout
+
 \begin_layout Itemize
 If the order parameter has some distribution 
-\begin_inset Formula $q\left(g\right)$
+\begin_inset Formula $q\left(\beta\right)$
 \end_inset
 
  then one has a 
@@ -233,7 +308,7 @@ mixed state
  and must write
 \begin_inset Formula 
 \[
-p\left(\sigma\right)=\int dgq\left(g\right)e^{-N\mathcal{H}\left(\sigma,g\right)}
+p\left(\sigma\right)=\int d\beta q\left(\beta\right)e^{-N\mathcal{H}\left(\sigma,\beta\right)}
 \]
 
 \end_inset
@@ -243,18 +318,14 @@ where the integral is over the
 \end_inset
 
  parameters: 
-\begin_inset Formula $\int dg=\int dg_{1}dg_{2}\cdots dg_{M}$
+\begin_inset Formula $\int d\beta=\int d\beta_{1}d\beta{}_{2}\cdots d\beta_{M}$
 \end_inset
 
  and 
-\begin_inset Formula $\mathcal{H}\left(\sigma,g\right)=\sum_{i}g_{i}H_{i}\left(\sigma\right)+\frac{1}{N}\log Z\left(g\right)$
+\begin_inset Formula $\mathcal{H}\left(\sigma,\beta\right)=\sum_{i}\beta_{i}H_{i}\left(\sigma\right)+\frac{1}{N}\log Z\left(\beta\right)$
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Subsection
-Saddle point methods
 \end_layout
 
 \begin_layout Standard
@@ -263,11 +334,11 @@ With some mild assumptions, one can make approximations
 
 \begin_layout Itemize
 If 
-\begin_inset Formula $q\left(g\right)$
+\begin_inset Formula $q\left(\beta\right)$
 \end_inset
 
  is smooth, if 
-\begin_inset Formula $q\left(g\right)$
+\begin_inset Formula $q\left(\beta\right)$
 \end_inset
 
  does not depend on 
@@ -275,18 +346,18 @@ If
 \end_inset
 
  and if 
-\begin_inset Formula $q\left(g\right)$
+\begin_inset Formula $q\left(\beta\right)$
 \end_inset
 
  has non-vanishing support at the saddle point 
-\begin_inset Formula $g^{*}$
+\begin_inset Formula $\beta^{*}$
 \end_inset
 
 , then the above can be approximated using saddle-point methods, giving
  
 \begin_inset Formula 
 \[
-E\left(\sigma\right)=-\frac{1}{N}\log p\left(\sigma\right)=\sum_{i}g_{i}^{*}H_{i}\left(\sigma\right)+\frac{1}{N}\log Z\left(g^{*}\right)
+E\left(\sigma\right)=-\frac{1}{N}\log p\left(\sigma\right)=\sum_{i}\beta_{i}^{*}H_{i}\left(\sigma\right)+\frac{1}{N}\log Z\left(\beta^{*}\right)
 \]
 
 \end_inset
@@ -296,23 +367,23 @@ E\left(\sigma\right)=-\frac{1}{N}\log p\left(\sigma\right)=\sum_{i}g_{i}^{*}H_{i
 
 \begin_layout Itemize
 The saddle point 
-\begin_inset Formula $g^{*}$
+\begin_inset Formula $\beta^{*}$
 \end_inset
 
  is the solution to 
 \begin_inset Formula 
 \[
-\frac{1}{N}\left.\frac{\partial\log Z\left(g\right)}{\partial g_{i}}\right|_{g^{*}}=-H_{i}\left(\sigma\right)
+\frac{1}{N}\left.\frac{\partial\log Z\left(\beta\right)}{\partial\beta_{i}}\right|_{\beta^{*}}=-H_{i}\left(\sigma\right)
 \]
 
 \end_inset
 
 Note that 
-\begin_inset Formula $g^{*}=g^{*}\left(\sigma\right)$
+\begin_inset Formula $\beta^{*}=\beta^{*}\left(\sigma\right)$
 \end_inset
 
  that is, 
-\begin_inset Formula $g^{*}$
+\begin_inset Formula $\beta^{*}$
 \end_inset
 
  is a function of 
@@ -320,6 +391,10 @@ Note that
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection
+Ising Models and Markov Random Fields
 \end_layout
 
 \begin_layout Subsection
@@ -337,6 +412,10 @@ Zipf ’s law and criticality in multivariate data without fine-tuning
 
  David J.
  Schwab, Ilya Nemenman, Pankaj Mehta, https://arxiv.org/pdf/1310.0448.pdf
+\end_layout
+
+\begin_layout Standard
+This paper provides a proof that Zipf's law arises whenve
 \end_layout
 
 \end_body
