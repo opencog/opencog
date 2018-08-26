@@ -547,7 +547,7 @@ That is, the number of states below energy
 \begin_inset Formula $E$
 \end_inset
 
- is exapnding exponentially.
+ is expanding exponentially.
 \end_layout
 
 \begin_layout Subsubsection
@@ -555,14 +555,30 @@ Deriving Zipf's Law
 \end_layout
 
 \begin_layout Standard
-The derivation of Zipf's law from latent variables is given by Schwab etal.
+The derivation of Zipf's law from latent variables is given by Schwab 
+\emph on
+etal
+\emph default
+.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Schwab2014"
 
 \end_inset
 
+ and is summarixed below.
+ Aitchison 
+\emph on
+etal
+\emph default
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Aitchison2016"
 
+\end_inset
+
+ claim to have a more general proof.
 \end_layout
 
 \begin_layout Itemize
@@ -827,11 +843,34 @@ models
 \end_layout
 
 \begin_layout Subsubsection
-Quality
+Proportion of Explained Energy Variance (PEEV)
 \end_layout
 
 \begin_layout Standard
-It depends on 
+The derivation above required that the distribution of the latent variables
+ 
+\begin_inset Formula $p\left(\theta\right)$
+\end_inset
+
+ be non-zero smooth near the fixed point.
+ The degree to which these need to be smooth depends inversely in how peaked
+ the components 
+\begin_inset Formula $p\left(\sigma|\theta\right)$
+\end_inset
+
+ are.
+ Aitchison 
+\emph on
+etal
+\emph default
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Aitchison2016"
+
+\end_inset
+
+ articulate how PEEV works to blend together latent distributions.
 \end_layout
 
 \begin_layout Subsection
@@ -855,10 +894,26 @@ key "WP-MarkovField"
 \end_inset
 
  for more.
+ 
 \end_layout
 
 \begin_layout Standard
-xxx
+Factorization of the Hamiltonian into cliques.
+\end_layout
+
+\begin_layout Standard
+Cliques correspond to synonyms.
+ i.e.
+ words (and word-phrases) that are synonymous (i.e.
+ can replace one-another with low energy.) 
+\end_layout
+
+\begin_layout Standard
+Cliques are the base-space for the sheaves; sheaves project down to cliques.
+\end_layout
+
+\begin_layout Standard
+TODO flesh all this out.
 \end_layout
 
 \begin_layout Standard
