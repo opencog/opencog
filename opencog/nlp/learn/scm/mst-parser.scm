@@ -210,8 +210,10 @@
 	; Define where the costs are coming from.
 	(define pair-obj 
 		(cond 
-			((equal? cnt-mode "any") (make-any-link-api))
-			(else make-clique-pair-api)))
+			((or (equal? cnt-mode "clique")
+			     (equal? cnt-mode "clique-dist"))
+			      	(make-clique-pair-api))
+			(else (make-any-link-api))))
 
 	(define mi-source (add-pair-freq-api pair-obj))
 
