@@ -2335,7 +2335,19 @@ magnetic field
 \begin_inset Formula $J$
 \end_inset
 
- is used for both tasks.) The Ising model is usually taken to be 
+ is used for both tasks.) In the present context, the 
+\begin_inset Formula $\sigma_{i}$
+\end_inset
+
+ are to be reinterpreted as the word at position 
+\begin_inset Formula $i$
+\end_inset
+
+ in a sentence.
+\end_layout
+
+\begin_layout Standard
+The Ising model is usually taken to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2358,8 +2370,8 @@ shift invariant
 ns to Markov chains, shift sequences, and finite state machines.
  This, in turn, implies that it, or a variant thereof, occurs in many natural
  models.
- As an example, it describes the distribution of sequences of amino acids
- in Zebrafish antibodies.
+ One example is the distribution of sequences of amino acids in Zebrafish
+ antibodies.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mora2010"
@@ -2370,9 +2382,20 @@ key "Mora2010"
 \begin_inset Formula $\sigma_{i}$
 \end_inset
 
- can be one of twenty different amino acids, and one is interested in describing
- the distribution of wide variety of different sequences a that antibodies
- employ to fight off infection.
+ can be one of twenty-one different amino acids, and one is interested in
+ describing the distribution of wide variety of different sequences that
+ antibodies employ to fight off infection.
+ Another example is that of protein sequences, specifically, of sensor kinase
+ and response regulator proteins in bacteria
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Weigt2009"
+
+\end_inset
+
+, where the goal is to identify which sensor amino-acid sequences directly
+ trigger response proteins, as opposed to merely being correlated with a
+ response.
 \end_layout
 
 \begin_layout Standard
