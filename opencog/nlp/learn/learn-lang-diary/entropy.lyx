@@ -346,7 +346,7 @@ XXX TODO there are other entropies, e.g.
  define them too.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Zipf's Law, Hidden variable models 
 \end_layout
 
@@ -450,7 +450,7 @@ key "Mora2011"
  articulate relationships to Ising models.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Zipf's Law
 \end_layout
 
@@ -587,7 +587,7 @@ That is, the number of states below energy
  is expanding exponentially.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Deriving Zipf's Law
 \end_layout
 
@@ -879,7 +879,7 @@ models
  
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Proportion of Explained Energy Variance (PEEV)
 \end_layout
 
@@ -910,8 +910,17 @@ key "Aitchison2016"
  articulate how PEEV works to blend together latent distributions.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Ising Models and Markov Random Fields
+\end_layout
+
+\begin_layout Standard
+Ising models are a simple case of MRF.
+ So cover them first.
+\end_layout
+
+\begin_layout Subsection
+Ising Models
 \end_layout
 
 \begin_layout Standard
@@ -1094,7 +1103,41 @@ and
 which now satisfies the constraints on the observed frequency counts.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
+Gauge fixing
+\end_layout
+
+\begin_layout Standard
+The frequencies are not independent; one has constraints 
+\begin_inset Formula 
+\[
+f_{a}\left(i\right)=\sum_{j,b}f_{ab}\left(i,j\right)
+\]
+
+\end_inset
+
+which means that there's ambiguity in how the Hamiltonian is split up, i.e.
+ there is guage invariance; and so one needs gauge fixing.
+ This is usually done by forcing 
+\begin_inset Formula 
+\[
+0=\sum_{i}H_{i}\left(\sigma_{i}\right)
+\]
+
+\end_inset
+
+ and 
+\begin_inset Formula 
+\[
+0=\sum_{i,j}H_{ij}\left(\sigma_{i},\sigma_{j}\right)
+\]
+
+\end_inset
+
+XXX show the details of this; firm it up.
+\end_layout
+
+\begin_layout Subsection
 Markov Random Fields
 \end_layout
 
