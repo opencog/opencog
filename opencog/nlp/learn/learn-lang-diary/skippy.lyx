@@ -3275,6 +3275,18 @@ more general
  by not contraining to fit the cost function to a probabilistic framework.
 \end_layout
 
+\begin_layout Standard
+XXX Caution: the MI is just a good first esimate; it gets interactions wrong.
+ See for example, 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Weigt2009"
+
+\end_inset
+
+ What does this mean for langauge?
+\end_layout
+
 \begin_layout Subsection
 Graph Algorithms vs.
  Gradient Descent for N-grams
@@ -3432,6 +3444,22 @@ reference "eq:SkipGram"
 \end_inset
 
 , so that the resulting probabilities are valid Boltzmann distributions.
+\end_layout
+
+\begin_layout Subsection
+Monte Carlo vs.
+ Message Passing
+\end_layout
+
+\begin_layout Standard
+There are several ways to solve the gradient descent problem.
+ One is Monte Carlo sampling, but this is known to converge slowly.
+\end_layout
+
+\begin_layout Standard
+Another is Beleif Propagation aka Message Passing aka Page-Rank algorithm.
+ Here, one performs self-consistent updates of the boltzman model ...
+ 
 \end_layout
 
 \begin_layout Subsection
