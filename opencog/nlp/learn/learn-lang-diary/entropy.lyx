@@ -340,6 +340,12 @@ pure state
  are fixed constants.
 \end_layout
 
+\begin_layout Standard
+XXX TODO there are other entropies, e.g.
+ microcanonincal, etc.
+ define them too.
+\end_layout
+
 \begin_layout Subsection
 Zipf's Law, Hidden variable models 
 \end_layout
@@ -906,6 +912,162 @@ key "Aitchison2016"
 
 \begin_layout Subsection
 Ising Models and Markov Random Fields
+\end_layout
+
+\begin_layout Standard
+Ising models with more than two states are called Potts models.
+\end_layout
+
+\begin_layout Standard
+The Ising Hamlitonian can be derived as a minimum entropy model, by applying
+ constraints that the probability of singletons and pairs must produce the
+ actual, observed frequency distribution of singltons and pairs.
+ The technique for forcing this agreement is called 
+\begin_inset Quotes eld
+\end_inset
+
+lagrange multipliers
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The primary issue is that the 
+\begin_inset Formula $H_{i}\left(\sigma\right)$
+\end_inset
+
+ depend on the full 
+\begin_inset Formula $\sigma$
+\end_inset
+
+, which in general makes the roblem intractable.
+ So instead, write the entropy as
+\begin_inset Formula 
+\[
+S=-\sum_{\sigma}p\left(\sigma\right)\log p\left(\sigma\right)
+\]
+
+\end_inset
+
+and write 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ as an indexed set; that is, 
+\begin_inset Formula $\sigma=\left(\sigma_{1},\sigma_{2},\cdots,\sigma_{N}\right)$
+\end_inset
+
+.
+ Each 
+\begin_inset Formula $\sigma_{i}$
+\end_inset
+
+ can be interpreted as a value at position 
+\begin_inset Formula $i$
+\end_inset
+
+, for example, a word at position 
+\begin_inset Formula $i$
+\end_inset
+
+ in a sentence, an amino acid in postion 
+\begin_inset Formula $i$
+\end_inset
+
+ in a protein, 
+\emph on
+etc
+\emph default
+.
+ In a basic Potts model, one has observed frequencies 
+\begin_inset Formula $f_{a}\left(i\right)$
+\end_inset
+
+ which counts the frequency at which the location 
+\begin_inset Formula $i$
+\end_inset
+
+ had the value 
+\begin_inset Formula $\sigma_{i}=a$
+\end_inset
+
+ and the pair frequencies 
+\begin_inset Formula $f_{ab}\left(i,j\right)$
+\end_inset
+
+ that location 
+\begin_inset Formula $i$
+\end_inset
+
+ had 
+\begin_inset Formula $\sigma_{i}=a$
+\end_inset
+
+ and also location 
+\begin_inset Formula $j$
+\end_inset
+
+ had 
+\begin_inset Formula $\sigma_{j}=b$
+\end_inset
+
+.
+ ...
+ Its common to ignore the position dependence, i.e.
+ to observe only the averages, independent of position...
+\end_layout
+
+\begin_layout Standard
+The goal is to create a model such that the singleton contraints
+\begin_inset Formula 
+\[
+f_{a}\left(i\right)=\sum_{\sigma_{1}}\sum_{\sigma_{2}}\cdots\sum_{\sigma_{N}}p\left(\sigma_{1},\sigma_{2},\cdots,\sigma_{N}\right)\delta_{\sigma_{i},a}
+\]
+
+\end_inset
+
+and the pairwise constraints 
+\begin_inset Formula 
+\[
+f_{ab}\left(i,j\right)=\sum_{\sigma_{1}}\sum_{\sigma_{2}}\cdots\sum_{\sigma_{N}}p\left(\sigma_{1},\sigma_{2},\cdots,\sigma_{N}\right)\delta_{\sigma_{i},a}\delta_{\sigma_{j},b}
+\]
+
+\end_inset
+
+are obeyed.
+ Here, the 
+\begin_inset Formula $\delta_{\sigma_{i},a}$
+\end_inset
+
+ is the Dirac delta function, such that 
+\begin_inset Formula 
+\[
+\delta_{\sigma_{i},a}=\begin{cases}
+1 & \mbox{ if }\sigma_{i}=a\\
+0 & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+This is done by 
+\begin_inset Quotes eld
+\end_inset
+
+adding a multiple of zero
+\begin_inset Quotes erd
+\end_inset
+
+ ...
+ etc.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Markov Random Fields
 \end_layout
 
 \begin_layout Standard
