@@ -921,7 +921,7 @@ Ising models with more than two states are called Potts models.
 \begin_layout Standard
 The Ising Hamlitonian can be derived as a minimum entropy model, by applying
  constraints that the probability of singletons and pairs must produce the
- actual, observed frequency distribution of singltons and pairs.
+ actual, observed frequency distribution of singletons and pairs.
  The technique for forcing this agreement is called 
 \begin_inset Quotes eld
 \end_inset
@@ -931,7 +931,7 @@ lagrange multipliers
 \end_inset
 
 .
- 
+ XXX TODO find a reference that explains how the below is actually done.
 \end_layout
 
 \begin_layout Standard
@@ -943,7 +943,7 @@ The primary issue is that the
 \begin_inset Formula $\sigma$
 \end_inset
 
-, which in general makes the roblem intractable.
+, which in general makes the problem intractable.
  So instead, write the entropy as
 \begin_inset Formula 
 \[
@@ -1063,7 +1063,35 @@ adding a multiple of zero
 
  ...
  etc.
- 
+ XXXTODO show how this is done.
+\end_layout
+
+\begin_layout Standard
+This causes the model probability to factorize:
+\begin_inset Formula 
+\[
+p\left(\sigma\right)=p\left(\sigma_{1},\sigma_{2},\cdots,\sigma_{N}\right)=\frac{1}{Z}\prod_{i}\phi\left(\sigma_{i}\right)\prod_{jk}\phi\left(\sigma_{j},\sigma_{k}\right)
+\]
+
+\end_inset
+
+where each factor is given by a Boltzmann model
+\begin_inset Formula 
+\[
+\phi\left(\sigma_{i}\right)=\exp-H_{i}\left(\sigma_{i}\right)
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\phi\left(\sigma_{i},\sigma_{j}\right)=\exp-H_{ij}\left(\sigma_{i},\sigma_{j}\right)
+\]
+
+\end_inset
+
+which now satisfies the constraints on the observed frequency counts.
 \end_layout
 
 \begin_layout Subsubsection
