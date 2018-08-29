@@ -15496,10 +15496,79 @@ Done computing 24213074 pair MI's in 21653 secs  << 6 hours
 Going to do column and row subtotals
 Finished left entropy subtotals in 419208 secs << 116 hours == 5 days
 Finished right entropy subtotals in 1459 secs
+Finished left MI subtotals in 396071 secs
+Finished right MI subtotals in 1369 secs
+Going to compute the left, right and total entropy
+Done computing totals; start saving wildcards
+Stored 40000 of 18265271 left-wilds in 388 secs (103 pairs/sec)
+Stored 80000 of 18265271 left-wilds in 327 secs (122 pairs/sec)
+...
+Stored 18240000 of 18265271 left-wilds in 22 secs (1818 pairs/sec)
+Done storing 18265271 left-wilds in 12769 secs
+Stored 40000 of 137075 right-wilds in 27 secs (1481 pairs/sec)
+Stored 80000 of 137075 right-wilds in 28 secs (1429 pairs/sec)
+Stored 120000 of 137075 right-wilds in 29 secs (1379 pairs/sec)
+Done storing 137075 right-wilds in 96 secs
+Finished with MI computations; this took 354. hours
 
+=========================================================================
+en_sh_mi_two
+------------
+English disjuncts+shapes from rfive-mtwo plus marginals plus entropy.
 
+Extended from en_sh_mtwo (which contains marginals for shapes), and
+adds the left, right, total entropy and total MI calculations.
+So matrix summary report is same as before, but includes entropy.
+This requires an additional 24M atoms, and 127M values!!  Hefty!
+Built as:
 
-yyyyyyyyyyyyyyyyyyyyyyyyyy
+(hvs 'fetch-pairs)
+(hvs 'explode-sections)
+(batch-all-pair-mi hvs)
+
+STATUS:  GOOD.
+DATE: 29 August 2018
+
+en_sh_mi_two=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 6564 MB    |
+ public | spaces     | table | linas | 40 kB      |
+ public | typecodes  | table | linas | 56 kB      |
+ public | valuations | table | linas | 20 GB      |
+ public | values     | table | linas | 8192 bytes |
+
+select count(*) from atoms;  -- 64267359 == 64.2M atoms << 24M more!!
+select count(*) from valuations; -- 204432721 == 204M << 127M more !!
+
+(print-matrix-summary-report hvs)
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type:
+EvaluationLink
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "shape word")
+   (AnyNode "shape section")
+)
+Rows: 137075 Columns: 18265271
+Size: 24213074 non-zero entries of 2503712022325 possible
+Fraction non-zero: 9.6709E-6 Sparsity (-log_2): 16.658
+Total observations: 18489594.0  Avg obs per pair: 0.7636
+Entropy Total: 21.956   Left: 18.052   Right: 11.391
+Total MI: 7.4869
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3568.        1.1179E+5
+Count   (l_1)  6.9286E+4    8.0072E+4     19.42        .7163
+Length  (l_2)  7782.        6245.         2.181        5.5866E-2
+RMS Count      7760.        6240.         2.175        5.5824E-2
+
+17558278594 Bytes uncompressed == 17.5 GBytes
+ 1766113632 Bytes compressed == 1.76 GBytes
+
+134616afe42c9e380d00d6cf3d8cf397  en_sh_mi_two.sql
+14d28c0678adf704fc81956458879fd0  en_sh_mi_two.sql.bz2
 
 =========================================================================
 OK, so where were we? We want
