@@ -374,7 +374,7 @@ ENDIF()
 
 # Cython is used to generate python bindings.
 IF (HAVE_PY_INTERP)
-	FIND_PACKAGE(Cython 0.19.0)
+	FIND_PACKAGE(Cython 0.23.0)
 
 	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
 		# Find python destination dir for python bindings because it may
