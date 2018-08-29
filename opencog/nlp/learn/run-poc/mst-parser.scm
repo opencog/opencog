@@ -306,9 +306,10 @@
 	(close-port file-port)
 )
 
-;wrapper for backwards compatibility
+; Wrapper for backwards compatibility
 (define-public (observe-mst plain-text)
-	observe-mst-mode plain-text "any" #f #f)
+	(observe-mst-mode plain-text "any" #f #f)
+)
 
 (define-public (observe-mst-mode plain-text CNT-MODE MST-DIST EXPORT-MST)
 "
