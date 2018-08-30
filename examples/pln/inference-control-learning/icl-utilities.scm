@@ -37,14 +37,15 @@
 (define (alphabet-ref i)
   (list->string (list (list-ref alphabet-list i))))
 
-;; Randomly select between 2 ordered letters and create a target
+;; Randomly select between 2 ordered discontiguous letters and create
+;; a target
 ;;
 ;; Inheritance
 ;;   X
 ;;   Y
 (define (gen-random-target)
-  (let* ((Ai (cog-randgen-randint 25))
-         (offset (+ Ai 1))
+  (let* ((Ai (cog-randgen-randint 24))
+         (offset (+ Ai 2))
          (Bi (+ offset (random (- 26 offset))))
          (A (alphabet-ref Ai))
          (B (alphabet-ref Bi)))
