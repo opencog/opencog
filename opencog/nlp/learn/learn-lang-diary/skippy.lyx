@@ -2177,6 +2177,7 @@ Thus, a maximum entropy model of natural language is any model that provides
 
 .
  Clearly, CBOW/SkipGram is such a model.
+ There are others.
 \end_layout
 
 \begin_layout Subsection
@@ -2946,6 +2947,18 @@ vacuum
  be made explicit.
  The single-point propagators have an explicit numerical effect in the determina
 tion of the best parse tree for a given sentence.
+\end_layout
+
+\begin_layout Subsection
+MST vs.
+ Ising
+\end_layout
+
+\begin_layout Standard
+Maximizing MI is just approximate ...
+ vs.
+ soliving ising exactly.
+ XXX Expand and explain.
 \end_layout
 
 \begin_layout Subsection
