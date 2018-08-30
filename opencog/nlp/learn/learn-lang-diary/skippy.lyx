@@ -4352,7 +4352,8 @@ name "sub:Zipf's-Law;-Noise"
 \begin_layout Standard
 Natural language does not have a large-data limit.
  More generally, Zipf distributions cannot have a large-data limit.
- 
+ This is in contrast to normal distributions, where the large-data limit
+ is a Gaussian.
 \end_layout
 
 \begin_layout Standard
@@ -5042,7 +5043,32 @@ The primary drawbacks of probabilistic matrix factorization is that it does
 \begin_layout Standard
 The assumption that the matrix entries are normally distributed are also
  in a direct collision course with the known fact that the distribution
- of the matrix entries are Zipfian.
+ of the matrix entries are Zipfian, as argued in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Zipf's-Law;-Noise"
+
+\end_inset
+
+.
+ Although one can compute a mean or expectation value for the 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+, creating a histogram around this mean value will not reveal a curve in
+ the shape of a Gaussian.
+ 
+\end_layout
+
+\begin_layout Standard
+Some words occur with frequencies that are many orders of magnitude larger
+ than others.
+ The Frobenius norm then becomes very strict for the former, and very loose
+ for the latter.
+ It leads to a situation where improving the factorization by 1% for a high
+ frequency word is equivalent to being wrong by factors of 2 or 3 on low-frequen
+cy words.
+ This does not seem like a plusible weighting scheme.
  The Frobenius norm seems less than ideal for the problem at hand.
 \end_layout
 
@@ -5207,6 +5233,113 @@ ion
 \end_layout
 
 \begin_layout Subsubsection
+Projective Probability Amplitudes
+\end_layout
+
+\begin_layout Standard
+The previous sections argue that when vectors are interpreted as probabilities,
+ then dot-products and invariance under orthogonal transformations are inappropr
+iate, because these transform probabilities into things that cannot be interpret
+ed as probabilities.
+ Intuitively, information-theoretic manipulations that preserve the probability
+ aspects seem wiser.
+ However, there is another possibility: work with probability amplitudes.
+\end_layout
+
+\begin_layout Standard
+A vector is a probability, if one has that
+\begin_inset Formula 
+\[
+\sum_{n}p_{n}=1
+\]
+
+\end_inset
+
+That is, a point 
+\begin_inset Formula $\vec{p}$
+\end_inset
+
+ is constrained to live on the surface of a simplex.
+ One can apply a simple trick: just write 
+\begin_inset Formula $a_{n}=\sqrt{p_{n}}$
+\end_inset
+
+ and then the constraint becomes
+\begin_inset Formula 
+\[
+\sum_{n}a_{n}^{2}=1
+\]
+
+\end_inset
+
+Clearly, the point 
+\begin_inset Formula $\vec{a}$
+\end_inset
+
+ is constrained to live on the surface of a sphere.
+ Now, orthogonal rotations do not violate this constraint.
+\end_layout
+
+\begin_layout Standard
+This implies that nurclear norms, or Frobenius norms might be quite appropriate,
+ if, instead of working with 
+\begin_inset Formula $\vec{p}$
+\end_inset
+
+, one worked with 
+\begin_inset Formula $\vec{a}$
+\end_inset
+
+.
+ To be more specific, define 
+\begin_inset Formula $a\left(w,d\right)=\sqrt{p\left(w,d\right)}$
+\end_inset
+
+ and then define an error matrix (residual matrix) 
+\begin_inset Formula 
+\[
+E\left(w,d\right)=\left|a\left(w,d\right)-\sum_{g\in G}a\left(w;g\right)a\left(g;d\right)\right|
+\]
+
+\end_inset
+
+and then, to assign word 
+\begin_inset Formula $w$
+\end_inset
+
+ to word-sense cluster 
+\begin_inset Formula $g$
+\end_inset
+
+, seek to minimize the objective function 
+\begin_inset Formula 
+\[
+U=\sum_{w,d}\left|E\left(w,d\right)\right|^{2}
+\]
+
+\end_inset
+
+This seems like a plausible objective function, if the 
+\begin_inset Formula $a\left(w,d\right)$
+\end_inset
+
+ are normally distributed.
+ But, as argued in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Zipf's-Law;-Noise"
+
+\end_inset
+
+, this is a faulty assumption.
+ As noted before, this error matrix causes high-frequency words to strongly
+ dominate over low-frequency words in the factorization.
+ Again, this seems like an implausbile objective function for natural language
+ or any Zipfian distributions.
+ 
+\end_layout
+
+\begin_layout Subsubsection
 Neural Net Matrix Factorization
 \end_layout
 
@@ -5231,13 +5364,13 @@ can be viewed as just one special function of the vector components indexed
  More generally, one can consider the function
 \begin_inset Formula 
 \[
-f\left(a_{1},a_{2},\cdots,a_{n}\right)
+f\left(q_{1},q_{2},\cdots,q_{n}\right)
 \]
 
 \end_inset
 
 where 
-\begin_inset Formula $a_{g}=p\left(w|g\right)p\left(g,d\right)$
+\begin_inset Formula $q_{g}=p\left(w|g\right)p\left(g,d\right)$
 \end_inset
 
  and 
@@ -5250,7 +5383,7 @@ where
 
 .
  Thus, the matrix factorization is just the function 
-\begin_inset Formula $f\left(a_{1},a_{2},\cdots,a_{n}\right)=a_{1}+a_{2}+\cdots+a_{n}$
+\begin_inset Formula $f\left(q_{1},q_{2},\cdots,q_{n}\right)=q_{1}+q_{2}+\cdots+q_{n}$
 \end_inset
 
 .
