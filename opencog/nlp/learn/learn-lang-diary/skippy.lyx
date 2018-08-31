@@ -3329,7 +3329,10 @@ key "Goertzel2014"
 \begin_inset Formula $d$
 \end_inset
 
-, one computes a normalized frequency of observations 
+, one computes a normalized frequency of observationsFor proFor problems
+ like the Ising model, we want to solve the inverse problem.blems like the
+ Ising model, we want to solve the inverse problem.
+ 
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
@@ -3472,7 +3475,33 @@ There are several ways to solve the gradient descent problem.
 \begin_layout Standard
 Another is Beleif Propagation aka Message Passing aka Page-Rank algorithm.
  Here, one performs self-consistent updates of the boltzman model ...
- 
+ XXX FIXME this is muddled.
+ There are two problems: forward and inverse.
+ The message-passing solves only the forward probelm.
+ We need to solve the inverse problem.
+\end_layout
+
+\begin_layout Standard
+But this only solves the forward (direct) problem (where the hamiltonian
+ is known, but the distribution is not).
+ We need to (also) solve the inverse problem: derive a hamiltonian from
+ an observed distribution.
+ The standard way for doing this is to guess a hamiltonian, solve for the
+ resulting distribution by message passing, compare this distribution to
+ the observed distribution, and revise the hamiltonian (by hill climbing
+ or gradient descent), and repeat.
+ This is very time consuming.
+\end_layout
+
+\begin_layout Standard
+The general process is outlined by Mezard and Mora in a very readable paper.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mezard2008"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
