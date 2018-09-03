@@ -8,12 +8,12 @@
 (load "mine-control-rules.scm")
 
 ;; Set the random seed of the experiment
-(cog-randgen-set-seed! 0)
+(cog-randgen-set-seed! 1)
 
 ;; Set loggers levels
-(cog-logger-set-level! "debug")
-(icl-logger-set-level! "fine")
-(ure-logger-set-level! "debug")
+(cog-logger-set-level! "info")
+(icl-logger-set-level! "debug")
+(ure-logger-set-level! "info")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
