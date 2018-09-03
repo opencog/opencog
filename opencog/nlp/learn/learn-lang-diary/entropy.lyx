@@ -1001,90 +1001,6 @@ Here, the vector
 \end_layout
 
 \begin_layout Standard
-One eample, given by Mezard, is that of an error-detecting code.
- In this case, each constraint 
-\begin_inset Formula $\psi_{a}$
-\end_inset
-
- is typically a parity polynomial, so that 
-\begin_inset Formula $\vec{x}$
-\end_inset
-
- is a bit-string, and the 
-\begin_inset Formula $\psi_{a}$
-\end_inset
-
- are parity constraints.
- Thus, 
-\begin_inset Formula $\psi_{a}\left(\vec{x}\right)=1$
-\end_inset
-
- when the parity on 
-\begin_inset Formula $\vec{x}$
-\end_inset
-
- is satsified, else it is zero.
- For an error-correcting code, the 
-\begin_inset Formula $\psi_{a}$
-\end_inset
-
- are decreasing functions of the number of errors in the bit-string.
- For an error-correcting code, one would write 
-\begin_inset Formula 
-\[
-\vec{x}=\left(\vec{y},\vec{d}\right)
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $\vec{y}$
-\end_inset
-
- is the crypt-text (the bit-string received over the communications channel,
- and thus possibly containing bit-errors), and 
-\begin_inset Formula $\vec{d}$
-\end_inset
-
- is the decrypted plain-text.
- Thus 
-\begin_inset Formula $p\left(\vec{x}\right)=p\left(\vec{y},\vec{d}\right)=1$
-\end_inset
-
- when 
-\begin_inset Formula $\vec{y}$
-\end_inset
-
- has no errors and 
-\begin_inset Formula $\vec{d}$
-\end_inset
-
- is the decoding of 
-\begin_inset Formula $\vec{y}$
-\end_inset
-
-.
- Otherwise, 
-\begin_inset Formula $p$
-\end_inset
-
- is large, when 
-\begin_inset Formula $\vec{d}$
-\end_inset
-
- is an error-free decoding of 
-\begin_inset Formula $\vec{y}$
-\end_inset
-
-, and if no error-free decodings exist, 
-\begin_inset Formula $p$
-\end_inset
-
- is low or zero.
- 
-\end_layout
-
-\begin_layout Standard
 Mezard describes how beleif propagation can be used to quickly solve graph
  factorization problems.
 \begin_inset CommandInset citation
@@ -1097,10 +1013,18 @@ key "Mezard2008"
 \end_layout
 
 \begin_layout Standard
-I'm cunfused, beleife propagation can also solve problems that don't have
+I'm confused; beleif propagation can also solve problems that don't have
  a factorization, e.g.
  single-layer perceptrons.
- 
+ So, really, the point is that beleif propagation can be used to solve for
+ probability distributions, and it works well on factorizable distributions,
+ too.
+ Which is kind-of the only point of the quoted paper.
+ They illustrate for the specific case of the Ising mode.
+\end_layout
+
+\begin_layout Standard
+XXX TODO: clean up this section.
 \end_layout
 
 \begin_layout Section
