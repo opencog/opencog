@@ -3463,45 +3463,189 @@ reference "eq:SkipGram"
 \end_layout
 
 \begin_layout Subsection
-Monte Carlo vs.
- Message Passing
+Graph Factorization by Message Passing
 \end_layout
 
 \begin_layout Standard
-There are several ways to solve the gradient descent problem.
- One is Monte Carlo sampling, but this is known to converge slowly.
-\end_layout
+The graph factorization problem can be posed as a constraint problem.
+ When there are relatively few constraints, or when the coupling is weak,
+ this can be solved in 
+\begin_inset Formula $\mathcal{O}\left(N\right)$
+\end_inset
 
-\begin_layout Standard
-Another is Beleif Propagation aka Message Passing aka Page-Rank algorithm.
- Here, one performs self-consistent updates of the boltzman model ...
- XXX FIXME this is muddled.
- There are two problems: forward and inverse.
- The message-passing solves only the forward probelm.
- We need to solve the inverse problem.
-\end_layout
-
-\begin_layout Standard
-But this only solves the forward (direct) problem (where the hamiltonian
- is known, but the distribution is not).
- We need to (also) solve the inverse problem: derive a hamiltonian from
- an observed distribution.
- The standard way for doing this is to guess a hamiltonian, solve for the
- resulting distribution by message passing, compare this distribution to
- the observed distribution, and revise the hamiltonian (by hill climbing
- or gradient descent), and repeat.
- This is very time consuming.
-\end_layout
-
-\begin_layout Standard
-The general process is outlined by Mezard and Mora in a very readable paper.
+ time by beleif propagation or message passing.
+ The general setting is outlined by Mezard and Mora in a very readable paper,
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mezard2008"
 
 \end_inset
 
+ recaped here.
+\end_layout
 
+\begin_layout Standard
+A factorizable graph is written in the form
+\begin_inset Formula 
+\[
+p\left(\vec{x}\right)=\frac{1}{Z}\prod_{a}\psi_{a}\left(x_{i_{1}\left(a\right)},x_{i_{2}\left(a\right)},\cdots,x_{i_{k\left(a\right)}\left(a\right)}\right)
+\]
+
+\end_inset
+
+Here, the vector 
+\begin_inset Formula $\vec{x}=\left(x_{1},x_{2},\cdots,x_{N}\right)$
+\end_inset
+
+ describes the state of the system, so that each 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ is some variable.
+ Thus, 
+\begin_inset Formula $p\left(\vec{x}\right)$
+\end_inset
+
+ describes the probability of finding the system in state 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+.
+ Its is assumed that the system must satisfy a set of constraints, which
+ are reflected in the 
+\begin_inset Formula $\psi_{a}$
+\end_inset
+
+, with the index 
+\begin_inset Formula $a$
+\end_inset
+
+ running over the set of constraints.
+ The constraints are assumed to run over only a subset of the full vector
+ 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+, so that, for fixed 
+\begin_inset Formula $a$
+\end_inset
+
+, only 
+\begin_inset Formula $k=k\left(a\right)$
+\end_inset
+
+ variables are involved.
+ Which of these variables are involved are indicated by the indicator function
+ 
+\begin_inset Formula $\vec{i}\left(a\right)=\left(i_{1}\left(a\right),i_{2}\left(a\right),\cdots,i_{k}\left(a\right)\right)$
+\end_inset
+
+.
+ The indicated variables for constraint 
+\begin_inset Formula $a$
+\end_inset
+
+ are then 
+\begin_inset Formula $x_{i_{1}\left(a\right)},x_{i_{2}\left(a\right)},\cdots,x_{i_{k}\left(a\right)}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+One eample, given by Mezard, is that of an error-detecting code.
+ In this case, each constraint 
+\begin_inset Formula $\psi_{a}$
+\end_inset
+
+ is typically a parity polynomial, so that 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+ is a bit-string, and the 
+\begin_inset Formula $\psi_{a}$
+\end_inset
+
+ are parity constraints.
+ Thus, 
+\begin_inset Formula $\psi_{a}\left(\vec{x}\right)=1$
+\end_inset
+
+ when the parity on 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+ is satsified, else it is zero.
+ For an error-correcting code, the 
+\begin_inset Formula $\psi_{a}$
+\end_inset
+
+ are decreasing functions of the number of errors in the bit-string.
+ For an error-correcting code, one would write 
+\begin_inset Formula 
+\[
+\vec{x}=\left(\vec{y},\vec{d}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\vec{y}$
+\end_inset
+
+ is the crypt-text (the bit-string received over the communications channel,
+ and thus possibly containing bit-errors, and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ is the decrypted plain-text.
+ Thus 
+\begin_inset Formula $p\left(\vec{x}\right)=p\left(\vec{y},\vec{d}\right)=1$
+\end_inset
+
+ when 
+\begin_inset Formula $\vec{y}$
+\end_inset
+
+ has no errors and 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ is the decoding of 
+\begin_inset Formula $\vec{y}$
+\end_inset
+
+.
+ Otherwise, 
+\begin_inset Formula $p$
+\end_inset
+
+ is large, when 
+\begin_inset Formula $\vec{d}$
+\end_inset
+
+ is an error-free decoding of 
+\begin_inset Formula $\vec{y}$
+\end_inset
+
+, and if no error-free decodings exist, 
+\begin_inset Formula $p$
+\end_inset
+
+ is low or zero.
+ 
+\end_layout
+
+\begin_layout Standard
+each 
+\begin_inset Formula $\psi$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Under certain conditions, 
 \end_layout
 
 \begin_layout Subsection
