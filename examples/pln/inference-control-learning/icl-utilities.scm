@@ -207,16 +207,28 @@
   ;; Switch to destination atomspace.
   (cog-set-atomspace! AS)
 
-  ;; The creation of a ListLink result in the atoms being inserted in
-  ;; the current atomspace.
-  (let* ((LST-List (List LST))
-         (results (cog-outgoing-set LST-List)))
-    ;; Remove List link cruft
-    (cog-delete LST-List)
+  (let ((results (map icl-cp-atom LST)))
     ;; Switch back to initial atomspace.
     (cog-set-atomspace! initial-as)
     ;; Return the copied LST now in AS
     results))
+
+(define (icl-cp-atom a)
+"
+  icl-cp AS LST - Copy ATOM to current atomspace and return the atom once
+                  copied. If ATOM is already in the current atomspace,
+                  then only overwrite the TV if its confidence is lower
+                  than ATOM's TV confidence.
+"
+  (let* ((a-type (cog-type a))
+         (a-out (cog-outgoing-set a))
+         (a-name (cog-name a))
+         (a-tv (cog-tv a))
+         (a-cp-out (map icl-cp-atom a-out))
+         (a-cp (if (cog-node? a)
+                   (cog-new-node a-type a-name)
+                   (cog-new-link a-type a-cp-out))))
+    (cog-merge-hi-conf-tv! a-cp a-tv)))
 
 (define (icl-cp-all AS)
 "
