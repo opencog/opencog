@@ -2551,6 +2551,47 @@ coding theory
  
 \end_layout
 
+\begin_layout Subsubsection
+High-accuracy two-point models
+\end_layout
+
+\begin_layout Standard
+Merely computing the MI between word-pairs does 
+\emph on
+not
+\emph default
+ give a solution to the Ising model; it only gives a rough approximation.
+ One can do considerably better, using several different algorithms, including
+ Monte Carlo and message passing algorithms.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mezard2008,Weigt2009"
+
+\end_inset
+
+ This is clearly appropriate for certain problem domains.
+ For example, for protein folding and protein mating, the solution to the
+ Ising model obtained by message passing beomes a very accurate predictor
+ of the three-dimensional physical structure of the protein, and indicates
+ which amino acids actually become physically close to one-another.
+\end_layout
+
+\begin_layout Standard
+For langauge, the need for a high-fidelity solution is not so clear.
+ From dependency grammar, we know that most words do not have a pair-wise
+ interaction.
+ The exceptions are determiners, and maybe mass nouns without any modifiers
+ on them.
+ Clearly, verbs and prepositions are never limited to pair-wise interactions.
+\end_layout
+
+\begin_layout Standard
+Would one obtain a better starting point for grammar, if one had a high-quality
+ solution to the pair-wise Ising model? This is not known.
+ But there seems to be no particular reason to think that one would.
+ 
+\end_layout
+
 \begin_layout Subsection
 MST models of Language
 \end_layout
@@ -2947,43 +2988,6 @@ vacuum
  be made explicit.
  The single-point propagators have an explicit numerical effect in the determina
 tion of the best parse tree for a given sentence.
-\end_layout
-
-\begin_layout Subsection
-MST vs.
- Ising
-\end_layout
-
-\begin_layout Standard
-Maximizing MI is just approximate ...
- vs.
- soliving ising exactly.
- XXX Expand and explain.
-\end_layout
-
-\begin_layout Standard
-Well, except we've got no reason to think that a pair-wise interaction for
- words is best -- this is unlike the protein interaction models, where we
- do expect amino acids to interact pair-wise -- and thus, solving the Ising
- model accurately is a good idea.
- e.g.Weigt
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Weigt2009"
-
-\end_inset
-
- gives a direct-interaction form of MI that is more accurate than MI, and
- works etrely well as an indicator of actual physical structure.
-\end_layout
-
-\begin_layout Standard
-This is in contrast to language, where we only expect and hope for pairwise
- interactions for determiners, and maybe a few other words - nouns that
- do not have any modifiers on them.
- In general, a pair-wiseonly Ising model of langauge would be wrong, and
- its not obvious why, or if solving an eplicit Ising model for word pairs
- would somehow be better than just using the MI.
 \end_layout
 
 \begin_layout Subsection
