@@ -2961,6 +2961,31 @@ Maximizing MI is just approximate ...
  XXX Expand and explain.
 \end_layout
 
+\begin_layout Standard
+Well, except we've got no reason to think that a pair-wise interaction for
+ words is best -- this is unlike the protein interaction models, where we
+ do expect amino acids to interact pair-wise -- and thus, solving the Ising
+ model accurately is a good idea.
+ e.g.Weigt
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Weigt2009"
+
+\end_inset
+
+ gives a direct-interaction form of MI that is more accurate than MI, and
+ works etrely well as an indicator of actual physical structure.
+\end_layout
+
+\begin_layout Standard
+This is in contrast to language, where we only expect and hope for pairwise
+ interactions for determiners, and maybe a few other words - nouns that
+ do not have any modifiers on them.
+ In general, a pair-wiseonly Ising model of langauge would be wrong, and
+ its not obvious why, or if solving an eplicit Ising model for word pairs
+ would somehow be better than just using the MI.
+\end_layout
+
 \begin_layout Subsection
 Disjunct Models of Language
 \end_layout
