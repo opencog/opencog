@@ -41,7 +41,7 @@
 (define (mine-control-rules-for inference-rule negative)
   (icl-logger-fine "Mining patterns for ~a" inference-rule)
 
-  (let* ((texts-cpt (mk-texts inference-rule))
+  (let* ((texts-cpt (mk-texts inference-rule negative))
          (ipat (initpat inference-rule negative))
          (patterns (cog-mine texts-cpt
                              minsup
@@ -144,52 +144,76 @@
 ;;
 ;; preproof-of(A, T)
 ;; expand(A, L, R, B)
+;; preproof-of(B, T)
 ;;
-;; and possibly (Not preproof-of(A, T)) if negative negative is #t
+;; or, if negative is #t
+;;
+;; preproof-of(A, T)
+;; expand(A, L, R, B)
+;; Not
+;;   preproof-of(B, T)
 ;;
 ;; where R is the given inference rule and A, T, L and B are variables
-(define (mk-texts inference-rule)
+(define (mk-texts inference-rule negative)
+  (icl-logger-fine-atomspace (cog-atomspace))
   (let* (;; Create texts concept node
          (texts-cpt (random-node 'ConceptNode 8 "texts-"))
 
-         ;; Fetch preproof-of
-         (preproof-vardecl (VariableList
-                              (dontexec-typed (Variable "$I"))
-                              (Variable "$T")))
-         (preproof-clause (preproof-of (List (Variable "$I") (Variable "$T"))))
-         (preproof-precondition (absolutely-true-eval preproof-clause))
-         (preproof-pattern (and preproof-precondition preproof-clause))
-         (preproof-bind (Bind preproof-vardecl preproof-pattern preproof-clause))
-         (preproof-results (cog-execute! preproof-bind))
+         ;; Build vardecl
+         (T (Variable "$T"))
+         (A (Variable "$A"))
+         (L (Variable "$L"))
+         (B (Variable "$B"))
+         (vardecl (VariableList
+                    T
+                    (dontexec-typed A)
+                    L
+                    (dontexec-typed B)))
 
-         ;; Fetch Not preproof-of
-         (not-preproof-clause (Not preproof-clause))
-         (not-preproof-precondition (absolutely-true-eval not-preproof-clause))
-         (not-preproof-pattern (and not-preproof-precondition not-preproof-clause))
-         (not-preproof-bind (Bind preproof-vardecl not-preproof-pattern not-preproof-clause))
-         (not-preproof-results (cog-execute! not-preproof-bind))
+         ;; preproof-of(A, T)
+         (preproof-A-clause (preproof-of (List A T)))
+         (preproof-A-precondition (absolutely-true-eval preproof-A-clause))
 
-         ;; Fetch expand
-         (expand-vardecl (VariableList
-                           (dontexec-typed (Variable "$A"))
-                           (dontexec-typed (Variable "$B"))
-                           (Variable "$L")))
+         ;; [Not] preproof-of(B, T)
+         (preproof-B-clause (if negative (Not (preproof-of (List B T))) (preproof-of (List B T))))
+         (preproof-B-precondition (absolutely-true-eval preproof-B-clause))
+
+         ;; expand(A, L, R, B)
          (expand-input (List
-                         (Variable "$A")
-                         (Variable "$L")
+                         A
+                         L
                          (DontExec inference-rule)))
-         (expand-pattern (expand expand-input (Variable "$B")))
-         (expand-bind (Bind expand-vardecl expand-pattern expand-pattern))
+         (expand-clause (expand expand-input B))
+         (expand-precondition (absolutely-true-eval expand-clause))
+
+         ;; preproof-of(A, T) & expand(A, L, R, B) & [Not] preproof-of(B, T)
+         (pattern (And preproof-A-clause
+                       preproof-B-clause
+                       expand-clause
+                       preproof-A-precondition
+                       preproof-B-precondition
+                       expand-precondition))
+
+         ;; Fetch preproof-of(A, T)
+         (preproof-A-bind (Bind vardecl pattern preproof-A-clause))
+         (preproof-A-results (cog-execute! preproof-A-bind))
+
+         ;; Fetch [Not] preproof-of(B, T)
+         (preproof-B-bind (Bind vardecl pattern preproof-B-clause))
+         (preproof-B-results (cog-execute! preproof-B-bind))
+
+         ;; Fetch expand(A, L, R, B)
+         (expand-bind (Bind vardecl pattern expand-clause))
          (expand-results (cog-execute! expand-bind))
 
          ;; Define function to add a member to texts-cpt
          (add-text (lambda (x) (Member x texts-cpt))))
 
     ;; Add all fetched preproof-of as members of texts-cpt
-    (for-each add-text (cog-outgoing-set preproof-results))
+    (for-each add-text (cog-outgoing-set preproof-A-results))
 
     ;; Add all fetched Not preproof-of as members of texts-cpt
-    (for-each add-text (cog-outgoing-set not-preproof-results))
+    (for-each add-text (cog-outgoing-set preproof-B-results))
 
     ;; Add all fetched expand as members of texts-cpt
     (for-each add-text (cog-outgoing-set expand-results))
