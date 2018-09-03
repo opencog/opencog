@@ -186,16 +186,18 @@
     (cog-set-atomspace! old-as)
     result))
 
-;; Build an atomspace as the union of a list of atomspaces
+;; Build an atomspace as the union of a list of atomspaces.
 (define (union-as dst atomspaces)
   (for-each (lambda (src) (cp-as src dst)) atomspaces))
 
 ;; Redefine cog-cp and cog-cp-all to return a list of copied atoms
-;; (indeed these are not the same the ones in the source).
+;; (indeed these are not the same the ones in the source). Take care
+;; of not overwriting TVs with higher confidences by lower ones.
 (define (icl-cp AS LST)
 "
   icl-cp AS LST - Copy the atoms in LST to the given atomspace AS and
-  return the list of atoms now in AS.
+                  return the list of atoms now in AS. Only overwrite
+                  existing TVs by TVs with higher confidences.
 "
   (define initial-as (cog-atomspace))
 
