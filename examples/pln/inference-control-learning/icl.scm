@@ -63,7 +63,7 @@
          (results (map cdr histories-results))
          (sol_count (count values results)))
 
-    (icl-logger-info "Number of solved problems = ~a" sol_count)
+    (icl-logger-info "Number of solved problems = ~a/~a" sol_count pss)
 
     ;; Copy all atomspaces for histories to history-as
     (icl-logger-info "Move all problem histories to history-as")
