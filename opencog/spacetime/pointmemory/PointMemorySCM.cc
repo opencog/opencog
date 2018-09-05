@@ -107,11 +107,11 @@ public:
 	// Remove atom from location at elapsed past time
 	Handle remove_past_location_ato(Handle, Handle, Handle);
 	// Remove all specific atoms from map at current time
-	Handle remove_curr_ato(Handle, Handle ato);
+	Handle remove_curr_ato(Handle, Handle ato, bool has_xyz);
 	// Remove all specific atoms from map in elapsed past
-	Handle remove_past_ato(Handle, Handle ato, Handle elapse);
+	Handle remove_past_ato(Handle, Handle ato, Handle elapse, bool has_xyz);
 	// Remove all specific atoms in all time points and all locations
-	Handle remove_all_ato(Handle, Handle ato);
+	Handle remove_all_ato(Handle, Handle ato, bool has_xyz);
 
 	////spatial query api assuming 1 ato in 1 map at 1 location.
 	Handle get_distance_between(Handle, Handle list, Handle elapse);
@@ -325,10 +325,15 @@ Handle PointMemorySCM::map_ato(Handle map_name, Handle ato, Handle loc)
 	have_map(map_name);
 	// loc should be a ListLink of three NumberNodes.
 	const HandleSeq& hs = loc->getOutgoingSet();
-	double x = NumberNodeCast(hs[0])->get_value();
-	double y = NumberNodeCast(hs[1])->get_value();
-	double z = NumberNodeCast(hs[2])->get_value();
-	tsa[map_name]->insert_atom(point3d(x, y, z), ato);
+	assert(hs.size() == 0 or hs.size() == 3);
+    if(hs.size() == 3){
+        double x = NumberNodeCast(hs[0])->get_value();
+        double y = NumberNodeCast(hs[1])->get_value();
+        double z = NumberNodeCast(hs[2])->get_value();
+        tsa[map_name]->insert_atom(point3d(x, y, z), ato);
+    }else{
+    tsa[map_name]->insert_atom(ato);
+}
 	return ato;
 }
 
@@ -520,24 +525,24 @@ Handle PointMemorySCM::remove_past_location_ato(Handle map_name,
 	return loc;
 }
 
-Handle PointMemorySCM::remove_curr_ato(Handle map_name, Handle ato)
+Handle PointMemorySCM::remove_curr_ato(Handle map_name, Handle ato, bool has_xyz)
 {
 	have_map(map_name);
-	tsa[map_name]->remove_atom_at_current_time(ato);
+	tsa[map_name]->remove_atom_at_current_time(ato, has_xyz);
 	return ato;
 }
 
-Handle PointMemorySCM::remove_past_ato(Handle map_name, Handle ato, Handle elapse)
+Handle PointMemorySCM::remove_past_ato(Handle map_name, Handle ato, Handle elapse, bool has_xyz)
 {
 	time_pt tpt = get_map_time(map_name, elapse);
-	tsa[map_name]->remove_atom_at_time(tpt, ato);
+	tsa[map_name]->remove_atom_at_time(tpt, ato, has_xyz);
 	return ato;
 }
 
-Handle PointMemorySCM::remove_all_ato(Handle map_name, Handle ato)
+Handle PointMemorySCM::remove_all_ato(Handle map_name, Handle ato, bool has_xyz)
 {
 	have_map(map_name);
-	tsa[map_name]->remove_atom(ato);
+	tsa[map_name]->remove_atom(ato, has_xyz);
 	return ato;
 }
 

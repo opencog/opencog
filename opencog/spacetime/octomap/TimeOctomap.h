@@ -56,6 +56,7 @@ struct TimeSlice
     time_pt t;
     duration_c duration;
     AtomOcTree<T> map_tree;
+    std::vector<T> temporal;
     TimeSlice(time_pt tp, duration_c d): t(tp), duration(d) {}
 
     /// Return true if time-point is within this interval.
@@ -81,23 +82,38 @@ struct TimeSlice
         map_tree.setNodeData(location, ato);
     }
 
+    void insert_atom(const T& ato){
+        temporal.push_back(ato);
+    }
+
     // Remove the atom from this time-slice.
-    void remove_atom(const T& ato){
-        point3d_list pl;
-        for (typename AtomOcTree<T>::tree_iterator it2 = map_tree.begin_tree(),
-                endit2 = map_tree.end_tree();
-                it2 != endit2;
-                ++it2)
-        {
-            if (it2->getData() == ato)
-            {
-                pl.push_back(it2.getCoordinate());
-                it2->setData(T()); //FIXME this requires default constructor always??
+    void remove_atom(const T& ato, bool has_xyz=true){
+        if(not has_xyz){
+            for(auto it = temporal.begin(); it != temporal.end(); ++it){
+                if(*it == ato){
+                    temporal.erase(it);
+                }
             }
+            return;
         }
 
-        for (auto& p : pl)
-            map_tree.deleteNode(p);
+        else{
+            point3d_list pl;
+            for (typename AtomOcTree<T>::tree_iterator it2 = map_tree.begin_tree(),
+                    endit2 = map_tree.end_tree();
+                    it2 != endit2;
+                    ++it2)
+            {
+                if (it2->getData() == ato)
+                {
+                    pl.push_back(it2.getCoordinate());
+                    it2->setData(T()); //FIXME this requires default constructor always??
+                }
+            }
+
+            for (auto& p : pl)
+                map_tree.deleteNode(p);
+        }
     }
 
     void remove_atoms_at_location(const point3d& location){
@@ -196,6 +212,12 @@ public:
         tu.insert_atom(location, ato);
     }
 
+    void insert_atom(const T& ato) {
+        std::lock_guard<std::mutex> lgm(mtx);
+        TimeSlice<T>& tu = get_current_timeslice();
+        tu.insert_atom(ato);
+    }
+
     void remove_atoms_at_location(const point3d& location){
         std::lock_guard<std::mutex> lgm(mtx);
         TimeSlice<T>& tu = get_current_timeslice();
@@ -211,23 +233,23 @@ public:
     }
 
     // Remove the atom from the current timeslice
-    void remove_atom_at_current_time(const T& ato){
+    void remove_atom_at_current_time(const T& ato, bool has_xyz=true){
         std::lock_guard<std::mutex> lgm(mtx);
         TimeSlice<T>& tu = get_current_timeslice();
-        tu.remove_atom(ato);
+        tu.remove_atom(ato, has_xyz);
     }
 
-    void remove_atom_at_time(const time_pt& time_p, const T& ato) {
+    void remove_atom_at_time(const time_pt& time_p, const T& ato, bool has_xyz=true) {
         std::lock_guard<std::mutex> lgm(mtx);
         auto tu = find(time_p);
         if (tu == nullptr) return;
-        tu->remove_atom(ato);
+        tu->remove_atom(ato, has_xyz);
     }
 
     // Remove all occurences of atom in all time-slices
-    void remove_atom(const T& ato){
+    void remove_atom(const T& ato, bool has_xyz=true){
         std::lock_guard<std::mutex> lgm(mtx);
-        for (auto& tu : time_circle) tu.remove_atom(ato);
+        for (auto& tu : time_circle) tu.remove_atom(ato, has_xyz);
     }
 
     // Get atom at the given location in the current time-slice.
@@ -268,12 +290,20 @@ public:
             // Go through all nodes of the octomap, searching for the atom
             // FIXME -- the octomap should provide this as a method.
             // We should not have to search for this ourselves.
-            for (auto& nod : tu.map_tree)
+            for (auto& nod : tu.map_tree){
                 if (nod.getData() == ato){
                     tl.push_back(tu.t);
                     break;
                 }
-        }
+            }
+
+            for(auto& data : tu.temporal){
+                if(data == ato){
+                    tl.push_back(tu.t);
+                    break;
+                }
+            }
+       }
         return tl;
     }
 
