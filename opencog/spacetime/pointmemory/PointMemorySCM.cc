@@ -107,11 +107,11 @@ public:
 	// Remove atom from location at elapsed past time
 	Handle remove_past_location_ato(Handle, Handle, Handle);
 	// Remove all specific atoms from map at current time
-	Handle remove_curr_ato(Handle, Handle ato, bool has_xyz);
+	Handle remove_curr_ato(Handle, Handle ato);
 	// Remove all specific atoms from map in elapsed past
-	Handle remove_past_ato(Handle, Handle ato, Handle elapse, bool has_xyz);
+	Handle remove_past_ato(Handle, Handle ato, Handle elapse);
 	// Remove all specific atoms in all time points and all locations
-	Handle remove_all_ato(Handle, Handle ato, bool has_xyz);
+	Handle remove_all_ato(Handle, Handle ato);
 
 	////spatial query api assuming 1 ato in 1 map at 1 location.
 	Handle get_distance_between(Handle, Handle list, Handle elapse);
@@ -525,24 +525,24 @@ Handle PointMemorySCM::remove_past_location_ato(Handle map_name,
 	return loc;
 }
 
-Handle PointMemorySCM::remove_curr_ato(Handle map_name, Handle ato, bool has_xyz)
+Handle PointMemorySCM::remove_curr_ato(Handle map_name, Handle ato)
 {
 	have_map(map_name);
-	tsa[map_name]->remove_atom_at_current_time(ato, has_xyz);
+	tsa[map_name]->remove_atom_at_current_time(ato);
 	return ato;
 }
 
-Handle PointMemorySCM::remove_past_ato(Handle map_name, Handle ato, Handle elapse, bool has_xyz)
+Handle PointMemorySCM::remove_past_ato(Handle map_name, Handle ato, Handle elapse)
 {
 	time_pt tpt = get_map_time(map_name, elapse);
-	tsa[map_name]->remove_atom_at_time(tpt, ato, has_xyz);
+	tsa[map_name]->remove_atom_at_time(tpt, ato);
 	return ato;
 }
 
-Handle PointMemorySCM::remove_all_ato(Handle map_name, Handle ato, bool has_xyz)
+Handle PointMemorySCM::remove_all_ato(Handle map_name, Handle ato)
 {
 	have_map(map_name);
-	tsa[map_name]->remove_atom(ato, has_xyz);
+	tsa[map_name]->remove_atom(ato);
 	return ato;
 }
 

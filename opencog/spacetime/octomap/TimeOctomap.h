@@ -87,33 +87,28 @@ struct TimeSlice
     }
 
     // Remove the atom from this time-slice.
-    void remove_atom(const T& ato, bool has_xyz=true){
-        if(not has_xyz){
-            for(auto it = temporal.begin(); it != temporal.end(); ++it){
-                if(*it == ato){
-                    temporal.erase(it);
-                }
+    void remove_atom(const T& ato){
+        for(auto it = temporal.begin(); it != temporal.end(); ++it){
+            if(*it == ato){
+                temporal.erase(it);
             }
-            return;
         }
 
-        else{
-            point3d_list pl;
-            for (typename AtomOcTree<T>::tree_iterator it2 = map_tree.begin_tree(),
-                    endit2 = map_tree.end_tree();
-                    it2 != endit2;
-                    ++it2)
+        point3d_list pl;
+        for (typename AtomOcTree<T>::tree_iterator it2 = map_tree.begin_tree(),
+                endit2 = map_tree.end_tree();
+                it2 != endit2;
+                ++it2)
+        {
+            if (it2->getData() == ato)
             {
-                if (it2->getData() == ato)
-                {
-                    pl.push_back(it2.getCoordinate());
-                    it2->setData(T()); //FIXME this requires default constructor always??
-                }
+                pl.push_back(it2.getCoordinate());
+                it2->setData(T()); //FIXME this requires default constructor always??
             }
-
-            for (auto& p : pl)
-                map_tree.deleteNode(p);
         }
+
+        for (auto& p : pl)
+            map_tree.deleteNode(p);
     }
 
     void remove_atoms_at_location(const point3d& location){
@@ -233,23 +228,23 @@ public:
     }
 
     // Remove the atom from the current timeslice
-    void remove_atom_at_current_time(const T& ato, bool has_xyz=true){
+    void remove_atom_at_current_time(const T& ato){
         std::lock_guard<std::mutex> lgm(mtx);
         TimeSlice<T>& tu = get_current_timeslice();
-        tu.remove_atom(ato, has_xyz);
+        tu.remove_atom(ato);
     }
 
-    void remove_atom_at_time(const time_pt& time_p, const T& ato, bool has_xyz=true) {
+    void remove_atom_at_time(const time_pt& time_p, const T& ato) {
         std::lock_guard<std::mutex> lgm(mtx);
         auto tu = find(time_p);
         if (tu == nullptr) return;
-        tu->remove_atom(ato, has_xyz);
+        tu->remove_atom(ato);
     }
 
     // Remove all occurences of atom in all time-slices
-    void remove_atom(const T& ato, bool has_xyz=true){
+    void remove_atom(const T& ato){
         std::lock_guard<std::mutex> lgm(mtx);
-        for (auto& tu : time_circle) tu.remove_atom(ato, has_xyz);
+        for (auto& tu : time_circle) tu.remove_atom(ato);
     }
 
     // Get atom at the given location in the current time-slice.
