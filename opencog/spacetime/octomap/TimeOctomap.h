@@ -77,7 +77,8 @@ struct TimeSlice
     }
 
     // Store an atom at `location`, for this timeslice
-    void insert_atom(const point3d& location, const T& ato){
+    void insert_atom(const point3d& location, const T& ato)
+    {
         map_tree.updateNode(location, true);
         map_tree.setNodeData(location, ato);
     }
@@ -87,7 +88,8 @@ struct TimeSlice
     }
 
     // Remove the atom from this time-slice.
-    void remove_atom(const T& ato){
+    void remove_atom(const T& ato)
+    {
         for(auto it = temporal.begin(); it != temporal.end(); ++it){
             if(*it == ato){
                 temporal.erase(it);
@@ -111,12 +113,14 @@ struct TimeSlice
             map_tree.deleteNode(p);
     }
 
-    void remove_atoms_at_location(const point3d& location){
+    void remove_atoms_at_location(const point3d& location)
+    {
         map_tree.updateNode(location, false);
     }
 
     // Get the atom at location
-    T get_atom_at_location(const point3d& location) {
+    T get_atom_at_location(const point3d& location)
+    {
         OcTreeNode* result = map_tree.search(location);
         if (result == nullptr or not map_tree.isNodeOccupied(result)) return T(); //FIXME
         return (static_cast<AtomOcTreeNode<T>*>(result))->getData();
@@ -213,14 +217,16 @@ public:
         tu.insert_atom(ato);
     }
 
-    void remove_atoms_at_location(const point3d& location){
+    void remove_atoms_at_location(const point3d& location)
+    {
         std::lock_guard<std::mutex> lgm(mtx);
         TimeSlice<T>& tu = get_current_timeslice();
         tu.remove_atoms_at_location(location);
     }
 
     void remove_atom_at_time_by_location(time_pt tp, 
-                                 const point3d& location){
+                                 const point3d& location)
+    {
         std::lock_guard<std::mutex> lgm(mtx);
         auto tu = find(tp);
         if (tu == nullptr) return;
@@ -228,13 +234,15 @@ public:
     }
 
     // Remove the atom from the current timeslice
-    void remove_atom_at_current_time(const T& ato){
+    void remove_atom_at_current_time(const T& ato)
+    {
         std::lock_guard<std::mutex> lgm(mtx);
         TimeSlice<T>& tu = get_current_timeslice();
         tu.remove_atom(ato);
     }
 
-    void remove_atom_at_time(const time_pt& time_p, const T& ato) {
+    void remove_atom_at_time(const time_pt& time_p, const T& ato)
+    {
         std::lock_guard<std::mutex> lgm(mtx);
         auto tu = find(time_p);
         if (tu == nullptr) return;
@@ -281,18 +289,18 @@ public:
     time_list get_timeline(const T& ato) {
         std::lock_guard<std::mutex> lgm(mtx);
         time_list tl;
-        for (auto& tu : time_circle){
+        for (auto& tu : time_circle) {
             // Go through all nodes of the octomap, searching for the atom
             // FIXME -- the octomap should provide this as a method.
             // We should not have to search for this ourselves.
-            for (auto& nod : tu.map_tree){
+            for (auto& nod : tu.map_tree) {
                 if (nod.getData() == ato){
                     tl.push_back(tu.t);
                     break;
                 }
             }
 
-            for(auto& data : tu.temporal){
+            for(auto& data : tu.temporal) {
                 if(data == ato){
                     tl.push_back(tu.t);
                     break;

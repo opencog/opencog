@@ -326,12 +326,12 @@ Handle PointMemorySCM::map_ato(Handle map_name, Handle ato, Handle loc)
 	// loc should be a ListLink of three NumberNodes.
 	const HandleSeq& hs = loc->getOutgoingSet();
 	assert(hs.size() == 0 or hs.size() == 3);
-    if(hs.size() == 3){
+    if(hs.size() == 3) {
         double x = NumberNodeCast(hs[0])->get_value();
         double y = NumberNodeCast(hs[1])->get_value();
         double z = NumberNodeCast(hs[2])->get_value();
         tsa[map_name]->insert_atom(point3d(x, y, z), ato);
-    }else{
+    } else {
     tsa[map_name]->insert_atom(ato);
 }
 	return ato;
