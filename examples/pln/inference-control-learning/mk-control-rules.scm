@@ -6,13 +6,31 @@
   (clear)
   (cp-as history-as (cog-atomspace))
 
-  ;; We ground the control rules first then evaluate all antecedents
-  ;; to allow direct evaluation of the control rules.
-  (ground-control-rules)
+  ;; Evaluate all antecedents to allow direct evaluation of the
+  ;; control rules.
+  (icl-logger-debug "Evaluate antecedents")
   (evaluate-antecedents)
 
-  ;; Produce inference control rules
-  (let* ((results (produce-control-rules)))
+  ;; (icl-logger-fine "mk-control-rules (cog-atomspace) [after evaluating antecedents]:")
+  ;; (icl-logger-fine-atomspace (cog-atomspace))
+
+  ;; Run pattern miner on the history to find frequent patterns for
+  ;; control rules.
+  (icl-logger-debug "Mine control rules")
+  (mine-all-control-rules)
+
+  ;; ;; We ground the control rules first.
+  ;; (icl-logger-debug "Ground control rules")
+  ;; (ground-control-rules)
+
+  (icl-logger-fine "mk-control-rules (cog-atomspace) [after mining control rules]:")
+  (icl-logger-fine-atomspace (cog-atomspace))
+
+  ;; Evaluate inference control rules
+  (ure-logger-flush)               ; make sure the next message does
+                                   ; not get mangled
+  (icl-logger-debug "Evaluate control rules")
+  (let* ((results (evaluate-control-rules)))
     ;; Copy inference control rules to the Inference Control Rules
     ;; atomspace
     (icl-cp control-as (cog-outgoing-set results)))
@@ -21,7 +39,8 @@
   (remove-dangling-atoms control-as)
 
   (icl-logger-debug "Control AtomSpace:")
-  (icl-logger-debug-atomspace control-as))
+  (icl-logger-debug-atomspace control-as)
+)
 
 (define (ground-control-rules)
   ;; Load PLN to have access to the PLN rules
@@ -33,6 +52,7 @@
   ;; (expand ($A $L $R) $B)
   ;; ->
   ;; (preproof-of $B $T)
+  (icl-logger-debug "Ground context free control rules")
   (ground-context-free-rules)
 
   ;; Ground rules like
@@ -41,6 +61,7 @@
   ;; (expand ($A (Inheritance a $X) $R) $B)
   ;; ->
   ;; (preproof-of $B $T)
+  (icl-logger-debug "Ground a-pattern control rules")
   (ground-a-pattern-rules)
 )
 
@@ -50,13 +71,9 @@
                     (Type "DefinedSchemaNode")))
          (impl-vardecl (VariableList
                          (Variable "$T")
-                         (TypedVariable
-                           (Variable "$A")
-                           (Type "DontExecLink"))
+                         (dontexec-typed (Variable "$A"))
                          (Variable "$L")
-                         (TypedVariable
-                           (Variable "$B")
-                           (Type "DontExecLink"))))
+                         (dontexec-typed (Variable "$B"))))
          (impl-antecedent (And
                             (preproof-of
                               (List
@@ -97,13 +114,9 @@
                     (Type "DefinedSchemaNode")))
          (impl-vardecl (VariableList
                          (Variable "$T")
-                         (TypedVariable
-                           (Variable "$A")
-                           (Type "DontExecLink"))
+                         (dontexec-typed (Variable "$A"))
                          (Variable "$X")
-                         (TypedVariable
-                           (Variable "$B")
-                           (Type "DontExecLink"))))
+                         (dontexec-typed (Variable "$B"))))
          (impl-antecedent (And
                             (preproof-of
                               (List
@@ -154,9 +167,25 @@
                                 (DontExec (Variable "$A"))
                                 (Variable "$L")
                                 (DontExec (Variable "$Rule")))
-                              (DontExec (Variable "$B"))))))
-    ;; Evaluate all antecedents
-    (pp-icr-bc impl-antecedent)))
+                              (DontExec (Variable "$B")))))
+         ;; Evaluate all antecedents
+         (results (pp-icr-bc impl-antecedent)))
+
+    (icl-logger-fine "evaluate-antecedents results = ~a" results)
+
+    ;; Remove query to clean the atomspace
+    (extract-hypergraph impl-antecedent) ; TODO: fix bug should print only (stv 1 1)
+
+    ;; Remove SetLink wrapping the results
+    (cog-extract results)
+
+    ;; Remove informationless atoms
+    (remove-dangling-atoms (cog-atomspace))
+
+    ;; (icl-logger-fine "evaluate-antecedents (cog-atomspace):")
+    ;; (icl-logger-fine-atomspace (cog-atomspace))
+  )
+)
 
 ;; Assumes that the control rules have already been grounded, and all
 ;; antecedent and consequent groundings are evaluated, merely run the
@@ -197,9 +226,12 @@
 ;; TODO: Probably make the arguments as explicit as possible, to
 ;; express the relationships between the different parts, as to make
 ;; sure the variable declarations will reflect these.
-(define (produce-control-rules)
+(define (evaluate-control-rules)
   ;; Load rule base for evaluating the control rules via direct evaluation
   (load "icr-rb.scm")
+
+  (icl-logger-fine "evaluate-control-rules (cog-atomspace):")
+  (icl-logger-fine-atomspace (cog-atomspace))
 
   (let* ((control-rules-vardecl (VariableList
                                   (TypedVariable
@@ -227,6 +259,11 @@
                                        (Unquote (Variable "$expand-output"))))
                                    (preproof-of
                                      (Unquote (Variable "$preproof-B-args")))))))
+
+    (icl-logger-fine "evaluate-control-rules control-rules-vardecl = ~a"
+                     control-rules-vardecl)
+    (icl-logger-fine "evaluate-control-rules control-rules-target = ~a"
+                     control-rules-target)
 
     ;; Produce the inference control rules
     (icr-bc control-rules-target #:vardecl control-rules-vardecl)))

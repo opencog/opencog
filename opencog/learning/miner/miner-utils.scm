@@ -334,7 +334,7 @@
          (es (enough-support? initpat texts-cpt ms)))
     (if (not es)
         ;; The initial pattern doesn't have enough support, thus the
-        ;; solution set is empty        
+        ;; solution set is empty
         (and ;; Use and to sequence statements
              (cog-set-atomspace! parent-as)
              ;; TODO: delete tmp-as if possible
