@@ -195,10 +195,6 @@
 ; A list of word-pairs, together with the associated mutual information,
 ; is returned.
 ;
-; wrapper for backwards compatibility
-(define-public (mst-parse-text plain-text)
-	mst-parse-text-mode plain-text "any" #f)
-
 (define-public (mst-parse-text-mode plain-text cnt-mode mst-dist)
 
 	; Tokenize the sentence into a list of words.
@@ -237,6 +233,10 @@
 	; Process the list of words.
 	(mst-parse-atom-seq word-list trunc-scorer)
 )
+; wrapper for backwards compatibility
+(define-public (mst-parse-text plain-text)
+	mst-parse-text-mode plain-text "any" #f)
+
 
 ; ---------------------------------------------------------------------
 ; Return #t if the section is bigger than what the current postgres
