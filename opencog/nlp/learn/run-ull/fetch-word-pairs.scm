@@ -7,7 +7,7 @@
 ; pass over the same sentences to be parsed.
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
-(use-modules (opencog nlp) (opencog nlp ull-parser))
+(use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (opencog matrix))
 
 (define (fetch-wp cnt-mode)

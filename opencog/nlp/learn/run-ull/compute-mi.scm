@@ -2,7 +2,7 @@
 ; Computes the mutual information for the word pairs.
 ; Takes as input the counting mode: lg, clique, clique-distance
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
-(use-modules (opencog nlp) (opencog nlp ull-parser))
+(use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (opencog matrix))
 
 (define (comp-mi cnt-mode)
