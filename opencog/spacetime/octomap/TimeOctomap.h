@@ -90,8 +90,8 @@ struct TimeSlice
     // Remove the atom from this time-slice.
     void remove_atom(const T& ato)
     {
-        for(auto it = temporal.begin(); it != temporal.end(); ++it){
-            if(*it == ato){
+        for(auto it = temporal.begin(); it != temporal.end(); ++it) {
+            if(*it == ato) {
                 temporal.erase(it);
             }
         }
@@ -102,8 +102,7 @@ struct TimeSlice
                 it2 != endit2;
                 ++it2)
         {
-            if (it2->getData() == ato)
-            {
+            if (it2->getData() == ato) {
                 pl.push_back(it2.getCoordinate());
                 it2->setData(T()); //FIXME this requires default constructor always??
             }
@@ -294,14 +293,14 @@ public:
             // FIXME -- the octomap should provide this as a method.
             // We should not have to search for this ourselves.
             for (auto& nod : tu.map_tree) {
-                if (nod.getData() == ato){
+                if (nod.getData() == ato) {
                     tl.push_back(tu.t);
                     break;
                 }
             }
 
             for(auto& data : tu.temporal) {
-                if(data == ato){
+                if(data == ato) {
                     tl.push_back(tu.t);
                     break;
                 }
