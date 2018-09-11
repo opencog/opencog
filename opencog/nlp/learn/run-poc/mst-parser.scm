@@ -306,11 +306,6 @@
 	(close-port file-port)
 )
 
-; Wrapper for backwards compatibility
-(define-public (observe-mst plain-text)
-	(observe-mst-mode plain-text "any" #f #f)
-)
-
 (define-public (observe-mst-mode plain-text CNT-MODE MST-DIST EXPORT-MST)
 "
   observe-mst-mode -- update pseduo-disjunct counts by observing raw text.
@@ -332,6 +327,11 @@
 		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
 		(make-sections parse)
 	)
+)
+
+; Wrapper for backwards compatibility
+(define-public (observe-mst plain-text)
+	(observe-mst-mode plain-text "any" #f #f)
 )
 
 ; ---------------------------------------------------------------------
