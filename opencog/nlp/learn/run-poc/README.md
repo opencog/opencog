@@ -669,11 +669,14 @@ and re-installing inside the container all three: cogutil, atomspace, opencog. F
    /cogutil/build$ make && sudo make install
    ```
 
-***Note 2***: Steps 1-5 are only necessary the first time you install the docker container and images.
-Afterwards, you just need to follow steps 6 and 7 every time you want to create a new opencog container,
-or you might want to access directly your already existing contianer (see next note).
+***Note 2***: If you make changes to the code in your installed repos, you can update those in your
+current container by `cd`-ing to the mount directory inside the container and running `/tmp/octool -bi`
 
-***Note 3***: Keep in mind that everytime you run `docker-compose run dev` it will create a new instance of *opencog*
+***Note 3***: Steps 1-5 are only necessary the first time you install the docker container and images.
+Afterwards, you just need to follow steps 6 and 7 every time you want to create a new opencog container,
+or you might want to access directly your already existing container (see next note).
+
+***Note 4***: Keep in mind that everytime you run `docker-compose run dev` it will create a new instance of *opencog*
 but the same instances of *postgres* and *relex* will be running on the background. Use (Ctrl+D) to exit a container.
 Some usefull commands for managing your containers on your local machine are listed below:
   - `docker ps`                         To see the list of all the active containers (it shows *container_ID*).
@@ -689,5 +692,5 @@ Some usefull commands for managing your containers on your local machine are lis
   
 **DO NOT** try to delete all running containers unless strictly necessary because it will delete the *postgres* instance as well, which means losing all your databases!!!
 
-***Note 4***: Remember to always close any cogserver (Ctrl+D) sessions you have started before continuing,
+***Note 5***: Remember to always close any cogserver (Ctrl+D) sessions you have started before continuing,
 otherwise you will have problems accessing your databases later.
