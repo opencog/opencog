@@ -40,7 +40,7 @@ case $1 in
    mst)
       subdir=mst-articles
       observe="observe-mst-mode"
-      if [[ "$exp_parses" == "#t" ]]
+      if [[ "$exp_parses" == "#t" ]]; then
          # create parses directory if missing
          mkdir -p $(dirname "$parsesdir/$rest")
       fi
