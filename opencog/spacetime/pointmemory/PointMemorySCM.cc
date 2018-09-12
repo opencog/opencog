@@ -68,6 +68,8 @@ public:
 	TruthValuePtr is_auto_step_on(Handle);
 	// Add an atom at location on current time step
 	Handle map_ato(Handle map, Handle ato, Handle loc);
+	// Add an atom without location on current time step
+	Handle time_index_ato(Handle map, Handle ato);
 
 	// Get time of first atom in past elapsed time
 	Handle get_first_time(Handle, Handle ato, Handle elapse);
@@ -193,6 +195,7 @@ void PointMemorySCM::init()
 	define_scheme_primitive("cog-pointmem-auto-step-time-off", &PointMemorySCM::auto_step_time_off, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-is-auto-step-on", &PointMemorySCM::is_auto_step_on, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-map-atom", &PointMemorySCM::map_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-time-index-atom", &PointMemorySCM::time_index_ato, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-first-atom", &PointMemorySCM::get_first_time, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-last-atom", &PointMemorySCM::get_last_time, this, "pointmem");
 
@@ -325,15 +328,18 @@ Handle PointMemorySCM::map_ato(Handle map_name, Handle ato, Handle loc)
 	have_map(map_name);
 	// loc should be a ListLink of three NumberNodes.
 	const HandleSeq& hs = loc->getOutgoingSet();
-	assert(hs.size() == 0 or hs.size() == 3);
-    if(hs.size() == 3) {
-        double x = NumberNodeCast(hs[0])->get_value();
-        double y = NumberNodeCast(hs[1])->get_value();
-        double z = NumberNodeCast(hs[2])->get_value();
-        tsa[map_name]->insert_atom(point3d(x, y, z), ato);
-    } else {
-    tsa[map_name]->insert_atom(ato);
+	double x = NumberNodeCast(hs[0])->get_value();
+	double y = NumberNodeCast(hs[1])->get_value();
+	double z = NumberNodeCast(hs[2])->get_value();
+	tsa[map_name]->insert_atom(point3d(x, y, z), ato);
+
+	return ato;
 }
+
+Handle PointMemorySCM::time_index_ato(Handle map_name, Handle ato)
+{
+	tsa[map_name]->insert_atom(ato);
+
 	return ato;
 }
 
