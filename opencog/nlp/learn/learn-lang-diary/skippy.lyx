@@ -8627,6 +8627,34 @@ Everything below here is incoherent and incomplete.
 \end_layout
 
 \begin_layout Subsubsection
+Ising Model
+\end_layout
+
+\begin_layout Standard
+Solving the Ising model by gradient descent can be done; a good way to do
+ this is by using message passing.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mezard2008"
+
+\end_inset
+
+ This is a particularly quickly-convergent mean-field method.
+ The problem is that it fails to converge when the coupling is strong --
+ in other words, when the network is glassy (in the sense of 
+\begin_inset Quotes eld
+\end_inset
+
+spin glass
+\begin_inset Quotes erd
+\end_inset
+
+).
+ The question: is language in a spin-glass state? Hypothesis: yes, it is.
+ Question: how can this be demonstrated?
+\end_layout
+
+\begin_layout Subsubsection
 Surprisal Analysis
 \end_layout
 
