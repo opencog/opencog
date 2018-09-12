@@ -235,7 +235,7 @@
 )
 ; wrapper for backwards compatibility
 (define-public (mst-parse-text plain-text)
-	mst-parse-text-mode plain-text "any" #f)
+	(mst-parse-text-mode plain-text "any" #f))
 
 
 ; ---------------------------------------------------------------------
