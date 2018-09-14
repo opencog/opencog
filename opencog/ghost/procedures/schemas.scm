@@ -700,3 +700,28 @@
 
 (define-emotion-parameter "valence")
 (define-emotion-parameter "arousal")
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "update-parameter")
+  (LambdaLink
+    (VariableList
+      (Variable "component")
+      (Variable "parameter")
+      (Variable "value"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "update-parameter")
+        (Variable "component")
+        (Variable "parameter")
+        (Variable "value")))
+  )
+)
+
+(define (update-parameter component parameter value)
+  (cog-execute!
+    (Put
+      (DefinedSchema "update-parameter")
+      (List component parameter value)))
+)
