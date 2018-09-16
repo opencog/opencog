@@ -46,7 +46,7 @@
     ; Update the strength of the demand-node using `n/(n+1)` where
     ; `n` is the `face-num` variable below.
     (let ((face-num (num-of-faces))
-          (conf (tv-conf (cog-tv demand-node))))
+          (conf (cog-tv-conf (cog-tv demand-node))))
         (cog-set-tv! demand-node (stv (/ face-num (+ face-num  1))  conf))
     )
 )

@@ -1263,7 +1263,7 @@ psi-controller-update-weights
 
 each rule has a weight.
 
-controled rules get a weight that is the tv-mean of the rule.
+controled rules get a weight that is the cog-tv-mean of the rule.
 
 demands are ConceptNodes, mean is a value-weight.
 
@@ -1344,7 +1344,7 @@ there is a settable action selector per demand
 
 the default action selector finds all rules associated with
 a demand, picks the one with the highest weight, and returns that.
-The weight is based on tv-mean right now.
+The weight is based on cog-tv-mean right now.
 
 split:
 rules.scm is core
@@ -1395,7 +1395,7 @@ How to fake it:
 
 ; Add face to the atomspace
 (EvaluationLink (PredicateNode "visible face") (ListLink (NumberNode 42)))
-aka 
+aka
 (use-modules (opencog eva-model))
 (make-new-face 42)
 (make-new-face 69)
@@ -1581,7 +1581,7 @@ obj-semantic-model-rule-2
 (Define (DefinedPredicate "Look-at-thing cmd")
  (DefinedPredicate "look at person"))
 
-(Define (DefinedSchema "current-speaker") 
+(Define (DefinedSchema "current-speaker")
 	(Get (State (Concept "last person who spoke") (Variable "$x"))))
 
 well, (Concept "last person who spoke") isn't being set.
@@ -1658,4 +1658,3 @@ what are you doing?
 (cog-grounded? (List (Variable "x")))
 (cog-grounded? (List (Concept "x")))
 (cog-grounded? (List (Concept "x") (List (Variable "x"))))
-

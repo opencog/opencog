@@ -682,7 +682,7 @@ See comments in ./module/statprof.scm ~ Implementation notes ~
 
 
 compute-mi.scm:		(for-each inc atom-list)
-compute-mi.scm:		(define (inc atom) (set! cnt (+ cnt (tv-count
+compute-mi.scm:		(define (inc atom) (set! cnt (+ cnt (cog-tv-count
 (cog-tv atom)))))
 
 Maybe lots and lots of threads ... ? Seems to get very backed-up.
@@ -779,7 +779,7 @@ scm_gc_register_allocation(size)
    static std::atomic<size_t> _tv_total_sz;
 
 
-(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv
+(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (cog-tv-count (cog-tv
 atom))))))
 scheme@(guile-user)>
 scheme@(guile-user)> (define foo (Concept "foo"))
@@ -819,13 +819,13 @@ so -- 46M incrs but 94M take-tvs -- so two takes for each incr.
 		(begin (display "rate=")
 		(display (/ cnt (- (current-time) start))) (newline)))
 	(set! cnt (+ cnt 1))
-	(cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv atom))))))
+	(cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (cog-tv-count (cog-tv atom))))))
 
 (define (floo) (finc shu) (floo))
 (floo)
 )
 
-(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv atom))))))
+(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (cog-tv-count (cog-tv atom))))))
 
 (define foo (Concept "foo"))
 (define (loo) (inc foo) (loo))
@@ -1264,7 +1264,7 @@ https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387
 
 	(define (mke)
 		(define x (make-dynamic-state (current-dynamic-state)))
-	
+
 		(set! cnt (+ cnt 1))
 		(if (eq? 0 (modulo cnt 1000000))
 			(begin
@@ -1295,7 +1295,7 @@ Bugg- the utf8 is fucked up.   Fixed. Its a guile-2.1.5 regression
 its ok in the containers ... select * from atoms where type=110;
 (cog-get-atoms 'WordInstanceNode)
 
-but guile-2.2 fucks up. 
+but guile-2.2 fucks up.
 (string-append "a" "係" "c") is OK.
 (Concept "係") is broken
 scm_c_eval_string
@@ -1306,7 +1306,7 @@ scm_lfwrite (s, strlen (s), port); --- again with latin1
 scm_c_put_string
 arggg
 bug-guile@gnu.org  --  bug#25397:
-https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387  
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387
 GUILE_VERSION_MINOR 1
 
 
@@ -1324,7 +1324,7 @@ pthread-threads.h:#define scm_i_pthread_detach                pthread_detach
 #define scm_i_pthread_self                  pthread_self
 
 
-join_thread_var  libguile/threads.x  uh no 
+join_thread_var  libguile/threads.x  uh no
 
 
 (with-continuation-barrier
@@ -1342,11 +1342,11 @@ what is in the currrent dynamic state?
 
 everything looks kosher.  best guess: copy of dyanmic state is not being gc'ed.
 SCM_USE_PTHREAD_THREADS ?? defined ?? yes.
-build/libguile/scmconfig.h:#define SCM_USE_PTHREAD_THREADS 1 
+build/libguile/scmconfig.h:#define SCM_USE_PTHREAD_THREADS 1
 
 GC_register_my_thread
 
-on_thread_exit ??? thread_count--; seems to be called because throead count 
+on_thread_exit ??? thread_count--; seems to be called because throead count
 is correct ... who sets scm_i_thread_key ? .. guile init does.
 
 
@@ -1370,7 +1370,7 @@ apt-get purge guile-2.0 guile-2.0-libs
 Bug --- java fucks up like this:
 above: java is runnning at 900% so its getting stuff in paralel.
 It seems to be responding slowly, though ... and guile is not running
-at high cpu .. its under 100% wtf... ah haha -- java is spinning 
+at high cpu .. its under 100% wtf... ah haha -- java is spinning
 on socket wait in some way...
 
 Its messed up. Java is buggy.
@@ -1384,15 +1384,15 @@ for morphemes, anysplit.c always sets seed=0 every call.
 
 
 anysplit.c:
-rng_uniform 
+rng_uniform
 sample_point
-use_sampling 
+use_sampling
 
 api.c:				(rand_r(&sent->rand_state) %
 parse_options_set_repeatable_rand
 
 struct anysplit_params * anysplit;
- set by 
+ set by
 
 duuuude wtf 0 3b23e1b0 240 st=1840299789
 duuuude wtf 1 78520aa1 33 st=-895367152
@@ -1417,7 +1417,7 @@ no its not, its just not displaying it. so its a minor bug.
 linkage_print_diagram
 
 l->r pass removed 1
-LEFT-WALL[1] 港[2] 區[2] 全[2] 國[2] 人[2] 
+LEFT-WALL[1] 港[2] 區[2] 全[2] 國[2] 人[2]
 
 utf8_strlen
 
@@ -1425,7 +1425,7 @@ utf8_strlen
 ------------------------
 
 BUGGGGGGGGGGG -- delete everything fails, cause  still counting in the other
-threads!! Aieee! ... 
+threads!! Aieee! ...
 
 its also probably picking up the wrong sentence...
 
@@ -1469,7 +1469,7 @@ psql -h localhost -U opencog_tester opencog_test
 PACKAGE_VERSION
 config.h:#define PACKAGE_VERSION "2.1.5.19-7e9395"
 
-Seem to have 
+Seem to have
 
 libgc-dev
 
@@ -1542,7 +1542,7 @@ guile-yue> (cog-report-counts)
 guile-yue> (count-all)
 673034
 
-So why is guile so splurgy?  This is just not that many atoms ... 
+So why is guile so splurgy?  This is just not that many atoms ...
 is bdwgc too conservative, somehow finding the TLB stuff?
 what If I close out the TLB, does guile free it all?
 
@@ -1555,8 +1555,8 @@ what If I close out the TLB, does guile free it all?
 1061))
 
 whoa -- that was it:
-fre is now 14.2 out of 15.5GB so actual use is only 1.3GB 
-... for 673K atoms, so about 2KBytes/atom which is still a lot, but 
+fre is now 14.2 out of 15.5GB so actual use is only 1.3GB
+... for 673K atoms, so about 2KBytes/atom which is still a lot, but
 ... plausible.
 
 So bdwgc was confused about the TLB... how? why? what about atom
@@ -1665,7 +1665,7 @@ persist/guile/PersistSCM.cc
 fetch-atom
 fetch-incoming-set
 
-is id deadlocking on the resolve? 
+is id deadlocking on the resolve?
 
 t1
 delete
@@ -1689,14 +1689,14 @@ table lock  2
 argh 201 theads
  201 -- do_poll_result SchemeEval.cc:655
  200 -- join from eval_loop GenericShell.cc:457
- 197 -- getNodeHandle AtomTable.cc:255 
+ 197 -- getNodeHandle AtomTable.cc:255
         owenr 20950 whih is 44
   44 -- TLB::removeAtom TLB.cc:143
         owner is 21423 which is 179
  179 -- AtomTable::getNodeHandl AtomTable.cc:255
         owner is 20950 which is 44
 
- so TLB can't get lock cause its held by 179 
+ so TLB can't get lock cause its held by 179
 
 but 179 is holding lock and calling do_res while holding the
 atomspace lock. called by tlb::add atom
@@ -1706,15 +1706,15 @@ atomtable must fully unwindws recursive lock
 
 
 so who in 44 has it?
-AtomTable.cc:841 is hwere we are ... 
+AtomTable.cc:841 is hwere we are ...
 called at line 762 with lock held at line 729  so we are at least
 one-deep. maybe more??
 
-std::unique_lock<std::recursive_mutex> 
+std::unique_lock<std::recursive_mutex>
 
     double frac = 100.0 * extra / ((double) all.size());
     printf("sql-stats: Examined %lu atoms in atomspace; %lu extra in TLB
-(%f percent) \n", 
+(%f percent) \n",
         all.size(), extra, frac);
 
 
@@ -1724,14 +1724,14 @@ std::unique_lock<std::recursive_mutex>
         all.size(), extra, frac);
 frac = 100.0 * extra / ((double) _store->_tlbuf.size());
     printf("sql-stats: tlbuf size=%lu extra=%f percent\n",
-_store->_tlbuf.size(), 
+_store->_tlbuf.size(),
 frac);
 }
 
 
 
 
-the __data.__owner member of the pthread_mutex_t 
+the __data.__owner member of the pthread_mutex_t
 print mutex.__data.__owner
 
 ---------------------------------------------------------------
@@ -1863,7 +1863,7 @@ guile-yue> (gc-stats)
 
 free is 16.1GB so somehow the TLB was chewing up 3.3GB holding
 412287 unremapped atoms!?  How is this possible? Should I have run gc a
-bunch more times? 
+bunch more times?
 -------------------------------------------------------------
 New API:
 Very fast: in 3 minutes:
@@ -1940,7 +1940,7 @@ Heap:free: 5.9GB wow -- lots smaller than while runing.
 Because 4.5GB alloced since last gc
 (heap-free-size . 9419513856)
 (heap-free-size . 13306900480)
-(heap-free-size . 13710024704) 
+(heap-free-size . 13710024704)
 (heap-free-size . 13740257280)  wow
 of
 (heap-size . 14738780160) 14.7 so only 1 GB needed.
@@ -2004,7 +2004,7 @@ $ find submitted-articles |wc     24      24     629
 
 After 40 minutes:
 select count(*) from atoms;   111632
-Java/do-count: 1064 sentences  
+Java/do-count: 1064 sentences
 find submitted-articles |wc      205
 
 so, rate: 4.5 articles/minute, 5.9 sentences/article.
@@ -2049,7 +2049,7 @@ rate: 11464 / 480 min = 23.9 sents/min
 
 
 4 concurrent writers:
-after 15 mins: 
+after 15 mins:
 write items=417737 drains=2532 fill_fraction=164.983017 concurrency=51.921801
 
 after 20 mins cpu:
@@ -2115,11 +2115,11 @@ avg drain time=0.418640 seconds; longest drain time=4.090000
 
 ------------
 18:15 -- 3hrs 15 mins later:
-find submitted* |wc gives 1025 so 
+find submitted* |wc gives 1025 so
 exactly 1000 articles in 195 minutes = 5.12 articles per minute
 
 select count(*) from atoms; 482295
-total loads = 803 total stores = 55843525 
+total loads = 803 total stores = 55843525
 num_node_inserts=7427 num_node_updates=41875213 ratio=5638.240609
 num_link_inserts=472298 num_link_updates=13488591 ratio=28.559492
 total stores for node=41882640 link=13960889 ratio=2.999998
@@ -2141,7 +2141,7 @@ on shutdown, at 22:30 --
 select sum(stv_count) from atoms; 62921108
 select count(*) from atoms; 861867
 
-find submitted* |wc 2314  
+find submitted* |wc 2314
 
 total stores = 125995216
 write items=62997608
@@ -2176,7 +2176,7 @@ back more stale data, ad infinitum... causing the counts to be bad.
 well, its up to user to use the barrier, which should now work.
 
  So .. need mechanism to fetch locally, until fully retired!
-Better yet, in scheme, just don't .. don't what? 
+Better yet, in scheme, just don't .. don't what?
 don't fetch, unless stv is the default stv ...!
 
 -----------------------------------------------
@@ -2233,7 +2233,7 @@ so its ogt a little worse... but atomspace is much much bigger, now.
 and also: java is fixed: the magic fix was:
 -- shut everything down every 500 sentences,
 -- run gc five times in a row,
--- restart everything. 
+-- restart everything.
 This unclogs the kitchen sink. -- java now stays up for 4+ hours,
 without tanking.
 
@@ -2266,8 +2266,8 @@ PGPORT=5433
 PGDATA=/home/linas/postgres/var/lib/pgsql/data
 PGLOG=/tmp/pgstartup.log
 
-postgres -c "/usr/bin/postmaster -p '$PGPORT' -D '$PGDATA' &" >> "$PGLOG" 2>&1 
-postgres -c "/usr/bin/postmaster -p 5432 -D /home/linas/postgres/var/lib/pgsq/data &" >> /home/linas/postgres/tmp/pgstartup.log 2>&1 
+postgres -c "/usr/bin/postmaster -p '$PGPORT' -D '$PGDATA' &" >> "$PGLOG" 2>&1
+postgres -c "/usr/bin/postmaster -p 5432 -D /home/linas/postgres/var/lib/pgsq/data &" >> /home/linas/postgres/tmp/pgstartup.log 2>&1
 
 alt: chroot /home/linas/postgres; /etc/init.d/postgresql start
 nooo dudn't work.
@@ -2276,7 +2276,7 @@ just this:
 /home/linas/postgres/etc/init.d/postgresql start
 
 /usr/bin/postmaster -p 5432 -D /home/linas/postgres/var/lib/pgsql/data &
->> /home/linas/postgres/tmp/pgstartup.log 2>&1 
+>> /home/linas/postgres/tmp/pgstartup.log 2>&1
 
 psql opencog_test -U opencog_tester -W -h localhost
 Nooooo
@@ -2287,7 +2287,7 @@ psql test-persist -p 6543
 CREATE TABLE Spaces (
     space  BIGINT PRIMARY KEY,
     parent BIGINT
-);  
+);
 INSERT INTO Spaces VALUES (0,0); -- no space defined; raw atoms.
 INSERT INTO Spaces VALUES (1,1); -- default root
 
@@ -2313,7 +2313,7 @@ pair_data -- 532 atoms, junk
 
 frwiki-20131220-pages-articles
    find alpha-pages |wc -- 1452754 - 1.4M
-   find beta-pages |wc -- 1436278 
+   find beta-pages |wc -- 1436278
    find submitted-articles |wc -- 16505
 
 plwiki-20131218-pages-articles
@@ -2381,7 +2381,7 @@ select count(*) from atoms; 7146891 == 7.1M atoms
 # C  [liblink-grammar.so.5+0x120d5]  print_flat_constituents+0xbd5
 # C  [liblink-grammar.so.5+0x120d5]  print_flat_constituents+0xbd5
 
-from 
+from
 C  [liblink-grammar.so.5+0x12a25]  linkage_print_constituent_tree+0x85
 
 4180 + bd5 = 4d55
@@ -2433,7 +2433,7 @@ OK
    120ed:   49 89 ff                mov    %rdi,%r15
    120f0:   41 55                   push   %r13
 
-So: 
+So:
 
 blank banshee
 I just wasn't made for these times -- beach boys -- pet sounds
@@ -2462,7 +2462,7 @@ parseSentence   159
 
 parser.parse(sentence);
 
-start again yue 30 Jan 22:19 
+start again yue 30 Jan 22:19
 at 22:49 -- 488 articles/30 minutes = 16 articles/minute! -- 3x faster than before.
 at 23:48 -- 796 articles in 90 minutes = 9 artciles/min
 at 00:19 -- 926 articles in 120 mins = 7.7 articles/min
@@ -2487,7 +2487,7 @@ also -- change java to 2GB from 1GB
 restart at 12:31 no explicit load.
 at 14:14 -- 13926 - 12376 = 1550/103min = 15.0 articles/min(!)
 
-at 15:40 - 12:31 = 189 mins, have 
+at 15:40 - 12:31 = 189 mins, have
          guile=637:07 mins, or 637/189 = 3.37 load
          java = 50:25 = 50/189 = 0.267 load
          postgres = 10974 secs = 182.9 mins = 182.9/189 = 0.968 load
@@ -2499,7 +2499,7 @@ at 21:30 - 12:31 = 539 mins
         java  =  148:04 / 539 = 0.274 load
         postgres = 519 / 539 = 0.963 load
 
-2 Feb 2017 -- guile crashed! no prints no dump. 
+2 Feb 2017 -- guile crashed! no prints no dump.
 restart at 12:05 -- 21174 articles
         at 12:43 -- 21411 articles = 411-174/38 = 237/38 = 6.2 artciles/min
         at 19:28 -- 23422 articles = 23422-21174/443 = 2248/443 = 5.07 arts/min
@@ -2524,7 +2524,7 @@ select count(*) from atoms; -- 4786479 -- 4.8M
 
 
 3 Feb 2017 -- restart. All-new atomspace, all-new link-grammar
-      at 12:18PM -- 27691 articles 
+      at 12:18PM -- 27691 articles
       at 12:30 -- crash of guile, restart.
       at 14:11 -- 28246 articles, 28246-27691/100 = 555 / 100 = 5.5 arts/min
       at 15:47 -- 28772 articles, 28772-28246/96 = 526 / 96 = 5.48 articles/min
@@ -2588,7 +2588,7 @@ cd /storage/wikipedia/frwiki-20131220-pages-articles
 
 
 
-french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053 
+french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053
                            12:25PM  2 Feb - find submitted* |wc 24563
                            11:43AM  4 Feb - find submitted* |wc 25361
                            11:34AM  5 Feb - find submitted* |wc 25830
@@ -2641,7 +2641,7 @@ guile/java ratio: 6781/683  = 9.93 -- 11:19AM  4 Feb
                  22980/2340 = 9.82 -- 20:20PM 14 Feb
 
 guile hangs:
-cx1 - 30 jan hang after 4.4M stores 
+cx1 - 30 jan hang after 4.4M stores
       31 jan hang after 42M stores
        1 Feb hang after 33M stores -- 2000:26 cpu
        1 Feb hang after 6.9M stores
@@ -2674,14 +2674,14 @@ alternates like this till 131 or so
 25: GC25: GC
 
 24: get_conn, do_store_single --- this is the write-back handler.
-    there are 8 of these .. through 17 
+    there are 8 of these .. through 17
 
 so .. the 8 busy writers are blocking readers, cause there are only 8
-conns total ... 
+conns total ...
 
 works better if we double the pool...
 
-no one seems to be waiting on postgres ... suggests that the 
+no one seems to be waiting on postgres ... suggests that the
 we've lost track of the number items in the queue ...
 
 15: console list
@@ -2723,7 +2723,7 @@ SQLBindParameter
 
 glurg. ODBC needs this: replace ? by &#63; what a clusterfuck
 
-Also: 
+Also:
 
 [2017-02-08 08:16:43:154] [WARN] ODBC Driver: (1) ODBC escape convert
 error
@@ -2815,7 +2815,7 @@ null ...
 
 OK, this is fine, the crash is somewhere inside of anysplit.
 
-unsplit word is.... at 0x00002b9ecaf2e450 - d0 = ...380 
+unsplit word is.... at 0x00002b9ecaf2e450 - d0 = ...380
 
 0x00002b9ecaf2e380: 000000004bb2c960 -- same as contents to rbx
 
@@ -2848,7 +2848,7 @@ Info: hndlr=1 sentence: "Chaussande (de) [http://gallica.bnf.fr/ark:/12148/bpt6k
 
 #5  0x00002b3a2392a7ce in wordgraph_path_free (free_final_path=true, wp=0x59551860)
     at ../../link-grammar/api.c:937
-#6  sane_linkage_morphism (sent=sent@entry=0x586bb130, lkg=lkg@entry=0x5877b850, 
+#6  sane_linkage_morphism (sent=sent@entry=0x586bb130, lkg=lkg@entry=0x5877b850,
     opts=opts@entry=0x586baef0) at ../../link-grammar/api.c:1021
 
 
@@ -2930,27 +2930,27 @@ scheme@(guile-user)> GC Warning: Repeated allocation of very large block (appr. 
 00600000-00601000 r--p 00000000 fd:00 80300005 /usr/local/bin/guile
 00601000-00602000 rw-p 00001000 fd:00 80300005 /usr/local/bin/guile
 01d52000-6258b000 rw-p 00000000 00:00 0                                  [heap]
-7f3870000000-7f38764e3000 rw-p 00000000 00:00 0 
-7f38764e3000-7f3878000000 ---p 00000000 00:00 0 
-7f3878000000-7f387c000000 rw-p 00000000 00:00 0 
-7f387d7bb000-7f387d7bc000 ---p 00000000 00:00 0 
-7f387d7bc000-7f387dfbc000 rw-p 00000000 00:00 0 
-7f387dfbc000-7f387dfbd000 ---p 00000000 00:00 0 
-7f387dfbd000-7f387e7bd000 rw-p 00000000 00:00 0 
-7f387e7bd000-7f387e7be000 ---p 00000000 00:00 0 
-7f387e7be000-7f387efbe000 rw-p 00000000 00:00 0 
-7f387efbe000-7f387efbf000 ---p 00000000 00:00 0 
-7f387efbf000-7f387f7bf000 rw-p 00000000 00:00 0 
-7f387f7bf000-7f387f7c0000 ---p 00000000 00:00 0 
-7f387f7c0000-7f387ffc0000 rw-p 00000000 00:00 0 
-7f387ffc0000-7f387ffc1000 ---p 00000000 00:00 0 
-7f387ffc1000-7f38807c1000 rw-p 00000000 00:00 0 
-7f38807c1000-7f38807c2000 ---p 00000000 00:00 0 
-7f38807c2000-7f3880fc2000 rw-p 00000000 00:00 0 
-7f3880fc2000-7f3880fc3000 ---p 00000000 00:00 0 
-7f3880fc3000-7f38817c3000 rw-p 00000000 00:00 0 
-7f38817c3000-7f38817c4000 ---p 00000000 00:00 0 
-7f38817c4000-7f3881fc4000 rw-p 00000000 00:00 0 
+7f3870000000-7f38764e3000 rw-p 00000000 00:00 0
+7f38764e3000-7f3878000000 ---p 00000000 00:00 0
+7f3878000000-7f387c000000 rw-p 00000000 00:00 0
+7f387d7bb000-7f387d7bc000 ---p 00000000 00:00 0
+7f387d7bc000-7f387dfbc000 rw-p 00000000 00:00 0
+7f387dfbc000-7f387dfbd000 ---p 00000000 00:00 0
+7f387dfbd000-7f387e7bd000 rw-p 00000000 00:00 0
+7f387e7bd000-7f387e7be000 ---p 00000000 00:00 0
+7f387e7be000-7f387efbe000 rw-p 00000000 00:00 0
+7f387efbe000-7f387efbf000 ---p 00000000 00:00 0
+7f387efbf000-7f387f7bf000 rw-p 00000000 00:00 0
+7f387f7bf000-7f387f7c0000 ---p 00000000 00:00 0
+7f387f7c0000-7f387ffc0000 rw-p 00000000 00:00 0
+7f387ffc0000-7f387ffc1000 ---p 00000000 00:00 0
+7f387ffc1000-7f38807c1000 rw-p 00000000 00:00 0
+7f38807c1000-7f38807c2000 ---p 00000000 00:00 0
+7f38807c2000-7f3880fc2000 rw-p 00000000 00:00 0
+7f3880fc2000-7f3880fc3000 ---p 00000000 00:00 0
+7f3880fc3000-7f38817c3000 rw-p 00000000 00:00 0
+7f38817c3000-7f38817c4000 ---p 00000000 00:00 0
+7f38817c4000-7f3881fc4000 rw-p 00000000 00:00 0
 
 
 
@@ -3068,7 +3068,7 @@ feature/LinkableView.java line 286
 
 LocalLGParser.java circa line 150
 -----------------------------
-yue: 
+yue:
 17006 -- 21876 submitted 27342 left
 
 
@@ -3219,13 +3219,13 @@ getUUID  INVALID_UUID
 select * from atoms where type = 89;
 
 en_pairs=> select * from atoms where type = 89;
-    uuid    | space | type | height | name | outgoing 
+    uuid    | space | type | height | name | outgoing
 ------------+-------+------+--------+------+----------
-        152 |     1 |   89 |      0 | ANY  | 
- 2439209701 |     1 |   89 |      0 | ANY  | 
- 2439209706 |     1 |   89 |      0 | ANY  | 
- 2439209711 |     1 |   89 |      0 | ANY  | 
- 2439209716 |     1 |   89 |      0 | ANY  | 
+        152 |     1 |   89 |      0 | ANY  |
+ 2439209701 |     1 |   89 |      0 | ANY  |
+ 2439209706 |     1 |   89 |      0 | ANY  |
+ 2439209711 |     1 |   89 |      0 | ANY  |
+ 2439209716 |     1 |   89 |      0 | ANY  |
 (5 rows)
 
 OK, so that's a bug .. no unique constraint
@@ -3233,10 +3233,10 @@ OK, so that's a bug .. no unique constraint
 
    8: SQLAtomStorage.cc:324
 opencog::SQLAtomStorage::Response::get_all_values_cb()
-"SELECT * FROM Valuations WHERE atom = 
+"SELECT * FROM Valuations WHERE atom =
 
 SELECT * FROM Valuations WHERE atom = 152;
-   1 |  152 |  177 | {1,0,402733330} |             | 
+   1 |  152 |  177 | {1,0,402733330} |             |
 
 loading_typemap
 
@@ -3258,7 +3258,7 @@ Noting for pair (When *) -- no frequency!
 no frequency's anywhere...
 (PredicateNode \"*-FrequencyKey-*\") was never stored!
 
-select * from atoms where type=53; -- the predicateNodes 
+select * from atoms where type=53; -- the predicateNodes
 
 wtf line 646 ... sote the keyy....
 
@@ -3279,7 +3279,7 @@ Going to do individual word-pair mi
 (define w (WordNode "When"))
 (define e (EvaluationLink
 (LinkGrammarRelationshipNode "ANY")
-(ListLink  (WordNode "When") (AnyNode "right-word")))) 
+(ListLink  (WordNode "When") (AnyNode "right-word"))))
 
 (cog-value e k)
 
@@ -3388,7 +3388,7 @@ well, get_uuid() does checking()
 soo  iif in tlb then works
 
 rp.id_set ...!?
-get_ids get all id's  in 
+get_ids get all id's  in
 
 do_store_single_atom
 do_store_atom
@@ -3435,7 +3435,7 @@ move printing exceptiioon ot guile
 
 fetch_incoming_set false
 MultiThreadUTest
-tv-conf
+cog-tv-conf
 cog-tv
 
 14:37
@@ -3456,7 +3456,7 @@ line 378
 start-cost-pair is bogus!
 and subsequent crash
 
- (define e (EvaluationLink 
+ (define e (EvaluationLink
    (LinkGrammarRelationshipNode "ANY")
    (ListLink (WordNode "this") (WordNode "test"))))
 
@@ -3707,15 +3707,15 @@ get_left_wildcard_count word lg_rel)
 836420450.0
 (length (get-all-pairs))
 
-(LgWordCset 
+(LgWordCset
     (WordInstanceNode "adsf@62e9c582-1984-472b-a2f5-b61b2b0707e8")
-    (LgAnd 
-        (LgConnector 
+    (LgAnd
+        (LgConnector
             (LgConnectorNode "ANY")
             (LgConnDirNode "-")
             (LgConnMultiNode "@")
         )
-        (LgConnector 
+        (LgConnector
             (LgConnectorNode "ANY")
             (LgConnDirNode "+")
             (LgConnMultiNode "@")
@@ -3763,7 +3763,7 @@ but only when sock is dropped...
 bug https://github.com/opencog/atomspace/issues/1054
 
 
-Using bdwgc as of 
+Using bdwgc as of
 0f4244e130541a591d638c98f820b6b49e915ac0
 Author: Ivan Maidanski <ivmai@mail.ru>
 Date:   Thu Jan 12 00:58:41 2017 +0300
@@ -3789,7 +3789,7 @@ stack below seen twice 3 4
 #9  0x00005555555551f2 in Eval::~Eval() ()
 
 
-stack below seen twice.3 
+stack below seen twice.3
 #0  0x00007ffff762c350 in pthread_kill ()
    from /lib/x86_64-linux-gnu/libpthread.so.0
 #1  0x00007ffff785f6fb in GC_start_world () at pthread_stop_world.c:990
@@ -3809,16 +3809,16 @@ stack below seen twice.3
 
 ==============================================
 latest bdwgc does this:
-#0  GC_push_all_eager (bottom=<optimized out>, 
+#0  GC_push_all_eager (bottom=<optimized out>,
     top=top@entry=0x7ffff43f7000 <error: Cannot access memory at address
 0x7ffff43f7000>) at mark.c:1599
-#1  0x00007ffff7855625 in GC_push_all_stack (bottom=<optimized out>, 
+#1  0x00007ffff7855625 in GC_push_all_stack (bottom=<optimized out>,
     top=top@entry=0x7ffff43f7000 <error: Cannot access memory at address
 0x7ffff43f7000>) at mark.c:1609
 #2  0x00007ffff78568aa in GC_push_all_stack_sections (lo=<optimized
-out>, 
+out>,
     lo@entry=0x7ffff43f56c0 <error: Cannot access memory at address
-0x7ffff43f56c0>, 
+0x7ffff43f56c0>,
     hi=hi@entry=0x7ffff43f7000 <error: Cannot access memory at address
 0x7ffff43f7000>, traced_stack_sect=<optimized out>) at mark_rts.c:565
 #3  0x00007ffff785f2fd in GC_push_all_stacks () at
@@ -3859,7 +3859,7 @@ gc7_6_0 <---  try this one -- notpe still bad.
 Guess  some of the threads are exiting when gc runs...
 
 for (p = GC_threads[i]; p != 0; p = p -> next) {
-p 
+p
 
 #define RAISE_SIGNAL(t, sig) pthread_kill(THREAD_SYSTEM_ID(t), sig)
 #define THREAD_SYSTEM_ID(t) (t)->id
@@ -3923,20 +3923,20 @@ include/private/pthread_support.h
 
 but its not teh main thread::: .. p is neoither of the below:
 (gdb) info thr
-  Id   Target Id         Frame 
+  Id   Target Id         Frame
   1    Thread 0x7ffff7fc7300 (LWP 24666) "a.out" 0x00007ffff762767d in pthread_join () from /lib/x86_64-linux-gnu/libpthread.so.0
 * 1917 Thread 0x7fffc639b700 (LWP 27872) "a.out" 0x00007ffff762d350 in pthread_kill () from /lib/x86_64-linux-gnu/libpthread.so.0
 
 (gdb) print *p
-$12 = {next = 0x0, id = 140737198868224, stop_info = {last_stop_count = 1545, 
-    stack_ptr = 0x7fffeebeb6c0 <error: Cannot access memory at address 0x7fffeebeb6c0>}, flags = 6 '\006', thread_blocked = 0 '\000', finalizer_skipped = 0, 
-  finalizer_nested = 0 '\000', stack_end = 0x0, altstack = 0x0, 
-  altstack_size = 0, stack = 0x0, stack_size = 0, traced_stack_sect = 0x0, 
-  status = 0x0, tlfs = {_freelists = {{0x1, 0xbd, 0x555555818520, 
-        0x55555591f5d0, 0x5555557ff500, 0x3d, 0x1, 0x1, 0x1, 0x65, 
-        0x1 <repeats 14 times>, 0x1a}, {0x1, 0x5555559242d0, 0x55555587d820, 
-        0x555555908540, 0x10, 0x3d, 0x5555558ff2a0, 0xb9, 0x1c, 0xb, 0x0, 0x1, 
-        0x1, 0x1, 0x1, 0x1, 0x555555927d00, 0x1, 0x14, 0x1, 0x1, 0x1, 0x1, 
+$12 = {next = 0x0, id = 140737198868224, stop_info = {last_stop_count = 1545,
+    stack_ptr = 0x7fffeebeb6c0 <error: Cannot access memory at address 0x7fffeebeb6c0>}, flags = 6 '\006', thread_blocked = 0 '\000', finalizer_skipped = 0,
+  finalizer_nested = 0 '\000', stack_end = 0x0, altstack = 0x0,
+  altstack_size = 0, stack = 0x0, stack_size = 0, traced_stack_sect = 0x0,
+  status = 0x0, tlfs = {_freelists = {{0x1, 0xbd, 0x555555818520,
+        0x55555591f5d0, 0x5555557ff500, 0x3d, 0x1, 0x1, 0x1, 0x65,
+        0x1 <repeats 14 times>, 0x1a}, {0x1, 0x5555559242d0, 0x55555587d820,
+        0x555555908540, 0x10, 0x3d, 0x5555558ff2a0, 0xb9, 0x1c, 0xb, 0x0, 0x1,
+        0x1, 0x1, 0x1, 0x1, 0x555555927d00, 0x1, 0x14, 0x1, 0x1, 0x1, 0x1,
         0x1, 0x1}, {0x1 <repeats 25 times>}}, gcj_freelists = {
       0xffffffffffffffff, 0x1 <repeats 24 times>}}}
 
@@ -3964,7 +3964,7 @@ libguile/gc.c
 
 static void on_thread_exit (void *v)
 calls GC_unregister_my_thread() but only if t->needs_unregister) is set
-called by init_thread_key 
+called by init_thread_key
 by scm_i_init_thread_for_guile
 by scm_init_guile()
 
@@ -3983,7 +3983,7 @@ Program terminated with signal SIGSEGV, Segmentation fault.
    from /lib/x86_64-linux-gnu/libpthread.so.0
 [Current thread is 1 (Thread 0x7f19aa6a7700 (LWP 7486))]
 
-sconew not being called !  
+sconew not being called !
 GC_register_my_thread
 print notin
 print nxt
@@ -4027,13 +4027,13 @@ select count(*) from atoms where type=73; gives 396K unique words.
 select count(8) from atoms where type=47; gives number fo evluation
 links which is 9672K  but 2*396K of these are anynodes, so really only
 9672-792=8880K unique word-pairs.
-which were observed 
+which were observed
 
 en_pairs=> select * from atoms where type=74;
-   uuid    | space | type | height |    name    | outgoing 
+   uuid    | space | type | height |    name    | outgoing
 -----------+-------+------+--------+------------+----------
- 143427138 |     1 |   74 |      0 | left-word  | 
- 143427163 |     1 |   74 |      0 | right-word | 
+ 143427138 |     1 |   74 |      0 | left-word  |
+ 143427163 |     1 |   74 |      0 | right-word |
 
 en_pairs=> select * from atoms where outgoing='{143427138,143427163}';
    uuid    | space | type | height | name |       outgoing
@@ -4046,9 +4046,9 @@ en_pairs=> select * from atoms where outgoing='{152,143670792}';
  143670793 |     1 |   47 |      2 |      | {152,143670792}
 
 en_pairs=> select * from valuations where atom=143670793;
- key |   atom    | type |   floatvalue    | stringvalue | linkvalue 
+ key |   atom    | type |   floatvalue    | stringvalue | linkvalue
 -----+-----------+------+-----------------+-------------+-----------
-   1 | 143670793 |  177 | {0,0,418235182} |             | 
+   1 | 143670793 |  177 | {0,0,418235182} |             |
 
 So 418M observations of word-pairs.
 
@@ -4060,7 +4060,7 @@ ALTER DATABASE en_pairs RENAME TO en_pairs_rohit;
  (sql-open "postgres:///en_pairs?user=ubuntu")
 
 (fetch-all-words)
-(length (get-all-words)) 65021 
+(length (get-all-words)) 65021
 (total-word-observations) 7181662.0 7.2M
 (PredicateNode "*-Sentence Word Pair-*")
 (SchemaNode "*-Pair Distance-*")o
@@ -4092,7 +4092,7 @@ get-any-pair-link-> GET-PAIR
 get-word-pairs
 
 cog-incoming-by-type
-.scm:		(par-map get-endpoint (cog-filter link-type 
+.scm:		(par-map get-endpoint (cog-filter link-type
 utilities.scm:
 cog-map-chase-link dead
 cog-map-chase-link-dbg   used by ppars ranker
@@ -4100,7 +4100,7 @@ cog-map-chase-links-chk  used by cog-chase-link-chk
 cog-chase-link-chk   used by  nlp-utils
 
 cog-map-apply-link  dead used by cog-get-link
-cog-get-link used by 
+cog-get-link used by
 cog-get-pred
 
 (define bar (let ((done #f))
@@ -4126,10 +4126,10 @@ getMaxUUID
 
 (make-narrow-links (mst-parse-text "The game is played on a level playing field"))
 
-(LgWordCset 
+(LgWordCset
     (WordInstanceNode "foo@e5bfab2f-b3b1-4cf1-ae89-89aaa47bf871")
-    (LgAnd 
-        (LgConnector 
+    (LgAnd
+        (LgConnector
             (LgConnectorNode "ANY")
             (LgConnDirNode "-")
         )
@@ -4159,11 +4159,11 @@ select count(*) from atoms where type=123;  -- 123 is wordNode
   142 | LinkGrammarRelationshipNode
 
 
- uuid | space | type | height |          name          | outgoing 
+ uuid | space | type | height |          name          | outgoing
 ------+-------+------+--------+------------------------+----------
-   29 |     1 |   88 |      0 | *-Sentence Word Pair-* | 
-   30 |     1 |   85 |      0 | *-Pair Distance-* | 
-  141 |     1 |  142 |      0 | ANY  | 
+   29 |     1 |   88 |      0 | *-Sentence Word Pair-* |
+   30 |     1 |   85 |      0 | *-Pair Distance-* |
+  141 |     1 |  142 |      0 | ANY  |
 
 
 select count(*) from atoms where outgoing[1]='29';
@@ -4200,7 +4200,7 @@ which
 
 115 | LgWordCset
 2440463600
-   1 | 2440463600 |  177 | {1,0,12}   |             | 
+   1 | 2440463600 |  177 | {1,0,12}   |             |
 2440463720   {636276,2440463719}
 2440463718   {107,2440463716}
 2440463717   {101,2440463715}
@@ -4224,7 +4224,7 @@ freshie (0 ())
 170 -- 28
 198 -- 26
 224 -- 24
-248 -- 
+248 --
 270
 269
 290
@@ -4256,7 +4256,7 @@ bad-pair in max-of-pair-list
 
 (define n 0)
 (for-each
-	(lambda (cset) 
+	(lambda (cset)
 		(set! n (+ 1 n)))
 	(cog-incoming-by-type (Word "the") 'LgWordCset))
 
@@ -4264,7 +4264,7 @@ Ben, Ruiting,
 
 For your enjoyment: I have some very preliminary results on word
 similarity.  They look pretty nice, even thogh based on a fairly
-small number of observations. 
+small number of observations.
 
 If you've been watching TV instead of reading email, here's the story
 so far: Starting from a large text corpus, the mutual information (MI)
@@ -4278,7 +4278,7 @@ So, for example, in in idealized world, the MST parse of the sentence
 "Ben ate pizza" would prodouce the parse Ben <--> ate <--> pizza and
 from this, we can extract the psuedo-disjunct (Ben- pizza+) on the
 word "ate".  Similarly, the sentence "Ben puked pizza" should produce
-the disjunct (Ben- pizza+) on the word "puke".  Since these two 
+the disjunct (Ben- pizza+) on the word "puke".  Since these two
 disjuncts are the same, we can conclude that the two words "ate"
 and "puke" are very similar to each other.  Considering all of the
 other disjuncts that arise in this example, we can conclude that these
@@ -4293,9 +4293,9 @@ cosine-similariy between the disjunct-vectors (or pick another,
 different metric, as you please.)
 
 Below are a set of examples, for English, on a somewhat smmall dataset.
-Collected over a few days, it contains just under half-a-million 
+Collected over a few days, it contains just under half-a-million
 observations of disjuncts, distributed across about 30K words.
-Thus, most words will have only a copule of disjuncts on them, 
+Thus, most words will have only a copule of disjuncts on them,
 which may have been seen only a couple of times. its important, at
 this stage, to limit oneself to only the most popular words.
 
@@ -4416,7 +4416,7 @@ COMMENT ON DATABASE en_pairs_2016 IS 'Rohits original pair data; old format; mis
 
 *) count words during MST
 err this can be reconstructed by taking:
-   counts of disjuncts  based on counts of csets .... 
+   counts of disjuncts  based on counts of csets ....
 so never mind....
 
 what are teh most comon disjuncts???
@@ -4465,8 +4465,8 @@ ad   cset-vec-observations
 (define all-cset-words (filter-words-with-csets (get-all-words)))
 
 (define total-cset-count 0)
-(cog-map-type 
-	(lambda (cset) 
+(cog-map-type
+	(lambda (cset)
 		(set! total-cset-count (+ total-cset-count (get-count cset))) #f)
 	'LgWordCset)
 
@@ -4535,7 +4535,7 @@ store-sim
 
 
 (map (lambda (sim) (sim-cosine sim)) (take ranked-sims 20))
-	
+
 
  'Poir .. Perls'
  'Poir .. Sevan'
@@ -4578,7 +4578,7 @@ store-sim
 971  0.8263325988164274  'in .. inside'
 
 
-canal -- 68 dj 
+canal -- 68 dj
 
 (define (prt-sim sim port)
    (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
@@ -4640,16 +4640,16 @@ MI(fast, car) = 3.805734
 -log P(fast, *) =  14.930225  P = 3.2029815202410256e-5
 
 
-MI(fast, {hosrse, car}) = linear interploation of the two. 
+MI(fast, {hosrse, car}) = linear interploation of the two.
   [
   p(fast,horse) log p(fast, horse) / p(fast,*) p(*,horse)
 +
-  p(fast,car) log p(fast, car) / p(fast,*) p(*,car) ] 
+  p(fast,car) log p(fast, car) / p(fast,*) p(*,car) ]
    / [p(fast,horse) + p(fast,car)]
 
 = [ p(fast,horse) 5.258979 + p(fast,car) 3.805734] /
      1.2433191350441628e-7
-= 5.565671566878678e-7 / 1.2433191350441628e-7 
+= 5.565671566878678e-7 / 1.2433191350441628e-7
 = 4.476462567015012
 
 
@@ -4673,7 +4673,7 @@ MI(fast, {hosrse, car}) = linear interploation of the two.
 get-any-pair PAIR -- public OK defined in common.scm
 get-clique-pair PAIR --public OK
 
-kill get-pair-mi-str 
+kill get-pair-mi-str
 make get-pair-mi public. done
 
 
@@ -4700,7 +4700,7 @@ all connectors ...
 
 
 wtf:
-(length all-disjuncts) 225396 
+(length all-disjuncts) 225396
 wiki-mst-en.sh is running
 why is get_nodes bad? because no nodes are being created. so that OK.
 why is total stores for node =0?  just like above. its OK.
@@ -4951,10 +4951,10 @@ duuuu
 (define w (car (wpca 'left-support)))
 (define d (car  (wpca 'right-support)))
 (cpca 'left-wild-count d)
-(define d (car (drop-while 
+(define d (car (drop-while
 	(lambda (dj) (> 10 (cpca 'left-wild-count dj))) (wpca 'right-support))))
 
-(define w (car (drop-while 
+(define w (car (drop-while
 	(lambda (wrd) (> 10 (cpca 'right-wild-count wrd))) (wpca 'left-support))))
 
 (cpca 'right-wild-count w)
@@ -4981,8 +4981,8 @@ ERROR: In procedure cog-value: There is no value for key (PredicateNode
 "*-FrequencyKey-*") ; [6632538966455889482][1]
  on atom (LgWordCset (ctv 1.000000 0.000000 1.000000)
 
-(LgWordCset 
-   (WordNode "dentist" 
+(LgWordCset
+   (WordNode "dentist"
    (LgAnd
       (PseudoConnector
          (WordNode "an")
@@ -5068,9 +5068,9 @@ en_snapshot
 
 pg_dump en_pairs
 pg_dump -cC en_pairs
-pg_dumpall 
+pg_dumpall
 
-time pg_dump en_pairs >en_pairs.sql 
+time pg_dump en_pairs >en_pairs.sql
 
 pg_dump: Dumping the contents of table "valuations" failed: PQgetResult() failed.
 pg_dump: Error message from server: ERROR:  could not access status of transaction 2786849088
@@ -5134,8 +5134,8 @@ Nonetheless, restart from scratch.
 
 ALTER DATABASE en_pairs RENAME TO en_pairs_semi_fu;
 
-COMMENT ON DATABASE en_pairs_semi_fu IS 
-   'rohit-pairs and some gutenberg, after the crash'; 
+COMMENT ON DATABASE en_pairs_semi_fu IS
+   'rohit-pairs and some gutenberg, after the crash';
 
 
 
@@ -5160,7 +5160,7 @@ pg_multixact/members/0E99
 Those 3 fixed it.
 
 time pg_dumpall > everything.sql
-pg_clog/033C 
+pg_clog/033C
 create all from 02CE to pg_clog/0350
 
 #!/bin/bash
@@ -5454,13 +5454,13 @@ DATE: 18 May 2017
 REASON: abandoned. Too bloated to be useful, per above.
 
                        List of relations
- Schema |    Name    | Type  | Owner |    Size    | Description 
+ Schema |    Name    | Type  | Owner |    Size    | Description
 --------+------------+-------+-------+------------+-------------
- public | atoms      | table | linas | 12 GB      | 
- public | spaces     | table | linas | 8192 bytes | 
- public | typecodes  | table | linas | 48 kB      | 
- public | valuations | table | linas | 9633 MB    | 
- public | values     | table | linas | 8192 bytes | 
+ public | atoms      | table | linas | 12 GB      |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 9633 MB    |
+ public | values     | table | linas | 8192 bytes |
 (5 rows)
 
 SELECT count(*) FROM atoms;   <<< 132172780 = 132M atoms total
@@ -5482,7 +5482,7 @@ So many of rohit's pairs were lost, and most of the new data are the
 cliique pairs.
 
 'WordNode' gives 276715 which is 2/3rds of rohits 400K so where did
-   all the words go? More importantly, why aren't the foreign-key 
+   all the words go? More importantly, why aren't the foreign-key
    constraints violated???
 
 'ExecutionLink' has 62936410 = 62M counted pairs
@@ -5517,7 +5517,7 @@ select count(*) from atoms;   <<< 41511869 = 41M
 
 A total of 106696 = 106K WordNodes
 
- SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(141 AS BIGINT)]; 
+ SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(141 AS BIGINT)];
 gives 2786640 == 2.7M  LG links.
 
 and 9587761 = 9.6M clique pairs, and 18M ExecutionLinks.
@@ -5533,17 +5533,17 @@ DATE: 24 May 2017
 REASON: Multiple issues:
 a) it fails to separate quotation marks.
 b) The any-disjuncts are junk.
-c) Missing links to ###LEFT-WALL### 
+c) Missing links to ###LEFT-WALL###
 d) FATAL ERROR: all disjuncts created with minus-the-MI, and so are junk.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 909 MB     | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 591 MB     | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 909 MB     |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 591 MB     |
+ public | values     | table | ubuntu | 8192 bytes |
 (5 rows)
 
 select count(*) from atoms;  <<< 10317409 = 10M atoms total
@@ -5590,18 +5590,18 @@ REASON: Three issues:
  a) fails to separate quoation marks (inherited from tone)
  b) contains junk lg-any disjuncts
  c) Uses LgWordCset for for connectors and pseudo-connectors.
-    Which screws up statistics. 
+    Which screws up statistics.
  d) FATAL ERROR: all disjuncts created with minus-the-MI, and so are junk.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 1496 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 1871 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 1496 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 1871 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 (5 rows)
 
 select count(*) from atoms; << 16487725 = 16.5M (6M more than baseline)
@@ -5649,13 +5649,13 @@ REASON: Several issues:
 
 en_pairs_tone_mst=> \dt+
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 1998 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 5153 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 1998 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 5153 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms; --- 18083439 = 18M
 select count(*) from valuations; -- 36903851 = 36M
@@ -5673,9 +5673,9 @@ Total MI: -2.030
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  1.6405E+4    1.6483E+4
-Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0    
-Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06    
-RMS Count      2.2878E+5    1.9854E+5     13.95        12.05    
+Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0
+Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06
+RMS Count      2.2878E+5    1.9854E+5     13.95        12.05
 
 (print-matrix-summary-report psa)
 Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
@@ -5693,10 +5693,10 @@ Total MI: -4.156
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  3.4890E+4    6946.    
-Count   (l_1)  9.1434E+4    3.4736E+4     2.621        5.001    
-Length  (l_2)  2143.        1397.         6.1427E-2    .2011    
-RMS Count      2107.        1368.         6.0395E-2    .1970    
+Support (l_0)  3.4890E+4    6946.
+Count   (l_1)  9.1434E+4    3.4736E+4     2.621        5.001
+Length  (l_2)  2143.        1397.         6.1427E-2    .2011
+RMS Count      2107.        1368.         6.0395E-2    .1970
 
 2652501065 Bytes = 2.65 GB uncompressed
 295210074 Bytes = 295M compressed
@@ -5708,7 +5708,7 @@ RMS Count      2107.        1368.         6.0395E-2    .1970
 ==================================================================
 en_pairs_ttwo
 -------------
-Random parses from tranche-1 and tranche-2. 
+Random parses from tranche-1 and tranche-2.
 
 STATUS: fair
 DATE: 29 May 2017
@@ -5719,13 +5719,13 @@ REASON: Three issues:
 
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 1483 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 956 MB     | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 1483 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 956 MB     |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms; <<< 16817599 = 16.8M atoms (6M more than tone)
 select count(*) from valuations; <<< 8770525 = 8.8m (3.4M more)
@@ -5760,7 +5760,7 @@ ParseNode << 12468055 = 12.5M parses more than double.
 en_pairs_ttwo_mst
 -----------------
 Random parses from tranche-1 and tranche-2, together with MST parses from
-both tranches. The bogus ANY-disjuncs got removed, and the correct 
+both tranches. The bogus ANY-disjuncs got removed, and the correct
 PseudoWordCsets are used.  Contains the summary stats for csets, too.
 
 STATUS: Total junk, should be deleted.
@@ -5773,16 +5773,16 @@ REASON: Multiple issues:
 
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 3616 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 9220 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 3616 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 9220 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
-select count(*) from atoms; --- 30689942 = 30.6M 
-select count(*) from valuations; --- 63432483 = 63M 
+select count(*) from atoms; --- 30689942 = 30.6M
+select count(*) from valuations; --- 63432483 = 63M
 
 Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
 Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
@@ -5799,9 +5799,9 @@ Total MI: -1.837
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  2.3078E+4    2.2456E+4
-Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3    
-Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56    
-RMS Count      4.2741E+5    3.4915E+5     18.52        15.55    
+Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3
+Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56
+RMS Count      4.2741E+5    3.4915E+5     18.52        15.55
 
 
 Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
@@ -5819,10 +5819,10 @@ Total MI: -3.906
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  6.1010E+4    9176.    
-Count   (l_1)  1.5853E+5    6.4221E+4     2.598        6.999    
-Length  (l_2)  5694.        3476.         9.3332E-2    .3788    
-RMS Count      5666.        3444.         9.2870E-2    .3753    
+Support (l_0)  6.1010E+4    9176.
+Count   (l_1)  1.5853E+5    6.4221E+4     2.598        6.999
+Length  (l_2)  5694.        3476.         9.3332E-2    .3788
+RMS Count      5666.        3444.         9.2870E-2    .3753
 
 4316209411 Bytes = 4.31 GB uncompressed
 517697226 Bytes = 518 MB compressed
@@ -5842,13 +5842,13 @@ REASON: I think it's good.  Has some extra cruft: has the bogus disjuncts
 that were collected.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 2831 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 2099 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 2831 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 2099 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 (5 rows)
 
 select count(*) from atoms;  <<< 32125825 = 32M atoms (15M more than before)
@@ -5858,7 +5858,7 @@ SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
 atoms.type=typecodes.type AND typecodes.typename='foobar';
 
 WordNode: 431609 = 432K (245K more) !!! that's a lot. More than double.
-EvaluationLink: 15224271 = 15.2 M (7.2M more, almost double) 
+EvaluationLink: 15224271 = 15.2 M (7.2M more, almost double)
 
 SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
 1588822019 << 1.59 G observations (832M more, more than double)
@@ -5891,13 +5891,13 @@ DATE: 9 Jun 2017
 REASON: Worthless: the sign on the MI is backwards.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 2983 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 5852 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 2983 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 5852 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;  -- 32593133 = 32M atoms
 select count(*) from valuations; -- 50386820 = 50M valuations
@@ -5921,11 +5921,11 @@ Total MI: -1.935
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  4.4098E+4    4.3839E+4
-Count   (l_1)  8.3106E+6    7.4675E+6     188.5        170.3    
-Length  (l_2)  9.1631E+5    7.7754E+5     20.78        17.74    
-RMS Count      9.1591E+5    7.7713E+5     20.77        17.73    
+Count   (l_1)  8.3106E+6    7.4675E+6     188.5        170.3
+Length  (l_2)  9.1631E+5    7.7754E+5     20.78        17.74
+RMS Count      9.1591E+5    7.7713E+5     20.77        17.73
 
-3411596887 = 3.4GB uncompressed 
+3411596887 = 3.4GB uncompressed
 470255603 = 470 MB compressed
 
 209da5230c7ac24c6ae0b8182ddb2412  en_pairs_tthree_mi.sql
@@ -5944,13 +5944,13 @@ REASON: Several issues:
  c) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 5557 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 14 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 5557 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 14 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 
 select count(*) from atoms; -- 61026822 = 61M
@@ -5973,9 +5973,9 @@ Total MI: -3.971
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  1.2948E+5    1.7353E+4
-Count   (l_1)  3.6454E+5    1.3127E+5     2.815        7.565    
-Length  (l_2)  9336.        5603.         7.2108E-2    .3229    
-RMS Count      9298.        5557.         7.1812E-2    .3203    
+Count   (l_1)  3.6454E+5    1.3127E+5     2.815        7.565
+Length  (l_2)  9336.        5603.         7.2108E-2    .3229
+RMS Count      9298.        5557.         7.1812E-2    .3203
 
 8158333695 Bytes = 8.16 GBytes uncompressed
 1018619547 Bytes = 1.02 GBytes compressed
@@ -5999,13 +5999,13 @@ REASON: Best so far, I think.  One issue:
   It now seems that this would have been the right thing to do.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 1024 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 1390 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 1024 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 1390 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms; -- 11224348 = 11M
 select count(*) from valuations; -- 5679764 = 5.7M
@@ -6058,13 +6058,13 @@ REASON: Multiple issues:
 
 en_pairs_rone_mst=> \dt+
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 1890 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 4601 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 1890 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 4601 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;  20840690 == 20.8 M atoms
 select count(*) from valuations; 42809795 == 42.8M values
@@ -6088,9 +6088,9 @@ Total MI: -1.943
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  1.7398E+4    1.7417E+4
-Count   (l_1)  2.4875E+6    2.2524E+6     143.0        129.3    
-Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98    
-RMS Count      2.8758E+5    2.4316E+5     16.53        13.96    
+Count   (l_1)  2.4875E+6    2.2524E+6     143.0        129.3
+Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98
+RMS Count      2.8758E+5    2.4316E+5     16.53        13.96
 
 
 (print-matrix-summary-report pca)
@@ -6110,10 +6110,10 @@ Total MI: -4.151
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  4.1304E+4    7307.    
-Count   (l_1)  1.1025E+5    3.9464E+4     2.669        5.401    
-Length  (l_2)  3011.        1778.         7.2909E-2    .2433    
-RMS Count      2975.        1748.         7.2030E-2    .2392    
+Support (l_0)  4.1304E+4    7307.
+Count   (l_1)  1.1025E+5    3.9464E+4     2.669        5.401
+Length  (l_2)  3011.        1778.         7.2909E-2    .2433
+RMS Count      2975.        1748.         7.2030E-2    .2392
 
 3059640344 Bytes = 3.1GB uncompressed
 332027863 Bytes = 332 MB compressed
@@ -6132,13 +6132,13 @@ DATE: 12 June 2017
 REASON: One issue, see en_pairs_rone for description.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 1596 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 1390 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 1596 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 1390 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 Strange: the above looks wrong. \l+ says total is 6608 MB so wtf?
 Maybe the rest is indexes....
@@ -6168,13 +6168,13 @@ REASON: Multiple issues:
 
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 3150 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 7081 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 3150 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 7081 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;  -- 34720695 = 34.7M
 select count(*) from valuations; -- 72196748 = 72.2M
@@ -6199,9 +6199,9 @@ Total MI: -1.786
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  2.4698E+4    2.3820E+4
-Count   (l_1)  4.9158E+6    4.1130E+6     199.0        172.7    
-Length  (l_2)  5.3153E+5    4.2463E+5     21.52        17.83    
-RMS Count      5.3111E+5    4.2421E+5     21.50        17.81    
+Count   (l_1)  4.9158E+6    4.1130E+6     199.0        172.7
+Length  (l_2)  5.3153E+5    4.2463E+5     21.52        17.83
+RMS Count      5.3111E+5    4.2421E+5     21.50        17.81
 
 Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
 Left type: WordNode    Right Type: PseudoAnd    Pair Type:
@@ -6219,10 +6219,10 @@ Total MI: -3.910
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  7.0869E+4    9633.    
-Count   (l_1)  1.9041E+5    7.1256E+4     2.687        7.397    
-Length  (l_2)  7130.        4017.         .1006        .4171    
-RMS Count      7100.        3985.         .1002        .4137    
+Support (l_0)  7.0869E+4    9633.
+Count   (l_1)  1.9041E+5    7.1256E+4     2.687        7.397
+Length  (l_2)  7130.        4017.         .1006        .4171
+RMS Count      7100.        3985.         .1002        .4137
 
 5034299859 Bytes = 5.0 GB uncompressed.
 560626052 Bytes = 561MB compressed
@@ -6247,13 +6247,13 @@ REASON: Best so far, I think.  Two issues:
   3) The pair-MI values have the wrong sign.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 3090 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 6024 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 3090 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 6024 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 35044156 = 35M atoms
 select count(*) from valuations; -- 54073127 = 54M values
@@ -6278,9 +6278,9 @@ Total MI: -1.896
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  4.5589E+4    4.5082E+4
-Count   (l_1)  9.4861E+6    8.4112E+6     208.1        186.6    
-Length  (l_2)  1.0437E+6    8.7608E+5     22.89        19.43    
-RMS Count      1.0433E+6    8.7564E+5     22.88        19.42    
+Count   (l_1)  9.4861E+6    8.4112E+6     208.1        186.6
+Length  (l_2)  1.0437E+6    8.7608E+5     22.89        19.43
+RMS Count      1.0433E+6    8.7564E+5     22.88        19.42
 
 3633274138 Bytes = 3.6GBytes uncompressed = 41 bytes per atom or valuation.
 509100498 Bytes = 509MBytes compressed = 5.7 Bytes/atom
@@ -6292,7 +6292,7 @@ RMS Count      1.0433E+6    8.7564E+5     22.88        19.42
 ==================================================================
 en_pairs_rfour
 ---------------
-Random-planar-tree parsed books from tranche-1, 2, 3 and 4. 
+Random-planar-tree parsed books from tranche-1, 2, 3 and 4.
 A continutation of en_pairs_rthree. Does NOT contain pair-MI values.
 
 STATUS: good
@@ -6302,13 +6302,13 @@ REASON: Best so far, I think.  One issue:
      It now seems that this would have been the right thing to do.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 3937 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 2619 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 3937 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 2619 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 44676827 = 45M atoms
 select count(*) from valuations; -- 22638956 = 23M valations
@@ -6316,7 +6316,7 @@ select count(*) from valuations; -- 22638956 = 23M valations
 2083700214 Bytes = 2.1 GBytes uncompressed
  354780718 Bytes compressed = 355 MBytes
 
-md5sum en_pairs_rfour.sql 
+md5sum en_pairs_rfour.sql
 98e873b7626d22e04f914b043c14d6ec  en_pairs_rfour.sql
 6726298084cb8b6ad92a63419c91b416  en_pairs_rfour.sql.bz2
 
@@ -6324,7 +6324,7 @@ md5sum en_pairs_rfour.sql
 ==================================================================
 en_pairs_rfive
 ---------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 A continutation of en_pairs_rfour. Does NOT contain pair-MI values.
 
 STATUS: good
@@ -6334,13 +6334,13 @@ REASON: Best so far, I think.  One issue:
      It now seems that this would have been the right thing to do.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 5380 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 3365 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 5380 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 3365 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 61069212 = 61M atoms
 select count(*) from valuations; -- 30960586 = 31M values
@@ -6373,7 +6373,7 @@ select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
 ==================================================================
 en_pairs_rfive_mone
 -------------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-one. Contains pair-MI values; does NOT contain
 any disjunct marginals.
 
@@ -6382,13 +6382,13 @@ DATE: 16 July 2017
 REASON: Best so far, I think.  Same issues as en_pairs_rfive
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 6502 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 11 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 6502 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 11 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;  -- 73314120 = 73M
 select count(*) from valuations; -- 104615442 = 105M
@@ -6404,9 +6404,9 @@ Total MI: 1.8370
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  8.0633E+4    8.0657E+4
-Count   (l_1)  2.0090E+7    1.8514E+7     249.2        229.5    
-Length  (l_2)  2.2769E+6    1.9732E+6     28.24        24.46    
-RMS Count      2.2764E+6    1.9726E+6     28.23        24.46    
+Count   (l_1)  2.0090E+7    1.8514E+7     249.2        229.5
+Length  (l_2)  2.2769E+6    1.9732E+6     28.24        24.46
+RMS Count      2.2764E+6    1.9726E+6     28.23        24.46
 
 9088177187 bytes uncompressed = 9.1GB
 1542005839 bytes compressed = 1.54GB
@@ -6417,7 +6417,7 @@ a4f8fbc42f802dd4ffc218296d20f703  en_pairs_rfive_mone.sql.bz2
 ==================================================================
 en_pairs_rfive_mtwo
 -------------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-1 and 2. Contains pair-MI values; does NOT contain
 any disjunct marginals.
 
@@ -6426,13 +6426,13 @@ DATE: 17 July 2017
 REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 7082 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 11 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 7082 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 11 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      --  79586531 = 79M = 6M more
 select count(*) from valuations; -- 108255875 = 108M = 5M more
@@ -6446,7 +6446,7 @@ de95af1f2ddb7c696b19a4cc3a3e443e  en_pairs_rfive_mtwo.sql.bz2
 ==================================================================
 en_pairs_rfive_mthree
 ---------------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-1, 2 and 3. Contains pair-MI values; does NOT
 contain any disjunct marginals.
 
@@ -6455,13 +6455,13 @@ DATE: 2 August 2017
 REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 8437 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 11 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 8437 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 11 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      --  94097585 =  94M = 15M more
 select count(*) from valuations; -- 116409279 = 116M =  8M more
@@ -6476,7 +6476,7 @@ ca4bcdf8d041053ac0d4bc72624a2978  en_pairs_rfive_mthree.sql.bz2
 ==================================================================
 en_pairs_rfive_mfour
 --------------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-1, 2, 3 and 4. Contains pair-MI values; does NOT
 contain any disjunct marginals.
 
@@ -6485,13 +6485,13 @@ DATE: 8 August 2017
 REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 9598 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 12 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 9598 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 12 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 106482665 = 106M = 12M more
 select count(*) from valuations; -- 123419676 = 123M =  7M more
@@ -6505,7 +6505,7 @@ eff6127b82ab205502bc1f9e8b4e139d  en_pairs_rfive_mfour.sql
 ==================================================================
 en_pairs_rfive_mfive
 --------------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-1, 2, 3, 4 and 5. Contains pair-MI values; does NOT
 contain any disjunct marginals.
 
@@ -6514,13 +6514,13 @@ DATE: 14 August 2017
 REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 11 GB      | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 13 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 11 GB      |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 13 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 124866072 = 125M = 19M more
 select count(*) from valuations; -- 133848790 = 134M = 11M more
@@ -6542,16 +6542,16 @@ REASON: Best so far, I think. Except it contains infixed punctuation.
     Which is a pointless waste of space. And which throws off stats
     slightly, I suppose.
 ISSUES: Too big to fit into RAM.  Just loading disjunct marginals
-    requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations) 
+    requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations)
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 13 GB      | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 34 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 13 GB      |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 34 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 150550752 = 150M (so +25M for marginals)
 select count(*) from valuations; -- 330716326 = 331M (+200M for marginals!!!)
@@ -6574,10 +6574,10 @@ Total MI: 8.1836
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  2.2054E+5    392.2    
-Count   (l_1)  1.0180E+6    1.0483E+4     4.616        26.73    
-Length  (l_2)  4.0497E+4    4661.         .1836        11.88    
-RMS Count      4.0447E+4    4596.         .1834        11.72    
+Support (l_0)  2.2054E+5    392.2
+Count   (l_1)  1.0180E+6    1.0483E+4     4.616        26.73
+Length  (l_2)  4.0497E+4    4661.         .1836        11.88
+RMS Count      4.0447E+4    4596.         .1834        11.72
 
 26935688497 bytes uncomepressed = 26.9 GBytes
  3389925594 bytes compressed = 3.4 GBytes
@@ -6589,7 +6589,7 @@ RMS Count      4.0447E+4    4596.         .1834        11.72
 ==================================================================
 en_pairs_cfive
 ---------------
-Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 A cleaned-up version of en_pairs_rfive.  Words with infix marks
 were removed.  However, hyphenated words and apostrophised words
 remain.  Does NOT contain pair-MI values.
@@ -6599,16 +6599,16 @@ DATE: 1 Sept 2017
 REASON: Best so far, I think.  One issue:
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 5380 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 3365 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 5380 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 3365 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 56409030 = 56M = 5M fewer than rfive.
-select count(*) from valuations; -- 28516287 = 28.5M = 2.5M fewer 
+select count(*) from valuations; -- 28516287 = 28.5M = 2.5M fewer
 
 2638878848 bytes uncompressed = 2.64 GBytes
  453916099 bytes compressed   = 454 MBytes
@@ -6626,20 +6626,20 @@ STATUS: good
 DATE: 12 Sept 2017
 REASON: Best so far, I think. The pair marginals have been recomputed.
     and the dj marginals also.
-ISSUES: Too big to fit into RAM. 
+ISSUES: Too big to fit into RAM.
     Loading word-pairs and marginals requires 72GBytes.
-    Just loading disjunct marginals requires 75GBytes. 
-    (25M csets and 25M ListLinks and umpteen valuations) 
+    Just loading disjunct marginals requires 75GBytes.
+    (25M csets and 25M ListLinks and umpteen valuations)
     Recomputing disjunct marginals uses 134GB RAM.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 13 GB      | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 57 GB      | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 13 GB      |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 57 GB      |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 139638908 = 140 M atoms (10M less)
 select count(*) from valuations; -- 307109283 = 307 M values (24M less)
@@ -6655,9 +6655,9 @@ Total MI: 1.7982
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  5.3758E+4    7.3126E+4
-Count   (l_1)  1.5140E+7    1.8578E+7     281.6        254.1    
-Length  (l_2)  1.8653E+6    1.8923E+6     34.70        25.88    
-RMS Count      1.8647E+6    1.8917E+6     34.69        25.87    
+Count   (l_1)  1.5140E+7    1.8578E+7     281.6        254.1
+Length  (l_2)  1.8653E+6    1.8923E+6     34.70        25.88
+RMS Count      1.8647E+6    1.8917E+6     34.69        25.87
 
 Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
 Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
@@ -6674,12 +6674,12 @@ Total MI: 8.1569
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  2.2742E+5    367.6    
-Count   (l_1)  9.4430E+5    7917.         4.152        21.54    
-Length  (l_2)  2.4549E+4    2397.         .1079        6.520    
-RMS Count      2.4499E+4    2379.         .1077        6.472    
+Support (l_0)  2.2742E+5    367.6
+Count   (l_1)  9.4430E+5    7917.         4.152        21.54
+Length  (l_2)  2.4549E+4    2397.         .1079        6.520
+RMS Count      2.4499E+4    2379.         .1077        6.472
 
-24893983049 bytes uncompressed = 24.9 GB 
+24893983049 bytes uncompressed = 24.9 GB
  3197324260 bytes compressed   =  3.2 GB
 
 85a872a283314d5bc1900b20da35a017  en_pairs_cfive_mst.sql
@@ -6703,7 +6703,7 @@ zh_pairs     | 4235 MB |  \l+
 select count(*) from atoms;  -- 12003950 = 12.0M
 select count(*) from valuations; -- 6081472 = 6.08 M
 
-537357532 bytes uncompressed = 537MB 
+537357532 bytes uncompressed = 537MB
  96333834 bytes compressed = 96.3MB
 
 0718a3670ac5ea3e3f6bca3a7fb560e9  zh_pairs_one.sql
@@ -6736,10 +6736,10 @@ Total MI: 2.0195
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  6819.        6411.    
-Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4    
-Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
-RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
+Support (l_0)  6819.        6411.
+Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4
+Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68
+RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 
 1647543636 bytes uncompressed = 1.65 GB
  290683964 bytes compressed = 291 GB
@@ -6758,13 +6758,13 @@ DATE: 17 July 2017
 REASON: No known defects. Except that the dataset is too small.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 303 MB     | 
- public | spaces     | table | ubuntu | 8192 bytes | 
- public | typecodes  | table | ubuntu | 48 kB      | 
- public | valuations | table | ubuntu | 187 MB     | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 303 MB     |
+ public | spaces     | table | ubuntu | 8192 bytes |
+ public | typecodes  | table | ubuntu | 48 kB      |
+ public | valuations | table | ubuntu | 187 MB     |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 3419298 = 3.4M
 select count(*) from valuations; -- 1739721 = 1.7M whoa
@@ -6787,13 +6787,13 @@ DATE: 17 July 2017
 REASON: No known defects.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 325 MB     | 
- public | spaces     | table | ubuntu | 8192 bytes | 
- public | typecodes  | table | ubuntu | 48 kB      | 
- public | valuations | table | ubuntu | 622 MB     | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 325 MB     |
+ public | spaces     | table | ubuntu | 8192 bytes |
+ public | typecodes  | table | ubuntu | 48 kB      |
+ public | valuations | table | ubuntu | 622 MB     |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 3659843 = 3.6M
 select count(*) from valuations; -- 5700207 = 5.7M
@@ -6807,10 +6807,10 @@ Total MI: 2.8871
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  8170.        8702.    
-Count   (l_1)  1.5620E+6    1.3583E+6     191.2        156.1    
-Length  (l_2)  1.4766E+5    1.3177E+5     18.07        15.14    
-RMS Count      1.4721E+5    1.3142E+5     18.02        15.10    
+Support (l_0)  8170.        8702.
+Count   (l_1)  1.5620E+6    1.3583E+6     191.2        156.1
+Length  (l_2)  1.4766E+5    1.3177E+5     18.07        15.14
+RMS Count      1.4721E+5    1.3142E+5     18.02        15.10
 
 472247960 Bytes uncompressed = 472 MB
  84150547 Bytes compressed = 84 MB
@@ -6831,13 +6831,13 @@ DATE: 17 July 2017
 REASON: No known defects.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 522 MB     | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 1219 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 522 MB     |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 1219 MB    |
+ public | values     | table | ubuntu | 8192 bytes |
 
 Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
 Rows: 60143 Columns: 602124
@@ -6849,10 +6849,10 @@ Total MI: 9.2606
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  6327.        7.399    
-Count   (l_1)  1.8066E+4    94.14         2.855        12.72    
-Length  (l_2)  722.8        67.89         .1142        9.175    
-RMS Count      695.7        62.85         .1100        8.494    
+Support (l_0)  6327.        7.399
+Count   (l_1)  1.8066E+4    94.14         2.855        12.72
+Length  (l_2)  722.8        67.89         .1142        9.175
+RMS Count      695.7        62.85         .1100        8.494
 
 select count(*) from atoms;      -- 5845332 = 5.85 M atoms
 select count(*) from valuations; -- 11414113 = 11.4M values
@@ -6876,13 +6876,13 @@ DATE: 10 Sept 2017
 REASON: No known defects. Except that the dataset is too big.
 
                         List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
+ Schema |    Name    | Type  | Owner  |    Size    | Description
 --------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 8947 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 103 GB     | 
- public | values     | table | ubuntu | 8192 bytes | 
+ public | atoms      | table | ubuntu | 8947 MB    |
+ public | spaces     | table | ubuntu | 40 kB      |
+ public | typecodes  | table | ubuntu | 56 kB      |
+ public | valuations | table | ubuntu | 103 GB     |
+ public | values     | table | ubuntu | 8192 bytes |
 
 select count(*) from atoms;      -- 101322902 = 101 M atoms
 select count(*) from valuations; --  54922685 =  55 M valuations
@@ -6900,7 +6900,7 @@ c8dc76a1bd5e68c8a6d08689f6485610  zen_pairs_two.sql.bz2
 ==================================================================
 ==================================================================
 
-dropdb  en_pairs_tthree en_pairs_ttwo en_pairs_rone 
+dropdb  en_pairs_tthree en_pairs_ttwo en_pairs_rone
 
 Plan:
 load en_pairs_mst
@@ -6945,7 +6945,7 @@ num_threads
 
 
 SELECT uuid, name FROM atoms WHERE type = 73
-  EXCEPT SELECT atoms.uuid,atoms.name FROM atoms, atoms_wtf 
+  EXCEPT SELECT atoms.uuid,atoms.name FROM atoms, atoms_wtf
      WHERE atoms_wtf.uuid = atoms.uuid;
 
  2293473835 | tail-piece
@@ -6978,21 +6978,21 @@ SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(2293473835 AS BIGINT)];
  2439795738 |     1 |    8 |      1 |      | {2293473835,143427163}
 
 
-CREATE TABLE tmp_atoms AS 
-   SELECT   uuid,  space, type, height, name, outgoing 
+CREATE TABLE tmp_atoms AS
+   SELECT   uuid,  space, type, height, name, outgoing
    FROM atoms WHERE height=0
      EXCEPT SELECT atoms.uuid,  atoms.space, atoms.type, atoms.height, atoms.name, atoms.outgoing
-          FROM atoms, atoms_wtf 
+          FROM atoms, atoms_wtf
           WHERE atoms_wtf.uuid = atoms.uuid;
 
 338354
 
 UPDATE tmp_atoms SET type= x WHERE NAME='joe';
 
-INSERT INTO atoms_wtf 
-   SELECT   uuid,  space, type, height, name, outgoing 
+INSERT INTO atoms_wtf
+   SELECT   uuid,  space, type, height, name, outgoing
 
-fuck it. 
+fuck it.
 load rohit first, then load semi_fu then load mst
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
@@ -7003,12 +7003,12 @@ load rohit first, then load semi_fu then load mst
 (sql-load)
 OK, that's loading in parallel yayyy! peaked over 17K/second
 dropped down to 11.3K per sec
-Need to load 19M for this one <<< 19741280 
+Need to load 19M for this one <<< 19741280
      ... in 1691 seconds (11674 per second)
      ... using 27GB RAM
      ... in approx 260 cpu-minutes.
 
-OK, so can hit rates over 20K atoms/sec during loads, when the 
+OK, so can hit rates over 20K atoms/sec during loads, when the
 DB is in RAM (or maybe SSD). Drops to 300 atoms/sec when DB is
 on spinning disk. Ouch!
 
@@ -7074,7 +7074,7 @@ Restart, again
 increase shared_buffers to 24GB
 shared_buffers = 24GB
 max_worker_processes = 24
-fsync = on  
+fsync = on
 effective_cache_size = 128GB
 
 increse  /etc/sysctl.d/30-postgresql-shm.conf too
@@ -7091,7 +7091,7 @@ no commit delay:  300%, 70% idle 6% wait 10 loadavg 10m val/h 20a/h
 -- Restart counting. Done,  May 21 06:15 UTC
 
 As of: 2017-05-21 18:59:08 i.e. 12.7 hours later,
-284 articles 
+284 articles
 
 select count(*) from atoms; <<< 1832992 = 1.8M
 
@@ -7118,10 +7118,10 @@ select count(*) from atoms; << 2829421 = 2.8M
 67789172 = 68M counts = 2.8M/hour = 784 pairs/sec
 
 ----------------
-As of 2017-05-22 23:58:10 
+As of 2017-05-22 23:58:10
 888 articles
 
-select count(*) from atoms; <<< 4239364 = 4.2M 
+select count(*) from atoms; <<< 4239364 = 4.2M
 1980561 = 2M eval links
 71595 = 71K words
 
@@ -7142,7 +7142,7 @@ Yayyyy!!!
 Why is it slowing?
 ---------------
 1) why is valuation updates about 3.5x of sum(3)?
-2) why is get-got almost 2x bigger than delta for nodes? A: 
+2) why is get-got almost 2x bigger than delta for nodes? A:
 3) why is get-got almost 1.5x bigger than delta for links? A: LgAnd's
 
 One sentence:
@@ -7172,8 +7172,8 @@ There were 23 fetches logged:
 245 stores. again 922 updates of values...
 
 SentenceNode got update twice...
-ParseNode twice ... 
-2x for all the words ... 
+ParseNode twice ...
+2x for all the words ...
 
 Then lots of updates, even when not teh main target of the store...
 Now, only 490 updates. Still too many. should be 245 ... !?
@@ -7184,7 +7184,7 @@ does close have a barrier?
 well, busy_writers is a bad idea... because it races.
 but queue size was wrong.
 
-OK, so 105 of 245 ... 123 
+OK, so 105 of 245 ... 123
 
  why is fillfraction 55K ? Because drain is no longer being hit.
 
@@ -7234,7 +7234,7 @@ right-wild gives dj
 (filter (lambda (cset) (< 10 (get-count cset))) cs)
 
 possible N=3 has 1: a-
-         N=2 has 5: (is- that+) (it- to+) 
+         N=2 has 5: (is- that+) (it- to+)
          N=1 = 106
 
 education: 100  N=3 has 1  N=2 has 7
@@ -7282,7 +7282,7 @@ total 15420+7168 -256 = 22588 - 256 = 22332  which is what union reports...
 unions 22260 < so wtf is this? oh 72 obse are identical!
 256 interested!  sum = 22260+256 = 22516
 
-Hmmm. 
+Hmmm.
 -       (filter!
 -               (lambda (wrd)
 -                       (not (null? (get-cset-vec wrd))))
@@ -7475,9 +7475,9 @@ Total MI: -1.935
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  4.4098E+4    4.3839E+4
-Count   (l_1)  8.3106E+6    7.4675E+6     188.5        170.3    
-Length  (l_2)  9.1631E+5    7.7754E+5     20.78        17.74    
-RMS Count      9.1591E+5    7.7713E+5     20.77        17.73    
+Count   (l_1)  8.3106E+6    7.4675E+6     188.5        170.3
+Length  (l_2)  9.1631E+5    7.7754E+5     20.78        17.74
+RMS Count      9.1591E+5    7.7713E+5     20.77        17.73
 
 OK, So I think we are done with en_pairs_tthree.
 
@@ -7556,9 +7556,9 @@ Total MI: -1.837
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  2.3078E+4    2.2456E+4
-Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3    
-Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56    
-RMS Count      4.2741E+5    3.4915E+5     18.52        15.55    
+Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3
+Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56
+RMS Count      4.2741E+5    3.4915E+5     18.52        15.55
 
 
 (define pca (make-pseudo-cset-api))
@@ -7585,9 +7585,9 @@ Total MI: -0.423
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  5.8326E+4    1.7086E+5
-Count   (l_1)  3.2094E+6    9.5093E+7     55.03        556.6    
-Length  (l_2)  2.4075E+6    1.2274E+7     41.28        71.84    
-RMS Count      1.8036E+6    1.2272E+7     30.92        71.83    
+Count   (l_1)  3.2094E+6    9.5093E+7     55.03        556.6
+Length  (l_2)  2.4075E+6    1.2274E+7     41.28        71.84
+RMS Count      1.8036E+6    1.2272E+7     30.92        71.83
 
 OK, but this is wrong, we have to redoit.
 
@@ -7674,12 +7674,12 @@ Total MI: -3.906
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  6.1010E+4    9176.    
-Count   (l_1)  1.5853E+5    6.4221E+4     2.598        6.999    
-Length  (l_2)  5694.        3476.         9.3332E-2    .3788    
-RMS Count      5666.        3444.         9.2870E-2    .3753    
+Support (l_0)  6.1010E+4    9176.
+Count   (l_1)  1.5853E+5    6.4221E+4     2.598        6.999
+Length  (l_2)  5694.        3476.         9.3332E-2    .3788
+RMS Count      5666.        3444.         9.2870E-2    .3753
 
-OK, 
+OK,
 so en_pairs_ttwo_mst seems to contain valid data.
 So we are done, here, and its time to construct the next tranche.
 
@@ -7705,7 +7705,7 @@ Done computing N(*,*) total-count=139806259.0 in 17 secs
 Going to do individual pair frequencies
 Done computing 4886362 pairs in 268 secs
 Start computing log P(*,y)
-Done computing 138014 left-wilds in 18 secs  
+Done computing 138014 left-wilds in 18 secs
 Done computing 139770 right-wilds in 17 secs
 Done storing 139770 left-wilds in 67 secs
 Done storing 138014 right-wilds in 64 secs
@@ -7736,9 +7736,9 @@ Total MI: -2.030
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  1.6405E+4    1.6483E+4
-Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0    
-Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06    
-RMS Count      2.2878E+5    1.9854E+5     13.95        12.05    
+Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0
+Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06
+RMS Count      2.2878E+5    1.9854E+5     13.95        12.05
 
 
 Now do it again, for the disjuncts!
@@ -7770,19 +7770,19 @@ Total MI: -0.410
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
 Support (l_0)  3.3665E+4    1.2870E+5
-Count   (l_1)  1.6849E+6    5.1241E+7     50.05        398.2    
-Length  (l_2)  1.2139E+6    6.4911E+6     36.06        50.44    
-RMS Count      1.0132E+6    6.4895E+6     30.10        50.42    
+Count   (l_1)  1.6849E+6    5.1241E+7     50.05        398.2
+Length  (l_2)  1.2139E+6    6.4911E+6     36.06        50.44
+RMS Count      1.0132E+6    6.4895E+6     30.10        50.42
 
 
 ===============
 Arghhhh Sanity check:
 the LgWordCset's in these files are:
 
-(LgWordCset 
+(LgWordCset
     (WordNode "this")
-    (LgAnd 
-        (LgConnector 
+    (LgAnd
+        (LgConnector
             (LgConnectorNode "ANY")
             (LgConnDirNode "-")
             (LgConnMultiNode "@")
@@ -7847,10 +7847,10 @@ Total MI: -4.156
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  3.4890E+4    6946.    
-Count   (l_1)  9.1434E+4    3.4736E+4     2.621        5.001    
-Length  (l_2)  2143.        1397.         6.1427E-2    .2011    
-RMS Count      2107.        1368.         6.0395E-2    .1970    
+Support (l_0)  3.4890E+4    6946.
+Count   (l_1)  9.1434E+4    3.4736E+4     2.621        5.001
+Length  (l_2)  2143.        1397.         6.1427E-2    .2011
+RMS Count      2107.        1368.         6.0395E-2    .1970
 
 
 ---------- repair:
@@ -7875,7 +7875,7 @@ update atoms set type=229 FROM con where outgoing[1]=con.uuid and type=167;
 
 How many LgAnds are left?
 select count(*) from atoms where type=167; -- gives 3
-wtf??? but this is exactly what is in tone, also!!!!!!! 
+wtf??? but this is exactly what is in tone, also!!!!!!!
    XXX so any disjunct counting is borken!  fuuck.
 
 select count(*) from atoms where type = 165;  -- 165==LgConnector
@@ -7894,7 +7894,7 @@ select count(*) from pan;
 so its 1860793 which is same as before.
 
 select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid;
-gives 5431830 
+gives 5431830
 
 -- 169 is LgWordCset
 select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid AND atoms.type=169;
@@ -7902,7 +7902,7 @@ gives 3571037
 
 so what the heck has pseudoAnd as second, but is not an LgWordCset ????
 
-its type=21 ... ListLink. 
+its type=21 ... ListLink.
 (ListLink ; 17184167    --- I guess we stored the counts here. Hmmm. why?
    (AnyNode "cset-word")
    (PseudoAnd ...)
@@ -7973,7 +7973,7 @@ sims should be LLOBJ
 Umm batch-all-pair-mi is where?
 
 batch-sim should NOT store!
-batch-sim-pairs 
+batch-sim-pairs
 
 So: 1) cutoff for sim  2) cutoff for store.
 
@@ -8004,7 +8004,7 @@ Try again:
 
 (sql-clear-stats)
 ; 1524572 atoms in AS
-(define ac (get-all-cset-words)) 
+(define ac (get-all-cset-words))
 (length ac)
 (load "gram-sim.scm")
 (para-batch-sim-pairs ac 0.1)
@@ -8082,7 +8082,7 @@ guile -l mst-count-en-r.scm on term-6
 Now compute the summaries.
 
 (define pca (make-pseudo-cset-api))
-(batch-pairs pca)  
+(batch-pairs pca)
 COMMENT ON DATABASE en_pairs_rone_mst IS 'Clean MST-parse of tranche-1 and summary';
 
 ---------- meanwhile do the tthree_mst DONE
@@ -8172,25 +8172,25 @@ revert to distro bdwgc
     set=set@entry=0x7f36214b1740 <suspend_handler_mask>)
     at ../sysdeps/unix/sysv/linux/sigsuspend.c:30
 #1  0x00007f3621293602 in GC_suspend_handler_inner
-(dummy=dummy@entry=0x0, 
+(dummy=dummy@entry=0x0,
     context=context@entry=0x7fff6c807540) at pthread_stop_world.c:324
 #2  0x00007f36212936cf in GC_suspend_handler (sig=30, info=<optimized
-out>, 
+out>,
     context=0x7fff6c807540) at pthread_stop_world.c:237
 #3  <signal handler called>
 
 
 thr 2: find_slot_map (
     cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
-#1  scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+#1  scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0,
     mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
-#2  0x00007f36212883be in GC_mark_from (mark_stack_top=0x7f361fe85ea0, 
-    mark_stack_top@entry=0x7f361fe85f00, 
-    mark_stack=mark_stack@entry=0x7f361fe85eb0, 
+#2  0x00007f36212883be in GC_mark_from (mark_stack_top=0x7f361fe85ea0,
+    mark_stack_top@entry=0x7f361fe85f00,
+    mark_stack=mark_stack@entry=0x7f361fe85eb0,
     mark_stack_limit=mark_stack_limit@entry=0x7f361fe95eb0) at
 mark.c:784
 #3  0x00007f36212889de in GC_do_local_mark
-(local_mark_stack=0x7f361fe85eb0, 
+(local_mark_stack=0x7f361fe85eb0,
     local_top=0x7f361fe85f00) at mark.c:1048
 #4  0x00007f3621288bf8 in GC_mark_local (
     local_mark_stack=local_mark_stack@entry=0x7f361fe85eb0,
@@ -8205,19 +8205,19 @@ id=id@entry=1)
 
 single-stepping:
 
-scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0,
     mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
 975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
 (gdb) print fp
 $1 = (union scm_vm_stack_element *) 0x7f36183d5e38
 (gdb) step
 973       for (fp = vp->fp, sp = vp->sp;
-(gdb) 
+(gdb)
 979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
-(gdb) 
+(gdb)
 1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
 &cache);
-(gdb) 
+(gdb)
 1006          sp = SCM_FRAME_PREVIOUS_SP (fp);
 (gdb) print fp
 $2 = (union scm_vm_stack_element *) 0x7f36183d5e38
@@ -8226,22 +8226,22 @@ $3 = (union scm_vm_stack_element *) 0x7f36183d5e48
 (gdb) step
 1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
 &cache);
-(gdb) 
+(gdb)
 find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:932
 932       size_t slot = (((scm_t_uintptr) ip) >> 2) %
 SLOT_MAP_CACHE_SIZE;
-(gdb) 
+(gdb)
 935       if (cache->entries[slot].ip == ip)
-(gdb) 
-scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+(gdb)
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0,
     mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
 1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
 &cache);
-(gdb) 
+(gdb)
 find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
 936         map = cache->entries[slot].map;
-(gdb) 
-scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+(gdb)
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0,
     mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
 975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
 (gdb) print fp
@@ -8273,7 +8273,7 @@ I've got a large, complex, heavily multi-threaded guile program that
 hangs during garbage collection; usually after running for half a day.
 It hangs in a tight loop in scm_i_vm_mark_stack, spinning at 100% of CPU.
 
-This is due to the for-loop line fp = SCM_FRAME_DYNAMIC_LINK (fp)) 
+This is due to the for-loop line fp = SCM_FRAME_DYNAMIC_LINK (fp))
 at libguile/vm.c line 975 failing to advance the frame pointer.
 There's no "obvious" corruption in the stack; it simply looks like
 the frame was incompletely set up, and so incrementing to the next
@@ -8301,7 +8301,7 @@ $2 = (scm_t_uint32 *) 0x1
 (gdb) print cache->entries[slot].map
 $4 = (const scm_t_uint8 *) 0x0
 (gdb) step
-scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40,
     mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
 1011        slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp), &cache);
 (gdb) print fp
@@ -8315,7 +8315,7 @@ OK that looks weird ... is this corrupted ?? but whatever,
 because the returned slot_map is never used ... because ...
 
 (gdb) step
-scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40,
     mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:975
 975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
 (gdb) print fp
@@ -8328,7 +8328,7 @@ $8 = 0
 OK, that seems bad, because now fp never advances, it just repeats
 over and over with this same value.
 
-(gdb) 
+(gdb)
 979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
 (gdb) print nlocals
 $10 = -2
@@ -8347,15 +8347,15 @@ frames.h:#define SCM_FRAME_PREVIOUS_SP(fp)	((fp) + 2)
 
 and so now it loops around and repeats.
 (gdb) print cache
-$19 = {entries = {{ip = 0x1, map = 0x0}, {ip = 0x0, 
-      map = 0x0} <repeats 23 times>, {ip = 0x1a1b5e0, map = 0x0}, {ip = 0x0, 
-      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, 
-      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, 
+$19 = {entries = {{ip = 0x1, map = 0x0}, {ip = 0x0,
+      map = 0x0} <repeats 23 times>, {ip = 0x1a1b5e0, map = 0x0}, {ip = 0x0,
+      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0,
+      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0,
       map = 0x0}}}
 (gdb) print &cache
 $20 = (struct slot_map_cache *) 0x7f3e9b783ab0
 
-and so the loop repeates forever, because 
+and so the loop repeates forever, because
 fp = SCM_FRAME_DYNAMIC_LINK (fp) never advances fp, because
 (fp)[1].as_uint  is zero.
 
@@ -8401,7 +8401,7 @@ $28 = (union scm_vm_stack_element *) 0x7f3e94cdee00
 (gdb) print  vp->stack_top
 $29 = (union scm_vm_stack_element *) 0x7f3e94cdf000
 
-So lets walk manually. 
+So lets walk manually.
 frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
 
 (gdb) print (vp->fp) + (vp->fp)[1].as_uint
@@ -8413,14 +8413,14 @@ So how did we get here?
 (gdb) print vp
 $32 = (struct scm_vm *) 0x755c1bd0
 (gdb) print *vp
-$33 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00, 
-  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0, 
-  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512, 
-  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000, 
-  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+$33 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00,
+  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0,
+  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512,
+  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000,
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4},
   resumable_prompt_cookie = 0x7f3d397f9440, engine = 1}
 
-Looks plausible, not corrupted. Why is engine=1 ?? 
+Looks plausible, not corrupted. Why is engine=1 ??
 #define SCM_VM_REGULAR_ENGINE 0
 #define SCM_VM_DEBUG_ENGINE 1
 #define SCM_VM_NUM_ENGINES 2
@@ -8434,13 +8434,13 @@ OK, that's not excellent.
 $35 = 161
 
 (gdb) bt
-#0  scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+#0  scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40,
     mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
-#1  0x00007f3e9db8835e in GC_mark_from (mark_stack_top=0x7f3e9b783ee0, 
-    mark_stack_top@entry=0x7f3e9b783f00, 
-    mark_stack=mark_stack@entry=0x7f3e9b783eb0, 
+#1  0x00007f3e9db8835e in GC_mark_from (mark_stack_top=0x7f3e9b783ee0,
+    mark_stack_top@entry=0x7f3e9b783f00,
+    mark_stack=mark_stack@entry=0x7f3e9b783eb0,
     mark_stack_limit=mark_stack_limit@entry=0x7f3e9b793eb0) at ../mark.c:772
-#2  0x00007f3e9db8897e in GC_do_local_mark (local_mark_stack=0x7f3e9b783eb0, 
+#2  0x00007f3e9db8897e in GC_do_local_mark (local_mark_stack=0x7f3e9b783eb0,
     local_top=0x7f3e9b783f00) at ../mark.c:1037
 #3  0x00007f3e9db88b98 in GC_mark_local (
     local_mark_stack=local_mark_stack@entry=0x7f3e9b783eb0, id=id@entry=4)
@@ -8459,7 +8459,7 @@ so bdwgc is version gc7_6_0
 So ../mark.c:772 is GET_HDR and GET_HDR is in
 include/private/gc_hdrs.h
 
-define GET_HDR(p, hhdr)  ... ((hhdr) = HDR_INNER(p) 
+define GET_HDR(p, hhdr)  ... ((hhdr) = HDR_INNER(p)
 # define HDR_INNER(p) HDR_FROM_BI(BI(p),p)
 #define HDR_FROM_BI(bi, p) \
                 ((bi)->index[((word)(p) >> LOG_HBLKSIZE) & (BOTTOM_SZ - 1)])
@@ -8487,14 +8487,14 @@ anyway ... in mark.c line 733
           mark_stack_top = (*PROC(descr))((word *)current_p, mark_stack_top,
                                           mark_stack_limit, ENV(descr));
           continue;
-But that's the wrong line number.  line 772 is in 
+But that's the wrong line number.  line 772 is in
         case GC_DS_PER_OBJECT:
           if ((signed_word)descr >= 0) {
             /* Descriptor is in the object.     */
             descr = *(word *)(current_p + descr - GC_DS_PER_OBJECT);
 
 Oh, it goes to retry, which loops around and calls PROC which is thread_mark
-which is called with args 
+which is called with args
           mark_stack_top = (*PROC(descr))((word *)current_p, mark_stack_top,
                                           mark_stack_limit, ENV(descr));
 
@@ -8505,22 +8505,22 @@ so back in libguile/threads.c line 84:
   const struct scm_i_thread *t = (struct scm_i_thread *) addr;
 
 (gdb) print *(struct scm_i_thread *) current_p
-$40 = {next_thread = 0x7225d540, handle = 0x5763f3b0, pthread = 139900934399744, 
-  result = 0x4, exited = 0, guile_mode = 1, needs_unregister = 1, wake = 0x0, 
-  sleep_cond = {__data = {__lock = 0, __futex = 0, __total_seq = 0, 
-      __wakeup_seq = 0, __woken_seq = 0, __mutex = 0x0, __nwaiters = 0, 
-      __broadcast_seq = 0}, __size = '\000' <repeats 47 times>, __align = 0}, 
-  sleep_pipe = {151, 197}, freelists = 0x71cfe800, 
+$40 = {next_thread = 0x7225d540, handle = 0x5763f3b0, pthread = 139900934399744,
+  result = 0x4, exited = 0, guile_mode = 1, needs_unregister = 1, wake = 0x0,
+  sleep_cond = {__data = {__lock = 0, __futex = 0, __total_seq = 0,
+      __wakeup_seq = 0, __woken_seq = 0, __mutex = 0x0, __nwaiters = 0,
+      __broadcast_seq = 0}, __size = '\000' <repeats 47 times>, __align = 0},
+  sleep_pipe = {151, 197}, freelists = 0x71cfe800,
   pointerless_freelists = 0x71cfe780, dynamic_state = 0x71de7900, dynstack = {
-    base = 0x698c3800, top = 0x698c3940, limit = 0x698c3a00}, 
-  pending_asyncs = 0x304, block_asyncs = 0, continuation_root = 0x5763f340, 
-  continuation_base = 0x7f3d397f9c90, vp = 0x755c1bd0, base = 0x7f3d397f9da0, 
-  regs = {{__jmpbuf = {139905204221696, 139906923931021, 1, 139894281647232, 
-        139906913276512, 0, 139906918327551, 8388608}, 
-      __mask_was_saved = 964664752, __saved_mask = {__val = {0, 139900934399744, 
-          139900934399744, 139900934397344, 139906923929400, 139893936840720, 
-          1804170656, 139906913276512, 139900934399744, 139900934397344, 
-          139900934397504, 139893936840720, 139906910859134, 139906913276484, 
+    base = 0x698c3800, top = 0x698c3940, limit = 0x698c3a00},
+  pending_asyncs = 0x304, block_asyncs = 0, continuation_root = 0x5763f340,
+  continuation_base = 0x7f3d397f9c90, vp = 0x755c1bd0, base = 0x7f3d397f9da0,
+  regs = {{__jmpbuf = {139905204221696, 139906923931021, 1, 139894281647232,
+        139906913276512, 0, 139906918327551, 8388608},
+      __mask_was_saved = 964664752, __saved_mask = {__val = {0, 139900934399744,
+          139900934399744, 139900934397344, 139906923929400, 139893936840720,
+          1804170656, 139906913276512, 139900934399744, 139900934397344,
+          139900934397504, 139893936840720, 139906910859134, 139906913276484,
           139906910857112, 27401856}}}}}
 
 (gdb) print ((struct scm_i_thread *) current_p)->vp
@@ -8531,15 +8531,15 @@ which is exactly the vp we had before, so this is the correct thread.
 So  ... all the values in *(struct scm_i_thread *) current_p look more or less OK;
 its not corrupted. And all the values in *vp look more or less OK, its not corrrupted
 except that engine=1 looks wrong.  So what's up with the weird stack looping?
-Again: 
+Again:
 From before, we had:
 
 (gdb) print *vp
-$42 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00, 
-  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0, 
-  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512, 
-  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000, 
-  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+$42 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00,
+  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0,
+  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512,
+  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000,
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4},
   resumable_prompt_cookie = 0x7f3d397f9440, engine = 1}
 
 so fp, sp, stack_bottom, stack_top all are self-consistent with each other.
@@ -8568,7 +8568,7 @@ Is the frame corrupted? How? what does the rest of the stack look like?
 0x7f3e94cdeef0: 0x0000000001a37c10      0x000000000192acd0
 
 
-So... who sets up thread->vp ? 
+So... who sets up thread->vp ?
 /* #define VM_ENABLE_ASSERTIONS */
 However, defining this breaks the build.
 
@@ -8577,7 +8577,7 @@ index 6c88ebf..f0f8164 100644
 --- a/libguile/vm-engine.c
 +++ b/libguile/vm-engine.c
 @@ -2050,11 +2050,11 @@ VM_NAME (scm_i_thread *thread, struct scm_vm *vp,
- 
+
            if (!scm_module_system_booted_p)
              {
 -              ASSERT (scm_is_true
@@ -8595,18 +8595,18 @@ index 18f2192..c26066e 100644
 --- a/libguile/vm.c
 +++ b/libguile/vm.c
 @@ -63,7 +63,7 @@ static size_t page_size;
- 
+
  /* The VM has a number of internal assertions that shouldn't normally be
     necessary, but might be if you think you found a bug in the VM. */
 -/* #define VM_ENABLE_ASSERTIONS */
 +#define VM_ENABLE_ASSERTIONS
- 
+
  static void vm_expand_stack (struct scm_vm *vp,
                               union scm_vm_stack_element *new_sp) SCM_NOINLINE;
 
 
  GEN      guile-procedures.texi
-/bin/bash: line 1: 24078 Broken pipe 
+/bin/bash: line 1: 24078 Broken pipe
 
  ./meta/guile
 Aborted
@@ -8617,25 +8617,25 @@ gdb libguile/.libs/lt-guile
 #0  0x00007ffff74f7428 in __GI_raise (sig=sig@entry=6)
     at ../sysdeps/unix/sysv/linux/raise.c:54
 #1  0x00007ffff74f902a in __GI_abort () at abort.c:89
-#2  0x00007ffff7b707c4 in vm_regular_engine (thread=0x7282, vp=0x806f30, 
+#2  0x00007ffff7b707c4 in vm_regular_engine (thread=0x7282, vp=0x806f30,
     registers=0x6, resume=-145787864) at ../../libguile/vm-engine.c:2053
-#3  0x00007ffff7b711d2 in scm_call_n (proc=0x832b30, argv=argv@entry=0x0, 
+#3  0x00007ffff7b711d2 in scm_call_n (proc=0x832b30, argv=argv@entry=0x0,
     nargs=nargs@entry=0) at ../../libguile/vm.c:1257
 #4  0x00007ffff7af14e9 in scm_call_0 (proc=<optimized out>)
     at ../../libguile/eval.c:481
 #5  0x00007ffff7b10568 in scm_primitive_load_path (args=<optimized out>)
     at ../../libguile/load.c:1248
-#6  0x00007ffff7b6e976 in vm_regular_engine (thread=0x7282, vp=0x806f30, 
+#6  0x00007ffff7b6e976 in vm_regular_engine (thread=0x7282, vp=0x806f30,
     registers=0x6, resume=-145787864) at ../../libguile/vm-engine.c:784
 
-Oh. wtf. 
+Oh. wtf.
 
 
 (define avg-time-taken
 	(let ((last-gc (gc-stats))
 			(start-time (get-internal-real-time))
 			(run-time (get-internal-run-time)))
-		(lambda () 
+		(lambda ()
 			(define now (get-internal-real-time))
 			(define run (get-internal-run-time))
 			(define cur (gc-stats))
@@ -8655,11 +8655,11 @@ Anyway: it hangs without ever hitting any of the VM DEBUG asserts.
 This time:
 
 (gdb) print *vp
-$1 = {ip = 0x7ffff7b87358 <subr_stub_code+56>, sp = 0x7fffdc617e00, 
-  fp = 0x7fffdc617e18, stack_limit = 0x7fffdc617000, trace_level = 0, 
-  sp_min_since_gc = 0x7fffdc617b58, stack_size = 512, 
-  stack_bottom = 0x7fffdc617000, stack_top = 0x7fffdc618000, 
-  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+$1 = {ip = 0x7ffff7b87358 <subr_stub_code+56>, sp = 0x7fffdc617e00,
+  fp = 0x7fffdc617e18, stack_limit = 0x7fffdc617000, trace_level = 0,
+  sp_min_since_gc = 0x7fffdc617b58, stack_size = 512,
+  stack_bottom = 0x7fffdc617000, stack_top = 0x7fffdc618000,
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4},
   resumable_prompt_cookie = 0x7fff857f9440, engine = 1}
 
 (gdb) x/32x 0x7fffdc617e00
@@ -8716,7 +8716,7 @@ But ... #define SCM_VM_REGULAR_ENGINE 0
 frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
 frames.h:#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl) ((fp)[1].as_uint = ((dl) - (fp)))
 
-So I'm getting dl == fp ?? 
+So I'm getting dl == fp ??
 guile -l pair-count-en.scm
 
 libguile/frames.h
@@ -8746,18 +8746,18 @@ libguile/frames.h
 --- a/libguile/vm.c
 +++ b/libguile/vm.c
 @@ -63,7 +63,7 @@ static size_t page_size;
- 
+
  /* The VM has a number of internal assertions that shouldn't normally be
     necessary, but might be if you think you found a bug in the VM. */
 -/* #define VM_ENABLE_ASSERTIONS */
 +#define VM_ENABLE_ASSERTIONS
- 
+
  static void vm_expand_stack (struct scm_vm *vp,
                               union scm_vm_stack_element *new_sp) SCM_NOINLINE;
 @@ -952,6 +952,9 @@ enum slot_desc
      SLOT_DESC_UNUSED = 3
    };
- 
+
 +extern const scm_t_uint32 subr_stub_code[];
 +scm_t_uint32 * pstub = (void*) &subr_stub_code;
 +
@@ -8770,9 +8770,9 @@ libguile/frames.h
    void *lower = (void *) GC_least_plausible_heap_addr;
    struct slot_map_cache cache;
 +  union scm_vm_stack_element *fprev = NULL;
- 
+
    memset (&cache, 0, sizeof (cache));
- 
+
 @@ -974,6 +978,14 @@ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry
 *mark_stack_ptr,
         fp < vp->stack_top;
@@ -8820,19 +8820,19 @@ All of these look bad, and will clearly crash if derefernced.
 
 
 
-#1  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+#1  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480,
     registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
     at ../../libguile/vm-engine.c:784
-#2  0x00007ffff7b7128a in scm_call_n (proc=0x7fffede811e8, 
+#2  0x00007ffff7b7128a in scm_call_n (proc=0x7fffede811e8,
     argv=argv@entry=0x7ffe53ffddd8, nargs=nargs@entry=1)
     at ../../libguile/vm.c:1269
 #3  0x00007ffff7af1568 in scm_call_1 (proc=<optimized out>, arg1=0x5bcae580)
     at ../../libguile/eval.c:487
-#4  0x00007ffff7affd08 in scm_i_frame_print (frame=0x5bcae580, port=0x16f10160, 
+#4  0x00007ffff7affd08 in scm_i_frame_print (frame=0x5bcae580, port=0x16f10160,
     pstate=<optimized out>) at ../../libguile/frames.c:48
 why are we printing???
 
-#5  0x00007ffff7b33c4b in scm_prin1 (exp=exp@entry=0x5bcae580, 
+#5  0x00007ffff7b33c4b in scm_prin1 (exp=exp@entry=0x5bcae580,
     port=port@entry=0x16f10160, writingp=writingp@entry=1)
     at ../../libguile/print.c:817
 #6  0x00007ffff7b34b11 in scm_write (obj=0x5bcae580, port=0x16f10160)
@@ -8840,46 +8840,46 @@ why are we printing???
 
 why are we writing?
 
-#7  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+#7  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480,
     registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
     at ../../libguile/vm-engine.c:784
-#8  0x00007ffff7b7128a in scm_call_n (proc=0x7fffeddbed70, 
+#8  0x00007ffff7b7128a in scm_call_n (proc=0x7fffeddbed70,
     argv=argv@entry=0x7ffe53ffe080, nargs=nargs@entry=4)
     at ../../libguile/vm.c:1269
-#9  0x00007ffff7af1644 in scm_call_4 (proc=<optimized out>, 
-    arg1=arg1@entry=0x59d5fee0, arg2=arg2@entry=0x59d5cf20, 
+#9  0x00007ffff7af1644 in scm_call_4 (proc=<optimized out>,
+    arg1=arg1@entry=0x59d5fee0, arg2=arg2@entry=0x59d5cf20,
     arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52) at ../../libguile/eval.c:508
 #10 0x00007ffff7ae29a5 in display_backtrace_body (a=<optimized out>)
     at ../../libguile/backtrace.c:244
 
 Ohh, why is this being done?
 
-#11 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+#11 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480,
     registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
     at ../../libguile/vm-engine.c:784
-#12 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x59d5cf00, 
+#12 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x59d5cf00,
     argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1269
 #13 0x00007ffff7af1549 in scm_call_0 (proc=proc@entry=0x59d5cf00)
     at ../../libguile/eval.c:481
-#14 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x59d5cf00, 
+#14 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x59d5cf00,
     handler=0x59d5cee0, pre_unwind_handler=0x4) at ../../libguile/throw.c:137
-#15 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404, 
-    thunk=<optimized out>, handler=<optimized out>, 
+#15 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404,
+    thunk=<optimized out>, handler=<optimized out>,
     pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
-#16 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404, 
-    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>, 
-    body_data=body_data@entry=0x7ffe53ffe460, 
-    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>, 
-    handler_data=<optimized out>, 
+#16 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404,
+    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>,
+    body_data=body_data@entry=0x7ffe53ffe460,
+    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>,
+    handler_data=<optimized out>,
     pre_unwind_handler=pre_unwind_handler@entry=0x0, pre_unwind_handler_data=0x0)
     at ../../libguile/throw.c:377
-#17 0x00007ffff7b6062e in scm_internal_catch (tag=tag@entry=0x404, 
-    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>, 
-    body_data=body_data@entry=0x7ffe53ffe460, 
-    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>, 
+#17 0x00007ffff7b6062e in scm_internal_catch (tag=tag@entry=0x404,
+    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>,
+    body_data=body_data@entry=0x7ffe53ffe460,
+    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>,
     handler_data=<optimized out>) at ../../libguile/throw.c:386
 #18 0x00007ffff7ae2855 in scm_display_backtrace_with_highlights (
-    stack=<optimized out>, port=<optimized out>, first=<optimized out>, 
+    stack=<optimized out>, port=<optimized out>, first=<optimized out>,
     depth=<optimized out>, highlights=<optimized out>)
     at ../../libguile/backtrace.c:282
 
@@ -8891,62 +8891,62 @@ scm_unused_struct*) (this=0x7ffe8c000980, tag=0x7a86e0, throw_args=0x5bcda980)
 Oh. Ewww. Something that got sent caused an exception.  But what?
 Lets print to the log file.
 
-#20 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+#20 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480,
     registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
     at ../../libguile/vm-engine.c:784
-#21 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5bcae600, 
+#21 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5bcae600,
     argv=<optimized out>, nargs=5) at ../../libguile/vm.c:1269
 #22 0x00007ffff7af1a3b in scm_apply_0 (proc=proc@entry=0x5bcae600, args=0x304)
     at ../../libguile/eval.c:594
-#23 0x00007ffff7b60177 in catch (tag=<optimized out>, thunk=0x5bcae620, 
+#23 0x00007ffff7b60177 in catch (tag=<optimized out>, thunk=0x5bcae620,
     handler=0x5bcae600, pre_unwind_handler=0x5bcae5e0)
     at ../../libguile/throw.c:134
 #24 0x00007fffecb62d29 in opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char,
-std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980, 
+std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
     expr=...) at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:572
 #25 0x00007fffecb62dda in opencog::SchemeEval::c_wrap_eval(void*) (
     p=0x7ffe8c000980)
     at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:501
 #26 0x00007ffff7aeb70a in c_body (d=0x7ffe53ffece0)
     at ../../libguile/continuations.c:422
-#27 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+#27 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480,
     registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
     at ../../libguile/vm-engine.c:784
 <<<<<<<<<< first one is here.
 
-#28 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5c6d3580, 
+#28 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5c6d3580,
     argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1269
 #29 0x00007ffff7af1549 in scm_call_0 (proc=proc@entry=0x5c6d3580)
     at ../../libguile/eval.c:481
-#30 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x5c6d3580, 
+#30 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x5c6d3580,
     handler=0x5c6d3560, pre_unwind_handler=0x5c6d3540)
     at ../../libguile/throw.c:137
-#31 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404, 
-    thunk=<optimized out>, handler=<optimized out>, 
+#31 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404,
+    thunk=<optimized out>, handler=<optimized out>,
     pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
-#32 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404, 
-    body=body@entry=0x7ffff7aeb700 <c_body>, 
-    body_data=body_data@entry=0x7ffe53ffece0, 
-    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>, 
-    handler_data=handler_data@entry=0x7ffe53ffece0, 
+#32 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404,
+    body=body@entry=0x7ffff7aeb700 <c_body>,
+    body_data=body_data@entry=0x7ffe53ffece0,
+    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>,
+    handler_data=handler_data@entry=0x7ffe53ffece0,
     pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aeb800 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at ../../libguile/throw.c:377
 #33 0x00007ffff7aebd10 in scm_i_with_continuation_barrier (
-    body=body@entry=0x7ffff7aeb700 <c_body>, 
-    body_data=body_data@entry=0x7ffe53ffece0, 
-    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>, 
-    handler_data=handler_data@entry=0x7ffe53ffece0, 
+    body=body@entry=0x7ffff7aeb700 <c_body>,
+    body_data=body_data@entry=0x7ffe53ffece0,
+    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>,
+    handler_data=handler_data@entry=0x7ffe53ffece0,
     pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aeb800 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at ../../libguile/continuations.c:360
-#34 0x00007ffff7aebdf5 in scm_c_with_continuation_barrier (func=<optimized out>, 
+#34 0x00007ffff7aebdf5 in scm_c_with_continuation_barrier (func=<optimized out>,
     data=<optimized out>) at ../../libguile/continuations.c:456
 #35 0x00007ffff717f127 in GC_call_with_gc_active (
-    fn=fn@entry=0x7ffff7b5e200 <with_guile_trampoline>, 
+    fn=fn@entry=0x7ffff7b5e200 <with_guile_trampoline>,
     client_data=client_data@entry=0x7ffe53ffedc0) at ../pthread_support.c:1343
-#36 0x00007ffff7b5ec11 in with_guile (base=base@entry=0x7ffe53ffed90, 
+#36 0x00007ffff7b5ec11 in with_guile (base=base@entry=0x7ffe53ffed90,
     data=data@entry=0x7ffe53ffedc0) at ../../libguile/threads.c:688
 #37 0x00007ffff7179132 in GC_call_with_stack_base (
     fn=fn@entry=0x7ffff7b5eb80 <with_guile>, arg=arg@entry=0x7ffe53ffedc0)
     at ../misc.c:1941
-#38 0x00007ffff7b5efb8 in scm_i_with_guile (dynamic_state=<optimized out>, 
+#38 0x00007ffff7b5efb8 in scm_i_with_guile (dynamic_state=<optimized out>,
     data=<optimized out>, func=<optimized out>) at ../../libguile/threads.c:703
 #39 scm_with_guile (func=<optimized out>, data=<optimized out>)
     at ../../libguile/threads.c:709
@@ -8977,7 +8977,7 @@ skip setWordAndPos or rather use simplified form of it.
 setWordAndPos
 Remove from Linkable...
 add loop for englsih when? in the algs... in Morphy? No, too late
-in RelationExtractor.java: in 
+in RelationExtractor.java: in
 FeatureNode fn = _parse.getLeft();
 while (fn != null)
 fn = fn.get("NEXT");
@@ -9063,45 +9063,45 @@ Thread 24232 "guile" received signal SIGSEGV, Segmentation fault.
 #2  0x00007ffff7b0d859 in scm_list_p (x=<optimized out>)
     at ../../libguile/list.c:168
 #3  0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
-vp=0x1644e990, 
+vp=0x1644e990,
     registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
-#4  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+#4  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70,
     argv=argv@entry=0x7ffee57f9070, nargs=nargs@entry=4)
     at ../../libguile/vm.c:1271
-#5  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
-    arg1=arg1@entry=0x54c8fd90, arg2=arg2@entry=0x547a18c0, 
+#5  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>,
+    arg1=arg1@entry=0x54c8fd90, arg2=arg2@entry=0x547a18c0,
     arg3=arg3@entry=0x984520, arg4=arg4@entry=0x52)
     at ../../libguile/eval.c:508
 #6  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
     at ../../libguile/backtrace.c:244
 #7  0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
-vp=0x1644e990, 
+vp=0x1644e990,
     registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
-#8  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x547a1700, 
+#8  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x547a1700,
     argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
 #9  0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x547a1700)
     at ../../libguile/eval.c:481
-#10 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x547a1700, 
+#10 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x547a1700,
 ---Type <return> to continue, or q <return> to quit---
     handler=0x547a16e0, pre_unwind_handler=0x4) at
 ../../libguile/throw.c:137
 #11 0x00007ffff7b5f4b5 in scm_catch_with_pre_unwind_handler (
-    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>, 
+    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>,
     pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
-#12 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404, 
-    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>, 
-    body_data=body_data@entry=0x7ffee57f9450, 
-    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>, 
-    handler_data=<optimized out>, 
-    pre_unwind_handler=pre_unwind_handler@entry=0x0, 
+#12 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404,
+    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>,
+    body_data=body_data@entry=0x7ffee57f9450,
+    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>,
+    handler_data=<optimized out>,
+    pre_unwind_handler=pre_unwind_handler@entry=0x0,
     pre_unwind_handler_data=0x0) at ../../libguile/throw.c:377
-#13 0x00007ffff7b5f67e in scm_internal_catch (tag=tag@entry=0x404, 
-    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>, 
-    body_data=body_data@entry=0x7ffee57f9450, 
-    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>, 
+#13 0x00007ffff7b5f67e in scm_internal_catch (tag=tag@entry=0x404,
+    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>,
+    body_data=body_data@entry=0x7ffee57f9450,
+    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>,
     handler_data=<optimized out>) at ../../libguile/throw.c:386
 #14 0x00007ffff7ae18a5 in scm_display_backtrace_with_highlights (
-    stack=<optimized out>, port=<optimized out>, first=<optimized out>, 
+    stack=<optimized out>, port=<optimized out>, first=<optimized out>,
     depth=<optimized out>, highlights=<optimized out>)
     at ../../libguile/backtrace.c:282
 #15 0x00007fffecb61684 in
@@ -9111,14 +9111,14 @@ throw_args=0x5148e850)
 ---Type <return> to continue, or q <return> to quit---
     at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:422
 #16 0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
-vp=0x1644e990, 
+vp=0x1644e990,
     registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
-#17 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x54569500, 
+#17 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x54569500,
     argv=<optimized out>, nargs=5) at ../../libguile/vm.c:1271
 #18 0x00007ffff7af0a8b in scm_apply_0 (proc=proc@entry=0x54569500,
 args=0x304)
     at ../../libguile/eval.c:594
-#19 0x00007ffff7b5f1c7 in catch (tag=<optimized out>, thunk=0x54569520, 
+#19 0x00007ffff7b5f1c7 in catch (tag=<optimized out>, thunk=0x54569520,
     handler=0x54569500, pre_unwind_handler=0x545694e0)
     at ../../libguile/throw.c:134
 #20 0x00007fffecb61d89 in
@@ -9132,32 +9132,32 @@ std::char_traits<char>, std::allocator<char> > const&) (
 #22 0x00007ffff7aea75a in c_body (d=0x7ffee57f9ce0)
     at ../../libguile/continuations.c:422
 #23 0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
-vp=0x1644e990, 
+vp=0x1644e990,
     registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
-#24 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x545695c0, 
+#24 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x545695c0,
 ---Type <return> to continue, or q <return> to quit---
     argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
 #25 0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x545695c0)
     at ../../libguile/eval.c:481
-#26 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x545695c0, 
+#26 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x545695c0,
     handler=0x545695a0, pre_unwind_handler=0x54569580)
     at ../../libguile/throw.c:137
 #27 0x00007ffff7b5f4b5 in scm_catch_with_pre_unwind_handler (
-    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>, 
+    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>,
     pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
-#28 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404, 
-    body=body@entry=0x7ffff7aea750 <c_body>, 
-    body_data=body_data@entry=0x7ffee57f9ce0, 
-    handler=handler@entry=0x7ffff7aea9f0 <c_handler>, 
-    handler_data=handler_data@entry=0x7ffee57f9ce0, 
+#28 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404,
+    body=body@entry=0x7ffff7aea750 <c_body>,
+    body_data=body_data@entry=0x7ffee57f9ce0,
+    handler=handler@entry=0x7ffff7aea9f0 <c_handler>,
+    handler_data=handler_data@entry=0x7ffee57f9ce0,
     pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aea850
 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at
 ../../libguile/throw.c:377
 #29 0x00007ffff7aead60 in scm_i_with_continuation_barrier (
-    body=body@entry=0x7ffff7aea750 <c_body>, 
-    body_data=body_data@entry=0x7ffee57f9ce0, 
-    handler=handler@entry=0x7ffff7aea9f0 <c_handler>, 
-    handler_data=handler_data@entry=0x7ffee57f9ce0, 
+    body=body@entry=0x7ffff7aea750 <c_body>,
+    body_data=body_data@entry=0x7ffee57f9ce0,
+    handler=handler@entry=0x7ffff7aea9f0 <c_handler>,
+    handler_data=handler_data@entry=0x7ffee57f9ce0,
     pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aea850
 <pre_unwind_handl---Type <return> to continue, or q <return> to quit---
 er>, pre_unwind_handler_data=0x7ff020) at
@@ -9166,17 +9166,17 @@ er>, pre_unwind_handler_data=0x7ff020) at
     func=<optimized out>, data=<optimized out>)
     at ../../libguile/continuations.c:456
 #31 0x00007ffff717e127 in GC_call_with_gc_active (
-    fn=fn@entry=0x7ffff7b5d250 <with_guile_trampoline>, 
+    fn=fn@entry=0x7ffff7b5d250 <with_guile_trampoline>,
     client_data=client_data@entry=0x7ffee57f9dc0) at
 ../pthread_support.c:1343
-#32 0x00007ffff7b5dc61 in with_guile (base=base@entry=0x7ffee57f9d90, 
+#32 0x00007ffff7b5dc61 in with_guile (base=base@entry=0x7ffee57f9d90,
     data=data@entry=0x7ffee57f9dc0) at ../../libguile/threads.c:688
 #33 0x00007ffff7178132 in GC_call_with_stack_base (
     fn=fn@entry=0x7ffff7b5dbd0 <with_guile>,
 arg=arg@entry=0x7ffee57f9dc0)
     at ../misc.c:1941
 #34 0x00007ffff7b5e008 in scm_i_with_guile (dynamic_state=<optimized
-out>, 
+out>,
     data=<optimized out>, func=<optimized out>) at
 ../../libguile/threads.c:703
 #35 scm_with_guile (func=<optimized out>, data=<optimized out>)
@@ -9197,7 +9197,7 @@ std::char_traits<char>, std::allocator<char> > const&) (
     at pthread_create.c:333
 #40 0x00007ffff75c782d in clone ()
     at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
-(gdb) 
+(gdb)
 
 
 Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 10:16:44 2017
@@ -9211,33 +9211,33 @@ Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Ju
 
 ----
 This time, no prints at all!! just hit abort:
-scheme@(guile-user)> 
+scheme@(guile-user)>
 Thread 451 "guile" received signal SIGABRT, Aborted.
 [Switching to Thread 0x7ffd25ffb700 (LWP 5037)]
 (gdb) bt
 #0  0x00007ffff74f6428 in __GI_raise (sig=sig@entry=6)
     at ../sysdeps/unix/sysv/linux/raise.c:54
 #1  0x00007ffff74f802a in __GI_abort () at abort.c:89
-#2  0x00007ffff7af22f4 in compute_assigned (exp=<optimized out>, 
+#2  0x00007ffff7af22f4 in compute_assigned (exp=<optimized out>,
     assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1268
-#3  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>, 
+#3  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>,
     assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
-#4  0x00007ffff7af2388 in compute_assigned (exp=<optimized out>, 
+#4  0x00007ffff7af2388 in compute_assigned (exp=<optimized out>,
     assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1227
-#5  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>, 
+#5  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>,
     assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
-#6  0x00007ffff7af2309 in compute_assigned (exp=exp@entry=0xd0366c0, 
+#6  0x00007ffff7af2309 in compute_assigned (exp=exp@entry=0xd0366c0,
     assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
 #7  0x00007ffff7af3e1e in scm_convert_assignment (exp=0xd0366c0)
     at ../../libguile/expand.c:1570
 #8  0x00007ffff7b12a45 in scm_memoize_expression (exp=<optimized out>)
     at ../../libguile/memoize.c:641
-#9  0x00007ffff7b66381 in vm_debug_engine (thread=0xabe, vp=0xc65240, 
+#9  0x00007ffff7b66381 in vm_debug_engine (thread=0xabe, vp=0xc65240,
     registers=0x6, resume=-145791960) at ../../libguile/vm-engine.c:784
-#10 0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8, 
+#10 0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8,
     argv=argv@entry=0x7ffd25ffa300, nargs=nargs@entry=3)
     at ../../libguile/vm.c:1271
-#11 0x00007ffff7af063f in scm_call_3 (proc=<optimized out>, 
+#11 0x00007ffff7af063f in scm_call_3 (proc=<optimized out>,
     arg1=<optimized out>, arg2=<optimized out>, arg3=<optimized out>)
     at ../../libguile/eval.c:501
 
@@ -9251,12 +9251,12 @@ another crazy:
 
 Thread 11590 "guile" received signal SIGSEGV, Segmentation fault.
 [Switching to Thread 0x7fff437fe700 (LWP 1316)]
-0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584, 
+0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584,
     buf=buf@entry=0x7fff437fcd70 "\\x00e3c0") at
 ../../libguile/ports.c:3053
 3053              buf[i++] = hex[ch / 16];
 (gdb) bt
-#0  0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584, 
+#0  0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584,
     buf=buf@entry=0x7fff437fcd70 "\\x00e3c0") at
 ../../libguile/ports.c:3053
 
@@ -9291,24 +9291,24 @@ iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
 
 #0  iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
     at ../../libguile/print.c:611
-#1  0x00007ffff7b32ad0 in scm_iprin1 (exp=<optimized out>, 
+#1  0x00007ffff7b32ad0 in scm_iprin1 (exp=<optimized out>,
     port=<optimized out>, pstate=<optimized out>) at
 ../../libguile/print.c:544
-#2  0x00007ffff7b60787 in scm_i_variable_print (exp=0x86b77de0, 
+#2  0x00007ffff7b60787 in scm_i_variable_print (exp=0x86b77de0,
     port=0x85864500, pstate=0x71165c50) at ../../libguile/variable.c:41
-#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x86b77de0, 
+#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x86b77de0,
     port=port@entry=0x85864500, writingp=writingp@entry=1)
     at ../../libguile/print.c:817
 #4  0x00007ffff7b33b61 in scm_write (obj=0x86b77de0, port=0x85864500)
     at ../../libguile/print.c:1076
-#5  0x00007ffff7b66381 in vm_debug_engine (thread=0x0, vp=0x19a7c60, 
+#5  0x00007ffff7b66381 in vm_debug_engine (thread=0x0, vp=0x19a7c60,
     registers=0xfffffffffffa7a74, resume=16) at
 ../../libguile/vm-engine.c:784
-#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70,
     argv=argv@entry=0x7ffe457f9070, nargs=nargs@entry=4)
     at ../../libguile/vm.c:1271
-#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
-    arg1=arg1@entry=0x8759cc40, arg2=arg2@entry=0x86101be0, 
+#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>,
+    arg1=arg1@entry=0x8759cc40, arg2=arg2@entry=0x86101be0,
     arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52)
     at ../../libguile/eval.c:508
 #8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
@@ -9319,30 +9319,30 @@ iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
 anotehr:
 Thread 213118 "guile" received signal SIGSEGV, Segmentation fault.
 [Switching to Thread 0x7fff61ffb700 (LWP 11550)]
-scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f, 
+scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f,
     port=0x7ed4f6a0) at ../../libguile/print.c:946
 946           scm_uintprint (SCM_CELL_WORD_0 (ptr), 16, port);
 (gdb) bt
-#0  scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f, 
+#0  scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f,
     port=0x7ed4f6a0) at ../../libguile/print.c:946
-#1  0x00007ffff7b32b73 in print_vector_or_weak_vector (v=0x7feff9e0, 
-    len=<optimized out>, ref=0x7ffff7b73ac0 <scm_c_weak_vector_ref>, 
+#1  0x00007ffff7b32b73 in print_vector_or_weak_vector (v=0x7feff9e0,
+    len=<optimized out>, ref=0x7ffff7b73ac0 <scm_c_weak_vector_ref>,
     port=0x7ed4f6a0, pstate=0x847400) at ../../libguile/print.c:561
-#2  0x00007ffff7b33245 in iprin1 (exp=0x7feff9e0, port=0x7ed4f6a0, 
+#2  0x00007ffff7b33245 in iprin1 (exp=0x7feff9e0, port=0x7ed4f6a0,
     pstate=0x847400) at ../../libguile/print.c:743
-#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x7feff9e0, 
+#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x7feff9e0,
     port=port@entry=0x7ed4f6a0, writingp=writingp@entry=1)
     at ../../libguile/print.c:817
 #4  0x00007ffff7b33b61 in scm_write (obj=0x7feff9e0, port=0x7ed4f6a0)
     at ../../libguile/print.c:1076
 #5  0x00007ffff7b66381 in vm_debug_engine (thread=0x7e25ea80,
-vp=0x160d2360, 
+vp=0x160d2360,
     registers=0x4d, resume=8) at ../../libguile/vm-engine.c:784
-#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70,
     argv=argv@entry=0x7fff61ffa070, nargs=nargs@entry=4)
     at ../../libguile/vm.c:1271
-#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
-    arg1=arg1@entry=0x7eabfee0, arg2=arg2@entry=0x7eabefa0, 
+#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>,
+    arg1=arg1@entry=0x7eabfee0, arg2=arg2@entry=0x7eabefa0,
     arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52)
     at ../../libguile/eval.c:508
 #8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
@@ -9354,28 +9354,28 @@ Thread 230572 "guile" received signal SIGSEGV, Segmentation fault.
 [Switching to Thread 0x7ffec77fe700 (LWP 3880)]
 scm_reverse (lst=lst@entry=0x80003e30) at ../../libguile/list.c:346
 #0  scm_reverse (lst=lst@entry=0x80003e30) at ../../libguile/list.c:346
-#1  0x00007ffff7b4d1ea in scm_string_concatenate_reverse (ls=0x80003e30, 
+#1  0x00007ffff7b4d1ea in scm_string_concatenate_reverse (ls=0x80003e30,
     final_string=0x7fc19520, end=<optimized out>)
     at ../../libguile/srfi-13.c:2465
 #2  0x00007ffff7b66381 in vm_debug_engine (
-    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0, 
+    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0,
     registers=0x7ffff73cd260 <GC_allocate_ml>, resume=1)
     at ../../libguile/vm-engine.c:784
-#3  0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8, 
+#3  0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8,
     argv=argv@entry=0x7ffec77fd540, nargs=nargs@entry=3)
     at ../../libguile/vm.c:1271
-#4  0x00007ffff7af063f in scm_call_3 (proc=<optimized out>, 
+#4  0x00007ffff7af063f in scm_call_3 (proc=<optimized out>,
     arg1=<optimized out>, arg2=<optimized out>, arg3=<optimized out>)
     at ../../libguile/eval.c:501
 #5  0x00007ffff7b66381 in vm_debug_engine (
-    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0, 
+    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0,
     registers=0x7ffff73cd260 <GC_allocate_ml>, resume=1)
     at ../../libguile/vm-engine.c:784
-#6  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x7cc865a0, 
+#6  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x7cc865a0,
     argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
 #7  0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x7cc865a0)
     at ../../libguile/eval.c:481
-#8  0x00007ffff7b5f149 in catch (tag=<optimized out>, thunk=0x7cc865a0, 
+#8  0x00007ffff7b5f149 in catch (tag=<optimized out>, thunk=0x7cc865a0,
     handler=0x7cc86580, pre_unwind_handler=0x7cc86560)
     at ../../libguile/throw.c:137
 #9  0x00007fffecb61d89 in opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (
@@ -9401,7 +9401,7 @@ total unique pairs
 2) support not computed or stored.. DONE
 3) stored support not fetchable FIXED with report-API
 4) store left and right sizes DONE
-cache-all-pair-freqs returs total 
+cache-all-pair-freqs returs total
 
 * sep out bin-counting code into own file DONE
 add-subtotal-mi-compute DONE
@@ -9491,7 +9491,7 @@ so this is right-legnth
 
 but p(*,y) = N(*,y) / N(*,*)
 
-<x^2w> = s x^2 p 
+<x^2w> = s x^2 p
        = sum_y p(*,y) N^2(*,y)
 
 s (x- <xw>)^2  p =
@@ -9505,7 +9505,7 @@ totals. But count-variation requires....
 
 2d 2 obj, each = 1, avg=1
 
-<x^2w> = 1/2 + 1/2 = 1 ... 
+<x^2w> = 1/2 + 1/2 = 1 ...
 so for lensq, needed to divide by support.
 and for avg, need to divide by support too.
 
@@ -9524,7 +9524,7 @@ Argh. Sim has the old style. pair-entropy
 
 (define pca (make-pseudo-cset-api))
 (pca 'fetch-pairs)
-(batch-all-pair-mi pca)  
+(batch-all-pair-mi pca)
 (define fca (add-pair-freq-api pca))
 (define ac (get-all-cset-words))
 
@@ -9566,7 +9566,7 @@ argh. compute-left-entropy is wrong... FIXED
 wild-wild-counta DONE
 time for totlaa DONE
 
-(define (an llobj) 
+(define (an llobj)
 	(lambda (message . args)
 		(case message ((name) "the big old name")
 		(else (apply llobj (cons message args))))))
@@ -9583,7 +9583,7 @@ todo: how many words, on average, go into a pair?
 what about hubiness? in the graph con sense?
 i.e avg incomiing avg outgoing (i.e. left, right support sizes)
 
-avg left-support: non-zero / num-lefts(rows) 
+avg left-support: non-zero / num-lefts(rows)
 left-size: tot count /num-lefts<F8>x
 
 avg length
@@ -9630,12 +9630,12 @@ left-norm took 1 seconds  <<< OK makes sense
 
 
 (pta 'left-norm (pta 'make-cache feig)) <<  461 seconds - 81 atoms/sec
-ouch! this hashing sucks!  
+ouch! this hashing sucks!
 OK, problem: all atoms hashing to same value.  OK fixed.
 
 (define lm (pta 'left-mult feig))
 (pta 'right-norm lm)
-right-norm took 16 seconds  <<  
+right-norm took 16 seconds  <<
 right-norm took 9 seconds  << baseline, no caching
 
 (define clm (pta 'left-mult cfg))
@@ -9659,7 +9659,7 @@ $24 = 1.8266495662334775e-7
 
 (define clit (pta 'right-mult cclm))
 (pta 'left-norm clit)
-left-norm took 18 seconds  << huh. weird. 
+left-norm took 18 seconds  << huh. weird.
 left-norm took 10 seconds
 left-norm took 10 seconds
 left-norm took 10 seconds
@@ -9691,7 +9691,7 @@ Wow. Like 4 iterations and its converged already!
 
 (WordNode ",")
 (define  dj (car (psa 'right-basis)))  ; crazy
-(define pna (add-pair-count-api psa))  
+(define pna (add-pair-count-api psa))
 (pna 'left-wild-count dj)    ; gives 4.0
 (length (psa 'left-stars dj)) gives 1
 so its entirely in just one: (WordNode ",") which has 4 obs.
@@ -9745,7 +9745,7 @@ OK, knockout time.  Kill the period.
 (define ptj (make-thresh-pca pfj))
 (define lit (ptj 'left-iterate feig 4))
 
-Hmm. 
+Hmm.
 (length (pti 'right-stars (Word "."))) ;  2031
 
 the 1403  106378.0
@@ -9845,7 +9845,7 @@ counts...
    is wrong but still ends up using add-support-api which is wrong.  FIXED
 -- it uses star-obj to get stars. which should be filtered stars.
 
-So: 
+So:
  (acc 'right-cosine (Word "the") (Word "a")) ; 0.8971244127293886 XXX
 
 Should be 0.8964505696268208
@@ -9853,7 +9853,7 @@ Should be 0.8964505696268208
 (sqrt (acc 'right-product (Word "the") (Word "the"))) ;
 9761.855971074354  OK so that agrees with support, now.
 
-Hmm But its off. 
+Hmm But its off.
 (acc 'right-cosine (Word "the") (Word "yes"))  ;0.48396212182787846 XXX
 (acc 'right-cosine (Word "yes") (Word "the")) ; 0.38874316832684397  OK
 (wm (WordNode "yes")) ; 0.38488729600833205
@@ -9907,7 +9907,7 @@ OK, I think that's running reliably now. DONE.
 -----------------------------------------------------------------
 (define grate
 	(let ((lg 0.00001) (ls 0.00001) (tm (current-time)))
-		(lambda() 
+		(lambda()
 			(define now (current-time))
 			(define fra (/ (- sent-cnt ls) (- gc-cnt lg) ))
 			(define dt (- now tm))
@@ -9927,7 +9927,7 @@ Redo earlier work: but with fixed filtering.  line 9305 above
 (define feig (pti 'make-left-unit (fsi 'left-basis)))
 (length (fsi 'left-basis))  ; 13122
 (feig (Word "the")) ; = 1/sqrt (13122)
-(length (pti 'right-basis)) ; 
+(length (pti 'right-basis)) ;
 
 (define lit (pti 'left-iterate feig 1))
 (define w (car (pti 'left-basis)))
@@ -9968,7 +9968,7 @@ the lit1 results are closer.
 ((WordNode "his" . 0.024322426008004088)
 ((WordNode "he" . 0.023323167571591752)
 
-cosines? 
+cosines?
 (define poi (add-pair-cosine-compute pti))
 (poi 'right-cosine WORD-A WORD-B)
 
@@ -9993,7 +9993,7 @@ cosines?
 
 
 OK, substaintially similar to before, about 8% larger.
- So we double-checked our data, fixed the bugs, and its good. 
+ So we double-checked our data, fixed the bugs, and its good.
 Now what?
 -----------------------------------------------------------------
 (define ac (pti 'left-basis))
@@ -10245,50 +10245,50 @@ The top 200 of the above:
 The top 20 non-capitalized:
 
 (((WordNode "nodded" . (WordNode "sighed" ) . 0.996016567043952)
-(smiled, sighed) . 0.9917868640114925) 
-(smiled, nodded) . 0.9915798481917005) 
-(laughed, asked) . 0.9914760479256299) 
-(laughed, sighed) . 0.9874272267287744) 
-(smiled, laughed) . 0.9858859081908571) 
-(nodded, laughed) . 0.9826039675475831) 
-(she, he) . 0.981876892746973) 
-(on, with) . 0.9816995328349034) 
-(with, in) . 0.9792626952550025) 
-(around, over) . 0.9770136201691976) 
-(asked, sighed) . 0.9769922567018301) 
-(into, from) . 0.9769095700320374) 
-(off, down) . 0.9753902427048208) 
-(on, from) . 0.9747012785336783) 
-(on, in) . 0.9746021337920453) 
-(smiled, asked) . 0.97447306776569) 
-(into, through) . 0.972188886981962) 
-(nodded, asked) . 0.9721627408838814) 
+(smiled, sighed) . 0.9917868640114925)
+(smiled, nodded) . 0.9915798481917005)
+(laughed, asked) . 0.9914760479256299)
+(laughed, sighed) . 0.9874272267287744)
+(smiled, laughed) . 0.9858859081908571)
+(nodded, laughed) . 0.9826039675475831)
+(she, he) . 0.981876892746973)
+(on, with) . 0.9816995328349034)
+(with, in) . 0.9792626952550025)
+(around, over) . 0.9770136201691976)
+(asked, sighed) . 0.9769922567018301)
+(into, from) . 0.9769095700320374)
+(off, down) . 0.9753902427048208)
+(on, from) . 0.9747012785336783)
+(on, in) . 0.9746021337920453)
+(smiled, asked) . 0.97447306776569)
+(into, through) . 0.972188886981962)
+(nodded, asked) . 0.9721627408838814)
 (on, for) . 0.9719692162741662))
 
 The first non-preps, non-verbs
 
-(would, could) . 0.9718788037224313) 
-(an, a) . 0.9716791745530755) 
-(night, day) . 0.9707165794699689) 
+(would, could) . 0.9718788037224313)
+(an, a) . 0.9716791745530755)
+(night, day) . 0.9707165794699689)
 (evening, morning) . 0.9702929323741435)
-(water, fire) . 0.9670737755352151) 
-(black, white) . 0.9666152160018894) 
-(head, hands) . 0.9665686866713692) 
-(an, some) . 0.965654580040422) 
-(throat, chest) . 0.9647259995951039) 
-(floor, table) . 0.9643904394443693) 
-(did, really) . 0.9643071841661717) 
-(bed, window) . 0.9642793931193115) 
-(upon, through) . 0.9640223642503675) 
+(water, fire) . 0.9670737755352151)
+(black, white) . 0.9666152160018894)
+(head, hands) . 0.9665686866713692)
+(an, some) . 0.965654580040422)
+(throat, chest) . 0.9647259995951039)
+(floor, table) . 0.9643904394443693)
+(did, really) . 0.9643071841661717)
+(bed, window) . 0.9642793931193115)
+(upon, through) . 0.9640223642503675)
 (shoulders, chest) . 0.9636889297135423)
 (child, question) . 0.9631387627819359)
 (didn’t, didn't) . 0.9628278593174421)
 (mind, life) . 0.9619200398737651)
-(three, two) . 0.9618460862079484) 
-(truth, evening) . 0.9614428353471973) 
-(window, table) . 0.9613977436755163) 
-(night, morning) . 0.9612113069050774) 
-(quite, almost) . 0.9609898949120979) 
+(three, two) . 0.9618460862079484)
+(truth, evening) . 0.9614428353471973)
+(window, table) . 0.9613977436755163)
+(night, morning) . 0.9612113069050774)
+(quite, almost) . 0.9609898949120979)
 
 -----------------------------------------------------------------
 Repeat the above, but for the overlap
@@ -10737,7 +10737,7 @@ We've got from before:
 (define ovprs (all-ovl top-cset-words '()))
 (length ovprs) ; = 322003
 
-so: 
+so:
 1) rank the top-cset-words
 2) create a pixel array.
 
@@ -10762,7 +10762,7 @@ what's faster: looking it up, or on-the-fly recompute?
    (lambda (wa wb) (poi 'right-cosine wa wb)))
 
 (define (get-cos wa wb)
-	(define cos-fkey (PredicateNode "*-Cosine Filtered Key-*")) 
+	(define cos-fkey (PredicateNode "*-Cosine Filtered Key-*"))
 	(define (get-val PR)
 		(cog-value-ref (cog-value PR cos-fkey) 0))
 	(define (set-val PR VAL)
@@ -10779,7 +10779,7 @@ what's faster: looking it up, or on-the-fly recompute?
 
 (define (get-cos wa wb)
 	(define cos-fkey (PredicateNode "*-Cosine Filtered Key-*"))
-	(pair-sym-cache wa wb cos-fkey 
+	(pair-sym-cache wa wb cos-fkey
 		(lambda (wx wy) (poi 'right-cosine wx wy))))
 
 
@@ -10809,7 +10809,7 @@ what's faster: looking it up, or on-the-fly recompute?
 						(begin (set! next-rankw item) cosi) biggest))
 				-1e20
 				wlist)
-			(drank-helper 
+			(drank-helper
 				(remove (lambda (w) (equal? w next-rankw)) wlist)
 				(cons next-rankw drl)))))
 
@@ -10926,7 +10926,7 @@ How aobout CMI ?
 (map (lambda (w) (cons w (cos-mi w (Word "he"))))
 	(take ranked-csw 100))
 
-(sort 
+(sort
 	(map (lambda (w) (cons w (cos-mi w (Word "he"))))
 		(take ranked-csw 100))
 	(lambda (a b) (> (cdr a) (cdr b))))
@@ -10955,7 +10955,7 @@ Multiple MST bugs:  OK all of these are fixed, I think. DONE
 
 Bug:
  (observe-mst "17 Book IV., § 23.")
-tokenize-text 
+tokenize-text
 strip-prefli "§"
 string-ref: Value out of range: 0
 
@@ -11024,7 +11024,7 @@ current conn_pool free=0 of 32  <<< 25 secs (24, 8)
 
 fetch-pairs doesn't seem to multi-thread oh wait it does
 
-omp 8 8  runs with ... 
+omp 8 8  runs with ...
 222% on guile  or lesss
 38%  x 8 on postgres   = 3.04
 (free = 13 of 18 12 of 18, 10 of 18 ...)
@@ -11032,7 +11032,7 @@ total cpu: 66:08
 Elapsed time to load ANY-link pairs: 1802 secs
 
 12 12 runs with
-240%  
+240%
 28% x 12 = 3.36
 total cpu: 73:05
 Elapsed time to load ANY-link pairs: 1847 secs
@@ -11049,9 +11049,9 @@ approx 12:30 PM
 oww. clean start, approx 320K atom and 1.6M ob in 2 hours elapsed.
 --> approx 800K obs/hour
 
-Again: start exactly: 15:12 
+Again: start exactly: 15:12
 15:32:  297K values -> 900K obs/hour.
-16:15:  941K values 
+16:15:  941K values
 16:42: 1320K values -> 1M obs/hour ... using the REPL shell
 
 Or ... using the cogserver: start 21:43:47
@@ -11104,7 +11104,7 @@ ln2 = 19.2299127083157
 estimate:
 (1/log2 + ln2) = 19.2299127083157 - 1.4426950408889634 =
                = 17.787217667426738
-sqrt(p) = 0.0012752922791530912 
+sqrt(p) = 0.0012752922791530912
 sqrt (p) * (1+log) = 0.022683901358884775
 sqrt (N) = 25275.400352912315
 abs err = 8.97469517481691e-7
@@ -11138,12 +11138,12 @@ So
 		(lambda (lipr sum) (+ sum (do-one-pair lipr)))
 		0
 		(star-obj 'right-stars left-item)))
-	
+
 (define (get-tot-error)
 	(define n 0)
 	(fold
 		(lambda (lefty sum)
-			(format #t "sum=~A for ~A of ~A\n" sum n (star-obj 'left-basis-size)) 
+			(format #t "sum=~A for ~A of ~A\n" sum n (star-obj 'left-basis-size))
 			(set! n (+ n 1))
 			; (+ sum (/ (right-loop lefty) sqw))
 			(+ sum (right-loop lefty)))
@@ -11164,7 +11164,7 @@ This gave 0.17825659639240693 for rthree but its wrong
 		0
 		(star-obj 'right-stars left-item)))
 
-WTF ... get a pr-freq of zero for 
+WTF ... get a pr-freq of zero for
  ((EvaluationLink (ctv 1 0 6)
    (LinkGrammarRelationshipNode "ANY")
    (ListLink
@@ -11174,11 +11174,11 @@ WTF ... get a pr-freq of zero for
 )
 )
 
-That can't be right so wtf??? 
+That can't be right so wtf???
 
 (cog-value wtf freq-key) gives nothing! !???
 
-(wtf-right-loop (WordNode "substantively" )) 
+(wtf-right-loop (WordNode "substantively" ))
 
 (ListLink (Word "substantively") (Word "events"))    ; count of 6
 (ListLink (Word "substantively") (Word "important"))  ; count of  13
@@ -11202,7 +11202,7 @@ check them all..
 			; (+ sum (right-frq lefty))
 		) 0 (star-obj 'left-basis)))
 
-So the right-marginal sum works out.  638845863.0 
+So the right-marginal sum works out.  638845863.0
 
 double check...
 (define (right-cnt left-item)
@@ -11219,7 +11219,7 @@ This eplicit check reports 638845863.0 so that's perfect.
 All atoms got loaded. Just some of the values did not.
 why?
 
-The freq is short: 0.9777130000000336 i.e. short by 
+The freq is short: 0.9777130000000336 i.e. short by
 14237957.7 = 14M out of 639M
 
 Points at failed-to-store or failed-to-load?
@@ -11237,9 +11237,9 @@ LinkGrammarRelationshipNode "ANY" is 7
 (Evalu = uuid  32131317
  -->
 en_pairs_rthree_mall=> select * from valuations where atom=32131317;
-   key    |   atom   | type |   floatvalue    | stringvalue | linkvalue 
+   key    |   atom   | type |   floatvalue    | stringvalue | linkvalue
 ----------+----------+------+-----------------+-------------+-----------
-        1 | 32131317 |    7 | {1,0,6}         |             | 
+        1 | 32131317 |    7 | {1,0,6}         |             |
  33712529 | 32131317 |    1 | {0,26.66593,0}  |    FrequencyKey
  35436504 | 32131317 |    1 | {-0,-12.283042} |    MI key
 (3 rows)
@@ -11271,7 +11271,7 @@ Add prints to get_atom_values.
 is it ? print in atom->setValue
 
 So: en_pairs_mst on fanny:
- * counts sum, 
+ * counts sum,
  * no missing values on load.
  * right-wild-freqs fail to sum.
    -- 0.962623000000125 reproducible
@@ -11294,11 +11294,11 @@ original = 645821
 List= 2371941696
 ANY = 152
 Eval link = 2371941697
-select * from valuations where atom=2371941697; 
+select * from valuations where atom=2371941697;
 select * from atoms where name='*-FrequencyKey-*'; = 2440463582
 
 again, SQL is in order.
-whoa ... 
+whoa ...
 (cog-value  (star-obj 'item-pair  (list-ref (star-obj 'right-stars
 (WordNode "sumatraus")) 1)) (Predicate "*-FrequencyKey-*"))
 is perfect!
@@ -11315,7 +11315,7 @@ Ohhh....
 
 Fuuuuuu
 
-Fixed with this: 
+Fixed with this:
 https://github.com/opencog/atomspace/pull/1295
 -------------------------------------
 en_pairs_rthree_mall restart
@@ -11331,7 +11331,7 @@ delete from atoms where type = 233 ConnectorSeq
 
 
 MSTConnector
-PseudoConnector 
+PseudoConnector
 MSTLinkNode  174 175 176
 
 
@@ -11404,21 +11404,21 @@ dammit. Kaboom. Start from scratch.
 . And 5.325353892901934  0.007068524421558074
 . He 5.1641299882215455  0.007253773644001228
 
-(define all-cmi (make-sym-pairs (take ranked-csw 162) 
+(define all-cmi (make-sym-pairs (take ranked-csw 162)
 	(lambda (wa wb) (* (get-cos wa wb) (get-cmi wa wb)))))
 
 (define ranked-cmi (sort all-cmi (lambda (a b) (> (cdr a) (cdr b)))))
 
 product:
-(WordNode ";")  (WordNode "said")) . 0.296607939087752) 
-(WordNode "said")  (WordNode "upon")) . 0.29633824003351183) 
-(WordNode "from")  (WordNode "Jack")) . 0.2937570566264612) 
-(WordNode ";")  (WordNode "Jack")) . 0.2936624229096209) 
-(WordNode "with")  (WordNode "said")) . 0.2923745344239661) 
-(WordNode "I")  (WordNode ";")) . 0.2919811998332135) 
-(WordNode "on")  (WordNode "said")) . 0.29101313047631) 
-(WordNode "from")  (WordNode "said")) . 0.29024498064059373) 
-(WordNode "on")  (WordNode "Jack")) . 0.28978802747511617) 
+(WordNode ";")  (WordNode "said")) . 0.296607939087752)
+(WordNode "said")  (WordNode "upon")) . 0.29633824003351183)
+(WordNode "from")  (WordNode "Jack")) . 0.2937570566264612)
+(WordNode ";")  (WordNode "Jack")) . 0.2936624229096209)
+(WordNode "with")  (WordNode "said")) . 0.2923745344239661)
+(WordNode "I")  (WordNode ";")) . 0.2919811998332135)
+(WordNode "on")  (WordNode "said")) . 0.29101313047631)
+(WordNode "from")  (WordNode "said")) . 0.29024498064059373)
+(WordNode "on")  (WordNode "Jack")) . 0.28978802747511617)
 (WordNode "I")  (WordNode "from")) . 0.2890086903794695))
 
 (get-cos (WordNode ";")  (WordNode "said")) $92 = 0.2723589177762356
@@ -11429,22 +11429,22 @@ product:
 (get-cos (WordNode "with")  (WordNode "said"))  0.3469959252702303
 (get-cos (WordNode "I")  (WordNode ";"))  0.2607676762450459
 (get-cos (WordNode "on")  (WordNode "said"))  0.3738730234710499
-(get-cos (WordNode "from")  (WordNode "said")) 
-(get-cos (WordNode "on")  (WordNode "Jack")) 
-(get-cos (WordNode "I")  (WordNode "from")) 
+(get-cos (WordNode "from")  (WordNode "said"))
+(get-cos (WordNode "on")  (WordNode "Jack"))
+(get-cos (WordNode "I")  (WordNode "from"))
 
 (get-cmi (WordNode ";")  (WordNode "said"))  1.0890333296574446
 (get-cmi (WordNode "said")  (WordNode "upon")) 0.8909656143806125
 (get-cmi (WordNode "from")  (WordNode "Jack")) 0.930131784516368
 (get-cmi (WordNode ";")  (WordNode "Jack"))  1.1735440079923058
 (get-cmi (WordNode "with")  (WordNode "said"))  0.8425878032898321
-(get-cmi (WordNode "I")  (WordNode ";"))  
-(get-cmi (WordNode "on")  (WordNode "said")) 
+(get-cmi (WordNode "I")  (WordNode ";"))
+(get-cmi (WordNode "on")  (WordNode "said"))
 
 
 
 =========================================================================
-	
+
 GC inf loop. ... 6121046016  observe-mst
 =========================================================================
 zh
@@ -11474,10 +11474,10 @@ Total MI: -2.020  < wrong sign
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
-Support (l_0)  6819.        6411.    
-Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4    
-Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
-RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
+Support (l_0)  6819.        6411.
+Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4
+Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68
+RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 
 mv submitted to gamma-pages wc | 135242
 
@@ -11497,7 +11497,7 @@ Expect our sailing in a few hours.
 At six this morning, came on a tremendous gale of wind.
 The wind altered sufficiently to allow us to escape from the Downs.
 She turned to walk to the gate where her carriage was waiting.
-The Sabbath day at Burnhead was a long, long day. 
+The Sabbath day at Burnhead was a long, long day.
 He wore a new white sailor suit with pockets.
 
 Maie threw back her veil and smiled
@@ -11569,8 +11569,8 @@ Action plan:
 * add minus sign to the MI code. in the matrix directory. DONE.
 * provide a conversion script for the databases NEVER
 * delete the mst databases.  DONE
-  en_pairs_rthree_mst   18 GB 
-  en_pairs_rthree_mall  29 GB 
+  en_pairs_rthree_mst   18 GB
+  en_pairs_rthree_mall  29 GB
   en_pairs_rtwo_mst     22 GB
   en_pairs_tthree_mst   41 GB
 
@@ -11579,7 +11579,7 @@ Action plan:
   en_pairs_ttwo_mst     15 GB
   en_pairs_ttwo_sim     17 GB
   en_pairs_ultrasim     23 GB
-  
+
 * uppdate status of all collections DONE
   e.g. en_pairs_ttwo_sim on fanny is junk.
 * restart MST.
@@ -11716,7 +11716,7 @@ scheme@(guile-user)> (print-mst  "道 德 学 社 创 始 人 。")
 1 . ###LEFT-WALL###   <-->  2 . 道  cost= -0.4271902589965446
 
 
-scheme@(guile-user)> (print-mst  "然 而 ， 此 混 战 亦 可 坚 持 三 十 六 日 。") 
+scheme@(guile-user)> (print-mst  "然 而 ， 此 混 战 亦 可 坚 持 三 十 六 日 。")
 10 . 坚   <-->  11 . 持  cost= 8.090136242433331
 2 . 然   <-->  10 . 坚  cost= 3.986785521916751
 2 . 然   <-->  3 . 而  cost= 5.260819401185174
@@ -11732,7 +11732,7 @@ scheme@(guile-user)> (print-mst  "然 而 ， 此 混 战 亦 可 坚 持 三 �
 12 . 三   <-->  13 . 十  cost= 4.910027341075681
 13 . 十   <-->  14 . 六  cost= 6.198613466629329
 13 . 十   <-->  15 . 日  cost= 1.2911435674834095
-scheme@(guile-user)> 
+scheme@(guile-user)>
 
 
 FYI, here are comparable parses, for English, using the English pair dataset.
@@ -11780,18 +11780,18 @@ scheme@(guile-user)> (print-mst "Maie threw back her veil and smiled")
     +------->WV------->+--MVs-+---CV->+
     +--Wd--+-Sp*i+--I--+Osm+  +Cs+-Sp-+--O-+
     |      |     |     |   |  |  |    |    |
-LEFT-WALL I.p will.v do.v it if you say.v so 
+LEFT-WALL I.p will.v do.v it if you say.v so
 
 
    +--MVs-+---CV->+
    |      +Cs+-Sp-+--O--+
    |      |  |    |     |
-   ?     if  ?  say     ? 
+   ?     if  ?  say     ?
 
 
          +Cs+
          |  |
-         if  ?  
+         if  ?
 
 
 guile-mst-zh> MST-Processing file >>>止-灣/汤加国徽<<<
@@ -11923,7 +11923,7 @@ h 4 . ，      <--> 5 . 王门    MI = 2.7025
 
                                         near+    far+
 丙寅年.399826              (g)TXYJK- & eTPYYP+ & dTRZZG+
- 夏日.232814                eTPYYP- 
+ 夏日.232814                eTPYYP-
                             far-      near-
  王门.270759                dTRZZG- & (h)TRZZH- & aTRZZI+
  胡氏.349378                aTRZZI- & bTVWZI+
@@ -11967,15 +11967,15 @@ wrong commas: expect:
 , with TBOFC+
 
 l->r pass removed 117441
-LEFT-WALL[15044] 然杜氏[3] 恶[1] 撰[3] ，[10192] 述[5] 一漏[3] 百[2] ，[10192] 且[5] 多[136] 谬误[1] 。[10] 
+LEFT-WALL[15044] 然杜氏[3] 恶[1] 撰[3] ，[10192] 述[5] 一漏[3] 百[2] ，[10192] 且[5] 多[136] 谬误[1] 。[10]
 
 r->l pass removed 35544
-LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3]
 
 l->r pass removed 0
 print_expression_sizes(sent);
 prepare/exprune.c:			size += size_of_expression(x->exp);
-LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3]
 
 for (d=sent->word[i].d; d != NULL; d = d->next) c++; is the dj count ..
 sent->word[i].alternatives[0]
@@ -11984,7 +11984,7 @@ sent->word[i].alternatives[0]
 build_disjuncts_for_exp
 
 line 171
-After expanding expressions into disjuncts:LEFT-WALL(2) 然杜氏(1) 恶(1) 撰(1) ，(1) 述(1) 一漏(1) 百(1) ，(0) 且(1) 多(2) 谬误(1) 。(3) 
+After expanding expressions into disjuncts:LEFT-WALL(2) 然杜氏(1) 恶(1) 撰(1) ，(1) 述(1) 一漏(1) 百(1) ，(0) 且(1) 多(2) 谬误(1) 。(3)
 
 So expression prunning removed the comma ... why?  Because of cost-max
 !cost-max = 50
@@ -12003,7 +12003,7 @@ Hmm first comma did have: TBOFC+ TVWZA+ but that is all....
 
 ------------------------------------------------------------
 
-Also bad line-wrapping: 
+Also bad line-wrapping:
 母猪 的 价格 暴涨 ， 可见 事态 之 严重 。
 glyph_width += mk_wcwidth(ws[i]);
 
@@ -12095,18 +12095,18 @@ and elapsed= 4543 secs = 4.77K atoms/sec
 cpu time: 435:31.67 = 26131 secs -? 5.75 parallel
 
 heap: 1421955072
-45.036 
+45.036
 Uhh oh.
 
 NO MI for DJ (WordNode \"Jud\") ...
 
-(Section (WordNode "Jud") 
+(Section (WordNode "Jud")
    (ConnectorSeq (Connector (WordNode "Prudie") (ConnectorDir "+"))))
 
 (define psf (add-pair-freq-api psa))
 (fetch-incoming-by-type (WordNode "Jud") 'Section)
 (psf 'pair-fmi  ... throws)
-(PredicateNode "*-Mutual Info Key-*") 
+(PredicateNode "*-Mutual Info Key-*")
 
 (cog-keys jud) doesn't list it. ... it was not saved.
 how to recomp only one MI?
@@ -12114,7 +12114,7 @@ count=3
 
 left-wild=17.7478927873962
 right-wild = 15.6685349957829
-wild-wild:  18489594 
+wild-wild:  18489594
 
 so freq should be: 1.622534275225297e-7
 logli = 22.55524770945383
@@ -12124,11 +12124,11 @@ mi = 1.7622636939013273e-6
 set-pair-freq
 set-pair-mi
 
-(Section (WordNode "set") 
+(Section (WordNode "set")
  (ConnectorSeq  (Connector (WordNode "watch")  (ConnectorDir "+"))))
 
 count=4
-right-wild-count 5698.0 
+right-wild-count 5698.0
 right-wild-logli 11.6639703038511
 left 15.478432112403
 
@@ -12208,13 +12208,13 @@ x/4a 0x7ffc6ba59e40
 0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16>
 
 (gdb) print *this
-$15 = {<> = {<> = {_M_weak_this = {<No data fields>}}, 
+$15 = {<> = {<> = {_M_weak_this = {<No data fields>}},
     _vptr.ProtoAtom = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
     _type = 127}, _flags = 0 '\000', _content_hash = 11383300620556476978,
   _atom_space = 0x0, _truthValue = {<No data fields>},
   _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}
 
-So... 
+So...
 
 atomspace should be 0x55595edc1590
 
@@ -12250,7 +12250,7 @@ $26 = (struct Handle &) @0x7ffc6ba59d90: {<No data fields>}
 wtf
 "Atom not in atomspace" ??? Ahh!
 
-Atom::setValue from 
+Atom::setValue from
         8: SQLAtomStorage.cc:307
 opencog::SQLAtomStorage::Response::get_all_values_cb()
 10: SQLAtomStorage.cc:1687  :getLink
@@ -12261,7 +12261,7 @@ doGetLink does no table insert directly! cause table not available.
 But the tlb resolve fixes it up for us! Cause the fetch was already
 in the as.
 
-vs. the incoming set .... 
+vs. the incoming set ....
 getIncomingByType  1566
 getIncoming  1502
   ... get_recursive_if_not_exists  1459
@@ -12269,7 +12269,7 @@ getIncoming  1502
              but that link is not in AS yet.
   add lnk to table
   get values of tabled link
-   _tlbuf.addAtom(hi, p->uuid); 
+   _tlbuf.addAtom(hi, p->uuid);
       but some other ato already in tlb....
 
   so:
@@ -12282,7 +12282,7 @@ So the second addAtom fails to resolve or update ad the first failed to
 resolve.
 
 ValuationPtr  .. s a triple, and thus is too much.
-Atom has pairs of key, ProtoAtomPtr&  
+Atom has pairs of key, ProtoAtomPtr&
 
 Remove the valuation table, do not even build it. DONE
 remove special-case for tv in sql  DONE
@@ -12309,9 +12309,9 @@ Andrew's+ 46
 Edouard+ 46
 Hans+ 33
 Bagration+ 32
-the- Andrew+ 27 
+the- Andrew+ 27
 the- Wales+ 27
-Hippolyte+ 21 
+Hippolyte+ 21
 Arthur+ 21
 the- 17
 Bolkonski+ 16
@@ -12326,7 +12326,7 @@ LEFT-WALL- Edouard+ 11
 148  2.5431777546500145 "was"  -- 35
 161  2.4965609797013926 "head" -- 5
 171  2.4537177541729895 "middle" --  1
-195  2.382483370288248 "long" -- 5 
+195  2.382483370288248 "long" -- 5
 196  2.3804440649017935 "day" -- 2
 208  2.3244970859184058 "going" -- 2
 
@@ -12376,8 +12376,8 @@ Mandarin word pairs + MI values; Ruitings segemented text
 --------------------
 
 1) filter the dictionary write...
-e.g. 
-(define pca (make-pseudo-cset-api) 
+e.g.
+(define pca (make-pseudo-cset-api)
 (define psa (add-pair-stars pca))
 (psa 'left-basis-size)  137078
 (psa 'right-basis-size)  6239997
@@ -12397,7 +12397,7 @@ get rid of all-csets DONE
 (define looper (add-loop-api psa))
 (looper 'for-each-pair cntr)
 
-fuuuu 
+fuuuu
 (define fsf (add-pair-freq-api fsa))
 (psf 'pair-fmi sec) works
 (fsf 'pair-fmi sec) fails
@@ -12447,7 +12447,7 @@ He looked away
 link-grammar/prepare/exprune.c:318
 #0  expression_prune (sent=sent@entry=0x555555928f50)
     at ../../link-grammar/prepare/exprune.c:318
-#1  0x00007ffff7b6f2e8 in sentence_parse (sent=0x555555928f50, 
+#1  0x00007ffff7b6f2e8 in sentence_parse (sent=0x555555928f50,
     opts=0x55555576f580) at ../../link-grammar/api.c:700
 
 x->exp == 0
@@ -12478,10 +12478,10 @@ ant ant-optional
 		(format #t "wtf ~A\n" (/ (log (first item)) (log 2.0))) )
 	(take sorted-lensq-norm 50))
 
-(define binned-sqlen-norm (bin-count 
+(define binned-sqlen-norm (bin-count
 	(take sorted-lensq-norm 50 )
 	50
-   (lambda (item) 
+   (lambda (item)
 		(define val (/ (log (first item)) (log 2.0)))
    	(format #t "wtf ~A\n" val)
 		val)
@@ -12500,7 +12500,7 @@ ant ant-optional
  (cog-map-type sto 'SimilarityLink)
 16:04
 
-almost exactly 1/3rd have sim > 0.5 ... 
+almost exactly 1/3rd have sim > 0.5 ...
 total = 142270 sim links
 
 198 dupes ... how is that possible??
@@ -12515,7 +12515,7 @@ where are the dupes coming from?
 	(string-append (cog-name (gar CON)) (cog-name (gdr CON)) " "))
 
 (define (section->dj-str SEC)
-	(string-concatenate 
+	(string-concatenate
 		(map print-connector (cog-outgoing-set (gdr SEC))))
 )
 
@@ -12536,7 +12536,7 @@ fsm .... filteres similarity
 	(define fsb (batch-similarity fsa #f))
 
 (fsb 'compute-similarity (Word "porch") (Word "horses"))
-(fsa 'right-stars (Word "porch")) 
+(fsa 'right-stars (Word "porch"))
 (fsa 'right-stars (Word "horses"))
 
 Fuu
@@ -12615,15 +12615,15 @@ Fuuuu.
 
  (define (compute-sim A B)
    (define val (psm 'pair-similarity (cog-link 'SimilarityLink A B)))
-     (if 
+     (if
 ; (and (not (null? val)) (< 1.0e-6 (cog-value-ref val 0)))
- (not (null? val)) 
+ (not (null? val))
 (format #t "Already got one ~A ~A ~A \n" (cog-value-ref val 0) A B)
 (begin (format #t "Gonna do it for ~A=~D ~A=~D\n"
 A (length (cog-incoming-by-type A 'Section))
 B (length (cog-incoming-by-type B 'Section)))
       (psm 'set-pair-similarity
-           (SimilarityLink A B) 
+           (SimilarityLink A B)
           (FloatValue (pac 'right-cosine A  B))))))
 
 ;          (compute-right-cosine A  B)))))
@@ -12675,7 +12675,7 @@ Replace below by hash:
 	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
 	(define (atom-assoc ATOM ALIST)
 		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
-			
+
 	(lambda (ITEM)
 		(if ITEM
 			(hashx-set! atom-hash atom-assoc cache ITEM #f)
@@ -12691,7 +12691,7 @@ Replace below by hash:
 
 wall -- 64125
 at -- 28773
-sum = 92898 
+sum = 92898
 wall-at: 92322
 last: 94888
 
@@ -12711,7 +12711,7 @@ finally: 317206 = (797 * 796) / 2  for len=128
 
 
 Notes: Chapter- or LEFT-WALL- or End-;  27 total
-Summary: Chapter- or LEFT-WALL-;  44 total 
+Summary: Chapter- or LEFT-WALL-;  44 total
 
 Rting: (LEFT-WALL- & :+) or (LEFT-WALL- & :+ & Audiences+) or
 (LEFT-WALL- & :+ & Explicit+) or (LEFT-WALL- & :+ & Mature+)
@@ -12738,7 +12738,7 @@ cset-vec-word-observations
 
 dranked:
 
-LEFT-WALL -- ... .. .... *** Two Bit - The “ And But So Perhaps Though When As Then While If Have Can Did Do Will Thank Are Where Who What Why How Or Now Here This That It There He She I You We They Some One Most Instead However Besides Well Oh Ah No Yes Yeah Good Ham 2 1 4 3 A Mai Demelza Richard John George nothing something anything everything it there who which that what where when until as because since if before while little small large good great second woman man child boy girl king house city village world town country ship sun latter land others children people men things them us me him her his my your their our the this every another leave take get find see hear speak move stop fight be make give show keep bring meet follow call ask tell help go live stay talk turn run change use read say understand remember know think suppose guess hope promise believe mean am myself fear thought knew saw felt found called happy fine certain new single word moment minute year day night evening morning way book letter party distance light fire forest room air sea earth ground floor table subject story line case question place time thing person family soul heart body own wife brother sister father mother daughter son hands face feet mouth eyes hand mind friends friend thoughts arm arms chest staff words office past water door window truth same whole best present first last least once home back down up at over on in by from upon under through into for with such having like quite only also still born gone already been seen done taken known given brought made making taking after above among between of all near against to will can cannot may must might would should could did does was is seems seemed appeared used began tried wanted needed meant came went turned continued said says spoke had has always never ever usual possible well soon far much late bad strong big young white black dark blue closed opened open hold put stand sleep answer try return come enough ready trying going supposed beginning rest sound corner direction presence name side power nature one most part kind sort number lot bit couple matter group other two three four five ten several many some out length force death life voice hair husband lips head shoulder eye bed business point state view sense feeling thinking saying now indeed therefore however sir yes God dear lady poor old dead wrong right here doing glad afraid sure sorry coming close hard long short real different clear probably certainly simply just almost not hardly easily feel have shall wish need want seem next following Queen captain wall future general London work himself herself smiled sighed nodded asked replied cried got stood sat looked look smile chance reason means longer doubt idea end edge bottom top account instead perhaps and or but though although then thus yet even really heard left lost passed met were are do love told gave took held followed behind within half an raised free better less more rather often true alone again ) too so very pretty a its these those anyone you we they he she North Jack Pitch Ross Jim Dallas Telzey Goth Sir san together along off away around round about how why – ; , : … ! . ? — All From In On By To With After For It’s It's Not Just Even At See paragraph spirit cause middle sight front spite charge form attention throat breath money law human few hundred thousand years hours minutes days times later ago ' " ” 」 ’ _ etc Mr Mrs Dr sama don ul looking especially nor either each any no finally suddenly slowly quietly Mary King Lord Lady Miss Captain I'm I’m My Her His Your ( ‘ Illustration Stats Category Rating Fandom Character Warning Is Really Please Father Mother May course being without let set sitting drawing living high heavy cold public fact particular full relief order hour individual General outside both talking able happened exactly else hell non re self S t six natural than fell deep wide deal agree don’t don't didn’t didn't received paid care drop provide York agreement ape medium author laws terms works forward forth shook enjoyed originally access permission instance chapter comment St Princess Old New Summary Notes Our THE # * Of { including Prince notes states copies copy ‐ YOU THIS OF OR Section CHAPTER Chapter + | Project eBook eBooks Gutenberg } P tax States fee electronic associated Archive Foundation United & copyright Literary donations License trademark distribution refund Van distributing Ooal Additional Posted archive Tags  
+LEFT-WALL -- ... .. .... *** Two Bit - The “ And But So Perhaps Though When As Then While If Have Can Did Do Will Thank Are Where Who What Why How Or Now Here This That It There He She I You We They Some One Most Instead However Besides Well Oh Ah No Yes Yeah Good Ham 2 1 4 3 A Mai Demelza Richard John George nothing something anything everything it there who which that what where when until as because since if before while little small large good great second woman man child boy girl king house city village world town country ship sun latter land others children people men things them us me him her his my your their our the this every another leave take get find see hear speak move stop fight be make give show keep bring meet follow call ask tell help go live stay talk turn run change use read say understand remember know think suppose guess hope promise believe mean am myself fear thought knew saw felt found called happy fine certain new single word moment minute year day night evening morning way book letter party distance light fire forest room air sea earth ground floor table subject story line case question place time thing person family soul heart body own wife brother sister father mother daughter son hands face feet mouth eyes hand mind friends friend thoughts arm arms chest staff words office past water door window truth same whole best present first last least once home back down up at over on in by from upon under through into for with such having like quite only also still born gone already been seen done taken known given brought made making taking after above among between of all near against to will can cannot may must might would should could did does was is seems seemed appeared used began tried wanted needed meant came went turned continued said says spoke had has always never ever usual possible well soon far much late bad strong big young white black dark blue closed opened open hold put stand sleep answer try return come enough ready trying going supposed beginning rest sound corner direction presence name side power nature one most part kind sort number lot bit couple matter group other two three four five ten several many some out length force death life voice hair husband lips head shoulder eye bed business point state view sense feeling thinking saying now indeed therefore however sir yes God dear lady poor old dead wrong right here doing glad afraid sure sorry coming close hard long short real different clear probably certainly simply just almost not hardly easily feel have shall wish need want seem next following Queen captain wall future general London work himself herself smiled sighed nodded asked replied cried got stood sat looked look smile chance reason means longer doubt idea end edge bottom top account instead perhaps and or but though although then thus yet even really heard left lost passed met were are do love told gave took held followed behind within half an raised free better less more rather often true alone again ) too so very pretty a its these those anyone you we they he she North Jack Pitch Ross Jim Dallas Telzey Goth Sir san together along off away around round about how why – ; , : … ! . ? — All From In On By To With After For It’s It's Not Just Even At See paragraph spirit cause middle sight front spite charge form attention throat breath money law human few hundred thousand years hours minutes days times later ago ' " ” 」 ’ _ etc Mr Mrs Dr sama don ul looking especially nor either each any no finally suddenly slowly quietly Mary King Lord Lady Miss Captain I'm I’m My Her His Your ( ‘ Illustration Stats Category Rating Fandom Character Warning Is Really Please Father Mother May course being without let set sitting drawing living high heavy cold public fact particular full relief order hour individual General outside both talking able happened exactly else hell non re self S t six natural than fell deep wide deal agree don’t don't didn’t didn't received paid care drop provide York agreement ape medium author laws terms works forward forth shook enjoyed originally access permission instance chapter comment St Princess Old New Summary Notes Our THE # * Of { including Prince notes states copies copy ‐ YOU THIS OF OR Section CHAPTER Chapter + | Project eBook eBooks Gutenberg } P tax States fee electronic associated Archive Foundation United & copyright Literary donations License trademark distribution refund Van distributing Ooal Additional Posted archive Tags
 
 "Ham" "2" "1" "4" "3" "A" "Mai" "Demelza" "Richard" "John" "George" "nothing" "something" "anything" "everything" "it" "there" "who" "which" "that" "what" "where" "when" "until" "as" "because" "since"
 
@@ -13029,13 +13029,13 @@ fields, again!
 				(clo (string-ref wstr (- wlen 1))))
 			(and (equal? #\[ ope) (equal? #\] clo)))
 		#f))
-	
+
 
 ; Look for trailing blank.
 (define (is-bad? wstr)
 	(define wlen (string-length wstr))
 	(equal? #\space  (string-ref wstr (- wlen 1))))
-	
+
 
 
 (define (is-numeric? wstr)
@@ -14667,7 +14667,7 @@ What's with the NaN's ?
 $25 = 9.214673132831397
 
 OK, great, but that is not the total MI ... Why ???
-which is 
+which is
 (cog-value (List (Any "cross-connector word") (Any "cross-connector section"))
 (PredicateNode "*-Total MI Key-*"))
 $34 = (FloatValue 9.0982793869337666)
@@ -14682,7 +14682,7 @@ $34 = (FloatValue 9.0982793869337666)
 (right-sum (lambda (x) (supobj 'right-count x)))  $41 = 47444396.0
 (left-sum (lambda (x) (supobj 'left-count x))) $42 = 47444396.0
 
-w 
+w
 p(x,*) ln p(x,*) =  1.0327767416155317e-6
 (define (plp  w) (* (frqobj 'right-wild-freq w) (frqobj 'right-wild-logli w)))
 
@@ -14709,15 +14709,15 @@ sum_y p(x,y) ln p(*,y) = 3.5984914562293424e-7
 
 (fold (lambda (w sum) (+ sum (zero w))) 0.0 (crs 'left-basis))
 (fold (lambda (w sum) (format #t "so ~A ~A" sum w) (+ sum (zero w))) 0.0 (crs 'left-basis))
-(fold (lambda (w sum) 
-	(define z (zero w)) 
+(fold (lambda (w sum)
+	(define z (zero w))
 	(if (< 1.0e-8 z) (format #t "bad ~A ~A" z w) (format #t "good ~A ~A" z w))
 	(+ sum z)) 0.0 (take (crs 'left-basis) 20))
 
 (define (audit-mi MANY)
-(fold (lambda (w sum) 
-	(define z (zero w)) 
-	(+ sum 
+(fold (lambda (w sum)
+	(define z (zero w))
+	(+ sum
 		(if (< 1.0e-8 z) (begin (format #t "bad ~A ~A" z w) 1) 0)))
 	0 (take (crs 'left-basis) MANY)))
 
@@ -14736,17 +14736,17 @@ sum_y p(x,y) ln p(*,y) = poo = 1.5742713752273321e-6
 so what is wrong?
 p(x,*) = 8.43092195756904e-8
 (fold (lambda (s sum) (+ sum (frqobj 'pair-freq s))) 0.0 (crs 'right-stars w))
-(frqobj 'right-wild-freq  w) == same as above. OK 
+(frqobj 'right-wild-freq  w) == same as above. OK
 
 (define (crent w)   ; OK< gives same asnwer as rent
   (fold (lambda (s sum)
 	 (define p (frqobj 'pair-freq s))
  	 (+ sum (* p (l2 p)))) 0.0 (crs 'right-stars w)))
 
-sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = rim = 
-sum_y p(x,y)ln [p(x,y) / p(*,y)] - sum_y p(x,y)ln p(x,*)  = 
-sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) sum_y p(x,y)  = 
-sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) p(x,*)  = 
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = rim =
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - sum_y p(x,y)ln p(x,*)  =
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) sum_y p(x,y)  =
+sum_y p(x,y)ln [p(x,y) / p(*,y)] - ln p(x,*) p(x,*)  =
 sum_y p(x,y)ln [p(x,y)] - sum_y p(x,y) ln [p(*,y)] - p(x,*) ln p(x,*)
 
 sum_y p(x,y)ln [p(x,y)] = - (frqobj 'right-wild-entropy w) = -2.149862702806752e-6
@@ -14756,14 +14756,14 @@ sum_y p(x,y)ln [p(x,y)] = - (frqobj 'right-wild-entropy w) = -2.149862702806752e
 So: (+ -2.149862702806752e-6 (poo w)  1.9812442636553735e-6) = 1.4056529360759538e-6
 which is NOT  rim.  So what's up with rim?
 
-sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] = 
+sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] =
 (define (rim w) (frqobj 'right-wild-mi w))
 
 (define (crim w)
 	(define (mi s) (frqobj 'pair-mi s))
   (fold (lambda (s sum) (+ sum (mi s)))
  	  0.0 (crs 'right-stars w)))
-(crim w) = 1.3691988899449898e-6 agrees with rim. 
+(crim w) = 1.3691988899449898e-6 agrees with rim.
 
 (define (drim w)
 	(define (mi d) (frqobj 'pair-mi (cra 'get-pair w d)))
@@ -14783,7 +14783,7 @@ sum_y p(x,y)ln [p(x,y) / p(x,*) p(*,y)] =
   (fold (lambda (d sum) (+ sum (mi d)))
  	  0.0 (crs 'right-duals w)))
 
-(cdrim w) $104 = 1.4056529360759508e-6  there we are... 
+(cdrim w) $104 = 1.4056529360759508e-6  there we are...
 
 (define (cdrim w)
 	(define prs (frqobj 'right-wild-freq w))
@@ -14823,7 +14823,7 @@ Here's it's dual:
 
 (cdrim (WordNode "Frollo/Harry"))
 Oh, hang on ... silly goose. Cannot hand MI on the sections. Of course.
-Since the pairs are not correctly identified. 
+Since the pairs are not correctly identified.
 There are three fmi's:
 word-to-conseq
 word-to first-con
