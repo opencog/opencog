@@ -80,7 +80,7 @@
                   (best-matches '()))
                 (map
                     (lambda (r)
-                        (let ((score (tv-mean (psi-satisfiable? r))))
+                        (let ((score (cog-tv-mean (psi-satisfiable? r))))
                             (if (> score max-score)
                                 (begin
                                     (set! max-score score)
@@ -126,7 +126,7 @@
 ; Scheme functions that will be called by the rules.
 
 (define (check-demand demand value)
-    (if (< (tv-mean (cog-tv demand)) (string->number (cog-name value)))
+    (if (< (cog-tv-mean (cog-tv demand)) (string->number (cog-name value)))
         (stv 1 1)
         (stv 0 1)
     )
