@@ -112,7 +112,7 @@
   (null? (cog-incoming-set atom)))
 
 (define (null-confidence? atom)
-  (= 0 (tv-conf (cog-tv atom))))
+  (= 0 (cog-tv-conf (cog-tv atom))))
 
 ;; Copy all atoms from an atomspace to another atomspace
 (define (cp-as src dst)
