@@ -703,7 +703,7 @@
 
 ; --------------------------------------------------------------
 (Define
-  (DefinedSchema "update-parameter")
+  (DefinedSchema "set-parameter")
   (LambdaLink
     (VariableList
       (Variable "component")
@@ -712,16 +712,50 @@
     (ExecutionOutput
       (GroundedSchema "scm: print-by-action-logger")
       (List
-        (Concept "update-parameter")
+        (Concept "set-parameter")
         (Variable "component")
         (Variable "parameter")
         (Variable "value")))
   )
 )
 
-(define (update-parameter component parameter value)
+(define (set-parameter component parameter value)
   (cog-execute!
     (Put
-      (DefinedSchema "update-parameter")
+      (DefinedSchema "set-parameter")
       (List component parameter value)))
+)
+
+; --------------------------------------------------------------
+; The *voice* schemas follow from ssml were 'speed' == 'rate'
+; See https://www.w3.org/TR/speech-synthesis/#edef_prosody
+;
+(define (increase_voice_speed percent)
+  (set-parameter (Concept "speech") (Concept "rate")
+    (Number (+ 1.0 (/ (string->number (cog-name percent)) 100))))
+)
+
+(define (decrease_voice_speed percent)
+  (define percent-num (string->number (cog-name percent)))
+  (if (<= 100.0 percent-num)
+    (error "Volume can't be decreased by 100% or more"))
+
+  (set-parameter (Concept "speech") (Concept "rate")
+    (Number (- 1.0 (/ percent-num 100))))
+)
+
+(define (increase_voice_volume percent)
+  (set-parameter (Concept "speech") (Concept "volume")
+    (Number (* 20 (log10 (+ 1.0 (/ (string->number (cog-name percent)) 100)))))
+  )
+)
+
+(define (decrease_voice_volume percent)
+  (define percent-num (string->number (cog-name percent)))
+  (if (<= 100.0 percent-num)
+    (error "Volume can't be decreased by 100% or more"))
+
+  (set-parameter (Concept "speech") (Concept "volume")
+    (Number (* 20 (log10 (- 1.0 (/ percent-num 100)))))
+  )
 )

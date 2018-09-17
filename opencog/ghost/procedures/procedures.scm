@@ -104,6 +104,10 @@
     increase_arousal
     decrease_arousal
     neutralize_arousal
+    increase_voice_speed
+    decrease_voice_speed
+    increase_voice_volume
+    decrease_voice_volume
 
     ; Source schemas
     send_query
