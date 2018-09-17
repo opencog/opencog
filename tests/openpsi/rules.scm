@@ -51,7 +51,7 @@
 
 (define (test-update-tv node strength)
     (cog-set-tv! node
-        (stv (string->number (cog-name strength)) (tv-conf (cog-tv node))))
+        (stv (string->number (cog-name strength)) (cog-tv-conf (cog-tv node))))
     (stv 1 1)
 )
 
@@ -268,7 +268,7 @@
 "
   Returns the strength of the demand-node to two decimal places.
 "
-    (/ (round (* 100 (tv-mean (cog-tv demand-node))) ) 100)
+    (/ (round (* 100 (cog-tv-mean (cog-tv demand-node))) ) 100)
 )
 
 (define (do_psi_step)
