@@ -277,16 +277,14 @@
 "
   ghost TXT
 
-  Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
-  Should run this with the main OpenPsi loop.
+  Parse the input TXT using nlp-parse and link it to the GHOST anchor.
+  Should run this with ECAN and OpenPsi.
+
+  Run (ghost-get-result) to get the output generated for the input, if any.
 "
   (set! ghost-result '())
   (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
-
-  ; Wait until a ghost rule has been triggered,
-  ; and return the result
-  (while (null? ghost-result) (usleep 100000))
-  ghost-result
+  ghost-buffer
 )
 
 ; ----------
