@@ -24,6 +24,7 @@ cnt_mode="clique-dist"
 cnt_reach=6
 mst_dist="#t"
 exp_parses="#t"
+split_sents="#t"
 source ./config/params.txt # overrides default values, if present
 
 # Split the filename into two parts
@@ -60,8 +61,12 @@ echo "Processing file >>>$rest<<<"
 mkdir -p $(dirname "$splitdir/$rest")
 mkdir -p $(dirname "$subdir/$rest")
 
-# Sentence split the article itself
-cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
+# Sentence split the article itself if requested
+if [[ "$split_sents" == "#t" ]]; then
+   cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
+else # escape double quotes and backslashes if not split-sentence
+   cat "$filename" | sed -e 's/\\/\\\\' -e 's/\"/\\\"' > "$splitdir/$rest"
+fi
 
 # Submit the split article
 cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe $params
