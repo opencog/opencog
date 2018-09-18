@@ -65,7 +65,7 @@ mkdir -p $(dirname "$subdir/$rest")
 if [[ "$split_sents" == "#t" ]]; then
    cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
 else # escape double quotes and backslashes if not split-sentence
-   cat "$filename" | sed -e 's/\\/\\\\' -e 's/\"/\\\"' > "$splitdir/$rest"
+   cat "$filename" | sed -e 's/\\/\\\\/g' -e 's/\"/\\\"/g' > "$splitdir/$rest"
 fi
 
 # Submit the split article
