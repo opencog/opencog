@@ -647,7 +647,7 @@ Before you follow the next steps make sure you have cloned the repositories from
 
    c) Send input to the pipeline:
    ```
-    $ echo -e "(observe-text \"This is a test\" \"any\" 24)" |nc localhost 17005
+    $ echo -e "(observe-text-mode \"This is a test\" \"any\" 24)" |nc localhost 17005
    ```
 
    d) Check that the input was registered in the database:
