@@ -476,7 +476,7 @@
 "
  observe-text-mode -- update word and word-pair counts by observing raw text.
 
- There are currently two observing modes, set by observe-mode, both taking
+ There are currently three observing modes, set by observe-mode, all taking
  an integer parameter:
  - any: counts pairs of words linked by the LG parser in 'any' language.
  	    In this case, 'count-reach' specifies how many linkages from LG-parser
