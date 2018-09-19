@@ -40,7 +40,7 @@
   (define (has-match? pattern str)
     (let ((match
             (string-match
-              (string-append "^[ \t]*" pattern) str)))
+              (string-append "^[ \t]*" pattern "[ \t]*") str)))
       (if match
         (begin (set! current-match match) #t)
         #f
@@ -56,7 +56,7 @@
     ; Return command string.
     (let ((match (string-match "~" (match:substring current-match))))
       ; The suffix is the command and the prefix is the argument
-      (cons (match:suffix match) (string-trim (match:prefix match)))
+      (cons (match:suffix match) (string-trim-both (match:prefix match)))
     ))
 
   ; NOTE
@@ -87,28 +87,28 @@
     ; Chatscript rules
     ((has-match? "[s?u]:" str)
       (result:suffix 'RESPONDERS location
-        (car (string->list (substring (string-trim
+        (car (string->list (substring (string-trim-both
           (match:substring current-match)) 0 1)))))
     ((has-match? "[a-q]:" str)
       (result:suffix 'REJOINDERS location
-        (car (string->list (substring (string-trim
+        (car (string->list (substring (string-trim-both
           (match:substring current-match)) 0 1)))))
     ((has-match? "[rt]:" str)
       (result:suffix 'GAMBIT location
-        (car (string->list (substring (string-trim
+        (car (string->list (substring (string-trim-both
           (match:substring current-match)) 0 1)))))
     ((has-match? "[{][%] set delay=[0-9]+ [%][}]" str)
       (result:suffix 'SET_DELAY location
-        (string-trim (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ((has-match? "_[0-9]" str)
       (result:suffix 'MVAR location
-        (substring (string-trim (match:substring current-match)) 1)))
+        (substring (string-trim-both (match:substring current-match)) 1)))
     ((has-match? "'_[0-9]" str)
       (result:suffix 'MOVAR location
-        (substring (string-trim (match:substring current-match)) 2)))
+        (substring (string-trim-both (match:substring current-match)) 2)))
     ((has-match? "\\$[a-zA-Z0-9_-]+" str)
       (result:suffix 'UVAR location
-        (substring (string-trim (match:substring current-match)) 1)))
+        (substring (string-trim-both (match:substring current-match)) 1)))
     ((has-match? "_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
     ((has-match? "[a-zA-Z]+~[a-zA-Z1-9]+" str)
@@ -117,10 +117,10 @@
     ; TODO Maybe replace with dictionary keyword sets then process it on action?
     ((has-match? "\\*~[0-9]+" str)
       (result:suffix '*~n location
-        (substring (string-trim (match:substring current-match)) 2)))
+        (substring (string-trim-both (match:substring current-match)) 2)))
     ((has-match? "~[a-zA-Z0-9_]+" str)
       (result:suffix 'ID location
-        (substring (string-trim (match:substring current-match)) 1)))
+        (substring (string-trim-both (match:substring current-match)) 1)))
     ((has-match? "\\^" str) (result:suffix '^ location #f))
     ((has-match? "\\[" str) (result:suffix 'LSBRACKET location #f))
     ((has-match? "]" str) (result:suffix 'RSBRACKET location #f))
@@ -137,7 +137,7 @@
     ((has-match? "\"" str) (result:suffix 'DQUOTE location "\""))
     ; Precise wildcards
     ((has-match? "\\*[0-9]+" str) (result:suffix '*n location
-       (substring (string-trim (match:substring current-match)) 1)))
+       (substring (string-trim-both (match:substring current-match)) 1)))
     ; Wildcards
     ((has-match? "\\*" str) (result:suffix '* location "*"))
     ((has-match? "!" str) (result:suffix 'NOT location #f))
@@ -146,33 +146,31 @@
     ; Words with apostrophe, e.g. I'm, it's etc
     ((has-match? "[a-zA-Z]+['’][a-zA-Z]+" str)
       (result:suffix 'LITERAL_APOS location
-        (string-trim (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ; Literals -- words start with a '
     ((has-match? "'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
-        (substring (string-trim (match:substring current-match)) 1)))
+        (substring (string-trim-both (match:substring current-match)) 1)))
     ((has-match? "[a-zA-Z-]+\\b" str)
-      (if (is-lemma? (string-trim (match:substring current-match)))
+      (if (is-lemma? (string-trim-both (match:substring current-match)))
         (result:suffix 'LEMMA location
-          (string-trim (match:substring current-match)))
+          (string-trim-both (match:substring current-match)))
         ; Literals, words in the pattern that are not in their canonical forms
         (result:suffix 'LITERAL location
-          (string-trim (match:substring current-match)))))
+          (string-trim-both (match:substring current-match)))))
     ((has-match? "[0-9]+[0-9.]*" str)
       (result:suffix 'NUM location
-        (string-trim (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ((has-match? "[|]" str)
       (result:suffix 'VLINE location
-         (string-trim (match:substring current-match))))
+         (string-trim-both (match:substring current-match))))
     ((has-match? "," str)
       (result:suffix 'COMMA location
-         (string-trim (match:substring current-match))))
+         (string-trim-both (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "[~’'._!?0-9a-zA-Z-]+" str)
       (result:suffix 'STRING location
-        (string-trim (match:substring current-match))))
-    ; Trailing space
-    ((has-match? "^[ \t]+$" str) (result:suffix 'TRAILSPACE location #f))
+        (string-trim-both (match:substring current-match))))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
     (else (cons (make-lexical-token 'NotDefined location str) ""))
   )
@@ -236,7 +234,7 @@
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
-     SAMPLE_INPUT TRAILSPACE
+     SAMPLE_INPUT
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
               SET_DELAY)
@@ -260,7 +258,6 @@
       (enter) : $1
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
-      (TRAILSPACE) : #f
     )
 
     (enter
@@ -473,7 +470,6 @@
       (action-pattern) : $1
       (action-patterns action-pattern) : (format #f "~a ~a" $1 $2)
       (action-patterns enter) : $1
-      (action-patterns TRAILSPACE) : $1
       (action-patterns COMMENT) : $1
       (COMMENT action-patterns) : $2
     )
