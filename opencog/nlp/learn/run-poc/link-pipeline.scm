@@ -479,16 +479,16 @@
  There are currently three observing modes, set by observe-mode, all taking
  an integer parameter:
  - any: counts pairs of words linked by the LG parser in 'any' language.
- 	    In this case, 'count-reach' specifies how many linkages from LG-parser
- 	    to use.
+        In this case, 'count-reach' specifies how many linkages from LG-parser
+        to use.
  - clique: itearates over each word in the sentence and pairs it with
            every word located within distance 'count-reach' to its right.
            Distance is defined as the difference between words positions
            in the sentence, so neighboring words have distance of 1.
  - clique-dist: same word-pairs as 'clique', but each word-pair is counted
- 				a number of times determined by the distance between words
- 				in the pair as:
- 				(quotient count-reach distance)
+                a number of times determined by the distance between words
+                in the pair as:
+                (quotient count-reach distance)
 
  This is the first part of the learning algo: simply count the words
  and word-pairs observed in incoming text. This takes in raw text, gets
