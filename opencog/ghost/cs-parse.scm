@@ -63,8 +63,8 @@
   ; 2. #f is given as a token value for those cases which don't have any
   ;    semantic values.
   (cond
-    ((has-match? "^[ ]*\\(" str) (result:suffix 'LPAREN location #f))
-    ((has-match? "^[ ]*\\)" str) (result:suffix 'RPAREN location #f))
+    ((has-match? "^[ ]*\\([ \t]*" str) (result:suffix 'LPAREN location #f))
+    ((has-match? "^[ ]*\\)[ \t]*" str) (result:suffix 'RPAREN location #f))
     ; Chatscript declarations
     ((has-match? "^[ ]*concept:" str) (result:suffix 'CONCEPT location #f))
     ((has-match? "^[ ]*topic:" str) (result:suffix 'TOPIC location #f))
