@@ -100,3 +100,93 @@
 )
 
 ; --------------------------------------------------------------
+; Utilites for openpsi parameters. These parameters are meant to be
+; used for defineing modulators, demanads ....
+(define value-key (Predicate "psi-param-value"))
+
+(define (set-value! atom num)
+  (cog-set-value! atom value-key (FloatValue num))
+)
+
+(define (psi-param name)
+"
+  psi-param NAME
+
+  Returns a (ConceptNode NAME) that represents an openpsi parameter.
+"
+  (Concept name)
+)
+
+(define (psi-param-value atom)
+"
+  psi-param-value ATOM
+
+  Returns the value of the parameter represented by ATOM.
+"
+  (define v (cog-value atom value-key))
+  (if (null? v)
+    (begin (set-value! atom 0) 0)
+    (cog-value-ref v 0))
+)
+
+(define (calc-inc-value atom num)
+  (+ (psi-param-value atom) (abs num))
+)
+
+(define (psi-param-increase! atom num)
+"
+  psi-param-increase! ATOM NUM
+
+  Returns ATOM after increasing the value of the parameter represented by it,
+  by an amount equal to the magnitude of NUM. The maximum amount the value
+  is increased to is 1.
+"
+  (let ((v (calc-inc-value atom num)))
+    (if (> 1 v)
+      (set-value! atom v)
+      (set-value! atom 1)))
+)
+
+(define (calc-dec-value atom num)
+  (- (psi-param-value atom) (abs num))
+)
+
+(define (psi-param-decrease! atom num)
+"
+  psi-param-decrease! ATOM NUM
+
+  Returns ATOM after decreasing the value of the parameter represented by it,
+  by an amount equal to the magnitude of NUM. The minimum amout the value
+  is decreased to is -1.
+"
+  (let ((v (- (psi-param-value atom) (abs num))))
+    (if (< -1 v)
+      (set-value! atom v)
+      (set-value! atom -1)))
+)
+
+(define (psi-param-neutralize! atom num)
+"
+  psi-param-neutralize! ATOM NUM
+
+  Returns ATOM after increasing/decreasing the value of the parameter
+  represented by it, by an amount equal to the magnitude of NUM until it
+  reaches zero.
+"
+  (let ((v (psi-param-value atom)))
+    (cond
+      ((equal? = 0) 0)
+      ((negative? v)
+         (let ((nv (calc-inc-value atom num)))
+           (if (> nv 0)
+             (set-value! atom 0)
+             (set-value! atom nv))))
+      ((positive? v)
+         (let ((nv (calc-dec-value atom num)))
+           (if (< nv 0)
+             (set-value! atom 0)
+             (set-value! atom nv))))
+    ))
+)
+
+; --------------------------------------------------------------

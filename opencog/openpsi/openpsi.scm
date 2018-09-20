@@ -36,6 +36,8 @@
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str
+    psi-param psi-param-value psi-param-increase! psi-param-decrease!
+    psi-param-neutralize!
 
     ; C++ bindings from libopenpsi
     psi-action-executed?
