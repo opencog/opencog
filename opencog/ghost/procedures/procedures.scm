@@ -96,6 +96,14 @@
     saccade_cancel
     sing
     get_neck_dir
+    get_valence
+    increase_valence
+    decrease_valence
+    neutralize_valence
+    get_arousal
+    increase_arousal
+    decrease_arousal
+    neutralize_arousal
 
     ; Source schemas
     send_query

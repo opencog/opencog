@@ -693,3 +693,6 @@
 		         (define (neu num) (psi-param-neutralize! (psi-param emo-param) num)))
      ))))
 )
+
+(define-emotion-parameter "valence")
+(define-emotion-parameter "arousal")
