@@ -662,3 +662,34 @@
 (define (sing)
   (cog-execute! (Put (DefinedSchema "sing") (List)))
 )
+
+; --------------------------------------------------------------
+(define-syntax define-emotion-parameter (lambda (x)
+  "define-emotion-parameter EMO-PARAM
+
+   Defines get_EMO-PARAM, increase_EMO-PARAM, decrease_EMO-PARAM,
+   and neutralize_EMO-PARAM functions, were EMO-PARAM is the name of
+   an openpsi parameter.
+  "
+
+  (define (new-id prefix id)
+  "prefix = a string
+   id = a pattern variable(aka keyword, template-identifier).
+   See https://scheme.com/tspl4/syntax.html#./syntax:h4 for details.
+  "
+    (datum->syntax id (string->symbol
+      (string-append prefix (syntax->datum id)))))
+
+  (syntax-case x ()
+    ((_ emo-param)
+     (with-syntax ((get (new-id "get_" #'emo-param))
+                   (inc (new-id "increase_" #'emo-param))
+                   (dec (new-id "decrease_" #'emo-param))
+                   (neu (new-id "neutralize_" #'emo-param)))
+         #'(begin
+		         (define (get) (psi-param-value (psi-param emo-param)))
+		         (define (inc num) (psi-param-increase! (psi-param emo-param) num))
+		         (define (dec num) (psi-param-decrease! (psi-param emo-param) num))
+		         (define (neu num) (psi-param-neutralize! (psi-param emo-param) num)))
+     ))))
+)
