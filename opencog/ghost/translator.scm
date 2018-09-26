@@ -285,6 +285,7 @@
             ((equal? 'empty-context (car t))
               (set! c (list (TrueLink))))
             (else (begin
+              (clear-parsing-states)
               (cog-logger-warn ghost-logger
                 "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
               (throw 'FeatureNotSupported (car t) (cdr t))))))

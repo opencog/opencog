@@ -238,6 +238,21 @@
 )
 
 ;; --------------------
+(define (clear-parsing-states)
+  (set! rule-topic '())
+  (set! initial-urges '())
+  (set! default-urge 0)
+  (set! top-lv-goals '())
+  (set! is-rule-seq? #f)
+  (set! goal-rule-cnt 0)
+  (set! pat-vars '())
+  (set! rule-label-list '())
+  (set! rule-type-alist '())
+  (set! rule-alist '())
+  (set! rule-hierarchy '())
+)
+
+;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
 
 (define-public (ghost-parse TXT)
