@@ -134,6 +134,21 @@
 ; Will be used when dealing with rejoinders
 (define rule-hierarchy '())
 
+; To clear the above states
+(define (clear-parsing-states)
+  (set! rule-topic '())
+  (set! initial-urges '())
+  (set! default-urge 0)
+  (set! top-lv-goals '())
+  (set! is-rule-seq? #f)
+  (set! goal-rule-cnt 0)
+  (set! pat-vars '())
+  (set! rule-label-list '())
+  (set! rule-type-alist '())
+  (set! rule-alist '())
+  (set! rule-hierarchy '())
+)
+
 ;; --------------------
 ;; For rule matching
 
@@ -235,21 +250,6 @@
       (generate-word-seqs ghost-buffer)
       (append-to-sent-seq ghost-buffer)
       (State ghost-curr-proc ghost-buffer)))
-)
-
-;; --------------------
-(define (clear-parsing-states)
-  (set! rule-topic '())
-  (set! initial-urges '())
-  (set! default-urge 0)
-  (set! top-lv-goals '())
-  (set! is-rule-seq? #f)
-  (set! goal-rule-cnt 0)
-  (set! pat-vars '())
-  (set! rule-label-list '())
-  (set! rule-type-alist '())
-  (set! rule-alist '())
-  (set! rule-hierarchy '())
 )
 
 ;; --------------------
