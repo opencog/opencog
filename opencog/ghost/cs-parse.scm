@@ -455,6 +455,7 @@
       (variable) : $1
       (user-variable) : $1
       (function) : $1
+      (function-compare) : $1
       (choice) : $1
       (optional) : $1
       (variable ? concept) :
@@ -606,6 +607,11 @@
       (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
+    )
+
+    (function-compare
+      (function operator right-compare) :
+        (format #f "(cons 'compare (list \"~a\" ~a ~a))" $2 $1 $3)
     )
 
     (function

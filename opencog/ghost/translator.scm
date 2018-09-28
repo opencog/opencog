@@ -139,23 +139,23 @@
   ; - be related to a particular "concept"
   (define spec-concept 2)
 
-  (define (compare-items i1 i2)
-    (map
-      (lambda (x)
-        (cond
-          ((equal? 'get_uvar (car x))
-           (get-user-variable (cdr x)))
-          ((equal? 'get_wvar (car x))
-           (list-ref pat-vars (cdr x)))
-          ((equal? 'get_lvar (car x))
-           (get-var-lemmas
-             (list-ref pat-vars (cdr x))))
-          ((equal? 'concept (car x))
-           (Concept (cdr x)))
-          ; TODO: function
-          ((equal? 'str (car x))
-           (WordNode (cdr x)))))
-      (list i1 i2))
+  (define (compare-item x)
+    (cond
+      ((equal? 'get_uvar (car x))
+       (get-user-variable (cdr x)))
+      ((equal? 'get_wvar (car x))
+       (list-ref pat-vars (cdr x)))
+      ((equal? 'get_lvar (car x))
+       (get-var-lemmas
+         (list-ref pat-vars (cdr x))))
+      ((equal? 'concept (car x))
+       (Concept (cdr x)))
+      ((equal? 'function (car x))
+       (action-function (cadr x)
+         (map compare-item (cddr x))))
+      ((or (equal? 'str (car x))
+           (equal? 'arg (car x)))
+       (WordNode (cdr x))))
   )
 
   (define (process terms)
@@ -301,23 +301,29 @@
              (set! c (append c (list
                (cond
                  ((string=? "equal" (cadr t))
-                  (apply compare-equal
-                    (compare-items (caddr t) (cadddr t))))
+                  (compare-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
                  ((string=? "not_equal" (cadr t))
-                  (apply compare-not-equal
-                    (compare-items (caddr t) (cadddr t))))
+                  (compare-not-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
                  ((string=? "smaller" (cadr t))
-                  (apply compare-smaller
-                    (compare-items (caddr t) (cadddr t))))
+                  (compare-smaller
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
                  ((string=? "smaller_equal" (cadr t))
-                  (apply compare-smaller-equal
-                    (compare-items (caddr t) (cadddr t))))
+                  (compare-smaller-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
                  ((string=? "greater" (cadr t))
-                  (apply compare-greater
-                    (compare-items (caddr t) (cadddr t))))
+                  (compare-greater
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
                  ((string=? "greater_equal" (cadr t))
-                  (apply compare-greater-equal
-                    (compare-items (caddr t) (cadddr t)))))))))
+                  (compare-greater-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t)))))))))
             (else (begin
               (clear-parsing-states)
               (cog-logger-warn ghost-logger
