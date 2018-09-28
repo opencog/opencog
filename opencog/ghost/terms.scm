@@ -494,8 +494,6 @@
 )
 
 (define-public (ghost-compare-equal? LV RV)
-; JJJ
-(format #t "LV = ~a\nRV = ~a\n" (flatten-list (cog-outgoing-set LV)) (get-members RV))
   (cond
     ((and (not (null? (gar RV)))
           (equal? 'ConceptNode (cog-type (gar RV)))
