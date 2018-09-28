@@ -139,6 +139,25 @@
   ; - be related to a particular "concept"
   (define spec-concept 2)
 
+  (define (compare-item x)
+    (cond
+      ((equal? 'get_uvar (car x))
+       (get-user-variable (cdr x)))
+      ((equal? 'get_wvar (car x))
+       (list-ref pat-vars (cdr x)))
+      ((equal? 'get_lvar (car x))
+       (get-var-lemmas
+         (list-ref pat-vars (cdr x))))
+      ((equal? 'concept (car x))
+       (Concept (cdr x)))
+      ((equal? 'function (car x))
+       (action-function (cadr x)
+         (map compare-item (cddr x))))
+      ((or (equal? 'str (car x))
+           (equal? 'arg (car x)))
+       (WordNode (cdr x))))
+  )
+
   (define (process terms)
     (define v '())
     (define c '())
@@ -251,12 +270,6 @@
              ; user variable has been defined
              (set! specificity (+ specificity 1))
              (set! has-words? #t))
-            ((equal? 'uvar_equal (car t))
-             (set! c (append c (list (uvar-equal? (cadr t) (caddr t)))))
-             ; uvar_equal should have a specificity of a word as they
-             ; have the same set of conditions to be satisfied
-             (set! specificity (+ specificity spec-word))
-             (set! has-words? #t))
             ((equal? 'function (car t))
              ; The specificity of a function / predicate depends really
              ; on what that function is doing (and it could be anything)
@@ -283,8 +296,36 @@
             ; it's always true and should be triggered
             ; even if there is no perception input
             ((equal? 'empty-context (car t))
-              (set! c (list (TrueLink))))
+             (set! c (list (TrueLink))))
+            ((equal? 'compare (car t))
+             (set! c (append c (list
+               (cond
+                 ((string=? "equal" (cadr t))
+                  (compare-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "not_equal" (cadr t))
+                  (compare-not-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "smaller" (cadr t))
+                  (compare-smaller
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "smaller_equal" (cadr t))
+                  (compare-smaller-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "greater" (cadr t))
+                  (compare-greater
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "greater_equal" (cadr t))
+                  (compare-greater-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t)))))))))
             (else (begin
+              (clear-parsing-states)
               (cog-logger-warn ghost-logger
                 "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
               (throw 'FeatureNotSupported (car t) (cdr t))))))

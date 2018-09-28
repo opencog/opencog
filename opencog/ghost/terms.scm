@@ -374,23 +374,6 @@
       (stv 1 1)))
 
 ; ----------
-(define (uvar-equal? UVAR VAL)
-"
-  Check if the value of the user variable VAR equals to VAL.
-"
-  ; TODO: VAL can also be a concept etc?
-  (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
-              (List (ghost-uvar UVAR) (List (Word VAL)))))
-
-(define-public (ghost-user-variable-equal? UVAR VAL)
-"
-  Check if the value of UVAR equals VAL.
-"
-  (if (equal? (assoc-ref uvars UVAR) VAL)
-      (stv 1 1)
-      (stv 0 1)))
-
-; ----------
 (define-public (ghost-execute-action . ACTIONS)
 "
   Execute the actions and update the internal state.
@@ -471,4 +454,121 @@
 
   ; Return an atom
   (True)
+)
+
+; ----------
+(define (compare-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-not-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-not-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-smaller LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-smaller?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-smaller-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-smaller-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-greater LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-greater?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-greater-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-greater-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define-public (ghost-compare-equal? LV RV)
+  (cond
+    ((and (not (null? (gar RV)))
+          (equal? 'ConceptNode (cog-type (gar RV)))
+          (is-member?
+            (flatten-list (cog-outgoing-set LV))
+            (get-members (gar RV))))
+     (stv 1 1))
+    ((compare "equal" LV RV) (stv 1 1))
+    (else (stv 0 1)))
+)
+
+(define-public (ghost-compare-not-equal? LV RV)
+  (define result (ghost-compare-equal? LV RV))
+  (if (equal? result (stv 1 1))
+    (stv 0 1)
+    (stv 1 1))
+)
+
+(define-public (ghost-compare-smaller? LV RV)
+  (if (compare "smaller" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define-public (ghost-compare-smaller-equal? LV RV)
+  (if (compare "smaller_equal" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define-public (ghost-compare-greater? LV RV)
+  (if (compare "greater" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define-public (ghost-compare-greater-equal? LV RV)
+  (if (compare "greater_equal" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define (compare OPERATOR LV RV)
+  (define lv
+    (if (equal? 'ListLink (cog-type LV))
+      (flatten-list (cog-outgoing-set LV))
+      (list LV)))
+  (define rv
+    (if (equal? 'ListLink (cog-type RV))
+      (flatten-list (cog-outgoing-set RV))
+      (list RV)))
+  (define lv-str (string-join (map cog-name lv)))
+  (define rv-str (string-join (map cog-name rv)))
+  (define lv-num
+    (string->number (string-join (map cog-name lv) "")))
+  (define rv-num
+    (string->number (string-join (map cog-name rv) "")))
+  (define both-numbers? (and lv-num rv-num))
+
+  (cond
+    ((string=? "equal" OPERATOR)
+     (if both-numbers?
+       (= lv-num rv-num)
+       (string=? lv-str rv-str)))
+    ((string=? "smaller" OPERATOR)
+     (and both-numbers?
+          (< lv-num rv-num)))
+    ((string=? "smaller_equal" OPERATOR)
+     (and both-numbers?
+          (<= lv-num rv-num)))
+    ((string=? "greater" OPERATOR)
+     (and both-numbers?
+          (> lv-num rv-num)))
+    ((string=? "greater_equal" OPERATOR)
+     (and both-numbers?
+          (>= lv-num rv-num)))
+    (else #f))
 )
