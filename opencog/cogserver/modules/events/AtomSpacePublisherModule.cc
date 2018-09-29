@@ -312,7 +312,7 @@ Json::Value AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string typeNameString = nameserver().getTypeName(type);
 
     // Name
-    std::string nameString
+    std::string nameString;
     if(h->is_node())
       nameString = h->get_name();
 
@@ -338,7 +338,7 @@ Json::Value AtomSpacePublisherModule::atomToJSON(Handle h)
     }
 
     // Outgoing set
-    Array outgoing;
+    Json::Value outgoing(Json::arrayValue);
     if (h->is_link()) {
         HandleSeq outgoingHandles = h->getOutgoingSet();
         for (uint i = 0; i < outgoingHandles.size(); i++) {
@@ -347,14 +347,14 @@ Json::Value AtomSpacePublisherModule::atomToJSON(Handle h)
     }
 
     Json::Value json(Json::objectValue);
-    json.["handle"] = handle;
-    json.["type"] = typeNameString;
+    json["handle"] = handle;
+    json["type"] = typeNameString;
     if(h->is_node())
-      json.["name"] = nameString;
-    json.["attentionvalue"] = jsonAV;
-    json.["truthvalue"] = jsonTV;
-    json.["outgoing"] = outgoing;
-    json.["incoming"] = incoming;
+      json["name"] = nameString;
+    json["attentionvalue"] = jsonAV;
+    json["truthvalue"] = jsonTV;
+    json["outgoing"] = outgoing;
+    json["incoming"] = incoming;
 
     return json;
 }
@@ -363,9 +363,9 @@ Json::Value AtomSpacePublisherModule::avToJSON(AttentionValuePtr av)
 {
     Json::Value json(Json::objectValue);
 
-    json.["sti"] = av->getSTI();
-    json.["lti"] = av->getLTI();
-    json.["vlti"] = av->getVLTI() != 0 ? true : false;
+    json["sti"] = av->getSTI();
+    json["lti"] = av->getLTI();
+    json["vlti"] = av->getVLTI() != 0 ? true : false;
 
     return json;
 }
@@ -378,43 +378,43 @@ Json::Value AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 
 
     if (tvt == SIMPLE_TRUTH_VALUE) {
-        json.["type"] = "simple";
-        jsonDetails.["strength"] = tvp->get_mean();
-        jsonDetails.["count"] = tvp->get_count();
-        jsonDetails.["confidence"] = tvp->get_confidence();
-        json.["details"] = jsonDetails;
+        json["type"] = "simple";
+        jsonDetails["strength"] = tvp->get_mean();
+        jsonDetails["count"] = tvp->get_count();
+        jsonDetails["confidence"] = tvp->get_confidence();
+        json["details"] = jsonDetails;
     }
     else if (tvt == COUNT_TRUTH_VALUE) {
-        json.["type"] = "count";
-        jsonDetails.["strength"] = tvp->get_mean();
-        jsonDetails.["count"] = tvp->get_count();
-        jsonDetails.["confidence"] = tvp->get_confidence();
-        json.["details"] = jsonDetails;
+        json["type"] = "count";
+        jsonDetails["strength"] = tvp->get_mean();
+        jsonDetails["count"] = tvp->get_count();
+        jsonDetails["confidence"] = tvp->get_confidence();
+        json["details"] = jsonDetails;
     }
     else if (tvt == INDEFINITE_TRUTH_VALUE) {
         IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
-        json.["type"] = "indefinite";
-        jsonDetails.["strength"] = itv->get_mean();
-        jsonDetails.["L"] = itv->getL();
-        jsonDetails.["U"] = itv->getU();
-        jsonDetails.["confidence"] = itv->getConfidenceLevel();
-        jsonDetails.["diff"] = itv->getDiff();
-        jsonDetails.["symmetric"] = itv->isSymmetric();
-        json.["details"] = jsonDetails;
+        json["type"] = "indefinite";
+        jsonDetails["strength"] = itv->get_mean();
+        jsonDetails["L"] = itv->getL();
+        jsonDetails["U"] = itv->getU();
+        jsonDetails["confidence"] = itv->getConfidenceLevel();
+        jsonDetails["diff"] = itv->getDiff();
+        jsonDetails["symmetric"] = itv->isSymmetric();
+        json["details"] = jsonDetails;
     }
     else if (tvt == PROBABILISTIC_TRUTH_VALUE) {
-        json.["type"] = "probabilistic";
-        jsonDetails.["strength"] = tvp->get_mean();
-        jsonDetails.["count"] = tvp->get_count();
-        jsonDetails.["confidence"] = tvp->get_confidence();
-        json.["details"] = jsonDetails;
+        json["type"] = "probabilistic";
+        jsonDetails["strength"] = tvp->get_mean();
+        jsonDetails["count"] = tvp->get_count();
+        jsonDetails["confidence"] = tvp->get_confidence();
+        json["details"] = jsonDetails;
     }
     else if (tvt == FUZZY_TRUTH_VALUE) {
-        json.["type"] = "fuzzy";
-        jsonDetails.["strength"] = tvp->get_mean();
-        jsonDetails.["count"] = tvp->get_count();
-        jsonDetails.["confidence"] = tvp->get_confidence();
-        json.["details"] = jsonDetails;
+        json["type"] = "fuzzy";
+        jsonDetails["strength"] = tvp->get_mean();
+        jsonDetails["count"] = tvp->get_count();
+        jsonDetails["confidence"] = tvp->get_confidence();
+        json["details"] = jsonDetails;
     }
     else {
         throw InvalidParamException(TRACE_INFO,
@@ -427,19 +427,21 @@ Json::Value AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 std::string AtomSpacePublisherModule::atomMessage(Json::Value jsonAtom)
 {
     Json::Value json;
-    json.["atom"] = jsonAtom;
-    json.["timestamp"] = (boost::uint64_t)time(0);
+    json["atom"] = jsonAtom;
+    json["timestamp"] = (Json::UInt64)time(0);
+    std::cout<<json<<std::endl;
+    return json.asString();
 }
 
 std::string AtomSpacePublisherModule::avMessage(
         Json::Value jsonAtom, Json::Value jsonAVOld, Json::Value jsonAVNew)
 {
     Json::Value json;
-    json.["handle"] = find_value(jsonAtom, "handle");
-    json.["avOld"] = jsonAVOld;
-    json.["avNew"] = jsonAVNew;
-    json.["atom"] = jsonAtom;
-    json.["timestamp"] = (boost::uint64_t)time(0);
+    json["handle"] = jsonAtom["handle"];
+    json["avOld"] = jsonAVOld;
+    json["avNew"] = jsonAVNew;
+    json["atom"] = jsonAtom;
+    json["timestamp"] = (Json::UInt64)time(0);
     return json.asString();
 }
 
@@ -447,11 +449,11 @@ std::string AtomSpacePublisherModule::tvMessage(
         Json::Value jsonAtom, Json::Value jsonTVOld, Json::Value jsonTVNew)
 {
     Json::Value json;
-    json.["handle"] = find_value(jsonAtom, "handle");
-    json.["tvOld"] = jsonTVOld;
-    json.["tvNew"] = jsonTVNew;
-    json.["atom"] = jsonAtom;
-    json.["timestamp"] = (boost::uint64_t)time(0);
+    json["handle"] = jsonAtom["handle"];
+    json["tvOld"] = jsonTVOld;
+    json["tvNew"] = jsonTVNew;
+    json["atom"] = jsonAtom;
+    json["timestamp"] = (Json::UInt64)time(0);
     return json.asString();
 }
 
