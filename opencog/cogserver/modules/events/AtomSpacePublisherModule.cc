@@ -27,7 +27,6 @@
 #include <thread>
 #include <time.h>
 
-#include <lib/json_spirit/json_spirit.h>
 #include <lib/zmq/zhelpers.hpp>
 #include <tbb/task.h>
 #include <tbb/concurrent_queue.h>
@@ -49,7 +48,6 @@
 
 using namespace std;
 using namespace std::placeholders;
-using namespace json_spirit;
 using namespace opencog;
 
 DECLARE_MODULE(AtomSpacePublisherModule)
