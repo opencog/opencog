@@ -28,7 +28,8 @@
 #include <string>
 #include <lib/zmq/zhelpers.hpp>
 
-#include <lib/json_spirit/json_spirit.h>
+#include <json/json.h>
+
 #include <tbb/task.h>
 #include <tbb/concurrent_queue.h>
 
@@ -40,7 +41,6 @@
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/CogServer.h>
 
-using namespace json_spirit;
 
 namespace opencog
 {
@@ -124,12 +124,12 @@ class AtomSpacePublisherModule : public Module
         void proxy();
 
         void sendMessage(std::string messageType, std::string payload);
-        std::string atomMessage(Object jsonAtom);
-        std::string avMessage(Object jsonAtom, Object jsonAVOld, Object jsonAVNew);
-        std::string tvMessage(Object jsonAtom, Object jsonTVOld, Object jsonTVNew);
-        Object atomToJSON(Handle h);
-        Object tvToJSON(TruthValuePtr tv);
-        Object avToJSON(AttentionValuePtr av);
+        std::string atomMessage(Json::Value jsonAtom);
+        std::string avMessage(Json::Value jsonAtom, Json::Value jsonAVOld, Json::Value jsonAVNew);
+        std::string tvMessage(Json::Value jsonAtom, Json::Value jsonTVOld, Json::Value jsonTVNew);
+        Json::Value atomToJSON(Handle h);
+        Json::Value tvToJSON(TruthValuePtr tv);
+        Json::Value avToJSON(AttentionValuePtr av);
         // TODO: add protoatom to JSON functionality
 
         DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
