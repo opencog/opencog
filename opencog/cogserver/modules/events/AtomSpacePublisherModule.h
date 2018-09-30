@@ -28,7 +28,8 @@
 #include <string>
 #include <lib/zmq/zhelpers.hpp>
 
-#include <lib/json_spirit/json_spirit.h>
+#include <json/json.h>
+
 #include <tbb/task.h>
 #include <tbb/concurrent_queue.h>
 
@@ -40,7 +41,6 @@
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/CogServer.h>
 
-using namespace json_spirit;
 
 namespace opencog
 {
@@ -81,8 +81,8 @@ class AtomSpacePublisherModule;
 typedef std::shared_ptr<AtomSpacePublisherModule> AtomSpacePublisherModulePtr;
 
 struct message_t {
-    std::string type;
-    std::string payload;
+	std::string type;
+	std::string payload;
 };
 
 // High water mark for publisher socket
@@ -90,82 +90,82 @@ const int HWM = 10000000;
 
 class AtomSpacePublisherModule : public Module
 {
-    private:
-        AtomSpace* as;
-        AttentionBank* _attention_bank;
+	private:
+		AtomSpace* as;
+		AttentionBank* _attention_bank;
 
-        AtomPtrSignal* _remove_atom_signal;
-        int _remove_atom_connection;
+		AtomPtrSignal* _remove_atom_signal;
+		int _remove_atom_connection;
 
-        AtomSignal* _add_atom_signal;
-        int _add_atom_connection;
+		AtomSignal* _add_atom_signal;
+		int _add_atom_connection;
 
-        TVCHSigl* _tvchange_signal;
-        int _tvchange_connection;
+		TVCHSigl* _tvchange_signal;
+		int _tvchange_connection;
 
-        AVCHSigl* _avchange_signal;
-        int _avchange_connection;
+		AVCHSigl* _avchange_signal;
+		int _avchange_connection;
 
-        AVCHSigl* _add_af_signal;
-        int _add_af_connection;
+		AVCHSigl* _add_af_signal;
+		int _add_af_connection;
 
-        AVCHSigl* _remove_af_signal;
-        int _remove_af_connection;
+		AVCHSigl* _remove_af_signal;
+		int _remove_af_connection;
 
-        void enableSignals();
-        void disableSignals();
+		void enableSignals();
+		void disableSignals();
 
-        // TBB
-        tbb::concurrent_bounded_queue<message_t> queue;
+		// TBB
+		tbb::concurrent_bounded_queue<message_t> queue;
 
-        // ZeroMQ
-        zmq::context_t * context;
-        void InitZeroMQ();
-        void proxy();
+		// ZeroMQ
+		zmq::context_t * context;
+		void InitZeroMQ();
+		void proxy();
 
-        void sendMessage(std::string messageType, std::string payload);
-        std::string atomMessage(Object jsonAtom);
-        std::string avMessage(Object jsonAtom, Object jsonAVOld, Object jsonAVNew);
-        std::string tvMessage(Object jsonAtom, Object jsonTVOld, Object jsonTVNew);
-        Object atomToJSON(Handle h);
-        Object tvToJSON(TruthValuePtr tv);
-        Object avToJSON(AttentionValuePtr av);
-        // TODO: add protoatom to JSON functionality
+		void sendMessage(std::string messageType, std::string payload);
+		std::string atomMessage(Json::Value jsonAtom);
+		std::string avMessage(Json::Value jsonAtom, Json::Value jsonAVOld, Json::Value jsonAVNew);
+		std::string tvMessage(Json::Value jsonAtom, Json::Value jsonTVOld, Json::Value jsonTVNew);
+		Json::Value atomToJSON(Handle h);
+		Json::Value tvToJSON(TruthValuePtr tv);
+		Json::Value avToJSON(AttentionValuePtr av);
+		// TODO: add protoatom to JSON functionality
 
-        DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
-           do_publisherEnableSignals,
-           "Enable AtomSpace event publishing",
-           "Usage: publisher-enable-signals",
-           false, false)
+		DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
+			 do_publisherEnableSignals,
+			 "Enable AtomSpace event publishing",
+			 "Usage: publisher-enable-signals",
+			 false, false)
 
-        DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-disable-signals",
-           do_publisherDisableSignals,
-           "Disable AtomSpace event publishing",
-           "Usage: publisher-disable-signals",
-           false, false)
+		DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-disable-signals",
+			 do_publisherDisableSignals,
+			 "Disable AtomSpace event publishing",
+			 "Usage: publisher-disable-signals",
+			 false, false)
 
-    public:
-        AtomSpacePublisherModule(CogServer&);
-        virtual ~AtomSpacePublisherModule();
-        virtual void run();
+	public:
+		AtomSpacePublisherModule(CogServer&);
+		virtual ~AtomSpacePublisherModule();
+		virtual void run();
 
-        static const char *id(void);
-        virtual void init(void);
+		static const char *id(void);
+		virtual void init(void);
 
-        void atomAddSignal(Handle h);
-        void atomRemoveSignal(AtomPtr atom);
-        void AVChangedSignal(const Handle& h,
-                             const AttentionValuePtr& av_old,
-                             const AttentionValuePtr& av_new);
-        void TVChangedSignal(const Handle& h,
-                             const TruthValuePtr& tv_old,
-                             const TruthValuePtr& tv_new);
-        void addAFSignal(const Handle& h,
-                         const AttentionValuePtr& av_old,
-                         const AttentionValuePtr& av_new);
-        void removeAFSignal(const Handle& h,
-                         const AttentionValuePtr& av_old,
-                         const AttentionValuePtr& av_new);
+		void atomAddSignal(Handle h);
+		void atomRemoveSignal(AtomPtr atom);
+		void AVChangedSignal(const Handle& h,
+							 const AttentionValuePtr& av_old,
+							 const AttentionValuePtr& av_new);
+		void TVChangedSignal(const Handle& h,
+							 const TruthValuePtr& tv_old,
+							 const TruthValuePtr& tv_new);
+		void addAFSignal(const Handle& h,
+						 const AttentionValuePtr& av_old,
+						 const AttentionValuePtr& av_new);
+		void removeAFSignal(const Handle& h,
+						 const AttentionValuePtr& av_old,
+						 const AttentionValuePtr& av_new);
 };
 
 }
