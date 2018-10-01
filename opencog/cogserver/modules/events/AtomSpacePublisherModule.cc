@@ -236,7 +236,7 @@ void AtomSpacePublisherModule::proxy()
 }
 
 void AtomSpacePublisherModule::sendMessage(std::string messageType,
-											 std::string payload)
+                                           std::string payload)
 {
 	message_t message;
 	message.type = messageType;
@@ -259,46 +259,46 @@ void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 }
 
 void AtomSpacePublisherModule::AVChangedSignal(const Handle& h,
-												 const AttentionValuePtr& av_old,
-												 const AttentionValuePtr& av_new)
+                                               const AttentionValuePtr& av_old,
+                                               const AttentionValuePtr& av_new)
 {
 	tbb_enqueue_lambda([=] {
 		sendMessage("avChanged", avMessage(atomToJSON(h),
-											 avToJSON(av_old),
-											 avToJSON(av_new)));
+		                         avToJSON(av_old),
+		                         avToJSON(av_new)));
 	});
 }
 
 void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
-												 const TruthValuePtr& tv_old,
-												 const TruthValuePtr& tv_new)
+                                               const TruthValuePtr& tv_old,
+                                               const TruthValuePtr& tv_new)
 {
 	tbb_enqueue_lambda([=] {
 		sendMessage("tvChanged", tvMessage(atomToJSON(h),
-											 tvToJSON(tv_old),
-											 tvToJSON(tv_new)));
+		                         tvToJSON(tv_old),
+		                         tvToJSON(tv_new)));
 	});
 }
 
 void AtomSpacePublisherModule::addAFSignal(const Handle& h,
-											 const AttentionValuePtr& av_old,
-											 const AttentionValuePtr& av_new)
+                                           const AttentionValuePtr& av_old,
+                                           const AttentionValuePtr& av_new)
 {
 	tbb_enqueue_lambda([=] {
 		sendMessage("addAF", avMessage(atomToJSON(h),
-										 avToJSON(av_old),
-										 avToJSON(av_new)));
+		                     avToJSON(av_old),
+		                     avToJSON(av_new)));
 	});
 }
 
 void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
-												const AttentionValuePtr& av_old,
-												const AttentionValuePtr& av_new)
+                                              const AttentionValuePtr& av_old,
+                                              const AttentionValuePtr& av_new)
 {
 	tbb_enqueue_lambda([=] {
 		sendMessage("removeAF", avMessage(atomToJSON(h),
-											avToJSON(av_old),
-											avToJSON(av_new)));
+		                        avToJSON(av_old),
+		                        avToJSON(av_new)));
 	});
 }
 
@@ -337,9 +337,11 @@ Json::Value AtomSpacePublisherModule::atomToJSON(Handle h)
 
 	// Outgoing set
 	Json::Value outgoing(Json::arrayValue);
-	if (h->is_link()) {
+	if (h->is_link())
+	{
 		HandleSeq outgoingHandles = h->getOutgoingSet();
-		for (uint i = 0; i < outgoingHandles.size(); i++) {
+		for (uint i = 0; i < outgoingHandles.size(); i++)
+		{
 			outgoing.append(std::to_string(outgoingHandles[i].value()));
 		}
 	}
@@ -372,21 +374,24 @@ Json::Value AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 	Json::Value jsonDetails(Json::objectValue);
 	Type tvt = tvp->get_type();
 
-	if (tvt == SIMPLE_TRUTH_VALUE) {
+	if (tvt == SIMPLE_TRUTH_VALUE)
+	{
 		json["type"] = "simple";
 		jsonDetails["strength"] = tvp->get_mean();
 		jsonDetails["count"] = tvp->get_count();
 		jsonDetails["confidence"] = tvp->get_confidence();
 		json["details"] = jsonDetails;
 	}
-	else if (tvt == COUNT_TRUTH_VALUE) {
+	else if (tvt == COUNT_TRUTH_VALUE)
+	{
 		json["type"] = "count";
 		jsonDetails["strength"] = tvp->get_mean();
 		jsonDetails["count"] = tvp->get_count();
 		jsonDetails["confidence"] = tvp->get_confidence();
 		json["details"] = jsonDetails;
 	}
-	else if (tvt == INDEFINITE_TRUTH_VALUE) {
+	else if (tvt == INDEFINITE_TRUTH_VALUE)
+	{
 		IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
 		json["type"] = "indefinite";
 		jsonDetails["strength"] = itv->get_mean();
@@ -397,21 +402,24 @@ Json::Value AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 		jsonDetails["symmetric"] = itv->isSymmetric();
 		json["details"] = jsonDetails;
 	}
-	else if (tvt == PROBABILISTIC_TRUTH_VALUE) {
+	else if (tvt == PROBABILISTIC_TRUTH_VALUE)
+	{
 		json["type"] = "probabilistic";
 		jsonDetails["strength"] = tvp->get_mean();
 		jsonDetails["count"] = tvp->get_count();
 		jsonDetails["confidence"] = tvp->get_confidence();
 		json["details"] = jsonDetails;
 	}
-	else if (tvt == FUZZY_TRUTH_VALUE) {
+	else if (tvt == FUZZY_TRUTH_VALUE)
+	{
 		json["type"] = "fuzzy";
 		jsonDetails["strength"] = tvp->get_mean();
 		jsonDetails["count"] = tvp->get_count();
 		jsonDetails["confidence"] = tvp->get_confidence();
 		json["details"] = jsonDetails;
 	}
-	else {
+	else
+	{
 		throw InvalidParamException(TRACE_INFO,
 			"Invalid TruthValue Type parameter.");
 	}
@@ -428,8 +436,9 @@ std::string AtomSpacePublisherModule::atomMessage(Json::Value jsonAtom)
 	return fw.write(json);
 }
 
-std::string AtomSpacePublisherModule::avMessage(
-		Json::Value jsonAtom, Json::Value jsonAVOld, Json::Value jsonAVNew)
+std::string AtomSpacePublisherModule::avMessage(Json::Value jsonAtom,
+                                                Json::Value jsonAVOld,
+                                                Json::Value jsonAVNew)
 {
 	Json::Value json;
 	json["handle"] = jsonAtom["handle"];
@@ -441,8 +450,9 @@ std::string AtomSpacePublisherModule::avMessage(
 	return fw.write(json);
 }
 
-std::string AtomSpacePublisherModule::tvMessage(
-		Json::Value jsonAtom, Json::Value jsonTVOld, Json::Value jsonTVNew)
+std::string AtomSpacePublisherModule::tvMessage(Json::Value jsonAtom,
+                                                Json::Value jsonTVOld,
+                                                Json::Value jsonTVNew)
 {
 	Json::Value json;
 	json["handle"] = jsonAtom["handle"];

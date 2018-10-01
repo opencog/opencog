@@ -69,7 +69,7 @@ class CogServer;
  *
  * Architecture:
  *   - Uses Intel TBB (Threaded Building Blocks), Boost Signals2 and ZeroMQ
- *   - The Boost Signals2 slots receive atomspace events and can be multithreaded
+ *   - The cogutil signal slots receive atomspace events and can be multithreaded
  *   - Events are enqueued as a pending TBB task
  *   - TBB scheduler schedules the tasks across available processor cores
  *   - Tasks serialize the atomspace event into a standard JSON message format
@@ -90,7 +90,7 @@ const int HWM = 10000000;
 
 class AtomSpacePublisherModule : public Module
 {
-	private:
+private:
 		AtomSpace* as;
 		AttentionBank* _attention_bank;
 
@@ -125,26 +125,30 @@ class AtomSpacePublisherModule : public Module
 
 		void sendMessage(std::string messageType, std::string payload);
 		std::string atomMessage(Json::Value jsonAtom);
-		std::string avMessage(Json::Value jsonAtom, Json::Value jsonAVOld, Json::Value jsonAVNew);
-		std::string tvMessage(Json::Value jsonAtom, Json::Value jsonTVOld, Json::Value jsonTVNew);
+		std::string avMessage(Json::Value jsonAtom,
+		                      Json::Value jsonAVOld,
+		                      Json::Value jsonAVNew);
+		std::string tvMessage(Json::Value jsonAtom,
+		                      Json::Value jsonTVOld,
+							  Json::Value jsonTVNew);
 		Json::Value atomToJSON(Handle h);
 		Json::Value tvToJSON(TruthValuePtr tv);
 		Json::Value avToJSON(AttentionValuePtr av);
 		// TODO: add protoatom to JSON functionality
 
 		DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
-			 do_publisherEnableSignals,
-			 "Enable AtomSpace event publishing",
-			 "Usage: publisher-enable-signals",
-			 false, false)
+		                    do_publisherEnableSignals,
+		                    "Enable AtomSpace event publishing",
+		                    "Usage: publisher-enable-signals",
+		                    false, false)
 
 		DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-disable-signals",
-			 do_publisherDisableSignals,
-			 "Disable AtomSpace event publishing",
-			 "Usage: publisher-disable-signals",
-			 false, false)
+		                    do_publisherDisableSignals,
+		                    "Disable AtomSpace event publishing",
+		                    "Usage: publisher-disable-signals",
+		                    false, false)
 
-	public:
+public:
 		AtomSpacePublisherModule(CogServer&);
 		virtual ~AtomSpacePublisherModule();
 		virtual void run();
@@ -155,17 +159,17 @@ class AtomSpacePublisherModule : public Module
 		void atomAddSignal(Handle h);
 		void atomRemoveSignal(AtomPtr atom);
 		void AVChangedSignal(const Handle& h,
-							 const AttentionValuePtr& av_old,
-							 const AttentionValuePtr& av_new);
+		                     const AttentionValuePtr& av_old,
+		                     const AttentionValuePtr& av_new);
 		void TVChangedSignal(const Handle& h,
-							 const TruthValuePtr& tv_old,
-							 const TruthValuePtr& tv_new);
+		                     const TruthValuePtr& tv_old,
+		                     const TruthValuePtr& tv_new);
 		void addAFSignal(const Handle& h,
-						 const AttentionValuePtr& av_old,
-						 const AttentionValuePtr& av_new);
+		                 const AttentionValuePtr& av_old,
+		                 const AttentionValuePtr& av_new);
 		void removeAFSignal(const Handle& h,
-						 const AttentionValuePtr& av_old,
-						 const AttentionValuePtr& av_new);
+		                    const AttentionValuePtr& av_old,
+		                    const AttentionValuePtr& av_new);
 };
 
 }
