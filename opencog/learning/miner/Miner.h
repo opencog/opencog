@@ -241,21 +241,12 @@ private:
 	 * usual one and corresponds to the minimum frequency over all
 	 * strongly connected components of that pattern.
 	 *
-	 * maxf is used to halt the frequency calculation if it reaches a
+	 * ms is used to halt the frequency calculation if it reaches a
 	 * certain maximum, for saving resources.
 	 */
 	unsigned freq(const Handle& pattern,
 	              const HandleSet& texts,
-	              int maxf=-1) const;
-
-	/**
-	 * Like above but assumes the pattern is a single strongly
-	 * connected component, as opposed to a conjuction of strongly
-	 * connected components.
-	 */
-	unsigned freq_component(const Handle& component,
-	                        const HandleSet& texts,
-	                        int maxf=-1) const;
+	              unsigned ms) const;
 
 	/**
 	 * Calculate the frequency of the whole pattern, given the
@@ -440,6 +431,36 @@ private:
 
 public:
 	/**
+	 * Given a texts concept node, retrieve all its members
+	 */
+	static HandleSet get_texts(const Handle& texts_cpt);
+
+	/**
+	 * Given a pattern and a text corpus, calculate the pattern
+	 * frequency up to ms (to avoid unnecessary calculations).
+	 */
+	static unsigned support(const Handle& pattern,
+	                        const HandleSet& texts,
+	                        unsigned ms);
+
+	/**
+	 * Like support but assumes that pattern is strongly connected (all
+	 * its variables depends on other clauses).
+	 */
+	static unsigned component_support(const Handle& pattern,
+	                                  const HandleSet& texts,
+	                                  unsigned ms);
+
+	/**
+	 * Calculate if the pattern has enough support w.r.t. to the given
+	 * texts, that is whether its frequency is greater than or equal
+	 * to ms.
+	 */
+	static bool enough_support(const Handle& pattern,
+	                           const HandleSet& texts,
+	                           unsigned ms);
+
+	/**
 	 * Like shallow_abstract(const Valuations&, unsigned) but takes a pattern
 	 * and a texts instead, and generate the valuations of the pattern
 	 * prior to calling shallow_abstract on its valuations.
@@ -470,15 +491,31 @@ public:
 
 	/**
 	 * Given a pattern and texts, return the satisfying set of the
-	 * pattern over the text. Please note that the texts count are
-	 * ignored. But this is still useful for multi-conjuncts patterns
-	 * where the counts are all 1 anyway.
+	 * pattern over the text.
 	 *
 	 * TODO: ignore permutations for unordered links.
+	 *
+	 * TODO: ignore duplicates within the same text. For instance if
+	 * the pattern is
+	 *
+	 * (Lambda (LocalQuote (And (Variable "$X") (Variable "$Y"))))
+	 *
+	 * and the texts is
+	 *
+	 * { (And (Concept "A") (And (Concept "B") (Concept "C"))) }
+	 *
+	 * then the result will include 2 results
+	 *
+	 * { (And (Concept "A") (And (Concept "B") (Concept "C"))),
+	 *   (And (Concept "B") (Concept "C")) }
+	 *
+	 * instead of one
+	 *
+	 * { (And (Concept "A") (And (Concept "B") (Concept "C"))) }
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
 	                                        const HandleSet& texts,
-	                                        int maxf=-1);
+	                                        unsigned ms);
 
 	/**
 	 * Return true iff the pattern is totally abstract like
