@@ -155,7 +155,7 @@ Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 {
 	for (const Handle& cp : Miner::get_component_patterns(pattern))
 	{
-		Handle satset = Miner::restricted_satisfying_set(cp, texts);
+		Handle satset = Miner::restricted_satisfying_set(cp, texts, texts.size());
 		scvs.insert(SCValuations(Miner::get_variables(cp), satset));
 	}
 	setup_size();
