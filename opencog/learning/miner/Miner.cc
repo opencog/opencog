@@ -249,10 +249,9 @@ bool Miner::enough_support(const Handle& pattern,
 
 unsigned Miner::freq(const Handle& pattern,
                      const HandleSet& texts,
-                     int maxf) const
+                     unsigned ms) const
 {
 	HandleSeq cps(get_component_patterns(pattern));
-	// HandleSeq cps(get_conjuncts(pattern));
 
 	// Likely a constant pattern
 	if (cps.empty())
@@ -262,17 +261,8 @@ unsigned Miner::freq(const Handle& pattern,
 	std::vector<unsigned> freqs;
 	boost::transform(cps, std::back_inserter(freqs),
 	                 [&](const Handle& cp)
-	                 { return freq_component(cp, texts, maxf); });
+	                 { return component_support(cp, texts, ms); });
 	return freq(freqs);
-}
-
-unsigned Miner::freq_component(const Handle& component,
-                               const HandleSet& texts,
-                               int maxf) const
-{
-	if (totally_abstract(component))
-		return texts.size();
-	return restricted_satisfying_set(component, texts, maxf)->get_arity();
 }
 
 unsigned Miner::freq(const std::vector<unsigned>& freqs) const
@@ -331,6 +321,56 @@ Handle Miner::matched_results(const Handle& pattern, const Handle& text) const
 		ml = tmp_as.add_link(MAP_LINK, tmp_pattern, tmp_text);
 	Instantiator inst(&tmp_as);
 	return HandleCast(inst.execute(ml));
+}
+
+HandleSet Miner::get_texts(const Handle& texts_cpt)
+{
+	// Retrieve all members of texts_cpt
+	HandleSet texts;
+	IncomingSet member_links = texts_cpt->getIncomingSetByType(MEMBER_LINK);
+	for (const LinkPtr l : member_links) {
+		Handle member = l->getOutgoingAtom(0);
+		if (member != texts_cpt)
+			texts.insert(member);
+	}
+	return texts;
+}
+
+unsigned Miner::support(const Handle& pattern,
+                        const HandleSet& texts,
+                        unsigned ms)
+{
+	// Partition the pattern into strongly connected components
+	HandleSeq cps(get_component_patterns(pattern));
+
+	// Likely a constant pattern
+	if (cps.empty())
+	    return 1;
+
+	// Otherwise calculate the frequency of each component
+	std::vector<unsigned> freqs;
+	boost::transform(cps, std::back_inserter(freqs),
+	                 [&](const Handle& cp)
+	                 { return component_support(cp, texts, ms); });
+
+	// Return the product of all frequencies
+	return boost::accumulate(freqs, 1, std::multiplies<unsigned>());
+}
+
+unsigned Miner::component_support(const Handle& component,
+                                  const HandleSet& texts,
+                                  unsigned ms)
+{
+	if (totally_abstract(component))
+		return texts.size();
+	return restricted_satisfying_set(component, texts, ms)->get_arity();
+}
+
+bool Miner::enough_support(const Handle& pattern,
+                           const HandleSet& texts,
+                           unsigned ms)
+{
+	return ms <= support(pattern, texts, ms);
 }
 
 HandleSetSeq Miner::shallow_abstract(const Handle& pattern,
@@ -683,16 +723,15 @@ HandleSeq Miner::get_conjuncts(const Handle& pattern)
 
 Handle Miner::restricted_satisfying_set(const Handle& pattern,
                                         const HandleSet& texts,
-                                        int maxf)
+                                        unsigned ms)
 {
-	static AtomSpace tmp_texts_as;
+	static AtomSpace tmp_texts_as; // TODO: fix to be thread safe
 	tmp_texts_as.clear();
 	HandleSeq tmp_texts;
 	for (const auto& text : texts)
 		tmp_texts.push_back(tmp_texts_as.add_atom(text));
 
 	// Avoid pattern matcher warning
-	// TODO: support 1 < conjuncts
 	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
 		return tmp_texts_as.add_link(SET_LINK, tmp_texts);
 
@@ -702,8 +741,7 @@ Handle Miner::restricted_satisfying_set(const Handle& pattern,
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
 		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = (maxf < 0 ? satisfying_set(&tmp_texts_as, gl)
-		           : satisfying_set(&tmp_texts_as, gl, maxf));
+		results = satisfying_set(&tmp_texts_as, gl, ms);
 	return results;
 }
 
