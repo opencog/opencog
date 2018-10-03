@@ -57,6 +57,12 @@ protected:
 	 */
 	Handle do_shallow_abstract(Handle pattern, Handle texts, Handle ms);
 
+	/**
+	 * Given a pattern, a texts concept and a minimum support, return
+	 * true iff the pattern has enough support.
+	 */
+	bool do_enough_support(Handle pattern, Handle texts, Handle ms);
+
 public:
 	MinerSCM();
 };
@@ -78,6 +84,9 @@ void MinerSCM::init(void)
 {
 	define_scheme_primitive("cog-shallow-abstract",
 		&MinerSCM::do_shallow_abstract, this, "miner");
+
+	define_scheme_primitive("cog-enough-support?",
+		&MinerSCM::do_enough_support, this, "miner");
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
@@ -115,6 +124,20 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	}
 
 	return as->add_link(SET_LINK, HandleSeq(sa_lists.begin(), sa_lists.end()));
+}
+
+bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-enough-support?");
+
+	// Fetch all texts
+	HandleSet texts_set = Miner::get_texts(texts);
+
+	// Fetch the minimum support
+	NumberNodePtr nn = NumberNodeCast(ms);
+	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+
+	return Miner::enough_support(pattern, texts_set, ms_uint);
 }
 
 extern "C" {
