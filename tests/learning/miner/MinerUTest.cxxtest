@@ -171,6 +171,7 @@ public:
 	void test_2conjuncts_5();
 	void test_InferenceControl();
 	void test_SodaDrinker();
+	void test_SodaDrinker_incremental();
 	void xtest_lojban();         // TODO: add support
 };
 
@@ -1151,6 +1152,69 @@ void MinerUTest::test_SodaDrinker()
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(_tmp_as,
 	                                5/*minsup*/, 3/*nconjuncts*/,
+	                                initpat, 3/*maxdepth*/, 1/*info*/);
+
+	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
+
+	TS_ASSERT(content_is_in(expected, cpp_results));
+
+	// Run URE pattern miner
+	Handle ure_results = ure_pm(_tmp_as, 5, 1000, initpat),
+		ure_expected = mk_minsup_eval(5, expected);
+
+	logger().debug() << "ure_results = " << oc_to_string(ure_results);
+	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
+
+	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
+}
+
+// Like test_SodaDrinker but starts with the most abstract pattern and
+// incrementally adds conjuncts
+void MinerUTest::test_SodaDrinker_incremental()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define texts
+	// Load ugly-male-soda-drinker-corpus.scm
+	std::string rs =
+		_tmp_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Define initial pattern (to speed up mining)
+	Handle initpat = top;
+
+	// The pattern of interest looks like
+	//
+	// Lambda
+	//   X
+	//   And
+	//     Inheritance
+	//       X
+	//       Concept "man"
+	//     Inheritance
+	//       X
+	//       Concept "soda drinker"
+	//     Inheritance
+	//       X
+	//       Concept "ugly"
+	Handle man = an(CONCEPT_NODE, "man"),
+		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
+		ugly = an(CONCEPT_NODE, "ugly"),
+		is_man = al(INHERITANCE_LINK, X, man),
+		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
+		is_ugly = al(INHERITANCE_LINK, X, ugly),
+		expected = al(LAMBDA_LINK,
+		              X,
+		              al(AND_LINK,
+		                 is_man,
+		                 is_soda_drinker,
+		                 is_ugly));
+
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	// Run C++ pattern miner
+	HandleTree cpp_results = cpp_pm(_tmp_as,
+	                                5/*minsup*/, 1/*nconjuncts*/,
 	                                initpat, 3/*maxdepth*/, 1/*info*/);
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
