@@ -47,7 +47,7 @@ protected:
 	 *            (Inheritance A C),
 	 *            (Inheritance D D),
 	 *            (Inheritance E E) }
-	 * ms = 2
+	 * ms = (Number 2)
 	 *
 	 * returns
 	 *
@@ -87,13 +87,7 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
 	// Fetch all texts
-	HandleSet texts_set;
-	IncomingSet member_links = texts->getIncomingSetByType(MEMBER_LINK);
-	for (const LinkPtr l : member_links) {
-		Handle member = l->getOutgoingAtom(0);
-		if (member != texts)
-			texts_set.insert(member);
-	}
+	HandleSet texts_set = Miner::get_texts(texts);
 
 	// Fetch the minimum support
 	NumberNodePtr nn = NumberNodeCast(ms);
