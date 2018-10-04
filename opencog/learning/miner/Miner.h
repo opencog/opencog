@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_XPATTERNMINER_H_
-#define OPENCOG_XPATTERNMINER_H_
+#ifndef OPENCOG_MINER_H_
+#define OPENCOG_MINER_H_
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Variables.h>
@@ -168,37 +168,8 @@ private:
 	 */
 	bool terminate(const Handle& pattern,
 	               const HandleSet& texts,
-	               int maxdepth) const;
-	bool terminate(const Handle& pattern,
-	               const HandleSet& texts,
 	               const Valuations& valuations,
 	               int maxdepth) const;
-	
-	/**
-	 * Given a pattern, a variable of that pattern, create another
-	 * pattern that is just that variable. For instance
-	 *
-	 * pattern = (Lambda
-	 *             (VariableList
-	 *               (TypedVariable
-	 *                 (Variable "$X")
-	 *                 (Type "ConceptNode"))
-	 *               (TypedVariable
-	 *                 (Variable "$Y")
-	 *                 (Type "AndLink"))
-	 *             (Inheritance
-	 *               (Variable "$X")
-	 *               (Variable "$Y")))
-	 *
-	 * var = (Variable "$X")
-	 *
-	 * mk_varpattern(pattern, var) = (Lambda
-	 *                                 (TypeVariable
-	 *                                   (Variable "$X")
-	 *                                   (Type "ConceptNode"))
-	 *                                 (Variable "$X"))
-	 */
-	Handle mk_varpattern(const Handle& pattern, const Handle& var) const;
 
 	/**
 	 * Specialize the given pattern according to shallow abstractions
@@ -229,8 +200,6 @@ private:
 	 */
 	bool enough_support(const Handle& pattern,
 	                    const HandleSet& texts) const;
-
-	// TODO move all static methods down
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern

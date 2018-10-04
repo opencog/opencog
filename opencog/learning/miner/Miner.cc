@@ -157,6 +157,23 @@ HandleTree Miner::specialize_alt(const Handle& pattern,
 	return patterns;
 }
 
+bool Miner::terminate(const Handle& pattern,
+                      const HandleSet& texts,
+                      const Valuations& valuations,
+                      int maxdepth) const
+{
+	return
+		// We have reached the maximum depth
+		maxdepth == 0 or
+		// The pattern is constant, no specialization is possible
+		pattern->get_type() != LAMBDA_LINK or
+		// There is no more variable to specialize from
+		valuations.novar() or
+		// The pattern doesn't have enough support
+		// TODO: it seems the text is always filtered prior anyway
+		not enough_support(pattern, texts);
+}
+
 HandleTree Miner::specialize_shabs(const Handle& pattern,
                                    const HandleSet& texts,
                                    const Valuations& valuations,
@@ -215,23 +232,6 @@ HandleTree Miner::specialize_shapat(const Handle& pattern,
 
 	// Return npat and its children
 	return HandleTree(npat, {nvapats});
-}
-
-bool Miner::terminate(const Handle& pattern,
-                      const HandleSet& texts,
-                      const Valuations& valuations,
-                      int maxdepth) const
-{	
-	return
-		// We have reached the maximum depth
-		maxdepth == 0 or
-		// The pattern is constant, no specialization is possible
-		pattern->get_type() != LAMBDA_LINK or
-		// There is no more variable to specialize from
-		valuations.novar() or
-		// The pattern doesn't have enough support
-		// TODO: it seems the text is always filtered prior anyway
-		not enough_support(pattern, texts);
 }
 
 bool Miner::enough_support(const Handle& pattern,
