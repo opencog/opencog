@@ -122,13 +122,13 @@
              (gf (cog-outgoing-atom con-minsup-args 0))
              (texts (cog-outgoing-atom con-minsup-args 1))
              (ms-atom (cog-outgoing-atom con-minsup-args 2))
-             (ms (inexact->exact (cog-number ms-atom)))
              (conclusion-tv (if (and (tv->bool pre-minsup-pred-tv)
-                                     ;; The lazyness of and allows to
-                                     ;; avoid testing g.f support if g
-                                     ;; doesn't have enough support
-                                     ;; TODO: do you really need this?
-                                     (enough-support? gf texts ms))
+                                     ;; The lazyness of 'and' allows
+                                     ;; to avoid testing g.f support
+                                     ;; if g doesn't have enough
+                                     ;; support TODO: do you really
+                                     ;; need this?
+                                     (cog-enough-support? gf texts ms-atom))
                                 ;; Both g and g,f have enough support
                                 (stv 1 1)
                                 ;; f.g doesn't have enough support
