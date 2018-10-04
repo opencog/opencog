@@ -28,6 +28,8 @@
 #include <opencog/guile/SchemeModule.h>
 #include <opencog/atoms/core/NumberNode.h>
 
+#include "MinerUtils.h"
+
 namespace opencog {
 
 class MinerSCM : public ModuleWrap
@@ -96,7 +98,7 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
 	// Fetch all texts
-	HandleSet texts_set = Miner::get_texts(texts);
+	HandleSet texts_set = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	NumberNodePtr nn = NumberNodeCast(ms);
@@ -104,11 +106,11 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
-		Miner::shallow_abstract(pattern, texts_set, ms_uint);
+		MinerUtils::shallow_abstract(pattern, texts_set, ms_uint);
 
 	// Turn that sequence of handle sets into a set of ready to be
 	// applied shallow abstractions
-	const Variables& vars = Miner::get_variables(pattern);
+	const Variables& vars = MinerUtils::get_variables(pattern);
 	HandleSet sa_lists;
 	unsigned vari = 0;         // Index of the variable
 	for (const HandleSet& shabs : shabs_per_var) {
@@ -128,16 +130,14 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 
 bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-enough-support?");
-
 	// Fetch all texts
-	HandleSet texts_set = Miner::get_texts(texts);
+	HandleSet texts_set = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	NumberNodePtr nn = NumberNodeCast(ms);
 	unsigned ms_uint = (unsigned)std::round(nn->get_value());
 
-	return Miner::enough_support(pattern, texts_set, ms_uint);
+	return MinerUtils::enough_support(pattern, texts_set, ms_uint);
 }
 
 extern "C" {

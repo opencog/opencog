@@ -23,7 +23,7 @@
 
 #include "Valuations.h"
 
-#include "Miner.h"
+#include "MinerUtils.h"
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -151,12 +151,16 @@ unsigned SCValuations::size() const
 ////////////////
 
 Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
-	: ValuationsBase(Miner::get_variables(pattern))
+	: ValuationsBase(MinerUtils::get_variables(pattern))
 {
-	for (const Handle& cp : Miner::get_component_patterns(pattern))
+	// Useless clauses (like redundant, constants, and more) are
+	// removed in order to simplify subsequent processing, and avoid
+	// warnings from the pattern matcher
+	Handle reduced_pattern = MinerUtils::remove_useless_clauses(pattern);
+	for (const Handle& cp : MinerUtils::get_component_patterns(reduced_pattern))
 	{
-		Handle satset = Miner::restricted_satisfying_set(cp, texts, texts.size());
-		scvs.insert(SCValuations(Miner::get_variables(cp), satset));
+		Handle satset = MinerUtils::restricted_satisfying_set(cp, texts, texts.size());
+		scvs.insert(SCValuations(MinerUtils::get_variables(cp), satset));
 	}
 	setup_size();
 }
