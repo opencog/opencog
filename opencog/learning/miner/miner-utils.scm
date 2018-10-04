@@ -168,7 +168,7 @@
 
 (define (pattern->bindlink pattern)
 "
-  Turn a pattern into a BindLink for for subsequent pattern
+  Turn a pattern into a BindLink for subsequent pattern
   matching texts.
 "
   (if (= (cog-arity pattern) 2)
@@ -179,37 +179,6 @@
       ;; Without variable declaration
       (let* ((body (gar pattern)))
         (Bind body body)))) ; to deal with unordered links
-
-(define (support pat texts ms)
-"
-  Return the min between the frequency of pat according to texts and
-  ms, or #f if pat is ill-formed. If the pattern is top then return the
-  cardinality of concept texts.
-"
-  ;; (cog-logger-debug "support pat = ~a, texts = ~a, ms = ~a" pat texts ms)
-  (if (equal? pat (top))
-      (get-cardinality texts)
-      (let* ((pat-prnx (cog-execute! pat))  ; get pat in prenex form
-             (ill-formed (null? pat-prnx)))
-        (if ill-formed
-            #f
-            (if (eq? (cog-type pat-prnx) 'LambdaLink)
-                (let* ((texts-as (texts->atomspace texts))
-                       (query-as (cog-new-atomspace texts-as))
-                       (prev-as (cog-set-atomspace! query-as))
-                       (bl (pattern->bindlink pat-prnx))
-                       (results (cog-bind-first-n bl ms)))
-                  (cog-set-atomspace! prev-as)
-                  (cog-arity results))
-                1)))))
-
-(define (enough-support? pat texts ms)
-"
-  Return #t if pat has enough support w.r.t. texts, that is if
-  the frequency of pat is greater than or equal to ms. Return #f
-  otherwise.
-"
-  (<= ms (support pat texts ms)))
 
 (define (fetch-patterns texts ms)
 "
@@ -330,8 +299,9 @@
                         (fill-texts-cpt (random-texts-cpt) texts)
                         ;; Otherwise texts is already a concept
                         texts))
+         (ms-nn (Number ms))
          ;; Check that the initial pattern has enough support
-         (es (enough-support? initpat texts-cpt ms)))
+         (es (cog-enough-support? initpat texts-cpt ms-nn)))
     (if (not es)
         ;; The initial pattern doesn't have enough support, thus the
         ;; solution set is empty
@@ -366,8 +336,6 @@
     minsup-eval-true
     get-members
     get-cardinality
-    support
-    enough-support?
     fetch-patterns
     conjunct-pattern
     cog-miner
