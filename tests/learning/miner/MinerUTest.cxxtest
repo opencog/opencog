@@ -142,6 +142,24 @@ private:
 	                  const Handle& initpat=Handle::UNDEFINED,
 	                  int maxdepth=-1, double info=1.0);
 
+	/**
+	 * Build the following pattern
+	 *
+	 * Lambda
+	 *   X
+	 *   And
+	 *     Inheritance
+	 *       X
+	 *       Concept "man"
+	 *     Inheritance
+	 *       X
+	 *       Concept "soda drinker"
+	 *     Inheritance
+	 *       X
+	 *       Concept "ugly"
+	 */
+	Handle mk_ugly_soda_drinker();
+
 public:
 	MinerUTest();
 	~MinerUTest();
@@ -294,6 +312,23 @@ HandleTree MinerUTest::cpp_pm(const HandleSet& texts,
 	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
 	Miner pm(param);
 	return pm(texts);
+}
+
+Handle MinerUTest::mk_ugly_soda_drinker()
+{
+	Handle man = an(CONCEPT_NODE, "man"),
+		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
+		ugly = an(CONCEPT_NODE, "ugly"),
+		is_man = al(INHERITANCE_LINK, X, man),
+		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
+		is_ugly = al(INHERITANCE_LINK, X, ugly),
+		ugly_soda_drinker = al(LAMBDA_LINK,
+		                       X,
+		                       al(AND_LINK,
+		                          is_man,
+		                          is_soda_drinker,
+		                          is_ugly));
+	return ugly_soda_drinker;
 }
 
 MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
@@ -1134,18 +1169,7 @@ void MinerUTest::test_SodaDrinker()
 	//     Inheritance
 	//       X
 	//       Concept "ugly"
-	Handle man = an(CONCEPT_NODE, "man"),
-		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
-		ugly = an(CONCEPT_NODE, "ugly"),
-		is_man = al(INHERITANCE_LINK, X, man),
-		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
-		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		expected = al(LAMBDA_LINK,
-		              X,
-		              al(AND_LINK,
-		                 is_man,
-		                 is_soda_drinker,
-		                 is_ugly));
+	Handle expected = mk_ugly_soda_drinker();
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
@@ -1197,18 +1221,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	//     Inheritance
 	//       X
 	//       Concept "ugly"
-	Handle man = an(CONCEPT_NODE, "man"),
-		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
-		ugly = an(CONCEPT_NODE, "ugly"),
-		is_man = al(INHERITANCE_LINK, X, man),
-		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
-		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		expected = al(LAMBDA_LINK,
-		              X,
-		              al(AND_LINK,
-		                 is_man,
-		                 is_soda_drinker,
-		                 is_ugly));
+	Handle expected = mk_ugly_soda_drinker();
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
