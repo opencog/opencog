@@ -86,7 +86,7 @@ public:
 
     HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 
-    std::string to_string() const;
+    std::string to_string(const std::string& indent=empty_string) const;
 
     HTreeNode()
         : count(0),
@@ -144,14 +144,14 @@ std::string oc_to_string(const HTreeNode& htn,
  * TODO: move this to cogutil
  */
 template<typename C>
-std::string oc_to_string(const C& c, const std::string& elname)
+std::string oc_to_string(const C& c, const std::string& indent, const std::string& elname)
 {
-    std::stringstream ss;
-	ss << "size = " << c.size() << std::endl;
+	std::stringstream ss;
+	ss << indent << "size = " << c.size() << std::endl;
 	int i = 0;
 	for (const auto& el : c) {
-		ss << elname << "[" << i << "]:" << std::endl
-		   << oc_to_string(el);
+		ss << indent << elname << "[" << i << "]:" << std::endl
+		   << oc_to_string(el, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();

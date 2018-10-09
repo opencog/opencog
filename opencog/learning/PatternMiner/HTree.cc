@@ -29,154 +29,157 @@ namespace opencog {
 using namespace std;
 using namespace PatternMining;
 
-std::string HTreeNode::to_string() const
+std::string HTreeNode::to_string(const std::string& indent) const
 {
 	stringstream ss;
 	if (not pattern.empty())
-		ss << "pattern:" << std::endl
-		   << oc_to_string(pattern);
+		ss << indent << "pattern:" << std::endl
+		   << oc_to_string(pattern, indent + OC_TO_STRING_INDENT);
 	if (quotedPatternLink)
-		ss << "quotedPatternLink:" << std::endl
-		   << oc_to_string(quotedPatternLink);
+		ss << indent << "quotedPatternLink:" << std::endl
+		   << oc_to_string(quotedPatternLink, indent + OC_TO_STRING_INDENT);
 	if (not instances.empty())
-		ss << "instances:" << std::endl
-		   << oc_to_string(instances);
+		ss << indent << "instances:" << std::endl
+		   << oc_to_string(instances, indent + OC_TO_STRING_INDENT);
 	if (not parentLinks.empty())
-		ss << "parentLinks:" << std::endl
-		   << oc_to_string(parentLinks);
+		ss << indent << "parentLinks:" << std::endl
+		   << oc_to_string(parentLinks, indent + OC_TO_STRING_INDENT);
 	if (not childLinks.empty())
-		ss << "childLinks:" << std::endl
-		   << oc_to_string(childLinks);
+		ss << indent << "childLinks:" << std::endl
+		   << oc_to_string(childLinks, indent + OC_TO_STRING_INDENT);
 	if (not superPatternRelations.empty())
-		ss << "superPatternRelations:" << std::endl
-		   << oc_to_string(superPatternRelations);
+		ss << indent << "superPatternRelations:" << std::endl
+		   << oc_to_string(superPatternRelations, indent + OC_TO_STRING_INDENT);
 	if (not superRelation_b_list.empty())
-		ss << "superRelation_b_list:" << std::endl
-		   << oc_to_string(superRelation_b_list);
+		ss << indent << "superRelation_b_list:" << std::endl
+		   << oc_to_string(superRelation_b_list, indent + OC_TO_STRING_INDENT);
 	if (not SubRelation_b_map.empty())
-		ss << "SubRelation_b_map:" << std::endl
-		   << oc_to_string(SubRelation_b_map);
+		ss << indent << "SubRelation_b_map:" << std::endl
+		   << oc_to_string(SubRelation_b_map, indent + OC_TO_STRING_INDENT);
 	if (count)
-		ss << "count: " << count << std::endl;
+		ss << indent << "count: " << count << std::endl;
 	if (var_num)
-		ss << "var_num: " << var_num << std::endl;
+		ss << indent << "var_num: " << var_num << std::endl;
 	if (interactionInformation)
-		ss << "interactionInformation: " << interactionInformation << std::endl;
+		ss << indent << "interactionInformation: " << interactionInformation << std::endl;
 	if (nI_Surprisingness)
-		ss << "nI_Surprisingness: " << nI_Surprisingness << std::endl;
+		ss << indent << "nI_Surprisingness: " << nI_Surprisingness << std::endl;
 	if (nII_Surprisingness)
-		ss << "nII_Surprisingness: " << nII_Surprisingness << std::endl;
+		ss << indent << "nII_Surprisingness: " << nII_Surprisingness << std::endl;
 	if (nII_Surprisingness_b)
-		ss << "nII_Surprisingness_b: " << nII_Surprisingness_b << std::endl;
+		ss << indent << "nII_Surprisingness_b: " << nII_Surprisingness_b << std::endl;
 	if (max_b_subpattern_num)
-		ss << "max_b_subpattern_num: " << max_b_subpattern_num << std::endl;
+		ss << indent << "max_b_subpattern_num: " << max_b_subpattern_num << std::endl;
 	if (not surprisingnessInfo.empty())
-		ss << "surprisingnessInfo: " << surprisingnessInfo << std::endl;
+		ss << indent << "surprisingnessInfo: " << surprisingnessInfo << std::endl;
 	if (not sharedVarNodeList.empty())
-		ss << "sharedVarNodeList:" << std::endl
-		   << oc_to_string(sharedVarNodeList);
+		ss << indent << "sharedVarNodeList:" << std::endl
+		   << oc_to_string(sharedVarNodeList, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
-std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm, const std::string& /*indent*/)
+std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm,
+                         const std::string& indent)
 {
-    std::stringstream ss;
-	ss << "size = " << sm.size();
+	std::stringstream ss;
+	ss << indent << "size = " << sm.size();
 	int i = 0;
 	for (const auto& el : sm) {
-		ss << "atom[" << i << "]:" << std::endl
-		   << oc_to_string(el.first)
-		   << "SubRelation_b sequence[" << i << "]:" << std::endl
-		   << oc_to_string(el.second);
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(el.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "SubRelation_b sequence[" << i << "]:" << std::endl
+		   << oc_to_string(el.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
 
 std::string oc_to_string(const std::vector<SuperRelation_b>& srbs,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return oc_to_string(srbs, "SuperRelation_b");
+	return oc_to_string(srbs, indent, "SuperRelation_b");
 }
 
 std::string oc_to_string(const std::vector<SubRelation_b>& srbs,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return oc_to_string(srbs, "SubRelation_b");
+	return oc_to_string(srbs, indent, "SubRelation_b");
 }
 
 std::string oc_to_string(const SuperRelation_b& srb,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
 	stringstream ss;
-	ss << "superHTreeNode:" << std::endl
-	   << oc_to_string(srb.superHTreeNode)
-	   << "constNode:" << std::endl
-	   << oc_to_string(srb.constNode);
+	ss << indent << "superHTreeNode:" << std::endl
+	   << oc_to_string(srb.superHTreeNode, indent + OC_TO_STRING_INDENT)
+	   << indent << "constNode:" << std::endl
+	   << oc_to_string(srb.constNode, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
 std::string oc_to_string(const SubRelation_b& srb,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
 	stringstream ss;
-	ss << "subHTreeNode:" << std::endl
-	   << oc_to_string(srb.subHTreeNode)
-	   << "constNode:" << std::endl
-	   << oc_to_string(srb.constNode);
+	ss << indent << "subHTreeNode:" << std::endl
+	   << oc_to_string(srb.subHTreeNode, indent + OC_TO_STRING_INDENT)
+	   << indent << "constNode:" << std::endl
+	   << oc_to_string(srb.constNode, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
 std::string oc_to_string(const ExtendRelation& extrel,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
 	stringstream ss;
-	ss << "extendedHTreeNode:" << std::endl
-	   << oc_to_string(extrel.extendedHTreeNode)
-	   << "sharedLink:" << std::endl
-	   << oc_to_string(extrel.sharedLink)
-	   << "newExtendedLink:" << std::endl
-	   << oc_to_string(extrel.newExtendedLink)
-	   << "extendedNode:" << std::endl
-	   << oc_to_string(extrel.extendedNode)
-	   << "isExtendedFromVar: " << extrel.isExtendedFromVar << std::endl;
+	ss << indent << "extendedHTreeNode:" << std::endl
+	   << oc_to_string(extrel.extendedHTreeNode, indent + OC_TO_STRING_INDENT)
+	   << indent << "sharedLink:" << std::endl
+	   << oc_to_string(extrel.sharedLink, indent + OC_TO_STRING_INDENT)
+	   << indent << "newExtendedLink:" << std::endl
+	   << oc_to_string(extrel.newExtendedLink, indent + OC_TO_STRING_INDENT)
+	   << indent << "extendedNode:" << std::endl
+	   << oc_to_string(extrel.extendedNode, indent + OC_TO_STRING_INDENT)
+	   << indent << "isExtendedFromVar: " << extrel.isExtendedFromVar << std::endl;
 	return ss.str();
 }
 
 std::string oc_to_string(const std::vector<ExtendRelation>& extrels,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return oc_to_string(extrels, "ExtendRelation");
+	return oc_to_string(extrels, indent, "ExtendRelation");
 }
 
 std::string oc_to_string(const std::vector<std::vector<HTreeNode*>>& htrees_seq,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return oc_to_string(htrees_seq, "HTreeNodeSeq");
+	return oc_to_string(htrees_seq, indent, "htrees");
 }
 
 std::string oc_to_string(const std::vector<HTreeNode*>& htrees,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return oc_to_string(htrees, "HTreeNode");
+	return oc_to_string(htrees, indent, "htree");
 }
 
 std::string oc_to_string(const std::set<HTreeNode*>& htrees,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return oc_to_string(htrees, "HTreeNode");
+	return oc_to_string(htrees, indent, "HTreeNode");
 }
 
 std::string oc_to_string(const HTreeNode* htnptr,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return htnptr ? htnptr->to_string() : string("none\n") ;
+	if (htnptr)
+		return htnptr->to_string(indent);
+	return indent + string("none\n");
 }
 
 std::string oc_to_string(const HTreeNode& htn,
-                         const std::string& /*indent*/)
+                         const std::string& indent)
 {
-	return htn.to_string();
+	return htn.to_string(indent);
 }
 
 }
