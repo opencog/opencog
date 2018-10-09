@@ -611,12 +611,12 @@ public:
     void queryPatternsWithFrequencySurprisingnessIRanges(unsigned int min_frequency, unsigned int max_frequency, float min_surprisingness_I, float max_surprisingness_I, int gram);
 
     void queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_frequency, unsigned int max_frequency,
-                                                                   float min_surprisingness_I, float max_surprisingness_I,
-                                                                   float min_surprisingness_II, float max_surprisingness_II,int gram);
+                                                     float min_surprisingness_I, float max_surprisingness_I,
+                                                     float min_surprisingness_II, float max_surprisingness_II,int gram);
 
     void queryPatternsWithFrequencySurprisingnessBRanges(unsigned int min_frequency, unsigned int max_frequency,
-                                                                   float min_surprisingness_B, float max_surprisingness_B,
-                                                                   unsigned int min_subpattern_num, unsigned int max_subpattern_num,int gram);
+                                                         float min_surprisingness_B, float max_surprisingness_B,
+                                                         unsigned int min_subpattern_num, unsigned int max_subpattern_num,int gram);
 
     void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_ii, float max_ii, int gram);
