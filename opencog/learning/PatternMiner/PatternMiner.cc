@@ -3129,7 +3129,7 @@ void PatternMiner::runInterestingnessEvaluation()
                 HTreeNode* pNode = patternsForGram[cur_gram-1][p];
 
                 // for patterns that have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
-                if ( (pNode->nII_Surprisingness < 0) || (pNode->nII_Surprisingness >= surprisingness_II_threshold) )
+                if ( (pNode->nII_Surprisingness < 0) || ((float)pNode->nII_Surprisingness >= surprisingness_II_threshold) )
                     finalPatternsForGram[cur_gram-1].push_back(pNode);
             }
 
