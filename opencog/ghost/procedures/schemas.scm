@@ -689,10 +689,14 @@
                    (dec (new-id "decrease_" #'emo-param))
                    (neu (new-id "neutralize_" #'emo-param)))
          #'(begin
-		         (define (get) (psi-param-value (psi-param emo-param)))
-		         (define (inc num) (psi-param-increase! (psi-param emo-param) num))
-		         (define (dec num) (psi-param-decrease! (psi-param emo-param) num))
-		         (define (neu num) (psi-param-neutralize! (psi-param emo-param) num)))
+             (define (get) (Concept (number->string
+                             (psi-param-value (psi-param emo-param)))))
+             (define (inc num) (psi-param-increase! (psi-param emo-param)
+                                 (string->number (cog-name num))))
+             (define (dec num) (psi-param-decrease! (psi-param emo-param)
+                                 (string->number (cog-name num))))
+             (define (neu num) (psi-param-neutralize! (psi-param emo-param)
+                                 (string->number (cog-name num)))))
      ))))
 )
 
