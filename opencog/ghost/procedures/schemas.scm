@@ -702,3 +702,64 @@
 
 (define-emotion-parameter "valence")
 (define-emotion-parameter "arousal")
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "set-parameter")
+  (LambdaLink
+    (VariableList
+      (Variable "component")
+      (Variable "parameter")
+      (Variable "value"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "set-parameter")
+        (Variable "component")
+        (Variable "parameter")
+        (Variable "value")))
+  )
+)
+
+(define (set-parameter component parameter value)
+  (cog-execute!
+    (Put
+      (DefinedSchema "set-parameter")
+      (List component parameter value)))
+)
+
+; --------------------------------------------------------------
+; The *voice* schemas follow from ssml were 'speed' == 'rate'
+; See https://www.w3.org/TR/speech-synthesis/#edef_prosody
+;
+; TODO: When there is an api to get information about the range of volume
+; and speeds that is possible to use.
+(define (increase_voice_speed percent)
+  (set-parameter (Concept "speech") (Concept "rate")
+    (Number (+ 1.0 (/ (string->number (cog-name percent)) 100))))
+)
+
+(define (decrease_voice_speed percent)
+  (define percent-num (string->number (cog-name percent)))
+  (if (<= 100.0 percent-num)
+    (error "Speed can't be decreased by 100% or more."))
+
+  (set-parameter (Concept "speech") (Concept "rate")
+    (Number (- 1.0 (/ percent-num 100))))
+)
+
+(define (increase_voice_volume percent)
+  (set-parameter (Concept "speech") (Concept "volume")
+    (Number (* 20 (log10 (+ 1.0 (/ (string->number (cog-name percent)) 100)))))
+  )
+)
+
+(define (decrease_voice_volume percent)
+  (define percent-num (string->number (cog-name percent)))
+  (if (<= 100.0 percent-num)
+    (error "Volume can't be decreased by 100% or more."))
+
+  (set-parameter (Concept "speech") (Concept "volume")
+    (Number (* 20 (log10 (- 1.0 (/ percent-num 100)))))
+  )
+)
