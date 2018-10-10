@@ -732,6 +732,8 @@
 ; The *voice* schemas follow from ssml were 'speed' == 'rate'
 ; See https://www.w3.org/TR/speech-synthesis/#edef_prosody
 ;
+; TODO: When there is an api to get information about the range of volume
+; and speeds that is possible to use.
 (define (increase_voice_speed percent)
   (set-parameter (Concept "speech") (Concept "rate")
     (Number (+ 1.0 (/ (string->number (cog-name percent)) 100))))
@@ -740,7 +742,7 @@
 (define (decrease_voice_speed percent)
   (define percent-num (string->number (cog-name percent)))
   (if (<= 100.0 percent-num)
-    (error "Volume can't be decreased by 100% or more"))
+    (error "Speed can't be decreased by 100% or more."))
 
   (set-parameter (Concept "speech") (Concept "rate")
     (Number (- 1.0 (/ percent-num 100))))
@@ -755,7 +757,7 @@
 (define (decrease_voice_volume percent)
   (define percent-num (string->number (cog-name percent)))
   (if (<= 100.0 percent-num)
-    (error "Volume can't be decreased by 100% or more"))
+    (error "Volume can't be decreased by 100% or more."))
 
   (set-parameter (Concept "speech") (Concept "volume")
     (Number (* 20 (log10 (- 1.0 (/ percent-num 100)))))
