@@ -137,15 +137,35 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
             HandleSeq outVariableNodes;
             Handle newLink = copyAtom(*observing_as, cur_link, outVariableNodes);
 
-            extendAPatternForOneMoreGramRecursively(newLink, *observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
-                                                    allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index, startFromLinkContainWhiteKeyword);
-
-
+            extendPatternForOneMoreGramRecursively(newLink,
+                                                   *observing_as,
+                                                   Handle::UNDEFINED,
+                                                   lastGramLinks,
+                                                   0,
+                                                   lastGramValueToVarMap,
+                                                   patternVarMap,
+                                                   false,
+                                                   allNewMinedPatternsCurTask,
+                                                   allHTreeNodesCurTask,
+                                                   allNewMinedPatternInfo,
+                                                   thread_index,
+                                                   startFromLinkContainWhiteKeyword);
         }
         else
         {
-            extendAPatternForOneMoreGramRecursively(cur_link, original_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
-                                                    allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
+            extendPatternForOneMoreGramRecursively(cur_link,
+                                                   original_as,
+                                                   Handle::UNDEFINED,
+                                                   lastGramLinks,
+                                                   0,
+                                                   lastGramValueToVarMap,
+                                                   patternVarMap,
+                                                   false,
+                                                   allNewMinedPatternsCurTask,
+                                                   allHTreeNodesCurTask,
+                                                   allNewMinedPatternInfo,
+                                                   thread_index,
+                                                   startFromLinkContainWhiteKeyword);
         }
 
         if (param.THREAD_NUM > 1)
@@ -215,13 +235,27 @@ void PatternMiner::runPatternMinerDepthFirst()
     cout << "\ntotalLinkNum = " << processedLinkNum << ", actualProcessedLinkNum = " << actualProcessedLinkNum << std::endl;
 }
 
-// extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
-// vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
-// notOutPutPattern is passed from extendAPatternForOneMoreGramRecursively, also may be modify in this function.
-// it indicates if one pattern is only generated for middle process - calculate interestingness for its superpatterns, but not put in output results
-HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, unsigned int & extendedLinkIndex,
-                                                                set<string>& allNewMinedPatternsCurTask, bool& notOutPutPattern, bool &patternAlreadyExtractedInCurTask, bool startFromLinkContainWhiteKeyword)
+// extendedLinkIndex is to return the index of extendedLink's
+// patternlink in the unified pattern so as to identify where is the
+// extended link in this pattern vector<HTreeNode*>
+// &allHTreeNodesCurTask is only used in distributed version
+// notOutPutPattern is passed from
+// extendPatternForOneMoreGramRecursively, also may be modify in this
+// function.  it indicates if one pattern is only generated for middle
+// process - calculate interestingness for its superpatterns, but not
+// put in output results
+HTreeNode* PatternMiner::extractPatternFromVarCombination(HandleSeq &inputLinks,
+                                                          HandleMap &patternVarMap,
+                                                          HandleMap& orderedVarNameMap,
+                                                          HandleSeqSeq &oneOfEachSeqShouldBeVars,
+                                                          HandleSeq &leaves,
+                                                          HandleSeq &shouldNotBeVars,
+                                                          HandleSeq &shouldBeVars,
+                                                          unsigned int & extendedLinkIndex,
+                                                          set<string>& allNewMinedPatternsCurTask,
+                                                          bool& notOutPutPattern,
+                                                          bool &patternAlreadyExtractedInCurTask,
+                                                          bool startFromLinkContainWhiteKeyword)
 {
     HTreeNode* returnHTreeNode = nullptr;
     bool skip = false;
@@ -421,7 +455,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                         (tmpPatternsForGram[gram-1]).push_back(newHTreeNode);
                 }
                 else
-                    (patternsForGram[gram-1]).push_back(newHTreeNode);
+                    patternsForGram[gram-1].push_back(newHTreeNode);
 
                 if (param.THREAD_NUM > 1)
                     addNewPatternLock.unlock();
@@ -481,15 +515,28 @@ bool PatternMiner::existInOneThreadExtractedLinks(unsigned int _gram, unsigned i
     return false;
 }
 
-// when it's the first gram pattern: parentNode = 0, extendedNode = undefined, lastGramLinks is empty, lastGramValueToVarMap and lastGramPatternVarMap are empty
-// extendedNode is the value node in original AtomSpace
-// lastGramLinks is the original links the parentLink is extracted from
-// allNewMinedPatternsCurTask is to store all the pattern keystrings mined in current Link task, to avoid duplicate patterns being mined
-// allNewMinedPatternInfo is only used in distributed mode, to store all the new mined pattern info to send to server
-void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace& from_as, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                 HTreeNode* parentNode, const HandleMap &lastGramValueToVarMap, const HandleMap &lastGramPatternVarMap, bool isExtendedFromVar,
-                 set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index,
-                 bool startFromLinkContainWhiteKeyword)
+// when it's the first gram pattern: parentNode = 0, extendedNode =
+// undefined, lastGramLinks is empty, lastGramValueToVarMap and
+// lastGramPatternVarMap are empty extendedNode is the value node in
+// original AtomSpace lastGramLinks is the original links the
+// parentLink is extracted from allNewMinedPatternsCurTask is to store
+// all the pattern keystrings mined in current Link task, to avoid
+// duplicate patterns being mined allNewMinedPatternInfo is only used
+// in distributed mode, to store all the new mined pattern info to
+// send to server
+void PatternMiner::extendPatternForOneMoreGramRecursively(const Handle &extendedLink,
+                                                          AtomSpace& from_as,
+                                                          const Handle &extendedNode,
+                                                          const HandleSeq &lastGramLinks,
+                                                          HTreeNode* parentNode,
+                                                          const HandleMap &lastGramValueToVarMap,
+                                                          const HandleMap &lastGramPatternVarMap,
+                                                          bool isExtendedFromVar,
+                                                          set<string>& allNewMinedPatternsCurTask,
+                                                          vector<HTreeNode*> &allHTreeNodesCurTask,
+                                                          vector<MinedPatternInfo> &allNewMinedPatternInfo,
+                                                          unsigned int thread_index,
+                                                          bool startFromLinkContainWhiteKeyword)
 {
     // the ground value node in the from_as to the variable handle in pattenmining Atomspace
     HandleMap valueToVarMap = lastGramValueToVarMap;
@@ -667,8 +714,18 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             bool patternAlreadyExtractedInCurTask;
             HandleMap orderedVarNameMap;
 
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, orderedVarNameMap,oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
-                                          extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
+            HTreeNode* thisGramHTreeNode = extractPatternFromVarCombination(inputLinks,
+                                                                            patternVarMap,
+                                                                            orderedVarNameMap,
+                                                                            oneOfEachSeqShouldBeVars,
+                                                                            leaves,
+                                                                            shouldNotBeVars,
+                                                                            shouldBeVars,
+                                                                            extendedLinkIndex,
+                                                                            allNewMinedPatternsCurTask,
+                                                                            notOutPutPattern,
+                                                                            patternAlreadyExtractedInCurTask,
+                                                                            startFromLinkContainWhiteKeyword);
 
             if (thisGramHTreeNode)
             {
@@ -974,8 +1031,19 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             }
 
                             // extract patterns from this child
-                            extendAPatternForOneMoreGramRecursively(extendedHandle,  from_as, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap,isNewExtendedFromVar,
-                                                                    allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index, startFromLinkContainWhiteKeyword);
+                            extendPatternForOneMoreGramRecursively(extendedHandle,
+                                                                   from_as,
+                                                                   extendNode,
+                                                                   inputLinks,
+                                                                   thisGramHTreeNode,
+                                                                   valueToVarMap,
+                                                                   patternVarMap,
+                                                                   isNewExtendedFromVar,
+                                                                   allNewMinedPatternsCurTask,
+                                                                   allHTreeNodesCurTask,
+                                                                   allNewMinedPatternInfo,
+                                                                   thread_index,
+                                                                   startFromLinkContainWhiteKeyword);
 
                         }
 //                        cout << "\n---------------end curvarstr = " << curvarstr << "---------------" <<std::endl;
