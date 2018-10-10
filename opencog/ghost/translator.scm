@@ -25,8 +25,14 @@
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
          (negation-only? (every (lambda (t) (equal? 'negation (car t))) TERMS))
          (empty-seq? (and (= 1 (length TERMS)) (equal? 'empty-context (caar TERMS))))
-         (func-only? (and (> (length TERMS) 0)
-           (every (lambda (t) (equal? 'function (car t))) TERMS)))
+         (func-only?
+           (and
+             (> (length TERMS) 0)
+             (every
+               (lambda (t)
+                 (or (equal? 'function (car t))
+                     (equal? 'compare (car t))))
+               TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
