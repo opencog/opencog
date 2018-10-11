@@ -775,7 +775,8 @@
   MIN-OBS is the smallest number of observations of the word that
   is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify classify-pair-wise (make-fuzz COS-CUT FRAC MIN-OBS))
+	(define ZIPF 4)
+	(gram-classify classify-pair-wise (make-fuzz COS-CUT FRAC ZIPF MIN-OBS))
 )
 
 (define-public (gram-classify-agglo MIN-OBS)
@@ -786,7 +787,8 @@
   but still slow-ish.  Suggest using instead `gram-classify-diag-blocks`
   or `gram-classify-greedy` for better performance.
 "
-	(gram-classify agglo-over-words (make-fuzz 0.65 0.3 MIN-OBS))
+	(define ZIPF 4)
+	(gram-classify agglo-over-words (make-fuzz 0.65 0.3 ZIPF MIN-OBS))
 )
 
 (define-public (gram-classify-diag-blocks MIN-OBS)
@@ -798,7 +800,8 @@
   `gram-classify-pair-wise` and `gram-classify-agglo`. However, the
   `gram-classify-greedy` variant is both faster and more accurate.
 "
-	(gram-classify diag-over-words (make-fuzz 0.65 0.3 MIN-OBS))
+	(define ZIPF 4)
+	(gram-classify diag-over-words (make-fuzz 0.65 0.3 ZIPF MIN-OBS))
 )
 
 (define-public (gram-classify-greedy-fuzz COS-CUT FRAC MIN-OBS)
@@ -821,7 +824,8 @@
   MIN-OBS is the smallest number of observations of the word that
   is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify greedy-over-words (make-fuzz COS-CUT FRAC MIN-OBS))
+	(define ZIPF 4)
+	(gram-classify greedy-over-words (make-fuzz COS-CUT FRAC ZIPF MIN-OBS))
 )
 
 (define-public (gram-classify-greedy-discrim COSINE MIN-OBS)
@@ -841,7 +845,8 @@
   MIN-OBS is the smallest number of observations of the word that
   is acceptable; words with fewer observations will be ignored.
 "
-	(gram-classify greedy-over-words (make-discrim COSINE MIN-OBS))
+	(define ZIPF 4)
+	(gram-classify greedy-over-words (make-discrim COSINE ZIPF MIN-OBS))
 )
 
 ; ---------------------------------------------------------------

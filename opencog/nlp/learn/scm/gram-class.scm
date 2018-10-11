@@ -59,7 +59,9 @@
 ; disjuncts form the basis of the vector space, and the count of
 ; observations of different disjuncts indicating the direction of the
 ; vector. It is the linearity of the observations that implies that
-; such a vector-based linear approach is correct.
+; such a vector-based linear approach is correct. (Footnote: actually,
+; the vector could/should to include subspaces for the sheaf shapes, as
+; well; this is not elaborated on here.)
 ;
 ; The number of grammatical classes that a word might belong to can
 ; vary from a few to a few dozen; in addition, there will be some
@@ -94,7 +96,7 @@
 ; Word Similarity
 ; ---------------
 ; There are several different means of comparing similarity between
-; two words.  The simplest is cosine distance: if the cosine of two
+; two words.  A traditional one is cosine distance: if the cosine of two
 ; word-vectors is greater than a threshold, they should be merged.
 ;
 ; The cosine distance between the two words w_a, w_b is
@@ -103,11 +105,29 @@
 ;
 ; Where, as usual, v_a . v_b is the dot product, and |v| is the length.
 ;
+; If N(w,d) is the count of the number of observations of word w with
+; disjunct d, the dot product is
+;
+;    dot(w_a, w_b) = v_a . v_b = sum_d N(w_a,d) N(w_b,d)
+;
 ; The minimum-allowed cosine-distance is a user-tunable parameter in
 ; the code below; it is currently hard-coded to 0.65.
 ;
-; Other similarity measures are possible, but have not yet been
-; explored.
+; It appears that a better judge of similarity is the information-
+; theoretic divergence between the vectors (the Kullback-Lielber
+; divergence). If N(w,d) is the count of the number of observations of
+; word w with disjunct d, the divergence is:
+;
+;    MI(w_a, w_b) = log_2 [dot(w_a, w_b) dot(*,*) / ent(w_a) ent(w_b)]
+;
+; where
+;
+;    ent(w) = sum_d N(w,d) N(*,d)
+;
+; so that log_2 ent(w) is the entropy of word w (up to a factor of
+; N(*,*) squared. That is, we should be using p(w,d) = N(w,d) / N(*,*)
+; in the defintion. Whatever, this is covered in much greater detail
+; elsewhere.)
 ;
 ;
 ; Merge Algos
@@ -211,19 +231,47 @@
 ;
 ;   {e_union} = {e_a} set-union {e_b}
 ;
+;
+; Zipf Tails
+; ----------
+; The distribution of disjuncts on words is necessarily Zipfian. That
+; is, the vectors could be called "Zipf vectors", in that the vector
+; coefficients follow a Zipfian distribution.  There are many reasons
+; why this is so, and multiple effects feed into this.
+;
+; It seems plausible to treat extremely-low frequency observations as
+; a kind of noise, but which might also contain some signal. Thus,
+; during merge, all of a Zipfian tail should be merged in. If its noise,
+; it will tend to cancel during merge; if its signal, it will tend to be
+; additive.
+;
+; That is, during merge, low-frequency observation counts should be
+; merged in thier entirety, rather than split in parts, with one part
+; remaining unmerged.  For example, if a word is to be merged into a
+; word-class, and disjunct d has been observed 4 times or less, then
+; all 4 of these observation counts should be merged into the word-class.
+; Only high-frequency disjuncts can be considered to be well-known
+; enough to be distinct, and thus suitable for fractional merging.
+;
+;
 ; merge-project
 ; -------------
-; The above two merge methods are implemented in the `merge-project`
+; The above merge methods are implemented in the `merge-project`
 ; function. It takes, as an argument, a fractional weight which is
 ; used when the disjunct isn't shared between both words. Setting
 ; the weight to zero gives overlap merging; setting it to one gives
 ; union merging. Setting it to fractional values provides a merge
 ; that is intermediate between the two: an overlap, plus a bit more,
-; viz some of the union.
+; viz some of the union.  A second parameter serves as a cutoff, so
+; that any oservation counts below the cutoff are always merged.
 ;
 ; That is, the merger is given by the vector
 ;
 ;   v_merged = v_overlap + FRAC * (v_union - v_overlap)
+;
+; for those vector components in v_union that have been observed more
+; than the minimum cutoff; else all of the small v_union components
+; are merged.
 ;
 ; If v_a and v_b are both words, then the counts on v_a and v_b are
 ; adjusted to remove the counts that were added into v_merged. If one
@@ -237,13 +285,15 @@
 ; v_b in a different way. What it does is to explicitly orthogonalize
 ; so that the final v_a and v_b are orthogonal to v_merged.  The result
 ; is probably very similar to `merge-project`, but not the same.  In
-; particular, the total number of counts in the system is not preserved
-; (which is maybe a bad thing?)
+; particular, the total number of observation counts in the system is
+; not preserved (which is surely a bad thing, since counts are
+; interpreted as probablity-frequencies.)
 ;
 ; There's no good reason for choosing `merge-ortho` over `merge-project`,
-; and there's a good theoretical reason to not use `merge-ortho`. Its
-; here for historical reasons -- it got coded funky, and that's that.
-; It should probably be eventually removed.
+; and the broken probabilites is a good reason to reject `merge-ortho`.
+; It is currently here for historical reasons -- it got coded funky, and
+; that's that.  It should probably be eventually removed, when
+; experimentation is done with.
 ;
 ;
 ; merge-discrim
@@ -269,10 +319,13 @@
 ; -----------------
 ; Gut-sense intuition suggests these possible experiments:
 ;
-; * Fuzz: use `merge-project` with hard-coded frac=0.3 and min acceptable
-;   cosine=0.65
+; * Fuzz: use `merge-project` with hard-coded frac=0.3 and cosine
+;   distance with min acceptable cosine=0.65
 ;
 ; * Discrim: use `merge-discrim` with min acceptable cosine = 0.5
+;
+; * Info: use `merge-project` with hard-coded frac=0.3 and information
+;   distance with min acceptable MI=3
 ;
 ;
 ; Broadening
@@ -316,10 +369,12 @@
 
 ; ---------------------------------------------------------------------
 
-(define (merge-project LLOBJ FRAC WA WB)
+(define (merge-project LLOBJ FRAC ZIPF WA WB)
 "
-  merge-project FRAC WA WB - merge WA and WB into a grammatical class.
-  Return the merged class.
+  merge-project LLOBJ FRAC ZIPF WA WB - merge WA and WB into a grammatical
+  class.  Return the merged class. This merges the Sections, this does not
+  merge connectors, nor does it merge shapes.  See `cset-class.scm` for
+  connector merging.
 
   WA should be a WordNode or a WordClassNode.
   WB is expected to be a WordNode.
@@ -327,6 +382,8 @@
      indicating the fraction of a non-shared count to be used.
      Setting this to 1.0 gives the sum of the union of supports;
      setting this to 0.0 gives the sum of the intersection of supports.
+  ZIPF is the smallest observation count, below which counts
+     will not be divided up, if a marge is performed.
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
 
@@ -339,7 +396,7 @@
   only a FRAC fraction of a single, unmatched count is transferred.
 
   If WA is a WordClassNode, and WB is not, then WB is merged into
-  WA. That is, the counts on QA are adjusted only upwards, and those
+  WA. That is, the counts on WA are adjusted only upwards, and those
   on WB only downwards.
 "
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
@@ -361,9 +418,9 @@
 	(define accum-rcnt 0)
 
 	; Merge two sections into one, placing the result on the word-class.
-	; Given, given a pair of sections, sum the counts from each, and
-	; then place that count on a corresponding section on the word-class.
-	; Store the updated section to the database.
+	; Given a pair of sections, sum the counts from each, and then place
+	; that count on a corresponding section on the word-class.  Store the
+	; updated section to the database.
 	;
 	; One or the other sections can be null. If both sections are not
 	; null, then both are assumed to have exactly the same disjunct.
@@ -389,10 +446,10 @@
 		; But only if we are merging in a word, not a word-class;
 		; we never want to shrink the support of a word-class, here.
 		(define wlc (if
-				(and (null? rsec) (is-word-sect? lsec))
+				(and (null? rsec) (is-word-sect? lsec) (< ZIPF lcnt))
 				(* FRAC lcnt) lcnt))
 		(define wrc (if
-				(and (null? lsec) (is-word-sect? rsec))
+				(and (null? lsec) (is-word-sect? rsec) (< ZIPF rcnt))
 				(* FRAC rcnt) rcnt))
 
 		; Sum them.
@@ -668,7 +725,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (merge-disambig COSOBJ COS-MIN WA WB)
+(define (merge-disambig COSOBJ COS-MIN ZIPF WA WB)
 "
   merge-disambig COS-MIN WA WB - merge WB into WA, returning the merged
   class.  If WA is a word, and not a class, then a new class is created
@@ -681,7 +738,7 @@
 "
 	(define cosi (COSOBJ 'right-cosine WA WB))
 	(define frac (/ (- cosi COS-MIN)  (- 1.0 COS-MIN)))
-	(merge-project COSOBJ frac WA WB)
+	(merge-project COSOBJ frac ZIPF WA WB)
 )
 
 ; ---------------------------------------------------------------
@@ -689,33 +746,34 @@
 ;
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
+; WORD-B should be a WordNode.
 ;
-; COSOBJ must offer the 'right-cosine method
+; SIM-FUNC must be a function that takes two words (or word-classes)
+; and returns the similarity between them.
 ;
-; This uses cosine-similarity and a cutoff to make the ok-to-merge
-; decision. (Other forms of similarity measure might also be
-; interesting to explore.) The code is glommed up with print statements
-; in order to show forward progress; this is because the current
-; infrastructure is sufficiently slow, that the prints are reassuring
-; that the system is not hung.
+; The CUTOFF is used to make the ok-to-merge decision; if the similarity
+; is greater than CUTOFF, then this returns #t else it returns #f.
 ;
-(define (is-cosine-similar? COSOBJ CUTOFF WORD-A WORD-B)
+; This requires only a single trivial line of code ... but ...
+; The below is a mass of print statements to show forward progress.
+; The current infrastructure is sufficiently slow, that the prints are
+; reassuring that the system is not hung.
+;
+(define (is-similar? SIM-FUNC CUTOFF WORD-A WORD-B)
 
-	(define (get-cosine) (COSOBJ 'right-cosine WORD-A WORD-B))
-
-	(define (report-cosine)
+	(define (report-progress)
 		(let* (
-; (foo (format #t "Start cosine ~A \"~A\" -- \"~A\"\n"
+; (foo (format #t "Start distance ~A \"~A\" -- \"~A\"\n"
 ; (if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 ; (cog-name WORD-A) (cog-name WORD-B)))
 				(start-time (get-internal-real-time))
-				(sim (get-cosine))
+				(sim (SIM-FUNC WORD-A WORD-B))
 				(now (get-internal-real-time))
 				(elapsed-time (* 1.0e-9 (- now start-time))))
 
 			; Only print if its time-consuming.
 			(if (< 2.0 elapsed-time)
-				(format #t "Cosine=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
+				(format #t "Dist=~6F for ~A \"~A\" -- \"~A\" in ~5F secs\n"
 					sim
 					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 					(cog-name WORD-A) (cog-name WORD-B)
@@ -723,20 +781,39 @@
 
 			; Print mergers.
 			(if (< CUTOFF sim)
-				(format #t "---------Bingo! Cosine=~6F for ~A \"~A\" -- \"~A\"\n"
+				(format #t "---------Bingo! Dist=~6F for ~A \"~A\" -- \"~A\"\n"
 					sim
 					(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
 					(cog-name WORD-A) (cog-name WORD-B)
 					))
 			sim))
 
-	; True, if cosine similarity is larger than the cutoff.
-	(< CUTOFF (report-cosine))
+	; True, if similarity is larger than the cutoff.
+	(< CUTOFF (report-progress))
+)
+
+; ---------------------------------------------------------------
+; Is it OK to merge WORD-A and WORD-B into a common vector?
+;
+; Return #t if the two should be merged, else return #f
+; WORD-A might be a WordClassNode or a WordNode.
+; WORD-B should be a WordNode.
+;
+; MIOBJ must offer the 'mmt-fmi method.
+;
+; This uses information-similarity and a cutoff to make the ok-to-merge
+; decision. Uses the information-similarity between the
+; disjunct-vectors only (for now!?), and not between the shapes.
+;
+(define (is-info-similar? MIOBJ CUTOFF WORD-A WORD-B)
+
+	(define (get-info-sim wa wb) (MIOBJ 'mmt-fmi wa wb))
+	(is-similar? get-info-sim CUTOFF WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------
 
-(define (make-fuzz CUTOFF UNION-FRAC MIN-CNT)
+(define (make-fuzz CUTOFF UNION-FRAC ZIPF MIN-CNT)
 "
   make-fuzz -- Do projection-merge, with a fixed merge fraction.
 
@@ -748,6 +825,9 @@
   UNION-FRAC is the fxied fraction of the union-set of the disjuncts
   that will be merged.
 
+  ZIPF is the smallest observation count, below which counts
+  will not be divided up, if a marge is performed.
+
   MIN-CNT is the minimum count (l1-norm) of the observations of
   disjuncts that a word is allowed to have, to even be considered.
 "
@@ -757,11 +837,12 @@
 			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
+		(define (get-cosine wa wb) (pcos 'right-cosine wa wb))
 		(define (mpred WORD-A WORD-B)
-			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
+			(is-similar? get-cosine CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-project pcos UNION-FRAC WORD-A WORD-B))
+			(merge-project pcos UNION-FRAC ZIPF WORD-A WORD-B))
 
 		(define (is-small-margin? WORD)
 			(< (pss 'right-count WORD) MIN-CNT))
@@ -784,7 +865,7 @@
 
 ; ---------------------------------------------------------------
 
-(define (make-discrim CUTOFF MIN-CNT)
+(define (make-discrim CUTOFF ZIPF MIN-CNT)
 "
   make-discrim -- Do a \"discriminating\" merge.
 
@@ -792,6 +873,9 @@
 
   CUTOFF is the min acceptable cosine, for words to be considered
   mergable.
+
+  ZIPF is the smallest observation count, below which counts
+  will not be divided up, if a marge is performed.
 
   MIN-CNT is the minimum count (l1-norm) of the observations of
   disjuncts that a word is allowed to have, to even be considered.
@@ -802,11 +886,12 @@
 			(psu (add-support-compute psa))
 			(pcos (add-pair-cosine-compute psa))
 		)
+		(define (get-cosine wa wb) (pcos 'right-cosine wa wb))
 		(define (mpred WORD-A WORD-B)
-			(is-cosine-similar? pcos CUTOFF WORD-A WORD-B))
+			(is-similar? get-cosine CUTOFF WORD-A WORD-B))
 
 		(define (merge WORD-A WORD-B)
-			(merge-disambig pcos CUTOFF WORD-A WORD-B))
+			(merge-disambig pcos CUTOFF ZIPF WORD-A WORD-B))
 
 		(define (is-small-margin? WORD)
 			(< (pss 'right-count WORD) MIN-CNT))
@@ -857,7 +942,7 @@
 ; (is-cosine-similar? pcos (Word "city") (Word "village"))
 ;
 ; Perform the actual merge
-; (merge-project pcos 0.3 (Word "city") (Word "village"))
+; (merge-project pcos 0.3 4 (Word "city") (Word "village"))
 ;
 ; Verify presence in the database:
 ; select count(*) from atoms where type=22;

@@ -64,7 +64,7 @@
 
 ; ============================================
 ; Cosines between words, using crosses
-(define cra (make-connector-vec-api))
+(define cra (make-shape-vec-api))
 (define crs (add-pair-stars cra))
 (define crt (add-transpose-api crs))
 
@@ -83,7 +83,7 @@
 
 ; -------------
 ; FMI between words, using crossovers -- below works
-(define cram (make-connector-vec-api))
+(define cram (make-shape-vec-api))
 (define crsm (add-pair-stars cram))
 (define crtm (add-transpose-api crsm))
 
