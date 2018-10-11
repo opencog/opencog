@@ -856,12 +856,11 @@ marginals for the pseudo-csets:
   (define psa (add-pair-stars pca))
   (define btr (batch-transpose psa))
   (psa 'fetch-pairs)
-  (btr 'left-marginals)
-  (btr 'right-marginals)
   (btr 'mmt-marginals)
 ```
 To obtain the marginals for the cross-connectors, repeat the above
-steps, but this time with `(make-connector-vec-api)` as the base class.
+steps, but this time with `(make-shape-vec-api)` as the base class.
+At this time, the need for the cross-connectors (shapes) is optional...
 
 The above omputations may take hours or days, depending on the size of
 the disjunct set.  Be sure to make a backup copy of the resulting

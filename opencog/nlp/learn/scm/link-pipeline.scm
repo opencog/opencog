@@ -539,7 +539,8 @@
 		(define (do-all-sents)
 			(let ((sent (get-one-new-sentence)))
 				(if (not (null? sent))
-					(begin (process-sent sent) (do-all-sents)))))
+					(begin (process-sent sent obs-mode cnt-reach)
+						(do-all-sents)))))
 
 		(relex-parse TXT)
 		(do-all-sents)

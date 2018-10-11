@@ -1295,7 +1295,7 @@ Bugg- the utf8 is fucked up.   Fixed. Its a guile-2.1.5 regression
 its ok in the containers ... select * from atoms where type=110;
 (cog-get-atoms 'WordInstanceNode)
 
-but guile-2.2 fucks up. 
+but guile-2.2 fucks up.
 (string-append "a" "係" "c") is OK.
 (Concept "係") is broken
 scm_c_eval_string
@@ -14823,7 +14823,7 @@ Here's it's dual:
 
 (cdrim (WordNode "Frollo/Harry"))
 Oh, hang on ... silly goose. Cannot hand MI on the sections. Of course.
-Since the pairs are not correctly identified. 
+Since the pairs are not correctly identified.
 There are three fmi's:
 word-to-conseq
 word-to first-con
@@ -15312,6 +15312,98 @@ sys	0m14.484s
 store-wildcards
 store-right-marginals
 
+en_sh_two
+---------
+English disjuncts+shapes from rfive-mtwo plus marginals.
+
+Extended from en_dj_mtwo (which was en_pairs_rfive_mtwo but with all
+word pairs removed, and and only the disjuncts left). The extensions
+are:
+* shape structures from (make-shape-api) are NOT in this dataset
+  (you must make them manually by (hva 'explode-sections) after loading
+   this dataset.)
+* left and right marginals for the pseudo-csets
+* left and right marginals for the shape structures (make-shape-api)
+* 'mmt-marginals for both of the above.
+
+
+STATUS:  GOOD.
+DATE: 13 August 2018
+
+en_sh_two=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 4256 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 7647 MB    |
+ public | values     | table | linas | 8192 bytes |
+
+ select count(*) from atoms;       40352376 <<<< 40.3 M (19M more)
+ select count(*) from valuations;  76884550 <<<< 76.8 M (19M more)
+
+The above does not contain the exploded sections. After explosion
+it looks like below.
+(cog-report-counts)
+(ListLink . 6514154)
+(EvaluationLink .  42478345
+(Connector . 268594)
+(ConnectorSeq .  6239997)
+(Section . 8629163)
+(WordNode . 137082)
+
+(print-matrix-summary-report hva)
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type: EvaluationLink
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "shape word")
+   (AnyNode "shape section")
+)
+Rows: 137075 Columns: 18265271
+Size: 24213074 non-zero entries of 2503712022325 possible
+Fraction non-zero: 9.6709E-6 Sparsity (-log_2): 16.658
+Total observations: 18489594.0  Avg obs per pair: 0.7636
+No MI statistics are present; run compute-mi to get them.
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3568.        1.1179E+5
+Count   (l_1)  6.9286E+4    8.0072E+4     19.42        .7163
+Length  (l_2)  7782.        6245.         2.181        5.5866E-2
+RMS Count      7760.        6240.         2.175        5.5824E-2
+
+(print-matrix-summary-report pca)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  145.4        4.8875E+4
+Count   (l_1)  3440.        2.2958E+5     23.66        4.697
+Length  (l_2)  1773.        1.3729E+4     12.19        .2809
+RMS Count      1732.        1.3696E+4     11.91        .2802
+
+7016483834 Bytes uncompressed == 7.0GBytes
+ 779019716 Bytes compressed == 780 MBytes
+
+782683944c9dcc2e3ce3d7ec7f89dd84  en_sh_two.sql
+54680d4ffe4378350184d748b841523a  en_sh_two.sql.bz2
+
+=========================================================================
+
+(sql-open "postgres:///en_sh_two?user=linas&password=asdf")
+
 $ guile -l x-mtwo.scm
 scheme@(guile-user)> (hva 'fetch-pairs)
 Elapsed time to load word sections: 2610 seconds
@@ -15319,7 +15411,30 @@ scheme@(guile-user)> (hva 'explode-sections)
 Elapsed time to create shapes: 1523 secs
 scheme@(guile-user)> (hst 'store-pairs (cog-incoming-set (Predicate "*-word-shape pair-*")))
 Hang on .. that is not really needed ... is it?  What's the point?
+Just always remember to explode the setions each time before use ....
+
 scheme@(guile-user)> (bhv 'mmt-marginals)
+Finished left norm marginals in 376195 secs  <<< 104 hours ....
+Finished left totals in 269 secs
+Finished column (left) norm averages in 1481 secs
+Stored 40000 of 18265271 left-wilds in 27 secs (1481 pairs/sec)
+Done storing 18265271 left-wilds in 12672 secs
+Finished mmt norm marginals in 1621 secs
+Finished mmt totals in 4 secs
+Stored 40000 of 137075 right-wilds in 23 secs (1739 pairs/sec)
+Stored 80000 of 137075 right-wilds in 24 secs (1667 pairs/sec)
+Stored 120000 of 137075 right-wilds in 24 secs (1667 pairs/sec)
+Done storing 137075 right-wilds in 81 secs
+Done computing and saving sum_y N(x,y) N(*,y)
+
+
+
+Crapp. The above needs right marginals, too
+(define hvc (add-support-compute hvs))
+(hvc 'right-marginals)
+(define hst (make-store hvs))
+(hst 'store-right-marginals)
+
 
 
 $ guile -l x-mmore.scm
@@ -15335,10 +15450,126 @@ Finished mmt totals in 4 secs
 Done storing 137078 right-wilds in 113 secs
 Done computing and saving sum_y N(x,y) N(*,y)
 
+-- dropdb en_dj_etwo
+-- createdb en_sh_mi_two -T en_sh_two
 
-yyyyyyyyyyyyyyyyyyyyyyyyyy
+Massive MI computations:  started 13 aug 20:00 CDT
+guile -l x-mcross.scm
+(hvs 'fetch-pairs)
+(hvs 'explode-sections)
+(batch-all-pair-mi hvs)
 
-dropdb en_dj_etwo
+Elapsed time to load word sections: 3418 seconds
+Elapsed time to load word-shape pairs: 53 seconds
+Elapsed time to create shapes: 1558 secs
+Start computing the basis
+Support: found num left= 137075 num right= 18265271 in 881 secs
+Finished left norm marginals in 405063 secs  <<<== yikes == 112 hours
+Finished left totals in 455 secs
+Finished right norm marginals in 1229 secs
+Finished right totals in 11 secs
+Done with wild-card count N(x,*) and N(*,y) in 406758 secs
+Total count N(*,*) = 18489593.9998708 = 18489593.99999996
+Finished column (left) norm averages in 2167 secs
+Finished row (right) norm averages in 32 secs
+Going to do individual pair frequencies
+Done computing 24213074 pairs in 3646 secs
+Start computing log P(*,y)
+Done computing 18265271 left-wilds in 598 secs
+Done with -log P(*,y), start -log P(x,*)
+Done computing 137075 right-wilds in 11 secs
+Stored 40000 of 18265271 left-wilds in 31 secs (1290 pairs/sec)
+Stored 80000 of 18265271 left-wilds in 29 secs (1379 pairs/sec)
+....
+Stored 18240000 of 18265271 left-wilds in 16 secs (2500 pairs/sec)
+Done storing 18265271 left-wilds in 7334 secs
+Stored 40000 of 137075 right-wilds in 27 secs (1481 pairs/sec)
+Stored 80000 of 137075 right-wilds in 18 secs (2222 pairs/sec)
+Stored 120000 of 137075 right-wilds in 18 secs (2222 pairs/sec)
+Done storing 137075 right-wilds in 70 secs
+Done computing and saving -log P(x,*) and P(*,y)
+Going to do individual pair MI
+Done 10000 of 137075 outer loops in 2116 secs, pairs=2286405 (1080.5 pairs/sec)
+...
+Done 130000 of 137075 outer loops in 1609 secs, pairs=23270250 (788.97 pairs/sec)
+Done computing 24213074 pair MI's in 21653 secs  << 6 hours
+Going to do column and row subtotals
+Finished left entropy subtotals in 419208 secs << 116 hours == 5 days
+Finished right entropy subtotals in 1459 secs
+Finished left MI subtotals in 396071 secs
+Finished right MI subtotals in 1369 secs
+Going to compute the left, right and total entropy
+Done computing totals; start saving wildcards
+Stored 40000 of 18265271 left-wilds in 388 secs (103 pairs/sec)
+Stored 80000 of 18265271 left-wilds in 327 secs (122 pairs/sec)
+...
+Stored 18240000 of 18265271 left-wilds in 22 secs (1818 pairs/sec)
+Done storing 18265271 left-wilds in 12769 secs
+Stored 40000 of 137075 right-wilds in 27 secs (1481 pairs/sec)
+Stored 80000 of 137075 right-wilds in 28 secs (1429 pairs/sec)
+Stored 120000 of 137075 right-wilds in 29 secs (1379 pairs/sec)
+Done storing 137075 right-wilds in 96 secs
+Finished with MI computations; this took 354. hours
+
+=========================================================================
+en_sh_mi_two
+------------
+English disjuncts+shapes from rfive-mtwo plus marginals plus entropy.
+
+Extended from en_sh_mtwo (which contains marginals for shapes), and
+adds the left, right, total entropy and total MI calculations.
+So matrix summary report is same as before, but includes entropy.
+This requires an additional 24M atoms, and 127M values!!  Hefty!
+Built as:
+
+(hvs 'fetch-pairs)
+(hvs 'explode-sections)
+(batch-all-pair-mi hvs)
+
+STATUS:  GOOD.
+DATE: 29 August 2018
+
+en_sh_mi_two=> \dt+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 6564 MB    |
+ public | spaces     | table | linas | 40 kB      |
+ public | typecodes  | table | linas | 56 kB      |
+ public | valuations | table | linas | 20 GB      |
+ public | values     | table | linas | 8192 bytes |
+
+select count(*) from atoms;  -- 64267359 == 64.2M atoms << 24M more!!
+select count(*) from valuations; -- 204432721 == 204M << 127M more !!
+
+(print-matrix-summary-report hvs)
+Summary Report for Correlation Matrix Cross-section Words
+Left type: WordNode    Right Type: EvaluationLink    Pair Type:
+EvaluationLink
+Wildcard: (ListLink (ctv 0 0 18489594)
+   (AnyNode "shape word")
+   (AnyNode "shape section")
+)
+Rows: 137075 Columns: 18265271
+Size: 24213074 non-zero entries of 2503712022325 possible
+Fraction non-zero: 9.6709E-6 Sparsity (-log_2): 16.658
+Total observations: 18489594.0  Avg obs per pair: 0.7636
+Entropy Total: 21.956   Left: 18.052   Right: 11.391
+Total MI: 7.4869
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3568.        1.1179E+5
+Count   (l_1)  6.9286E+4    8.0072E+4     19.42        .7163
+Length  (l_2)  7782.        6245.         2.181        5.5866E-2
+RMS Count      7760.        6240.         2.175        5.5824E-2
+
+17558278594 Bytes uncompressed == 17.5 GBytes
+ 1766113632 Bytes compressed == 1.76 GBytes
+
+134616afe42c9e380d00d6cf3d8cf397  en_sh_mi_two.sql
+14d28c0678adf704fc81956458879fd0  en_sh_mi_two.sql.bz2
+
 =========================================================================
 OK, so where were we? We want
 * cosines between words, using dj's
@@ -15657,9 +15888,66 @@ Hmm  slefmi is needed, and the cond is bad
    (dab-perp-helper w1 w2 wr w))
 
 =========================================================================
+Compositionality
+(define pco (add-pair-cosine-compute psa))
+(cog-get-atoms 'ConceptNode)
+(section-vec-sum (Concept "cap-fra") psa 1.0 0.0
+	(Word "capital") (Word "France"))
+
+(pco 'right-cosine (Word "capital") (Word "France")) 0.04255500982730526
+(pco 'right-cosine (Word "Paris") (Word "France")) 0.5596429825328416
+(pco 'right-cosine (Word "capital") (Word "Paris")) 0.05447529708635267
+
+(pco 'right-cosine (Concept "cap-fra") (Word "Paris")) ; 0.40030313552977614
+(pco 'right-cosine (Concept "cap-fra") (Word "France")) 0.6748163062971411
+(pco 'right-cosine (Concept "cap-fra") (Word "capital")) 0.766034032120569
+
+; OK so above is totally lame
+
+(section-vec-sum (Concept "cpfrm") psa 0.0 0.0
+	(Word "capital") (Word "France"))
+
+(pco 'right-cosine (Concept "cpfrm") (Word "Paris")) 0.3810198495859706
+(pco 'right-cosine (Concept "cpfrm") (Word "France")) 0.35398467437926406
+(pco 'right-cosine (Concept "cpfrm") (Word "capital")) 0.16742518929899683
+
+; OK, so that's interesting! similarity to the two components
+is much much lower. But similarity to "paris" is about the same,
+and is now the highest of the three numbers.
+
+(pco 'right-cosine (Concept "cpfrm") (Word "Madrid")) 0
+(length (cog-incoming-by-type (Word "Madrid") 'Section)) 3
+
+(pco 'right-cosine (Concept "cpfrm") (Word "Berlin")) 0
+(length (cog-incoming-by-type (Word "Berlin") 'Section)) 16
+
+(pco 'right-cosine (Concept "cpfrm") (Word "London")) 0.5451708663713439
+(length (cog-incoming-by-type (Word "London") 'Section)) 911
+
+(length (cog-incoming-by-type (Word "Paris") 'Section)) 248
+
+(length (cog-incoming-by-type (Concept "cpfrm") 'Section)) 6
+
+(length (cog-incoming-by-type (Word "France") 'Section)) 267
+(length (cog-incoming-by-type (Word "capital") 'Section)) 300
+
+The 6 sections on "cpfrm" are totally lame --
+They are prepositions, punctuation.
+
+whatever compistionality there mayb be, not enough data in this dataset.
+Probably need to perform clustering first.
+
+
+(pmi 'mmt-fmi (Word "France")(Word "capital")) 0.634246152887463
+(pmi 'mmt-fmi (Word "France")(Word "Paris")) 5.458600057659794
+(pmi 'mmt-fmi (Word "Paris")(Word "capital")) 1.0135814069906335
+
+OK, not too interesting.
+
+=========================================================================
 cross-connector similarities.
 
-(define ara (make-connector-vec-api))
+(define ara (make-shape-vec-api))
 (define ars (add-pair-stars ara))
 (define art (add-transpose-api ars))
 (define aco (add-pair-cosine-compute art))
@@ -15674,7 +15962,7 @@ cross-connector similarities.
 (map (lambda (n) (bcr 'batch-compute n)) (iota 100 140 2))
 
 
-(define fra (make-connector-vec-api))
+(define fra (make-shape-vec-api))
 (define frs (add-pair-stars fra))
 (define frt (add-transpose-api frs))
 (define fco (add-pair-cosine-compute frt))
@@ -15862,6 +16150,11 @@ OK, so got to 920.... stop there.
 (map (lambda (n) (bco 'batch-compute n)) (iota 6 680 40))
 (map (lambda (n) (bco 'batch-compute n)) (iota 5 720 40))
 
+bmi (normal disjuncts) done to 1536
+cos on normal disjuncts ...
+bmi on shapes
+
+
 =========================================================================
 OK, so now redo the graphs.
  good-sims and ranked-sims in disjunct-stats.scm
@@ -15963,18 +16256,75 @@ wtf!? o profilig
 
 
 =========================================================================
+Restart the similarities, this time on en_sh_two_sim
+
+iota:  nsteps start stepsz
+regular disjuncts mi going to 70+14*72 == 1078
+                           now to (+ 1024 (* 8 64)) == 1536
+regular disjuncts cos going to 10 + 59*25 = 1485 .. done
+(bco 'batch-compute 1536)
+
+cross mi to ... 571 + 50*20 = 1571
+(for-each (lambda (n) (mib 'batch-compute n)) (iota 50 571 21))
+
+; below got to 30 + 99*14 = 1416
+(map (lambda (n) (mid 'batch-compute n)) (iota 100 30 14))
+;this should get to 1536:  ... done actually, got to 1591
+(for-each (lambda (n) (mid 'batch-compute n)) (iota 7 1416 20))
+
+
+
+=========================================================================
 =========================================================================
 =========================================================================
 NEW TODO LIST
 
+Authoring TODO:
+connector-sets.lyx:
+*) stop saying its logli, call it energy instead.
+*) on page 13, number-of-words == density of states.
+*) explain that density of states is a sum over delta functions
+*) Use curly E for energy
+*) page 16 change 400+ to >400
+*) Compute the smoothed energy P(E) and graph that
+*) smoothed energy  is from this:
+   Zipf’s Law Arises Naturally When There Are
+   Underlying, Unobserved Variables
+   Laurence Aitchison, Nicola Corradi, Peter E. Latha
+*) what is heat capacity?
+*) PEEV from above article vs. number of letters in the word.
+   why is this interesting?
+   Its not but it can maybe discriminate between utility
+   of different latent variables in various cases???
+*) besides word-legnth what other obvious latent variables are there?
+   how are these discovered?
+*) page 23 show MI vs. energy.  Same for page 25 ff
+*) page 28: number of connectors vs. MI
+*) number of connectors vs energy.
+   (i.e. some hope that these have bad MI, and thus would not be used).
+*) page 33ff: cosine similarity vs. energy  of the two words.
+
+
+--------------------------------------------------
+
 * Finish elimination of 'left-element, 'right-element in filters.
 
--- Copy en_dj_ptwo and start running cosines, entropies, etc.
-   for the top 1K's for both disjuncts and for cross connectors.
-   - IN PROGRESS
+-- Copy en_sh_two to en_sh_two_sim and start running cosines,
+   entropies, etc. for the top 1K's for both disjuncts and for
+   cross connectors.
+   - 13 August - In process.
 
--- start old-style MI cross-marginal in dj_etwo BROKEN. See above.
--- save en_dj_etwo after cross-marginals
+-- start old-style MI cross-marginal in en_sh_mi_etwo
+   - 13 August - In process.
+
+-- Explain in the text, what this is:
+  -- there are C+1 MI's:
+     * word to connector-seq
+     * word-to-first-connector
+     * word-to-second-connector
+     * ...
+     * word to C'th connector. Dohhh.
+     And distinct marginals for each.
 
 -- show graph distribution of mi of word-dj pairs in mtwo
    What scripts would these be?
@@ -15990,6 +16340,7 @@ NEW TODO LIST
 (2a) graphs, for the crosses, too
 
 (3) Scatterplot of pseudo-cset MI vs. cross-MI.
+    Done, need to add words for this.
 
 (4) show distribution of the sums, above.
 
@@ -16001,11 +16352,6 @@ While waiting for above, write code for:
   just with independent parameter.
   `merge-disambig` uses cosines to do fractionals.
   Should this use MI in some way?
-
-* XXX mmt-marginals is using the support obj, but all it needs
-  are the marginal counts .. wtf I'm confused.
-  supports are done with add-support-compute
-  well, it uses the supports, because it does a support variant.
 
 * The cosines do need the supports, right? (does it actually
   use them, or does it ignore them?)
@@ -16044,14 +16390,13 @@ Merging minor tasks DONE
 * SQL dump en_dj_ptwo -- a dataset with pseudos and with crosses
   and with transpose-marginals for both. DONE
 * Fix bug re cross-connector MI's -- DONE
-  -- there are C+1 MI's:
-     * word to connector-seq
-     * word-to-first-connector
-     * word-to-second-connector
-     * ...
-     * word to C'th connector. Dohhh.
-     And distinct marginals for each.
 * products of conditional probabilities. DONE NO GOOD
+* XXX mmt-marginals is using the support obj, but all it needs
+  are the marginal counts .. wtf I'm confused.
+  supports are done with add-support-compute
+  well, it uses the supports, because it does a support variant.
+  Ohh, both left and right supports were needed. DONE
+
 
 
 
@@ -16069,7 +16414,7 @@ LREC 2006
 Above uses a training set, and then attempts to parse the test set to
 obtain coverage.  So, here:  statistically:
 1) given a dict, what fraction of the test set is parseable?
-2) earlier queston: what portion was parsable by MST Any skipped words?
+2) earlier question: what portion was parsable by MST Any skipped words?
 2a) What fraction of MST clique has zero counts on the training data?
 
 =========================================================================
