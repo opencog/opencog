@@ -732,7 +732,7 @@
     (operator
       (<) : "smaller"
       (>) : "greater"
-      (EQUAL) : "equal"
+      (EQUAL EQUAL) : "equal"
       (< EQUAL) : "smaller_equal"
       (> EQUAL) : "greater_equal"
       (NOT EQUAL) : "not_equal"
