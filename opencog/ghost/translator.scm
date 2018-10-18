@@ -684,9 +684,7 @@
     rule-label-list)
 
   ; Clear the states
-  (set! rule-label-list '())
-  (set! rule-alist '())
-  (set! rule-hierarchy '())
+  (clear-parsing-states)
 )
 
 ; ----------

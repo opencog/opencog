@@ -151,6 +151,7 @@
   (set! rule-type-alist '())
   (set! rule-alist '())
   (set! rule-hierarchy '())
+  (set! goals-of-prev-rule '())
 )
 
 ;; --------------------
