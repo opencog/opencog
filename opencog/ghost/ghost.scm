@@ -130,9 +130,13 @@
 ; The key of this list is the labels of the rules
 (define rule-alist '())
 
-; A list to keep track of what rules hierarchy
+; A list to keep track of the rule hierarchy
 ; Will be used when dealing with rejoinders
 (define rule-hierarchy '())
+
+; Keep a record of the goals associated with the rule that has
+; just been instantiated, for dealing with rule ordering
+(define goals-of-prev-rule '())
 
 ; To clear the above states
 (define (clear-parsing-states)
@@ -147,6 +151,7 @@
   (set! rule-type-alist '())
   (set! rule-alist '())
   (set! rule-hierarchy '())
+  (set! goals-of-prev-rule '())
 )
 
 ;; --------------------

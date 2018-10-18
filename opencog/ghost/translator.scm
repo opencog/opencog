@@ -684,9 +684,7 @@
     rule-label-list)
 
   ; Clear the states
-  (set! rule-label-list '())
-  (set! rule-alist '())
-  (set! rule-hierarchy '())
+  (clear-parsing-states)
 )
 
 ; ----------
@@ -744,6 +742,16 @@
 
   ; Reset the list of local variables
   (set! pat-vars '())
+
+  ; Reset the rule hierarchy if we are looking at a rule with
+  ; a different set of goals, or it has been changed from
+  ; ordered to unordered (or vice versa)
+  (if (or (null? goals-of-prev-rule)
+          (not (equal? (car goals-of-prev-rule) ALL-GOALS))
+          (not (equal? (cdr goals-of-prev-rule) ORDERED?)))
+    (begin
+      (set! goals-of-prev-rule (cons ALL-GOALS ORDERED?))
+      (set! rule-hierarchy '())))
 
   (let* ((proc-type (process-type TYPE NAME))
          (ordered-terms (order-terms PATTERN))
