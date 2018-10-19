@@ -203,8 +203,16 @@ paragraph = listl . cons . addfst (cAN "paragraph") . cons
              )
 
 statement :: Syntax Atom
-statement = handleMa <<< statement'
-    where handleMa :: SynIso Atom Atom
+statement = handleDA . handleMa <<< statement'
+    where handleDA = Iso f g where
+              f a = do
+                daf <- gets sDA
+                let x = traceShow (daf (cCN "Hello" lowTv)) a
+                modify (\s -> s {sDaM = M.empty})
+                modify (\s -> s {sDA = id})
+                pure (daf x)
+              g = error "statement.handleDA.g not implemented"
+          handleMa :: SynIso Atom Atom
           handleMa = Iso f g where
               f a = do
                   let x = atomFold (\r a -> r || isMa a) False a
@@ -597,9 +605,23 @@ sumti_5Q = (isoFoldl handleKEhA ||| id) . ifJustB
               f a = do
                   atoms <- gets sAtoms
                   case getDefinitions [a] atoms of
-                      [] -> apply instanceOf a
+                      [] -> apply daInstanceOf a
                       _  -> pure a              --We have a lep which is already an instance
               g a = error "Check for lep somehow"
+
+          daInstanceOf = Iso f g where
+              f a@(VN name) = if name `elem` ["da","de","di"]
+                                  then do
+                                      mi <- getDA name
+                                      case mi of
+                                          Just i -> pure i
+                                          Nothing -> do
+                                            i <- apply instanceOf a
+                                            setDa name i
+                                            pure i
+                                  else apply instanceOf a
+              f a = apply instanceOf a
+              g = error "sumti_5Q.daInstanceOf.g not implemented"
 
           handleSubSet = sndToState 1 . second (tolist1 . subsetL)
 
@@ -685,7 +707,7 @@ lerfuP = (handleFREEs2 ||| id) . ifJustB
 --TODO: Check if "-" as seperator coudl cause issues
 lerfu_string :: Syntax Atom
 lerfu_string = instanceOf . concept . isoIntercalate "-" . cons
-            <<< lerfu_word &&& many (morph "PA" <+> lerfu_word)
+            <<< lerfu_word &&& many (pa <+> lerfu_word)
 
 --FIXME handle ga'e to'a upper/lower caes
 lerfu_word :: Syntax String
@@ -925,12 +947,19 @@ quantifier = number <&& optMorph "BOI"
 number :: Syntax Atom
 number = handleFREEs2 <<< number' &&& frees
 
+pa :: Syntax String
+pa = handle <<< (morph "PA" &&& lookahead (optional (oneOfS word ["da","de","di"])))
+    where handle :: SynIso (String,Maybe String) (String)
+          handle = Iso f g
+          f ("ro",(Just _)) = lift $ Left "Don't parse ro before da here."
+          f (w   ,_       ) = pure w
+          g _ = error "pa.handle.g not implemented."
+
 number' :: Syntax Atom
 number' =  (    numberNode    |||    concept   )
     . (showReadIso . paToNum |^| isoIntercalate " ")
     . cons
-    -- <<< some (morphN 2 "PA") <&& sepSpace
-    <<< morph "PA" &&& many (morph "PA" <+> lerfu_word)
+    <<< pa &&& many (pa <+> lerfu_word)
     where paToNum :: SynIso [String] Int
           paToNum = isoFoldl (digitsToNum . second paToDigit) . addfst 0
 
@@ -956,9 +985,21 @@ kohaP :: Syntax Atom
 kohaP = da <+> ma <+> ko <+> keha <+> koha
     where koha = concept . morph "KOhA"
           ma   = varnode . word "ma"
-          da   = concept . oneOfS word ["da","de","di"]
+          da   = handleDA . (optional (mword "PA" "ro") &&& oneOfS word ["da","de","di"])
           ko   = setFlagIso "ko" . concept . word "ko"
           keha = concept . word "ke'a"
+
+          handleDA = Iso f g where
+            f (mp,w) = do
+                c <- apply varnode w
+                daf <- gets sDA
+                mi <- getDA w
+                case (mp,mi) of
+                    (Just _ ,Nothing) -> setDAF (\x -> daf $ cFAL noTv c x)
+                    (Nothing,Nothing) -> setDAF (\x -> daf $ cExL noTv c x)
+                    _                 -> setDAF daf
+                pure c
+            g c = error $ "kohaP.handleDA.g not implemented"
 
 luP :: Syntax Atom
 luP = instanceOf . ifNothingFail <<< sepMorph "LU" &&> text <&& optMorph "LIhU"

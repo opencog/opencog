@@ -225,6 +225,8 @@ cleanState s = State {sFlags = M.empty
                      ,sNow = sNow s
                      ,sCtx = sCtx s
                      ,sJAI = Nothing
+					 ,sDA = sDA s
+					 ,sDaM = sDaM s
                      ,sXU  = []}
 
 mergeState :: State -> State -> State
@@ -236,6 +238,8 @@ mergeState s1 s2 = State {sFlags = sFlags s1
                          ,sNow = sNow s1
                          ,sCtx = sCtx s1
                          ,sJAI = sJAI s1
+						 ,sDA = sDA s2
+						 ,sDaM = sDaM s2
                          ,sXU  = sXU s1}
 
 withEmptyState :: SynIso a b -> SynIso a b
@@ -251,6 +255,20 @@ withEmptyState iso = Iso f g
 
 setSeed :: SynMonad t State => Int -> (t ME) ()
 setSeed i = modify (\s -> s {sSeed = i})
+
+setDAF :: SynMonad t State => (Atom -> Atom) -> (t ME) ()
+setDAF f = modify (\s -> s {sDA = f})
+
+setDa :: SynMonad t State => String -> Atom -> (t ME) ()
+setDa da a = modify (\s -> s {sDaM = M.insert da a (sDaM s)})
+
+unsetDA :: SynMonad t State => String -> (t ME) ()
+unsetDA da = modify (\s -> s {sDaM = M.delete da (sDaM s)})
+
+getDA :: SynMonad t State => String -> (t ME) (Maybe Atom)
+getDA da = do
+        das <- gets sDaM
+        pure $ M.lookup da das
 
 setFlag :: SynMonad t State => Flag -> (t ME) ()
 setFlag f = modify (\s -> s {sFlags = M.insert f "" (sFlags s) })

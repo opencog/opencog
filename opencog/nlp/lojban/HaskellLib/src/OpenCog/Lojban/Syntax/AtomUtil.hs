@@ -402,7 +402,9 @@ genInstance typeL = Iso f g where
         rndname <- randName $ show a
         let i = Node t (rndname  ++ "___" ++ name) noTv
             l = case a of
-                    VN name -> Link typeL [i,cCN name noTv] highTv
+                    VN name -> if name `elem` ["da","de","di"]
+                                  then Link typeL [cCN (nodeName i) noTv,a] highTv
+                                  else Link typeL [i,cCN name noTv] highTv
                     _       -> Link typeL [i,a] highTv
         pushAtom l
         pure i
@@ -427,7 +429,10 @@ filterState = Iso f g where
 getDefinitions :: [Atom] -> [Atom] -> [Atom]
 getDefinitions ns ls = if ns == nns then links else getDefinitions nns ls
     where links = filter ff ls --Get all links that contain a node from ns
-          ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
+          --ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
+          --The node to be defined should be the first element of  a link
+          ff (Link _ ls _) = (head ls) `elem` ns
+          ff _ = False
           nodes = concatMap atomGetAllNodes links --Get all Nodes from the links
           nns   = nub $ ns ++ nodes --Remove duplicates
 
