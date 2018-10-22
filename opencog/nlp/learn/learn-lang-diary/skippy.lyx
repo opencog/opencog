@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{url}
@@ -12,16 +14,16 @@
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -41,15 +43,24 @@
 \pdf_pdfusetitle true
 \papersize default
 \use_geometry false
-\use_amsmath 1
-\use_esint 1
-\use_mhchem 1
-\use_mathdots 1
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 1
 \index Index
 \shortcut idx
@@ -827,7 +838,7 @@ In the CBOW model, the dimension of the space in which the vector
 \begin_inset Formula $D$
 \end_inset
 
- are in the range of 50--300; by contrast, typical vocabulary sizes 
+ are in the range of 50–300; by contrast, typical vocabulary sizes 
 \begin_inset Formula $W$
 \end_inset
 
@@ -952,7 +963,7 @@ one-hot
 \begin_inset Formula $w$
 \end_inset
 
- -- equivalently, it is the 
+ – equivalently, it is the 
 \begin_inset Formula $w$
 \end_inset
 
@@ -1457,7 +1468,7 @@ Typical choices for the dimension
 \begin_inset Formula $H$
 \end_inset
 
- is in the 500--1000 range, and is thus comparable to the size of 
+ is in the 500–1000 range, and is thus comparable to the size of 
 \begin_inset Formula $ND$
 \end_inset
 
@@ -1780,7 +1791,7 @@ ran
 \begin_inset Quotes eld
 \end_inset
 
-girl--ran
+girl–ran
 \begin_inset Quotes erd
 \end_inset
 
@@ -2804,7 +2815,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Feynman Diagrams in Language
@@ -3015,7 +3026,7 @@ key "Sleator1991,Sleator1993"
  by disjuncts 
 \begin_inset Formula 
 \[
-J_{ijk\cdots}=-\log p\left(w_{i};w_{left\, facing};w_{right\, facing}\right)
+J_{ijk\cdots}=-\log p\left(w_{i};w_{left\,facing};w_{right\,facing}\right)
 \]
 
 \end_inset
@@ -3532,7 +3543,7 @@ status collapsed
 \begin_layout Plain Layout
 Properly speaking, mutual information is not a metric, since it does not
  obey the triangle inequality.
- Thus, it should be called a divergence (it is essentially the Kullback--Liebler
+ Thus, it should be called a divergence (it is essentially the Kullback–Liebler
  dirvergence) in that it distinguishes points by thier divergence, without
  providing a specific distance betwen them.
  Despite this, the divergence will be called either a matric or a distance
@@ -3993,7 +4004,7 @@ lots of zero entries
 Sparsity
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Sparsity"
+name "subsec:Sparsity"
 
 \end_inset
 
@@ -4063,6 +4074,10 @@ key "Vepstas2013"
 
  for a detailed description of these datasets.
  The dimensions and sparsity are summarized in the table below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4070,10 +4085,10 @@ key "Vepstas2013"
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -4358,7 +4373,7 @@ Compared to the back-of-the-envelope estimate of sparsity for SkipGrams,
 No Large Data Limit 
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Zipf's-Law;-Noise"
+name "subsec:Zipf's-Law;-Noise"
 
 \end_inset
 
@@ -4940,7 +4955,7 @@ reference "eq:factorize"
 \begin_inset Formula $G$
 \end_inset
 
- -- it is the rank of the matrices in the factorization.
+ – it is the rank of the matrices in the factorization.
  The factorization is only an approximation to the original data; thus,
  one says LRMA and not LRMF.
 \end_layout
@@ -5062,7 +5077,7 @@ The assumption that the matrix entries are normally distributed are also
  of the matrix entries are Zipfian, as argued in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Zipf's-Law;-Noise"
+reference "subsec:Zipf's-Law;-Noise"
 
 \end_inset
 
@@ -5138,7 +5153,7 @@ key "WP-Homogenous-space"
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
 
- -- that is, the spaces behave like actual vector spaces, so that concepts
+ – that is, the spaces behave like actual vector spaces, so that concepts
  like PCA and SVD can be applied.
 \end_layout
 
@@ -5343,7 +5358,7 @@ This seems like a plausible objective function, if the
  But, as argued in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Zipf's-Law;-Noise"
+reference "subsec:Zipf's-Law;-Noise"
 
 \end_inset
 
@@ -5512,7 +5527,7 @@ Thus, the use of the smoothing techniques seems highly appropriate, given
  is both noisy and incomplete, as discussed in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Zipf's-Law;-Noise"
+reference "subsec:Zipf's-Law;-Noise"
 
 \end_inset
 
@@ -5562,7 +5577,7 @@ These are not reviewed here.
 Clustering as Matrix Factorization 
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Clustering-as-Matrix"
+name "subsec:Clustering-as-Matrix"
 
 \end_inset
 
@@ -5796,7 +5811,7 @@ The constraint
 \begin_inset Formula $I$
 \end_inset
 
- -- that is, have equal values along the diagonal.
+ – that is, have equal values along the diagonal.
  Here, the tr operator is the matrix trace.
  The trace of a matrix is, of course, equal to the sum of the eigenvalues
  of the matrix; thus, optimizing the above is equivalent to performing a
@@ -6170,7 +6185,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Factorization
@@ -6447,7 +6462,7 @@ key "Dhillon2003"
 Factorization in Link Grammar
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Factorization-in-Link"
+name "subsec:Factorization-in-Link"
 
 \end_inset
 
@@ -6944,7 +6959,7 @@ This allows an iterative algorithm to be performed, clustering only rows
 Biclustering
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Biclustering"
+name "subsec:Biclustering"
 
 \end_inset
 
@@ -7066,7 +7081,7 @@ The new cluster assignments are obtained by minimizing the information loss,
  such that
 \begin_inset Formula 
 \[
-MI_{word\, loss}=\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\left(d|g^{\prime}\right)p\left(g^{\prime}|g\right)}
+MI_{word\,loss}=\sum_{d}p\left(d|w\right)\log_{2}\frac{p\left(d|w\right)}{p\left(d|g^{\prime}\right)p\left(g^{\prime}|g\right)}
 \]
 
 \end_inset
@@ -7080,7 +7095,7 @@ is minimized.
  that minimizes the loss 
 \begin_inset Formula 
 \[
-MI_{disjunct\, loss}=\sum_{w}p\left(w|d\right)\log_{2}\frac{p\left(w|d\right)}{p\left(w|g\right)p\left(g|g^{\prime}\right)}
+MI_{disjunct\,loss}=\sum_{w}p\left(w|d\right)\log_{2}\frac{p\left(w|d\right)}{p\left(w|g\right)p\left(g|g^{\prime}\right)}
 \]
 
 \end_inset
@@ -7089,7 +7104,7 @@ This looks like an entirely reasonable algorithm, concrete and specific
  and implementable, until one refers back to the table in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Sparsity"
+reference "subsec:Sparsity"
 
 \end_inset
 
@@ -7126,7 +7141,7 @@ on.
 Word-Sense Disambiguation
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Word-Sense-Disambiguation"
+name "subsec:Word-Sense-Disambiguation"
 
 \end_inset
 
@@ -7337,7 +7352,7 @@ Not much has changed: the word-senses can now be legitimately hard-clustered;
  The clustering algorithm reviewed in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Biclustering"
+reference "subsec:Biclustering"
 
 \end_inset
 
@@ -7481,7 +7496,7 @@ The point here is that it is the graph structure that is the most important;
  This is made clear in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Factorization-in-Link"
+reference "subsec:Factorization-in-Link"
 
 \end_inset
 
@@ -7750,7 +7765,7 @@ key "Vepstas2017connectors"
  enables, is meaningless.
  For cosine values greater than 1/2, the logarithm is essentially linear:
  
-\begin_inset Formula $-\log\cos\, x\approx1-\cos\, x$
+\begin_inset Formula $-\log\cos\,x\approx1-\cos\,x$
 \end_inset
 
  in the region of interest.
@@ -7818,7 +7833,7 @@ key "Ding2005"
  and reviewed in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Clustering-as-Matrix"
+reference "subsec:Clustering-as-Matrix"
 
 \end_inset
 
@@ -8213,7 +8228,7 @@ This has the peculiar property that, if for any word
  This was already noted in section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Sparsity"
+reference "subsec:Sparsity"
 
 \end_inset
 
@@ -8249,7 +8264,7 @@ To be consistent with the previous expression, if
 \begin_inset Formula $\log_{2}p\left(w,d\right)=0$
 \end_inset
 
- -- missing observations contribute nothing.
+ – missing observations contribute nothing.
  Continuing in this vein of thinking, that infrequently-observed phenomena
  are being unfairly punished and are not being given due weight, one might
  consider the centroid to be described by
@@ -8327,7 +8342,7 @@ Word-Sense Disambiguation
 The section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Word-Sense-Disambiguation"
+reference "subsec:Word-Sense-Disambiguation"
 
 \end_inset
 
@@ -8640,7 +8655,7 @@ key "Mezard2008"
 \end_inset
 
  This is a particularly quickly-convergent mean-field method.
- The problem is that it fails to converge when the coupling is strong --
+ The problem is that it fails to converge when the coupling is strong –
  in other words, when the network is glassy (in the sense of 
 \begin_inset Quotes eld
 \end_inset
@@ -9002,7 +9017,7 @@ non-uniform spreading
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "lang"
-options "plain"
+options "tufte"
 
 \end_inset
 
