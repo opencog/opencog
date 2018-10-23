@@ -93,7 +93,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; draft of 11 September 2018
+6 July 2018; draft of 23 October 2018
 \end_layout
 
 \begin_layout Abstract
@@ -142,6 +142,86 @@ This is a work in progress.
 
 \begin_layout Section
 Introduction
+\end_layout
+
+\begin_layout Standard
+Deep learning and neural nets are all the rage, today, and have displaced
+ symbolic AI systems in most applications.
+ It’s commonly believed that the two approaches have nothing to do with
+ each other; that they’re just completely different, and that’s that.
+ But this is false: there are some profound similarities; they are not only
+ variants of one-another, but, in a deep way, they have commonalities that
+ render them essentially identical.
+ This text attempts to explain how.
+ 
+\end_layout
+
+\begin_layout Standard
+The clearest starting point for seeing this seems to be natural language,
+ where neural net methods have made great strides, but have not surpassed
+ traditional (symbolic) linguistic theory.
+ However, once this similarity is understood, it can be ported over to other
+ domains, including deep-learning strongholds such as vision.
+ To keep the discussion anchored, and to avoid confusing abstractions, most
+ of what follows will focus on linguistics; it is up to you, the reader,
+ to imagine other, more general settings.
+\end_layout
+
+\begin_layout Standard
+The starting point for probabilistic approaches (including deep learning)
+ is the Bayesian network
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-BayesNet"
+
+\end_inset
+
+: a probability 
+\begin_inset Formula $P(x_{1},x_{2},…,x_{n})$
+\end_inset
+
+ of observing 
+\begin_inset Formula $n$
+\end_inset
+
+ events.
+ For language, the 
+\begin_inset Formula $x_{k}$
+\end_inset
+
+ are taken to be words, and 
+\begin_inset Formula $n$
+\end_inset
+
+ is the length of the sentence, so that 
+\begin_inset Formula $P(x_{1},x_{2},…,x_{n})$
+\end_inset
+
+ is the “probability” of observing the sequence 
+\begin_inset Formula $x_{1},x_{2},…,x_{n}$
+\end_inset
+
+ of words.
+ The technical problem with this viewpoint is the explosively large space:
+ if one limits oneself to a vocabulary of 10 thousand words (and many people
+ don’t) and sentences of 20 words or less, that’s 
+\begin_inset Formula $(10^{4})^{20}=10^{80}=2^{270}$
+\end_inset
+
+ probabilities, an absurdly large number even for Jupiter-sized computers.
+ If 
+\begin_inset Formula $n$
+\end_inset
+
+ is the length of this text, then it really seems impossible.
+ The key, of course, is to realize that almost all of these probabilities
+ are effectively zero; the goal of machine learning is to find a format,
+ a representation for grammar (and meaning) that effortlessly avoids that
+ vast ocean of zero entries.
+\end_layout
+
+\begin_layout Section
+ntroduction
 \end_layout
 
 \begin_layout Standard
