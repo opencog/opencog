@@ -220,6 +220,331 @@ key "WP-BayesNet"
  vast ocean of zero entries.
 \end_layout
 
+\begin_layout Standard
+Traditional linguistics has done exactly that: when one has a theory of
+ syntax, one has a formulation that clearly states which sentences should
+ be considered to be grammatically valid, and which ones not.
+ The trick is to provide a lexis (a lookup table), and some fairly small
+ number of rules that define how words can be combined; i.e.
+ arranged to the left and right of one-another.
+ You look up a word in the lexis (the dictionary) to find a listing of what
+ other words are allowed to surround it.
+ Try every possible combination of rules until you find one that works,
+ where all of the words can hook up to one-another.
+ For the purposes here, the easiest and the best way to visualize this is
+ with Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-LinkGrammar,Sleator1991,Sleator1993"
+
+\end_inset
+
+, a specific kind of dependency grammar.
+ All theories of grammar will constrain allowed syntax; but Link Grammar
+ is useful for this comparison because it explicitly identifies words to
+ the left, and words to the right.
+ Each lexical entry is like a template, a fill-in-the-blanks form, a jigsaw-puzz
+le piece, telling you exactly what other words are allowed to the left,
+ and to the right, of the given word.
+ This left-right sequence makes it directly comparable to what neural-net
+ approaches, such as Word2Vec
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Word2Vec,Bengio2003"
+
+\end_inset
+
+ or SkipGram
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013b,Mikolov2013a"
+
+\end_inset
+
+ do.
+\end_layout
+
+\begin_layout Standard
+What does Word2Vec do? Clearly, the 
+\begin_inset Formula $2^{270}$
+\end_inset
+
+ probabilities in a twenty-word sentence is overwhelming; one obvious simplifica
+tion is to look only at N-grams: that is, to only look at the closest neighborin
+g words, working in a window that is N words wide.
+ For N=5, this gives 
+\begin_inset Formula $(10^{4})^{5}=10^{20}=2^{65}$
+\end_inset
+
+ which is still huge, but is bearable.
+ When scanning actual text, almost all of these combinations won’t be observed;
+ this is just an upper bound.
+ In practice, a table of 5-grams fit in latter-day computer RAM.
+ The statistical model is to map each N-gram to a vector, use that vector
+ to define a Boltzmann distribution (
+\begin_inset Formula $P=\exp(\overrightarrow{v}⋅\overrightarrow{w})/Z$
+\end_inset
+
+), and then use gradient ascent (hill-climbing) to adjust the vector coefficient
+s, so as to maximize find a maximum of the probability 
+\begin_inset Formula $P$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+How are Word2Vec and Link Grammar similar? Well, I hope that the above descripti
+on of Link Grammar already planted the idea that each lexical entry is a
+ lot like an N-gram.
+ Each lexical entry tells you which words can appear to the right, and which
+ words to the left of a given word.
+ Its a bit less constrained than an N-gram: there’s no particular distance
+ limitation on the dependency links.
+ It can also skip over words: a lexical entry is more like a skip-gram.
+ Although there is no distance limitation, lexical entries still have a
+ small-N-like behavior, not in window size, but in attachment complexity.
+ Determiners have a valency of 1; nouns a valency of 2 or 3 (a link to a
+ verb, to an adjective, to a determiner); verbs a valency of 2, 3 or 4 (subject,
+ object, etc.).
+ So lexical entries are like skip-grams: the window size is effectively
+ unbounded, but the size of the context remains small (N is small).
+\end_layout
+
+\begin_layout Standard
+Are there other similarities? Yes, but first, a detour.
+\end_layout
+
+\begin_layout Standard
+What happened to the 2270 probabilities? A symbolic theory of grammar, such
+ as Link Grammar, is saying that nearly all of these are zero; the only
+ ones that are not zero are the ones that obey the rules of the grammar.
+ Consider the verb “throw” (“Kevin threw the ball”).
+ A symbolic theory of grammar effectively sates that the only non-vanishing
+ probabilities are those of the form P(x1,x2,…,xk=noun,…,xm=throw,…,xp=object,…,
+xn) and that all the others must be zero.
+ Now, since nouns make up maybe 1/2 of all words (the subject and object
+ are both nouns), this constraint eliminates 104x104/(2×2)= 224 possibilities
+ (shrinking 2270 to 2270-24 = 2246).
+ Nothing to sneeze at, given that its just one fairly simple rule.
+ But this is only one rule: there are others, which say things like “singular
+ count nouns must be preceded by a determiner” (so, “the ball”).
+ These constraints are multiplicative: if the determiner is missing, then
+ the probability is exactly zero.
+ There are only a handful of determiners, so another factor of 104=213 is
+ vaporized.
+ And so on.
+ A relatively small lexis quickly collapses the set of possibilities.
+ Can we make a back of the envelope estimate? A noun-constraint eliminates
+ half the words (leaving 5K of 10K possibilities).
+ A determiner constraint removes all but 10 possibilities.
+ Many grammatical classes have only a few hundred members in them (“throw”
+ is like “hit”, but is not like “smile”).
+ So, realistically, each xk can have only about 100 possibilities; there
+ are only about 10020 =1040 =2130 grammatically valid sentences that are
+ 20 words long, and these can be encoded fairly accurately with a few thousand
+ lexical entries.
+\end_layout
+
+\begin_layout Standard
+In essence, a symbolic theory of grammar, and more specifically, dependency
+ grammars, accomplish the holy grail of Bayesian networks: factorizing the
+ Bayesian network.
+ The lexical rules state that there is a node in the network, for example,
+ P(x1,x2,…,xk=noun,…,xm=throw,…,xp=object,…,xn) and that the entire sentences
+ is a product of such nodes: The probability of “Kevin threw the ball” is
+ the product P(x1=Kevin, x2=verb, …, xn) P(x1,x2, …, xk=noun, …, xm=throw,
+ …, xp=object, …, xn) P(x1,x2, …, xk=the, …, xm=noun, …, xn) P(x1,x2, …,
+ xn=ball) Stitch them all together, you’ve got a sentence, and its probability.
+ (In Link Grammar, -log P is called the “cost”, and costs are additive,
+ for parse ordering.) To be explicit: lexical entries are exactly the same
+ thing as the factors of a factorized Bayesian network.
+ What’s more, figuring out which of these factors come to play in analyzing
+ a specific sentence is called “parsing”.
+ One picks through the lookup table of possible network factors, and wires
+ them up, so that there are no dangling endpoints.
+ Lexical entries are look like subsets of a graph: a vertex, and some dangling
+ edges hanging from the vertex.
+ Pick out the right vertexes (one per word), wire them together so that
+ there are no dangling unconnected edges, and viola! One has a graph: the
+ graph is the Bayesian network.
+ Linguists use a different name: they call it a dependency parse.
+\end_layout
+
+\begin_layout Standard
+The Word2Vec/SkipGram model also factorizes, in much the same way! First,
+ note that the above parse can be written as a product of factors of the
+ form P(word|context), the product running over all of the words in the
+ sentence.
+ For a dependency grammar, the context expresses the dependency relations.
+ The Word2Vec factorization is identical; the context is simpler.
+ In it’s most naive form, its just a bag of the N nearest words, ignoring
+ the word-order.
+ But the word-order is ignored for practical reasons, not theoretical ones:
+ it reduces the size of the computational problem; it speeds convergence.
+ Smaller values of N mean that long-distance dependencies are hard to discover;
+ the skipgram model partly overcomes this by keeping the bag small, while
+ expanding the size of the window.
+ If one uses the skip-gram model, with a large window size, and also keep
+ track of the word-order, and restrict to low valencies, then one very nearly
+ has a dependency grammar, in the style of Link Grammar.
+ The only difference is that such a model does not force any explicit dependency
+ constraints; rather, they are implicit, as the words must appear in the
+ context.
+ Compared to a normal dependency grammar, this might allow some words to
+ be accidentally double-linked, when they should not have been.
+ Dependency grammar constraints are sharper than merely asking for the correct
+ context.
+ To summarize: the notions of context are different, but there’s a clear
+ path from one to the other, with several interesting midway points.
+\end_layout
+
+\begin_layout Standard
+The next obvious difference between Link Grammar and Word2Vec/SkipGram are
+ the mechanisms for obtaining the probabilities.
+ But this is naive: in fact, they are much more similar than it first appears.
+ In both systems, the starting point is (conceptually) a matrix, of dimension
+ WxK, with W the size of the vocabulary, and K the size of the context.
+ In general, K is much much larger than W; for Word2Vec, K could get as
+ large as WN for a window size of N, although, in practice, only a tiny
+ fraction of that is observed.
+ Both Link Grammar and Word2Vec perform approximate matrix factorization
+ on this matrix.
+ The way the approximations are done is different.
+ In the case of Word2Vec, one picks some much smaller dimension M, typically
+ around M=200, or maybe twice as large; this is the number of “neurons”
+ in the middle layer.
+ Then, all of W is projected down to this M-dimensional space (with a linear
+ projection matrix).
+ Separately, the K-dimensional context is also projected down.
+ Given a word, let its projection be the (M-dimensional) vector u.
+ Given a context, let it’s projection be the vector v.
+ The probability of a word-in-context is given by a Boltzmann distribution,
+ as exp(u⋅v)/Z where u⋅v is the dot product and Z is a scale factor (called
+ the “partition function“).
+ The basis elements in this M-dimensional space have no specific meaning;
+ the grand-total vector space is rotationally invariant (only the dot product
+ matters, and dot products are scalars).
+\end_layout
+
+\begin_layout Standard
+The primary task for Word2Vec/SkipGram is to discover the two projection
+ matrices.
+ This can be done by gradient ascent (hillclimbing), looking to maximize
+ the probability.
+ The primary output of Word2Vec are the two projection matrices: one that
+ is WxM-dimensional, the other that is MxK-dimensional.
+ In general, neither of these matrices are sparse (that is, most entries
+ are non-zero).
+\end_layout
+
+\begin_layout Standard
+Link Grammar also performs a dimensional reduction, but not quite exactly
+ by using projection matrices.
+ Rather, a word can be assigned to several different word-categories (there
+ are de facto about 2300 of these in the hand-built English dictionaries).
+ Associated with each category is a list of dozens to thousands of “disjuncts”
+ (dependency-grammar dependencies), which play the role analogous to “context”.
+ However, there are far, far fewer disjuncts than there are contexts.
+ This is because every (multi-word) context is associated with a handful
+ of disjuncts, in such a way that each disjunct stands for hundreds to as
+ many as millions of different contexts.
+ Effectively, the lexis of Link Grammar is a sparse CxD-dimensional matrix,
+ with C grammatical categories, and D disjuncts, and most entries in this
+ CxD dimensional matrix being zero.
+ (The upper bound on D is LV, where L is the number of link types, and V
+ is the maximum valency – about 5 or 6.
+ In practice, D is in the tens of thousands.) The act of parsing selects
+ a single entry from this matrix for each word in the sentence.
+ The probability associated to that word is exp(-c) where c is the “cost”,
+ the numerical value stored at this matrix entry.
+\end_layout
+
+\begin_layout Standard
+Thus, both systems perform a rather sharp dimensional reduction, to obtain
+ a much-lower dimensional intermediate form.
+ Word2Vec is explicitly linear, Link Grammar is not exactly.
+ However (and this is important, but very abstract) Link Grammar can be
+ described by a (non-symmetric) monoidal category.
+ This category is similar to that of the so-called “pregroup grammar”, and
+ is described in a number of places (some predating both Link Grammar an
+ pregroup grammar).
+ The curious thing is that linear algebra is also described by a monoidal
+ category.
+ One might say that this “explains” why Word2Vec works well: it is using
+ the same underlying structural framework (monoidal categories) as traditional
+ symbolic linguistics.
+ The precise details are too complex to sketch here, and must remain cryptic,
+ for now, although they are open to those versed in category theory.
+ The curious reader is encouraged to explore category-theoretic approaches
+ to grammar, safe in the understanding that they provide a foundational
+ understanding, no matter which detailed theory one works in.
+ At the same time, the category-theoretic approach suggests how Word2Vec
+ (or any other neural-net or vector-based approach to grammar) can be improved
+ upon: it shows how syntax can be restored, with the result still looking
+ like a funny/unusual kind of sparse neural-net.
+ These are not conflicting approaches; they have far far more in common
+ than meets the eye.
+\end_layout
+
+\begin_layout Standard
+A few words about word-senses and semantics are in order.
+ It has been generally observed that Word2Vec seems to encode “semantics”
+ in some opaque way, in that it can distinguish different word-senses, based
+ on context.
+ The same is true for Link Grammar: when a word is used in a specific context,
+ the result of parsing selects a single disjunct.
+ That disjunct can be thought of as a hyper-fine grammatical category; but
+ these are strongly correlated with meaning.
+ Synonyms can be discovered in similar ways in both systems: if two different
+ words all share a lot of the same disjuncts, they are effectively synonymous,
+ and can be used interchangeably in sentences.
+\end_layout
+
+\begin_layout Standard
+Similarly, given two different words in Word2Vec/SkipGram, if they both
+ project down to approximately the same vector in the intermediate layer,
+ they can be considered to be synonymous.
+ This illustrates yet another way that Link Grammar and Word2Vec/SkipGram
+ are similar: the list of all possible disjuncts associated with a word
+ is also a vector, and, if two words have almost co-linear disjunct vectors,
+ they are effectively synonymous.
+ That is, disjunct-vectors behave almost exactly like neuron intermediate-layer
+ vectors.
+ They encode similar kinds of information into a vector format.
+\end_layout
+
+\begin_layout Standard
+This is also where we have the largest, and the most important difference
+ between neural net approaches, and Link Grammar.
+ In the neural net approach, the intermediate neuron layer is a black box,
+ completely opaque and un-analyzable, just some meaningless collection of
+ floating-point numbers.
+ In Link Grammar, the disjunct vector is clear, overt, and understandable:
+ you can see exactly what it is encoding, because each disjunct tells you
+ exactly the syntactic relationship between a word, and its neighbors.
+ This is the great power of symbolic approaches to natural-language: they
+ are human-auditable, human understandable in a way that neural nets are
+ not.
+ (Currently; I think that what this essay describes is an effective sketch
+ for a technique for prying open the lid of the black box of neural nets.
+ But that’s for a different day.)
+\end_layout
+
+\begin_layout Standard
+The arguments presented above are worked out in greater detail, with all
+ the mathematical trimmings, in this linked PDF.
+ The commonality, by means of category theory, is explored in a different
+ paper, on sheaves.
+\end_layout
+
+\begin_layout Standard
+Many thanks and appreciation to Hanson Robotics for providing the time to
+ think and write about such things.
+ (Much much earlier and kludgier versions of these ideas have been seen
+ in public, in older robot demos.)
+\end_layout
+
 \begin_layout Section
 ntroduction
 \end_layout
@@ -234,21 +559,6 @@ key "Sleator1991,Sleator1993"
 \end_inset
 
 .
- A slightly more details review of N-gram, neural net
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Bengio2003"
-
-\end_inset
-
- and SkipGram
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Mikolov2013b,Mikolov2013a"
-
-\end_inset
-
- models are given, including AdaGram.
  It is generally assumed that the reader is generally familiar with various
  concepts employed in the OpenCog language-learning project.
 \end_layout
