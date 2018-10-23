@@ -270,9 +270,21 @@ What does Word2Vec do? Clearly, the
 \end_inset
 
  probabilities in a twenty-word sentence is overwhelming; one obvious simplifica
-tion is to look only at N-grams: that is, to only look at the closest neighborin
-g words, working in a window that is N words wide.
- For N=5, this gives 
+tion is to look only at 
+\begin_inset Formula $N$
+\end_inset
+
+-grams: that is, to only look at the closest neighboring words, working
+ in a window that is 
+\begin_inset Formula $N$
+\end_inset
+
+ words wide.
+ For 
+\begin_inset Formula $N=5$
+\end_inset
+
+, this gives 
 \begin_inset Formula $(10^{4})^{5}=10^{20}=2^{65}$
 \end_inset
 
@@ -280,9 +292,12 @@ g words, working in a window that is N words wide.
  When scanning actual text, almost all of these combinations won’t be observed;
  this is just an upper bound.
  In practice, a table of 5-grams fit in latter-day computer RAM.
- The statistical model is to map each N-gram to a vector, use that vector
- to define a Boltzmann distribution (
-\begin_inset Formula $P=\exp(\overrightarrow{v}⋅\overrightarrow{w})/Z$
+ The statistical model is to map each 
+\begin_inset Formula $N$
+\end_inset
+
+-gram to a vector, use that vector to define a Boltzmann distribution (
+\begin_inset Formula $P=\exp(\overrightarrow{v}\cdot\overrightarrow{w})/Z$
 \end_inset
 
 ), and then use gradient ascent (hill-climbing) to adjust the vector coefficient
@@ -294,45 +309,88 @@ s, so as to maximize find a maximum of the probability
 \end_layout
 
 \begin_layout Standard
-How are Word2Vec and Link Grammar similar? Well, I hope that the above descripti
-on of Link Grammar already planted the idea that each lexical entry is a
- lot like an N-gram.
+How are Word2Vec and Link Grammar similar? The above description of Link
+ Grammar should have already planted the idea that each lexical entry is
+ a lot like an 
+\begin_inset Formula $N$
+\end_inset
+
+-gram.
  Each lexical entry tells you which words can appear to the right, and which
  words to the left of a given word.
- Its a bit less constrained than an N-gram: there’s no particular distance
- limitation on the dependency links.
+ Its a bit less constrained than an 
+\begin_inset Formula $N$
+\end_inset
+
+-gram: there’s no particular distance limitation on the dependency links.
  It can also skip over words: a lexical entry is more like a skip-gram.
  Although there is no distance limitation, lexical entries still have a
- small-N-like behavior, not in window size, but in attachment complexity.
- Determiners have a valency of 1; nouns a valency of 2 or 3 (a link to a
- verb, to an adjective, to a determiner); verbs a valency of 2, 3 or 4 (subject,
- object, etc.).
+ small-
+\begin_inset Formula $N$
+\end_inset
+
+-like behavior, not in window size, but in attachment complexity.
+ Determiners have a valency
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Valency"
+
+\end_inset
+
+ of 1; nouns a valency of 2 or 3 (a link to a verb, to an adjective, to
+ a determiner); verbs a valency of 2, 3 or 4 (subject, object, etc.).
  So lexical entries are like skip-grams: the window size is effectively
- unbounded, but the size of the context remains small (N is small).
+ unbounded, but the size of the context remains small (
+\begin_inset Formula $N$
+\end_inset
+
+ is small).
 \end_layout
 
 \begin_layout Standard
 Are there other similarities? Yes, but first, a detour.
-\end_layout
+ What happened to the 
+\begin_inset Formula $2^{270}$
+\end_inset
 
-\begin_layout Standard
-What happened to the 2270 probabilities? A symbolic theory of grammar, such
- as Link Grammar, is saying that nearly all of these are zero; the only
- ones that are not zero are the ones that obey the rules of the grammar.
+ probabilities? A symbolic theory of grammar, such as Link Grammar, is saying
+ that nearly all of these are zero; the only ones that are not zero are
+ the ones that obey the rules of the grammar.
  Consider the verb “throw” (“Kevin threw the ball”).
  A symbolic theory of grammar effectively sates that the only non-vanishing
- probabilities are those of the form P(x1,x2,…,xk=noun,…,xm=throw,…,xp=object,…,
-xn) and that all the others must be zero.
+ probabilities are those of the form 
+\begin_inset Formula 
+\[
+P(x_{1},x_{2},\cdots,x_{k}=\mbox{noun},\cdots,x_{m}=\mbox{throw},\cdots,x_{p}=\mbox{object},\cdots,x_{n})
+\]
+
+\end_inset
+
+and that all the others must be zero.
  Now, since nouns make up maybe 1/2 of all words (the subject and object
- are both nouns), this constraint eliminates 104x104/(2×2)= 224 possibilities
- (shrinking 2270 to 2270-24 = 2246).
+ are both nouns), this constraint eliminates 
+\begin_inset Formula $10^{4}\times10^{4}/(2\times2)=2^{24}$
+\end_inset
+
+ possibilities (shrinking 
+\begin_inset Formula $2^{270}$
+\end_inset
+
+ to 
+\begin_inset Formula $2^{270-24}=2^{246}$
+\end_inset
+
+).
  Nothing to sneeze at, given that its just one fairly simple rule.
  But this is only one rule: there are others, which say things like “singular
  count nouns must be preceded by a determiner” (so, “the ball”).
  These constraints are multiplicative: if the determiner is missing, then
  the probability is exactly zero.
- There are only a handful of determiners, so another factor of 104=213 is
- vaporized.
+ There are only a handful of determiners, so another factor of 
+\begin_inset Formula $10^{4}=2^{13}$
+\end_inset
+
+ is vaporized.
  And so on.
  A relatively small lexis quickly collapses the set of possibilities.
  Can we make a back of the envelope estimate? A noun-constraint eliminates
@@ -340,10 +398,16 @@ xn) and that all the others must be zero.
  A determiner constraint removes all but 10 possibilities.
  Many grammatical classes have only a few hundred members in them (“throw”
  is like “hit”, but is not like “smile”).
- So, realistically, each xk can have only about 100 possibilities; there
- are only about 10020 =1040 =2130 grammatically valid sentences that are
- 20 words long, and these can be encoded fairly accurately with a few thousand
- lexical entries.
+ So, realistically, each 
+\begin_inset Formula $x_{k}$
+\end_inset
+
+ can have only about 100 possibilities; there are only about 
+\begin_inset Formula $100^{20}=10^{40}=2^{130}$
+\end_inset
+
+ grammatically valid sentences that are 20 words long, and these can be
+ encoded fairly accurately with a few thousand lexical entries.
 \end_layout
 
 \begin_layout Standard
@@ -351,14 +415,34 @@ In essence, a symbolic theory of grammar, and more specifically, dependency
  grammars, accomplish the holy grail of Bayesian networks: factorizing the
  Bayesian network.
  The lexical rules state that there is a node in the network, for example,
- P(x1,x2,…,xk=noun,…,xm=throw,…,xp=object,…,xn) and that the entire sentences
- is a product of such nodes: The probability of “Kevin threw the ball” is
- the product P(x1=Kevin, x2=verb, …, xn) P(x1,x2, …, xk=noun, …, xm=throw,
- …, xp=object, …, xn) P(x1,x2, …, xk=the, …, xm=noun, …, xn) P(x1,x2, …,
- xn=ball) Stitch them all together, you’ve got a sentence, and its probability.
- (In Link Grammar, -log P is called the “cost”, and costs are additive,
- for parse ordering.) To be explicit: lexical entries are exactly the same
- thing as the factors of a factorized Bayesian network.
+ 
+\begin_inset Formula 
+\[
+P(x_{1},x_{2},\cdots,x_{k}=\mbox{noun},\cdots,x_{m}=\mbox{throw},\cdots,x_{p}=\mbox{object},\cdots,x_{n})
+\]
+
+\end_inset
+
+and that the entire sentences is a product of such nodes: The probability
+ of “Kevin threw the ball” is the product
+\begin_inset Formula 
+\begin{multline*}
+P(x_{1}=\mbox{Kevin},x_{2}=\mbox{verb},\cdots,x_{n})\\
+P(x_{1},x_{2},\cdots,x_{k}=\mbox{noun},\cdots,x_{m}=\mbox{throw},\cdots,x_{p}=\mbox{object},\cdots,x_{n})\\
+P(x_{1},x_{2},\cdots,x_{i}=\mbox{the},\cdots,x_{p}=\mbox{noun},\cdots,x_{n})\\
+P(x_{1},x_{2},\cdots,x_{n}=\mbox{ball})
+\end{multline*}
+
+\end_inset
+
+Stitch them all together, you’ve got a sentence, and its probability.
+ (In Link Grammar, 
+\begin_inset Formula $-\log P$
+\end_inset
+
+ is called the “cost”, and costs are additive, for parse ordering.) To be
+ explicit: lexical entries are exactly the same thing as the factors of
+ a factorized Bayesian network.
  What’s more, figuring out which of these factors come to play in analyzing
  a specific sentence is called “parsing”.
  One picks through the lookup table of possible network factors, and wires
@@ -374,18 +458,28 @@ In essence, a symbolic theory of grammar, and more specifically, dependency
 \begin_layout Standard
 The Word2Vec/SkipGram model also factorizes, in much the same way! First,
  note that the above parse can be written as a product of factors of the
- form P(word|context), the product running over all of the words in the
- sentence.
+ form 
+\begin_inset Formula $P(\mbox{word}|\mbox{context})$
+\end_inset
+
+, the product running over all of the words in the sentence.
  For a dependency grammar, the context expresses the dependency relations.
  The Word2Vec factorization is identical; the context is simpler.
- In it’s most naive form, its just a bag of the N nearest words, ignoring
- the word-order.
+ In it’s most naive form, its just a bag of the 
+\begin_inset Formula $N$
+\end_inset
+
+ nearest words, ignoring the word-order.
  But the word-order is ignored for practical reasons, not theoretical ones:
  it reduces the size of the computational problem; it speeds convergence.
- Smaller values of N mean that long-distance dependencies are hard to discover;
- the skipgram model partly overcomes this by keeping the bag small, while
- expanding the size of the window.
- If one uses the skip-gram model, with a large window size, and also keep
+ Smaller values of 
+\begin_inset Formula $N$
+\end_inset
+
+ mean that long-distance dependencies are hard to discover; the skipgram
+ model partly overcomes this by keeping the bag small, while expanding the
+ size of the window.
+ If one uses the SkipGram model, with a large window size, and also keep
  track of the word-order, and restrict to low valencies, then one very nearly
  has a dependency grammar, in the style of Link Grammar.
  The only difference is that such a model does not force any explicit dependency
@@ -404,27 +498,117 @@ The next obvious difference between Link Grammar and Word2Vec/SkipGram are
  the mechanisms for obtaining the probabilities.
  But this is naive: in fact, they are much more similar than it first appears.
  In both systems, the starting point is (conceptually) a matrix, of dimension
- WxK, with W the size of the vocabulary, and K the size of the context.
- In general, K is much much larger than W; for Word2Vec, K could get as
- large as WN for a window size of N, although, in practice, only a tiny
- fraction of that is observed.
+ 
+\begin_inset Formula $W\times K$
+\end_inset
+
+, with 
+\begin_inset Formula $W$
+\end_inset
+
+ the size of the vocabulary, and 
+\begin_inset Formula $K$
+\end_inset
+
+ the size of the context.
+ In general, 
+\begin_inset Formula $K$
+\end_inset
+
+ is much much larger than 
+\begin_inset Formula $W$
+\end_inset
+
+; for Word2Vec, 
+\begin_inset Formula $K$
+\end_inset
+
+ could get as large as 
+\begin_inset Formula $W^{N}$
+\end_inset
+
+ for a window size of 
+\begin_inset Formula $N$
+\end_inset
+
+, although, in practice, only a tiny fraction of that is observed.
  Both Link Grammar and Word2Vec perform approximate matrix factorization
  on this matrix.
  The way the approximations are done is different.
- In the case of Word2Vec, one picks some much smaller dimension M, typically
- around M=200, or maybe twice as large; this is the number of “neurons”
- in the middle layer.
- Then, all of W is projected down to this M-dimensional space (with a linear
- projection matrix).
- Separately, the K-dimensional context is also projected down.
- Given a word, let its projection be the (M-dimensional) vector u.
- Given a context, let it’s projection be the vector v.
+ In the case of Word2Vec, one picks some much smaller dimension 
+\begin_inset Formula $M$
+\end_inset
+
+, typically around 
+\begin_inset Formula $M=200$
+\end_inset
+
+, or maybe twice as large; this is the number of “neurons” in the middle
+ layer.
+ Then, all of 
+\begin_inset Formula $W$
+\end_inset
+
+ is projected down to this 
+\begin_inset Formula $M$
+\end_inset
+
+-dimensional space (with a linear projection matrix).
+ Separately, the 
+\begin_inset Formula $K$
+\end_inset
+
+-dimensional context is also projected down.
+ Given a word, let its projection be the (
+\begin_inset Formula $M$
+\end_inset
+
+-dimensional) vector 
+\begin_inset Formula $\vec{u}$
+\end_inset
+
+.
+ Given a context, let it’s projection be the vector 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+.
  The probability of a word-in-context is given by a Boltzmann distribution,
- as exp(u⋅v)/Z where u⋅v is the dot product and Z is a scale factor (called
- the “partition function“).
- The basis elements in this M-dimensional space have no specific meaning;
- the grand-total vector space is rotationally invariant (only the dot product
- matters, and dot products are scalars).
+ as 
+\begin_inset Formula $\exp\left(\vec{u}\cdot\vec{v}\right)/Z$
+\end_inset
+
+ where 
+\begin_inset Formula $\vec{u}\cdot\vec{v}$
+\end_inset
+
+ is the dot product and 
+\begin_inset Formula $Z$
+\end_inset
+
+ is a scale factor (called the 
+\begin_inset Quotes eld
+\end_inset
+
+partition function
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WP-Partition"
+
+\end_inset
+
+).
+ The basis elements in this 
+\begin_inset Formula $M$
+\end_inset
+
+-dimensional space have no specific meaning; the grand-total vector space
+ is rotationally invariant (only the dot product matters, and dot products
+ are scalars).
 \end_layout
 
 \begin_layout Standard
@@ -433,7 +617,15 @@ The primary task for Word2Vec/SkipGram is to discover the two projection
  This can be done by gradient ascent (hillclimbing), looking to maximize
  the probability.
  The primary output of Word2Vec are the two projection matrices: one that
- is WxM-dimensional, the other that is MxK-dimensional.
+ is 
+\begin_inset Formula $W\times M$
+\end_inset
+
+-dimensional, the other that is 
+\begin_inset Formula $M\times K$
+\end_inset
+
+-dimensional.
  In general, neither of these matrices are sparse (that is, most entries
  are non-zero).
 \end_layout
@@ -449,15 +641,55 @@ Link Grammar also performs a dimensional reduction, but not quite exactly
  This is because every (multi-word) context is associated with a handful
  of disjuncts, in such a way that each disjunct stands for hundreds to as
  many as millions of different contexts.
- Effectively, the lexis of Link Grammar is a sparse CxD-dimensional matrix,
- with C grammatical categories, and D disjuncts, and most entries in this
- CxD dimensional matrix being zero.
- (The upper bound on D is LV, where L is the number of link types, and V
+ Effectively, the lexis of Link Grammar is a sparse 
+\begin_inset Formula $C\times D$
+\end_inset
+
+-dimensional matrix, with 
+\begin_inset Formula $C$
+\end_inset
+
+ grammatical categories, and 
+\begin_inset Formula $D$
+\end_inset
+
+ disjuncts, and most entries in this 
+\begin_inset Formula $C\times D$
+\end_inset
+
+ dimensional matrix being zero.
+ (The upper bound on 
+\begin_inset Formula $D$
+\end_inset
+
+ is 
+\begin_inset Formula $L^{V}$
+\end_inset
+
+, where 
+\begin_inset Formula $L$
+\end_inset
+
+ is the number of link types, and 
+\begin_inset Formula $V$
+\end_inset
+
  is the maximum valency – about 5 or 6.
- In practice, D is in the tens of thousands.) The act of parsing selects
- a single entry from this matrix for each word in the sentence.
- The probability associated to that word is exp(-c) where c is the “cost”,
- the numerical value stored at this matrix entry.
+ In practice, 
+\begin_inset Formula $D$
+\end_inset
+
+ is in the tens of thousands.) The act of parsing selects a single entry
+ from this matrix for each word in the sentence.
+ The probability associated to that word is 
+\begin_inset Formula $\exp(-c)$
+\end_inset
+
+ where 
+\begin_inset Formula $c$
+\end_inset
+
+ is the “cost”, the numerical value stored at this matrix entry.
 \end_layout
 
 \begin_layout Standard
@@ -467,8 +699,14 @@ Thus, both systems perform a rather sharp dimensional reduction, to obtain
  However (and this is important, but very abstract) Link Grammar can be
  described by a (non-symmetric) monoidal category.
  This category is similar to that of the so-called “pregroup grammar”, and
- is described in a number of places (some predating both Link Grammar an
- pregroup grammar).
+ is described in a number of places
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Marcus1967"
+
+\end_inset
+
+ (some predating both Link Grammar an pregroup grammar).
  The curious thing is that linear algebra is also described by a monoidal
  category.
  One might say that this “explains” why Word2Vec works well: it is using
