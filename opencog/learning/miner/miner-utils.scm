@@ -74,26 +74,43 @@
     (for-each mk-member texts-lst))
   texts-cpt)
 
-(define (configure-rules pm-rbs)
-  ;; Load and associate rules to pm-rbs
-  (let* ((rule-path "opencog/miner/rules/")
-         (base-rule-files (list "shallow-abstraction.scm"
-                                "specialization.scm"))
-         (mk-full-path (lambda (rf) (string-append rule-path rf)))
-         (rule-files (map mk-full-path base-rule-files)))
-    (for-each load-from-path rule-files)
-    (let* ((rules (list ;; TODO somehow shallow-abstraction-rule-name
-                        ;; and specialization-rule-name are not
-                        ;; accessible thom here after loading
-                        ;; shallow-abstraction.scm and
-                        ;; specialization.scm. For that reason we use
-                        ;; their Atomese definitions instead. This
-                        ;; might be a guile bug.
-                        (DefinedSchemaNode "shallow-abstraction-rule")
-                        (DefinedSchemaNode "specialization-rule"))))
-      (ure-add-rules pm-rbs rules))))
+(define (mk-full-rule-path brf)
+  (let ((rule-path "opencog/miner/rules/"))
+    (string-append rule-path brf)))
 
-(define* (configure-miner pm-rbs #:key (maxiter -1))
+(define (configure-mandatory-rules pm-rbs)
+  ;; Load and associate mandatory rules to pm-rbs
+  (let* ((base-rule-files (list "shallow-abstraction.scm"
+                                "specialization.scm"))
+         (rule-files (map mk-full-rule-path base-rule-files))
+         (rules (list ;; TODO somehow shallow-abstraction-rule-name
+                      ;; and specialization-rule-name are not
+                      ;; accessible thom here after loading
+                      ;; shallow-abstraction.scm and
+                      ;; specialization.scm. For that reason we use
+                      ;; their Atomese definitions instead. This
+                      ;; might be a guile bug.
+                      (DefinedSchemaNode "shallow-abstraction-rule")
+                      (DefinedSchemaNode "specialization-rule"))))
+    (for-each load-from-path rule-files)
+    (ure-add-rules pm-rbs rules)))
+
+(define (false-tv? tv)
+  (equal? tv (stv 0 1)))
+
+(define* (configure-optional-rules pm-rbs #:key (incremental-expansion (stv 0 1)))
+  ;; Load conjunction-expansion and associate to pm-rbs
+  (if (not (false-tv? incremental-expansion))
+      (let* ((rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
+             (rule (DefinedSchemaNode "conjunction-expansion-rule")))
+        (load-from-path rule-pathfile)
+        (ure-add-rule pm-rbs rule incremental-expansion))))
+
+(define* (configure-rules pm-rbs #:key (incremental-expansion (stv 0 1)))
+  (configure-mandatory-rules pm-rbs)
+  (configure-optional-rules pm-rbs #:incremental-expansion incremental-expansion))
+
+(define* (configure-miner pm-rbs #:key (maxiter -1) (incremental-expansion (stv 0 1)))
 "
   Given a Concept node representing a rule based system for the
   pattern miner. Automatically configure it with the appropriate
@@ -104,13 +121,20 @@
   pm-rbs: Concept node of the rule-based system to configure
 
   mi: [optional] Maximum number of iterations of the rule-engine
+
+  tv: [optional] Truth value of a rule to expand existing conjunctions
+      of patterns. It will only expand conjunctions with enough support with
+      patterns with enough support.
 "
   ;; Load and associate rules to pm-rbs
-  (configure-rules pm-rbs)
+  (configure-rules pm-rbs #:incremental-expansion incremental-expansion)
 
   ;; Set parameters
   (ure-set-maximum-iterations pm-rbs maxiter)
-  (ure-set-fc-retry-sources pm-rbs #f)
+
+  ;; If there is no incremental expansion then each rule is
+  ;; deterministic, thus no need to retry exhausted sources
+  (ure-set-fc-retry-exhausted-sources pm-rbs (not (false-tv? incremental-expansion)))
 )
 
 (define (minsup-eval pattern texts ms)
@@ -223,12 +247,16 @@
 (define* (cog-miner . args)
   (display ("The command you are looking for is cog-mine.")))
 
-(define* (cog-mine texts ms #:key (maxiter -1) (initpat (top)))
+(define* (cog-mine texts ms
+                   #:key
+                   (maxiter -1)
+                   (initpat (top))
+                   (incremental-expansion (stv 0 1)))
 "
   Mine patterns in texts with minimum support ms, optionally
   using maxiter iterations and starting from the initial pattern initpat.
 
-  Usage: (cog-mine texts ms #:maxiter mi #:initpat ip)
+  Usage: (cog-mine texts ms #:maxiter mi #:initpat ip #:incremental-expansion tv)
 
   texts: Collection of texts to mine. It can be given in 3 forms
 
@@ -263,6 +291,10 @@
   ip: [optional] Initial pattern to start the search from. All mined
       pattern will be specializations of this pattern.
 
+  tv: [optional] Truth value of a rule to expand existing conjunctions
+      of patterns. It will only expand conjunctions with enough support with
+      patterns with enough support.
+
   Under the hood it will create a rule base and a query for the rule
   engine, configure it according to the user's options and run it.
   Everything takes place in a child atomspace. After the job is done
@@ -277,7 +309,7 @@
      specializations cannot have more support than their parent
      abstraction.
 
-  2. If it takes too long to copmlete, it means the search tree is
+  2. If it takes too long to complete, it means the search tree is
      too large to explorer entirely. Set mi to a positive value to
      halt the exploration after a certain number of iterations of
      the rule engine.
@@ -292,7 +324,7 @@
          (tmp-as (cog-new-atomspace (cog-atomspace)))
          (parent-as (cog-set-atomspace! tmp-as))
          (texts-concept? (and (cog-atom? texts)
-                              (eq? (cog-type texts 'ConceptNode))))
+                              (eq? (cog-type texts) 'ConceptNode)))
          (texts-cpt (if (not texts-concept?)
                         ;; Construct a temporary concept containing
                         ;; the texts
@@ -309,11 +341,14 @@
              (cog-set-atomspace! parent-as)
              ;; TODO: delete tmp-as if possible
              (Set))
+
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
         (let* ((source (minsup-eval-true initpat texts-cpt ms))
                (miner-rbs (random-miner-rbs-cpt)))
-          (configure-miner miner-rbs #:maxiter maxiter)
+          (configure-miner miner-rbs
+                           #:maxiter maxiter
+                           #:incremental-expansion incremental-expansion)
           (let* (;; Run the pattern miner in a forward way
                  (results (cog-fc miner-rbs source))
                  ;; Fetch all relevant results
@@ -330,6 +365,8 @@
     random-texts-cpt
     random-miner-rbs-cpt
     fill-texts-cpt
+    configure-mandatory-rules
+    configure-optional-rules
     configure-rules
     configure-miner
     minsup-eval

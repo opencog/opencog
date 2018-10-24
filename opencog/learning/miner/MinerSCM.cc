@@ -65,6 +65,13 @@ protected:
 	 */
 	bool do_enough_support(Handle pattern, Handle texts, Handle ms);
 
+	/**
+	 * Construct the conjunction of 2 patterns. If cnjtion is a
+	 * conjunction, then expand it with pattern. It is assumed that
+	 * pattern cannot be a conjunction itself.
+	 */
+	Handle do_expand_conjunction(Handle cnjtion, Handle pattern);
+
 public:
 	MinerSCM();
 };
@@ -89,6 +96,9 @@ void MinerSCM::init(void)
 
 	define_scheme_primitive("cog-enough-support?",
 		&MinerSCM::do_enough_support, this, "miner");
+
+	define_scheme_primitive("cog-expand-conjunction",
+		&MinerSCM::do_expand_conjunction, this, "miner");
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
@@ -138,6 +148,13 @@ bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
 	unsigned ms_uint = (unsigned)std::round(nn->get_value());
 
 	return MinerUtils::enough_support(pattern, texts_set, ms_uint);
+}
+
+Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-expand-conjunction");
+	Handle result = MinerUtils::expand_conjunction(cnjtion, pattern);
+	return as->add_atom(result);
 }
 
 extern "C" {
