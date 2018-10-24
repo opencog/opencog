@@ -1813,18 +1813,19 @@ classic
 \begin_inset Formula $N=3$
 \end_inset
 
-, this requires 
-\begin_inset Formula $W^{N}=10^{12}$
+, this requires up to 
+\begin_inset Formula $W^{N}=10^{12}=2^{40}$
 \end_inset
 
- probabilities to be maintained: at 8 giga-probabilities, this is clearly
- near the edge of what is possible with present-day computers.
+ probabilities to be maintained: even if most 3-word sequences are never
+ observed, this is still clearly near the edge of what is possible with
+ present-day computers.
 \end_layout
 
 \begin_layout Standard
-The model can be made computationally tractable with several variants.
- One common variant is to blend together, in varying proportions, the models
- for 
+The model can be made computationally tractable in various ways.
+ One well-discussed variant is to blend together, in varying proportions,
+ the models for 
 \begin_inset Formula $N=0$
 \end_inset
 
@@ -1837,7 +1838,13 @@ The model can be made computationally tractable with several variants.
 \end_inset
 
 .
- The details are of no particular concern to the rest of this essay.
+ Such an approach is of no particular interest for the subsequent development;
+ grammar happens at larger values of 
+\begin_inset Formula $N$
+\end_inset
+
+, and the goal is to create effective factorizations that encompass grammar.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1861,29 +1868,29 @@ a priori
 tely) equal to one-another, or that they can be grouped or summed in some
  other ways.
  More correctly, one hypothesizes that the vast majority of the probabilities
- are either zero or fall into classes where they are equal: say, all but
- one in ten-thousand, or thereabouts, is the 
-\emph on
-de facto
-\emph default
- order of magnitude obtained in these models.
- Alternately, one can hypothesize that certain linear combinations of the
- probabilities are identical; this is the common tactic of most deep-learning
- algorithms.
+ are either zero or fall into classes where they are equal.
+ If one can find a model that captures that all but one in ten-thousand
+ such probabilities are zero, then tht model becomes compuitationally tractable
+ again.
+ An alternate model is to hypothesize that certain linear combinations of
+ the probabilities are all equal to one-another.
+ The latter approach is exactly that of the neural net and deep learning
+ approaches: the linear combinations of equivalent probabilities are the
+ ones represented by various layers in the neural net.
 \end_layout
 
 \begin_layout Standard
-There is a fairly rich variety of models.
- Reviewed immediately below are two common foundational models: the so-called
- CBOW model, and the SkipGram model.
+There is a fairly rich variety of such models.
+ Reviewed immediately below are two foundational models: the so-called CBOW
+ model, and the SkipGram model.
  The general goal of this paper is to demonstrate that Link Grammar, and
  thus dependency grammars in general, can be understood to also fit into
  this same class of probabilistic models.
  What differs is the mechanism by which the models are trained; the Link
  Grammar training algorithm, already sketched above, is not a hill-climbing/deep
 -learning technique.
- A proper comparison will be made after the initial review of the CBOW and
- SkipGram models.
+ A proper comparison of training algorithms will be made after the initial
+ review of the CBOW and SkipGram models.
 \end_layout
 
 \begin_layout Subsection
