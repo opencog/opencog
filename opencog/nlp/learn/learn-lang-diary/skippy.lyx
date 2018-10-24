@@ -93,7 +93,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; working draft of 23 October 2018
+6 July 2018; working draft of 24 October 2018
 \end_layout
 
 \begin_layout Abstract
@@ -819,8 +819,8 @@ name "sec:Link-Grammar"
 
 \begin_layout Standard
 One of the barriers to understanding the commonality between symbolic and
- vector approaches is the notational difference.This section provides a highly
- abbreviated review of the Link Grammar
+ vector approaches is the notational difference.
+ This section provides a highly abbreviated review of the Link Grammar
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
@@ -1548,7 +1548,7 @@ reference "fig:Rhisome"
 \end_layout
 
 \begin_layout Section
-Statistical Models
+Statistical Network Models
 \end_layout
 
 \begin_layout Standard
@@ -2410,7 +2410,7 @@ deep learning
 \end_layout
 
 \begin_layout Subsection
-Perceptrons as Neural Nets 
+Perceptrons and Neural Nets 
 \end_layout
 
 \begin_layout Standard
@@ -2949,7 +2949,7 @@ more bits of info
 \end_layout
 
 \begin_layout Subsection
-Skip-Grams and Grammar
+Skip-Grams and Syntatic Structure
 \end_layout
 
 \begin_layout Standard
@@ -3449,9 +3449,9 @@ The principle of maximum entropy states that the above should be solved
  Standard texts on statistical mechanics exhibit the solution; it is the
  Boltzmann distribution, namely
 \begin_inset Formula 
-\[
-p\left(w_{1},w_{2},\cdots\right)=\frac{1}{Z}\exp-E\left(w_{1},w_{2},\cdots\right)
-\]
+\begin{equation}
+p\left(w_{1},w_{2},\cdots\right)=\frac{1}{Z}\exp-E\left(w_{1},w_{2},\cdots\right)\label{eq:boltzmann}
+\end{equation}
 
 \end_inset
 
@@ -3535,7 +3535,8 @@ reference "eq:SkipGram"
  is pretty much the grand-total extent or content of these language models.
  The statement is effectively that vectors provide a pretty good model of
  natural language, and the vectors are able to capture important features
- of natural language, including semantics and compositionality (the 
+ of natural language, including semantics and compositionality (such as
+ the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3575,9 +3576,9 @@ key "Mikolov2013a,Mikolov2013b"
 \end_inset
 
 ).
- This is interesting, because the vectors themselves are effectively structurele
-ss; they capture some kind of latent structure of language, but how this
- is captured is entirely opaque.
+ This is an interesting effect, because the vectors themselves seem to be
+ some kind of effectively structureless black boxes; they capture some kind
+ of latent structure of language, but how this is captured is entirely opaque.
  This is entirely at odds with traditional theories of syntax, as developed
  by more than half a century of linguistics research.
  How can the latent content of the feature vectors be reconciled with structural
@@ -3645,7 +3646,11 @@ magnetic field
 \end_inset
 
  between neighbors).
- (The 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The 
 \begin_inset Formula $J_{ij}$
 \end_inset
 
@@ -3658,11 +3663,20 @@ magnetic field
 \begin_inset Formula $J$
 \end_inset
 
- is used for both tasks.) In the present context, the 
+ is used for both tasks.
+\end_layout
+
+\end_inset
+
+ In the present context, the 
 \begin_inset Formula $\sigma_{i}$
 \end_inset
 
- are to be reinterpreted as the word at position 
+ are to be reinterpreted as 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+, the word at position 
 \begin_inset Formula $i$
 \end_inset
 
@@ -3686,13 +3700,13 @@ shift invariant
 \begin_inset Quotes erd
 \end_inset
 
-, dependent only relative positions between points in the lattice, rather
+, dependent only on relative positions between points in the lattice, rather
  than their absolute position.
  For the one-dimensional Ising model, where the lattice points are in a
  linear sequence, the shift invariance implies a number of interesting connectio
 ns to Markov chains, shift sequences, and finite state machines.
- This, in turn, implies that it, or a variant thereof, occurs in many natural
- models.
+ This, in turn, implies that the Ising model, or a variant thereof, occurs
+ in many natural models.
  One example is the distribution of sequences of amino acids in Zebrafish
  antibodies.
 \begin_inset CommandInset citation
@@ -3706,7 +3720,7 @@ key "Mora2010"
 \end_inset
 
  can be one of twenty-one different amino acids, and one is interested in
- describing the distribution of wide variety of different sequences that
+ describing the distribution of a wide variety of different sequences that
  antibodies employ to fight off infection.
  Another example is that of protein sequences, specifically, of sensor kinase
  and response regulator proteins in bacteria
@@ -3802,6 +3816,14 @@ J_{w_{i},w_{i+1},\cdots}=-\log p\left(w_{i},w_{i+1},\cdots\right)
 \end_inset
 
 is the loss function.
+ This is just eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:boltzmann"
+
+\end_inset
+
+ in slightly different form.
 \end_layout
 
 \begin_layout Standard
@@ -3855,9 +3877,13 @@ The additive model of grammatical structure also exposes the limit of this
 \begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
 \end_inset
 
- are sufficient to capture the grammar of the language, but not (at this
- level) to capture the message itself.
+ are sufficient to capture the grammar and syntactic structure of the language,
+ but not (at this level) to capture the message itself.
  The 
+\begin_inset Formula $n$
+\end_inset
+
+-point functions 
 \begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
 \end_inset
 
@@ -3869,7 +3895,9 @@ coding theory
 \begin_inset Quotes erd
 \end_inset
 
- of signal processing.
+ of signal processing; they convert plaintext to cryptext.
+ The plaintext is a bag-of-concepts; the cryptext is the word-sequence that
+ encodes the plaintext.
  
 \end_layout
 
