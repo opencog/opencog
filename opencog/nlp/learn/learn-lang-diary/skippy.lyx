@@ -780,12 +780,28 @@ This is also where we have the largest, and the most important difference
 \end_layout
 
 \begin_layout Standard
+The remainder of this essay is structured as follows: Section 2 provides
+ a very quick sketch of Link Grammar, emphasizing how dependency grammars
+ have vector-like aspects to them.
+ Section 3 reviews the based CBOW, SkipGram and neural net models, setting
+ up some basic notation.
+ Section 4 ...
+\end_layout
+
+\begin_layout Standard
 Many thanks and appreciation to Hanson Robotics for providing the time to
  think and write about such things.
 \end_layout
 
 \begin_layout Section
 Link Grammar
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Link-Grammar"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2646,6 +2662,7 @@ On the face of it, the description given for Link Grammar seems to bear
  The descriptions of language appear to be completely different.
  There are similarities; they are obscured both by the notation, and the
  viewpoint.
+ These similarities are discussed here.
 \end_layout
 
 \begin_layout Subsection
@@ -2679,20 +2696,21 @@ This is meant to indicate the probability of observing the word
 \end_inset
 
  and let 
-\begin_inset Formula $w_{t}=ran$
+\begin_inset Formula $w_{t}=\mbox{ran}$
 \end_inset
 
 , 
-\begin_inset Formula $w_{t-1}=girl$
+\begin_inset Formula $w_{t-1}=\mbox{girl}$
 \end_inset
 
  and 
-\begin_inset Formula $w_{t+1}=home$
+\begin_inset Formula $w_{t+1}=\mbox{home}$
 \end_inset
 
 .
  This clearly resembles the Link Grammar disjunct 
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -2735,7 +2753,7 @@ likelihood.
 \end_inset
 
  for the disjunct, 
-\begin_inset Formula $girl-\&home+$
+\begin_inset Formula $\mbox{girl- \& home+}$
 \end_inset
 
  in this example.
@@ -2772,8 +2790,12 @@ The resemblance, at this point, should be obvious: the disjunct
 \begin_inset Formula $d$
 \end_inset
 
- plays the role of the N-gram context.
- Abusing the existing notation, one should should understand that
+ plays the role of the 
+\begin_inset Formula $N$
+\end_inset
+
+-gram context.
+ Abusing the existing notation, one should understand that
 \begin_inset Formula 
 \[
 d\approx w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}
@@ -2813,13 +2835,29 @@ output
 \end_inset
 
 .
- 
+ More precisely, the disjunct notation actively skips over some of the words
+ in the context.
+ Rather than specifying a fixed offset from the target word, the disjunct
+ provides a relative squential ordering of the context-words, left to right,
+ without specifying distance.
 \end_layout
 
 \begin_layout Standard
-In fact, the disjunct notation can do more: it can also encode parse information.
- That is, one could take the disjunct as being a sequence of words, with
- no gaps allowed between the words.
+This change of notation allows the disjunct to do more than the index set
+ notation: the disjunct effectively encodes syntactic information.
+ How this is done was already detailed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Link-Grammar"
+
+\end_inset
+
+.
+ With this seemingly minor change of notation, from indexes to sequential
+ lists, one gains access to grammatical information.
+ Do keep in mind that by working with disjunct notation, nothing is lost:
+ if one wished, one could take the disjunct as being a sequence of words,
+ with no gaps allowed between the words.
  If this is done, then the disjunct 
 \begin_inset Formula $d$
 \end_inset
@@ -2833,9 +2871,23 @@ In fact, the disjunct notation can do more: it can also encode parse information
 \end_inset
 
  are just two notations for saying the same thing.
- But the disjunct can also do more: it effectively suggests that the index
- set can be used as parse information.
- 
+ The disjunct encodes 
+\begin_inset Quotes eld
+\end_inset
+
+more information
+\begin_inset Quotes erd
+\end_inset
+
+, in the information-theoretic sense of encoding 
+\begin_inset Quotes eld
+\end_inset
+
+more bits of info
+\begin_inset Quotes erd
+\end_inset
+
+ than the index notatin can.
 \end_layout
 
 \begin_layout Subsection
@@ -2883,6 +2935,32 @@ loss function
  just write an export function, and dump the contents into a Link Grammar
  dictionary.
  All that remains would be to evaluate the quality of the results.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+These statements are also perhaps misleading: conventional systems really
+ do use a 
+\begin_inset Quotes eld
+\end_inset
+
+bag of words
+\begin_inset Quotes erd
+\end_inset
+
+, ignoring the word-order.
+ Yet word-order is needed to write a disjunct.
+ Thus, existing off-the-shelf software would have to be modified to track
+ word-order, and this modification will require an order of magnitude more
+ storage, possibly rendering the computation intractably large or slow.
+ Keeping track of word order is theoretically interesting, but entirely
+ misses the tractability issue that these models were invented to solve.
+ 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2959,7 +3037,7 @@ Such long-distance attachments are problematic for CBOW or Skip-Grams, in
 \begin_inset Formula $N$
 \end_inset
 
- must be quite large to skip over the post-nominal modifier.
+ would have to be quite large to skip over the post-nominal modifier.
  Counting punctuation, one must look at least seven words to the right,
  in the above example.
  If the window is symmetric about the target word, this calls for 
@@ -2988,6 +3066,7 @@ p\left(w_{t}=\mbox{girl}\left|w_{t-1}=\mbox{the },w_{t+1}=\mbox{ran}\right.\righ
 
 can be trivially re-interpreted as the dictionary entry
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -3008,6 +3087,7 @@ The girl, upset by the taunting, ran home in tears.
 
  What is needed, instead, is the dictionary entry 
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -3026,6 +3106,7 @@ which is invisible with an
  The punctuation is also important for the post-nominal modifier; somewhere
  one must also find
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -3050,7 +3131,8 @@ which also does not fit in an
 \end_layout
 
 \begin_layout Standard
-Another difficulty is that dependency grammars are naturally 
+Another difficulty in a naive correspondance with index notation is that
+ dependency grammars are naturally 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3072,6 +3154,7 @@ know
  one: a determiner can typically modify only one noun.
  One expects the entry
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -3106,11 +3189,16 @@ p\left(w_{t}=\mbox{the}\left|w_{t+1}=\mbox{girl}\right.\right)
 
 with no other context words present, then one will have trouble building
  a suitable dictionary.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+I assume that Parsey McParseFace overcomes all of these problems ins some
+ way; I have not studied it.
 \end_layout
 
-\begin_layout Standard
-Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
- problems, but I have not studied it.
+\end_inset
+
  
 \end_layout
 
