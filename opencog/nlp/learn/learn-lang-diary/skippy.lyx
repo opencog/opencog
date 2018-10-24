@@ -815,8 +815,8 @@ Kevin threw the ball
 \align center
 \begin_inset Graphics
 	filename parse.ps
-	lyxscale 200
-	width 60col%
+	lyxscale 160
+	width 30col%
 
 \end_inset
 
@@ -851,12 +851,107 @@ D
 \end_inset
 
  links a noun to a determiner.
- 
+ The required lexical entries, in alphabetical order, are 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ball:  D- & O-;
+\end_layout
+
+\begin_layout Plain Layout
+
+	Kevin: S+;
+\end_layout
+
+\begin_layout Plain Layout
+
+	the:   D+;
+\end_layout
+
+\begin_layout Plain Layout
+
+	threw: S- & O+;
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-defines a word-disjunct pair as an object of the general form
+\noindent
+The capital letters, together with a 
+\family typewriter
++
+\family default
+/
+\family typewriter
+-
+\family default
+ sign, are called 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+; a pair of connectors form a 
+\begin_inset Quotes eld
+\end_inset
+
+link
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\family typewriter
++
+\family default
+/
+\family typewriter
+-
+\family default
+ sign indicates a left-right directionality: for example, the 
+\family typewriter
+S+
+\family default
+ connector can only connect to the right; it must mate with an 
+\family typewriter
+S-
+\family default
+ connector to form an 
+\family typewriter
+S
+\family default
+ link.
+ A valid parse exists if and only if all available connectors are paired
+ up.
+ The construction 
+\family typewriter
+S+ & O-
+\family default
+ is called a 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+; the name has a historical basis that is of no particular concern here.
+ During parsing, all connectors in a disjunct must be satisfied.
+\end_layout
+
+\begin_layout Standard
+Each lexical entry is a word-disjunct pair; they are of the general form
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -867,6 +962,12 @@ status open
 
 \end_inset
 
+Because every link connects a pair of words, it can be thought of as the
+ set of all possible word-pairs allowed by that connector.
+ Thus, in the example above, 
+\end_layout
+
+\begin_layout Standard
 The disjunct is the expression to the right of the colon.
  The notations A-, B+, C+, etc.
  are called connectors; they are types that indicate what other (classes
@@ -894,6 +995,7 @@ For the language learning project, it is convenient to extend the above
  by instances of individual words.
  For example
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -947,11 +1049,12 @@ l-word connectors into word-classes, and so generalizing individual words
 The primary learning mechanism is to accumulate observation counts of different
  disjuncts, thus leading naturally to the idea of word-vectors.
  For example, one might observe the vector 
-\begin_inset Formula $\vec{v}_{ran}$
+\begin_inset Formula $\vec{v}_{\mbox{ran}}$
 \end_inset
 
  represented as
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -981,7 +1084,7 @@ the girl ran away
  was observed twice.
  Such vectors can be used to judge word-similarity.
  For example, a different vector 
-\begin_inset Formula $\vec{v}_{walked}$
+\begin_inset Formula $\vec{v}_{\mbox{walked}}$
 \end_inset
 
  represented as
@@ -989,6 +1092,7 @@ the girl ran away
 
 \begin_layout Standard
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -1000,7 +1104,7 @@ status open
 \end_inset
 
 suggests that the cosine-product 
-\begin_inset Formula $\cos\left(\vec{v}_{ran},\vec{v}_{walked}\right)$
+\begin_inset Formula $\cos\left(\vec{v}_{\mbox{ran}},\vec{v}_{\mbox{walked}}\right)$
 \end_inset
 
  between the two might be used to judge word-similarity: 
@@ -1038,6 +1142,7 @@ home
 
 \begin_layout Standard
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -1063,11 +1168,11 @@ viz
 \emph default
 .
  write 
-\begin_inset Formula $\vec{v}_{ran}^{D}$
+\begin_inset Formula $\vec{v}_{\mbox{ran}}^{D}$
 \end_inset
 
  for the disjunct-based vector, and 
-\begin_inset Formula $\vec{v}_{home}^{C}$
+\begin_inset Formula $\vec{v}_{\mbox{home}}^{C}$
 \end_inset
 
  for the connector-based vector.
