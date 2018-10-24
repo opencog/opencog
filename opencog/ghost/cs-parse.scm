@@ -147,8 +147,8 @@
     ((has-match? "[a-zA-Z]+['’][a-zA-Z]+" str)
       (result:suffix 'LITERAL_APOS location
         (string-trim-both (match:substring current-match))))
-    ; Literals for example: Mr. Dr.
-    ((has-match? "[a-zA-Z]+\\." str)
+    ; Literals for example: Mr. Dr. etc
+    ((has-match? "[A-Z][a-zA-Z]+\\." str)
       (result:suffix 'LITERAL location
         (string-trim-both (match:substring current-match))))
     ; Literals -- words start with a '
@@ -167,10 +167,10 @@
         (string-trim-both (match:substring current-match))))
     ((has-match? "[|]" str)
       (result:suffix 'VLINE location
-         (string-trim-both (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ((has-match? "," str)
       (result:suffix 'COMMA location
-         (string-trim-both (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "[~’'._!?0-9a-zA-Z-]+" str)
       (result:suffix 'STRING location
