@@ -951,7 +951,7 @@ disjunct
 ; the name has a historical basis that is of no particular concern here.
  During parsing, all connectors in a disjunct must be satisfied.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Not immediately obvious from this abbreviated sketch is that the Link Grammar
@@ -1591,9 +1591,9 @@ true
 
 \begin_layout Standard
 Although this statistical model is commonly taken as gospel, it is, of course,
- wrong: we know, a priori, that sentences are constructed whole before being
- written, and so the current word also depends on future words, ones that
- follow it in the text.
+ wrong: we know, a priori, that sentences are mentally constructed nearly
+ whole before being written or spoken, and so the current word also depends
+ on future words, ones that follow it in the text.
  This is the case not just at the sentence-level, but also at the level
  of the entire text, as the writer already has a theme in mind.
  To estimate the probability of a word at a given location, one must look
@@ -1645,9 +1645,9 @@ of observing a word
  surrounding words, to the left and right, in the text.
  The probability of the text is then modeled by
 \begin_inset Formula 
-\[
-\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
-\]
+\begin{equation}
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)\label{eq:bayes-factorize}
+\end{equation}
 
 \end_inset
 
@@ -1666,8 +1666,8 @@ The above contains another key simplification: the total probability is
 \end_inset
 
 .
- This is commonly taken to be a reasonable simplification, but is, of course,
- 
+ This is commonly taken to be a reasonable simplification, but again, it
+ is, of course, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1676,12 +1676,15 @@ obviously
 \end_inset
 
  wrong.
- The words at the end of a text occur with different probabilities than
- those at the beginning; for example, in a dramatic story, a new character
- may appear mid-way, or the setting may move from indoors to outdoors, with
- furniture-words becoming uncommon, while nature-words becoming common.
+ At the sentence level, in English, we commonly do not start sentences with
+ verbs.
+ At the text level, the words at the end of a text occur with different
+ probabilities than those at the beginning; for example, in a dramatic story,
+ a new character may appear mid-way, or the setting may move from indoors
+ to outdoors, so that furniture-words become uncommon, while nature-words
+ occur more frequently.
  The translational invariance only becomes plausible in the limit of 
-\begin_inset Formula $T\to\infty$
+\begin_inset Formula $N\to\infty$
 \end_inset
 
  where one is considering 
@@ -1696,8 +1699,64 @@ all human language
  This too, is preposterous; first, because not everything that can be said
  has been said; second, because different individuals speak differently,
  and third, because new words are invented regularly, as others become archaic.
- Despite all this, the assumption of translational invariance is entirely
- appropriate at this level.
+ 
+\end_layout
+
+\begin_layout Standard
+In general, it seems reasonable to assume that the distribution of words,
+ when taken over sliding windows of different sizes, varies in a scale-free
+ fashion with the window size.
+ So, consider a long book, and a sliding window of width 
+\begin_inset Formula $N=1000$
+\end_inset
+
+.
+ The distribution of the words within that window will be Zipfian; as the
+ window slides from scene to scene, the probability distribution will be
+ sensitive to that scene (indoors/outdoors, with/without some character...)
+ The positional non-uniformity persists at all window-sizes 
+\begin_inset Formula $N$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In what follows, we are primarily concerned with the grammatical structure
+ of single sentences, and not the narrative structure of longer texts.
+ Effectively, it is enough to work with a value of 
+\begin_inset Formula $N$
+\end_inset
+
+ that is less than a few dozen.
+ The fact that sentences typically do not start with verbs can be 
+\begin_inset Quotes eld
+\end_inset
+
+explained
+\begin_inset Quotes erd
+\end_inset
+
+ by the rules of syntax; no explicit factorization for single-word probabilities
+ is required.
+ Thus, the translation-invariant 
+\begin_inset Quotes eld
+\end_inset
+
+Bayesian network
+\begin_inset Quotes erd
+\end_inset
+
+ factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:bayes-factorize"
+
+\end_inset
+
+ is appropriate and suitable for the current task.
+ As will be seen in later chapters, this factorization can be improved on,
+ and performed much more cleanly and elegantly.
 \end_layout
 
 \begin_layout Subsection
