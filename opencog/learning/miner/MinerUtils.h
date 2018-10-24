@@ -347,6 +347,13 @@ public:
 	 * there subtrees.
 	 */
 	static void remove_redundant_clauses(HandleSeq& clauses);
+
+	/**
+	 * Construct the conjunction of 2 patterns. If cnjtion is a
+	 * conjunction, then expand it with pattern. It is assumed that
+	 * pattern cannot be a conjunction itself.
+	 */
+	static Handle expand_conjunction(const Handle& cnjtion, const Handle& pattern);
 };
 
 } // ~namespace opencog

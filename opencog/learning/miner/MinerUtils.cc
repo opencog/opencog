@@ -597,4 +597,57 @@ void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
 	}
 }
 
+Handle MinerUtils::expand_conjunction(const Handle& cnjtion, const Handle& pattern)
+{
+	// Copy variables from cnjtion and pattern, as they are gonna be modified
+	Variables cnjtion_vars = get_variables(cnjtion);
+	Variables pattern_vars = get_variables(pattern);
+
+	// For each variable of pattern that is in cnjtion, alpha convert
+	// to avoid variable name collision.
+	HandleMap aconv;
+	for (const Handle& var : pattern_vars.varset) {
+		if (cnjtion_vars.is_in_varset(var)) {
+			Handle nvar;
+			bool used;
+			do {
+				nvar = createNode(VARIABLE_NODE, randstr(var->get_name() + "-"));
+				// Make sure it is not in cnjtion_vars or pattern_vars
+				used = cnjtion_vars.is_in_varset(nvar) or pattern_vars.is_in_varset(nvar);
+			} while (used);
+			aconv[var] = nvar;
+		}
+	}
+
+	// Expand cnjtion_vars with pattern_vars, alpha converting
+	// pattern_vars if necessary
+	if (not aconv.empty()) {
+		Handle avdecl = pattern_vars.substitute_nocheck(get_vardecl(pattern), aconv);
+		pattern_vars = createVariableList(avdecl)->get_variables();
+	}
+	cnjtion_vars.extend(pattern_vars);
+
+	// Alpha-convert pattern body if necessary
+	Handle pattern_body = aconv.empty() ? get_body(pattern)
+		: get_variables(pattern).substitute_nocheck(get_body(pattern), aconv);
+
+	// Expand cnjtion_body with pattern, flattening cnjtion_body if necessary
+	const Handle& cnjtion_body = get_body(cnjtion);
+	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
+		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
+	nclauses.push_back(pattern_body);
+
+	// Remove redundant clauses
+	boost::sort(nclauses);
+	boost::erase(nclauses,
+	             boost::unique<boost::return_found_end>(nclauses));
+
+	// Recreate combined pattern
+	Handle nvardecl = cnjtion_vars.get_vardecl(),
+		nbody = createLink(nclauses, AND_LINK),
+		npattern = Handle(createLambdaLink(nvardecl, nbody));
+
+	return npattern;
+}
+
 } // namespace opencog
