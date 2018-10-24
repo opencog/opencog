@@ -950,6 +950,32 @@ disjunct
 
 ; the name has a historical basis that is of no particular concern here.
  During parsing, all connectors in a disjunct must be satisfied.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Not immediately obvious from this abbreviated sketch is that the Link Grammar
+ formulation of a dependency grammar is sufficiently strong to encode long-range
+ coordination or enforce the correct usage of set phrases/phrasemes with
+ 
+\begin_inset Quotes eld
+\end_inset
+
+holes
+\begin_inset Quotes erd
+\end_inset
+
+ in them.
+ It can.
+ There is a set of effects that can be encoded in this way, from phonetic
+ structure to to morphology.
+ The referenced sources open the doors to understanding how this can be
+ done.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
