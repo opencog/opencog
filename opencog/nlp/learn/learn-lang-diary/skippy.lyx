@@ -785,7 +785,20 @@ The remainder of this essay is structured as follows: Section 2 provides
  have vector-like aspects to them.
  Section 3 reviews the based CBOW, SkipGram and neural net models, setting
  up some basic notation.
- Section 4 ...
+ Section 4 defines a graph network model of language, emphasizing that statistic
+al physics provides a well-developed toolset for working with graph networks.
+ Section 5 reviews several different techniques by which statistical information
+ can be gathered, and the graphical structure can be infered, given a large
+ 
+\begin_inset Quotes eld
+\end_inset
+
+flat
+\begin_inset Quotes erd
+\end_inset
+
+ corpus of text.
+ Section 6...
 \end_layout
 
 \begin_layout Standard
@@ -2645,7 +2658,7 @@ Typical choices for the dimension
 \end_layout
 
 \begin_layout Section
-Network Models of Language
+Graph Network Models of Language
 \begin_inset CommandInset label
 LatexCommand label
 name "sec:Network Models"
@@ -2656,13 +2669,58 @@ name "sec:Network Models"
 \end_layout
 
 \begin_layout Standard
-On the face of it, the description given for Link Grammar seems to bear
- no resemblance to that of the description of probabilistic neural net models,
- other than to invoke vectors in some way.
- The descriptions of language appear to be completely different.
- There are similarities; they are obscured both by the notation, and the
- viewpoint.
- These similarities are discussed here.
+Superficially, the graphical approach of a symbolic dependency grammar,
+ such as Link Grammar, seems to have no resemblance at all to the probabilistic
+ approach of neural network models.
+ The previous sections hinted at the presence of vectors in both systems;
+ but the vectors are superficially different, and the role of probability
+ in either remained less than entirely clear.
+ The differences are less than they seem; different notation obscures similarity
+; different traditions emphasize different aspects so strongly that even
+ minor hints of similarity are lost.
+ This section attempts to articulate the commonality.
+\end_layout
+
+\begin_layout Standard
+Both the neural network and the symbolic graphical approaches to language
+ could be termed to two different faces of a common graphical network model
+ of language.
+ The structure of graph networks are a part of the standard curriculum of
+ physics and statistical mechanics.
+ This section begins with a reiteration that Link Grammar disjuncts resemble
+ the factors of a factored Bayesian network.
+ Next, the loss functions of the CBOW/SkipGram model can be seen as a manifestat
+ion of standard (statistical mechanics) maximum entropy principles.
+ Equiped with this insight, one can proceed along a common track in physics:
+ derive the statistical models from a partition function.
+ The partition function encodes 
+\begin_inset Quotes eld
+\end_inset
+
+all possible knowledge
+\begin_inset Quotes erd
+\end_inset
+
+ of a network graph; specific factors of this graph are called 
+\begin_inset Quotes eld
+\end_inset
+
+Feynman diagrams
+\begin_inset Quotes erd
+\end_inset
+
+.
+ With the tools of physics thus deployed, a dependency parse, when obtained
+ statistically, can be recognized as a kind of Feynman diagram.
+ The dependency grammars of natural language are Feynman diagrams of statistical
+ physics.
+\end_layout
+
+\begin_layout Standard
+This section sets the stage for the next, which reviews several different
+ approaches for obtaining the statistical information needed to correctly
+ factor a graph network.
+ 
 \end_layout
 
 \begin_layout Subsection
