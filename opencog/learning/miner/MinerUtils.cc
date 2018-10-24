@@ -87,6 +87,22 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 	for (const HandleSeq& valuation : var_scv.valuations) {
 		const Handle& value = var_scv.focus_value(valuation);
 
+		// If var_scv contains only one variable, then ignore shallow
+		// abstractions of nodes and nullary links as they create
+		// constant abstractions and
+		//
+		// 1. In case there is only one strongly connected component,
+		//    constant patterns cannot have support > 1.
+		//
+		// 2. In case there are more than one strongly connected
+		//    component, constant patterns are essentially useless
+		//    (don't affect the support), and they will no longer
+		//    reconnect, so they will remain useless.
+		//
+		// For these 2 reasons they can be safely ignored.
+		if (valuation.size() == 1 and is_nullary(value))
+			continue;
+
 		// Otherwise generate its shallow abstraction
 		Handle shabs = val_shallow_abstract(value);
 		if (shabs)
