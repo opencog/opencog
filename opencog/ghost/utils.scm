@@ -194,7 +194,11 @@
 "
   (define seen-lemma (assoc-ref lemma-alist WORD))
   (if (equal? #f seen-lemma)
-      (let ((lemma (get-lemma-from-relex WORD)))
+      (let ((lemma
+              ; Don't bother if it's a personal title like "Mrs.", "Dr." etc
+              (if (string-suffix? "." WORD)
+                WORD
+                (get-lemma-from-relex WORD))))
         (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
         lemma)
       seen-lemma))
