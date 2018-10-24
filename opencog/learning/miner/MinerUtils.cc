@@ -255,13 +255,10 @@ Handle MinerUtils::compose(const Handle& pattern, const HandleMap& var2pat)
 	// Get variable declaration of the composition
 	Handle vardecl = vardecl_compose(get_vardecl(pattern), var2subdecl);
 
-	// Turn the map into a vector of new bodies
-	const Variables variables = get_variables(pattern);
-	HandleSeq subodies = variables.make_sequence(var2subody);
-
 	// Perform composition of the pattern body with the sub-bodies)
 	// TODO: perhaps use RewriteLink partial_substitute
-	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
+	const Variables& variables = get_variables(pattern);
+	Handle body = variables.substitute_nocheck(get_body(pattern), var2subody);
 	body = RewriteLink::consume_quotations(vardecl, body, true);
 	// If root AndLink then simplify the pattern
 	if (body->get_type() == AND_LINK) {

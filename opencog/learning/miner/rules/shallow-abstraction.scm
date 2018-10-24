@@ -96,7 +96,7 @@
              (shabs-evals (map list->eval (cog-outgoing-set shabs-lists))))
         (Set shabs-evals))))
 
-;; Define specialization
+;; Define shallow abstraction
 (define shallow-abstraction-rule-name
   (DefinedSchemaNode "shallow-abstraction-rule"))
 (DefineLink shallow-abstraction-rule-name
