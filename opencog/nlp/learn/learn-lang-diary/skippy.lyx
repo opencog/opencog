@@ -3901,47 +3901,6 @@ coding theory
  
 \end_layout
 
-\begin_layout Subsubsection
-High-accuracy two-point models
-\end_layout
-
-\begin_layout Standard
-Merely computing the MI between word-pairs does 
-\emph on
-not
-\emph default
- give a solution to the Ising model; it only gives a rough approximation.
- One can do considerably better, using several different algorithms, including
- Monte Carlo and message passing algorithms.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Mezard2008,Weigt2009"
-
-\end_inset
-
- This is clearly appropriate for certain problem domains.
- For example, for protein folding and protein mating, the solution to the
- Ising model obtained by message passing beomes a very accurate predictor
- of the three-dimensional physical structure of the protein, and indicates
- which amino acids actually become physically close to one-another.
-\end_layout
-
-\begin_layout Standard
-For langauge, the need for a high-fidelity solution is not so clear.
- From dependency grammar, we know that most words do not have a pair-wise
- interaction.
- The exceptions are determiners, and maybe mass nouns without any modifiers
- on them.
- Clearly, verbs and prepositions are never limited to pair-wise interactions.
-\end_layout
-
-\begin_layout Standard
-Would one obtain a better starting point for grammar, if one had a high-quality
- solution to the pair-wise Ising model? This is not known.
- But there seems to be no particular reason to think that one would.
- 
-\end_layout
-
 \begin_layout Subsection
 MST models of Language
 \end_layout
@@ -4044,8 +4003,8 @@ etal.
 
 \begin_layout Standard
 It is here that Yuret does one better: he proposes that the score be given
- by the mutual information between word-pairs; that is (aligning the different
- notation)
+ by the mutual information (MI) between word-pairs; that is (aligning the
+ different notation)
 \begin_inset Formula 
 \[
 s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}
@@ -4309,7 +4268,6 @@ bulk magnetic field
  the bottom half of this figure.
  This is a reasonable omission: it not only clutters the diagram, but, from
  the point of view of linguistics, it almost seems like tautological nonsense.
- Of course a language model is taken within the context of the language.
 \begin_inset Foot
 status collapsed
 
@@ -4332,12 +4290,187 @@ vacuum
 
 \end_inset
 
+ Of course a language model is taken within the context of the language.
  However, in order to bridge from a purely linguistic model, to a statistical
  model based on probabilities taken from first principles from Boltzmann
  distributions derived from partition functions, those implicit terms must
  be made explicit.
  The single-point propagators have an explicit numerical effect in the determina
 tion of the best parse tree for a given sentence.
+\end_layout
+
+\begin_layout Subsection
+Vacuum Contributions and 
+\begin_inset Formula $n$
+\end_inset
+
+-point Functions
+\end_layout
+
+\begin_layout Standard
+Pair-wise mutual information is not the same thing as the two-point function
+ 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+; the MI includes one-point terms in it.
+ For many applications, including chemistry, the one-point vacuum contributions
+ to the MI are clearly inappropriate.
+ Atoms, amino acids and protiens don't respond to other atoms that 
+\begin_inset Quotes eld
+\end_inset
+
+might have been there, but weren't
+\begin_inset Quotes erd
+\end_inset
+
+.
+ For those applications, MI can only provide a rough approximation for a
+ starting point for a more acurate solution of the 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ Ising model, one which contains a two-point function, but no one-point
+ functions.
+ That is, MI is not a substitute for accurately solving the Ising model,
+ when a solution of the Ising model is actually needed.
+\end_layout
+
+\begin_layout Standard
+There are several different algorithms for solving the Ising model, including
+ Monte Carlo and message passing algorithms.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mezard2008,Weigt2009"
+
+\end_inset
+
+ For example, for protein folding and protein mating, the solution to the
+ Ising model obtained by message passing becomes a very accurate predictor
+ of the three-dimensional physical structure of the protein, and indicates
+ which amino acids actually become physically close to one-another.
+ It is considerably more accurate than the MI-based estimate.
+\end_layout
+
+\begin_layout Section
+xxx
+\end_layout
+
+\begin_layout Standard
+Should one consider a 
+\begin_inset Quotes eld
+\end_inset
+
+pure
+\begin_inset Quotes erd
+\end_inset
+
+ Ising model of natural language, one which omits the one-point contributions?
+ Maybe.
+ And maybe not.
+ For natural langauge, most words have valancies of 3, 4 or 5, and so it
+ seems that they would be better described by 3-point, 4-point or 5-point
+ Ising interaction energies, as opposed to a bag of 2-point interactions.
+ How true is this? Consider a transitive verb: it has a subject and an object.
+ If the subject and object are truly independent of one-another, then two
+ pair-wise interactions would be enough: a noun-verb link for the subject,
+ and a verb-noun link for the object.
+ Are subjects and objects independent of one-another? Consider the verb
+ 
+\begin_inset Quotes eld
+\end_inset
+
+throw
+\begin_inset Quotes erd
+\end_inset
+
+, and a sentence of the form 
+\begin_inset Quotes eld
+\end_inset
+
+subject throws object
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this case, 
+\begin_inset Quotes eld
+\end_inset
+
+subject
+\begin_inset Quotes erd
+\end_inset
+
+ can only be chosen from the class of animate beings, capable of throwing
+ things.
+ The object must be chosen from the class of physical objects that can be
+ thrown.
+ Although these two classes are fairly narrow, they still seem uncorrelated.
+ This illusion can be broken: further restricing the class of subjects to
+ humans forces the restriction of objects to the class of physical items
+ weighing between a few grams and ten kilograms.
+ But there is only one word 
+\begin_inset Quotes eld
+\end_inset
+
+throw
+\begin_inset Quotes erd
+\end_inset
+
+, and not some hypothectical 
+\begin_inset Formula $\mbox{throw}_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mbox{throw}_{3}$
+\end_inset
+
+, where 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ is used only with human subjects.
+ The verb subjects and objects are correlated; when this is the case, a
+ pair of two-point functions is not enough; these require a three-point
+ function for an accurate description.
+\end_layout
+
+\begin_layout Standard
+Perhaps, after word-sense disambiguation, one can discover multiple word
+ senses, so that, for example, 
+\begin_inset Formula $\mbox{throw}_{1}$
+\end_inset
+
+ applies to metal machines that throw heavy objects, 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ pertains to human subjects, and 
+\begin_inset Formula $\mbox{throw}_{3}$
+\end_inset
+
+ applies to horses.
+ In this case, the three-point function might indeed factorize.
+\end_layout
+
+\begin_layout Standard
+the need to obtain a high-fidelity 2-point solution is not so clear.
+ Obtaining 
+\end_layout
+
+\begin_layout Standard
+Would one obtain a better starting point for grammar, if one had a high-quality
+ solution to the pair-wise Ising model? This is not known.
+ But there seems to be no particular reason to think that one would.
+ 
 \end_layout
 
 \begin_layout Subsection
