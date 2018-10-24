@@ -69,8 +69,8 @@ public:
 
 	/**
 	 * Given valuations produce all shallow abstractions reaching
-	 * minimum support based on the values associated to the front
-	 * variable first variable. This shallow abstractions include
+	 * minimum support based on the values associated to the variable
+	 * in focus. This shallow abstractions include
 	 *
 	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
 	 * 2. Constant nodes, like (Concept "A")
@@ -95,13 +95,18 @@ public:
 	 *                                            (Variable "$X1")
 	 *                                            (Variable "$X2"))) }
 	 */
-	static HandleSet front_shallow_abstract(const Valuations& valuations, unsigned ms);
+	static HandleSet focus_shallow_abstract(const Valuations& valuations, unsigned ms);
+
+	/**
+	 * Return true iff h is a node or a nullary link.
+	 */
+	static bool is_nullary(const Handle& h);
 
 	/**
 	 * Given an atom, a value, return its corresponding shallow
 	 * abstraction. A shallow abstraction of an atom is
 	 *
-	 * 1. itself if it is a node
+	 * 1. itself if it is nullary (see is_nullary)
 	 *
 	 * 2. (Lambda (VariableList X1 ... Xn) (L X1 ... Xn) if it is a
 	 *    link of arity n.

@@ -41,18 +41,30 @@ namespace opencog
 // ValuationsBase //
 ////////////////////
 
-ValuationsBase::ValuationsBase(const Variables& vars) : variables(vars) {}
+ValuationsBase::ValuationsBase(const Variables& vars)
+	: variables(vars), _var_idx(0) {}
 
 ValuationsBase::ValuationsBase() {}
 
-bool ValuationsBase::novar() const
+bool ValuationsBase::no_focus() const
 {
-	return variables.empty();
+	return variables.varset.size() <= _var_idx;
 }
 
-Handle ValuationsBase::front_variable() const
+const Handle& ValuationsBase::focus_variable() const
 {
-	return variables.varseq[0];
+	return variables.varseq[_var_idx];
+}
+
+void ValuationsBase::inc_focus_variable() const
+{
+	_var_idx++;
+}
+
+void ValuationsBase::dec_focus_variable() const
+{
+	OC_ASSERT(0 < _var_idx);
+	_var_idx--;
 }
 
 Handle ValuationsBase::variable(unsigned i) const
@@ -90,34 +102,6 @@ SCValuations::SCValuations(const Variables& vars, const Handle& satset)
 	}
 }
 
-SCValuations SCValuations::erase_front() const
-{
-	return erase(front_variable());
-}
-
-SCValuations SCValuations::erase(const Handle& var) const
-{
-	// No variable, just return itself
-	if (not variables.is_in_varset(var))
-		return *this;
-
-	// Remove variable
-	Variables nvars(variables);
-	nvars.erase(var);
-	auto it = boost::find(variables.varseq, var);
-	int dst = std::distance(variables.varseq.begin(), it);
-	SCValuations nvals(nvars);
-	if (not nvals.novar())
-	{
-		for (HandleSeq vals : valuations)
-		{
-			vals.erase(std::next(vals.begin(), dst));
-			nvals.valuations.push_back(vals);
-		}
-	}
-	return nvals;
-}
-
 HandleUCounter SCValuations::values(const Handle& var) const
 {
 	return values(index(var));
@@ -129,6 +113,11 @@ HandleUCounter SCValuations::values(unsigned var_idx) const
 	for (const HandleSeq& valuation : valuations)
 		vals[valuation[var_idx]]++;
 	return vals;
+}
+
+const Handle& SCValuations::focus_value(const HandleSeq& values) const
+{
+	return values[_var_idx];
 }
 
 bool SCValuations::operator==(const SCValuations& other) const
@@ -144,6 +133,17 @@ bool SCValuations::operator<(const SCValuations& other) const
 unsigned SCValuations::size() const
 {
 	return valuations.size();
+}
+
+std::string SCValuations::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	ss << indent << "variables:" << std::endl
+	   << oc_to_string(variables, indent + OC_TO_STRING_INDENT)
+		<< indent << "valuations:" << std::endl
+	   << oc_to_string(valuations, indent + OC_TO_STRING_INDENT)
+	   << indent << "_var_idx = " << _var_idx;
+	return ss.str();
 }
 
 ////////////////
@@ -174,30 +174,6 @@ Valuations::Valuations(const Variables& vars, const SCValuationsSet& sc)
 Valuations::Valuations(const Variables& vars)
 	: ValuationsBase(vars), _size(0) {}
 
-Valuations Valuations::erase_front() const
-{
-	// Take remaining variables
-	Variables nvars(variables);
-	Handle var = front_variable();
-	nvars.erase(var);
-	Valuations nvals(nvars);
-
-	// Move values from remaining variables to new Valuations
-	for (const SCValuations& scv : scvs)
-	{
-		SCValuations nscvals(scv.erase(var));
-		if (not nscvals.novar())
-			nvals.scvs.insert(nscvals);
-	}
-
-	// Keep the previous size as we still need to consider those
-	// combinations
-	nvals._size = _size;
-
-	// Return new Valuations
-	return nvals;
-}
-
 const SCValuations& Valuations::get_scvaluations(const Handle& var) const
 {
 	for (const SCValuations& scv : scvs)
@@ -206,9 +182,38 @@ const SCValuations& Valuations::get_scvaluations(const Handle& var) const
 	throw RuntimeException(TRACE_INFO, "There's likely a bug");
 }
 
+const SCValuations& Valuations::focus_scvaluations() const
+{
+	return get_scvaluations(focus_variable());
+}
+
+void Valuations::inc_focus_variable() const
+{
+	focus_scvaluations().inc_focus_variable();
+	ValuationsBase::inc_focus_variable();
+}
+
+void Valuations::dec_focus_variable() const
+{
+	ValuationsBase::dec_focus_variable();
+	focus_scvaluations().dec_focus_variable();
+}
+
 unsigned Valuations::size() const
 {
 	return _size;
+}
+
+std::string Valuations::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	ss << indent << "size = " << size() << std::endl
+		<< indent << "variables:" << std::endl
+	   << oc_to_string(variables, indent + OC_TO_STRING_INDENT)
+	   << indent << "scvaluations set:" << std::endl
+	   << oc_to_string(scvs, indent + OC_TO_STRING_INDENT) << std::endl
+	   << indent << "_var_idx = " << _var_idx;
+	return ss.str();
 }
 
 void Valuations::setup_size()
@@ -220,12 +225,7 @@ void Valuations::setup_size()
 
 std::string oc_to_string(const SCValuations& scv, const std::string& indent)
 {
-	std::stringstream ss;
-	ss << indent << "variables:" << std::endl
-	   << oc_to_string(scv.variables, indent + OC_TO_STRING_INDENT);
-	ss << indent << "valuations:" << std::endl
-	   << oc_to_string(scv.valuations, indent + OC_TO_STRING_INDENT);
-	return ss.str();
+	return scv.to_string(indent);
 }
 
 std::string oc_to_string(const SCValuationsSet& scvs, const std::string& indent)
@@ -244,13 +244,7 @@ std::string oc_to_string(const SCValuationsSet& scvs, const std::string& indent)
 
 std::string oc_to_string(const Valuations& valuations, const std::string& indent)
 {
-	std::stringstream ss;
-	ss << indent << "size = " << valuations.size() << std::endl;
-	ss << indent << "variables:" << std::endl
-	   << oc_to_string(valuations.variables, indent + OC_TO_STRING_INDENT);
-	ss << indent << "scvaluations set:" << std::endl
-	   << oc_to_string(valuations.scvs, indent + OC_TO_STRING_INDENT);
-	return ss.str();
+	return valuations.to_string(indent);
 }
 
 std::string oc_to_string(const HandleValuationsMap& h2vals, const std::string& indent)

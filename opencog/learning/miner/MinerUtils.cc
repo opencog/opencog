@@ -47,29 +47,31 @@ namespace opencog
 HandleSetSeq MinerUtils::shallow_abstract(const Valuations& valuations, unsigned ms)
 {
 	// Base case
-	if (valuations.novar())
+	if (valuations.no_focus())
 		return HandleSetSeq();
 
 	// Recursive case
-	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations, ms)};
-	HandleSetSeq remaining = shallow_abstract(valuations.erase_front(), ms);
+	HandleSetSeq shabs_per_var{focus_shallow_abstract(valuations, ms)};
+	valuations.inc_focus_variable();
+	HandleSetSeq remaining = shallow_abstract(valuations, ms);
+	valuations.dec_focus_variable();
 	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
 	return shabs_per_var;
 }
 
-HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsigned ms)
+HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsigned ms)
 {
 	HandleSet shabs;
 
 	// No more variable to specialize from
-	if (valuations.novar())
+	if (valuations.no_focus())
 		return HandleSet();
 
 	// Variable to specialize
-	Handle var = valuations.front_variable();
+	Handle var = valuations.focus_variable();
 
 	// Strongly connected valuations associated to that variable
-	const SCValuations& var_scv(valuations.get_scvaluations(var));
+	const SCValuations& var_scv(valuations.focus_scvaluations());
 
 	////////////////////////////
 	// Shallow abtractions    //
@@ -83,12 +85,15 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 	// shallow abstractions
 	unsigned val_count = valuations.size() / var_scv.size();
 	for (const HandleSeq& valuation : var_scv.valuations) {
-		Handle shabs = val_shallow_abstract(valuation[0]);
+		const Handle& value = var_scv.focus_value(valuation);
+
+		// Otherwise generate its shallow abstraction
+		Handle shabs = val_shallow_abstract(value);
 		if (shabs)
-			shapats[val_shallow_abstract(valuation[0])] += val_count;
+			shapats[val_shallow_abstract(value)] += val_count;
 	}
 
-	// Only consider the shallow abstractions that reach the minimum
+	// Only consider shallow abstractions that reach the minimum
 	// support
 	for (const auto& shapat : shapats)
 		if (ms <= shapat.second)
@@ -163,10 +168,15 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 	return shabs;
 }
 
+bool MinerUtils::is_nullary(const Handle& h)
+{
+	return h->is_node() or h->get_arity() == 0;
+}
+
 Handle MinerUtils::val_shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
-	if (value->is_node() or value->get_arity() == 0)
+	if (is_nullary(value))
 		return value;
 
 	Type tt = value->get_type();
@@ -393,7 +403,8 @@ HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
                                           const HandleSet& texts,
                                           unsigned ms)
 {
-	return shallow_abstract(Valuations(pattern, texts), ms);
+	Valuations valuations(pattern, texts);
+	return shallow_abstract(valuations, ms);
 }
 
 Handle MinerUtils::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
