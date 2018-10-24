@@ -964,36 +964,115 @@ status open
 
 Because every link connects a pair of words, it can be thought of as the
  set of all possible word-pairs allowed by that connector.
- Thus, in the example above, 
+ Thus, in the example above, the link 
+\family typewriter
+O
+\family default
+ is effectively equivalent to the singleton set 
+\family typewriter
+{threw-ball}.
+
+\family default
+ The above dictionary is so simple, that there are no other word-pairs in
+ this set; in general, this is not the case.
+ Thus, the capital-letter link types are actual types, in the type-theoretic
+ sense.
 \end_layout
 
 \begin_layout Standard
-The disjunct is the expression to the right of the colon.
- The notations A-, B+, C+, etc.
- are called connectors; they are types that indicate what other (classes
- of) words the given word can connect to.
- The minus and plus signs indicate whether the connectors link to the left
- or to the right.
- The number of such connectors is variable, depending on the disjunct.
- The ampersand serves as a reminder that, during parsing, all connectors
- must be satisfied; that is, the connectors are conjoined.
- A given word can have multiple disjuncts associated with it, these are
- disjoined from one-another, thus the name 
-\begin_inset Quotes eld
+At this point, it is notationally convenient to replace each type by the
+ set, like so:
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ball:  {the-ball}- & {threw-ball}-;
+\end_layout
+
+\begin_layout Plain Layout
+
+	Kevin: {Kevin-threw}+;
+\end_layout
+
+\begin_layout Plain Layout
+
+	the:   {the-ball}+;
+\end_layout
+
+\begin_layout Plain Layout
+
+	threw: {Kevin-threw}- & {threw-ball}+;
+\end_layout
+
 \end_inset
 
-disjunct
-\begin_inset Quotes erd
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+Each lexical entry above redundantly repeats noe of the words in each word-pair.
+ To obtain a more compact notation, drop the redundant word, to get
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ball:  the- & threw-;
+\end_layout
+
+\begin_layout Plain Layout
+
+	Kevin: threw+;
+\end_layout
+
+\begin_layout Plain Layout
+
+	the:   ball+;
+\end_layout
+
+\begin_layout Plain Layout
+
+	threw: Kevin- & ball+;
+\end_layout
+
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+This is encoding represents the exact same dictionary as the first one,
+ but now using the attachment-words as connectors, instead of single letters.
+ The resulting sentence parse is exactly the same as before.
+ The link types appear to be lost; these can be partly restored, as long
+ as some other location records that 
+\family typewriter
+{threw-ball}
+\family default
+ should be replaced by the link 
+\family typewriter
+O
+\family default
 .
+ 
 \end_layout
 
 \begin_layout Standard
-For the language learning project, it is convenient to extend the above
- to the notion of a pseudo-disjunct, where the connector types are replaced
- by instances of individual words.
- For example
+The above representation for the dictionary is verbose, and is not very
+ practical for hand-crafted dictionaries.
+ Link types really are much more convenient.
+ However, the above representation helps make it brutally clear that disjuncts
+ effectively resemble adaptive N-gram word-contexts.
+ The pseudo-disjunct, where the connector types are replaced by instances
+ of individual words, can be used as a word-in-context.
+ For example, a quick galnce at the pseudo-disjunct
 \begin_inset listings
 lstparams "basicstyle={\ttfamily}"
 inline false
@@ -1006,7 +1085,7 @@ status open
 
 \end_inset
 
-is used to represent the grammatical structure of the sentence 
+makes it clear tht it might be observed in a sentence such as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1014,45 +1093,19 @@ the girl ran home
 \begin_inset Quotes erd
 \end_inset
 
-, namely, that the verb 
-\begin_inset Quotes eld
-\end_inset
-
-ran
-\begin_inset Quotes erd
-\end_inset
-
- can attach to the word 
-\begin_inset Quotes eld
-\end_inset
-
-girl
-\begin_inset Quotes erd
-\end_inset
-
- (the subject) on the left, and the word 
-\begin_inset Quotes eld
-\end_inset
-
-home
-\begin_inset Quotes erd
-\end_inset
-
- (the object) on the right.
- An early goal of the language learning project is to automatically discern
- such pseudo-disjuncts; a later goal is to automatically classify such individua
-l-word connectors into word-classes, and so generalizing individual words
- into connector types, just as in traditional Link Grammar.
-\end_layout
-
-\begin_layout Standard
-The primary learning mechanism is to accumulate observation counts of different
- disjuncts, thus leading naturally to the idea of word-vectors.
+.
+ Neither the subject nor the object are explicitly labelled; however, one
+ can maintain statistical observation counts using this method.
+ It provides a direct bridge from dependency grammars to corpus linguistics.
+ The vectorial representation arises naturally when accumulating observation
+ counts of different disjuncts.
+ A word-vector is then simply a count of all the different observed pseudo-disju
+ncts.
  For example, one might observe the vector 
 \begin_inset Formula $\vec{v}_{\mbox{ran}}$
 \end_inset
 
- represented as
+, which may be represented as
 \begin_inset listings
 lstparams "basicstyle={\ttfamily}"
 inline false
@@ -1065,7 +1118,7 @@ status open
 
 \end_inset
 
-that might naturally arise if the sentence 
+This will naturally arise if the sentence 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1082,7 +1135,16 @@ the girl ran away
 \end_inset
 
  was observed twice.
- Such vectors can be used to judge word-similarity.
+ 
+\end_layout
+
+\begin_layout Standard
+From this point on, the standard panalopy of vector-based techniques become
+ available.
+ Normalizing vectors to be of unit-length implies that the frequency-counts
+ can be re-interpreted as frequency-probabilities.
+ Once in possession of vectors, the standard tricks of vectorially-based
+ semantic similarity apply.
  For example, a different vector 
 \begin_inset Formula $\vec{v}_{\mbox{walked}}$
 \end_inset
@@ -1124,12 +1186,28 @@ walked
 \end_inset
 
  can be used in syntactically similar ways.
+ Syntactic similarity is generally associated with semantic similarity (synonymy
+).
+ Later in this text, it is strongly argued that cosine-products are 
+\emph on
+not
+\emph default
+ the correct way to measure similarity (synonymy), and that the information-theo
+retic Kullback-Liebler divergence is much more appropriate.
+ A precise formulation will be given then.
+ For now, it is enough to note that the availability of a vector means that
+ all usual vector tricks can be applied.
 \end_layout
 
 \begin_layout Standard
-The disjunct representation also allows other kinds of vectors, such as
- those anchored on connectors.
- Using the examples above, one also has a vector for the word 
+However, unlike (adaptive) N-gram techniques, the disjunct approach explicitly
+ 
+\end_layout
+
+\begin_layout Standard
+Despite this, a quick taste of the flavor can be given here: given the above
+ corpus of five sentences, one can formulate different vector, for the word
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1137,7 +1215,9 @@ home
 \begin_inset Quotes erd
 \end_inset
 
-, which can be awkwardly written as
+.
+ Unlike the earlier examples, the representation is a bit more awkward:
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1157,12 +1237,56 @@ Note that the counts, here, of 3 and 2, are identical to the counts above:
  all of these counts are derived from the same observational dataset.
  What differs is the choice of the attachment-point for which the vector
  is to be formed.
+ The attachement-point is the 
+\begin_inset Quotes eld
+\end_inset
+
+germ
+\begin_inset Quotes erd
+\end_inset
+
+, and can be high-lighted by replacing it with a star:
 \end_layout
 
 \begin_layout Standard
-A less awkward notation for these two kinds of vectors would be nice; however,
- for current purposes, it is enough to distinguish them with superscripts
- D and C: 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	3(ran: girl- & *+) + 2(walked: girl- & *+)
+\end_layout
+
+\end_inset
+
+This is a fundamentally different kind of vector than the one given earlier;
+ the disjunct system enables two different kinds of vectors that can be
+ 
+\begin_inset Quotes eld
+\end_inset
+
+glued
+\begin_inset Quotes erd
+\end_inset
+
+ together in non-linear ways.
+ The ordinary (adaptive) N-gram vectors do not have this property.
+\end_layout
+
+\begin_layout Standard
+A variaty of different notations are possible.
+ For example, these two different vector types can be distinguished by emplying
+ superscripts 
+\begin_inset Formula $D$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+: 
 \emph on
 viz
 \emph default
@@ -1180,7 +1304,7 @@ viz
 \begin_inset Formula $w$
 \end_inset
 
-, there will be vectors 
+, there will in general always be vectors 
 \begin_inset Formula $\vec{v}_{w}^{D}$
 \end_inset
 
@@ -1189,16 +1313,99 @@ viz
 \end_inset
 
 .
- These two vectors can be taken together as 
-\begin_inset Formula $\vec{v}_{w}^{D}\oplus\vec{v}_{w}^{C}$
+ Even more: there will be several forms of 
+\begin_inset Formula $\vec{v}_{w}^{C}$
 \end_inset
 
- and inhabit two orthogonal subspaces of 
-\begin_inset Formula $\vec{V}^{D}\oplus\vec{V}^{C}$
+, with the word occupying different slots in the disjunct, thus 
+\begin_inset Formula $\vec{v}_{w}^{C_{1}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{w}^{C_{2}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{w}^{C_{3}}$
+\end_inset
+
+ and so on.
+ These vectors can be taken together as 
+\begin_inset Formula $\vec{v}_{w}^{D}\oplus\vec{v}_{w}^{C_{1}}\oplus\vec{v}_{w}^{C_{2}}\oplus\cdots$
+\end_inset
+
+ which inhabit orthogonal subspaces of 
+\begin_inset Formula $\vec{V}^{D}\oplus\vec{V}^{C_{1}}\oplus\vec{V}^{C_{2}}\oplus\cdots$
 \end_inset
 
 .
- There are many interesting relationships between these subspaces; the most
+ Again, the dependency-grammar constraints embodied in the connectors imply
+ that these vector spaces can be 
+\begin_inset Quotes eld
+\end_inset
+
+glued together
+\begin_inset Quotes erd
+\end_inset
+
+; the dependency-grammar constraints are the same
+\end_layout
+
+\begin_layout Standard
+enables a form of 
+\begin_inset Quotes eld
+\end_inset
+
+gluing
+\begin_inset Quotes erd
+\end_inset
+
+ to be applied to the problem.
+ The gluing is inherited from the algebraic structure of Link Grammar: the
+ disjuncts are not only parse constraints; they can also be viewed as the
+ generators of a (non-symmetric) monoidal category.
+ The details of this are left for a different text
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017sheaves"
+
+\end_inset
+
+; it is worth noting that the gluing together of the connectors obeys exactly
+ the gluing axioms of sheaf theory and algebraic topology.
+ This allows the disjunct vectors to be understood as a kind-of germ or
+ stalk, or as a kind of 
+\begin_inset Quotes eld
+\end_inset
+
+tangent vector
+\begin_inset Quotes erd
+\end_inset
+
+ to a kind-of 
+\begin_inset Quotes eld
+\end_inset
+
+manifold
+\begin_inset Quotes erd
+\end_inset
+
+ of natural language.
+ These are all rather abstract concepts arising in a very different domain
+ of mathematics, and this text is not the appropriate place to expand on
+ this; see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017sheaves"
+
+\end_inset
+
+ for details.
+ 
+\end_layout
+
+\begin_layout Standard
+There are many interesting relationships between these subspaces; the most
  important of these, developed in a later section, is that they can be viewed
  as sections of a sheaf of a graph.
  
