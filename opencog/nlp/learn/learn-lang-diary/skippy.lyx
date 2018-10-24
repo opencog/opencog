@@ -794,7 +794,7 @@ Many thanks and appreciation to Hanson Robotics for providing the time to
 \end_layout
 
 \begin_layout Section
-Link Grammar
+Link Grammar as a Model of Language
 \begin_inset CommandInset label
 LatexCommand label
 name "sec:Link-Grammar"
@@ -2645,10 +2645,10 @@ Typical choices for the dimension
 \end_layout
 
 \begin_layout Section
-Similarities and Differences 
+Network Models of Language
 \begin_inset CommandInset label
 LatexCommand label
-name "sec:Similarities-and-Differences"
+name "sec:Network Models"
 
 \end_inset
 
@@ -3221,8 +3221,8 @@ reference "eq:SkipGram"
 
 \end_inset
 
-, are commonly discussed in terms of neural nets, and the models are sometimes
- called 
+, are commonly discussed as optimization problems, and the utility functions
+ are sometimes called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3239,8 +3239,8 @@ loss functions
 \end_inset
 
 .
- From the point of view of statistical mechanics, these models can also
- be easily recognized as Gibbs distributions.
+ From the point of view of statistical mechanics, these utility functions
+ can be easily recognized as Gibbs distributions.
  This allows all of the traditional intuition and tools of statistical mechanics
  to be brought to bear on the language problem.
  Specifically, the probabilities are obtainable from a partition function.
@@ -3282,16 +3282,34 @@ Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{
 
 \end_inset
 
-The 
+In physics literature, the 
 \begin_inset Formula $J_{w_{t},I}$
 \end_inset
 
- are colloquially called 
+ are called 
 \begin_inset Quotes eld
 \end_inset
 
 sources
 \begin_inset Quotes erd
+\end_inset
+
+ or the 
+\begin_inset Quotes eld
+\end_inset
+
+current
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Mathematically, they resemble electric charges or currents.
+\end_layout
+
 \end_inset
 
 , and can be understood as parameters that are nominally zero.
@@ -3313,8 +3331,8 @@ p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t}
 
 \end_inset
 
-In other words, CBOW/SkipGram fit squarely into the standard maximum entropy
- theoretical framework.
+In other words, CBOW/SkipGram fit squarely into the standard framework of
+ maximum entropy principles.
  This is no accident, of course; the 
 \begin_inset Quotes eld
 \end_inset
@@ -3337,7 +3355,8 @@ The last statement can be made even more precise.
 \end_inset
 
 .
- The set of all such sequences is termed an 
+ The set of all such sequences is termed (in the historical literature of
+ physics and thermodynamics) an 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3367,6 +3386,8 @@ The principle of maximum entropy states that the above should be solved
 \end_inset
 
 .
+ This can be solved without the need to provide any addtional statements
+ or constraints.
  Standard texts on statistical mechanics exhibit the solution; it is the
  Boltzmann distribution, namely
 \begin_inset Formula 
