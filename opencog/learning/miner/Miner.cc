@@ -112,8 +112,9 @@ HandleTree Miner::specialize(const Handle& pattern,
 
 	// Produce specializations from other variables than the front
 	// one.
-	HandleTree patterns = specialize(pattern, texts, valuations.erase_front(),
-	                                 maxdepth);
+	valuations.inc_focus_variable();
+	HandleTree patterns = specialize(pattern, texts, valuations, maxdepth);
+	valuations.dec_focus_variable();
 
 	// Produce specializations from shallow abstractions on the front
 	// variable, and so recusively.
@@ -168,7 +169,7 @@ bool Miner::terminate(const Handle& pattern,
 		// The pattern is constant, no specialization is possible
 		pattern->get_type() != LAMBDA_LINK or
 		// There is no more variable to specialize from
-		valuations.novar() or
+		valuations.no_focus() or
 		// The pattern doesn't have enough support
 		// TODO: it seems the text is always filtered prior anyway
 		not enough_support(pattern, texts);
@@ -182,7 +183,7 @@ HandleTree Miner::specialize_shabs(const Handle& pattern,
 	// Generate shallow patterns of the first variable of the
 	// valuations and associate the remaining valuations (excluding
 	// that variable) to them.
-	HandleSet shapats = MinerUtils::front_shallow_abstract(valuations, param.minsup);
+	HandleSet shapats = MinerUtils::focus_shallow_abstract(valuations, param.minsup);
 
 	// No shallow abstraction to use for specialization
 	if (shapats.empty())
@@ -192,7 +193,7 @@ HandleTree Miner::specialize_shabs(const Handle& pattern,
 	// pattern by composing it, and recursively specialize the result
 	// with the new resulting valuations.
 	HandleTree patterns;
-	Handle var = valuations.front_variable();
+	Handle var = valuations.focus_variable();
 	for (const auto& shapat : shapats)
 	{
 		// Specialize pattern by composing it with shapat, and
