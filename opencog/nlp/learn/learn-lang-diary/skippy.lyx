@@ -93,7 +93,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; draft of 23 October 2018
+6 July 2018; working draft of 23 October 2018
 \end_layout
 
 \begin_layout Abstract
@@ -106,13 +106,13 @@ This text provides a broad sketch of how deep-learning/neural-net approaches
 
 \begin_layout Abstract
 To keep the development focused and concrete, the presentation is limited
- models of natural langauge, and thus compares Word2Vec, SkipGram or AdaGram-sty
+ models of natural language, and thus compares Word2Vec, SkipGram or AdaGram-sty
 le vector-space approaches to traditional symbolic linguistics approaches.
  To maintain concreteness, Link Grammar is used as a stand-in for a prototypical
  dependency grammar.
  Superficially, these systems appear to have nothing in common.
- On closer examination, it becomes evidenct that both employ a vector representa
-tion of words-in-context.
+ On closer examination, it becomes evident that both employ a vector representat
+ion of words-in-context.
  The context is an N-gram, skip-gram or adagram, in the neural-net case,
  and a dependency linkage disjunct in the symbolic case.
 \end_layout
@@ -612,7 +612,7 @@ key "WP-Partition"
 \begin_layout Standard
 The primary task for Word2Vec/SkipGram is to discover the two projection
  matrices.
- This can be done by gradient ascent (hillclimbing), looking to maximize
+ This can be done by gradient ascent (hill-climbing), looking to maximize
  the probability.
  The primary output of Word2Vec are the two projection matrices: one that
  is 
@@ -632,7 +632,11 @@ The primary task for Word2Vec/SkipGram is to discover the two projection
 Link Grammar also performs a dimensional reduction, but not quite exactly
  by using projection matrices.
  Rather, a word can be assigned to several different word-categories (there
- are de facto about 2300 of these in the hand-built English dictionaries).
+ are 
+\emph on
+de facto
+\emph default
+ about 2300 of these in the hand-built English dictionaries).
  Associated with each category is a list of dozens to thousands of “disjuncts”
  (dependency-grammar dependencies), which play the role analogous to “context”.
  However, there are far, far fewer disjuncts than there are contexts.
@@ -762,7 +766,7 @@ Similarly, given two different words in Word2Vec/SkipGram, if they both
 This is also where we have the largest, and the most important difference
  between neural net approaches, and Link Grammar.
  In the neural net approach, the intermediate neuron layer is a black box,
- completely opaque and un-analyzable, just some meaningless collection of
+ completely opaque and unanalyzable, just some meaningless collection of
  floating-point numbers.
  In Link Grammar, the disjunct vector is clear, overt, and understandable:
  you can see exactly what it is encoding, because each disjunct tells you
@@ -1014,7 +1018,7 @@ status open
 
 \begin_layout Standard
 \noindent
-Each lexical entry above redundantly repeats noe of the words in each word-pair.
+Each lexical entry above redundantly repeats one of the words in each word-pair.
  To obtain a more compact notation, drop the redundant word, to get
 \begin_inset listings
 lstparams "basicstyle={\ttfamily}"
@@ -1072,7 +1076,7 @@ The above representation for the dictionary is verbose, and is not very
  effectively resemble adaptive N-gram word-contexts.
  The pseudo-disjunct, where the connector types are replaced by instances
  of individual words, can be used as a word-in-context.
- For example, a quick galnce at the pseudo-disjunct
+ For example, a quick glance at the pseudo-disjunct
 \begin_inset listings
 lstparams "basicstyle={\ttfamily}"
 inline false
@@ -1085,7 +1089,7 @@ status open
 
 \end_inset
 
-makes it clear tht it might be observed in a sentence such as 
+makes it clear that it might be observed in a sentence such as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1094,7 +1098,7 @@ the girl ran home
 \end_inset
 
 .
- Neither the subject nor the object are explicitly labelled; however, one
+ Neither the subject nor the object are explicitly labeled; however, one
  can maintain statistical observation counts using this method.
  It provides a direct bridge from dependency grammars to corpus linguistics.
  The vectorial representation arises naturally when accumulating observation
@@ -1139,7 +1143,7 @@ the girl ran away
 \end_layout
 
 \begin_layout Standard
-From this point on, the standard panalopy of vector-based techniques become
+From this point on, the standard panoply of vector-based techniques become
  available.
  Normalizing vectors to be of unit-length implies that the frequency-counts
  can be re-interpreted as frequency-probabilities.
@@ -1193,7 +1197,7 @@ walked
 not
 \emph default
  the correct way to measure similarity (synonymy), and that the information-theo
-retic Kullback-Liebler divergence is much more appropriate.
+retic Kullback-Leibler divergence is much more appropriate.
  A precise formulation will be given then.
  For now, it is enough to note that the availability of a vector means that
  all usual vector tricks can be applied.
@@ -1233,7 +1237,7 @@ Note that the counts, here, of 3 and 2, are identical to the counts above:
  all of these counts are derived from the same observational dataset.
  What differs is the choice of the attachment-point for which the vector
  is to be formed.
- The attachement-point or 
+ The attachment-point or 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1263,9 +1267,9 @@ l ability; they all collapse down to the same representation.
 \end_layout
 
 \begin_layout Standard
-This difference turns out to be important, and has deep reprecussions.
- A quick sketh can be given.
- These two different vector types can be distinguished by emplying superscripts
+This difference turns out to be important, and has deep repercussions.
+ A quick sketch can be given.
+ These two different vector types can be distinguished by employing superscripts
  
 \begin_inset Formula $D$
 \end_inset
@@ -1334,16 +1338,16 @@ viz
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Rhysome
+Rhizome
 \begin_inset CommandInset label
 LatexCommand label
-name "fig:Rhysome"
+name "fig:Rhisome"
 
 \end_inset
 
@@ -1368,7 +1372,7 @@ name "fig:Rhysome"
 \end_layout
 
 \begin_layout Plain Layout
-This image illustrates the general concept of a rhisome.
+This image illustrates the general concept of a rhizome.
  It is meant only to provide a suggestive inspiration for visualizing a
  graphical sheaf.
  Lines correspond to dependency grammar link contraints between tangent
@@ -1474,18 +1478,18 @@ To simplify these last claims somewhat, they effectively say this: the correct
  graph, with vectors of observation counts attached to each vertex.
  When the vectors are consistently glued to one-another, so that only the
  syntactically-allowed sentences are possible, the network begins to look
- more like a bramble or rhysome, with each thread in the rhysome corresponding
+ more like a bramble or rhizome, with each thread in the rhizome corresponding
  to a grammatically-correct sentence.
- The algebraic structure of this rhysome is a sheaf, explicitly in the sense
+ The algebraic structure of this rhizome is a sheaf, explicitly in the sense
  of sheaf theory.
  Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:Rhysome"
+reference "fig:Rhisome"
 
 \end_inset
 
- illustrates a rhysome.
+ illustrates a rhizome.
 \end_layout
 
 \begin_layout Section
