@@ -147,6 +147,10 @@
     ((has-match? "[a-zA-Z]+['’][a-zA-Z]+" str)
       (result:suffix 'LITERAL_APOS location
         (string-trim-both (match:substring current-match))))
+    ; Literals for example: Mr. Dr.
+    ((has-match? "[a-zA-Z]+\\." str)
+      (result:suffix 'LITERAL location
+        (string-trim-both (match:substring current-match))))
     ; Literals -- words start with a '
     ((has-match? "'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
