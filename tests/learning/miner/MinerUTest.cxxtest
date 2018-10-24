@@ -26,6 +26,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -35,6 +36,7 @@
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
 
 #include <vector>
 
@@ -126,9 +128,13 @@ private:
 	 * then backward to gather the results, and output them.
 	 */
 	Handle ure_pm(const AtomSpace& texts_as, int minsup,
-	              int max_iter=-1, Handle initpat=Handle::UNDEFINED);
+	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
+	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              double complexity_penalty=0.0);
 	Handle ure_pm(const HandleSet& texts, int minsup,
-	              int max_iter=-1, Handle initpat=Handle::UNDEFINED);
+	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
+	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              double complexity_penalty=0.0);
 
 	/**
 	 * Configure the C++ Miner and run it.
@@ -160,6 +166,9 @@ private:
 	 */
 	Handle mk_ugly_soda_drinker();
 
+	void configure_mandatory_rules();
+	void configure_optional_rules(TruthValuePtr incremental_expansion);
+
 public:
 	MinerUTest();
 	~MinerUTest();
@@ -172,6 +181,8 @@ public:
 	void test_match();
 	void test_compose_1();
 	void test_compose_2();
+	void test_expand_conjunction_1();
+	void test_expand_conjunction_2();
 
 	// Pattern miner
 	void test_A();
@@ -244,16 +255,21 @@ HandleSeq MinerUTest::gen_variables(const std::string& prefix, int n)
 }
 
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
-                          int maxiter, Handle initpat)
+                          int maxiter, Handle initpat,
+                          TruthValuePtr incremental_expansion,
+                          double complexity_penalty)
 {
 	HandleSet texts;
 	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                             opencog::ATOM, true);
-	return ure_pm(texts, minsup, maxiter, initpat);
+	return ure_pm(texts, minsup, maxiter, initpat,
+	              incremental_expansion, complexity_penalty);
 }
 
 Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
-                          int maxiter, Handle initpat)
+                          int maxiter, Handle initpat,
+                          TruthValuePtr incremental_expansion,
+                          double complexity_penalty)
 {
 	// Make (Member text (Concept "texts)) links
 	for (const Handle& text : texts)
@@ -270,13 +286,21 @@ Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
 	// If it doesn't have enough support return the empty solution
 	if (not es)
 		return al(SET_LINK);
-	TruthValuePtr tv = SimpleTruthValue::createTV(1.0, 1.0);
+
+	// Add incremental conjunction expansion if necessary
+	bool inc_exp_enabled = incremental_expansion != TruthValue::FALSE_TV();
+	if (inc_exp_enabled)
+		configure_optional_rules(incremental_expansion);
+
+	// Otherwise prepare the source
+	TruthValuePtr tv = TruthValue::TRUE_TV();
 	Handle source = mk_minsup_eval(minsup, initpat, tv);
 
-	// Run the foward chainer from the initial pattern
+	// Run the forward chainer from the initial pattern
 	ForwardChainer fc(_as, pm_rb, source);
 	fc.get_config().set_maximum_iterations(maxiter);
-	fc.get_config().set_retry_sources(false);
+	fc.get_config().set_retry_exhausted_sources(inc_exp_enabled);
+	fc.get_config().set_complexity_penalty(complexity_penalty);
 	fc.do_chain();
 
 	// Run the pattern matcher query to gather the knowledge of
@@ -331,16 +355,34 @@ Handle MinerUTest::mk_ugly_soda_drinker()
 	return ugly_soda_drinker;
 }
 
+void MinerUTest::configure_mandatory_rules()
+{
+	std::string rs = _scm.eval("(configure-mandatory-rules (Concept \"pm-rbs\"))");
+	logger().debug() << "MinerUTest::configure_mandatory_rules() rs = " << rs;
+}
+
+void MinerUTest::configure_optional_rules(TruthValuePtr incremental_expansion)
+{
+	string call = "(configure-optional-rules (Concept \"pm-rbs\") ";
+	call += "#:incremental-expansion ";
+	call += SchemeSmob::tv_to_string(incremental_expansion);
+	call += ")";
+	std::string rs = _scm.eval(call);
+	logger().debug() << "MinerUTest::configure_optional_rules() rs = " << rs;
+}
+
 MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 {
+	randGen().seed(0);
+
 	// Main logger
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 	logger().set_timestamp_flag(false);
 	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
-	ure_logger().set_level(Logger::INFO);
+	ure_logger().set_level(Logger::DEBUG);
 	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
@@ -385,8 +427,7 @@ void MinerUTest::setUp()
 	top = al(LAMBDA_LINK, X, X);
 
 	// Load URE-based pattern miner
-	std::string rs = _scm.eval("(configure-rules (Concept \"pm-rbs\"))");
-	logger().debug() << "setUp() rs = " << rs;
+	configure_mandatory_rules();
 }
 
 void MinerUTest::tearDown()
@@ -479,6 +520,39 @@ void MinerUTest::test_compose_2()
 	TS_ASSERT(content_eq(npat, expected));
 }
 
+void MinerUTest::test_expand_conjunction_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle result = MinerUtils::expand_conjunction(top, top),
+		expected = al(LAMBDA_LINK,
+		              al(VARIABLE_LIST, X, Y),
+		              al(AND_LINK, X, Y));
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+void MinerUTest::test_expand_conjunction_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle XY = al(INHERITANCE_LINK, X, Y),
+		p1 = al(LAMBDA_LINK,
+		        al(VARIABLE_LIST, X, Y),
+		        al(AND_LINK, XY, XY)),
+		p2 = al(LAMBDA_LINK,
+		        al(VARIABLE_LIST, X, Y),
+		        XY);
+
+	Handle result = MinerUtils::expand_conjunction(p1, p2),
+		ZW = al(INHERITANCE_LINK, Z, W),
+		expected = al(LAMBDA_LINK,
+		              al(VARIABLE_LIST, X, Y, Z, W),
+		              al(AND_LINK, XY, ZW));
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
 void MinerUTest::test_A()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -556,7 +630,7 @@ void MinerUTest::test_AB_AC()
 
 	// Run URE pattern miner (using _as for testing more diverse
 	// content)
-	Handle ure_results = ure_pm(_as, 2, 20),
+	Handle ure_results = ure_pm(_as, 2, 40),
 		ure_expected = mk_minsup_eval(2, al(LAMBDA_LINK, Y, InhAY));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
@@ -1225,29 +1299,17 @@ void MinerUTest::test_SodaDrinker_incremental()
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
-	// Run C++ pattern miner
-	HandleTree cpp_results = cpp_pm(_tmp_as,
-	                                5/*minsup*/, 1/*nconjuncts*/,
-	                                initpat, 3/*maxdepth*/, 1/*info*/);
-
-	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
-
-	// TODO: the C++ pattern miner doesn't (and might never) support
-	// incremental conjunct search.
-	TS_ASSERT(true);
-	// TS_ASSERT(content_is_in(expected, cpp_results));
-
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(_tmp_as, 5, 1000, initpat),
+	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.001, 1.0);
+	// VT: get rid of stupid shallow abstractions, such as ones that
+	// would change the number of conjunctions of the pattern
+	Handle ure_results = ure_pm(_tmp_as, 5, 1000, initpat, incremental_expansion, 0.1),
 		ure_expected = mk_minsup_eval(5, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
 
-	// TODO: the URE pattern miner doesn't support incremental conjunct
-	// search for now.
-	TS_ASSERT(true);
-	// TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
+	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
 }
 
 void MinerUTest::xtest_lojban()
