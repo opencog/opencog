@@ -785,14 +785,77 @@ Link Grammar
 \end_layout
 
 \begin_layout Standard
-Link Grammar
+One of the barriers to understanding the commonality between symbolic and
+ vector approaches is the notational difference.This section provides a highly
+ abbreviated review of the Link Grammar
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
 
 \end_inset
 
- defines a word-disjunct pair as an object of the general form
+ notation, followed by a simple modification so that it's vector-like form
+ becomes more apparent.
+ 
+\end_layout
+
+\begin_layout Standard
+The figure below represents a (simplified) parse of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+Kevin threw the ball
+\begin_inset Quotes erd
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename parse.ps
+	lyxscale 200
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
+The labeling is prototypical of a dependency grammar: the arc labeled 
+\begin_inset Quotes eld
+\end_inset
+
+S
+\begin_inset Quotes erd
+\end_inset
+
+ denotes a subject-verb dependency; 
+\begin_inset Quotes eld
+\end_inset
+
+O
+\begin_inset Quotes erd
+\end_inset
+
+ a verb-object dependency, and 
+\begin_inset Quotes eld
+\end_inset
+
+D
+\begin_inset Quotes erd
+\end_inset
+
+ links a noun to a determiner.
+ 
+\end_layout
+
+\begin_layout Standard
+defines a word-disjunct pair as an object of the general form
 \begin_inset listings
 inline false
 status open
