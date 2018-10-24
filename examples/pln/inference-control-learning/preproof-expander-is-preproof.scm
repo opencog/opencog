@@ -162,7 +162,7 @@
 ;; Complexity penalty, negative so that it always expands the biggest,
 ;; we can do that since the backward chainer is linear (it has only
 ;; one branch).
-(ure-set-num-parameter pep-rbs "URE:BC:complexity-penalty" -2)
+(ure-set-num-parameter pep-rbs "URE:complexity-penalty" -2)
 
 ;; Actually: to speed this up we instead reapply the following rule,
 ;; corresponding to a conditional instantiation followed by a
