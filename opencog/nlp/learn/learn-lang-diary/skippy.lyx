@@ -2279,6 +2279,7 @@ By convention,
 \end_inset
 
 .
+ Knowledgable readers are encouraged to correct my misperception.
 \end_layout
 
 \begin_layout Subsection
@@ -2330,7 +2331,7 @@ That is, the word
 \begin_inset Formula $N$
 \end_inset
 
- is the width of the sliding window.
+ is the width of the sliding window).
 \end_layout
 
 \begin_layout Standard
@@ -2419,7 +2420,7 @@ weight matrix
 \end_inset
 
  
-\begin_inset Formula $H$
+\begin_inset Formula $h$
 \end_inset
 
 , and a non-linear sigmoid function 
@@ -2427,11 +2428,11 @@ weight matrix
 \end_inset
 
 , which is commonly taken to be 
-\begin_inset Formula $\tanh x$
+\begin_inset Formula $\sigma\left(x\right)=\tanh x$
 \end_inset
 
  or 
-\begin_inset Formula $1/\left(1+e^{-x}\right)$
+\begin_inset Formula $\sigma\left(x\right)=1/\left(1+e^{-x}\right)$
 \end_inset
 
  or similar, according to taste.
@@ -2624,7 +2625,7 @@ Typical choices for the dimension
 \begin_inset Formula $h$
 \end_inset
 
- does a minimal amount of, if any at all, of dimensional reduction.
+ does a minimal amount of, if any at all, dimensional reduction.
 \end_layout
 
 \begin_layout Section
