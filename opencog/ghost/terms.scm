@@ -6,7 +6,7 @@
 "
   Occurrence of a word, a word that should be matched literally.
 "
-  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
+  (let* ((str-dc (string-downcase STR))
          (v1 (WordNode str-dc))
          (v2 (Variable (gen-var str-dc #f)))
          (l (WordNode (get-lemma str-dc)))
@@ -23,8 +23,7 @@
 "
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
-         (l (WordNode
-              (if (string-prefix? "I'" nstr) nstr (string-downcase nstr)))))
+         (l (WordNode (string-downcase nstr))))
     (list (list) (list) (list l) (list l))))
 
 ; ----------
@@ -33,7 +32,7 @@
   Lemma occurrence, aka canonical form of a term.
   This is the default for word mentions in the rule pattern.
 "
-  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
+  (let* ((str-dc (string-downcase STR))
          (v1 (Variable (gen-var str-dc #t)))
          (v2 (Variable (gen-var str-dc #f)))
          (l (WordNode (get-lemma str-dc)))

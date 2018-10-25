@@ -129,8 +129,13 @@
            (set! final-word-seq (append final-word-seq (list new-word)))
            (set! word-apos-alist (assoc-set! word-apos-alist (cons i i) new-word))))
         (else (set! final-word-seq (append final-word-seq (list current-word-node)))))))
-
-  (Evaluation ghost-word-seq (List SENT (List final-word-seq)))
+  (Evaluation
+    ghost-word-seq
+    (List SENT
+      (List (map
+        (lambda (w)
+          (WordNode (string-downcase (cog-name w))))
+        final-word-seq))))
 
   ; Generate this lemma-seq only for backward compatibility
   (if (not ghost-with-ecan)
@@ -169,7 +174,13 @@
              (assoc-ref word-apos-alist (cons i i)))
             ; Just a normal word
             (else (list-ref lemma-seq i)))))))
-    (Evaluation ghost-lemma-seq (List SENT (List final-lemma-seq))))))
+    (Evaluation
+      ghost-lemma-seq
+      (List SENT
+        (List (map
+          (lambda (w)
+            (WordNode (string-downcase (cog-name w))))
+          final-lemma-seq)))))))
 
 ; ----------
 (define (get-lemma-from-relex WORD)
