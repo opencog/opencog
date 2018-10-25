@@ -183,6 +183,14 @@
                   (is-nonbreaking-prefix? (cog-name (list-ref lemma-seq i))))
              (set! i (1+ i))
              (WordNode (string-append (cog-name (list-ref lemma-seq (1- i))) ".")))
+            ; For time, regardless of the format e.g. "2am", "2 am", "2 a.m." or "2a.m.",
+            ; will all get splitted into two words, and this is a quick workaround for
+            ; the problem of RelEx lemmatizing "a.m." to "be"
+            ((and (< (1+ i) (length lemma-seq))
+                  (string->number (cog-name (list-ref lemma-seq i)))
+                  (string=? "be" (cog-name (list-ref lemma-seq (1+ i)))))
+             (set! i (1+ i))
+             (list (list-ref lemma-seq (1- i)) (list-ref final-word-seq i)))
             ; Just a normal word
             (else (list-ref lemma-seq i)))))))
     (Evaluation
@@ -191,7 +199,7 @@
         (List (map
           (lambda (w)
             (WordNode (string-downcase (cog-name w))))
-          final-lemma-seq)))))))
+          (flatten final-lemma-seq))))))))
 
 ; ----------
 (define (get-lemma-from-relex WORD)
@@ -218,7 +226,10 @@
   (if (equal? #f seen-lemma)
       (let ((lemma
               ; Don't bother if it's, say, a personal title like "Mrs."
-              (if (is-nonbreaking-prefix? WORD)
+              ; or it's time related like a.m. and p.m.
+              (if (or (is-nonbreaking-prefix? WORD)
+                      (string=? "a.m." WORD)
+                      (string=? "p.m." WORD))
                 WORD
                 (get-lemma-from-relex WORD))))
         (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
@@ -299,6 +310,18 @@
         (cog-outgoing-set x)
         (list x)))
     LST))
+
+ ; ----------
+(define (flatten LST)
+"
+  Flatten a list of lists.
+"
+  (cond ((null? LST) '())
+        ((pair? (car LST))
+         (append (flatten (car LST))
+                 (flatten (cdr LST))))
+        (else (cons (car LST) (flatten (cdr LST)))))
+)
 
 ; ----------
 (define (get-rejoinder-level TYPE)
