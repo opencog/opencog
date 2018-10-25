@@ -4841,6 +4841,10 @@ more general
 
  by not constraining to fit the cost function to a probabilistic framework.
  The need for this generality does not seem to be well-supported.
+ There does not appear to be any data to indicate if some other pair-wise
+ cost function provides a superior MST-tree, as compared to using the MI.
+ Although this is an open question, there's no particular hint that this
+ could be a fruitful direction to take.
 \end_layout
 
 \begin_layout Subsection
@@ -4877,7 +4881,7 @@ key "Goertzel2014"
 \end_layout
 
 \begin_layout Standard
-xxx
+xxx fixme nonsequiter missing text xxx
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
