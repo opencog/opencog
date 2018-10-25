@@ -162,7 +162,7 @@
         ; Literals, words in the pattern that are not in their canonical forms
         (result:suffix 'LITERAL location
           (string-trim-both (match:substring current-match)))))
-    ((has-match? "[0-9]+[0-9.]*" str)
+    ((has-match? "[0-9]+[0-9.]*\\b" str)
       (result:suffix 'NUM location
         (string-trim-both (match:substring current-match))))
     ((has-match? "[|]" str)
@@ -511,6 +511,7 @@
 
     (literal
       (LITERAL) : (format #f "(cons 'word \"~a\")" $1)
+      (NUM) : (format #f "(cons 'word \"~a\")" $1)
       (STRING) : (format #f "(cons 'word \"~a\")" $1)
     )
 
