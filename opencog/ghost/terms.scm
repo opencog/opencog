@@ -6,14 +6,29 @@
 "
   Occurrence of a word, a word that should be matched literally.
 "
-  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
-         (v1 (WordNode str-dc))
-         (v2 (Variable (gen-var str-dc #f)))
-         (l (WordNode (get-lemma str-dc)))
-         (v (list (TypedVariable v2 (Type "WordInstanceNode"))))
-         (c (list (WordInstanceLink v2 (Variable "$P"))
-                  (ReferenceLink v2 v1))))
-    (list v c (list v1) (list l))))
+  (let* ((str-dc (string-downcase STR))
+         ; Special handling for time that's written as a single word
+         ; e.g. 2pm, 10am etc
+         ; For the input, regardless of the format, e.g. "2am", "2 am",
+         ; "2 a.m." or "2a.m.", will all get splitted into two words
+         (is-time? (string-match "[0-9]{1,2}[ ]*[ap][.]*m[.]*" str-dc))
+         (is-two-digits?
+           (and is-time? (char-numeric? (string-ref str-dc 1))))
+         (time-1pt
+           (if is-two-digits?
+             (substring str-dc 0 2)
+             (substring str-dc 0 1)))
+         (time-2pt
+           (if is-two-digits?
+             (substring str-dc 2)
+             (substring str-dc 1))))
+    (list (list) (list)
+      (if is-time?
+        (list (WordNode time-1pt) (WordNode time-2pt))
+        (list (WordNode str-dc)))
+      (if is-time?
+        (list (WordNode time-1pt) (WordNode time-2pt))
+        (list (WordNode (get-lemma str-dc)))))))
 
 ; ----------
 (define (word-apos STR)
@@ -23,9 +38,8 @@
 "
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
-         (l (WordNode
-              (if (string-prefix? "I'" nstr) nstr (string-downcase nstr)))))
-    (list (list) (list) (list l) (list l))))
+         (w (WordNode (string-downcase nstr))))
+    (list (list) (list) (list w) (list w))))
 
 ; ----------
 (define (lemma STR)
@@ -33,23 +47,19 @@
   Lemma occurrence, aka canonical form of a term.
   This is the default for word mentions in the rule pattern.
 "
-  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
-         (v1 (Variable (gen-var str-dc #t)))
-         (v2 (Variable (gen-var str-dc #f)))
+  (let* ((str-dc (string-downcase STR))
+         (var (Variable (gen-var str-dc #t)))
          (l (WordNode (get-lemma str-dc)))
-         (v (list (TypedVariable v1 (Type "WordNode"))
-                  (TypedVariable v2 (Type "WordInstanceNode"))))
-         (c (list (ReferenceLink v2 v1)
-                  ; In some rare situation, particularly if the input
+         (v (list (TypedVariable var (Type "WordNode"))))
+         (c (list ; In some rare situation, particularly if the input
                   ; sentence is not grammatical, RelEx may not lemmatize a
                   ; word because of the ambiguity
-                  ; So just to be sure "l" is the stem of "v1",
+                  ; So just to be sure "l" is the stem of "var",
                   ; a GroundedPredicateNode is used instead of putting
                   ; "(LemmaLink v2 l)" in the context
                   (Evaluation (GroundedPredicate "scm: ghost-lemma?")
-                              (List v1 l))
-                  (WordInstanceLink v2 (Variable "$P")))))
-    (list v c (list v1) (list l))))
+                              (List var l)))))
+    (list v c (list var) (list l))))
 
 (define-public (ghost-lemma? GRD LEMMA)
 "
@@ -557,7 +567,7 @@
     ((string=? "equal" OPERATOR)
      (if both-numbers?
        (= lv-num rv-num)
-       (string=? lv-str rv-str)))
+       (string-ci=? lv-str rv-str)))
     ((string=? "smaller" OPERATOR)
      (and both-numbers?
           (< lv-num rv-num)))

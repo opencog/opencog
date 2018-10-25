@@ -122,6 +122,12 @@
            (set! final-word-seq (append final-word-seq (list merged-word)))
            (set! word-apos-alist (assoc-set! word-apos-alist (cons i (1+ i)) merged-word))
            (set! i (1+ i))))
+        ; To merge for example "dr" and "." into one word, just for matching
+        ((and (string=? next-word-str ".")
+              (is-nonbreaking-prefix? current-word-str))
+         (set! final-word-seq (append final-word-seq
+           (list (WordNode (string-append current-word-str ".")))))
+         (set! i (1+ i)))
         ; The current word may also have an apostrophe, make sure to turn
         ; "’" into "'" as well for consistency
         ((> (length current-word-splitted) 1)
@@ -129,8 +135,13 @@
            (set! final-word-seq (append final-word-seq (list new-word)))
            (set! word-apos-alist (assoc-set! word-apos-alist (cons i i) new-word))))
         (else (set! final-word-seq (append final-word-seq (list current-word-node)))))))
-
-  (Evaluation ghost-word-seq (List SENT (List final-word-seq)))
+  (Evaluation
+    ghost-word-seq
+    (List SENT
+      (List (map
+        (lambda (w)
+          (WordNode (string-downcase (cog-name w))))
+        final-word-seq))))
 
   ; Generate this lemma-seq only for backward compatibility
   (if (not ghost-with-ecan)
@@ -161,15 +172,34 @@
           (cond
             ; For the next-word-prefix-with-apos? case
             ((assoc-ref word-apos-alist (cons i (1+ i)))
-             (begin
-               (set! i (1+ i))
-               (assoc-ref word-apos-alist (cons (1- i) i))))
+             (set! i (1+ i))
+             (assoc-ref word-apos-alist (cons (1- i) i)))
             ; For having apos in the same word
             ((assoc-ref word-apos-alist (cons i i))
              (assoc-ref word-apos-alist (cons i i)))
+            ; For nonbreaking-prefix like Mr. Mrs. etc
+            ((and (< (1+ i) (length lemma-seq))
+                  (string=? "." (cog-name (list-ref lemma-seq (1+ i))))
+                  (is-nonbreaking-prefix? (cog-name (list-ref lemma-seq i))))
+             (set! i (1+ i))
+             (WordNode (string-append (cog-name (list-ref lemma-seq (1- i))) ".")))
+            ; For time, regardless of the format e.g. "2am", "2 am", "2 a.m." or "2a.m.",
+            ; will all get splitted into two words, and this is a quick workaround for
+            ; the problem of RelEx lemmatizing "a.m." to "be"
+            ((and (< (1+ i) (length lemma-seq))
+                  (string->number (cog-name (list-ref lemma-seq i)))
+                  (string=? "be" (cog-name (list-ref lemma-seq (1+ i)))))
+             (set! i (1+ i))
+             (list (list-ref lemma-seq (1- i)) (list-ref final-word-seq i)))
             ; Just a normal word
             (else (list-ref lemma-seq i)))))))
-    (Evaluation ghost-lemma-seq (List SENT (List final-lemma-seq))))))
+    (Evaluation
+      ghost-lemma-seq
+      (List SENT
+        (List (map
+          (lambda (w)
+            (WordNode (string-downcase (cog-name w))))
+          (flatten final-lemma-seq))))))))
 
 ; ----------
 (define (get-lemma-from-relex WORD)
@@ -194,7 +224,14 @@
 "
   (define seen-lemma (assoc-ref lemma-alist WORD))
   (if (equal? #f seen-lemma)
-      (let ((lemma (get-lemma-from-relex WORD)))
+      (let ((lemma
+              ; Don't bother if it's, say, a personal title like "Mrs."
+              ; or it's time related like a.m. and p.m.
+              (if (or (is-nonbreaking-prefix? WORD)
+                      (string=? "a.m." WORD)
+                      (string=? "p.m." WORD))
+                WORD
+                (get-lemma-from-relex WORD))))
         (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
         lemma)
       seen-lemma))
@@ -274,6 +311,18 @@
         (list x)))
     LST))
 
+ ; ----------
+(define (flatten LST)
+"
+  Flatten a list of lists.
+"
+  (cond ((null? LST) '())
+        ((pair? (car LST))
+         (append (flatten (car LST))
+                 (flatten (cdr LST))))
+        (else (cons (car LST) (flatten (cdr LST)))))
+)
+
 ; ----------
 (define (get-rejoinder-level TYPE)
 "
@@ -321,7 +370,7 @@
 ; ----------
 (define (get-rule-from-label LABEL)
 "
-  Given the label of a rule in string, return the rule with that lavel.
+  Given the label of a rule in string, return the rule with that label.
 "
   (define rule (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
@@ -333,3 +382,30 @@
           "Failed to find the GHOST rule \"~a\"" LABEL)
         (list))
       (car rule)))
+
+; ----------
+(define (is-nonbreaking-prefix? WORD)
+"
+  Check if WORD is a personal title.
+"
+  (define lst (list
+    "abp" "adj" "adm" "adv" "asst" "bart" "bp" "bldg" "brig" "bros"
+    "capt" "cmdr" "col" "comdr" "con" "corp" "cpl" "dr" "drs" "ens"
+    "gen" "gov" "hon" "hr" "hosp" "insp" "lt" "maj" "messrs" "mlle"
+    "mm" "mme" "mr" "mrs" "ms" "msgr" "op" "ord" "pfc" "ph" "prof"
+    "pvt" "rep" "reps" "res" "rev" "rt" "sen" "sens" "sfc" "sgt"
+    "sr" "st" "supt" "surg"
+    "abstr" "acad" "acct" "accts" "admin" "agric" "amer" "ar" "arch"
+    "assn" "assoc" "cong" "dept" "econ" "ed" "ess" "evang" "fr"
+    "gaz" "glac" "gr" "hist" "hosp" "inst" "jas" "let" "lett" "libr"
+    "mss" "mt" "org" "phys" "princ" "proc" "prod" "prol" "prov" "pt"
+    "publ" "quot" "quots" "ref" "reg" "rep" "rept" "rev" "roy" "russ"
+    "soc" "tel" "ths" "trad" "transl" "univ" "will" "wk" "wkly" "wlky"
+    "wks" "wm" "yr" "zool" "v" "vs" "i.e" "e.g" "op" "cit" "p.s" "q.v"
+    "viz" "no" "nos" "art" "nr" "pp" "fig" "i" "ii" "p" "seq" "sp"
+    "spec" "specif" "vol" "vols"))
+
+  (or (member (string-downcase WORD) lst)
+      (and (string-suffix? "." WORD)
+           (member (string-downcase (car (string-split WORD #\.))) lst)))
+)
