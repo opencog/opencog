@@ -93,7 +93,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; working draft of 23 October 2018
+6 July 2018; working draft of 24 October 2018
 \end_layout
 
 \begin_layout Abstract
@@ -780,18 +780,47 @@ This is also where we have the largest, and the most important difference
 \end_layout
 
 \begin_layout Standard
+The remainder of this essay is structured as follows: Section 2 provides
+ a very quick sketch of Link Grammar, emphasizing how dependency grammars
+ have vector-like aspects to them.
+ Section 3 reviews the based CBOW, SkipGram and neural net models, setting
+ up some basic notation.
+ Section 4 defines a graph network model of language, emphasizing that statistic
+al physics provides a well-developed toolset for working with graph networks.
+ Section 5 reviews several different techniques by which statistical information
+ can be gathered, and the graphical structure can be infered, given a large
+ 
+\begin_inset Quotes eld
+\end_inset
+
+flat
+\begin_inset Quotes erd
+\end_inset
+
+ corpus of text.
+ Section 6...
+\end_layout
+
+\begin_layout Standard
 Many thanks and appreciation to Hanson Robotics for providing the time to
  think and write about such things.
 \end_layout
 
 \begin_layout Section
-Link Grammar
+Link Grammar as a Model of Language
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Link-Grammar"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 One of the barriers to understanding the commonality between symbolic and
- vector approaches is the notational difference.This section provides a highly
- abbreviated review of the Link Grammar
+ vector approaches is the notational difference.
+ This section provides a highly abbreviated review of the Link Grammar
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
@@ -950,6 +979,32 @@ disjunct
 
 ; the name has a historical basis that is of no particular concern here.
  During parsing, all connectors in a disjunct must be satisfied.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Not immediately obvious from this abbreviated sketch is that the Link Grammar
+ formulation of a dependency grammar is sufficiently strong to encode long-range
+ coordination or enforce the correct usage of set phrases/phrasemes with
+ 
+\begin_inset Quotes eld
+\end_inset
+
+holes
+\begin_inset Quotes erd
+\end_inset
+
+ in them.
+ It can.
+ There is a set of effects that can be encoded in this way, from phonetic
+ structure to to morphology.
+ The referenced sources open the doors to understanding how this can be
+ done.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1493,7 +1548,7 @@ reference "fig:Rhisome"
 \end_layout
 
 \begin_layout Section
-Statistical Models
+Statistical Network Models
 \end_layout
 
 \begin_layout Standard
@@ -1565,9 +1620,9 @@ true
 
 \begin_layout Standard
 Although this statistical model is commonly taken as gospel, it is, of course,
- wrong: we know, a priori, that sentences are constructed whole before being
- written, and so the current word also depends on future words, ones that
- follow it in the text.
+ wrong: we know, a priori, that sentences are mentally constructed nearly
+ whole before being written or spoken, and so the current word also depends
+ on future words, ones that follow it in the text.
  This is the case not just at the sentence-level, but also at the level
  of the entire text, as the writer already has a theme in mind.
  To estimate the probability of a word at a given location, one must look
@@ -1619,9 +1674,9 @@ of observing a word
  surrounding words, to the left and right, in the text.
  The probability of the text is then modeled by
 \begin_inset Formula 
-\[
-\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)
-\]
+\begin{equation}
+\widehat{P}\left(w_{1}^{T}\right)=\prod_{t=1}^{T}p\left(w_{t}\left|w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}\right.\right)\label{eq:bayes-factorize}
+\end{equation}
 
 \end_inset
 
@@ -1640,8 +1695,8 @@ The above contains another key simplification: the total probability is
 \end_inset
 
 .
- This is commonly taken to be a reasonable simplification, but is, of course,
- 
+ This is commonly taken to be a reasonable simplification, but again, it
+ is, of course, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1650,12 +1705,15 @@ obviously
 \end_inset
 
  wrong.
- The words at the end of a text occur with different probabilities than
- those at the beginning; for example, in a dramatic story, a new character
- may appear mid-way, or the setting may move from indoors to outdoors, with
- furniture-words becoming uncommon, while nature-words becoming common.
+ At the sentence level, in English, we commonly do not start sentences with
+ verbs.
+ At the text level, the words at the end of a text occur with different
+ probabilities than those at the beginning; for example, in a dramatic story,
+ a new character may appear mid-way, or the setting may move from indoors
+ to outdoors, so that furniture-words become uncommon, while nature-words
+ occur more frequently.
  The translational invariance only becomes plausible in the limit of 
-\begin_inset Formula $T\to\infty$
+\begin_inset Formula $N\to\infty$
 \end_inset
 
  where one is considering 
@@ -1670,8 +1728,64 @@ all human language
  This too, is preposterous; first, because not everything that can be said
  has been said; second, because different individuals speak differently,
  and third, because new words are invented regularly, as others become archaic.
- Despite all this, the assumption of translational invariance is entirely
- appropriate at this level.
+ 
+\end_layout
+
+\begin_layout Standard
+In general, it seems reasonable to assume that the distribution of words,
+ when taken over sliding windows of different sizes, varies in a scale-free
+ fashion with the window size.
+ So, consider a long book, and a sliding window of width 
+\begin_inset Formula $N=1000$
+\end_inset
+
+.
+ The distribution of the words within that window will be Zipfian; as the
+ window slides from scene to scene, the probability distribution will be
+ sensitive to that scene (indoors/outdoors, with/without some character...)
+ The positional non-uniformity persists at all window-sizes 
+\begin_inset Formula $N$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In what follows, we are primarily concerned with the grammatical structure
+ of single sentences, and not the narrative structure of longer texts.
+ Effectively, it is enough to work with a value of 
+\begin_inset Formula $N$
+\end_inset
+
+ that is less than a few dozen.
+ The fact that sentences typically do not start with verbs can be 
+\begin_inset Quotes eld
+\end_inset
+
+explained
+\begin_inset Quotes erd
+\end_inset
+
+ by the rules of syntax; no explicit factorization for single-word probabilities
+ is required.
+ Thus, the translation-invariant 
+\begin_inset Quotes eld
+\end_inset
+
+Bayesian network
+\begin_inset Quotes erd
+\end_inset
+
+ factorization of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:bayes-factorize"
+
+\end_inset
+
+ is appropriate and suitable for the current task.
+ As will be seen in later chapters, this factorization can be improved on,
+ and performed much more cleanly and elegantly.
 \end_layout
 
 \begin_layout Subsection
@@ -1728,18 +1842,19 @@ classic
 \begin_inset Formula $N=3$
 \end_inset
 
-, this requires 
-\begin_inset Formula $W^{N}=10^{12}$
+, this requires up to 
+\begin_inset Formula $W^{N}=10^{12}=2^{40}$
 \end_inset
 
- probabilities to be maintained: at 8 giga-probabilities, this is clearly
- near the edge of what is possible with present-day computers.
+ probabilities to be maintained: even if most 3-word sequences are never
+ observed, this is still clearly near the edge of what is possible with
+ present-day computers.
 \end_layout
 
 \begin_layout Standard
-The model can be made computationally tractable with several variants.
- One common variant is to blend together, in varying proportions, the models
- for 
+The model can be made computationally tractable in various ways.
+ One well-discussed variant is to blend together, in varying proportions,
+ the models for 
 \begin_inset Formula $N=0$
 \end_inset
 
@@ -1752,7 +1867,13 @@ The model can be made computationally tractable with several variants.
 \end_inset
 
 .
- The details are of no particular concern to the rest of this essay.
+ Such an approach is of no particular interest for the subsequent development;
+ grammar happens at larger values of 
+\begin_inset Formula $N$
+\end_inset
+
+, and the goal is to create effective factorizations that encompass grammar.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1776,29 +1897,29 @@ a priori
 tely) equal to one-another, or that they can be grouped or summed in some
  other ways.
  More correctly, one hypothesizes that the vast majority of the probabilities
- are either zero or fall into classes where they are equal: say, all but
- one in ten-thousand, or thereabouts, is the 
-\emph on
-de facto
-\emph default
- order of magnitude obtained in these models.
- Alternately, one can hypothesize that certain linear combinations of the
- probabilities are identical; this is the common tactic of most deep-learning
- algorithms.
+ are either zero or fall into classes where they are equal.
+ If one can find a model that captures that all but one in ten-thousand
+ such probabilities are zero, then tht model becomes compuitationally tractable
+ again.
+ An alternate model is to hypothesize that certain linear combinations of
+ the probabilities are all equal to one-another.
+ The latter approach is exactly that of the neural net and deep learning
+ approaches: the linear combinations of equivalent probabilities are the
+ ones represented by various layers in the neural net.
 \end_layout
 
 \begin_layout Standard
-There is a fairly rich variety of models.
- Reviewed immediately below are two common foundational models: the so-called
- CBOW model, and the SkipGram model.
+There is a fairly rich variety of such models.
+ Reviewed immediately below are two foundational models: the so-called CBOW
+ model, and the SkipGram model.
  The general goal of this paper is to demonstrate that Link Grammar, and
  thus dependency grammars in general, can be understood to also fit into
  this same class of probabilistic models.
  What differs is the mechanism by which the models are trained; the Link
  Grammar training algorithm, already sketched above, is not a hill-climbing/deep
 -learning technique.
- A proper comparison will be made after the initial review of the CBOW and
- SkipGram models.
+ A proper comparison of training algorithms will be made after the initial
+ review of the CBOW and SkipGram models.
 \end_layout
 
 \begin_layout Subsection
@@ -2187,6 +2308,7 @@ By convention,
 \end_inset
 
 .
+ Knowledgable readers are encouraged to correct my misperception.
 \end_layout
 
 \begin_layout Subsection
@@ -2238,7 +2360,7 @@ That is, the word
 \begin_inset Formula $N$
 \end_inset
 
- is the width of the sliding window.
+ is the width of the sliding window).
 \end_layout
 
 \begin_layout Standard
@@ -2288,7 +2410,7 @@ deep learning
 \end_layout
 
 \begin_layout Subsection
-Perceptrons as Neural Nets 
+Perceptrons and Neural Nets 
 \end_layout
 
 \begin_layout Standard
@@ -2327,7 +2449,7 @@ weight matrix
 \end_inset
 
  
-\begin_inset Formula $H$
+\begin_inset Formula $h$
 \end_inset
 
 , and a non-linear sigmoid function 
@@ -2335,11 +2457,11 @@ weight matrix
 \end_inset
 
 , which is commonly taken to be 
-\begin_inset Formula $\tanh x$
+\begin_inset Formula $\sigma\left(x\right)=\tanh x$
 \end_inset
 
  or 
-\begin_inset Formula $1/\left(1+e^{-x}\right)$
+\begin_inset Formula $\sigma\left(x\right)=1/\left(1+e^{-x}\right)$
 \end_inset
 
  or similar, according to taste.
@@ -2532,14 +2654,14 @@ Typical choices for the dimension
 \begin_inset Formula $h$
 \end_inset
 
- does a minimal amount of, if any at all, of dimensional reduction.
+ does a minimal amount of, if any at all, dimensional reduction.
 \end_layout
 
 \begin_layout Section
-Similarities and Differences 
+Graph Network Models of Language
 \begin_inset CommandInset label
 LatexCommand label
-name "sec:Similarities-and-Differences"
+name "sec:Network Models"
 
 \end_inset
 
@@ -2547,12 +2669,58 @@ name "sec:Similarities-and-Differences"
 \end_layout
 
 \begin_layout Standard
-On the face of it, the description given for Link Grammar seems to bear
- no resemblance to that of the description of probabilistic neural net models,
- other than to invoke vectors in some way.
- The descriptions of language appear to be completely different.
- There are similarities; they are obscured both by the notation, and the
- viewpoint.
+Superficially, the graphical approach of a symbolic dependency grammar,
+ such as Link Grammar, seems to have no resemblance at all to the probabilistic
+ approach of neural network models.
+ The previous sections hinted at the presence of vectors in both systems;
+ but the vectors are superficially different, and the role of probability
+ in either remained less than entirely clear.
+ The differences are less than they seem; different notation obscures similarity
+; different traditions emphasize different aspects so strongly that even
+ minor hints of similarity are lost.
+ This section attempts to articulate the commonality.
+\end_layout
+
+\begin_layout Standard
+Both the neural network and the symbolic graphical approaches to language
+ could be termed to two different faces of a common graphical network model
+ of language.
+ The structure of graph networks are a part of the standard curriculum of
+ physics and statistical mechanics.
+ This section begins with a reiteration that Link Grammar disjuncts resemble
+ the factors of a factored Bayesian network.
+ Next, the loss functions of the CBOW/SkipGram model can be seen as a manifestat
+ion of standard (statistical mechanics) maximum entropy principles.
+ Equiped with this insight, one can proceed along a common track in physics:
+ derive the statistical models from a partition function.
+ The partition function encodes 
+\begin_inset Quotes eld
+\end_inset
+
+all possible knowledge
+\begin_inset Quotes erd
+\end_inset
+
+ of a network graph; specific factors of this graph are called 
+\begin_inset Quotes eld
+\end_inset
+
+Feynman diagrams
+\begin_inset Quotes erd
+\end_inset
+
+.
+ With the tools of physics thus deployed, a dependency parse, when obtained
+ statistically, can be recognized as a kind of Feynman diagram.
+ The dependency grammars of natural language are Feynman diagrams of statistical
+ physics.
+\end_layout
+
+\begin_layout Standard
+This section sets the stage for the next, which reviews several different
+ approaches for obtaining the statistical information needed to correctly
+ factor a graph network.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -2586,20 +2754,21 @@ This is meant to indicate the probability of observing the word
 \end_inset
 
  and let 
-\begin_inset Formula $w_{t}=ran$
+\begin_inset Formula $w_{t}=\mbox{ran}$
 \end_inset
 
 , 
-\begin_inset Formula $w_{t-1}=girl$
+\begin_inset Formula $w_{t-1}=\mbox{girl}$
 \end_inset
 
  and 
-\begin_inset Formula $w_{t+1}=home$
+\begin_inset Formula $w_{t+1}=\mbox{home}$
 \end_inset
 
 .
  This clearly resembles the Link Grammar disjunct 
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -2642,7 +2811,7 @@ likelihood.
 \end_inset
 
  for the disjunct, 
-\begin_inset Formula $girl-\&home+$
+\begin_inset Formula $\mbox{girl- \& home+}$
 \end_inset
 
  in this example.
@@ -2679,8 +2848,12 @@ The resemblance, at this point, should be obvious: the disjunct
 \begin_inset Formula $d$
 \end_inset
 
- plays the role of the N-gram context.
- Abusing the existing notation, one should should understand that
+ plays the role of the 
+\begin_inset Formula $N$
+\end_inset
+
+-gram context.
+ Abusing the existing notation, one should understand that
 \begin_inset Formula 
 \[
 d\approx w_{t-c},\cdots w_{t-1},w_{t+1},\cdots w_{t+c}
@@ -2720,13 +2893,29 @@ output
 \end_inset
 
 .
- 
+ More precisely, the disjunct notation actively skips over some of the words
+ in the context.
+ Rather than specifying a fixed offset from the target word, the disjunct
+ provides a relative squential ordering of the context-words, left to right,
+ without specifying distance.
 \end_layout
 
 \begin_layout Standard
-In fact, the disjunct notation can do more: it can also encode parse information.
- That is, one could take the disjunct as being a sequence of words, with
- no gaps allowed between the words.
+This change of notation allows the disjunct to do more than the index set
+ notation: the disjunct effectively encodes syntactic information.
+ How this is done was already detailed in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Link-Grammar"
+
+\end_inset
+
+.
+ With this seemingly minor change of notation, from indexes to sequential
+ lists, one gains access to grammatical information.
+ Do keep in mind that by working with disjunct notation, nothing is lost:
+ if one wished, one could take the disjunct as being a sequence of words,
+ with no gaps allowed between the words.
  If this is done, then the disjunct 
 \begin_inset Formula $d$
 \end_inset
@@ -2740,13 +2929,27 @@ In fact, the disjunct notation can do more: it can also encode parse information
 \end_inset
 
  are just two notations for saying the same thing.
- But the disjunct can also do more: it effectively suggests that the index
- set can be used as parse information.
- 
+ The disjunct encodes 
+\begin_inset Quotes eld
+\end_inset
+
+more information
+\begin_inset Quotes erd
+\end_inset
+
+, in the information-theoretic sense of encoding 
+\begin_inset Quotes eld
+\end_inset
+
+more bits of info
+\begin_inset Quotes erd
+\end_inset
+
+ than the index notatin can.
 \end_layout
 
 \begin_layout Subsection
-Skip-Grams and Grammar
+Skip-Grams and Syntatic Structure
 \end_layout
 
 \begin_layout Standard
@@ -2790,6 +2993,32 @@ loss function
  just write an export function, and dump the contents into a Link Grammar
  dictionary.
  All that remains would be to evaluate the quality of the results.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+These statements are also perhaps misleading: conventional systems really
+ do use a 
+\begin_inset Quotes eld
+\end_inset
+
+bag of words
+\begin_inset Quotes erd
+\end_inset
+
+, ignoring the word-order.
+ Yet word-order is needed to write a disjunct.
+ Thus, existing off-the-shelf software would have to be modified to track
+ word-order, and this modification will require an order of magnitude more
+ storage, possibly rendering the computation intractably large or slow.
+ Keeping track of word order is theoretically interesting, but entirely
+ misses the tractability issue that these models were invented to solve.
+ 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2866,7 +3095,7 @@ Such long-distance attachments are problematic for CBOW or Skip-Grams, in
 \begin_inset Formula $N$
 \end_inset
 
- must be quite large to skip over the post-nominal modifier.
+ would have to be quite large to skip over the post-nominal modifier.
  Counting punctuation, one must look at least seven words to the right,
  in the above example.
  If the window is symmetric about the target word, this calls for 
@@ -2895,6 +3124,7 @@ p\left(w_{t}=\mbox{girl}\left|w_{t-1}=\mbox{the },w_{t+1}=\mbox{ran}\right.\righ
 
 can be trivially re-interpreted as the dictionary entry
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -2915,6 +3145,7 @@ The girl, upset by the taunting, ran home in tears.
 
  What is needed, instead, is the dictionary entry 
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -2933,6 +3164,7 @@ which is invisible with an
  The punctuation is also important for the post-nominal modifier; somewhere
  one must also find
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -2957,7 +3189,8 @@ which also does not fit in an
 \end_layout
 
 \begin_layout Standard
-Another difficulty is that dependency grammars are naturally 
+Another difficulty in a naive correspondance with index notation is that
+ dependency grammars are naturally 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2979,6 +3212,7 @@ know
  one: a determiner can typically modify only one noun.
  One expects the entry
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -3013,11 +3247,16 @@ p\left(w_{t}=\mbox{the}\left|w_{t+1}=\mbox{girl}\right.\right)
 
 with no other context words present, then one will have trouble building
  a suitable dictionary.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+I assume that Parsey McParseFace overcomes all of these problems ins some
+ way; I have not studied it.
 \end_layout
 
-\begin_layout Standard
-Comment: I assume that Parsey McParseFace overcomes all of the above mentioned
- problems, but I have not studied it.
+\end_inset
+
  
 \end_layout
 
@@ -3040,8 +3279,8 @@ reference "eq:SkipGram"
 
 \end_inset
 
-, are commonly discussed in terms of neural nets, and the models are sometimes
- called 
+, are commonly discussed as optimization problems, and the utility functions
+ are sometimes called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3058,8 +3297,8 @@ loss functions
 \end_inset
 
 .
- From the point of view of statistical mechanics, these models can also
- be easily recognized as Gibbs distributions.
+ From the point of view of statistical mechanics, these utility functions
+ can be easily recognized as Gibbs distributions.
  This allows all of the traditional intuition and tools of statistical mechanics
  to be brought to bear on the language problem.
  Specifically, the probabilities are obtainable from a partition function.
@@ -3101,16 +3340,34 @@ Z\left[J\right]=\sum_{w\in W}\sum_{I\in W^{N}}\exp\,\left(\sum_{i\in I}\vec{u}_{
 
 \end_inset
 
-The 
+In physics literature, the 
 \begin_inset Formula $J_{w_{t},I}$
 \end_inset
 
- are colloquially called 
+ are called 
 \begin_inset Quotes eld
 \end_inset
 
 sources
 \begin_inset Quotes erd
+\end_inset
+
+ or the 
+\begin_inset Quotes eld
+\end_inset
+
+current
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Mathematically, they resemble electric charges or currents.
+\end_layout
+
 \end_inset
 
 , and can be understood as parameters that are nominally zero.
@@ -3132,8 +3389,8 @@ p\left(w_{t},w_{I}\right)=\left.\frac{\delta\ln Z\left[J\right]}{\delta J_{w_{t}
 
 \end_inset
 
-In other words, CBOW/SkipGram fit squarely into the standard maximum entropy
- theoretical framework.
+In other words, CBOW/SkipGram fit squarely into the standard framework of
+ maximum entropy principles.
  This is no accident, of course; the 
 \begin_inset Quotes eld
 \end_inset
@@ -3156,7 +3413,8 @@ The last statement can be made even more precise.
 \end_inset
 
 .
- The set of all such sequences is termed an 
+ The set of all such sequences is termed (in the historical literature of
+ physics and thermodynamics) an 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3186,12 +3444,14 @@ The principle of maximum entropy states that the above should be solved
 \end_inset
 
 .
+ This can be solved without the need to provide any addtional statements
+ or constraints.
  Standard texts on statistical mechanics exhibit the solution; it is the
  Boltzmann distribution, namely
 \begin_inset Formula 
-\[
-p\left(w_{1},w_{2},\cdots\right)=\frac{1}{Z}\exp-E\left(w_{1},w_{2},\cdots\right)
-\]
+\begin{equation}
+p\left(w_{1},w_{2},\cdots\right)=\frac{1}{Z}\exp-E\left(w_{1},w_{2},\cdots\right)\label{eq:boltzmann}
+\end{equation}
 
 \end_inset
 
@@ -3275,7 +3535,8 @@ reference "eq:SkipGram"
  is pretty much the grand-total extent or content of these language models.
  The statement is effectively that vectors provide a pretty good model of
  natural language, and the vectors are able to capture important features
- of natural language, including semantics and compositionality (the 
+ of natural language, including semantics and compositionality (such as
+ the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3315,9 +3576,9 @@ key "Mikolov2013a,Mikolov2013b"
 \end_inset
 
 ).
- This is interesting, because the vectors themselves are effectively structurele
-ss; they capture some kind of latent structure of language, but how this
- is captured is entirely opaque.
+ This is an interesting effect, because the vectors themselves seem to be
+ some kind of effectively structureless black boxes; they capture some kind
+ of latent structure of language, but how this is captured is entirely opaque.
  This is entirely at odds with traditional theories of syntax, as developed
  by more than half a century of linguistics research.
  How can the latent content of the feature vectors be reconciled with structural
@@ -3385,7 +3646,11 @@ magnetic field
 \end_inset
 
  between neighbors).
- (The 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The 
 \begin_inset Formula $J_{ij}$
 \end_inset
 
@@ -3398,11 +3663,20 @@ magnetic field
 \begin_inset Formula $J$
 \end_inset
 
- is used for both tasks.) In the present context, the 
+ is used for both tasks.
+\end_layout
+
+\end_inset
+
+ In the present context, the 
 \begin_inset Formula $\sigma_{i}$
 \end_inset
 
- are to be reinterpreted as the word at position 
+ are to be reinterpreted as 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+, the word at position 
 \begin_inset Formula $i$
 \end_inset
 
@@ -3426,13 +3700,13 @@ shift invariant
 \begin_inset Quotes erd
 \end_inset
 
-, dependent only relative positions between points in the lattice, rather
+, dependent only on relative positions between points in the lattice, rather
  than their absolute position.
  For the one-dimensional Ising model, where the lattice points are in a
  linear sequence, the shift invariance implies a number of interesting connectio
 ns to Markov chains, shift sequences, and finite state machines.
- This, in turn, implies that it, or a variant thereof, occurs in many natural
- models.
+ This, in turn, implies that the Ising model, or a variant thereof, occurs
+ in many natural models.
  One example is the distribution of sequences of amino acids in Zebrafish
  antibodies.
 \begin_inset CommandInset citation
@@ -3446,7 +3720,7 @@ key "Mora2010"
 \end_inset
 
  can be one of twenty-one different amino acids, and one is interested in
- describing the distribution of wide variety of different sequences that
+ describing the distribution of a wide variety of different sequences that
  antibodies employ to fight off infection.
  Another example is that of protein sequences, specifically, of sensor kinase
  and response regulator proteins in bacteria
@@ -3542,6 +3816,14 @@ J_{w_{i},w_{i+1},\cdots}=-\log p\left(w_{i},w_{i+1},\cdots\right)
 \end_inset
 
 is the loss function.
+ This is just eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:boltzmann"
+
+\end_inset
+
+ in slightly different form.
 \end_layout
 
 \begin_layout Standard
@@ -3595,9 +3877,13 @@ The additive model of grammatical structure also exposes the limit of this
 \begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
 \end_inset
 
- are sufficient to capture the grammar of the language, but not (at this
- level) to capture the message itself.
+ are sufficient to capture the grammar and syntactic structure of the language,
+ but not (at this level) to capture the message itself.
  The 
+\begin_inset Formula $n$
+\end_inset
+
+-point functions 
 \begin_inset Formula $J_{w_{i},w_{i+1},\cdots}$
 \end_inset
 
@@ -3609,48 +3895,9 @@ coding theory
 \begin_inset Quotes erd
 \end_inset
 
- of signal processing.
- 
-\end_layout
-
-\begin_layout Subsubsection
-High-accuracy two-point models
-\end_layout
-
-\begin_layout Standard
-Merely computing the MI between word-pairs does 
-\emph on
-not
-\emph default
- give a solution to the Ising model; it only gives a rough approximation.
- One can do considerably better, using several different algorithms, including
- Monte Carlo and message passing algorithms.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Mezard2008,Weigt2009"
-
-\end_inset
-
- This is clearly appropriate for certain problem domains.
- For example, for protein folding and protein mating, the solution to the
- Ising model obtained by message passing beomes a very accurate predictor
- of the three-dimensional physical structure of the protein, and indicates
- which amino acids actually become physically close to one-another.
-\end_layout
-
-\begin_layout Standard
-For langauge, the need for a high-fidelity solution is not so clear.
- From dependency grammar, we know that most words do not have a pair-wise
- interaction.
- The exceptions are determiners, and maybe mass nouns without any modifiers
- on them.
- Clearly, verbs and prepositions are never limited to pair-wise interactions.
-\end_layout
-
-\begin_layout Standard
-Would one obtain a better starting point for grammar, if one had a high-quality
- solution to the pair-wise Ising model? This is not known.
- But there seems to be no particular reason to think that one would.
+ of signal processing; they convert plaintext to cryptext.
+ The plaintext is a bag-of-concepts; the cryptext is the word-sequence that
+ encodes the plaintext.
  
 \end_layout
 
@@ -3756,8 +4003,8 @@ etal.
 
 \begin_layout Standard
 It is here that Yuret does one better: he proposes that the score be given
- by the mutual information between word-pairs; that is (aligning the different
- notation)
+ by the mutual information (MI) between word-pairs; that is (aligning the
+ different notation)
 \begin_inset Formula 
 \[
 s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}
@@ -4021,7 +4268,6 @@ bulk magnetic field
  the bottom half of this figure.
  This is a reasonable omission: it not only clutters the diagram, but, from
  the point of view of linguistics, it almost seems like tautological nonsense.
- Of course a language model is taken within the context of the language.
 \begin_inset Foot
 status collapsed
 
@@ -4044,12 +4290,229 @@ vacuum
 
 \end_inset
 
+ Of course a language model is taken within the context of the language.
  However, in order to bridge from a purely linguistic model, to a statistical
  model based on probabilities taken from first principles from Boltzmann
  distributions derived from partition functions, those implicit terms must
  be made explicit.
  The single-point propagators have an explicit numerical effect in the determina
 tion of the best parse tree for a given sentence.
+\end_layout
+
+\begin_layout Subsection
+Vacuum Contributions and Exact Solutions
+\end_layout
+
+\begin_layout Standard
+Pair-wise mutual information is not the same thing as the two-point function
+ 
+\begin_inset Formula $J_{ij}$
+\end_inset
+
+; the MI includes one-point terms in it.
+ For many applications, including chemistry, the one-point vacuum contributions
+ to the MI are clearly inappropriate.
+ Atoms, amino acids and protiens don't respond to other atoms that 
+\begin_inset Quotes eld
+\end_inset
+
+might have been there, but weren't
+\begin_inset Quotes erd
+\end_inset
+
+.
+ For those applications, MI can only provide a rough approximation for a
+ starting point for a more acurate solution of the 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ Ising model, one which contains a two-point function, but no one-point
+ functions.
+ That is, MI is not a substitute for accurately solving the Ising model,
+ when a solution of the Ising model is actually needed.
+\end_layout
+
+\begin_layout Standard
+For example, for protein folding and protein mating, the solution to the
+ Ising model obtained by message passing becomes a very accurate predictor
+ of the three-dimensional physical structure of the protein, and indicates
+ which amino acids actually become physically close to one-another.
+ It is considerably more accurate than the MI-based estimate.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Weigt2009"
+
+\end_inset
+
+ There are several different algorithms for solving the Ising model, including
+ Monte Carlo and message passing algorithms.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mezard2008,Weigt2009"
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+\begin_inset Formula $n$
+\end_inset
+
+-point Functions and Word-Sense Disambiguation
+\end_layout
+
+\begin_layout Standard
+The preceeding two sections potentially sow a point of confusion: Should
+ one consider a 
+\begin_inset Quotes eld
+\end_inset
+
+pure
+\begin_inset Quotes erd
+\end_inset
+
+ Ising model of natural language, one which omits the one-point contributions?
+ Would it be more accurate than an MST-parse? Maybe.
+ And maybe not.
+ The author is not aware of any pure-Ising models of natural language that
+ could be compared to the results of MST parsing.
+\end_layout
+
+\begin_layout Standard
+For natural language, most words have valancies of 3, 4 or 5, and so it
+ seems that they would be better described by 3-point, 4-point or 5-point
+ Ising interaction energies, as opposed to a bag of 2-point interactions.
+ How true is this? Consider a transitive verb: it has a subject and an object.
+ If the subject and object are truly independent of one-another, then two
+ pair-wise interactions would be enough: a noun-verb link for the subject,
+ and a verb-noun link for the object.
+ Are subjects and objects independent of one-another? Consider the verb
+ 
+\begin_inset Quotes eld
+\end_inset
+
+throw
+\begin_inset Quotes erd
+\end_inset
+
+, and a sentence of the form 
+\begin_inset Quotes eld
+\end_inset
+
+subject throws object
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this case, 
+\begin_inset Quotes eld
+\end_inset
+
+subject
+\begin_inset Quotes erd
+\end_inset
+
+ can only be chosen from the class of animate beings, capable of throwing
+ things.
+ The object must be chosen from the class of physical objects that can be
+ thrown.
+ Although these two classes are fairly narrow, they still seem uncorrelated.
+ This illusion can be broken: further restricing the class of subjects to
+ humans forces the restriction of objects to the class of physical items
+ weighing between a few grams and ten kilograms.
+ But there is only one word 
+\begin_inset Quotes eld
+\end_inset
+
+throw
+\begin_inset Quotes erd
+\end_inset
+
+, and not some hypothectical 
+\begin_inset Formula $\mbox{throw}_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mbox{throw}_{3}$
+\end_inset
+
+, where 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ is used only with human subjects.
+ The verb subjects and objects are correlated; when this is the case, a
+ pair of two-point functions is not enough; these require a three-point
+ function for an accurate description.
+\end_layout
+
+\begin_layout Standard
+Perhaps, after word-sense disambiguation, one can discover multiple word
+ senses, so that, for example, 
+\begin_inset Formula $\mbox{throw}_{1}$
+\end_inset
+
+ applies to metal machines that throw heavy objects, 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ pertains to human subjects, and 
+\begin_inset Formula $\mbox{throw}_{3}$
+\end_inset
+
+ applies to horses.
+ In this case, the three-point function might indeed factorize.
+ Written as an algebraic expression, one might be able to observe the factorizat
+ion
+\begin_inset Formula 
+\begin{align*}
+p\left(w_{subj},\mbox{throw},w_{obj}\right)= & p\left(w_{machine},\mbox{throw}_{1}\right)p\left(\mbox{throw}_{1},w_{heavy}\right)\\
++ & p\left(w_{human},\mbox{throw}_{2}\right)p\left(\mbox{throw}_{2},w_{graspable}\right)\\
++ & p\left(w_{horse},\mbox{throw}_{3}\right)p\left(\mbox{throw}_{3},w_{rider}\right)
+\end{align*}
+
+\end_inset
+
+so that any kind of machine can 
+\begin_inset Formula $\mbox{throw}_{1}$
+\end_inset
+
+ any kind of heavy object, in a statistically uncorrelated sense, whereas
+ any human can 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ any object that can be grasped by hand, with there being no statistical
+ correlation between the human subject and the human-thrown object.
+ The third factorization is likewise: only horses or other mountable creatures
+ can 
+\begin_inset Formula $\mbox{throw}_{3}$
+\end_inset
+
+ thier riders, but there is no statistical correlation (no three-point function)
+ between the thrower, and the rider.
+\end_layout
+
+\begin_layout Standard
+This kind of factorization into components might even provide a plausible
+ automated means of performing word-sense disambiguation, given only the
+ undifferentiated, measured 3-point frequency 
+\begin_inset Formula $p\left(w_{subj},\mbox{throw},w_{obj}\right)$
+\end_inset
+
+.
+ Exactly how far this can be pushed, without grinding into the floor of
+ statistically noisey data is unclear: only horses throw cowboys, and only
+ elephants throw maharajis.
 \end_layout
 
 \begin_layout Subsection
@@ -4068,7 +4531,7 @@ key "Sleator1991,Sleator1993"
 \end_inset
 
  provides a much better model of language, and it is anchored on top of
- half a century of tradition in linguistics research.
+ half a century of tradition in linguistics research into structure.
  To place it within the current context, the key leap being taken is to
  replace the pair-wise word-interactions 
 \begin_inset Formula $J_{ij}=-\log p\left(w_{i},w_{j}\right)$
@@ -4140,8 +4603,8 @@ key "Hud84,Hud07"
 
 \begin_layout Standard
 The primary point here is that Link Grammar is interesting because it provides
- a bridge to both traditional, symbolic linguistics (per above) and while
- also allowing an interpretation as an Ising model of language.
+ a bridge to both traditional, symbolic structural linguistics (per above)
+ and while also allowing an interpretation as an Ising model of language.
  Following Yuret's ansatz, one includes energy terms of not only 
 \begin_inset Formula $J_{ijk\cdots}$
 \end_inset
@@ -4149,7 +4612,7 @@ The primary point here is that Link Grammar is interesting because it provides
  in the Hamiltonian, but also bulk terms, indicating how disjuncts interact
  in the background.
  In practice, what this means is that one should associate to each word-disjunct
- pair a mutial information
+ pair a mutual information
 \end_layout
 
 \begin_layout Standard
@@ -4236,11 +4699,11 @@ Graph Algorithms vs.
 \end_layout
 
 \begin_layout Standard
-The previous sections illustrate that both the CBOW/SkipGram model, and
- the disjunct model of natural language are both forms of maximum entropy
- models.
+The previous sections illustrate that the CBOW/SkipGram model is a form
+ of a maximum-entropy model, and that the disjunct model of natural language
+ is amenable to the same treatment.
  In one case, the word-context is an N-gram; in the other, it is a disjunct;
- but these are not so unlike one-another, they have mch in common.
+ but these are not so unlike one-another, they have much in common.
  Both langauge models share a common difficulty: finding an energy functional
  that correctly models the observed probability distribution.
 \end_layout
@@ -4258,7 +4721,7 @@ relaxation
 \end_inset
 
  algorithms; deep learning algorithms fall in this class.
- The other classs of algorithms can be loosely called 
+ The other class of algorithms can be loosely called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4294,16 +4757,16 @@ reference "fig:Feynman-Diagrams"
 \end_inset
 
 .
- The graphical algorithms expose the graphical structure immediately; in
- the above examples, as maximum spanning trees that can be found using greedy
- algorithms applied to pair-wise relationships.
+ The graphical algorithms expose the graph network structure immediately;
+ in the above examples, as maximum spanning trees that can be found using
+ greedy algorithms applied to pair-wise relationships.
  The Monte Carlo algorithms do not provide any manifest graphical structure,
- although one can be discerned by applying some sort of thresholding to
- eliminate weak links.
+ although perhaps one can be discerned by applying some sort of thresholding
+ to eliminate weak links.
  Indeed, thresholding, using sigmoid functions to prune unwanted, weak weights
  from a neural net is a characteristic of most deep-learning models.
- Even so, the resulting weight vectors and weight matrices tend to be featureles
-s amorphous masses: large blocks of uninterpretable numbers whose precise
+ Even so, the resulting weight vectors and weight matrices tend to be cryptic
+ amorphous masses: large blocks of uninterpretable numbers whose precise
  role and importance seems impossible to discern.
 \end_layout
 
@@ -4363,12 +4826,12 @@ key "McDonald2005,McDonald2006"
 
 \end_inset
 
-: on trains up a model by defining a cost function, and then performing
- hill climbing or gradient descent on it.
+: one trains up a model by defining a cost function, and then performs hill
+ climbing or gradient descent on it.
  The result is still a pair-wise cost function, and a dependency parse is
- obtained by search for an MST tree, just as before.
+ obtained by searching for an MST tree, just as before.
  For McDonald, there is no overt relationship to the principle of maximum
- entropy; it is eaither covert, or perhaps one could say its 
+ entropy; it is either covert, or perhaps one could say its 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4376,19 +4839,12 @@ more general
 \begin_inset Quotes erd
 \end_inset
 
- by not contraining to fit the cost function to a probabilistic framework.
-\end_layout
-
-\begin_layout Standard
-XXX Caution: the MI is just a good first esimate; it gets interactions wrong.
- See for example, 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Weigt2009"
-
-\end_inset
-
- What does this mean for langauge?
+ by not constraining to fit the cost function to a probabilistic framework.
+ The need for this generality does not seem to be well-supported.
+ There does not appear to be any data to indicate if some other pair-wise
+ cost function provides a superior MST-tree, as compared to using the MI.
+ Although this is an open question, there's no particular hint that this
+ could be a fruitful direction to take.
 \end_layout
 
 \begin_layout Subsection
@@ -4420,10 +4876,12 @@ key "Goertzel2014"
 \begin_inset Formula $d$
 \end_inset
 
-, one computes a normalized frequency of observationsFor proFor problems
- like the Ising model, we want to solve the inverse problem.blems like the
- Ising model, we want to solve the inverse problem.
- 
+, one computes a normalized frequency of observations.
+ For problems like the Ising model, we want to solve the inverse problem.
+\end_layout
+
+\begin_layout Standard
+xxx fixme nonsequiter missing text xxx
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
