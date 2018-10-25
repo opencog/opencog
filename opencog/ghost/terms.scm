@@ -548,7 +548,7 @@
     ((string=? "equal" OPERATOR)
      (if both-numbers?
        (= lv-num rv-num)
-       (string=? lv-str rv-str)))
+       (string-ci=? lv-str rv-str)))
     ((string=? "smaller" OPERATOR)
      (and both-numbers?
           (< lv-num rv-num)))
