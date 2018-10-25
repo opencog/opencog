@@ -143,6 +143,12 @@
     ((has-match? "!" str) (result:suffix 'NOT location #f))
     ((has-match? "[?]" str) (result:suffix '? location "?"))
     ((has-match? "=" str) (result:suffix 'EQUAL location #f))
+    ; For time -- a.m. and p.m.
+    ; Just catch it to avoid it being splitted into multiple words
+    ; Should be done before any literal / lemma matching
+    ((has-match? "[ap]\\.m\\." str)
+      (result:suffix 'STRING location
+        (string-trim-both (match:substring current-match))))
     ; Words with apostrophe, e.g. I'm, it's etc
     ((has-match? "[a-zA-Z]+['’][a-zA-Z]+" str)
       (result:suffix 'LITERAL_APOS location

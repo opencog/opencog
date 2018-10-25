@@ -6,10 +6,29 @@
 "
   Occurrence of a word, a word that should be matched literally.
 "
-  (let* ((str-dc (string-downcase STR)))
+  (let* ((str-dc (string-downcase STR))
+         ; Special handling for time that's written as a single word
+         ; e.g. 2pm, 10am etc
+         ; For the input, regardless of the format, e.g. "2am", "2 am",
+         ; "2 a.m." or "2a.m.", will all get splitted into two words
+         (is-time? (string-match "[0-9]{1,2}[ ]*[ap][.]*m[.]*" str-dc))
+         (is-two-digits?
+           (and is-time? (char-numeric? (string-ref str-dc 1))))
+         (time-1pt
+           (if is-two-digits?
+             (substring str-dc 0 2)
+             (substring str-dc 0 1)))
+         (time-2pt
+           (if is-two-digits?
+             (substring str-dc 2)
+             (substring str-dc 1))))
     (list (list) (list)
-      (list (WordNode str-dc))
-      (list (WordNode (get-lemma str-dc))))))
+      (if is-time?
+        (list (WordNode time-1pt) (WordNode time-2pt))
+        (list (WordNode str-dc)))
+      (if is-time?
+        (list (WordNode time-1pt) (WordNode time-2pt))
+        (list (WordNode (get-lemma str-dc)))))))
 
 ; ----------
 (define (word-apos STR)
