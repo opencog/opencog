@@ -4531,7 +4531,7 @@ key "Sleator1991,Sleator1993"
 \end_inset
 
  provides a much better model of language, and it is anchored on top of
- half a century of tradition in linguistics research.
+ half a century of tradition in linguistics research into structure.
  To place it within the current context, the key leap being taken is to
  replace the pair-wise word-interactions 
 \begin_inset Formula $J_{ij}=-\log p\left(w_{i},w_{j}\right)$
@@ -4603,8 +4603,8 @@ key "Hud84,Hud07"
 
 \begin_layout Standard
 The primary point here is that Link Grammar is interesting because it provides
- a bridge to both traditional, symbolic linguistics (per above) and while
- also allowing an interpretation as an Ising model of language.
+ a bridge to both traditional, symbolic structural linguistics (per above)
+ and while also allowing an interpretation as an Ising model of language.
  Following Yuret's ansatz, one includes energy terms of not only 
 \begin_inset Formula $J_{ijk\cdots}$
 \end_inset
@@ -4612,7 +4612,7 @@ The primary point here is that Link Grammar is interesting because it provides
  in the Hamiltonian, but also bulk terms, indicating how disjuncts interact
  in the background.
  In practice, what this means is that one should associate to each word-disjunct
- pair a mutial information
+ pair a mutual information
 \end_layout
 
 \begin_layout Standard
@@ -4699,11 +4699,11 @@ Graph Algorithms vs.
 \end_layout
 
 \begin_layout Standard
-The previous sections illustrate that both the CBOW/SkipGram model, and
- the disjunct model of natural language are both forms of maximum entropy
- models.
+The previous sections illustrate that the CBOW/SkipGram model is a form
+ of a maximum-entropy model, and that the disjunct model of natural language
+ is amenable to the same treatment.
  In one case, the word-context is an N-gram; in the other, it is a disjunct;
- but these are not so unlike one-another, they have mch in common.
+ but these are not so unlike one-another, they have much in common.
  Both langauge models share a common difficulty: finding an energy functional
  that correctly models the observed probability distribution.
 \end_layout
@@ -4721,7 +4721,7 @@ relaxation
 \end_inset
 
  algorithms; deep learning algorithms fall in this class.
- The other classs of algorithms can be loosely called 
+ The other class of algorithms can be loosely called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4757,16 +4757,16 @@ reference "fig:Feynman-Diagrams"
 \end_inset
 
 .
- The graphical algorithms expose the graphical structure immediately; in
- the above examples, as maximum spanning trees that can be found using greedy
- algorithms applied to pair-wise relationships.
+ The graphical algorithms expose the graph network structure immediately;
+ in the above examples, as maximum spanning trees that can be found using
+ greedy algorithms applied to pair-wise relationships.
  The Monte Carlo algorithms do not provide any manifest graphical structure,
- although one can be discerned by applying some sort of thresholding to
- eliminate weak links.
+ although perhaps one can be discerned by applying some sort of thresholding
+ to eliminate weak links.
  Indeed, thresholding, using sigmoid functions to prune unwanted, weak weights
  from a neural net is a characteristic of most deep-learning models.
- Even so, the resulting weight vectors and weight matrices tend to be featureles
-s amorphous masses: large blocks of uninterpretable numbers whose precise
+ Even so, the resulting weight vectors and weight matrices tend to be cryptic
+ amorphous masses: large blocks of uninterpretable numbers whose precise
  role and importance seems impossible to discern.
 \end_layout
 
@@ -4826,12 +4826,12 @@ key "McDonald2005,McDonald2006"
 
 \end_inset
 
-: on trains up a model by defining a cost function, and then performing
- hill climbing or gradient descent on it.
+: one trains up a model by defining a cost function, and then performs hill
+ climbing or gradient descent on it.
  The result is still a pair-wise cost function, and a dependency parse is
- obtained by search for an MST tree, just as before.
+ obtained by searching for an MST tree, just as before.
  For McDonald, there is no overt relationship to the principle of maximum
- entropy; it is eaither covert, or perhaps one could say its 
+ entropy; it is either covert, or perhaps one could say its 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4839,19 +4839,8 @@ more general
 \begin_inset Quotes erd
 \end_inset
 
- by not contraining to fit the cost function to a probabilistic framework.
-\end_layout
-
-\begin_layout Standard
-XXX Caution: the MI is just a good first esimate; it gets interactions wrong.
- See for example, 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Weigt2009"
-
-\end_inset
-
- What does this mean for langauge?
+ by not constraining to fit the cost function to a probabilistic framework.
+ The need for this generality does not seem to be well-supported.
 \end_layout
 
 \begin_layout Subsection
@@ -4883,10 +4872,12 @@ key "Goertzel2014"
 \begin_inset Formula $d$
 \end_inset
 
-, one computes a normalized frequency of observationsFor proFor problems
- like the Ising model, we want to solve the inverse problem.blems like the
- Ising model, we want to solve the inverse problem.
- 
+, one computes a normalized frequency of observations.
+ For problems like the Ising model, we want to solve the inverse problem.
+\end_layout
+
+\begin_layout Standard
+xxx
 \begin_inset Formula 
 \[
 p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
