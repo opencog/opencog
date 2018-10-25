@@ -4300,11 +4300,7 @@ tion of the best parse tree for a given sentence.
 \end_layout
 
 \begin_layout Subsection
-Vacuum Contributions and 
-\begin_inset Formula $n$
-\end_inset
-
--point Functions
+Vacuum Contributions and Exact Solutions
 \end_layout
 
 \begin_layout Standard
@@ -4341,7 +4337,18 @@ true
 \end_layout
 
 \begin_layout Standard
-There are several different algorithms for solving the Ising model, including
+For example, for protein folding and protein mating, the solution to the
+ Ising model obtained by message passing becomes a very accurate predictor
+ of the three-dimensional physical structure of the protein, and indicates
+ which amino acids actually become physically close to one-another.
+ It is considerably more accurate than the MI-based estimate.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Weigt2009"
+
+\end_inset
+
+ There are several different algorithms for solving the Ising model, including
  Monte Carlo and message passing algorithms.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -4349,19 +4356,19 @@ key "Mezard2008,Weigt2009"
 
 \end_inset
 
- For example, for protein folding and protein mating, the solution to the
- Ising model obtained by message passing becomes a very accurate predictor
- of the three-dimensional physical structure of the protein, and indicates
- which amino acids actually become physically close to one-another.
- It is considerably more accurate than the MI-based estimate.
+ 
 \end_layout
 
-\begin_layout Section
-xxx
+\begin_layout Subsection
+\begin_inset Formula $n$
+\end_inset
+
+-point Functions and Word-Sense Disambiguation
 \end_layout
 
 \begin_layout Standard
-Should one consider a 
+The preceeding two sections potentially sow a point of confusion: Should
+ one consider a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4370,9 +4377,14 @@ pure
 \end_inset
 
  Ising model of natural language, one which omits the one-point contributions?
- Maybe.
+ Would it be more accurate than an MST-parse? Maybe.
  And maybe not.
- For natural langauge, most words have valancies of 3, 4 or 5, and so it
+ The author is not aware of any pure-Ising models of natural language that
+ could be compared to the results of MST parsing.
+\end_layout
+
+\begin_layout Standard
+For natural language, most words have valancies of 3, 4 or 5, and so it
  seems that they would be better described by 3-point, 4-point or 5-point
  Ising interaction energies, as opposed to a bag of 2-point interactions.
  How true is this? Consider a transitive verb: it has a subject and an object.
@@ -4459,18 +4471,48 @@ Perhaps, after word-sense disambiguation, one can discover multiple word
 
  applies to horses.
  In this case, the three-point function might indeed factorize.
+ Written as an algebraic expression, one might be able to observe the factorizat
+ion
+\begin_inset Formula 
+\begin{align*}
+p\left(w_{subj},\mbox{throw},w_{obj}\right)= & p\left(w_{machine},\mbox{throw}_{1}\right)p\left(\mbox{throw}_{1},w_{heavy}\right)\\
++ & p\left(w_{human},\mbox{throw}_{2}\right)p\left(\mbox{throw}_{2},w_{graspable}\right)\\
++ & p\left(w_{horse},\mbox{throw}_{3}\right)p\left(\mbox{throw}_{3},w_{rider}\right)
+\end{align*}
+
+\end_inset
+
+so that any kind of machine can 
+\begin_inset Formula $\mbox{throw}_{1}$
+\end_inset
+
+ any kind of heavy object, in a statistically uncorrelated sense, whereas
+ any human can 
+\begin_inset Formula $\mbox{throw}_{2}$
+\end_inset
+
+ any object that can be grasped by hand, with there being no statistical
+ correlation between the human subject and the human-thrown object.
+ The third factorization is likewise: only horses or other mountable creatures
+ can 
+\begin_inset Formula $\mbox{throw}_{3}$
+\end_inset
+
+ thier riders, but there is no statistical correlation (no three-point function)
+ between the thrower, and the rider.
 \end_layout
 
 \begin_layout Standard
-the need to obtain a high-fidelity 2-point solution is not so clear.
- Obtaining 
-\end_layout
+This kind of factorization into components might even provide a plausible
+ automated means of performing word-sense disambiguation, given only the
+ undifferentiated, measured 3-point frequency 
+\begin_inset Formula $p\left(w_{subj},\mbox{throw},w_{obj}\right)$
+\end_inset
 
-\begin_layout Standard
-Would one obtain a better starting point for grammar, if one had a high-quality
- solution to the pair-wise Ising model? This is not known.
- But there seems to be no particular reason to think that one would.
- 
+.
+ Exactly how far this can be pushed, without grinding into the floor of
+ statistically noisey data is unclear: only horses throw cowboys, and only
+ elephants throw maharajis.
 \end_layout
 
 \begin_layout Subsection
