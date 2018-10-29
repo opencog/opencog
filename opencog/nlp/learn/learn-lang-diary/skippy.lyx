@@ -4885,148 +4885,35 @@ Graph Algorithms vs.
 \end_layout
 
 \begin_layout Standard
-The OpenCog language learning project
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Goertzel2014"
+Another strong comparison of the difference between graph algorithm and
+ gradient descent approaches is manifest at the disjunct/N-gram level.
+ The goal in both cases is to obtain a Bayesian-network factorization of
+ language, as in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:bayes-factorize"
 
 \end_inset
 
- proposes the creation of a disjunct model of natural language by means
- of graphical algorithms.
- Specifically, this means that the probabilities of disjuncts are obtained
- by direct counting.
- After a large body of text, and obtaining an observational count 
-\begin_inset Formula $N\left(w,d\right)$
-\end_inset
-
- of how often the word 
-\begin_inset Formula $w$
-\end_inset
-
- is assocaited with the disjunct 
-\begin_inset Formula $d$
-\end_inset
-
-, one computes a normalized frequency of observations.
- For problems like the Ising model, we want to solve the inverse problem.
+, and then to describe each of the factors as compactly as possible.
+ In both cases, some 
+\emph on
+a priori
+\emph default
+ model of language is proposed, and a search is performed to obtain the
+ factors in compact form.
+ 
 \end_layout
 
 \begin_layout Standard
-xxx fixme nonsequiter missing text xxx
-\begin_inset Formula 
-\[
-p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
-\]
-
-\end_inset
-
-so that the frequency is properly normalized: 
-\begin_inset Formula $p\left(*,*\right)=1$
-\end_inset
-
-.
- The 
-\begin_inset Formula $N\left(w,d\right)$
-\end_inset
-
- is just the observational count of observing the pair 
-\begin_inset Formula $\left(w,d\right)$
-\end_inset
-
- in text; the probability is just the frequentist probability.
- The energy functional is explicitly 
-\begin_inset Formula 
-\[
-E\left(w,d\right)=-\log_{2}p\left(w,d\right)
-\]
-
-\end_inset
-
-The enemble of all possible grammatical word-sequences has the form of a
- sheaf.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Vepstas2017sheaves"
-
-\end_inset
-
- The most likely relationship between the words in a sentence is the one
- that maximizes the entropy, including the contribution of the vacuum; and
- thus looks like a maximization of mutual information.
- Because disjuncts impose a complex relationship between words, one must
- use more complex algorithms, generically called 
-\begin_inset Quotes eld
-\end_inset
-
-parsers
-\begin_inset Quotes erd
-\end_inset
-
-, to discover how to attach disjuncts to one-another to obtain a valid nateork
- graph.
- The original Link grammar papers
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Sleator1991,Sleator1993"
-
-\end_inset
-
- provide an eminently suitable parsing algorithm that is well-suited to
- the task.
-\end_layout
-
-\begin_layout Standard
-By contrast, the CBOW/SkipGram models use gradient-descent to obtain a probabili
-ty similar to 
-\begin_inset Formula $p\left(w,d\right)$
-\end_inset
-
-.
- The notation used is different, so that 
-\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
-\end_inset
-
- is written, with the N-gram context 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- as a stand-in for the disjunct 
-\begin_inset Formula $d$
-\end_inset
-
-.
- Previous sections above point out that 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- is a lot like 
-\begin_inset Formula $d$
-\end_inset
-
-; for some purposes (many purposes?) they can be treated as being the same
- thing.
- The big difference is that 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- is lacking the grammatical structure that 
-\begin_inset Formula $d$
-\end_inset
-
- encodes; there is some buried graph-like structure in 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- but it is not overt, and one must work to make it overt.
- One can use the disjuncts directly, with a suitable parsing algorithm,
- to obtain an explicit dependency parse of any given sentence.
- The actual probability function 
-\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
-\end_inset
-
- is treated as an unknown, to be obtained by gradient descent algorithms,
- constrained only by the core assumption of either eqn 
+The Monte Carlo approach presumes that the 
+\emph on
+a priori
+\emph default
+ model consists of a high-dimensional space of hidden parameters, and that
+ the space must be searched to find those paramters that best reproduce
+ the observed probabilities.
+ For example, eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:CBOW"
@@ -5040,7 +4927,169 @@ reference "eq:SkipGram"
 
 \end_inset
 
-, so that the resulting probabilities are valid Boltzmann distributions.
+ can be taken as the model of language; the vectors 
+\begin_inset Formula $\vec{u}_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+ are the hidden, unknown parameters, and hill-climbing (as an example of
+ a Monte Carlo method) is used to find them, with the goal of accurately
+ reproducing the observed probability 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+ of word 
+\begin_inset Formula $w$
+\end_inset
+
+ surrounded by the N-gram context 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+.
+ This is a reasonable approach to modelling language; the primary critique
+ here is that the CBOW/SkipGram models are not graphical, at least, not
+ in the sense of providing an explicit symbolic, syntactic representation
+ of language.
+\end_layout
+
+\begin_layout Standard
+The can be contrasted with the OpenCog language learning project
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+, which is overtly graphical at each step, and does produce a symbolic,
+ syntactic representation of language at its conclusion.
+ The proceedure replaces the directly observed probability 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+ with the hidden, indirectly observed probability 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ of a disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ occuring on word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ The previous sections have already extensively argued that the probability
+ 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is very much like the probability 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+, except that 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ can be explicitly understood as syntax, while 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+ cannot.
+ That is, the 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+, with no further modification, redefintion or processing, can be used with
+ a parser to obtain a syntactic parse.
+ The probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ are the 
+\emph on
+de facto
+\emph default
+ lexical entries in the Link grammar parser
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ The existing parser implementation can use the probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ directly, to obtain a syntactic parse.
+\end_layout
+
+\begin_layout Standard
+How are the 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ obtained? One way is through direct counting.
+ Given an observational count 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ of how often the word 
+\begin_inset Formula $w$
+\end_inset
+
+ is associated with the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+, one computes a normalized frequency of observations: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
+\]
+
+\end_inset
+
+so that the frequency is properly normalized: 
+\begin_inset Formula $p\left(*,*\right)=1$
+\end_inset
+
+.
+ The energy functional is explicitly 
+\begin_inset Formula 
+\[
+E\left(w,d\right)=-\log_{2}p\left(w,d\right)
+\]
+
+\end_inset
+
+No parameter fitting is required to obtain this.
+\end_layout
+
+\begin_layout Standard
+However, the 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ need to be obtained somehow.
+ A number of ways of doing this are possible.
+\end_layout
+
+\begin_layout Standard
+is just the observational count of observing the pair 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ in text; the probability is just the frequentist probability.
 \end_layout
 
 \begin_layout Subsection
