@@ -67,10 +67,8 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 	if (valuations.no_focus())
 		return HandleSet();
 
-	// Variable to specialize
-	Handle var = valuations.focus_variable();
-
-	// Strongly connected valuations associated to that variable
+	// Strongly connected valuations associated to the variable under
+	// focus
 	const SCValuations& var_scv(valuations.focus_scvaluations());
 
 	////////////////////////////

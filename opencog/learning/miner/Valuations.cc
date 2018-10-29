@@ -174,6 +174,7 @@ Valuations::Valuations(const Variables& vars, const SCValuationsSet& sc)
 Valuations::Valuations(const Variables& vars)
 	: ValuationsBase(vars), _size(0) {}
 
+// TODO: maybe speed this up by sorting the SCValuation in order of variables
 const SCValuations& Valuations::get_scvaluations(const Handle& var) const
 {
 	for (const SCValuations& scv : scvs)
