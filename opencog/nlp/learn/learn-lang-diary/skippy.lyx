@@ -1393,7 +1393,7 @@ viz
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -4540,7 +4540,7 @@ key "Sleator1991,Sleator1993"
  by disjuncts 
 \begin_inset Formula 
 \[
-J_{ijk\cdots}=-\log p\left(w_{i};w_{left\,facing};w_{right\,facing}\right)
+J_{ijk\cdots}=-\log p\left(w_{i};w_{left\,connected};w_{right\,connected}\right)
 \]
 
 \end_inset
@@ -4573,7 +4573,7 @@ resting on a tradition of linguistics
 \end_inset
 
  should be clarified.
- Link Grammar proposes a dependency-grammar like model of language.
+ Link Grammar proposes a dependency-grammar model of language.
  Other popular models of language include constituency-tree grammars, such
  as Head-Phrase Structure Grammar (HPSG).
  Grammars such as Categorial Grammar (CG) combine aspects of constituency
@@ -4597,8 +4597,8 @@ key "Hud84,Hud07"
  of landmark transitivity.
  We sweep such details under the rug, for now, wishing to rest on the broader
  statement that all grammar frameworks can be converted into one-another,
- while acknowledging that some frameworks give better insight into language
- than others.
+ while acknowledging that some frameworks give better insight into certain
+ aspects of language than others.
 \end_layout
 
 \begin_layout Standard
@@ -4701,17 +4701,17 @@ Graph Algorithms vs.
 \begin_layout Standard
 The previous sections illustrate that the CBOW/SkipGram model is a form
  of a maximum-entropy model, and that the disjunct model of natural language
- is amenable to the same treatment.
+ is a natural variant.
  In one case, the word-context is an N-gram; in the other, it is a disjunct;
  but these are not so unlike one-another, they have much in common.
- Both langauge models share a common difficulty: finding an energy functional
+ Both language models are faced with a common task: finding an energy functional
  that correctly models the observed probability distribution.
 \end_layout
 
 \begin_layout Standard
 There are several generic classes of algorithms that can be applied to obtain
  the energy functional.
- One class are termed Monte Carlo methods, driving either hill-climbing,
+ One class comprises Monte Carlo methods, driving either hill-climbing,
  gradient descent or 
 \begin_inset Quotes eld
 \end_inset
@@ -4729,15 +4729,31 @@ graph algorithms
 \begin_inset Quotes erd
 \end_inset
 
-.
- These accumulate frequency counts on low-arity observed relationships,
- and use the logarithm of these frequencies as a surrogate for the energy
- functional.
- 
+; these attempt to infer generic network relationships, as opposed to the
+ dense, highly-symmetric bipartite graph typical of neural networks.
+ A characteristic approach, elaborated here, is to accumulate frequency
+ counts on low-arity observed relationships, and use the logarithm of these
+ frequencies as a surrogate for the energy functional.
+ The low-arity (low connectivity) of a node in a network graph makes such
+ graphs feel more 
+\begin_inset Quotes eld
+\end_inset
+
+sparse
+\begin_inset Quotes erd
+\end_inset
+
+, as as compared to the high arity (high connectivity) in a neural-net,
+ where a node in one layer is connected to 
+\emph on
+every
+\emph default
+ node in another.
 \end_layout
 
 \begin_layout Standard
-The class of Mone Carlo methods can be said to be 
+Besides connectivity, there are other differences: the class of Monte Carlo
+ methods can be said to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4748,8 +4764,9 @@ global
 , in that they are trying to navigate an extremely large energy functional
  landscape through random sampling.
  By contrast, the graph algorithms are manifestly local, and re-assemble
- the global landscape explicitly by means of Feynman diagrams and vacuum
- contributions, as illustrated in figure 
+ the global landscape explicitly by summing together contributions from
+ different Feynman diagrams, including vacuum contributions, as illustrated
+ in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Feynman-Diagrams"
@@ -4761,13 +4778,28 @@ reference "fig:Feynman-Diagrams"
  in the above examples, as maximum spanning trees that can be found using
  greedy algorithms applied to pair-wise relationships.
  The Monte Carlo algorithms do not provide any manifest graphical structure,
- although perhaps one can be discerned by applying some sort of thresholding
- to eliminate weak links.
+ although perhaps a graph structure could be discerned 
+\emph on
+post facto
+\emph default
+, by applying some sort of thresholding to eliminate weak links.
  Indeed, thresholding, using sigmoid functions to prune unwanted, weak weights
  from a neural net is a characteristic of most deep-learning models.
  Even so, the resulting weight vectors and weight matrices tend to be cryptic
  amorphous masses: large blocks of uninterpretable numbers whose precise
  role and importance seems impossible to discern.
+\end_layout
+
+\begin_layout Standard
+This section attempts to better characterize the general idea of a 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithm
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -4778,8 +4810,8 @@ Graph Algorithms vs.
 \begin_layout Standard
 The difference between graphical and Monte Carlo methods is perhaps best
  illustrated by example.
- Yuret assumes an Ising model of natural language, and considers only pair-wise
- word realtionships.
+ Yuret (implicitly) assumes an Ising model of natural language, and considers
+ only pair-wise word realtionships.
  To obtain an energy functional, it suffices to count the frequency 
 \begin_inset Formula $N\left(w_{left},w_{right}\right)$
 \end_inset
