@@ -93,7 +93,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; working draft of 24 October 2018
+6 July 2018; working draft of 29 October 2018
 \end_layout
 
 \begin_layout Abstract
@@ -1393,7 +1393,7 @@ viz
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1417,7 +1417,7 @@ name "fig:Rhisome"
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename rhizome.jpg
+	filename skimage/rhizome.jpg
 	lyxscale 50
 	width 80col%
 
