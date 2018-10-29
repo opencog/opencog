@@ -38,7 +38,7 @@
 ; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
-(use-modules (ice-9 textual-ports))
+(use-modules (ice-9 regex))
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 
