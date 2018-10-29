@@ -84,7 +84,9 @@
         minsup-g
         (absolutely-true-eval minsup-f)
         (absolutely-true-eval minsup-g)
-        (single-conjunct-eval g-body))
+        (single-conjunct-eval g-body)
+        (Not (Equal f (top)))
+        (Not (Equal g (top))))
       (ExecutionOutput
         (GroundedSchema "scm: conjunction-expansion-formula")
         (List
