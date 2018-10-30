@@ -5082,6 +5082,37 @@ However, the
 
  need to be obtained somehow.
  A number of ways of doing this are possible.
+ Some of these are sketched in the immediately following subsection.
+ There is also another, distinct problem: even with 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ in hand, it is potentially a very large matrix.
+ It's been argued that 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is a lot like 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+, and so that if the latter can be reduced to a much smaller model, then
+ so can the former.
+ In fact, the same set of algorithms can be applied to simplify either of
+ them; and specifically, CBOW/SkipGram can be applied to 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ just as readily as 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+.
+ The remainder of this paper is dedicated to this task.
+\end_layout
+
+\begin_layout Standard
+There is a strong reason to 
 \end_layout
 
 \begin_layout Standard
