@@ -5179,10 +5179,17 @@ name "fig:Disjuncts-from-Dependency"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \align center
 \begin_inset Graphics
 	filename skimage/disjunct.eps
-	width 80col%
+	width 60col%
 
 \end_inset
 
@@ -5190,7 +5197,7 @@ name "fig:Disjuncts-from-Dependency"
 \end_layout
 
 \begin_layout Plain Layout
-The uppr diagram represents an unlablled dependency parse, such as might
+The upper diagram represents an unlabeled dependency parse, such as might
  be obtained from MST parsing.
  The lower-left diagram shows two links being cut; the lower-right diagram
  shows one of the resulting disjuncts.
@@ -5285,10 +5292,17 @@ name "fig:Dependency-Clique"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \align center
 \begin_inset Graphics
 	filename skimage/clique.eps
-	width 50col%
+	width 35col%
 
 \end_inset
 
