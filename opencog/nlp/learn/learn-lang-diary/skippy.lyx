@@ -5411,8 +5411,75 @@ A combination of techniques, allowing both disconnected regions, and cycles.
 \end_layout
 
 \begin_layout Standard
-The last may be the best.
- 
+There does not appear to be any published comprehensive comparison of these
+ or other techniques.
+\end_layout
+
+\begin_layout Standard
+A few remarks are in order, concerning disconnected trees and dependency
+ graphs with cycles in them.
+ In traditional theories of grammar, grammatical relations are always trees,
+ and every word appears in the tree.
+ There are several reasons for this: standard formulations of phrase structure
+ grammars are always presented in terms of production rules; production
+ rules necessarily generate directed, acyclic trees.
+ Most dependency grammars also insist on dependencies described by trees,
+ and usually, with an additional planarity constraint (projectivity or no-edges-
+crossing constraint).
+ Since every word in a sentence is presumed to have some important role,
+ grammars always connect all words, in some way.
+\end_layout
+
+\begin_layout Standard
+Practical experience suggests that this outlook is perhaps too strict.
+ Non-planar dependency graphs have been observed in several languages.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Havelka2007"
+
+\end_inset
+
+ Dick Hudson has proposed the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+landmark transitivity
+\begin_inset Quotes erd
+\end_inset
+
+ as a way of describing the link-crossing phenomenon.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hud84,Hud07"
+
+\end_inset
+
+ Full connectivity is not always meaningful: writing is filled with typographica
+l and grammatical errors that defy strict grammatical analysis; for example,
+ if a word is accidentally repeated twice, this has no particular significance.
+ Spoken language is almost always less syntactically coherent than written
+ language.
+ Direct experience with Link Grammar shows that cycles in graphs are very
+ useful for enforcing additional grammatical constraints, and disambiguating
+ competing parses.
+ That is, there may be two equally-plausible competing dependency-tree parses;
+ the ability to add an arc to form a loop can often be critical to establish
+ the correctness of a parse.
+ Examples include cycles formed in relative clauses, with one link to the
+ subject of the relative clause, another link to the head-verb of the relative
+ clause, and, completing the cycle, a link between the subject and verb
+ of the relative clause.
+ Only when all three links can be clearly identified, can one be confident
+ that the parse is correct.
+\end_layout
+
+\begin_layout Standard
+Neither the acyclic condition, nor the connectivity condition need to be
+ satisfied, when the goal is to obtain statisical counts of disjuncts.
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Standard
@@ -5429,14 +5496,6 @@ x
 
 \begin_layout Standard
 x
-\end_layout
-
-\begin_layout Standard
-In traditional linguistics, one is interested in a parse tree that connects
- all of the words in a sentence, and thus indicates which words are related
- to which.
- More connections than what is in the spanning tree just confuse the issue,
- at least for traditional linguistics.
 \end_layout
 
 \begin_layout Standard
