@@ -5108,42 +5108,127 @@ However, the
 \end_inset
 
 .
- The remainder of this paper is dedicated to this task.
-\end_layout
-
-\begin_layout Standard
-There is a strong reason to 
-\end_layout
-
-\begin_layout Standard
-is just the observational count of observing the pair 
-\begin_inset Formula $\left(w,d\right)$
+ Conversely, a completely different set of algorithms, suitable for 
+\begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
- in text; the probability is just the frequentist probability.
-\end_layout
-
-\begin_layout Subsection
-Avoiding Maximum Entropy Principles
-\end_layout
-
-\begin_layout Standard
-The previous sections explicitly focused on maximum entropy as a guiding
- principle, emphasizing that it is compatible with both a graphical algorithm
- approach, as well as a Monte Carlo or gradient descent approach to learning
- a language model.
- This guiding principle can be set to the side and ignored; there is nothing
- specific in either the graph algorithms or the training algorithms that
- require or assume it.
-\end_layout
-
-\begin_layout Standard
-Consider again the mechanism used to obtain the counts 
-\begin_inset Formula $N\left(w,d\right)$
+, might be portable to 
+\begin_inset Formula $p\left(w,w_{I}\right)$
 \end_inset
 
 .
- The first half of this mechanism is commonly called MST parsing (Maximum
+ Except for the next section, the remainder of this paper is dedicated to
+ the task of finding adequate algorithms for smaller, factored representations
+ of 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Obtaining Disjunct Counts
+\end_layout
+
+\begin_layout Standard
+How should one obtain the counts 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ of word-disjunct pairs? Unlike the N-gram counts, there is a direct assumption
+ that 
+\begin_inset Formula $d$
+\end_inset
+
+ encodes syntactic information.
+ That is, 
+\begin_inset Formula $d$
+\end_inset
+
+ should be obtained from a parse
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Disjuncts from Dependency Parses
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Disjuncts-from-Dependency"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename skimage/disjunct.eps
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The uppr diagram represents an unlablled dependency parse, such as might
+ be obtained from MST parsing.
+ The lower-left diagram shows two links being cut; the lower-right diagram
+ shows one of the resulting disjuncts.
+ In Link Grammar notation, it would be written 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ball: the- & threw-;
+\end_layout
+
+\end_inset
+
+indicating both the connectors, and the order in which they must be satisfied.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first half of this mechanism is commonly called MST parsing (Maximum
  Spanning Tree parsing), and is described in 
 \begin_inset CommandInset citation
 LatexCommand cite
