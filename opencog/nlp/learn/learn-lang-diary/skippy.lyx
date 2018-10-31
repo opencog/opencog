@@ -5141,11 +5141,12 @@ How should one obtain the counts
 \end_inset
 
  encodes syntactic information.
- That is, 
-\begin_inset Formula $d$
+ That is, it should be possible to use
+\begin_inset Formula $N\left(w,d\right)$
 \end_inset
 
- should be obtained from a parse
+ to obtain partly or mostly-accurate parses.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -5228,8 +5229,97 @@ height "1pt"
 \end_layout
 
 \begin_layout Standard
-The first half of this mechanism is commonly called MST parsing (Maximum
- Spanning Tree parsing), and is described in 
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Disjuncts-from-Dependency"
+
+\end_inset
+
+ shows one possible way of obtaining a disjunct: obtain an unlabeled dependency
+ parse, in some way, and then cut each link to obtain connector pairs.
+ The resulting words, with the attached connectors are then 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ pairs, which can be counted to obtain 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+.
+ This may seem to put the cart before the horse, but for two reasons: the
+ dependency parse does not have to be labeled, and, most importantly, it
+ doesn't have to have a high accuracy.
+ It nees only to have a accuracy that is better than random chance.
+ The law of large numbers should allow correct disjunct to accumulate large
+ counts, while the rest wash out into background noise.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Dependency Clique
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Dependency-Clique"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename skimage/clique.eps
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+A dependency clique.
+ All words are joined by edges to all other words.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One way to obtain a fairly accurate unlabeled dependency parse is by performing
+ MST parsing (Maximum Spanning Tree parsing), and is described in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yuret1998"
@@ -5238,34 +5328,46 @@ key "Yuret1998"
 
 .
  It is a form of a greedy graph algorithm.
- One begins by considering the graph clique, wherein every word in the sentence
- is related (joined by an edge) to every other word in a sentence.
- Each edge is associated with a metric, that defines the length or size
- of the edge.
- In traditional MST, this metric is the mutual information of the word-pair.
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-Properly speaking, mutual information is not a metric, since it does not
- obey the triangle inequality.
- Thus, it should be called a divergence (it is essentially the Kullback–Liebler
- dirvergence) in that it distinguishes points by thier divergence, without
- providing a specific distance betwen them.
- Despite this, the divergence will be called either a matric or a distance
- in much of what follows, simply because it rolls off the tongue more easily.
-\end_layout
+ One begins by considering the graph clique (shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-Clique"
 
 \end_inset
 
- One can proceed in three ways from here: 
+), wherein every word in the sentence is related (joined by an edge) to
+ every other word in a sentence.
+ Each edge is associated with a numerical weight.
+ In canonical MST, this weight is the mutual information of the word-pair.
+ Other weights are possible.
+ For example, de Souza 
+\emph on
+etal
+\emph default
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "deSousa2015"
+
+\end_inset
+
+ suggest an additional entropy factor, based on the vertex degree in the
+ final chosen dependency graph.
+ 
 \end_layout
 
-\begin_layout Itemize
-Apply thresholding, and discard all edges that have a weak, low quality
- connection.
- The result may be a disconnected graph, or a multiply-connected graph.
- A fixed threshold might reject too much, or it might reject too little.
+\begin_layout Standard
+Given a dependency clique, one wishes to select a subset of the edges, so
+ as to call that subset the 
+\begin_inset Quotes eld
+\end_inset
+
+unlabelled dependency graph
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Several choices are possible: 
 \end_layout
 
 \begin_layout Itemize
@@ -5274,12 +5376,49 @@ Apply a greedy algorithm, and keep only the edges of the highest quality,
 \end_layout
 
 \begin_layout Itemize
-A combination of the two.
+Apply a greedy algorithm with additional weighting factors, such as entropy
+ obtained from vertex degree (de Souza 
+\emph on
+etal
+\emph default
+.)
+\end_layout
+
+\begin_layout Itemize
+Apply thresholding, and discard all edges that have a weak, low quality
+ connection.
+ The result of thresholding may be a disconnected graph, or a multiply-connected
+ graph.
+ The threshold may depend on the graph.
+\end_layout
+
+\begin_layout Itemize
+A combination of techniques, allowing both disconnected regions, and cycles.
 \end_layout
 
 \begin_layout Standard
 The last may be the best.
- In traditional linguistics, one is interested in a parse tree that connects
+ 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+In traditional linguistics, one is interested in a parse tree that connects
  all of the words in a sentence, and thus indicates which words are related
  to which.
  More connections than what is in the spanning tree just confuse the issue,
