@@ -5476,61 +5476,20 @@ l and grammatical errors that defy strict grammatical analysis; for example,
 \begin_layout Standard
 Neither the acyclic condition, nor the connectivity condition need to be
  satisfied, when the goal is to obtain statisical counts of disjuncts.
-\end_layout
-
-\begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-For disjunct counting, insisting on a spanning tree might be too strong
- a condition.
- For disjunct counting, one is only interested in how words connect to other
- words: one is interested in extracting and counting the 
-\begin_inset Quotes eld
-\end_inset
-
-jigsaw puzzle pieces
-\begin_inset Quotes erd
-\end_inset
-
- that represent how words can connect to other words.
- To obtain these jigsaw-puzzle pieces, one does not need a tree that spans
- all words in the sentence; it is acceptable that some words might be omitted.
- Nor is it strictly necessary that the parse graph be a tree: it is OK if
- it has cycles, since these cycles often indicate important grammatical
- relations.
-\end_layout
-
-\begin_layout Standard
-A spanning-tree algorithm can be thought of as a kind-of thresholding algorithm,
- but with a local, dynamically-adjustable threshold.
- When a word has very strong connections to all other words, one might consider
- dynamically adjusting a threshold to a high value; when a word has only
- weak connections to all other words, one might dynamically adjust the threshold
- to a low value.
- This type of dynamically-adjustable thresholding can be confusing to define
- and difficult to optimize; by contrast, the spanning tree is simple and
- direct.
- At an abstract level, though, the differences can be imagined to be less
- than they first appear.
- 
+ The reasons for this should be clear: the frequency count of spurious,
+ incorrect disjuncts will remain low, disappearing in the noise.
+ Ungrammatical sentences in the input corpus require no special treatment.
+ Cycles in dependency graphs are important for providing constraints.
+ Not all dependencies are planar or projective.
+ Thus, the mechanism for generating disjuncts, so that they can be statistically
+ counted, need not be subjected to any particularly strong theory of grammar.
+ A weak, frequently-correct unlabelled dependency graph should be enough.
+ Weaker systems might take longer to converge, but should also perhaps introduce
+ less 
+\emph on
+a priori
+\emph default
+ bias.
 \end_layout
 
 \begin_layout Subsection
@@ -5538,30 +5497,32 @@ Summary
 \end_layout
 
 \begin_layout Standard
-The net result is that by observing disjuncts, one is observing an explicit
- graphical structure.
+By observing disjuncts, one is observing an explicit graphical structure.
  The disjunct is overt, in the foreground, explicitly demonstrated.
  It is obtained by explicitly searching for a graphical structure.
- 
+ Dependency structures are a form of explicit thresholding: of all of the
+ possible edges in a clique (figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-Clique"
+
+\end_inset
+
+) only some are selected; the weights of all other edges are expressily
+ zero.
 \end_layout
 
 \begin_layout Standard
-Because every graph has a corresponding adjacency matrix, one can always
- approach the problem from the other direction: given a matrix, declare
- it to be a graph, with the matrix entries being 
-\begin_inset Quotes eld
-\end_inset
-
-weights
-\begin_inset Quotes erd
-\end_inset
-
- on the graph edges.
- This is the approach taken by the neural net, deep-learning models.
- They clearly have taken the world by storm, and are quite successful in
- what they do.
- The disadvantage is that they obscure the explicit graphical structure
- of natural language.
+The alternative, proposed by neural-net approaches, avoids ever explicitly
+ setting the weight of any edge in the clique to zero.
+ By means of hill-climbing, relaxation or some other Monte Carlo or deep-learnin
+g technique, many edges eventually become weak.
+ But they are never explicitly forced to zero.
+ The failure of these techniques to drive an unlikely proposition to complete
+ falsehood (zero probability) prevents these techniques from having any
+ simple, direct symbolic representation.
+ In practice, this can also result in a cluttered data-space, where many
+ small-but-non-zero probabilities and weights require compute storage.
  
 \end_layout
 
