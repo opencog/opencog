@@ -5367,7 +5367,33 @@ key "deSousa2015"
 
  suggest an additional entropy factor, based on the vertex degree in the
  final chosen dependency graph.
- 
+ Other factors are possible.
+ For example, natural language tends to be close to the theoretical minimum
+ possible dependency distance,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Temper2008,Temper2007,Ferrer2006"
+
+\end_inset
+
+ suggesting that weighting should incorporate dependency distance as a factor.
+ Other factors are possible, including 
+\begin_inset Quotes eld
+\end_inset
+
+hubbiness
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ferrer2013"
+
+\end_inset
+
+ (although this might be equivalent to a weight based on entropy from vertex
+ degree).
 \end_layout
 
 \begin_layout Standard
@@ -5432,10 +5458,17 @@ crossing constraint).
 
 \begin_layout Standard
 Practical experience suggests that this outlook is perhaps too strict.
- Non-planar dependency graphs have been observed in several languages.
+ Non-planar dependency graphs have been observed in several languages,
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Havelka2007"
+
+\end_inset
+
+ although there are other claims that this rare.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ferrer2017"
 
 \end_inset
 
