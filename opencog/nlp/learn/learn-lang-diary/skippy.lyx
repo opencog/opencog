@@ -5458,17 +5458,32 @@ crossing constraint).
 
 \begin_layout Standard
 Practical experience suggests that this outlook is perhaps too strict.
- Non-planar dependency graphs have been observed in several languages,
+ Non-planar dependency graphs have been observed in many languages,
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Havelka2007"
 
 \end_inset
 
- although there are other claims that this rare.
+ although this is (objectively) rare.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ferrer2017"
+
+\end_inset
+
+ When there are crossings, they are 
+\begin_inset Quotes eld
+\end_inset
+
+well nested
+\begin_inset Quotes erd
+\end_inset
+
+: a link is crossed only once, almost never more than once.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Havelka2007"
 
 \end_inset
 
