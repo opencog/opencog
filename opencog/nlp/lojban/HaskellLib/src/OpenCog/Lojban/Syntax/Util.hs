@@ -225,8 +225,8 @@ cleanState s = State {sFlags = M.empty
                      ,sNow = sNow s
                      ,sCtx = sCtx s
                      ,sJAI = Nothing
-					 ,sDA = sDA s
-					 ,sDaM = sDaM s
+                     ,sDA = sDA s
+                     ,sDaM = sDaM s
                      ,sXU  = []}
 
 mergeState :: State -> State -> State
@@ -238,8 +238,8 @@ mergeState s1 s2 = State {sFlags = sFlags s1
                          ,sNow = sNow s1
                          ,sCtx = sCtx s1
                          ,sJAI = sJAI s1
-						 ,sDA = sDA s2
-						 ,sDaM = sDaM s2
+                         ,sDA = sDA s2
+                         ,sDaM = sDaM s2
                          ,sXU  = sXU s1}
 
 withEmptyState :: SynIso a b -> SynIso a b

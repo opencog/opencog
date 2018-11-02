@@ -61,8 +61,8 @@ data State = State { sFlags :: M.Map String String
                    , sNow   :: Atom
                    , sCtx   :: [Atom]
                    , sJAI   :: Maybe JJCTTS
-				   , sDA    :: (Atom -> Atom)
-				   , sDaM   :: M.Map String Atom
+                   , sDA    :: (Atom -> Atom)
+                   , sDaM   :: M.Map String Atom
                 -- , sPro   :: M.Map String String
                    , sXU    :: [Atom]
                    } --deriving Show

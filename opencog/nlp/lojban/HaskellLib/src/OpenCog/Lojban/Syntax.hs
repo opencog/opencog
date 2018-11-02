@@ -207,10 +207,9 @@ statement = handleDA . handleMa <<< statement'
     where handleDA = Iso f g where
               f a = do
                 daf <- gets sDA
-                let x = traceShow (daf (cCN "Hello" lowTv)) a
                 modify (\s -> s {sDaM = M.empty})
                 modify (\s -> s {sDA = id})
-                pure (daf x)
+                pure (daf a)
               g = error "statement.handleDA.g not implemented"
           handleMa :: SynIso Atom Atom
           handleMa = Iso f g where
