@@ -77,7 +77,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --FEhE switch between temporal/spatioal interval_propertys
 
 lojban :: Syntax (Maybe Atom)
-lojban = finalCheck <<< (just . text <+> insert Nothing) <&& optMorph "FAhO"
+lojban = finalCheck <<< text <&& optMorph "FAhO"
 
 finalCheck :: SynIso a a
 finalCheck = Iso f g where
@@ -110,8 +110,8 @@ text_1 = handle
     &&& optional paragraphs
 -}
 
-text :: Syntax Atom
-text = text_1 <+> free_frees
+text :: Syntax (Maybe Atom)
+text = (just <<< ifNothingFail . text_1 <+> free_frees) <+> insert Nothing
 
 free_frees :: Syntax Atom
 free_frees = filterDummy . handleFREEs . addfst dummy . ifEmptyFail . frees
@@ -123,26 +123,52 @@ free_frees = filterDummy . handleFREEs . addfst dummy . ifEmptyFail . frees
           f a = pure a
           g a = pure a
 
-text_1 :: Syntax Atom
-text_1 = ((handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
-        <<< optional (left . checkEmpty . (manySep (sepMorph "I")
-                      &&> optional joik_jek
-                      &&& (optional (stag <&& sepMorph "BO")
-                          <+> nothing <<< optMorph "BO"))
+handleStatementCon :: SynIso (Atom,(Con,Atom)) Atom
+handleStatementCon = listl . cons
+                   . ((withFlagValue "StatementCon" "all" handleCon2) *** gsAtoms)
+                   . unit
+
+toLO :: SynIso SelbriNA Atom
+toLO = genInstance "SubsetLink" . _ssl . handleBRIDI
+     . addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
+
+
+handleStatementCon1 :: SynIso (Con,Maybe Atom) Atom
+handleStatementCon1 = listl . cons
+                    . ((handleCON . second prepare) *** gsAtoms)
+                    . unit
+                    . (id ||| addsnd dummy)
+                    . ifJustB
+    where prepare = first instanceOf . addfst (cCN "zo'e" noTv)
+          handleCON = (withFlagValue "StatementCon" "one" handleCon)
+          dummy = cCN "dummy" noTv
+
+text_1 :: Syntax (Maybe Atom)
+text_1 = (just . (handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
+        <<< optional (left . (checkEmpty . (manySep (sepMorph "I")
+                                            &&> optional joik_jek
+                                            &&& (optional (stag <&& sepMorph "BO")
+                                                 <+> nothing <<< optMorph "BO"))
+                             &&& frees)
                       <+>
                       right . (someNIhO &&& frees))
-        &&& paragraphs
+        &&& optional paragraphs
     where handleNIhO = listl . tolist2
                              . second (handleFREEs.commute)
                              . inverse associate
-          handleCON = handleCon . second (addfst $ cCN "dummy" noTv) --FIXME no dummy
+                             . (id ||| addsnd dummy)
+                             . ifJustB
+          dummy = cCN "dummy" noTv
+          handleCON :: SynIso ((Con,[Free]),Maybe Atom) Atom
+          handleCON = handleFREEs . commute . second handleStatementCon1
+                    . inverse associate . first commute
           someNIhO = mkIso f g . countNulls . some (sepMorph "NIhO")
           f i = cAN ("paragraphLevel" ++ show i)
           g (AN name) = read $ drop 14 name
 
 checkEmpty :: SynIso Con Con
 checkEmpty = Iso f g where
-    f (Nothing,Nothing) = lift $ Left "No connectives"
+    f (Nothing,Nothing) = lift $ Left "No connectives or frees"
     f a = pure a
     g a = pure a
 
@@ -177,8 +203,15 @@ paragraph = listl . cons . addfst (cAN "paragraph") . cons
              )
 
 statement :: Syntax Atom
-statement = handleMa <<< statement'
-    where handleMa :: SynIso Atom Atom
+statement = handleDA . handleMa <<< statement'
+    where handleDA = Iso f g where
+              f a = do
+                daf <- gets sDA
+                modify (\s -> s {sDaM = M.empty})
+                modify (\s -> s {sDA = id})
+                pure (daf a)
+              g = error "statement.handleDA.g not implemented"
+          handleMa :: SynIso Atom Atom
           handleMa = Iso f g where
               f a = do
                   let x = atomFold (\r a -> r || isMa a) False a
@@ -205,7 +238,7 @@ statement' = listl . cons . addfst (cAN "statement") . cons
         <<< (statement_1 <+> (prenex &&> statement)) &&& gsAtoms
 
 statement_1 :: Syntax Atom
-statement_1 = isoFoldl handleCon2
+statement_1 = isoFoldl handleStatementCon
     <<< statement_2 &&& many (sepMorph "I"
                               &&>
                               (just.joik_jek &&& insert Nothing)
@@ -214,7 +247,7 @@ statement_1 = isoFoldl handleCon2
                              )
 
 statement_2 :: Syntax Atom
-statement_2 = (handleCon2 ||| id) . ifJustB
+statement_2 = (handleStatementCon ||| id) . ifJustB
     <<< statement_3 &&& optional (sepMorph "I"
                                   &&> (checkEmpty <<< optional joik_jek
                                                   &&& optional stag)
@@ -225,7 +258,7 @@ statement_2 = (handleCon2 ||| id) . ifJustB
 statement_3 :: Syntax Atom
 statement_3 = sentence
             <+> (handle <<< optional tag <&& sepMorph "TUhE" &&& frees
-                                         &&& text_1
+                                         &&& ifNothingFail . text_1
                                          &&& ((sepMorph "TUhU" &&> frees)
                                               <+> insert [])
                 )
@@ -562,41 +595,47 @@ sumti_5 = ptp (quantifier &&& lookahead selbri) (isoAppend " lo ") sumti_5Q
 
 -- Quantiviers
 sumti_5Q :: Syntax Atom
-sumti_5Q = (handleSubSet . second setWithSize ||| maybeinof)
-        . manage
-       <<< (optional quantifier &&& sumti_5R)
+sumti_5Q = (isoFoldl handleKEhA ||| id) . ifJustB
+         . first ((handleSetWithSize ||| maybeinof) . ifJustA)
+         <<< (optional quantifier &&& sumti_6) &&& optional relative_clauses
 
-    where manage :: SynIso (Maybe Atom,Atom) (Either (Atom,(Atom,Atom)) Atom)
-          manage = Iso f g where
-              f (Just pa,sumti) = do
-                        atoms <- gets sAtoms
-                        case findSetType sumti atoms of
-                            Just t  -> pure $ Left (sumti,(pa,t    ))
-                            Nothing -> pure $ Left (sumti,(pa,sumti))
-              f (Nothing,sumti) = pure $ Right sumti
-              g (Left (sumti,(pa,t))) = pure (Just pa,sumti)
-              g (Right sumti)         = pure (Nothing,sumti)
-
-          handleSubSet = sndToState 1 . second (tolist1 . subsetL) . reorder2
-
-          maybeinof = Iso f g where
+    where maybeinof = Iso f g where
+              f a@(NN _) = pure a
               f a = do
                   atoms <- gets sAtoms
                   case getDefinitions [a] atoms of
-                      [] -> apply instanceOf a
+                      [] -> apply daInstanceOf a
                       _  -> pure a              --We have a lep which is already an instance
               g a = error "Check for lep somehow"
 
+          daInstanceOf = Iso f g where
+              f a@(VN name) = if name `elem` ["da","de","di"]
+                                  then do
+                                      mi <- getDA name
+                                      case mi of
+                                          Just i -> pure i
+                                          Nothing -> do
+                                            i <- apply instanceOf a
+                                            setDa name i
+                                            pure i
+                                  else apply instanceOf a
+              f a = apply instanceOf a
+              g = error "sumti_5Q.daInstanceOf.g not implemented"
+
+          handleSubSet = sndToState 1 . second (tolist1 . subsetL)
+
           reorder2 = mkIso f g where
-              f (t,s)     = (s,(s,t))
-              g (s,(_,t)) = (t,s)
+                        f (s,t)     = (s,(s,t))
+                        g (s,(_,t)) = (s,t)
 
+          handleSetWithSize = ( handleSubSet . reorder2
+                               . first setWithSize . associate
+                               |||
+                               setWithSize)
+                            . distribute2 . second findSetType
 
-
--- Relative clauses
-sumti_5R :: Syntax Atom
-sumti_5R = (isoFoldl handleKEhA ||| id) . ifJustB
-        <<< sumti_6 &&& optional relative_clauses
+distribute2 :: SynIso (a,Either b c) (Either (a,b) (a,c))
+distribute2 = (commute +++ commute) . distribute . commute
 
 handleRelClause :: SynIso (Atom,Maybe [Atom]) Atom
 handleRelClause = (isoFoldl handleKEhA ||| id) . ifJustB
@@ -667,13 +706,13 @@ lerfuP = (handleFREEs2 ||| id) . ifJustB
 --TODO: Check if "-" as seperator coudl cause issues
 lerfu_string :: Syntax Atom
 lerfu_string = instanceOf . concept . isoIntercalate "-" . cons
-            <<< lerfu_word &&& many (morph "PA" <+> lerfu_word)
+            <<< lerfu_word &&& many (pa <+> lerfu_word)
 
 --FIXME handle ga'e to'a upper/lower caes
 lerfu_word :: Syntax String
 lerfu_word = morph "BY"
          <+> (tolist2 <<< consonant &&& token ((==) 'y'))
-         <+> handle . anyWord
+         <+> handle . anyWord . notsyn brivla' --Some brivla end in bu they have to be excluded because would succed before birlva'
  -- <+> adtMorph "LAU" &+& lerfu_word
  -- <+> adtMorph "TEI" &+& lerfu_string &+& adtMorph "FOI"
     where handle = Iso f g
@@ -694,7 +733,7 @@ relative_clauses :: Syntax [Atom]
 relative_clauses = cons <<< relative_clause &&& many (sepMorph "ZIhE" &&> relative_clause)
 
 relative_clause :: Syntax Atom
-relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
+relative_clause = goi <+> noi
     where goi :: Syntax Atom
           goi = ptp (morph "GOI") goiToNoi noi where
               goiToNoi = mkSynonymIso [("pe "  ,"poi ke'a srana ")
@@ -706,9 +745,13 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
                                       ,("goi " ,"poi ke'a du ")]
 
           noi :: Syntax Atom
-          noi = sepMorph "NOI" &&> ((hasKEhA <<< relSentence)
-                                      <+>
-                                      ptp bridi_tail addKEhA relSentence)
+          noi = handleFREEs2 . reorder <<<
+                sepMorph "NOI" &&> frees
+                               &&& noiSentence
+                               &&& (((sepMorph "KUhO" <+> sepMorph "GEhU")
+                                      &&> frees
+                                    ) <+> insert [])
+
               where hasKEhA = Iso f f
                     f a = if atomAny (\case { Link{} -> False
                                             ; (Node _ n _) -> "ke'a" `isInfixOf` n
@@ -719,6 +762,14 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
                     addKEhA = mkIso f g where
                       f = (++) "ke'a "
                       g = drop 4
+
+                    reorder = mkIso f g where
+                        f (f1,(ns,f2)) = (ns,f1++f2)
+                        g (ns,f) = ([],(ns,f))
+
+                    noiSentence = ((hasKEhA <<< relSentence)
+                                    <+>
+                                    ptp bridi_tail addKEhA relSentence)
 
                     relSentence = withNoCTX subsentence
 
@@ -737,12 +788,17 @@ relative_clause = (goi <&& optMorph "GEhU") <+> (noi <&& optMorph "KUhO")
                             pure res
 
 le :: Syntax Atom
-le = (handleFREEs2 ||| id) . ifJustB
+le = handleFREEs2 . reorder
    <<< ((setFlagValueIso "LE_FLAG" . morph "LE")
        <+>
        (setFlagIso "LA_FLAG" . sepMorph "LA"))
-   &&> sumti_tail
+   &&> frees
+   &&& sumti_tail
    &&& optional (sepMorph "KU" &&> frees)
+    where reorder = mkIso f g
+          f (f1,(s,Just f2)) = (s,f1++f2)
+          f (f1,(s,Nothing)) = (s,f1)
+          g (s,f1) = (f1,(s,Nothing))
 
 sumti_tail :: Syntax Atom
 sumti_tail = sumti_tail_1
@@ -890,12 +946,19 @@ quantifier = number <&& optMorph "BOI"
 number :: Syntax Atom
 number = handleFREEs2 <<< number' &&& frees
 
+pa :: Syntax String
+pa = handle <<< (morph "PA" &&& lookahead (optional (oneOfS word ["da","de","di"])))
+    where handle :: SynIso (String,Maybe String) (String)
+          handle = Iso f g
+          f ("ro",(Just _)) = lift $ Left "Don't parse ro before da here."
+          f (w   ,_       ) = pure w
+          g _ = error "pa.handle.g not implemented."
+
 number' :: Syntax Atom
 number' =  (    numberNode    |||    concept   )
     . (showReadIso . paToNum |^| isoIntercalate " ")
     . cons
-    -- <<< some (morphN 2 "PA") <&& sepSpace
-    <<< morph "PA" &&& many (morph "PA" <+> lerfu_word)
+    <<< pa &&& many (pa <+> lerfu_word)
     where paToNum :: SynIso [String] Int
           paToNum = isoFoldl (digitsToNum . second paToDigit) . addfst 0
 
@@ -921,12 +984,24 @@ kohaP :: Syntax Atom
 kohaP = da <+> ma <+> ko <+> keha <+> koha
     where koha = concept . morph "KOhA"
           ma   = varnode . word "ma"
-          da   = concept . oneOfS word ["da","de","di"]
+          da   = handleDA . (optional (mword "PA" "ro") &&& oneOfS word ["da","de","di"])
           ko   = setFlagIso "ko" . concept . word "ko"
           keha = concept . word "ke'a"
 
+          handleDA = Iso f g where
+            f (mp,w) = do
+                c <- apply varnode w
+                daf <- gets sDA
+                mi <- getDA w
+                case (mp,mi) of
+                    (Just _ ,Nothing) -> setDAF (\x -> daf $ cFAL noTv c x)
+                    (Nothing,Nothing) -> setDAF (\x -> daf $ cExL noTv c x)
+                    _                 -> setDAF daf
+                pure c
+            g c = error $ "kohaP.handleDA.g not implemented"
+
 luP :: Syntax Atom
-luP = instanceOf <<< sepMorph "LU" &&> text <&& optMorph "LIhU"
+luP = instanceOf . ifNothingFail <<< sepMorph "LU" &&> text <&& optMorph "LIhU"
 
 setWithSize :: SynIso (Atom,Atom) Atom
 setWithSize = sndToState 2 . second (tolist2 . (sizeL *** setTypeL)) . makeSet
@@ -1017,19 +1092,13 @@ _space_time = addsnd (Just "space_time") . second (addfstAny noTv)
                                          . space_time
 
 _CAhA :: Syntax (Tagged SelbriNA)
-_CAhA = addsndAny Nothing . addfst Nothing . addfstAny noTv
-      . implicationOf . predicate . morph "CAhA"
+_CAhA = addsndAny Nothing . addfst Nothing . addfstAny noTv . handleFREEs2
+      <<< implicationOf . predicate . morph "CAhA" &&& many (fUI . indicators)
 
 _CUhE :: Syntax (Tagged SelbriNA)
-_CUhE = addsndAny Nothing . addfst Nothing . addfstAny noTv
-      . (randvarnode |||  implicationOf . predicate)
-      . switchOnValue "cu'e" . morph "CUhE"
-
---Fails when the Syntax Succeds and the other way arround
---Either the syn succeds then we fail with the zeroArrow
---Or the right . insertc succeds because syn failed then we do nothing
-notsyn :: Syntax a -> Syntax ()
-notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert ()))
+_CUhE = addsndAny Nothing . addfst Nothing . addfstAny noTv . handleFREEs2
+     <<< (randvarnode |||  implicationOf . predicate)
+      . switchOnValue "cu'e" . morph "CUhE" &&& many (fUI . indicators)
 
 -------------------------------------------------------------------------------
 --Selbri
@@ -1254,7 +1323,7 @@ brivla :: Syntax Atom
 brivla = handleFREEs2 <<< brivla' &&& frees
 
 brivla' :: Syntax Atom
-brivla' = implicationOf . predicate <<< gismu <+> Morph.brivla
+brivla' = implicationOf . predicate <<< Morph.brivla
 
 meP :: Syntax Atom
 meP = (handleFREEs2 ||| id) . handle
@@ -1375,6 +1444,8 @@ nuP = maybeImpl . isoFoldl handleCon2 . manage
              ff predP (ImpL _ predD _) = predP == predD
              ff _ _ = False
 
+toNuEvent :: SynIso Atom SelbriNA
+toNuEvent = addfst Nothing . addfst noTv . handleNU "nu" (mkNuEvent ["fasnu"])
 
 nuHandlers :: [SynIso (String,Atom) Atom]
 nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u")           . rmfst "du'u",
@@ -1389,40 +1460,40 @@ nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u")           . rmfst "du'u",
               handleNU "li'i" (mkNuEventLabel "is_experience")  . rmfst "li'i",
               handleNU "pu'u" (mkNuEventLabel "is_point_event") . rmfst "pu'u",
               handleNU "jei"  (mkNuEventLabel "is_truth_value") . rmfst "jei"]
-  where
-    -- Functions that specify the type of the abstraction
-    -- Note: atomNub may leave AndLink with only one atom
-    mkNuEventLabel :: String -> String -> SynIso Atom [Atom]
-    mkNuEventLabel eventName _ = tolist2 . (mkEval . atomNub . mkEvent &&& id)
-      where mkEval = _eval . addfst (cPN eventName highTv)
-                   . tolist2 . addfstAny (cCN "$2" highTv)
 
-    mkNuEvent :: [String] -> String -> SynIso Atom [Atom]
-    mkNuEvent (nuType:nts) name = isoConcat . tolist2 . addfstAny nuImps
-                                            . tolist2 . (wrapNuVars &&& id)
-     where
-       nuPred = cPN (nuType ++ "_" ++ name) highTv
+-- Functions that specify the type of the abstraction
+-- Note: atomNub may leave AndLink with only one atom
+mkNuEventLabel :: String -> String -> SynIso Atom [Atom]
+mkNuEventLabel eventName _ = tolist2 . (mkEval . atomNub . mkEvent &&& id)
+  where mkEval = _eval . addfst (cPN eventName highTv)
+               . tolist2 . addfstAny (cCN "$2" highTv)
 
-       nuImps = cImpL highTv nuPred (cPN nuType highTv)
-            :(case nts of
-                [] -> []
-                [nts] -> let nuSec = cPN (nts ++ "_" ++ name) highTv
-                         in [cIImpL highTv nuPred nuSec
-                            ,cImpL highTv nuSec (cPN nts highTv)])
+mkNuEvent :: [String] -> String -> SynIso Atom [Atom]
+mkNuEvent (nuType:nts) name = isoConcat . tolist2 . addfstAny nuImps
+                                        . tolist2 . (wrapNuVars &&& id)
+ where
+   nuPred = cPN (nuType ++ "_" ++ name) highTv
 
-       wrapNuVars = andl . tolist2 . (mkEval "1" *** mkEval "2")
-                         . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
+   nuImps = cImpL highTv nuPred (cPN nuType highTv)
+        :(case nts of
+            [] -> []
+            [nts] -> let nuSec = cPN (nts ++ "_" ++ name) highTv
+                     in [cIImpL highTv nuPred nuSec
+                        ,cImpL highTv nuSec (cPN nts highTv)])
 
-       mkEval num = _evalTv . addfstAny highTv
-                            . addfstAny (cPN ("sumti" ++ num) highTv)
-                            . tolist2
-                            . addfstAny nuPred
+   wrapNuVars = andl . tolist2 . (mkEval "1" *** mkEval "2")
+                     . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
 
-    --Turns a Sentence into a conjunction of predicates
-    mkEvent = atomIsoMap (mkIso f id) where
-     f (CtxL _ (SL (evals:_))) = evals
-     f (EvalL _ (PN _) (LL [vn@(VN _), _])) = vn -- can be PN:CN, PN:WN, anything else?
-     f a = a
+   mkEval num = _evalTv . addfstAny highTv
+                        . addfstAny (cPN ("sumti" ++ num) highTv)
+                        . tolist2
+                        . addfstAny nuPred
+
+--Turns a Sentence into a conjunction of predicates
+mkEvent = atomIsoMap (mkIso f id) where
+ f (CtxL _ (SL (evals:_))) = evals
+ f (EvalL _ (PN _) (LL [vn@(VN _), _])) = vn -- can be PN:CN, PN:WN, anything else?
+ f a = a
 
 --As for "pu'u", "pruce" and "farvi" don't seem quite right
 
@@ -1652,7 +1723,14 @@ vocatives = mapIso (implicationOf . predicate) . merge
             g _ = error "Not implemented vocative merge g."
 
 toTOI :: Syntax Atom
-toTOI = sepMorph "TO" &&> text <&& optMorph "TOI"
+toTOI = ifNothingFail <<< sepMorph "TO" &&> text <&& optMorph "TOI"
+
+--FIXME: Using this to liberatly try to remove where possible
+ifNothingFail :: SynIso (Maybe a) a
+ifNothingFail = Iso f g where
+    f (Just a) = pure a
+    f (Nothing) = lift $ Left "Nothing not allowed."
+    g a = pure (Just a)
 
 --Vice Versa
 --soi :: Syntax Atom
@@ -2170,7 +2248,14 @@ handleCon = merge
           . (mapIso handle_joik_ek *** mapIso handle_jjctts)
           . reorder
     where handle_joik_ek = (handleJOIK ||| conLink) . expandEither
-          handle_jjctts = handleJJCTTS .> tolist2
+          handle_jjctts = handleJJCTTS
+                        . second (tolist2 .
+                                  (( ((toLONU *** toLONU) ||| (id *** toLONU))
+                                    . switchOnFlagValue "StatementCon" "all"
+                                   ) ||| id)
+                                   . switchOnFlag "StatementCon"
+                                 )
+          toLONU = toLO . toNuEvent
 
           reorder = mkIso f g where
               f ((s,ts),as)                 = (eM (s,as),eM (ts,as))

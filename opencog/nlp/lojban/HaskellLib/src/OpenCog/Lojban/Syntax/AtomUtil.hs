@@ -23,7 +23,7 @@ import Data.Char (chr)
 import System.Random
 
 import OpenCog.AtomSpace (Atom(..),noTv,TruthVal(..),stv,atomType
-                         ,atomGetAllNodes,atomElem,nodeName)
+                         ,atomGetAllNodes,atomElem,nodeName,showAtom)
 
 import OpenCog.Lojban.Syntax.Types
 import OpenCog.Lojban.Syntax.Util
@@ -129,7 +129,7 @@ andl :: SynIso [Atom] Atom
 andl = linkIso "AndLink" noTv
 
 orl :: SynIso [Atom] Atom
-orl = linkIso "OrLink" noTv
+orl = linkIso "MyOrLink" noTv
 
 exel :: SynIso [Atom] Atom
 exel = linkIso "ExecutionLink" noTv
@@ -144,6 +144,9 @@ iffl = definedSchemaLink "IfAndOnlyIf"
 uL :: SynIso [Atom] Atom
 uL = definedSchemaLink "WetherOrNot"
 
+--FIXME this is completely broken would need use TypeNode
+--Which wouldn't allow using a1 and a2 makes is kinda pointless
+--Find other solution
 jiL :: SynIso [Atom] Atom
 jiL = Iso f g where
     f [a1,a2] = do
@@ -171,10 +174,10 @@ jiL = Iso f g where
 handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
 handleEKMods = mkIso f g where
     f ((bna,(bse,(c,bnai))),(a1,a2)) = let na1 = if bna
-                                                 then cNL noTv a1
+                                                 then cMNL noTv a1
                                                  else a1
                                            na2 = if bnai
-                                                 then cNL noTv a2
+                                                 then cMNL noTv a2
                                                  else a2
                                        in if bse
                                              then (c,(na2,na1))
@@ -195,7 +198,7 @@ conLink = conLink' . second tolist2 . handleEKMods
                         ,orl    . rmfst "a"
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
-                        ,jiL    . rmfst "ji"
+                        {-,jiL    . rmfst "ji"-}
                         ]
 
 _JAtoA :: SynIso String String
@@ -399,7 +402,9 @@ genInstance typeL = Iso f g where
         rndname <- randName $ show a
         let i = Node t (rndname  ++ "___" ++ name) noTv
             l = case a of
-                    VN name -> Link typeL [i,cCN name noTv] highTv
+                    VN name -> if name `elem` ["da","de","di"]
+                                  then Link typeL [cCN (nodeName i) noTv,a] highTv
+                                  else Link typeL [i,cCN name noTv] highTv
                     _       -> Link typeL [i,a] highTv
         pushAtom l
         pure i
@@ -424,15 +429,27 @@ filterState = Iso f g where
 getDefinitions :: [Atom] -> [Atom] -> [Atom]
 getDefinitions ns ls = if ns == nns then links else getDefinitions nns ls
     where links = filter ff ls --Get all links that contain a node from ns
-          ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
+          --ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
+          --The node to be defined should be the first element of  a link
+          ff (Link _ ls _) = (head ls) `elem` ns
+          ff _ = False
           nodes = concatMap atomGetAllNodes links --Get all Nodes from the links
           nns   = nub $ ns ++ nodes --Remove duplicates
 
-findSetType :: Atom -> [Atom] -> Maybe Atom
-findSetType a = fmap getType . F.find f
-    where f (Link "SetTypeLink" [s,t] _) = s == a
-          f _ = False
-          getType (Link "SetTypeLink" [s,t] _) = t
+findSetType :: SynIso Atom (Either (Atom,Atom) Atom)
+findSetType = Iso f g where
+    f a = do
+        atoms <- gets sAtoms
+        case fmap getType $ F.find (pat a) atoms of
+            Just t -> pure $ Left (t,a)
+            Nothing -> pure $ Right a
+    g (Left (t,a)) = pure a
+    g (Right a) = pure a
+
+    getType (Link "SetTypeLink" [s,t] _) = t
+
+    pat a (Link "SetTypeLink" [s,t] _) = s == a
+    pat _ _ = False
 
 atomIsoMap :: SynIso Atom Atom -> SynIso Atom Atom
 atomIsoMap iso = Iso f g where

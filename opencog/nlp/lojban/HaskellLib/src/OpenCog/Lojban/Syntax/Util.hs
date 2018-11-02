@@ -225,6 +225,8 @@ cleanState s = State {sFlags = M.empty
                      ,sNow = sNow s
                      ,sCtx = sCtx s
                      ,sJAI = Nothing
+                     ,sDA = sDA s
+                     ,sDaM = sDaM s
                      ,sXU  = []}
 
 mergeState :: State -> State -> State
@@ -236,6 +238,8 @@ mergeState s1 s2 = State {sFlags = sFlags s1
                          ,sNow = sNow s1
                          ,sCtx = sCtx s1
                          ,sJAI = sJAI s1
+                         ,sDA = sDA s2
+                         ,sDaM = sDaM s2
                          ,sXU  = sXU s1}
 
 withEmptyState :: SynIso a b -> SynIso a b
@@ -251,6 +255,20 @@ withEmptyState iso = Iso f g
 
 setSeed :: SynMonad t State => Int -> (t ME) ()
 setSeed i = modify (\s -> s {sSeed = i})
+
+setDAF :: SynMonad t State => (Atom -> Atom) -> (t ME) ()
+setDAF f = modify (\s -> s {sDA = f})
+
+setDa :: SynMonad t State => String -> Atom -> (t ME) ()
+setDa da a = modify (\s -> s {sDaM = M.insert da a (sDaM s)})
+
+unsetDA :: SynMonad t State => String -> (t ME) ()
+unsetDA da = modify (\s -> s {sDaM = M.delete da (sDaM s)})
+
+getDA :: SynMonad t State => String -> (t ME) (Maybe Atom)
+getDA da = do
+        das <- gets sDaM
+        pure $ M.lookup da das
 
 setFlag :: SynMonad t State => Flag -> (t ME) ()
 setFlag f = modify (\s -> s {sFlags = M.insert f "" (sFlags s) })
@@ -273,6 +291,11 @@ getFlagValueIso flag = Iso f g where
 setFlagValueIso :: Flag -> SynIso String ()
 setFlagValueIso flag = inverse (getFlagValueIso flag)
 
+setFlagValueIso2 :: Flag -> String -> SynIso a a
+setFlagValueIso2 flag val = Iso f g
+    where f a = setFlagValue flag val >> pure a
+          g a = rmFlag flag >> pure a
+
 rmFlag :: SynMonad t State => Flag -> (t ME) ()
 rmFlag f = modify (\s -> s {sFlags = M.delete f (sFlags s)})
 
@@ -285,7 +308,13 @@ rmFlagIso :: Flag -> SynIso a a
 rmFlagIso flag = inverse $ setFlagIso flag
 
 withFlag :: Flag -> SynIso a b -> SynIso a b
-withFlag flag syn = inverse (setFlagIso flag) . syn . setFlagIso flag
+withFlag flag syn = rmFlagIso flag . syn . setFlagIso flag
+
+withFlagValue :: Flag -> String -> SynIso a b -> SynIso a b
+withFlagValue flag val syn = inverse (setFlagValueIso2 flag val)
+                           . syn
+                           . setFlagValueIso2 flag val
+
 
 toggleFlag :: Flag -> SynIso a a
 toggleFlag f = setFlagIso f . ifNotFlag f <+> rmFlagIso f . ifFlag f
@@ -331,6 +360,16 @@ switchOnValue val = mkIso f g where
              else Right a
     g (Left a)  = a
     g (Right a) = a
+
+switchOnFlagValue :: Eq a => Flag -> String -> SynIso a (Either a a)
+switchOnFlagValue flag val = Iso f g where
+    f a = do
+        flagval <- getFlagValue flag
+        if flagval == val
+           then pure (Left a)
+           else pure (Right a)
+    g (Left a)  = setFlagValue flag val >> pure a
+    g (Right a) = pure a
 
 toState :: Int -> SynIso [Atom] ()
 toState i = Iso f g where

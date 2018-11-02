@@ -79,19 +79,19 @@ std::string LojbanModule::do_parse_lojban(Request *req, std::list<std::string> a
 
 std::string LojbanModule::do_load_lojban(Request *req, std::list<std::string> args)
 {
+    std::cout << "------------------------------------------";
     std::string path = args.front();
+    std::cout << path;
 
     std::ifstream file(path);
     std::string line;
 
-    std::string lojban;
-
     while (std::getline(file, line))
     {
-        std::size_t pos = line.find(",");
-        lojban = line.substr(0,pos);
-
-        Handle * hptr = lojban_parse(_as,_wordlist,lojban.c_str());
+        std::cout << "------------------------------------------";
+        std::cout << line;
+        std::cout << "------------------------------------------";
+        lojban_parse(_as,_wordlist,line.c_str());
     }
 
     return "";

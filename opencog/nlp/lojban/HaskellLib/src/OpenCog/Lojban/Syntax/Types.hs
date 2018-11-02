@@ -61,9 +61,11 @@ data State = State { sFlags :: M.Map String String
                    , sNow   :: Atom
                    , sCtx   :: [Atom]
                    , sJAI   :: Maybe JJCTTS
+                   , sDA    :: (Atom -> Atom)
+                   , sDaM   :: M.Map String Atom
                 -- , sPro   :: M.Map String String
                    , sXU    :: [Atom]
-                   } deriving Show
+                   } --deriving Show
 
 --They Iso we are using
 --We use a RWST monad over (Either String) for failurs

@@ -44,6 +44,7 @@ infixl 8 ...
 pattern CN name <-Node "ConceptNode" name _
 pattern AN name <-Node "AnchorNode" name _
 pattern PN name <-Node "PredicateNode" name _
+pattern NN name <-Node "NumberNode" name _
 pattern GPN name <-Node "GroundedPredicateNode" name _
 pattern VN name <-Node "VariableNode" name _
 pattern DSN name <- Node "DefinedSchemaNode" name _
@@ -92,6 +93,7 @@ cGL     a       = Link "GetLink"                            [a]     noTv
 cAL  tv a       = Link "AndLink"                              a     tv
 cOL  tv a       = Link "OrLink"                               a     tv
 cNL  tv a       = Link "NotLink"                            [a]     tv
+cMNL tv a       = Link "MyNotLink"                          [a]     tv
 cDL  tv a       = Link "DefineLink"                           a     tv
 cEXOL tv a      = Link "ExecutionOutputLink"                  a     tv
 cEXL tv a b     = Link "ExecutionOutputLink"              [a,b]     tv
