@@ -616,7 +616,7 @@
 	(GroundedSchemaNode "scm: do-aiml-input"))
 
 (define-public (do-aiml-input idx)
-	(if (= (string->number (cog-name idx)) 1)
+	(if (= (cog-number idx) 1)
 		(do-aiml-get (Concept "input"))
 		(do-aiml-get (Concept (string-append "input-"
 			(car (string-split (cog-name idx) #\.))))))
@@ -627,7 +627,7 @@
 	(GroundedSchemaNode "scm: do-aiml-that"))
 
 (define-public (do-aiml-that idx)
-	(if (= (string->number (cog-name idx)) 1)
+	(if (= (cog-number idx) 1)
 		(do-aiml-get (Concept "that"))
 		(do-aiml-get (Concept (string-append "that-"
 			(car (string-split (cog-name idx) #\.))))))

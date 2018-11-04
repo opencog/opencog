@@ -522,8 +522,8 @@
 			)))
 
 (define-public (is_nn_equal_cn? number-node concept-node)
-	(if (equal? (string->number (cog-name number-node))
-			(exact->inexact (string->number (cog-name concept-node))))
+	(if (equal? (cog-number number-node)
+			(exact->inexact (cog-number concept-node)))
 		(stv 1 1)
 		(stv 0 1)
 	)

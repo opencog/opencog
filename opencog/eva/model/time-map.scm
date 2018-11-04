@@ -168,11 +168,11 @@
 			(cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
 
 	(define (loc-link-x at-loc-link)
-		(string->number (cog-name (car (space-nodes at-loc-link)))))
+		(cog-number (car (space-nodes at-loc-link))))
 	(define (loc-link-y at-loc-link)
-		(string->number (cog-name (cadr (space-nodes at-loc-link)))))
+		(cog-number (cadr (space-nodes at-loc-link))))
 	(define (loc-link-z at-loc-link)
-		(string->number (cog-name (caddr (space-nodes at-loc-link)))))
+		(cog-number (caddr (space-nodes at-loc-link))))
 
 	;; Get the xyz coords, as a list, for `face-id-node`
 	(let* ((loc-atom (get-face-coords FACE-ID)))

@@ -138,7 +138,7 @@
   the demand-value will be updated with, on each step.
 "
     (let* ((strength (cog-tv-mean (cog-tv  demand-node)))
-           (rate (/ (string->number (cog-name rate-node)) 100))
+           (rate (/ (cog-number rate-node) 100))
            (demand-value (+ strength (* strength rate))))
         (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
@@ -156,7 +156,7 @@
   the demand-value will be updated with, on each step.
 "
     (let* ((strength (cog-tv-mean (cog-tv  demand-node)))
-           (rate (/ (string->number (cog-name rate-node)) 100))
+           (rate (/ (cog-number rate-node) 100))
            (demand-value (- strength (* strength rate))))
         (psi-set-demand-value demand-node demand-value)
         (stv 1 1)

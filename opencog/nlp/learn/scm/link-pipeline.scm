@@ -106,7 +106,7 @@
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-number word-inst)
-		(string->number (cog-name (word-inst-get-number word-inst))))
+		(cog-number (word-inst-get-number word-inst)))
 
 	; A comparison function, for use as kons in fold
 	(define (least word-inst lim)
@@ -126,7 +126,7 @@
 	; Ahhh .. later code will be easier, if we return the list in
 	; sequential order. So, define a compare function and sort it.
 	(define (get-no seq-lnk)
-		(string->number (cog-name (gdr seq-lnk))))
+		(cog-number (gdr seq-lnk)))
 
 	(sort (map make-ordered-word (parse-get-words PARSE))
 		(lambda (wa wb)
@@ -235,7 +235,7 @@
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)
-		(string->number (cog-name (gdr seq-lnk))))
+		(cog-number (gdr seq-lnk)))
 
 	; Create and count a word-pair, and the distance.
 	(define (count-one-pair left-seq right-seq)

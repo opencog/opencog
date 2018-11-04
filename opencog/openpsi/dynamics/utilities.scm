@@ -72,7 +72,7 @@
 	;(format #t "psi-get-number-value entity: \n~a initial result: ~a\n"
 	;	entity result)
 	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
-		(set! result (string->number (cog-name result))))
+		(set! result (cog-number result)))
 	; if result is a tv and confidenct is 0, means that it has not been set
 	(if (and (cog-tv? result) (> (cog-tv-confidence result) 0))
 		(set! result (cog-tv-mean result)))

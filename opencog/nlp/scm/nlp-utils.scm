@@ -186,7 +186,7 @@
 "
 	; Get the scheme-number of the word-sequence numbe
 	(define (get-number word-inst)
-		(string->number (cog-name (word-inst-get-number word-inst))))
+		(cog-number (word-inst-get-number word-inst)))
 
 	(define (less-than word-inst-1 word-inst-2)
 		(< (get-number word-inst-1) (get-number word-inst-2)))
