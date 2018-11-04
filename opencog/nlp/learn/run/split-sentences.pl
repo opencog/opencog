@@ -155,7 +155,8 @@ sub preprocess
 	# Sentences that end in punctuation, followed by a double-dash.
 	$text =~ s/([?!\.]) +(--[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	# Sentences that end in punctuation, followed by one or more underscores.
+	# Sentences that end in punctuation, followed by one or more
+	# underscores. These are typically used to denote _emphasized text_.
 	$text =~ s/([?!\.]) *(_+[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
 	# Sentence-ending punctuation, followed by optional close-quote.
