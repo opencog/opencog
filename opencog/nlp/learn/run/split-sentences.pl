@@ -2,6 +2,14 @@
 #
 # Multi-language sentence splitter.
 #
+# For help, enter `./split-sentences.pl -h`
+#
+# Example usage:
+#    echo "This is a test. This is more." | ./split-sentences.pl -l en
+# Expected output is one sentence per line. That is, newlines are
+# inserted after the end of each sentence. The -l en flag uses English
+# language period-punctuation rules.
+#
 # Derived from the moses-smt (Moses Statistica Machine Translation)
 # sentece splitter; modified slightly for our needs.
 #
