@@ -2,6 +2,14 @@
 #
 # Multi-language sentence splitter.
 #
+# For help, enter `./split-sentences.pl -h`
+#
+# Example usage:
+#    echo "This is a test. This is more." | ./split-sentences.pl -l en
+# Expected output is one sentence per line. That is, newlines are
+# inserted after the end of each sentence. The -l en flag uses English
+# language period-punctuation rules.
+#
 # Derived from the moses-smt (Moses Statistica Machine Translation)
 # sentece splitter; modified slightly for our needs.
 #
@@ -146,6 +154,10 @@ sub preprocess
 
 	# Sentences that end in punctuation, followed by a double-dash.
 	$text =~ s/([?!\.]) +(--[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+
+	# Sentences that end in punctuation, followed by one or more
+	# underscores. These are typically used to denote _emphasized text_.
+	$text =~ s/([?!\.]) *(_+[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
 	# Sentence-ending punctuation, followed by optional close-quote.
 	$text =~ s/([。．？！♪]”?)/$1\n/g;
