@@ -93,7 +93,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-6 July 2018; working draft of 24 October 2018
+6 July 2018; working draft of 29 October 2018
 \end_layout
 
 \begin_layout Abstract
@@ -1417,7 +1417,7 @@ name "fig:Rhisome"
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename rhizome.jpg
+	filename skimage/rhizome.jpg
 	lyxscale 50
 	width 80col%
 
@@ -4540,7 +4540,7 @@ key "Sleator1991,Sleator1993"
  by disjuncts 
 \begin_inset Formula 
 \[
-J_{ijk\cdots}=-\log p\left(w_{i};w_{left\,facing};w_{right\,facing}\right)
+J_{ijk\cdots}=-\log p\left(w_{i};w_{left\,connected};w_{right\,connected}\right)
 \]
 
 \end_inset
@@ -4573,7 +4573,7 @@ resting on a tradition of linguistics
 \end_inset
 
  should be clarified.
- Link Grammar proposes a dependency-grammar like model of language.
+ Link Grammar proposes a dependency-grammar model of language.
  Other popular models of language include constituency-tree grammars, such
  as Head-Phrase Structure Grammar (HPSG).
  Grammars such as Categorial Grammar (CG) combine aspects of constituency
@@ -4597,8 +4597,8 @@ key "Hud84,Hud07"
  of landmark transitivity.
  We sweep such details under the rug, for now, wishing to rest on the broader
  statement that all grammar frameworks can be converted into one-another,
- while acknowledging that some frameworks give better insight into language
- than others.
+ while acknowledging that some frameworks give better insight into certain
+ aspects of language than others.
 \end_layout
 
 \begin_layout Standard
@@ -4701,17 +4701,17 @@ Graph Algorithms vs.
 \begin_layout Standard
 The previous sections illustrate that the CBOW/SkipGram model is a form
  of a maximum-entropy model, and that the disjunct model of natural language
- is amenable to the same treatment.
+ is a natural variant.
  In one case, the word-context is an N-gram; in the other, it is a disjunct;
  but these are not so unlike one-another, they have much in common.
- Both langauge models share a common difficulty: finding an energy functional
+ Both language models are faced with a common task: finding an energy functional
  that correctly models the observed probability distribution.
 \end_layout
 
 \begin_layout Standard
 There are several generic classes of algorithms that can be applied to obtain
  the energy functional.
- One class are termed Monte Carlo methods, driving either hill-climbing,
+ One class comprises Monte Carlo methods, driving either hill-climbing,
  gradient descent or 
 \begin_inset Quotes eld
 \end_inset
@@ -4729,15 +4729,31 @@ graph algorithms
 \begin_inset Quotes erd
 \end_inset
 
-.
- These accumulate frequency counts on low-arity observed relationships,
- and use the logarithm of these frequencies as a surrogate for the energy
- functional.
- 
+; these attempt to infer generic network relationships, as opposed to the
+ dense, highly-symmetric bipartite graph typical of neural networks.
+ A characteristic approach, elaborated here, is to accumulate frequency
+ counts on low-arity observed relationships, and use the logarithm of these
+ frequencies as a surrogate for the energy functional.
+ The low-arity (low connectivity) of a node in a network graph makes such
+ graphs feel more 
+\begin_inset Quotes eld
+\end_inset
+
+sparse
+\begin_inset Quotes erd
+\end_inset
+
+, as as compared to the high arity (high connectivity) in a neural-net,
+ where a node in one layer is connected to 
+\emph on
+every
+\emph default
+ node in another.
 \end_layout
 
 \begin_layout Standard
-The class of Mone Carlo methods can be said to be 
+Besides connectivity, there are other differences: the class of Monte Carlo
+ methods can be said to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4748,8 +4764,9 @@ global
 , in that they are trying to navigate an extremely large energy functional
  landscape through random sampling.
  By contrast, the graph algorithms are manifestly local, and re-assemble
- the global landscape explicitly by means of Feynman diagrams and vacuum
- contributions, as illustrated in figure 
+ the global landscape explicitly by summing together contributions from
+ different Feynman diagrams, including vacuum contributions, as illustrated
+ in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Feynman-Diagrams"
@@ -4761,13 +4778,28 @@ reference "fig:Feynman-Diagrams"
  in the above examples, as maximum spanning trees that can be found using
  greedy algorithms applied to pair-wise relationships.
  The Monte Carlo algorithms do not provide any manifest graphical structure,
- although perhaps one can be discerned by applying some sort of thresholding
- to eliminate weak links.
+ although perhaps a graph structure could be discerned 
+\emph on
+post facto
+\emph default
+, by applying some sort of thresholding to eliminate weak links.
  Indeed, thresholding, using sigmoid functions to prune unwanted, weak weights
  from a neural net is a characteristic of most deep-learning models.
  Even so, the resulting weight vectors and weight matrices tend to be cryptic
  amorphous masses: large blocks of uninterpretable numbers whose precise
  role and importance seems impossible to discern.
+\end_layout
+
+\begin_layout Standard
+This section attempts to better characterize the general idea of a 
+\begin_inset Quotes eld
+\end_inset
+
+graph algorithm
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -4778,8 +4810,8 @@ Graph Algorithms vs.
 \begin_layout Standard
 The difference between graphical and Monte Carlo methods is perhaps best
  illustrated by example.
- Yuret assumes an Ising model of natural language, and considers only pair-wise
- word realtionships.
+ Yuret (implicitly) assumes an Ising model of natural language, and considers
+ only pair-wise word realtionships.
  To obtain an energy functional, it suffices to count the frequency 
 \begin_inset Formula $N\left(w_{left},w_{right}\right)$
 \end_inset
@@ -4853,148 +4885,35 @@ Graph Algorithms vs.
 \end_layout
 
 \begin_layout Standard
-The OpenCog language learning project
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Goertzel2014"
+Another strong comparison of the difference between graph algorithm and
+ gradient descent approaches is manifest at the disjunct/N-gram level.
+ The goal in both cases is to obtain a Bayesian-network factorization of
+ language, as in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:bayes-factorize"
 
 \end_inset
 
- proposes the creation of a disjunct model of natural language by means
- of graphical algorithms.
- Specifically, this means that the probabilities of disjuncts are obtained
- by direct counting.
- After a large body of text, and obtaining an observational count 
-\begin_inset Formula $N\left(w,d\right)$
-\end_inset
-
- of how often the word 
-\begin_inset Formula $w$
-\end_inset
-
- is assocaited with the disjunct 
-\begin_inset Formula $d$
-\end_inset
-
-, one computes a normalized frequency of observations.
- For problems like the Ising model, we want to solve the inverse problem.
+, and then to describe each of the factors as compactly as possible.
+ In both cases, some 
+\emph on
+a priori
+\emph default
+ model of language is proposed, and a search is performed to obtain the
+ factors in compact form.
+ 
 \end_layout
 
 \begin_layout Standard
-xxx fixme nonsequiter missing text xxx
-\begin_inset Formula 
-\[
-p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
-\]
-
-\end_inset
-
-so that the frequency is properly normalized: 
-\begin_inset Formula $p\left(*,*\right)=1$
-\end_inset
-
-.
- The 
-\begin_inset Formula $N\left(w,d\right)$
-\end_inset
-
- is just the observational count of observing the pair 
-\begin_inset Formula $\left(w,d\right)$
-\end_inset
-
- in text; the probability is just the frequentist probability.
- The energy functional is explicitly 
-\begin_inset Formula 
-\[
-E\left(w,d\right)=-\log_{2}p\left(w,d\right)
-\]
-
-\end_inset
-
-The enemble of all possible grammatical word-sequences has the form of a
- sheaf.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Vepstas2017sheaves"
-
-\end_inset
-
- The most likely relationship between the words in a sentence is the one
- that maximizes the entropy, including the contribution of the vacuum; and
- thus looks like a maximization of mutual information.
- Because disjuncts impose a complex relationship between words, one must
- use more complex algorithms, generically called 
-\begin_inset Quotes eld
-\end_inset
-
-parsers
-\begin_inset Quotes erd
-\end_inset
-
-, to discover how to attach disjuncts to one-another to obtain a valid nateork
- graph.
- The original Link grammar papers
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Sleator1991,Sleator1993"
-
-\end_inset
-
- provide an eminently suitable parsing algorithm that is well-suited to
- the task.
-\end_layout
-
-\begin_layout Standard
-By contrast, the CBOW/SkipGram models use gradient-descent to obtain a probabili
-ty similar to 
-\begin_inset Formula $p\left(w,d\right)$
-\end_inset
-
-.
- The notation used is different, so that 
-\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
-\end_inset
-
- is written, with the N-gram context 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- as a stand-in for the disjunct 
-\begin_inset Formula $d$
-\end_inset
-
-.
- Previous sections above point out that 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- is a lot like 
-\begin_inset Formula $d$
-\end_inset
-
-; for some purposes (many purposes?) they can be treated as being the same
- thing.
- The big difference is that 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- is lacking the grammatical structure that 
-\begin_inset Formula $d$
-\end_inset
-
- encodes; there is some buried graph-like structure in 
-\begin_inset Formula $w_{I}$
-\end_inset
-
- but it is not overt, and one must work to make it overt.
- One can use the disjuncts directly, with a suitable parsing algorithm,
- to obtain an explicit dependency parse of any given sentence.
- The actual probability function 
-\begin_inset Formula $p\left(w_{j}\left|w_{I}\right.\right)$
-\end_inset
-
- is treated as an unknown, to be obtained by gradient descent algorithms,
- constrained only by the core assumption of either eqn 
+The Monte Carlo approach presumes that the 
+\emph on
+a priori
+\emph default
+ model consists of a high-dimensional space of hidden parameters, and that
+ the space must be searched to find those paramters that best reproduce
+ the observed probabilities.
+ For example, eqn 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:CBOW"
@@ -5008,31 +4927,413 @@ reference "eq:SkipGram"
 
 \end_inset
 
-, so that the resulting probabilities are valid Boltzmann distributions.
+ can be taken as the model of language; the vectors 
+\begin_inset Formula $\vec{u}_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+ are the hidden, unknown parameters, and hill-climbing (as an example of
+ a Monte Carlo method) is used to find them, with the goal of accurately
+ reproducing the observed probability 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+ of word 
+\begin_inset Formula $w$
+\end_inset
+
+ surrounded by the N-gram context 
+\begin_inset Formula $w_{I}$
+\end_inset
+
+.
+ This is a reasonable approach to modelling language; the primary critique
+ here is that the CBOW/SkipGram models are not graphical, at least, not
+ in the sense of providing an explicit symbolic, syntactic representation
+ of language.
+\end_layout
+
+\begin_layout Standard
+The can be contrasted with the OpenCog language learning project
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+, which is overtly graphical at each step, and does produce a symbolic,
+ syntactic representation of language at its conclusion.
+ The proceedure replaces the directly observed probability 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+ with the hidden, indirectly observed probability 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ of a disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ occuring on word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ The previous sections have already extensively argued that the probability
+ 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is very much like the probability 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+, except that 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ can be explicitly understood as syntax, while 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+ cannot.
+ That is, the 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+, with no further modification, redefintion or processing, can be used with
+ a parser to obtain a syntactic parse.
+ The probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ are the 
+\emph on
+de facto
+\emph default
+ lexical entries in the Link grammar parser
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ The existing parser implementation can use the probabilities 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ directly, to obtain a syntactic parse.
+\end_layout
+
+\begin_layout Standard
+How are the 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ obtained? One way is through direct counting.
+ Given an observational count 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ of how often the word 
+\begin_inset Formula $w$
+\end_inset
+
+ is associated with the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+, one computes a normalized frequency of observations: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p\left(w,d\right)=\frac{N\left(w,d\right)}{N\left(*,*\right)}
+\]
+
+\end_inset
+
+so that the frequency is properly normalized: 
+\begin_inset Formula $p\left(*,*\right)=1$
+\end_inset
+
+.
+ The energy functional is explicitly 
+\begin_inset Formula 
+\[
+E\left(w,d\right)=-\log_{2}p\left(w,d\right)
+\]
+
+\end_inset
+
+No parameter fitting is required to obtain this.
+\end_layout
+
+\begin_layout Standard
+However, the 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ need to be obtained somehow.
+ A number of ways of doing this are possible.
+ Some of these are sketched in the immediately following subsection.
+ There is also another, distinct problem: even with 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ in hand, it is potentially a very large matrix.
+ It's been argued that 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ is a lot like 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+, and so that if the latter can be reduced to a much smaller model, then
+ so can the former.
+ In fact, the same set of algorithms can be applied to simplify either of
+ them; and specifically, CBOW/SkipGram can be applied to 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+ just as readily as 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+.
+ Conversely, a completely different set of algorithms, suitable for 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+, might be portable to 
+\begin_inset Formula $p\left(w,w_{I}\right)$
+\end_inset
+
+.
+ Except for the next section, the remainder of this paper is dedicated to
+ the task of finding adequate algorithms for smaller, factored representations
+ of 
+\begin_inset Formula $p\left(w,d\right)$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
-Avoiding Maximum Entropy Principles
+Obtaining Disjunct Counts
 \end_layout
 
 \begin_layout Standard
-The previous sections explicitly focused on maximum entropy as a guiding
- principle, emphasizing that it is compatible with both a graphical algorithm
- approach, as well as a Monte Carlo or gradient descent approach to learning
- a language model.
- This guiding principle can be set to the side and ignored; there is nothing
- specific in either the graph algorithms or the training algorithms that
- require or assume it.
+How should one obtain the counts 
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ of word-disjunct pairs? Unlike the N-gram counts, there is a direct assumption
+ that 
+\begin_inset Formula $d$
+\end_inset
+
+ encodes syntactic information.
+ That is, it should be possible to use
+\begin_inset Formula $N\left(w,d\right)$
+\end_inset
+
+ to obtain partly or mostly-accurate parses.
+ 
 \end_layout
 
 \begin_layout Standard
-Consider again the mechanism used to obtain the counts 
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Disjuncts from Dependency Parses
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Disjuncts-from-Dependency"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename skimage/disjunct.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The upper diagram represents an unlabeled dependency parse, such as might
+ be obtained from MST parsing.
+ The lower-left diagram shows two links being cut; the lower-right diagram
+ shows one of the resulting disjuncts.
+ In Link Grammar notation, it would be written 
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	ball: the- & threw-;
+\end_layout
+
+\end_inset
+
+indicating both the connectors, and the order in which they must be satisfied.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Disjuncts-from-Dependency"
+
+\end_inset
+
+ shows one possible way of obtaining a disjunct: obtain an unlabeled dependency
+ parse, in some way, and then cut each link to obtain connector pairs.
+ The resulting words, with the attached connectors are then 
+\begin_inset Formula $\left(w,d\right)$
+\end_inset
+
+ pairs, which can be counted to obtain 
 \begin_inset Formula $N\left(w,d\right)$
 \end_inset
 
 .
- The first half of this mechanism is commonly called MST parsing (Maximum
- Spanning Tree parsing), and is described in 
+ This may seem to put the cart before the horse, but for two reasons: the
+ dependency parse does not have to be labeled, and, most importantly, it
+ doesn't have to have a high accuracy.
+ It nees only to have a accuracy that is better than random chance.
+ The law of large numbers should allow correct disjunct to accumulate large
+ counts, while the rest wash out into background noise.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Dependency Clique
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Dependency-Clique"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename skimage/clique.eps
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+A dependency clique.
+ All words are joined by edges to all other words.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One way to obtain a fairly accurate unlabeled dependency parse is by performing
+ MST parsing (Maximum Spanning Tree parsing), and is described in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yuret1998"
@@ -5041,34 +5342,72 @@ key "Yuret1998"
 
 .
  It is a form of a greedy graph algorithm.
- One begins by considering the graph clique, wherein every word in the sentence
- is related (joined by an edge) to every other word in a sentence.
- Each edge is associated with a metric, that defines the length or size
- of the edge.
- In traditional MST, this metric is the mutual information of the word-pair.
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-Properly speaking, mutual information is not a metric, since it does not
- obey the triangle inequality.
- Thus, it should be called a divergence (it is essentially the Kullback–Liebler
- dirvergence) in that it distinguishes points by thier divergence, without
- providing a specific distance betwen them.
- Despite this, the divergence will be called either a matric or a distance
- in much of what follows, simply because it rolls off the tongue more easily.
-\end_layout
+ One begins by considering the graph clique (shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-Clique"
 
 \end_inset
 
- One can proceed in three ways from here: 
+), wherein every word in the sentence is related (joined by an edge) to
+ every other word in a sentence.
+ Each edge is associated with a numerical weight.
+ In canonical MST, this weight is the mutual information of the word-pair.
+ Other weights are possible.
+ For example, de Souza 
+\emph on
+etal
+\emph default
+.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "deSousa2015"
+
+\end_inset
+
+ suggest an additional entropy factor, based on the vertex degree in the
+ final chosen dependency graph.
+ Other factors are possible.
+ For example, natural language tends to be close to the theoretical minimum
+ possible dependency distance,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Temper2008,Temper2007,Ferrer2006"
+
+\end_inset
+
+ suggesting that weighting should incorporate dependency distance as a factor.
+ Other factors are possible, including 
+\begin_inset Quotes eld
+\end_inset
+
+hubbiness
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ferrer2013"
+
+\end_inset
+
+ (although this might be equivalent to a weight based on entropy from vertex
+ degree).
 \end_layout
 
-\begin_layout Itemize
-Apply thresholding, and discard all edges that have a weak, low quality
- connection.
- The result may be a disconnected graph, or a multiply-connected graph.
- A fixed threshold might reject too much, or it might reject too little.
+\begin_layout Standard
+Given a dependency clique, one wishes to select a subset of the edges, so
+ as to call that subset the 
+\begin_inset Quotes eld
+\end_inset
+
+unlabelled dependency graph
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Several choices are possible: 
 \end_layout
 
 \begin_layout Itemize
@@ -5077,51 +5416,128 @@ Apply a greedy algorithm, and keep only the edges of the highest quality,
 \end_layout
 
 \begin_layout Itemize
-A combination of the two.
+Apply a greedy algorithm with additional weighting factors, such as entropy
+ obtained from vertex degree (de Souza 
+\emph on
+etal
+\emph default
+.)
+\end_layout
+
+\begin_layout Itemize
+Apply thresholding, and discard all edges that have a weak, low quality
+ connection.
+ The result of thresholding may be a disconnected graph, or a multiply-connected
+ graph.
+ The threshold may depend on the graph.
+\end_layout
+
+\begin_layout Itemize
+A combination of techniques, allowing both disconnected regions, and cycles.
 \end_layout
 
 \begin_layout Standard
-The last may be the best.
- In traditional linguistics, one is interested in a parse tree that connects
- all of the words in a sentence, and thus indicates which words are related
- to which.
- More connections than what is in the spanning tree just confuse the issue,
- at least for traditional linguistics.
+There does not appear to be any published comprehensive comparison of these
+ or other techniques.
 \end_layout
 
 \begin_layout Standard
-For disjunct counting, insisting on a spanning tree might be too strong
- a condition.
- For disjunct counting, one is only interested in how words connect to other
- words: one is interested in extracting and counting the 
+A few remarks are in order, concerning disconnected trees and dependency
+ graphs with cycles in them.
+ In traditional theories of grammar, grammatical relations are always trees,
+ and every word appears in the tree.
+ There are several reasons for this: standard formulations of phrase structure
+ grammars are always presented in terms of production rules; production
+ rules necessarily generate directed, acyclic trees.
+ Most dependency grammars also insist on dependencies described by trees,
+ and usually, with an additional planarity constraint (projectivity or no-edges-
+crossing constraint).
+ Since every word in a sentence is presumed to have some important role,
+ grammars always connect all words, in some way.
+\end_layout
+
+\begin_layout Standard
+Practical experience suggests that this outlook is perhaps too strict.
+ Non-planar dependency graphs have been observed in many languages,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Havelka2007"
+
+\end_inset
+
+ although this is (objectively) rare.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ferrer2017"
+
+\end_inset
+
+ When there are crossings, they are 
 \begin_inset Quotes eld
 \end_inset
 
-jigsaw puzzle pieces
+well nested
 \begin_inset Quotes erd
 \end_inset
 
- that represent how words can connect to other words.
- To obtain these jigsaw-puzzle pieces, one does not need a tree that spans
- all words in the sentence; it is acceptable that some words might be omitted.
- Nor is it strictly necessary that the parse graph be a tree: it is OK if
- it has cycles, since these cycles often indicate important grammatical
- relations.
+: a link is crossed only once, almost never more than once.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Havelka2007"
+
+\end_inset
+
+ Dick Hudson has proposed the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+landmark transitivity
+\begin_inset Quotes erd
+\end_inset
+
+ as a way of describing the link-crossing phenomenon.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hud84,Hud07"
+
+\end_inset
+
+ Full connectivity is not always meaningful: writing is filled with typographica
+l and grammatical errors that defy strict grammatical analysis; for example,
+ if a word is accidentally repeated twice, this has no particular significance.
+ Spoken language is almost always less syntactically coherent than written
+ language.
+ Direct experience with Link Grammar shows that cycles in graphs are very
+ useful for enforcing additional grammatical constraints, and disambiguating
+ competing parses.
+ That is, there may be two equally-plausible competing dependency-tree parses;
+ the ability to add an arc to form a loop can often be critical to establish
+ the correctness of a parse.
+ Examples include cycles formed in relative clauses, with one link to the
+ subject of the relative clause, another link to the head-verb of the relative
+ clause, and, completing the cycle, a link between the subject and verb
+ of the relative clause.
+ Only when all three links can be clearly identified, can one be confident
+ that the parse is correct.
 \end_layout
 
 \begin_layout Standard
-A spanning-tree algorithm can be thought of as a kind-of thresholding algorithm,
- but with a local, dynamically-adjustable threshold.
- When a word has very strong connections to all other words, one might consider
- dynamically adjusting a threshold to a high value; when a word has only
- weak connections to all other words, one might dynamically adjust the threshold
- to a low value.
- This type of dynamically-adjustable thresholding can be confusing to define
- and difficult to optimize; by contrast, the spanning tree is simple and
- direct.
- At an abstract level, though, the differences can be imagined to be less
- than they first appear.
- 
+Neither the acyclic condition, nor the connectivity condition need to be
+ satisfied, when the goal is to obtain statisical counts of disjuncts.
+ The reasons for this should be clear: the frequency count of spurious,
+ incorrect disjuncts will remain low, disappearing in the noise.
+ Ungrammatical sentences in the input corpus require no special treatment.
+ Cycles in dependency graphs are important for providing constraints.
+ Not all dependencies are planar or projective.
+ Thus, the mechanism for generating disjuncts, so that they can be statistically
+ counted, need not be subjected to any particularly strong theory of grammar.
+ A weak, frequently-correct unlabelled dependency graph should be enough.
+ Weaker systems might take longer to converge, but should also perhaps introduce
+ less 
+\emph on
+a priori
+\emph default
+ bias.
 \end_layout
 
 \begin_layout Subsection
@@ -5129,30 +5545,32 @@ Summary
 \end_layout
 
 \begin_layout Standard
-The net result is that by observing disjuncts, one is observing an explicit
- graphical structure.
+By observing disjuncts, one is observing an explicit graphical structure.
  The disjunct is overt, in the foreground, explicitly demonstrated.
  It is obtained by explicitly searching for a graphical structure.
- 
+ Dependency structures are a form of explicit thresholding: of all of the
+ possible edges in a clique (figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-Clique"
+
+\end_inset
+
+) only some are selected; the weights of all other edges are expressily
+ zero.
 \end_layout
 
 \begin_layout Standard
-Because every graph has a corresponding adjacency matrix, one can always
- approach the problem from the other direction: given a matrix, declare
- it to be a graph, with the matrix entries being 
-\begin_inset Quotes eld
-\end_inset
-
-weights
-\begin_inset Quotes erd
-\end_inset
-
- on the graph edges.
- This is the approach taken by the neural net, deep-learning models.
- They clearly have taken the world by storm, and are quite successful in
- what they do.
- The disadvantage is that they obscure the explicit graphical structure
- of natural language.
+The alternative, proposed by neural-net approaches, avoids ever explicitly
+ setting the weight of any edge in the clique to zero.
+ By means of hill-climbing, relaxation or some other Monte Carlo or deep-learnin
+g technique, many edges eventually become weak.
+ But they are never explicitly forced to zero.
+ The failure of these techniques to drive an unlikely proposition to complete
+ falsehood (zero probability) prevents these techniques from having any
+ simple, direct symbolic representation.
+ In practice, this can also result in a cluttered data-space, where many
+ small-but-non-zero probabilities and weights require compute storage.
  
 \end_layout
 
