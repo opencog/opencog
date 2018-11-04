@@ -126,7 +126,7 @@
 "
     (MemberLink psi-rule psi-controller-demand)
 
-    (psi-rule-set-atomese-weight psi-rule (cog-tv-mean (cog-tv psi-rule)))
+    (psi-rule-set-atomese-weight psi-rule (cog-mean psi-rule))
 
     (psi-rule-set-alias! psi-rule name)
 

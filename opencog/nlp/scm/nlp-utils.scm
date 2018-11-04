@@ -309,11 +309,7 @@
   If there is no such link, return -999 as the score.
 "
 	(let ((slink (cog-link 'InheritanceLink word-inst word-sense)))
-		(if (null? slink)
-			-999.0
-			(cdr (assoc 'count (cog-tv->alist (cog-tv slink))))
-		)
-	)
+		(if (null? slink) -999.0 (cog-count slink)))
 )
 
 ; ---------------------------------------------------------------------
