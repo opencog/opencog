@@ -50,9 +50,7 @@
     Return the weight of RULE, which is defined as product of strength
     and confidence.
 "
-  (let ((rule-stv (cog-tv RULE)))
-    (* (cog-tv-confidence rule-stv) (cog-tv-mean rule-stv))
-  )
+  (* (cog-confidence RULE) (cog-mean RULE))
 )
 
 ; --------------------------------------------------------------
@@ -62,9 +60,7 @@
     Return the weight of RULE, which defined as product of strength,
     confidence, and short-term-importance.
 "
-  (let ((a-stv (cog-tv RULE)))
-    (* (cog-tv-confidence a-stv) (cog-tv-mean a-stv) (cog-av-sti RULE))
-  )
+  (* (cog-confidence RULE) (cog-mean RULE) (cog-av-sti RULE))
 )
 
 ; --------------------------------------------------------------

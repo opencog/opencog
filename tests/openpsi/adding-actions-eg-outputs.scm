@@ -14,8 +14,8 @@
   Increments the number of faces perceived by 1
 "
     (define (num-of-faces)
-        (string->number (cog-name (car
-            (cog-chase-link 'StateLink 'NumberNode (faces-node))))))
+        (cog-number (car
+            (cog-chase-link 'StateLink 'NumberNode (faces-node)))))
 
     (StateLink
         (ConceptNode "Total number of faces around")
