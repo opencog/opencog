@@ -12,7 +12,7 @@
 \maintain_unincluded_children false
 \language english
 \language_package default
-\inputencoding auto
+\inputencoding utf8
 \fontencoding global
 \font_roman "default" "default"
 \font_sans "default" "default"
@@ -90,10 +90,31 @@ Gradient Descent vs.
 
 \begin_layout Author
 Linas Vepstas
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Date
 6 July 2018; working draft of 29 October 2018
+\end_layout
+
+\begin_layout Address
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+Hanson Robotics; SingularityNET
 \end_layout
 
 \begin_layout Abstract
@@ -5472,7 +5493,9 @@ key "Ferrer2017"
 
 \end_inset
 
- When there are crossings, they are 
+ (That is, although long sentences tend to have more crossings, the fraction
+ drops sharply in proportion to the number they could have had.) When there
+ are crossings, they are 
 \begin_inset Quotes eld
 \end_inset
 
