@@ -56,7 +56,7 @@
 (define (check-aiml-reply num-node)
     (let* ((tv (cog-tv (aiml-get-selected-rule)))
            (conf (cog-tv-confidence tv))
-           (threshold (string->number (cog-name num-node))))
+           (threshold (cog-number num-node)))
         (if (> conf threshold)
             (stv 1 1)
             (stv 0 1)
@@ -65,9 +65,9 @@
 )
 
 (define (check-fuzzy-reply num-node)
-    (if (> (string->number (cog-name (car
-            (cog-chase-link 'StateLink 'NumberNode fuzzy-reply-conf))))
-                (string->number (cog-name num-node)))
+    (if (> (cog-number (car
+            (cog-chase-link 'StateLink 'NumberNode fuzzy-reply-conf)))
+                (cog-number num-node))
         (stv 1 1)
         (stv 0 1)
     )
@@ -75,9 +75,9 @@
 
 (define (long-time-elapsed)
     (if (> (- (current-time) (string->number (get-input-time)))
-            (string->number (cog-name (gar (cog-execute!
+            (cog-number (gar (cog-execute!
                 (Get (TypedVariable (Variable "$t") (Type "TimeNode"))
-                    (State max-waiting-time (Variable "$t"))))))))
+                    (State max-waiting-time (Variable "$t")))))))
         (stv 1 1)
         (stv 0 1)
     )

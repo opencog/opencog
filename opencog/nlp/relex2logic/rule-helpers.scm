@@ -1639,7 +1639,7 @@
 ;    (define time-node
 ;        (if (string=? $period "am")
 ;            (TimeNode $hour)
-;            (TimeNode (number->string (+ (string->number $hour) 12)))
+;            (TimeNode (+ (string->number $hour) 12))
 ;        )
 ;    )
 ;    (ListLink (AtTimeLink (PredicateNode $v_instance) time-node))

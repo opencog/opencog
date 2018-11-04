@@ -22,8 +22,7 @@
 
 	; Given a WordInstanceNode, return its word sequence number
 	(define (get-index w)
-		(inexact->exact (string->number
-			(cog-name (word-inst-get-number w)))))
+		(inexact->exact (cog-number (word-inst-get-number w))))
 
 	; Given a WordInstanceNode, return its corresponding word
 	(define (get-word w)

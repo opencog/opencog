@@ -192,11 +192,11 @@
 			(set! subsets (filter (lambda (l) (word-inst-is-noun? (r2l-get-word-inst (gar l)))) subsets))
 
 			; remove close to false or low confidence links base on TruthValue
-			(set! subsets (filter (lambda (l) (and (> (cog-tv-mean (cog-tv l)) 0.5) (> (cog-tv-confidence (cog-tv l)) 0.5))) subsets))
+			(set! subsets (filter (lambda (l) (and (> (cog-mean l) 0.5) (> (cog-confidence l) 0.5))) subsets))
 
 			(let* ((weights
 				; calculate a weight for each link
-				(map (lambda (l) (length (cog-incoming-set (gar l))) * (cog-tv-mean (cog-tv l)) * (cog-tv-confidence (cog-tv l))) subsets))
+				(map (lambda (l) (length (cog-incoming-set (gar l))) * (cog-mean l) * (cog-confidence l)) subsets))
 			       (sorted-zip
 				; sort bases on the weight
 				(sort (zip weights (map gar subsets)) (lambda (s1 s2) (> (car s1) (car s2)))))

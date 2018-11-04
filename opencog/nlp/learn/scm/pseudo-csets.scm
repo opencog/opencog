@@ -99,7 +99,7 @@
 	(let ((all-csets '()))
 
 		; Get the observational count on ATOM
-		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+		(define (get-count ATOM) (cog-count ATOM))
 
 		(define any-left (AnyNode "cset-word"))
 		(define any-right (AnyNode "cset-disjunct"))

@@ -110,7 +110,7 @@
 	(prt-distribution nmemb))
 
 (define (get-count atom)
-	(if (cog-atom? atom) (cog-tv-count (cog-tv atom)) 0))
+	(if (cog-atom? atom) (cog-count atom) 0))
 
 ; Print disjunct support distribution, viz, number of distinct different
 ; disjuncts on each class
