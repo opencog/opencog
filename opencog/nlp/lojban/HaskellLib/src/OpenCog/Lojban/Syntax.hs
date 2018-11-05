@@ -50,12 +50,13 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 
 --http://wiki.opencog.org/w/Claims_and_contexts#An_Example_of_Moderately_Complex_Semantic_Embedding
 
+--This parser tries to follow the structure of the offical EBNF Grammar of Lojban
+--wherever possible
+
 --TODO Parser
 -- FIX: pa + ki'o
---      da + quantifier
 --      ZAhO explicit representation
 --      vo'a
---      make statments explicit
 --      ge'e cai on logical conectives and else?
 --      Does SEI have implicit args?
 --      What if you have SEI and UI
@@ -72,13 +73,14 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 -- da,de,di differentiation
 
 
---List of Flags
+--List of important Flags
 --NA_FLAG keeps track of the current NA state
 --FEhE switch between temporal/spatioal interval_propertys
 
 lojban :: Syntax (Maybe Atom)
 lojban = finalCheck <<< text <&& optMorph "FAhO"
 
+--Make sure we consumed all the input
 finalCheck :: SynIso a a
 finalCheck = Iso f g where
     f a = do
@@ -87,28 +89,6 @@ finalCheck = Iso f g where
            then pure a
            else lift $ Left $ "Incomplete parse: " ++ text
     g = pure
-
-{-
-text = handle
-    <<< many (morph "NAI")
-    &&& many (cmene <+> indicators)
-    &&& optional (joik_jek)
-    &&& text_1
-
-text_1 :: Syntax Atom
-text_1 = handle
-    <<< optional (many (sepMorph "I")
-                    --   &&> optional joik_jek
-                    --   &&& optional (optional stag
-                    --                 <&& sepMorph "BO"
-                    --                )
-                    -- )
-                  <+>
-                  many (sepMorph "NIhO") &&& frees
-                 )
-
-    &&& optional paragraphs
--}
 
 text :: Syntax (Maybe Atom)
 text = (just <<< ifNothingFail . text_1 <+> free_frees) <+> insert Nothing
@@ -128,11 +108,10 @@ handleStatementCon = listl . cons
                    . ((withFlagValue "StatementCon" "all" handleCon2) *** gsAtoms)
                    . unit
 
-toLO :: SynIso SelbriNA Atom
-toLO = genInstance "SubsetLink" . _ssl . handleBRIDI
-     . addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
-
-
+--Used for the first statment/start of text
+--Assumes some previous thing "zo'e" that the text can be connected to
+--If the text has not actually content use a dummy
+--FIXME: find better solution other then dummy
 handleStatementCon1 :: SynIso (Con,Maybe Atom) Atom
 handleStatementCon1 = listl . cons
                     . ((handleCON . second prepare) *** gsAtoms)
@@ -145,7 +124,7 @@ handleStatementCon1 = listl . cons
 
 text_1 :: Syntax (Maybe Atom)
 text_1 = (just . (handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
-        <<< optional (left . (checkEmpty . (manySep (sepMorph "I")
+        <<< optional (left . (checkConEmpty . (manySep (sepMorph "I")
                                             &&> optional joik_jek
                                             &&& (optional (stag <&& sepMorph "BO")
                                                  <+> nothing <<< optMorph "BO"))
@@ -166,8 +145,10 @@ text_1 = (just . (handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
           f i = cAN ("paragraphLevel" ++ show i)
           g (AN name) = read $ drop 14 name
 
-checkEmpty :: SynIso Con Con
-checkEmpty = Iso f g where
+--A Con can consists of 2 independent parts
+--If booth are empty we fail
+checkConEmpty :: SynIso Con Con
+checkConEmpty = Iso f g where
     f (Nothing,Nothing) = lift $ Left "No connectives or frees"
     f a = pure a
     g a = pure a
@@ -176,9 +157,6 @@ countNulls :: SynIso [()] Int
 countNulls = mkIso f g where
     f = length
     g n = replicate n ()
-
-manySep :: Syntax () -> Syntax ()
-manySep iso = (manySep iso <+> id) . iso <+> insert ()
 
 paragraphs :: Syntax Atom
 paragraphs = listl . cons . addfst (cAN "paragraphs") . cons
@@ -249,8 +227,8 @@ statement_1 = isoFoldl handleStatementCon
 statement_2 :: Syntax Atom
 statement_2 = (handleStatementCon ||| id) . ifJustB
     <<< statement_3 &&& optional (sepMorph "I"
-                                  &&> (checkEmpty <<< optional joik_jek
-                                                  &&& optional stag)
+                                  &&> (checkConEmpty <<< optional joik_jek
+                                                     &&& optional stag)
                                   &&& sepMorph "BO"
                                   &&> statement_2 --FIXME officaly optional
                                  )
@@ -262,7 +240,7 @@ statement_3 = sentence
                                          &&& ((sepMorph "TUhU" &&> frees)
                                               <+> insert [])
                 )
-    where handle = (handleJJCTTS .> tolist1 ||| id) . ifJustA
+    where handle = (handleJJCTTS . second tolist1 ||| id) . ifJustA
                  . second handleFREEs2 . reorder
           reorder = mkIso f g where
               f (mt,(f1,(t,f2))) = (mt,(t,f1++f2))
@@ -334,14 +312,7 @@ handleBTCT = Iso f g where
         apply handleCon (con,(a1,a2))
     g = error "Not implemented g handleBTCT"
 
- -- Isoier version:
- -- (handleBRIDI . manageLeaf. inverse ctLeaf
- -- <+> handleCon . second (handleBTCT *** handleBTCT) . manageNode . inverse ctNode)
-
- -- manageLeaf = Iso f g where
- --     f (s1,(s,s2)) = (s,s1++s2)
- --     g (s1,s) = ([],(s,s1)) --Leafe it and split later
-
+--Coments show intermeditae values
 handleBRIDI :: SynIso BT Atom
 handleBRIDI = handleNA
             -- (NA,frames)
@@ -634,6 +605,7 @@ sumti_5Q = (isoFoldl handleKEhA ||| id) . ifJustB
                                setWithSize)
                             . distribute2 . second findSetType
 
+--distribute with argument order flipped
 distribute2 :: SynIso (a,Either b c) (Either (a,b) (a,c))
 distribute2 = (commute +++ commute) . distribute . commute
 
@@ -708,7 +680,7 @@ lerfu_string :: Syntax Atom
 lerfu_string = instanceOf . concept . isoIntercalate "-" . cons
             <<< lerfu_word &&& many (pa <+> lerfu_word)
 
---FIXME handle ga'e to'a upper/lower caes
+--FIXME handle ga'e to'a upper/lower case
 lerfu_word :: Syntax String
 lerfu_word = morph "BY"
          <+> (tolist2 <<< consonant &&& token ((==) 'y'))
@@ -829,13 +801,14 @@ sumti_tail_1 =
             )
             <+>
             (setWithSize <<< quantifier &&& sumti)
-    where --myselbri = (addfst Nothing . addfst noTv . meP ||| selbri) . switchOnFlag "moi"
-          varNode = addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
+    where varNode = addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
           handle = (handleLA ||| handleLE) . switchOnFlag "LA_FLAG"
           handleLE = choice leHandlers . first (getFlagValueIso "LE_FLAG")
                    . commute . unit . _ssl . handleBRIDI . varNode
 
-          --handleLA = (second.second) (Iso f g) where
+          --LA in this case means we only got the meaning of name of an object,
+          --here we create the connection between the 3 so we can talk about
+          --the object from now on and not the meaning of it's name
           handleLA = Iso f g . rmfstAny noTv . rmfstAny Nothing where
               f pmeaning = do
                   cmene <- apply instanceOf (cPN "cmene" lowTv)
@@ -884,27 +857,6 @@ setOf itype = sndToState 1 . second (tolist1 . setTypeL . tolist2)
                         let set = cCN name noTv
                         pure (set,(set,a))
                     g (_,(_,a)) = pure a
-
-{-laP :: Syntax Atom
-laP = handleName . wordNode
-    <<< sepMorph "LA"
-    &&> anyWord
-    <&& optMorph "KU"
-    where handleName :: SynIso Atom Atom
-          handleName = Iso f g where
-              f a = do
-                  p <- apply instanceOf (cPN "cmene" lowTv)
-                  name <- randName (nodeName a ++ "___" ++ nodeName a)
-                  let c = cCN name lowTv
-                      at = (a,"1")
-                      ct = (c,"2")
-                      pt = (highTv,p)
-                  l <- apply _frames (pt,[at,ct])
-                  pushAtom l
-                  pure c
-              g _ = do
-                  (EvalL _ _ (LL [a,_])) <- popAtom
-                  pure a-}
 
 laP :: Syntax Atom
 laP = handleRelClause . first handleFREEs2 . reorder
@@ -1011,12 +963,6 @@ setWithSize = sndToState 2 . second (tolist2 . (sizeL *** setTypeL)) . makeSet
               let set = cCN name noTv
               pure (set,([set,a],[set,b]))
           g (_,([_,a],[_,b])) = pure (a,b)
-
-ctLeaf :: SynIso a (ConnectorTree c a)
-ctLeaf = Iso f g where
-    f a = pure $ CTLeaf a
-    g (CTLeaf a) = pure a
-    g _ = lift $ Left "Not a CTLeaf."
 
 tagPat :: Syntax (Tagged SelbriNA) -> Syntax JJCTTS
 tagPat syn = isoFoldl toTree <<< ctLeaf . syn
@@ -1174,18 +1120,18 @@ selbri_5 = (handleSelbri5 ||| id) . ifJustB
                         <&& sepMorph "BO"
                       )
                      &&& selbriToEval . selbri_5)
-    where handleSelbri5 = manageSelbriCon . handleCon2 .< selbriToEval
+    where handleSelbri5 = manageSelbriCon . handleCon2 . first selbriToEval
 
 
 selbri_6 :: Syntax Selbri
-selbri_6 = tanruBO <+> tanruGUHEK
+selbri_6 = tanruBO <+> tanruGUhEK
 
 tanruBO :: Syntax Selbri
 tanruBO = (handleTanru ||| id) . ifJustB
        <<< tanru_unit &&& optional (sepMorph "BO" &&> selbri_6)
 
-tanruGUHEK :: Syntax Selbri
-tanruGUHEK = manageSelbriCon . handleCon . handleGIK
+tanruGUhEK :: Syntax Selbri
+tanruGUhEK = manageSelbriCon . handleCon . handleGIK
          <<< guhek &&& (selbriNAToEval . selbri) &&& gik &&& (selbriToEval . selbri_6)
 
 tanru_unit :: Syntax Selbri
@@ -1276,13 +1222,16 @@ selbriNAToEval = mkIso f g where
     g (EvalL natv (GPN na) (LL [EvalL ptv _ (LL [p,_])]))
         = (Just (na,[(cCN "ge'e" lowTv,natv)]),(ptv,p))
 
+--Take an Atom representing mutliple connected Predicates
+--and create a new Predicates that implies this structure
 manageSelbriCon :: SynIso Atom Selbri
 manageSelbriCon = Iso f g where
     f a = do
         name <- randName (show a)
         let s = (selbriDefaultTV,cPN name noTv)
+            v = cVL [cVN "$arg_place",cVN "$arg"]
         eval <- apply selbriToEval s
-        pushAtom $ cImpL noTv eval a
+        pushAtom $ cImpSL noTv v eval a
         pure s
     g s = do
         atoms <- gets sAtoms
@@ -1290,9 +1239,9 @@ manageSelbriCon = Iso f g where
         let ml = find (ff eval) atoms
         case ml of
            Nothing -> lift $ Left "No ImpL for guhek."
-           Just l@(ImpL _ _ a) -> rmAtom l >> pure a
+           Just l@(ImpSL _ _ _ a) -> rmAtom l >> pure a
 
-    ff eval (ImpL _ eval2 _) = eval == eval2
+    ff eval (ImpSL _ _ eval2 _) = eval == eval2
     ff _ _ = False
 
 --Nahe with pred ohter then main??? influnce impl link???
@@ -2232,6 +2181,11 @@ handleJJCTTS_Selbri = Iso f g where
                 _ -> error "handleJJCTTS_Selbri.handleSpaceTime.f only ge'e uis allowed"
         g _ = error "Not Implemented g handleSpaceTime_selbri"
 
+
+--Turn a Selbri into a LO phrase
+toLO :: SynIso SelbriNA Atom
+toLO = genInstance "SubsetLink" . _ssl . handleBRIDI
+     . addsnd [(Node "VariableNode" "$var" noTv,Nothing)]
 
 --HandleCon Connectes the Atoms with 2 possible connectives
 --Since booth connectives are in a Maybe we first lift the Atoms into the Maybe

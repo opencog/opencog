@@ -54,6 +54,7 @@ pattern LL l <- Link "ListLink" l _
 pattern NL l <- Link "NotLink" l _
 pattern DL l <- Link "DefineLink" l _
 pattern ImpL tv a b <- Link "ImplicationLink" [a,b] tv
+pattern ImpSL tv v a b <- Link "ImplicationScopeLink" [v,a,b] tv
 pattern InhL tv a b <- Link "InheritanceLink" [a,b] tv
 pattern SL l <- Link "SetLink" l _
 pattern SSScL l <- Link "SatisfyingSetScopeLink" l _
@@ -82,6 +83,7 @@ cSimL a b       = Link "SimilarityLink"                   [a,b]    noTv
 cVL a           = Link "VariableList"                         a     noTv
 cInhL tv a b    = Link "InheritanceLink"                  [a,b]     tv
 cImpL tv a b    = Link "ImplicationLink"                  [a,b]     tv
+cImpSL tv v a b = Link "ImplicationScopeLink"             [v,a,b]   tv
 cIImpL tv a b   = Link "IntensionalImplicationLink"       [a,b]     tv
 cIFaoIFL tv a b = Link "AndLink"          [cImpL tv a b,cImpL tv b a] tv
 cEvalL tv a b   = Link "EvaluationLink"                   [a,b]     tv
