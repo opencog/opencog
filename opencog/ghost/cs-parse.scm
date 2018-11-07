@@ -79,6 +79,8 @@
     ((has-match? "ordered-goal:" str) (result:suffix 'ORD-GOAL location #f))
     ((has-match? "goal:" str) (result:suffix 'GOAL location #f))
     ((has-match? "#goal:" str) (result:suffix 'RGOAL location #f))
+    ((has-match? "parallel-rules:" str)
+      (result:suffix 'PARALLEL-RULES location #f))
     ((has-match? "#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
@@ -244,7 +246,7 @@
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
-     SAMPLE_INPUT
+     SAMPLE_INPUT PARALLEL-RULES
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
               SET_DELAY)
@@ -264,6 +266,7 @@
       (goal) : (create-top-lv-goal (eval-string (string-append "(list " $1 ")")))
       (ordered-goal) :
         (create-top-lv-goal (eval-string (string-append "(list " $1 ")")) #t)
+      (PARALLEL-RULES) : (create-top-lv-goal (list (cons "Parallel-Rules" 1)))
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
