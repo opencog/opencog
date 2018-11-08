@@ -28,7 +28,7 @@
 ; ----------
 ; TODO: Remove once experimentation is over
 (define expt-var '())
-; TODO: Should be removed as this is using 'ghost-find-rules',
+; TODO: Should be removed as this is using 'ghost-find-rules-duallink',
 ; which will be obsolete soon
 (define-public (test-ghost TXT)
 "
@@ -38,7 +38,8 @@
   (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
   (process-ghost-buffer)
 
-  (let ((rule (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent)))))
+  (let ((rule (cog-outgoing-set
+          (ghost-find-rules-duallink (ghost-get-curr-sent)))))
     (map (lambda (r) (psi-imply r)) rule)
     ; not using ghost-last-executed, because getting back to the rule
     ; from the alias atom is a hassle.

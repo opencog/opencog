@@ -397,7 +397,7 @@
 )
 
 ; ----------
-(define (process-action ACTION RULENAME)
+(define (process-action ACTION RULENAME IS-PARALLEL-RULE?)
 "
   Generate the atomese for each of the terms in ACTION.
   RULENAME is the alias assigned to the rule.
@@ -405,9 +405,13 @@
   ; The system functions that are commonly used
   (define reuse #f)
   (define keep (topic-has-feature? rule-topic "keep"))
+  (define unkeep #f)
 
   ; The GroundedSchemaNode that will be used
-  (define gsn-action (GroundedSchema "scm: ghost-execute-action"))
+  (define gsn-action
+    (if IS-PARALLEL-RULE?
+      (GroundedSchema "scm: ghost-execute-base-action")
+      (GroundedSchema "scm: ghost-execute-action")))
 
   (define (to-atomese actions)
     (define choices '())
@@ -442,6 +446,11 @@
                     (equal? "keep" (cadr n)))
                (set! keep #t)
                (list))
+              ; A system function -- unkeep, just for parallel-rules
+              ((and (equal? 'function (car n))
+                    (equal? "unkeep" (cadr n)))
+               (set! unkeep #t)
+               (list))
               ; A system function -- reuse
               ; First of all, try to see if the rule has been created in
               ; the AtomSpace, and get its action directly if so
@@ -462,7 +471,9 @@
                          (set! reuse #t)
                          (process-action
                            ; The 2nd item in the list is the action
-                           (list-ref reused-rule-from-alist 1) label))))
+                           (list-ref reused-rule-from-alist 1)
+                           label
+                           IS-PARALLEL-RULE?))))
                    (begin
                      (set! reuse #t)
                      (psi-get-action reused-rule)))))
@@ -557,8 +568,12 @@
       ; a rejoinder (rejoinders are kept by default, because it
       ; won't be triggered anyway if the parent is not triggered
       ; and if the parent is triggered, one would expect the
-      ; rejoinders can be triggered too for the next input)
-      (if (or keep (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder))
+      ; rejoinders can be triggered too for the next input),
+      ; or it's a parallel-rule that's supposed to be evaluated
+      ; all the time in the background
+      (if (or keep
+              (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder)
+              (and IS-PARALLEL-RULE? (not unkeep)))
           (list)
           (ExecutionOutput
             (GroundedSchema "scm: ghost-update-rule-strength")
@@ -624,11 +639,17 @@
            (assoc-set! rule-type-alist NAME strval-gambit))
          (list '() '()))
         ((null? rule-hierarchy)
+         (clear-parsing-states)
          ; If we are here, it has to be a rejoinder, so make sure
          ; rule-hierarchy is not empty, i.e. a responder should
          ; be defined in advance
          (throw (ghost-prefix
            "Please define a responder first before defining a rejoinder.")))
+        ((equal? "Parallel-Rules"
+           (cog-name (psi-get-goal (get-rule-from-label
+             (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1)))))))
+         (clear-parsing-states)
+         (throw (ghost-prefix "Rejoinder is not supported for parallel rules.")))
         ; For rejoinders, put the condition (the last rule executed is
         ; the parent of this rejoinder) in the pattern of the rule
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
@@ -758,7 +779,10 @@
                         (list-ref proc-type 1)))
          (specificity (list-ref proc-terms 3))
          (type (assoc-ref rule-type-alist NAME))
-         (action (process-action ACTION NAME))
+         (action (process-action ACTION NAME
+                   (find
+                     (lambda (g) (string=? "Parallel-Rules" (car g)))
+                     ALL-GOALS)))
          (is-rejoinder? (equal? type strval-rejoinder))
          (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
