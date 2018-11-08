@@ -112,6 +112,15 @@ goal: (novelty=0.9)
   ; ... rules under the novelty goal ...
 ```
 
+Apart from the above, one can also define a special set of rules, aka parallel-rules, that will always be evaluated (and triggered if they are satisfiable) in the background, before evaluating the normal GHOST rules. To define them:
+
+```
+parallel-rules:
+  ; ... define the rules here ...
+```
+
+Rejoinders are not supported for parallel-rules.
+
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
 ## How To Run
