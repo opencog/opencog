@@ -397,7 +397,7 @@
 )
 
 ; ----------
-(define (process-action ACTION RULENAME)
+(define (process-action ACTION RULENAME IS-PARALLEL-RULE?)
 "
   Generate the atomese for each of the terms in ACTION.
   RULENAME is the alias assigned to the rule.
@@ -407,7 +407,10 @@
   (define keep (topic-has-feature? rule-topic "keep"))
 
   ; The GroundedSchemaNode that will be used
-  (define gsn-action (GroundedSchema "scm: ghost-execute-action"))
+  (define gsn-action
+    (if IS-PARALLEL-RULE?
+      (GroundedSchema "scm: ghost-execute-base-action")
+      (GroundedSchema "scm: ghost-execute-action")))
 
   (define (to-atomese actions)
     (define choices '())
@@ -462,7 +465,9 @@
                          (set! reuse #t)
                          (process-action
                            ; The 2nd item in the list is the action
-                           (list-ref reused-rule-from-alist 1) label))))
+                           (list-ref reused-rule-from-alist 1)
+                           label
+                           IS-PARALLEL-RULE?))))
                    (begin
                      (set! reuse #t)
                      (psi-get-action reused-rule)))))
@@ -758,7 +763,10 @@
                         (list-ref proc-type 1)))
          (specificity (list-ref proc-terms 3))
          (type (assoc-ref rule-type-alist NAME))
-         (action (process-action ACTION NAME))
+         (action (process-action ACTION NAME
+                   (find
+                     (lambda (g) (string=? "Parallel-Rules" (car g)))
+                     ALL-GOALS)))
          (is-rejoinder? (equal? type strval-rejoinder))
          (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 

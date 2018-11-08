@@ -384,9 +384,9 @@
       (stv 1 1)))
 
 ; ----------
-(define-public (ghost-execute-action . ACTIONS)
+(define-public (ghost-execute-base-action ACTIONS)
 "
-  Execute the actions and update the internal state.
+  Execute the actions and record the results.
 "
   (define txt-str "")
   (define txt-atoms '())
@@ -420,7 +420,16 @@
   (if (not (null? atoms-created))
       (cog-logger-debug ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
-  (set! ghost-result (append txt-atoms atoms-created))
+  (set! ghost-result (append txt-atoms atoms-created)))
+
+; ----------
+(define-public (ghost-execute-action . ACTIONS)
+"
+  Execute the actions and update the internal state -- that particular
+  input will no longer triggered any other GHOST rules.
+"
+  (ghost-execute-base-action ACTIONS)
+
   ; Reset the state
   (State ghost-curr-proc (Concept "Default State")))
 
