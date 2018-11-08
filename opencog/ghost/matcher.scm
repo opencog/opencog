@@ -92,7 +92,7 @@
 
   ; Check if a rule should be skipped or not, based on
   ; its current STI, strength, and the last executed time
-  (define (skip-rule? r)
+  (define (accept-rule? r)
     (or SKIP-STI
         (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
              (or (= strength-weight 0) (> (cog-stv-strength r) 0))
@@ -102,9 +102,9 @@
   (for-each
     (lambda (r)
       ; Skip the rule if its STI or strength is zero,
-      ; unless we choose to ignore their weights,
-      ; or if it's still with the refractory period
-      (if (skip-rule? r)
+      ; or if it's still with the refractory period,
+      ; unless we choose to ignore their weights
+      (if (accept-rule? r)
         (let ((rc (psi-get-context r))
               (ra (psi-get-action r)))
           ; Though an action may be in multiple psi-rule, but it doesn't
