@@ -562,8 +562,12 @@
       ; a rejoinder (rejoinders are kept by default, because it
       ; won't be triggered anyway if the parent is not triggered
       ; and if the parent is triggered, one would expect the
-      ; rejoinders can be triggered too for the next input)
-      (if (or keep (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder))
+      ; rejoinders can be triggered too for the next input),
+      ; or it's a parallel-rule that's supposed to be evaluated
+      ; all the time in the background
+      (if (or keep
+              (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder)
+              IS-PARALLEL-RULE?)
           (list)
           (ExecutionOutput
             (GroundedSchema "scm: ghost-update-rule-strength")
