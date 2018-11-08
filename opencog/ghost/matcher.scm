@@ -1,6 +1,16 @@
 ;; This is the GHOST action selector for finding and deciding
 ;; which action should be executed at a particular point in time.
 
+(define (not-within-refractory? RULE)
+"
+  Check if a rule is still within its refractory period or not.
+"
+  (or (null? (cog-value RULE ghost-time-last-executed))
+      (> (- (current-time)
+            (car (cog-value->list
+              (cog-value RULE ghost-time-last-executed))))
+         refractory-period)))
+
 (define* (eval-and-select RULES #:optional (SKIP-STI #f))
 "
   This is the goal-driven action selection.
@@ -86,11 +96,7 @@
     (or SKIP-STI
         (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
              (or (= strength-weight 0) (> (cog-stv-strength r) 0))
-             (or (null? (cog-value r ghost-time-last-executed))
-                 (> (- (current-time)
-                       (car (cog-value->list
-                         (cog-value r ghost-time-last-executed))))
-                    refractory-period)))))
+             (not-within-refractory? r))))
 
   ; ----------
   (for-each
@@ -275,6 +281,15 @@
           (current-source-location) key args) #f)))
 
   (process-ghost-buffer)
+
+  ; First of all, run the "limbic system" -- a subset of rules that
+  ; will always be evaluated, and if appropriate, triggered immediately
+  (for-each
+    (lambda (p-rule)
+      (if (and (not-within-refractory? p-rule)
+               (> (cog-tv-mean (psi-satisfiable? p-rule)) 0))
+        (psi-imply p-rule)))
+    (filter psi-rule? (cog-incoming-set (ConceptNode "Parallel-Rules"))))
 
   (let* ((candidate-rules
            (if ghost-af-only?
