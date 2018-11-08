@@ -405,6 +405,7 @@
   ; The system functions that are commonly used
   (define reuse #f)
   (define keep (topic-has-feature? rule-topic "keep"))
+  (define unkeep #f)
 
   ; The GroundedSchemaNode that will be used
   (define gsn-action
@@ -444,6 +445,11 @@
               ((and (equal? 'function (car n))
                     (equal? "keep" (cadr n)))
                (set! keep #t)
+               (list))
+              ; A system function -- unkeep, just for parallel-rules
+              ((and (equal? 'function (car n))
+                    (equal? "unkeep" (cadr n)))
+               (set! unkeep #t)
                (list))
               ; A system function -- reuse
               ; First of all, try to see if the rule has been created in
@@ -567,7 +573,7 @@
       ; all the time in the background
       (if (or keep
               (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder)
-              IS-PARALLEL-RULE?)
+              (and IS-PARALLEL-RULE? (not unkeep)))
           (list)
           (ExecutionOutput
             (GroundedSchema "scm: ghost-update-rule-strength")

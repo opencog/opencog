@@ -287,7 +287,8 @@
   (for-each
     (lambda (p-rule)
       (if (and (not-within-refractory? p-rule)
-               (> (cog-tv-mean (psi-satisfiable? p-rule)) 0))
+               (> (cog-tv-mean (psi-satisfiable? p-rule)) 0)
+               (> (cog-stv-strength p-rule) 0))
         (psi-imply p-rule)))
     (filter psi-rule? (cog-incoming-set (ConceptNode "Parallel-Rules"))))
 

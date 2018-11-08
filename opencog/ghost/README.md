@@ -112,14 +112,14 @@ goal: (novelty=0.9)
   ; ... rules under the novelty goal ...
 ```
 
-Apart from the above, one can also define a special set of rules, aka parallel-rules, that will always be evaluated (and triggered if they are satisfiable) in the background, before evaluating the normal GHOST rules. To define them:
+Apart from the above, one can also define a special set of rules, aka parallel-rules, that will always be evaluated (and triggered if they are satisfiable) in the background, before evaluating the normal GHOST rules. Similar to creating rules under a certain goal, use the keyword `parallel-rules:` to create them:
 
 ```
 parallel-rules:
   ; ... define the rules here ...
 ```
 
-Rejoinders are not supported for parallel-rules.
+Parallel-rules are 'kept' by default, that means it can be triggered more than once unless you explicitly unkeep it using `^unkeep()`. The same input will still be handled by the normal GHOST rules even if one or more parallel-rules have been triggered by it. Currently, rejoinders are not supported in parallel-rules.
 
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
