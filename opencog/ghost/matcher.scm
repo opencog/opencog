@@ -214,7 +214,7 @@
         rejoinder))))
 
 ; ----------
-(define-public (ghost-find-rules SENT)
+(define-public (ghost-find-rules-duallink SENT)
 "
   The action selector. It first searches for the rules using DualLink,
   and then does the filtering by evaluating the context of the rules.
@@ -258,7 +258,7 @@
         (List selected)))
 
 ; ----------
-(define-public (ghost-get-rules-from-af)
+(define-public (ghost-get-rules)
 "
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
@@ -315,4 +315,4 @@
 ; The action selector for OpenPsi
 (psi-set-action-selector!
   ghost-component
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules-from-af") (List)))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules") (List)))
