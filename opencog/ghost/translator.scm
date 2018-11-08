@@ -633,11 +633,17 @@
            (assoc-set! rule-type-alist NAME strval-gambit))
          (list '() '()))
         ((null? rule-hierarchy)
+         (clear-parsing-states)
          ; If we are here, it has to be a rejoinder, so make sure
          ; rule-hierarchy is not empty, i.e. a responder should
          ; be defined in advance
          (throw (ghost-prefix
            "Please define a responder first before defining a rejoinder.")))
+        ((equal? "Parallel-Rules"
+           (cog-name (psi-get-goal (get-rule-from-label
+             (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1)))))))
+         (clear-parsing-states)
+         (throw (ghost-prefix "Rejoinder is not supported for parallel rules.")))
         ; For rejoinders, put the condition (the last rule executed is
         ; the parent of this rejoinder) in the pattern of the rule
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
