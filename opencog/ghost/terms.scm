@@ -420,7 +420,9 @@
   (if (not (null? atoms-created))
       (cog-logger-debug ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
-  (set! ghost-result (append txt-atoms atoms-created)))
+  (set! ghost-result (append txt-atoms atoms-created))
+  ; Return an atom
+  (True))
 
 ; ----------
 (define-public (ghost-execute-action . ACTIONS)
