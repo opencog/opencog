@@ -48,6 +48,7 @@ AttentionBank::AttentionBank(AtomSpace* asp)
     LTIAtomWage = config().get_double("ECAN_STARTING_ATOM_LTI_WAGE", 10);
     maxAFSize = config().get_int("ECAN_MAX_AF_SIZE", 100);
 
+    _as = asp;
     _remove_signal = &asp->atomRemovedSignal();
     _remove_connection = _remove_signal->connect(
             std::bind(&AttentionBank::remove_atom_from_bank, this,
@@ -60,7 +61,7 @@ AttentionBank::~AttentionBank()
     // This can occur when the cogserver is being shutdown, when
     // atomspaces are being deleted, and during Python unit tests.
     // Basically, the teardown sequence is somehow wrong, and I'm
-    // too lazy to figure it out. Having a singleton isntance is
+    // too lazy to figure it out. Having a singleton instance is
     // probably the main flaw; it does not play nice with the rest
     // of the code, which is working with several atomspaces.
     // _remove_signal->disconnect(_remove_connection);
@@ -77,7 +78,9 @@ void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
         attentionalFocus.erase(it);
     AFMutex.unlock();
 
-   _importanceIndex.removeAtom(Handle(atom));
+    Handle h(atom);
+    _importanceIndex.removeAtom(h);
+    set_av(_as, h, nullptr);
 }
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
@@ -123,7 +126,7 @@ void AttentionBank::AVChanged(const Handle& h,
 {
     _mtx.lock();
     // First, update the atom's actual AV.
-    set_av(h, new_av);
+    set_av(_as, h, new_av);
 
     AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();
@@ -249,6 +252,7 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
 
     // Protect setting and getting against thread races.
     // This is probably not needed.
+    // The map is currently not used cause no one wants it.
     static std::map<AtomSpace*, AttentionBank*> banksy;
     static std::mutex art;
     std::unique_lock<std::mutex> graffiti(art);

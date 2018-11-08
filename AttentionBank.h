@@ -103,6 +103,8 @@ class AttentionBank
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
+    AtomSpace* _as;
+
     void change_vlti(const Handle&, int);
     void remove_atom_from_bank(const AtomPtr& atom);
 

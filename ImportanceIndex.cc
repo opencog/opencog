@@ -101,10 +101,7 @@ void ImportanceIndex::updateImportance(const Handle& h,
 
 void ImportanceIndex::removeAtom(const Handle& h)
 {
-    AttentionValuePtr oldav = get_av(h);
-    set_av(h, nullptr);
-
-    int bin = ImportanceIndex::importanceBin(oldav->getSTI());
+    int bin = ImportanceIndex::importanceBin(get_av(h)->getSTI());
 
     std::lock_guard<std::mutex> lock(_mtx);
     _index.remove(bin, h);

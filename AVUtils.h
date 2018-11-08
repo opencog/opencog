@@ -25,6 +25,7 @@
 
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -36,7 +37,7 @@ namespace opencog
  * Handy utilities to get the attention value of an atom.
  */
 AttentionValuePtr get_av(const Handle&);
-void set_av(const Handle&, const AttentionValuePtr&);
+void set_av(AtomSpace*, const Handle&, const AttentionValuePtr&);
 
 static inline AttentionValue::sti_t get_sti(const Handle& h)
 {
