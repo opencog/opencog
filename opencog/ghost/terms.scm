@@ -384,7 +384,7 @@
       (stv 1 1)))
 
 ; ----------
-(define-public (ghost-execute-base-action ACTIONS)
+(define-public (ghost-execute-base-action . ACTIONS)
 "
   Execute the actions and record the results.
 "
@@ -428,7 +428,7 @@
   Execute the actions and update the internal state -- that particular
   input will no longer triggered any other GHOST rules.
 "
-  (ghost-execute-base-action ACTIONS)
+  (apply ghost-execute-base-action ACTIONS)
 
   ; Reset the state
   (State ghost-curr-proc (Concept "Default State")))
