@@ -41,4 +41,4 @@ Inference Chain Documentation
 The file Amusing_Friend_PLN_Demo.html documents the inference chain 
 steps of the demo. The file can be opened in a web browser. Detail 
 information about the PLN rules and Atomese involved at each step can be
-displayed by expanding the step panel sections. 
+displayed by expanding the step panel sections.
