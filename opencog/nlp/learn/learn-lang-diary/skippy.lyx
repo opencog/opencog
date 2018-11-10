@@ -7441,22 +7441,51 @@ key "Dzuigaite2015"
 These are not reviewed here.
 \end_layout
 
+\begin_layout Subsection
+Neural Networks as Matrix Factorization
+\end_layout
+
 \begin_layout Standard
-Perhaps the most relevant observation is that SkipGrams, and specifically,
- SkipGrams with Negative Sampling (SGNS) can be explicitly understood as
- a form of matrix factorization.
+The need to perform a matrix factorization, of the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ was arrived at indirectly, by making an explicit appeal to grammatical
+ categories and semantics.
+ To recap: it was argued that N-grams and SkipGrams resemble grammatical
+ disjuncts.
+ Grammatical disjuncts can in turn be understood as extremely fine-grained
+ parts-of-speech.
+ That parts of speech are correlated with semantic meaning dates back to
+ the earliest dictionaries.
+ These arguments, combined together, motivated the correctness of factorization;
+ they explain why factorization is meaningful and desirable, and why it
+ aligns with natural, intuitive notions of grammatical category.
+\end_layout
+
+\begin_layout Standard
+One can skip this round-about route, ingoring the philosophical ruminations
+ and motivations, and skip directly to matrix factorization.
+ Levy and Golberg do so, by observing that SkipGrams, and specifically,
+ SkipGrams with Negative Sampling (SGNS) are mathematically equivalent to
+ matrix factorization.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Levy2014"
 
 \end_inset
 
- That is, the long-way-around path taken here, of identifying N-grams with
- disjuncts, and then factoring the word-disjunct matrix, can be shortened:
- SGNS is a form of matrix factorization.
- More generally, neural network techniques, used to embed very large network
- graphs into low-dimensional vector spaces can be understood to be equivalent
- to low-rank matrix factorizations.
+ More generally, Qui 
+\emph on
+et al.
+
+\emph default
+ show that a number of different neural network techniques, used to embed
+ very large network graphs into low-dimensional vector spaces, are formally
+  equivalent to low-rank matrix factorizations.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Qiu2017"
