@@ -7464,6 +7464,13 @@ reference "eq:factorize"
  These arguments, combined together, motivated the correctness of factorization;
  they explain why factorization is meaningful and desirable, and why it
  aligns with natural, intuitive notions of grammatical category.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nida97"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -7485,7 +7492,7 @@ et al.
 \emph default
  show that a number of different neural network techniques, used to embed
  very large network graphs into low-dimensional vector spaces, are formally
-  equivalent to low-rank matrix factorizations.
+ equivalent to low-rank matrix factorizations.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Qiu2017"
