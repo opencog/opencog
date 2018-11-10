@@ -7321,99 +7321,6 @@ reference "subsec:Zipf's-Law;-Noise"
 \end_layout
 
 \begin_layout Subsubsection
-Neural Net Matrix Factorization
-\end_layout
-
-\begin_layout Standard
-The factorization
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\sum_{g\in G}p\left(w|g\right)p\left(g,d\right)
-\]
-
-\end_inset
-
-can be viewed as just one special function of the vector components indexed
- by 
-\begin_inset Formula $g$
-\end_inset
-
-.
- More generally, one can consider the function
-\begin_inset Formula 
-\[
-f\left(q_{1},q_{2},\cdots,q_{n}\right)
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $q_{g}=p\left(w|g\right)p\left(g,d\right)$
-\end_inset
-
- and 
-\begin_inset Formula $n=\left|G\right|$
-\end_inset
-
- the number of elements in 
-\begin_inset Formula $G$
-\end_inset
-
-.
- Thus, the matrix factorization is just the function 
-\begin_inset Formula $f\left(q_{1},q_{2},\cdots,q_{n}\right)=q_{1}+q_{2}+\cdots+q_{n}$
-\end_inset
-
-.
- The neural net matrix factorization
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Dzuigaite2015"
-
-\end_inset
-
- replaces the simple sum by a multi-layer feed-forward neural net.
-\end_layout
-
-\begin_layout Standard
-The loss of linearity in this model seems like a rather extreme proposal.
- The fact that it is effective may in fact be a symptom of unknown, underlying
- structure.
- For example, there is nothing in the current formulation of the natural
- language problem that suggests this as an appropriate model of language.
- See, however, the next section, on factorization ambiguity, that suggests
- that the 
-\begin_inset Quotes eld
-\end_inset
-
-shape
-\begin_inset Quotes erd
-\end_inset
-
- of language consists of a tight, highly-interconnected nucleus, attached
- to sparse feeder trees.
- That nucleus itself has additional structure.
- It might be the case that this complex structure can be captured by an
- 
-\emph on
-ad hoc
-\emph default
- model consisting of some non-linear function 
-\begin_inset Formula $f$
-\end_inset
-
-.
- However, in the end, this just suggests that the function 
-\begin_inset Formula $f$
-\end_inset
-
- is just hiding or modeling or leaving unexplored some deeper linear structure.
-\end_layout
-
-\begin_layout Subsubsection
 Local Low Rank Matrix Factorization
 \end_layout
 
@@ -7519,8 +7426,44 @@ I-RBM (Restricted Boltzmann Machine)
 I-AutoRec
 \end_layout
 
+\begin_layout Itemize
+Neural networks
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dzuigaite2015"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 These are not reviewed here.
+\end_layout
+
+\begin_layout Standard
+Perhaps the most relevant observation is that SkipGrams, and specifically,
+ SkipGrams with Negative Sampling (SGNS) can be explicitly understood as
+ a form of matrix factorization.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+ That is, the long-way-around path taken here, of identifying N-grams with
+ disjuncts, and then factoring the word-disjunct matrix, can be shortened:
+ SGNS is a form of matrix factorization.
+ More generally, neural network techniques, used to embed very large network
+ graphs into low-dimensional vector spaces can be understood to be equivalent
+ to low-rank matrix factorizations.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Qiu2017"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
