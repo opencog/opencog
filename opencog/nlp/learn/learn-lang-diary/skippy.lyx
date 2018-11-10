@@ -9444,6 +9444,33 @@ al categories.
  
 \end_layout
 
+\begin_layout Subsection
+TODO
+\end_layout
+
+\begin_layout Standard
+This: PMI stuff.
+\end_layout
+
+\begin_layout Itemize
+Sanjeev Arora, Yuanzhi Li, Yingyu Liang, Tengyu Ma, and Andrej Risteski.
+ 2016.
+ A latent variable model approach to pmi-based word embeddings.
+ TACL 4 (2016), 385–399.
+\end_layout
+
+\begin_layout Itemize
+Tatsunori B Hashimoto, David Alvarez-Melis, and Tommi S Jaakkola.
+ 2016.
+ Word embeddings as metric recovery in semantic spaces.
+ TACL 4 (2016), 273–286.
+ 
+\end_layout
+
+\begin_layout Standard
+Arghhh.
+\end_layout
+
 \begin_layout Section
 Factorizing the language model
 \end_layout
