@@ -7725,7 +7725,23 @@ reference "eq:SkipGram"
  It now becomes readily apparent that perhaps a summation that discards
  low MI values, while also taking into account the entire sentence, can
  perhaps yeild a superior result.
- In essence, the choice of MI for 
+ The two approaches butress one-another, and mutually explain one-another.
+ The effectiveness of the SkipGram model is explained by it's resemblance
+ to MST parsing with word-pair MI, which in turn has strong connections
+ to symbolic approaches to linguistics.
+ Grammatical structure as given in the symbolic approach to linguistics
+ is intellectually overt and comprehensible.
+ It now appears that the 
+\begin_inset Quotes eld
+\end_inset
+
+subsymbolic
+\begin_inset Quotes erd
+\end_inset
+
+, neural network approach, at first seemingly opaque and hidden in a black
+ box of neural net weights, can be seen as a somewhat obfuscated form of
+ traditional symbolic linguistics.
 \end_layout
 
 \begin_layout Subsection
