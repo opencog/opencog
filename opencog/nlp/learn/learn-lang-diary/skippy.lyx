@@ -1945,6 +1945,13 @@ There is a fairly rich variety of such models.
 
 \begin_layout Subsection
 CBOW
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:CBOW"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3924,6 +3931,13 @@ coding theory
 
 \begin_layout Subsection
 MST models of Language
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:MST-parsing"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4027,9 +4041,9 @@ It is here that Yuret does one better: he proposes that the score be given
  by the mutual information (MI) between word-pairs; that is (aligning the
  different notation)
 \begin_inset Formula 
-\[
-s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}
-\]
+\begin{equation}
+s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}\label{eq:word-pair-MI}
+\end{equation}
 
 \end_inset
 
@@ -7476,9 +7490,8 @@ key "Nida97"
 \begin_layout Standard
 One can skip this round-about route, ingoring the philosophical ruminations
  and motivations, and skip directly to matrix factorization.
- Levy and Golberg do so, by observing that SkipGrams, and specifically,
- SkipGrams with Negative Sampling (SGNS) are mathematically equivalent to
- matrix factorization.
+ Levy and Golberg do so, by observing that maximization of the SkipGram
+ objective function is mathematically equivalent to matrix factorization.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Levy2014"
@@ -7500,6 +7513,219 @@ key "Qiu2017"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+In practice, rather than working with an objective function defined directly
+ from eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CBOW"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SkipGram"
+
+\end_inset
+
+, Mikolov
+\emph on
+ etal.
+\emph default
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013b"
+
+\end_inset
+
+ explain that it is more effective to work with a variant invloving a sigmoid
+ function, together with a 
+\begin_inset Quotes eld
+\end_inset
+
+negative sampling
+\begin_inset Quotes erd
+\end_inset
+
+ term, designed to suppress word-context pairings that are not observed.
+ The negative-sampling term helps draw a sharper distinction between word-contex
+t pairings that are infrequently observed, and those that are never observed.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Other work
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017connectors"
+
+\end_inset
+
+ suggests that infrequently-observed word-context pairings play an (unexpectedly
+) important role in classification, and that explicit filtering to remove
+ infrequently observed pairings causes significant damage to the quality
+ of the results.
+ Thus, rather than discarding infrequent observations, adding a 
+\begin_inset Quotes eld
+\end_inset
+
+negative sampling
+\begin_inset Quotes erd
+\end_inset
+
+ to guess at those pairings that can 
+\emph on
+never
+\emph default
+ happen does indeed seem like a reasonable tactic.
+\end_layout
+
+\end_inset
+
+ The suitablly revised objective function (using the notation from section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:CBOW"
+
+\end_inset
+
+) is built from the observation counts 
+\begin_inset Formula $N(w_{t},w_{i})$
+\end_inset
+
+ of a target word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ and a context word 
+\begin_inset Formula $w_{i}\in I$
+\end_inset
+
+, together with the dimensionaly reduced vectors 
+\begin_inset Formula $\vec{u}_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+.
+ It is not reviewed here; the details are readily available in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013b"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The remarkable result of Levy and Golberg
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+ is that the maximization of this objective function is mathematically identical
+ to the factorization of the word-pair mutual information of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:word-pair-MI"
+
+\end_inset
+
+.
+ The explicit result is that the dimensionaly reduced vectors 
+\begin_inset Formula $\vec{u}_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+ are related to the mutial information as
+\begin_inset Formula 
+\[
+\vec{u}_{t}\cdot\vec{v}_{i}=MI\left(w_{t},w_{i}\right)-\log k
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $k$
+\end_inset
+
+ the negative-sampling weighting coefficient.
+ Just so that importance of this sinks in, it is worth stating again, with
+ different words: the SkipGram technique is equivalent to a low-rank matrix
+ factorization of the mutual information between word-pairs.
+ 
+\end_layout
+
+\begin_layout Standard
+This can be used as yet a different vindication of the MST parsing of the
+ Yuret approach, described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:MST-parsing"
+
+\end_inset
+
+.
+ Summations over context words, of the form 
+\begin_inset Formula 
+\[
+\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}
+\]
+
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+appearing in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CBOW"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SkipGram"
+
+\end_inset
+
+ are nothing more than summations over the mutual information between a
+ word and it's context.
+ It now becomes readily apparent that perhaps a summation that discards
+ low MI values, while also taking into account the entire sentence, can
+ perhaps yeild a superior result.
+ In essence, the choice of MI for 
 \end_layout
 
 \begin_layout Subsection
