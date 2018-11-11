@@ -820,6 +820,7 @@ flat
 
  corpus of text.
  Section 6...
+ is the triumphant section...
 \end_layout
 
 \begin_layout Standard
@@ -6976,8 +6977,8 @@ Probabilistic Matrix Factorization
 \end_layout
 
 \begin_layout Standard
-Probabilistic matrix factorization (PMF) assumes that the observation counts
- 
+Probabilistic matrix factorization (PMF) or stochastic matrix factorization
+ (SMF) assumes that the observation counts 
 \begin_inset Formula $N\left(w,d\right)$
 \end_inset
 
@@ -7118,7 +7119,20 @@ key "WP-Homogenous-space"
 \end_inset
 
  – that is, the spaces behave like actual vector spaces, so that concepts
- like PCA and SVD can be applied.
+ like Principle Component Analysis (PCA) and Singular Value Decomposition
+ (SVD) can be applied.
+ SVD is particularly appealing, as it provides the best possible approximate
+ decomposition of a given rank.
+ Fixing the rank 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+, the SVD is that decomposition which minimizes the mean square error for
+ that rank; that is, it minimizes the objective function 
+\begin_inset Formula $U$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -7162,6 +7176,30 @@ not
  to a probability, such that the result is still a probability.
  Applying the notion of a trace, which is implicitly defined as being invariant
  under orthogonal transformations, is inappropriate for the problem at hand.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Perhaps this explains why results based on SVD are often underwhelming as
+ compared to others.
+ See, for example 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+ for precisely such a report: the conception that SVD could have or should
+ have given a better result, followed by the disappointment of noting that
+ it does not.
+ Of course, other explanations are also posible: one is that SVD behaves
+ poorly when some matrix elements are missing or unknown.
+ This shortcoming is one reason why PMF, above, and LLORMA, below, have
+ been proposed.
+\end_layout
+
+\end_inset
+
  What would be appropriate is some sort of trace-like invariant that transforms
  as a scalar under Markov transformations.
 \end_layout

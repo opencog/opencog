@@ -1279,6 +1279,25 @@ reference "eq:Yuret's MI"
  (See my other notes for a graph.)
 \end_layout
 
+\begin_layout Standard
+References:
+\end_layout
+
+\begin_layout Itemize
+Apparently, MI is introduced here: Kenneth Ward Church and Patrick Hanks.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Word association norms, mutual information, and lexicography
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Computational linguistics, 16(1):22–29, 1990.
+ 
+\end_layout
+
 \begin_layout Section*
 1 January 2014
 \end_layout
