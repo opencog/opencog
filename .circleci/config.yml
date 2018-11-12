@@ -1,0 +1,88 @@
+version: 2.0
+
+jobs:
+  opencog:
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/opencog
+    environment:
+      ORG: singnet
+    steps:
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Start restoring ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - restore_cache:
+          keys:
+            - ccache-{{ checksum "/tmp/date" }}
+            - ccache-
+      - run:
+          name: Install cogutil
+          command: |
+            git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
+            mkdir -p /ws/cogutil/build
+            cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
+            ldconfig
+      - run:
+          name: Install AtomSpace
+          command: |
+            git clone --depth 1 https://github.com/$ORG/atomspace /ws/atomspace
+            mkdir -p /ws/atomspace/build
+            cd /ws/atomspace/build && cmake .. && make -j4 && make -j4 install
+            ldconfig
+      - checkout
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j4
+      - run:
+          name: Install AtomSpace
+          command: cd build && make -j4 install && ldconfig
+      - run:
+          name: Build tests
+          command: cd build && make -j4 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j4 test
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - ccache
+
+  package: #Place holder
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+    working_directory: /ws/opencog
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Start storing ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - save_cache:
+          key: ccache-{{ checksum "/tmp/date" }}
+          paths:
+            - /ws/ccache
+
+workflows:
+  version: 2
+  build-test-package:
+    jobs:
+      - opencog
+      - package:
+          requires:
+            - opencog
+          filters:
+            branches:
+              only: master

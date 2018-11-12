@@ -32,28 +32,56 @@
       (Variable "$I"))))
 
 (define (conditional-direct-evaluation-implication-scope-formula I)
+  ;; (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula I = ~a" I)
   (let* ((out (cog-outgoing-set I))
          (arity (length out))
          (vardecl (if (= arity 2) #f (list-ref out 0)))
          (antecedent (list-ref out (if (= arity 2) 0 1)))
          (consequent (list-ref out (if (= arity 2) 1 2)))
 
+         ;; (dummy-1 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent = ~a" antecedent))
+         ;; (dummy-2 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula consequent = ~a" consequent))
+
          ;; Fetch all antecedent values
          (antecedent-get (Get vardecl antecedent))
          (antecedent-result (cog-execute! antecedent-get))
          (antecedent-values (cog-outgoing-set antecedent-result))
+
+         ;; Possibly wrap the values with Quote, not sure that is right though
+         (antecedent-quoted-values (map quote-values antecedent-values))
+
+         ;; (dummy-3 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent = ~a" antecedent-get))
+         ;; (dummy-4 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent-result = ~a" antecedent-result))
+         ;; (dummy-5 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent-values = ~a" antecedent-values))
+         ;; (dummy-6 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent-quoted-values = ~a" antecedent-quoted-values))
 
          ;; Generate the antecedent and consequent terms
          (antecedent-lambda (Lambda vardecl antecedent))
          (consequent-lambda (Lambda vardecl consequent))
          (antecedent-terms (map-beta-reduce antecedent-lambda antecedent-values))
          (consequent-terms (map-beta-reduce consequent-lambda antecedent-values))
+         ;; (antecedent-terms (map-beta-reduce antecedent-lambda antecedent-quoted-values))
+         ;; (consequent-terms (map-beta-reduce consequent-lambda antecedent-quoted-values))
+
+         ;; (dummy-7 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent-lambda = ~a" antecedent-lambda))
+         ;; (dummy-8 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula consequent-lambda = ~a" consequent-lambda))
+         ;; (dummy-9 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula antecedent-terms = ~a" antecedent-terms))
+         ;; (dummy-10 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula consequent-terms = ~a" consequent-terms))
 
          ;; Calculate the TV based on the evidence
-         (tv (evidence->tv antecedent-terms consequent-terms)))
+         (tv (evidence->tv antecedent-terms consequent-terms))
+
+         ;; (dummy-11 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula tv = ~a" tv))
+         )
 
     (if (tv-non-null-conf? tv)
         (cog-merge-hi-conf-tv! I tv))))
+
+;; Given List of values, wrap a Quote link around each element of that list
+(define (quote-values values)
+  (let* ((values-lst (cog-outgoing-set values))
+         (quoted-values-lst (map Quote values-lst)))
+    (List quoted-values-lst)))
 
 ;; Given a list of values and a lambda link generate a list of terms
 ;; as the results of beta reductions of values within the lambda. We

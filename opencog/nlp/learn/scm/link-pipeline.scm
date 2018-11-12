@@ -202,10 +202,8 @@
 ;    this additional traffic can slow down statistics gathering by...
 ;    3x or 4x.
 ;
-; Thus, clique-counting is currently disabled. You can turn it on
-; by uncommenting this routine in the main loop, below.
-;
-; Note that this might throw an exception...
+; Clique-counting can be used by passing "clique" or "clique-dist" 
+; as second argument when calling observe-text-mode.
 ;
 ; The structures that get created and incremented are of the form
 ;
@@ -226,12 +224,22 @@
 ; at least one -- i.e. it is the difference between their ordinals.
 ;
 ; Parameters:
+; DIST-MODE -- booleant #t or #f: enable or disable multiplying each
+; 			   pair-count by a distance weight given by
+;			   (quotient MAX-LEN dist), where dist is the separation between
+;			   the words in the pair.
 ; MAX-LEN -- integer: don't count a pair, if the words are farther apart
 ;            than this.
 ; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
 ;            If enabled, see warning about the quantity of data, above.
 ;
-(define (update-pair-counts-once PARSE MAX-LEN RECORD-LEN)
+(define (update-pair-counts-once PARSE DIST-MODE MAX-LEN RECORD-LEN)
+
+	; Function to calculate how many times to count a word-pair
+	(define calc-times
+		(if DIST-MODE
+			(lambda (d) (quotient MAX-LEN d))
+			(lambda (d) 1)))
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)
@@ -243,8 +251,9 @@
 
 		; Only count if the distance is less than the cap.
 		(if (<= dist MAX-LEN)
-			(let ((pare (ListLink (gar left-seq) (gar right-seq))))
-				(count-one-atom (EvaluationLink pair-pred pare))
+			(let ((pare (ListLink (gar left-seq) (gar right-seq)))
+				(counts (calc-times dist)))
+				(count-one-atom-times (EvaluationLink pair-pred pare) counts)
 				(if RECORD-LEN
 					(count-one-atom
 						(ExecutionLink pair-dist pare (NumberNode dist)))))))
@@ -275,13 +284,17 @@
 	(make-pairs word-seq)
 )
 
-; See above for explanation.
+; wrapper for backwards compatibility
 (define (update-clique-pair-counts SENT MAX-LEN RECORD-LEN)
+	(update-clique-pair-counts-mode SENT #f MAX-LEN RECORD-LEN))
+
+; See above for explanation.
+(define (update-clique-pair-counts-mode SENT DIST-MODE MAX-LEN RECORD-LEN)
 	; In most cases, all parses return the same words in the same order.
 	; Thus, counting only requires us to look at only one parse.
 	(update-pair-counts-once
 		(car (sentence-get-parses SENT))
-		MAX-LEN RECORD-LEN)
+		DIST-MODE MAX-LEN RECORD-LEN)
 )
 
 ; ---------------------------------------------------------------------
@@ -463,14 +476,19 @@
 "
  observe-text-mode -- update word and word-pair counts by observing raw text.
 
- There are currently two observing modes, set by observe-mode, both taking
+ There are currently three observing modes, set by observe-mode, all taking
  an integer parameter:
  - any: counts pairs of words linked by the LG parser in 'any' language.
- 	   'count-reach' specifies how many linkages from LG-parser to use.
+        In this case, 'count-reach' specifies how many linkages from LG-parser
+        to use.
  - clique: itearates over each word in the sentence and pairs it with
            every word located within distance 'count-reach' to its right.
            Distance is defined as the difference between words positions
            in the sentence, so neighboring words have distance of 1.
+ - clique-dist: same word-pairs as 'clique', but each word-pair is counted
+                a number of times determined by the distance between words
+                in the pair as:
+                (quotient count-reach distance)
 
  This is the first part of the learning algo: simply count the words
  and word-pairs observed in incoming text. This takes in raw text, gets
@@ -484,12 +502,13 @@
 	; data, but none of it will be interesting to most people.
 	(define (process-sent SENT cnt-mode win-size)
 		(update-word-counts SENT)
-		(if (equal? cnt-mode "any")
-			(update-lg-link-counts SENT)
-			(update-clique-pair-counts SENT win-size #f))
-		; If you uncomment this, be sure to also uncomment
-		; LgParseLink below, because LgParseMinimal is not enough.
-		; (update-disjunct-counts sent)
+		(cond
+		 	((equal? cnt-mode "any") (update-lg-link-counts SENT))
+			((equal? cnt-mode "clique") (update-clique-pair-counts-mode SENT #f win-size #f))
+			((equal? cnt-mode "clique-dist") (update-clique-pair-counts-mode SENT #t win-size #f)))
+			; If you uncomment this, be sure to also uncomment
+			; LgParseLink below, because LgParseMinimal is not enough.
+			; (update-disjunct-counts sent)
 		(delete-sentence SENT)
 		(monitor-parse-rate '()))
 

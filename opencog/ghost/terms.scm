@@ -6,14 +6,29 @@
 "
   Occurrence of a word, a word that should be matched literally.
 "
-  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
-         (v1 (WordNode str-dc))
-         (v2 (Variable (gen-var str-dc #f)))
-         (l (WordNode (get-lemma str-dc)))
-         (v (list (TypedVariable v2 (Type "WordInstanceNode"))))
-         (c (list (WordInstanceLink v2 (Variable "$P"))
-                  (ReferenceLink v2 v1))))
-    (list v c (list v1) (list l))))
+  (let* ((str-dc (string-downcase STR))
+         ; Special handling for time that's written as a single word
+         ; e.g. 2pm, 10am etc
+         ; For the input, regardless of the format, e.g. "2am", "2 am",
+         ; "2 a.m." or "2a.m.", will all get splitted into two words
+         (is-time? (string-match "[0-9]{1,2}[ ]*[ap][.]*m[.]*" str-dc))
+         (is-two-digits?
+           (and is-time? (char-numeric? (string-ref str-dc 1))))
+         (time-1pt
+           (if is-two-digits?
+             (substring str-dc 0 2)
+             (substring str-dc 0 1)))
+         (time-2pt
+           (if is-two-digits?
+             (substring str-dc 2)
+             (substring str-dc 1))))
+    (list (list) (list)
+      (if is-time?
+        (list (WordNode time-1pt) (WordNode time-2pt))
+        (list (WordNode str-dc)))
+      (if is-time?
+        (list (WordNode time-1pt) (WordNode time-2pt))
+        (list (WordNode (get-lemma str-dc)))))))
 
 ; ----------
 (define (word-apos STR)
@@ -23,9 +38,8 @@
 "
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
-         (l (WordNode
-              (if (string-prefix? "I'" nstr) nstr (string-downcase nstr)))))
-    (list (list) (list) (list l) (list l))))
+         (w (WordNode (string-downcase nstr))))
+    (list (list) (list) (list w) (list w))))
 
 ; ----------
 (define (lemma STR)
@@ -33,23 +47,19 @@
   Lemma occurrence, aka canonical form of a term.
   This is the default for word mentions in the rule pattern.
 "
-  (let* ((str-dc (if (string=? STR "I") STR (string-downcase STR)))
-         (v1 (Variable (gen-var str-dc #t)))
-         (v2 (Variable (gen-var str-dc #f)))
+  (let* ((str-dc (string-downcase STR))
+         (var (Variable (gen-var str-dc #t)))
          (l (WordNode (get-lemma str-dc)))
-         (v (list (TypedVariable v1 (Type "WordNode"))
-                  (TypedVariable v2 (Type "WordInstanceNode"))))
-         (c (list (ReferenceLink v2 v1)
-                  ; In some rare situation, particularly if the input
+         (v (list (TypedVariable var (Type "WordNode"))))
+         (c (list ; In some rare situation, particularly if the input
                   ; sentence is not grammatical, RelEx may not lemmatize a
                   ; word because of the ambiguity
-                  ; So just to be sure "l" is the stem of "v1",
+                  ; So just to be sure "l" is the stem of "var",
                   ; a GroundedPredicateNode is used instead of putting
                   ; "(LemmaLink v2 l)" in the context
                   (Evaluation (GroundedPredicate "scm: ghost-lemma?")
-                              (List v1 l))
-                  (WordInstanceLink v2 (Variable "$P")))))
-    (list v c (list v1) (list l))))
+                              (List var l)))))
+    (list v c (list var) (list l))))
 
 (define-public (ghost-lemma? GRD LEMMA)
 "
@@ -374,26 +384,9 @@
       (stv 1 1)))
 
 ; ----------
-(define (uvar-equal? UVAR VAL)
+(define-public (ghost-execute-base-action . ACTIONS)
 "
-  Check if the value of the user variable VAR equals to VAL.
-"
-  ; TODO: VAL can also be a concept etc?
-  (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
-              (List (ghost-uvar UVAR) (List (Word VAL)))))
-
-(define-public (ghost-user-variable-equal? UVAR VAL)
-"
-  Check if the value of UVAR equals VAL.
-"
-  (if (equal? (assoc-ref uvars UVAR) VAL)
-      (stv 1 1)
-      (stv 0 1)))
-
-; ----------
-(define-public (ghost-execute-action . ACTIONS)
-"
-  Execute the actions and update the internal state.
+  Execute the actions and record the results.
 "
   (define txt-str "")
   (define txt-atoms '())
@@ -428,6 +421,17 @@
       (cog-logger-debug ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
   (set! ghost-result (append txt-atoms atoms-created))
+  ; Return an atom
+  (True))
+
+; ----------
+(define-public (ghost-execute-action . ACTIONS)
+"
+  Execute the actions and update the internal state -- that particular
+  input will no longer triggered any other GHOST rules.
+"
+  (apply ghost-execute-base-action ACTIONS)
+
   ; Reset the state
   (State ghost-curr-proc (Concept "Default State")))
 
@@ -471,4 +475,121 @@
 
   ; Return an atom
   (True)
+)
+
+; ----------
+(define (compare-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-not-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-not-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-smaller LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-smaller?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-smaller-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-smaller-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-greater LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-greater?")
+    (List (List LV) (List RV)))
+)
+
+(define (compare-greater-equal LV RV)
+  (Evaluation
+    (GroundedPredicate "scm: ghost-compare-greater-equal?")
+    (List (List LV) (List RV)))
+)
+
+(define-public (ghost-compare-equal? LV RV)
+  (cond
+    ((and (not (null? (gar RV)))
+          (equal? 'ConceptNode (cog-type (gar RV)))
+          (is-member?
+            (flatten-list (cog-outgoing-set LV))
+            (get-members (gar RV))))
+     (stv 1 1))
+    ((compare "equal" LV RV) (stv 1 1))
+    (else (stv 0 1)))
+)
+
+(define-public (ghost-compare-not-equal? LV RV)
+  (define result (ghost-compare-equal? LV RV))
+  (if (equal? result (stv 1 1))
+    (stv 0 1)
+    (stv 1 1))
+)
+
+(define-public (ghost-compare-smaller? LV RV)
+  (if (compare "smaller" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define-public (ghost-compare-smaller-equal? LV RV)
+  (if (compare "smaller_equal" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define-public (ghost-compare-greater? LV RV)
+  (if (compare "greater" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define-public (ghost-compare-greater-equal? LV RV)
+  (if (compare "greater_equal" LV RV)
+    (stv 1 1)
+    (stv 0 1))
+)
+
+(define (compare OPERATOR LV RV)
+  (define lv
+    (if (equal? 'ListLink (cog-type LV))
+      (flatten-list (cog-outgoing-set LV))
+      (list LV)))
+  (define rv
+    (if (equal? 'ListLink (cog-type RV))
+      (flatten-list (cog-outgoing-set RV))
+      (list RV)))
+  (define lv-str (string-join (map cog-name lv)))
+  (define rv-str (string-join (map cog-name rv)))
+  (define lv-num
+    (string->number (string-join (map cog-name lv) "")))
+  (define rv-num
+    (string->number (string-join (map cog-name rv) "")))
+  (define both-numbers? (and lv-num rv-num))
+
+  (cond
+    ((string=? "equal" OPERATOR)
+     (if both-numbers?
+       (= lv-num rv-num)
+       (string-ci=? lv-str rv-str)))
+    ((string=? "smaller" OPERATOR)
+     (and both-numbers?
+          (< lv-num rv-num)))
+    ((string=? "smaller_equal" OPERATOR)
+     (and both-numbers?
+          (<= lv-num rv-num)))
+    ((string=? "greater" OPERATOR)
+     (and both-numbers?
+          (> lv-num rv-num)))
+    ((string=? "greater_equal" OPERATOR)
+     (and both-numbers?
+          (>= lv-num rv-num)))
+    (else #f))
 )

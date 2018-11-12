@@ -38,6 +38,7 @@
 ; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
+(use-modules (ice-9 regex))
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 
@@ -496,6 +497,34 @@
 		#t
 		(lambda () (use-relex-server "relex" 4444))
 		(lambda (key . rest) relex-server-host))
+)
+
+(define-public (relex-reachable?)
+"
+  relex-reachable?
+
+  Returns #t if the relex server is reachable, #f either wise. This can be
+  used as a circuit breaker while writing unit or integration tests.
+"
+  (define result "")
+  (define s (socket PF_INET SOCK_STREAM 0))
+  (define connected
+    (catch #t
+      (lambda () (connect s AF_INET (inet-pton AF_INET relex-server-host)
+        relex-server-port))
+      (lambda (key . args) #f)))
+
+  (if connected
+    (begin
+      ; An explicit port-encoding is needed by guile-2.0.9. Doesn't hurt for
+      ; higher versions as well.
+      (set-port-encoding! s "utf-8")
+      (display "A circuit breaker.\n" s)
+      (set! result (get-string-all s))
+      (close-port s)
+      (if (string-match "; ##### END OF A PARSE #####\n" result) #t #f))
+    #f
+  )
 )
 
 ; =============================================================

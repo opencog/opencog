@@ -1,0 +1,9 @@
+# PARAMETERS for NLP pipeline
+#       variable_name=value	#possibilities
+
+export cnt_mode="clique-dist" 	 # clique, clique-dist or any
+export cnt_reach=6		 # num-parses for any, or win-size for cliques
+export mst_dist="#t"		 # #t or #f; use distance weight during mst
+export exp_parses="#t"  	 # #t or #f; exports parses in folder mst-parses
+export split_sents="#t"		 # #t or #f; calls sentence splitter before parser
+#TODO export store_fmi="#t"	# #t or #f 

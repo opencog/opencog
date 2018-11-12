@@ -1,0 +1,23 @@
+#
+# Systemd shutdown script.
+#
+# Copy this to /lib/systemd/system/ and then run 
+# `sudo systemctl daemon-reload` by hand.
+#
+# This will cause any scripts in /etc/rc.local.shutdown
+# to be run when the system is powered off.
+#
+[Unit]
+Description=/etc/rc.local.shutdown Compatibility
+ConditionFileIsExecutable=/etc/rc.local.shutdown
+DefaultDependencies=no
+# After=rc-local.service basic.target
+Before=shutdown.target
+
+[Service]
+ExecStop=/etc/rc.local.shutdown
+StandardInput=tty
+RemainAfterExit=yes
+
+[Install]
+WantedBy=shutdown.target

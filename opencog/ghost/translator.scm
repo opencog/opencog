@@ -25,8 +25,14 @@
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
          (negation-only? (every (lambda (t) (equal? 'negation (car t))) TERMS))
          (empty-seq? (and (= 1 (length TERMS)) (equal? 'empty-context (caar TERMS))))
-         (func-only? (and (> (length TERMS) 0)
-           (every (lambda (t) (equal? 'function (car t))) TERMS)))
+         (func-only?
+           (and
+             (> (length TERMS) 0)
+             (every
+               (lambda (t)
+                 (or (equal? 'function (car t))
+                     (equal? 'compare (car t))))
+               TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
@@ -93,10 +99,6 @@
                         (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
                         (equal? 'wildcard (car (first prev))))
                    (cons term (cdr prev)))
-                  ; Same as the above, but for optionals
-                  ((and (equal? 'optionals (car term))
-                        (equal? 'wildcard (car (first prev))))
-                   (cons term (cdr prev)))
                   ; Similarly if there is a wildcard followed by a variable
                   ; that matches to "zero or more", e.g.
                   ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
@@ -138,6 +140,25 @@
   ; - be grounded to one or more words -> i.e. lower bound
   ; - be related to a particular "concept"
   (define spec-concept 2)
+
+  (define (compare-item x)
+    (cond
+      ((equal? 'get_uvar (car x))
+       (get-user-variable (cdr x)))
+      ((equal? 'get_wvar (car x))
+       (list-ref pat-vars (cdr x)))
+      ((equal? 'get_lvar (car x))
+       (get-var-lemmas
+         (list-ref pat-vars (cdr x))))
+      ((equal? 'concept (car x))
+       (Concept (cdr x)))
+      ((equal? 'function (car x))
+       (action-function (cadr x)
+         (map compare-item (cddr x))))
+      ((or (equal? 'str (car x))
+           (equal? 'arg (car x)))
+       (WordNode (cdr x))))
+  )
 
   (define (process terms)
     (define v '())
@@ -251,12 +272,6 @@
              ; user variable has been defined
              (set! specificity (+ specificity 1))
              (set! has-words? #t))
-            ((equal? 'uvar_equal (car t))
-             (set! c (append c (list (uvar-equal? (cadr t) (caddr t)))))
-             ; uvar_equal should have a specificity of a word as they
-             ; have the same set of conditions to be satisfied
-             (set! specificity (+ specificity spec-word))
-             (set! has-words? #t))
             ((equal? 'function (car t))
              ; The specificity of a function / predicate depends really
              ; on what that function is doing (and it could be anything)
@@ -283,8 +298,36 @@
             ; it's always true and should be triggered
             ; even if there is no perception input
             ((equal? 'empty-context (car t))
-              (set! c (list (TrueLink))))
+             (set! c (list (TrueLink))))
+            ((equal? 'compare (car t))
+             (set! c (append c (list
+               (cond
+                 ((string=? "equal" (cadr t))
+                  (compare-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "not_equal" (cadr t))
+                  (compare-not-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "smaller" (cadr t))
+                  (compare-smaller
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "smaller_equal" (cadr t))
+                  (compare-smaller-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "greater" (cadr t))
+                  (compare-greater
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t))))
+                 ((string=? "greater_equal" (cadr t))
+                  (compare-greater-equal
+                    (compare-item (caddr t))
+                    (compare-item (cadddr t)))))))))
             (else (begin
+              (clear-parsing-states)
               (cog-logger-warn ghost-logger
                 "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
               (throw 'FeatureNotSupported (car t) (cdr t))))))
@@ -354,7 +397,7 @@
 )
 
 ; ----------
-(define (process-action ACTION RULENAME)
+(define (process-action ACTION RULENAME IS-PARALLEL-RULE?)
 "
   Generate the atomese for each of the terms in ACTION.
   RULENAME is the alias assigned to the rule.
@@ -362,9 +405,13 @@
   ; The system functions that are commonly used
   (define reuse #f)
   (define keep (topic-has-feature? rule-topic "keep"))
+  (define unkeep #f)
 
   ; The GroundedSchemaNode that will be used
-  (define gsn-action (GroundedSchema "scm: ghost-execute-action"))
+  (define gsn-action
+    (if IS-PARALLEL-RULE?
+      (GroundedSchema "scm: ghost-execute-base-action")
+      (GroundedSchema "scm: ghost-execute-action")))
 
   (define (to-atomese actions)
     (define choices '())
@@ -399,6 +446,11 @@
                     (equal? "keep" (cadr n)))
                (set! keep #t)
                (list))
+              ; A system function -- unkeep, just for parallel-rules
+              ((and (equal? 'function (car n))
+                    (equal? "unkeep" (cadr n)))
+               (set! unkeep #t)
+               (list))
               ; A system function -- reuse
               ; First of all, try to see if the rule has been created in
               ; the AtomSpace, and get its action directly if so
@@ -419,7 +471,9 @@
                          (set! reuse #t)
                          (process-action
                            ; The 2nd item in the list is the action
-                           (list-ref reused-rule-from-alist 1) label))))
+                           (list-ref reused-rule-from-alist 1)
+                           label
+                           IS-PARALLEL-RULE?))))
                    (begin
                      (set! reuse #t)
                      (psi-get-action reused-rule)))))
@@ -514,8 +568,12 @@
       ; a rejoinder (rejoinders are kept by default, because it
       ; won't be triggered anyway if the parent is not triggered
       ; and if the parent is triggered, one would expect the
-      ; rejoinders can be triggered too for the next input)
-      (if (or keep (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder))
+      ; rejoinders can be triggered too for the next input),
+      ; or it's a parallel-rule that's supposed to be evaluated
+      ; all the time in the background
+      (if (or keep
+              (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder)
+              (and IS-PARALLEL-RULE? (not unkeep)))
           (list)
           (ExecutionOutput
             (GroundedSchema "scm: ghost-update-rule-strength")
@@ -581,11 +639,17 @@
            (assoc-set! rule-type-alist NAME strval-gambit))
          (list '() '()))
         ((null? rule-hierarchy)
+         (clear-parsing-states)
          ; If we are here, it has to be a rejoinder, so make sure
          ; rule-hierarchy is not empty, i.e. a responder should
          ; be defined in advance
          (throw (ghost-prefix
            "Please define a responder first before defining a rejoinder.")))
+        ((equal? "Parallel-Rules"
+           (cog-name (psi-get-goal (get-rule-from-label
+             (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1)))))))
+         (clear-parsing-states)
+         (throw (ghost-prefix "Rejoinder is not supported for parallel rules.")))
         ; For rejoinders, put the condition (the last rule executed is
         ; the parent of this rejoinder) in the pattern of the rule
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
@@ -637,9 +701,7 @@
     rule-label-list)
 
   ; Clear the states
-  (set! rule-label-list '())
-  (set! rule-alist '())
-  (set! rule-hierarchy '())
+  (clear-parsing-states)
 )
 
 ; ----------
@@ -698,6 +760,16 @@
   ; Reset the list of local variables
   (set! pat-vars '())
 
+  ; Reset the rule hierarchy if we are looking at a rule with
+  ; a different set of goals, or it has been changed from
+  ; ordered to unordered (or vice versa)
+  (if (or (null? goals-of-prev-rule)
+          (not (equal? (car goals-of-prev-rule) ALL-GOALS))
+          (not (equal? (cdr goals-of-prev-rule) ORDERED?)))
+    (begin
+      (set! goals-of-prev-rule (cons ALL-GOALS ORDERED?))
+      (set! rule-hierarchy '())))
+
   (let* ((proc-type (process-type TYPE NAME))
          (ordered-terms (order-terms PATTERN))
          (proc-terms (process-pattern-terms ordered-terms))
@@ -707,7 +779,10 @@
                         (list-ref proc-type 1)))
          (specificity (list-ref proc-terms 3))
          (type (assoc-ref rule-type-alist NAME))
-         (action (process-action ACTION NAME))
+         (action (process-action ACTION NAME
+                   (find
+                     (lambda (g) (string=? "Parallel-Rules" (car g)))
+                     ALL-GOALS)))
          (is-rejoinder? (equal? type strval-rejoinder))
          (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 

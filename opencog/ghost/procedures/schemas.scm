@@ -662,3 +662,102 @@
 (define (sing)
   (cog-execute! (Put (DefinedSchema "sing") (List)))
 )
+
+; --------------------------------------------------------------
+(define-syntax define-emotion-parameter (lambda (x)
+  "define-emotion-parameter EMO-PARAM
+
+   Defines get_EMO-PARAM, increase_EMO-PARAM, decrease_EMO-PARAM,
+   and neutralize_EMO-PARAM functions, were EMO-PARAM is the name of
+   an openpsi parameter.
+  "
+
+  (define (new-id prefix id)
+  "prefix = a string
+   id = a pattern variable(aka keyword, template-identifier).
+   See https://scheme.com/tspl4/syntax.html#./syntax:h4 for details.
+  "
+    (datum->syntax id (string->symbol
+      (string-append prefix (syntax->datum id)))))
+
+  (syntax-case x ()
+    ((_ emo-param)
+     (with-syntax ((get (new-id "get_" #'emo-param))
+                   (inc (new-id "increase_" #'emo-param))
+                   (dec (new-id "decrease_" #'emo-param))
+                   (neu (new-id "neutralize_" #'emo-param)))
+         #'(begin
+             (define (get) (Concept (number->string
+                             (psi-param-value (psi-param emo-param)))))
+             (define (inc num) (psi-param-increase! (psi-param emo-param)
+                                 (string->number (cog-name num))))
+             (define (dec num) (psi-param-decrease! (psi-param emo-param)
+                                 (string->number (cog-name num))))
+             (define (neu num) (psi-param-neutralize! (psi-param emo-param)
+                                 (string->number (cog-name num)))))
+     ))))
+)
+
+(define-emotion-parameter "valence")
+(define-emotion-parameter "arousal")
+
+; --------------------------------------------------------------
+(Define
+  (DefinedSchema "set-parameter")
+  (LambdaLink
+    (VariableList
+      (Variable "component")
+      (Variable "parameter")
+      (Variable "value"))
+    (ExecutionOutput
+      (GroundedSchema "scm: print-by-action-logger")
+      (List
+        (Concept "set-parameter")
+        (Variable "component")
+        (Variable "parameter")
+        (Variable "value")))
+  )
+)
+
+(define (set-parameter component parameter value)
+  (cog-execute!
+    (Put
+      (DefinedSchema "set-parameter")
+      (List component parameter value)))
+)
+
+; --------------------------------------------------------------
+; The *voice* schemas follow from ssml were 'speed' == 'rate'
+; See https://www.w3.org/TR/speech-synthesis/#edef_prosody
+;
+; TODO: When there is an api to get information about the range of volume
+; and speeds that is possible to use.
+(define (increase_voice_speed percent)
+  (set-parameter (Concept "speech") (Concept "rate")
+    (Number (+ 1.0 (/ (string->number (cog-name percent)) 100))))
+)
+
+(define (decrease_voice_speed percent)
+  (define percent-num (string->number (cog-name percent)))
+  (if (<= 100.0 percent-num)
+    (error "Speed can't be decreased by 100% or more."))
+
+  (set-parameter (Concept "speech") (Concept "rate")
+    (Number (- 1.0 (/ percent-num 100))))
+)
+
+(define (increase_voice_volume percent)
+  (set-parameter (Concept "speech") (Concept "volume")
+    (Number (* 20 (log10 (+ 1.0 (/ (string->number (cog-name percent)) 100)))))
+  )
+)
+
+(define (decrease_voice_volume percent)
+  (define percent-num (string->number (cog-name percent)))
+  (if (<= 100.0 percent-num)
+    (error "Volume can't be decreased by 100% or more."))
+
+  (set-parameter (Concept "speech") (Concept "volume")
+    (Number (* 20 (log10 (- 1.0 (/ percent-num 100)))))
+  )
+)

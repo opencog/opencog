@@ -1,6 +1,16 @@
 ;; This is the GHOST action selector for finding and deciding
 ;; which action should be executed at a particular point in time.
 
+(define (not-within-refractory? RULE)
+"
+  Check if a rule is still within its refractory period or not.
+"
+  (or (null? (cog-value RULE ghost-time-last-executed))
+      (> (- (current-time)
+            (car (cog-value->list
+              (cog-value RULE ghost-time-last-executed))))
+         refractory-period)))
+
 (define* (eval-and-select RULES #:optional (SKIP-STI #f))
 "
   This is the goal-driven action selection.
@@ -82,23 +92,19 @@
 
   ; Check if a rule should be skipped or not, based on
   ; its current STI, strength, and the last executed time
-  (define (skip-rule? r)
+  (define (accept-rule? r)
     (or SKIP-STI
         (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
              (or (= strength-weight 0) (> (cog-stv-strength r) 0))
-             (or (null? (cog-value r ghost-time-last-executed))
-                 (> (- (current-time)
-                       (car (cog-value->list
-                         (cog-value r ghost-time-last-executed))))
-                    refractory-period)))))
+             (not-within-refractory? r))))
 
   ; ----------
   (for-each
     (lambda (r)
       ; Skip the rule if its STI or strength is zero,
-      ; unless we choose to ignore their weights,
-      ; or if it's still with the refractory period
-      (if (skip-rule? r)
+      ; or if it's still with the refractory period,
+      ; unless we choose to ignore their weights
+      (if (accept-rule? r)
         (let ((rc (psi-get-context r))
               (ra (psi-get-action r)))
           ; Though an action may be in multiple psi-rule, but it doesn't
@@ -214,7 +220,7 @@
         rejoinder))))
 
 ; ----------
-(define-public (ghost-find-rules SENT)
+(define-public (ghost-find-rules-duallink SENT)
 "
   The action selector. It first searches for the rules using DualLink,
   and then does the filtering by evaluating the context of the rules.
@@ -258,7 +264,7 @@
         (List selected)))
 
 ; ----------
-(define-public (ghost-get-rules-from-af)
+(define-public (ghost-get-rules)
 "
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
@@ -275,6 +281,16 @@
           (current-source-location) key args) #f)))
 
   (process-ghost-buffer)
+
+  ; First of all, run the "limbic system" -- a subset of rules that
+  ; will always be evaluated, and if appropriate, triggered immediately
+  (for-each
+    (lambda (p-rule)
+      (if (and (not-within-refractory? p-rule)
+               (> (cog-tv-mean (psi-satisfiable? p-rule)) 0)
+               (> (cog-stv-strength p-rule) 0))
+        (psi-imply p-rule)))
+    (filter psi-rule? (cog-incoming-set (ConceptNode "Parallel-Rules"))))
 
   (let* ((candidate-rules
            (if ghost-af-only?
@@ -315,4 +331,4 @@
 ; The action selector for OpenPsi
 (psi-set-action-selector!
   ghost-component
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules-from-af") (List)))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules") (List)))
