@@ -379,13 +379,13 @@ MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 	logger().set_level(Logger::DEBUG);
 	logger().set_timestamp_flag(false);
 	// logger().set_sync_flag(true);
-	logger().set_print_to_stdout_flag(true);
+	// logger().set_print_to_stdout_flag(true);
 
 	// URE logger
 	ure_logger().set_level(Logger::DEBUG);
 	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
-	ure_logger().set_print_to_stdout_flag(true);
+	// ure_logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
@@ -1300,10 +1300,8 @@ void MinerUTest::test_SodaDrinker_incremental()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.001, 1.0);
-	// VT: get rid of stupid shallow abstractions, such as ones that
-	// would change the number of conjunctions of the pattern
-	Handle ure_results = ure_pm(_tmp_as, 5, 1000, initpat, incremental_expansion, 0.1),
+	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	Handle ure_results = ure_pm(_tmp_as, 5, 10000, initpat, incremental_expansion, 10),
 		ure_expected = mk_minsup_eval(5, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
