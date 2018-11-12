@@ -164,6 +164,24 @@ Introduction
 \end_layout
 
 \begin_layout Standard
+XXX TODO: should mention that LSA also gives meaning but not at a local
+ level, because its document-wide (term-document matrixes, with word=rows,
+ columns=terms)
+\end_layout
+
+\begin_layout Standard
+XXX its 
+\begin_inset Quotes eld
+\end_inset
+
+vector speace models
+\begin_inset Quotes erd
+\end_inset
+
+ its not that...
+\end_layout
+
+\begin_layout Standard
 Deep learning and neural nets are all the rage, today, and have displaced
  symbolic AI systems in most applications.
  It’s commonly believed that the two approaches have nothing to do with
@@ -6972,13 +6990,36 @@ reference "eq:factorize"
 on.
 \end_layout
 
+\begin_layout Standard
+Of these, perhaps the most important point is that the space of joint probabilit
+ies is not the same as Eucliden space.
+ This is a terminological issue that unintentionally becomes a technical
+ issue.
+ Properly speaking, frequency counts are multisets or bags; these resemble
+ vectors, and are commonly thought of and treated as vectors; they are not.
+ The risk of envisioning vectors is that it leads one to think of dot-products,
+ cosine angles and rotational invariance.
+ These are all valid concepts for Euclidean space; but probability does
+ not live in a Euclidean space.
+ The shape of the space 
+\begin_inset Formula $\sum_{i}p_{i}=1$
+\end_inset
+
+ is a convex polytope; a rotation applied to a point in this space will
+ typically rotate it out.
+ That is, bags/multisets are neither rotationally invariant, nor rotationally
+ covariant.
+ Yet, many matrix factorization frameworks assume rotational invariance.
+ This creates issues, and so is a point to focus on in what follows.
+\end_layout
+
 \begin_layout Subsubsection
 Probabilistic Matrix Factorization
 \end_layout
 
 \begin_layout Standard
-Probabilistic matrix factorization (PMF) or stochastic matrix factorization
- (SMF) assumes that the observation counts 
+Probabilistic matrix factorization (PMF) (alternately, stochastic matrix
+ factorization (SMF)) assumes that the observation counts 
 \begin_inset Formula $N\left(w,d\right)$
 \end_inset
 
