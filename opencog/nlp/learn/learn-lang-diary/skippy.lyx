@@ -164,24 +164,6 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-XXX TODO: should mention that LSA also gives meaning but not at a local
- level, because its document-wide (term-document matrixes, with word=rows,
- columns=terms)
-\end_layout
-
-\begin_layout Standard
-XXX its 
-\begin_inset Quotes eld
-\end_inset
-
-vector speace models
-\begin_inset Quotes erd
-\end_inset
-
- its not that...
-\end_layout
-
-\begin_layout Standard
 Deep learning and neural nets are all the rage, today, and have displaced
  symbolic AI systems in most applications.
  It’s commonly believed that the two approaches have nothing to do with
@@ -776,16 +758,50 @@ key "Vepstas2017sheaves"
 
 \begin_layout Standard
 A few words about word-senses and semantics are in order.
- It has been generally observed that Word2Vec seems to encode “semantics”
- in some opaque way, in that it can distinguish different word-senses, based
- on context.
- The same is true for Link Grammar: when a word is used in a specific context,
- the result of parsing selects a single disjunct.
+ The most common computational approach to semantics are 
+\begin_inset Quotes eld
+\end_inset
+
+vector space models
+\begin_inset Quotes erd
+\end_inset
+
+ (VSM).
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Turney2010"
+
+\end_inset
+
+ The Word2Vec model is in many ways a VSM; sharing many common properties.
+ Perhaps most annoying is that the “semantics” is encoded in some opaque
+ way.
+ VSMs can distinguish different word-senses, based on context, but exactly
+ what part of that context 
+\begin_inset Quotes eld
+\end_inset
+
+matters
+\begin_inset Quotes erd
+\end_inset
+
+ is unclear.
+ Link Grammar disjuncts can also distinguish word-senses; but now the 
+\begin_inset Quotes eld
+\end_inset
+
+reason why
+\begin_inset Quotes erd
+\end_inset
+
+ becomes understandable, or human-auditable.
+ So, in Link Grammar, when a word is used in a specific context, the result
+ of parsing selects a single disjunct.
  That disjunct can be thought of as a hyper-fine grammatical category; but
  these are strongly correlated with meaning.
- Synonyms can be discovered in similar ways in both systems: if two different
- words all share a lot of the same disjuncts, they are effectively synonymous,
- and can be used interchangeably in sentences.
+ Synonyms can be discovered in the same way that they are in VSM's: if two
+ different words all share a lot of the same disjuncts, they are effectively
+ synonymous, and can be used interchangeably in sentences.
 \end_layout
 
 \begin_layout Standard
@@ -803,7 +819,7 @@ Similarly, given two different words in Word2Vec/SkipGram, if they both
 
 \begin_layout Standard
 This is also where we have the largest, and the most important difference
- between neural net approaches, and Link Grammar.
+ between Link Grammar and other vector-space models.
  In the neural net approach, the intermediate neuron layer is a black box,
  completely opaque and unanalyzable, just some meaningless collection of
  floating-point numbers.
@@ -811,8 +827,8 @@ This is also where we have the largest, and the most important difference
  you can see exactly what it is encoding, because each disjunct tells you
  exactly the syntactic relationship between a word, and its neighbors.
  This is the great power of symbolic approaches to natural-language: they
- are human-auditable, human understandable in a way that neural nets are
- not.
+ are human-auditable, human understandable in a way that other vector-space
+ models are not.
  (Currently; I think that what this essay describes is an effective sketch
  for a technique for prying open the lid of the black box of neural nets.
  But that’s for a different day.)
