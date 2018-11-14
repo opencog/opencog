@@ -68,7 +68,6 @@ SuRealPMCB::~SuRealPMCB()
  */
 bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 {
-
     if (m_use_cache) {
         int cached = SuRealCache::instance().variable_match(hPat, hSoln);
         if (cached >= 0) {
@@ -239,7 +238,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         if (it == m_words.end())
         {
             HandleSeq neighbor_win = get_target_neighbors(hPatNode, REFERENCE_LINK);
-            
+
             if (neighbor_win.size() != 0)
             {
                 HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
@@ -386,13 +385,13 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
             hPatWord = neighbor_wn[0];
         }
-        else 
+        else
         {
             string sWord = sName.substr(0, sName.find_first_of('@'));
             sWord = sWord.substr(0, sWord.find_last_of('.'));
             hPatWord = m_as->get_handle(WORD_NODE, sWord);
         }
-        
+
         //Handle hSolnWordInst = get_target_neighbors(kv.second, REFERENCE_LINK)[0];
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
         // do a disjunct match for PredicateNodes as well
@@ -433,7 +432,6 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
                     std::string sName = qOS[0]->get_name();
                     std::string sWord = get_target_neighbors(qOS[0], REFERENCE_LINK)[0]->get_name();
-
 
                     // Skip if we have seen it before
                     if (std::find(qChkWords.begin(), qChkWords.end(), sWord) != qChkWords.end())
