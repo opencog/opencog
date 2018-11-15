@@ -192,12 +192,6 @@ public:
 	static Handle remove_unary_and(const Handle& h);
 
 	/**
-	 * Call alpha_conversion if pattern is a scope, return itself
-	 * otherwise.
-	 */
-	static Handle alpha_conversion(const Handle& pattern);
-
-	/**
 	 * Given a texts concept node, retrieve all its members
 	 */
 	static HandleSet get_texts(const Handle& texts_cpt);
@@ -354,11 +348,62 @@ public:
 	static void remove_redundant_clauses(HandleSeq& clauses);
 
 	/**
-	 * Construct the conjunction of 2 patterns. If cnjtion is a
-	 * conjunction, then expand it with pattern. It is assumed that
-	 * pattern cannot be a conjunction itself.
+	 * Alpha convert pattern so that none of its variables collide with
+	 * the variables in other_vars.
 	 */
-	static Handle expand_conjunction(const Handle& cnjtion, const Handle& pattern);
+	static Handle alpha_convert(const Handle& pattern,
+	                            const Variables& other_vars);
+
+	/**
+	 * Construct the conjunction of 2 patterns. If cnjtion is a
+	 * conjunction, then expand it with pattern (performing
+	 * alpha-conversion when necessary). It is assumed that pattern
+	 * cannot be a conjunction itself.
+	 *
+	 * This method will not attempt to connect the 2 patterns, thus,
+	 * assuming that cnjtion is itself strongly connected, the result
+	 * will be 2 strongly connected components.
+	 */
+	static Handle expand_conjunction_disconnect(const Handle& cnjtion,
+	                                            const Handle& pattern);
+
+	/**
+	 * Like expand_conjunction_disconnect but produced a single
+	 * strongly connected component, assuming that cnjtion is itself
+	 * strongly connected, given 2 connecting variables, one from
+	 * cnjtion, one from pattern.
+	 *
+	 * Unlike expand_conjunction_disconnect, no alpha conversion is
+	 * performed, cnjtion is assumed not to collide with pattern.
+	 */
+	static Handle expand_conjunction_connect(const Handle& cnjtion,
+	                                         const Handle& pattern,
+	                                         const Handle& cnjtion_var,
+	                                         const Handle& pattern_var);
+
+	/**
+	 * Given cnjtion and pattern, consider all possible connections and
+	 * expand cnjtion accordingly. For instance if
+	 *
+	 * cnjtion = (Inheritance X Y)
+	 * pattern = (Inheritance Z W)
+	 *
+	 * return
+	 *
+	 *   (And (Inheritance X Y) (Inheritance X W))
+	 *   (And (Inheritance X Y) (Inheritance Z X))
+	 *   (And (Inheritance X Y) (Inheritance Y W))
+	 *   (And (Inheritance X Y) (Inheritance X Y))
+	 *
+	 * It will also only include patterns with minimum support ms
+	 * according to texts, and perform alpha-conversion when necessary.
+	 * If an expansion is cnjtion itself it will be dismissed.
+	 */
+	static HandleSet expand_conjunction(const Handle& cnjtion,
+	                                    const Handle& pattern,
+	                                    const HandleSet& texts,
+	                                    unsigned ms);
+
 };
 
 } // ~namespace opencog

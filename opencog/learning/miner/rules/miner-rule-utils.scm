@@ -24,15 +24,21 @@
       shabs-list
       minsup-g)))
 
-(define (single-conjunct-eval body)
+(define (unary-conjunction-eval body)
   (Evaluation
-    (GroundedPredicate "scm: single-conjunct")
+    (GroundedPredicate "scm: unary-conjunction")
     body))
 
-(define (single-conjunct? body)
+(define (unary-conjunction? body)
   (let ((body-type (cog-type body)))
     (and (not (equal? body-type 'PresentLink))
          (not (equal? body-type 'AndLink)))))
 
-(define (single-conjunct body)
-  (bool->tv (single-conjunct? body)))
+(define (unary-conjunction body)
+  (bool->tv (unary-conjunction? body)))
+
+(define (equal-top x)
+  (Equal x (top)))
+
+(define (not-equal-top x)
+  (Not (equal-top x)))

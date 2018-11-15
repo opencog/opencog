@@ -355,14 +355,6 @@ Handle MinerUtils::remove_unary_and(const Handle& h)
 	return h;
 }
 
-Handle MinerUtils::alpha_conversion(const Handle& pattern)
-{
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
-		return sc->alpha_convert();
-	return pattern;
-}
-
 HandleSet MinerUtils::get_texts(const Handle& texts_cpt)
 {
 	// Retrieve all members of texts_cpt
@@ -619,57 +611,131 @@ void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
 	}
 }
 
-Handle MinerUtils::expand_conjunction(const Handle& cnjtion, const Handle& pattern)
+Handle MinerUtils::alpha_convert(const Handle& pattern,
+                                 const Variables& other_vars)
 {
-	// Copy variables from cnjtion and pattern, as they are gonna be modified
-	Variables cnjtion_vars = get_variables(cnjtion);
-	Variables pattern_vars = get_variables(pattern);
+	const Variables& pattern_vars = get_variables(pattern);
 
-	// For each variable of pattern that is in cnjtion, alpha convert
-	// to avoid variable name collision.
+	// Detect collision between pattern_vars and other_vars
 	HandleMap aconv;
 	for (const Handle& var : pattern_vars.varset) {
-		if (cnjtion_vars.is_in_varset(var)) {
+		if (other_vars.is_in_varset(var)) {
 			Handle nvar;
 			bool used;
 			do {
 				nvar = createNode(VARIABLE_NODE, randstr(var->get_name() + "-"));
-				// Make sure it is not in cnjtion_vars or pattern_vars
-				used = cnjtion_vars.is_in_varset(nvar) or pattern_vars.is_in_varset(nvar);
+				// Make sure it is not in other_vars or pattern_vars
+				used = other_vars.is_in_varset(nvar) or pattern_vars.is_in_varset(nvar);
 			} while (used);
 			aconv[var] = nvar;
 		}
 	}
 
-	// Expand cnjtion_vars with pattern_vars, alpha converting
-	// pattern_vars if necessary
-	if (not aconv.empty()) {
-		Handle avdecl = pattern_vars.substitute_nocheck(get_vardecl(pattern), aconv);
-		pattern_vars = createVariableList(avdecl)->get_variables();
-	}
-	cnjtion_vars.extend(pattern_vars);
+	// No collision
+	if (aconv.empty())
+		return pattern;
 
-	// Alpha-convert pattern body if necessary
-	Handle pattern_body = aconv.empty() ? get_body(pattern)
-		: get_variables(pattern).substitute_nocheck(get_body(pattern), aconv);
+	// Collisions, need to alpha convert vardecl and body
+	Handle nvardecl = pattern_vars.substitute_nocheck(get_vardecl(pattern), aconv);
+	Handle nbody = pattern_vars.substitute_nocheck(get_body(pattern), aconv);
+
+	// Reconstruct alpha converted pattern
+	return Handle(createLambdaLink(nvardecl, nbody));
+}
+
+Handle MinerUtils::expand_conjunction_disconnect(const Handle& cnjtion,
+                                                 const Handle& pattern)
+{
+	// Copy variables from cnjtion as it will be extended
+	Variables cnjtion_vars = get_variables(cnjtion);
+
+	// Alpha convert pattern, if necessary, to avoid collisions between
+	// cnjtion_vars and pattern variables
+	Handle acpat = alpha_convert(pattern, cnjtion_vars);
+
+	// Extend cnjtion_vars with pattern variables
+	cnjtion_vars.extend(get_variables(acpat));
 
 	// Expand cnjtion_body with pattern, flattening cnjtion_body if necessary
 	const Handle& cnjtion_body = get_body(cnjtion);
 	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
 		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
-	nclauses.push_back(pattern_body);
+	nclauses.push_back(get_body(acpat));
 
 	// Remove redundant clauses
 	boost::sort(nclauses);
+	typedef std::equal_to<opencog::Handle> HandleEqual;
 	boost::erase(nclauses,
-	             boost::unique<boost::return_found_end>(nclauses));
+	             boost::unique<boost::return_found_end, HandleSeq, HandleEqual>
+	             (nclauses, HandleEqual()));
 
-	// Recreate combined pattern
+	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
 		nbody = createLink(nclauses, AND_LINK),
 		npattern = Handle(createLambdaLink(nvardecl, nbody));
 
 	return npattern;
+}
+
+Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
+                                              const Handle& pattern,
+                                              const Handle& cnjtion_var,
+                                              const Handle& pattern_var)
+{
+	// Substitute pattern_var by cnjtion_var in pattern
+	Variables pattern_vars = get_variables(pattern);
+	HandleMap p2c{{pattern_var, cnjtion_var}};
+	Handle npat_body = pattern_vars.substitute_nocheck(get_body(pattern), p2c);
+	pattern_vars.erase(pattern_var);
+
+	// Extend cnjtion variables with the pattern variables, except pattern_var
+	Variables cnjtion_vars = get_variables(cnjtion);
+	cnjtion_vars.extend(pattern_vars);
+
+	// Expand cnjtion body with npat_body, flattening cnjtion_body if necessary
+	const Handle& cnjtion_body = get_body(cnjtion);
+	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
+		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
+	nclauses.push_back(npat_body);
+
+	// Remove redundant clauses
+	boost::sort(nclauses);
+	typedef std::equal_to<opencog::Handle> HandleEqual;
+	boost::erase(nclauses,
+	             boost::unique<boost::return_found_end, HandleSeq, HandleEqual>
+	             (nclauses, HandleEqual()));
+
+	// Recreate expanded conjunction
+	Handle nvardecl = cnjtion_vars.get_vardecl(),
+		nbody = nclauses.size() == 1 ? nclauses[0] : createLink(nclauses, AND_LINK),
+		npattern = Handle(createLambdaLink(nvardecl, nbody));
+
+	return npattern;
+}
+
+HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
+                                         const Handle& pattern,
+                                         const HandleSet& texts,
+                                         unsigned ms)
+{
+	// Alpha convert pattern, if necessary, to avoid collisions between
+	// cnjtion variables and pattern variables
+	Handle apat = alpha_convert(pattern, get_variables(cnjtion));
+
+	// For each variable in apat and cnjtion, create a connected
+	// pattern, retain it if enough support.
+	const Variables& cnjtion_vars = get_variables(cnjtion);
+	const Variables& apat_vars = get_variables(apat);
+	HandleSet patterns;
+	for (const Handle& pvar : apat_vars.varseq) {
+		for (const Handle& cvar : cnjtion_vars.varseq) {
+			Handle cpat = expand_conjunction_connect(cnjtion, apat, cvar, pvar);
+			if (not content_eq(cpat, cnjtion) and enough_support(cpat, texts, ms))
+				patterns.insert(cpat);
+		}
+	}
+
+	return patterns;
 }
 
 } // namespace opencog

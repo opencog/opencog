@@ -70,7 +70,8 @@ protected:
 	 * conjunction, then expand it with pattern. It is assumed that
 	 * pattern cannot be a conjunction itself.
 	 */
-	Handle do_expand_conjunction(Handle cnjtion, Handle pattern);
+	Handle do_expand_conjunction(Handle cnjtion, Handle pattern,
+	                             Handle texts, Handle ms);
 
 public:
 	MinerSCM();
@@ -150,11 +151,21 @@ bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
 	return MinerUtils::enough_support(pattern, texts_set, ms_uint);
 }
 
-Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern)
+Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
+                                       Handle texts, Handle ms)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-expand-conjunction");
-	Handle result = MinerUtils::expand_conjunction(cnjtion, pattern);
-	return as->add_atom(result);
+
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	// Fetch the minimum support
+	NumberNodePtr nn = NumberNodeCast(ms);
+	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+
+	HandleSet results = MinerUtils::expand_conjunction(cnjtion, pattern,
+	                                                   texts_set, ms_uint);
+	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
 }
 
 extern "C" {
