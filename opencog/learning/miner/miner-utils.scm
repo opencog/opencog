@@ -98,13 +98,32 @@
 (define (false-tv? tv)
   (equal? tv (stv 0 1)))
 
-(define* (configure-optional-rules pm-rbs #:key (incremental-expansion (stv 0 1)))
+(define* (configure-optional-rules pm-rbs
+                                   #:key
+                                   (incremental-expansion (stv 0 1))
+                                   (max-conjuncts -1))
   ;; Load conjunction-expansion and associate to pm-rbs
-  (if (not (false-tv? incremental-expansion))
+  (if (not (or (false-tv? incremental-expansion) (= max-conjuncts 1)))
       (let* ((rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
-             (rule (DefinedSchemaNode "conjunction-expansion-rule")))
+             (namify (lambda (i)
+                       (string-concatenate
+                        (cons "conjunction-expansion-"
+                              (if (<= i 0)
+                                  (list "rule")
+                                  (list (number->string i) "ary-rule"))))))
+             (rulify (lambda (i)
+                       (list (DefinedSchemaNode (namify i))
+                             incremental-expansion)))
+             (max-conjuncts? (lambda (x) (<= max-conjuncts x)))
+             (add1 (lambda (x) (+ x 1)))
+             (1-to-max-conjuncts (unfold max-conjuncts? identity add1 1))
+             (rules (if (<= max-conjuncts 0)
+                        ;; No maximum conjuncts
+                        (list (rulify 0))
+                        ;; At most max-conjuncts conjuncts
+                        (map rulify 1-to-max-conjuncts))))
         (load-from-path rule-pathfile)
-        (ure-add-rule pm-rbs rule incremental-expansion))))
+        (ure-add-rules pm-rbs rules))))
 
 (define* (configure-rules pm-rbs #:key (incremental-expansion (stv 0 1)))
   (configure-mandatory-rules pm-rbs)
