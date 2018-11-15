@@ -345,9 +345,15 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
     HandleSeq qItprNode = getInterpretation(pred_soln.begin()->second);
     std::sort(qItprNode.begin(), qItprNode.end());
 
+    logger().debug("[SuReal] In grounding, trying to find a common interpretation between:\n%s",
+        (pred_soln.begin()->second)->to_short_string().c_str());
+
     // try to find a common InterpretationNode to the solutions
+    // i.e. all the solution-clauses have to come from the same interpretation (of a sentence)
     for (HandleMap::const_iterator it = ++pred_soln.begin(); it != pred_soln.end(); ++it)
     {
+        logger().debug("[SuReal] ...and:\n%s", it->second->to_short_string().c_str());
+
         HandleSeq thisSeq = getInterpretation(it->second);
         std::sort(thisSeq.begin(), thisSeq.end());
 
@@ -407,7 +413,6 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             hPatWord = m_as->get_handle(WORD_NODE, sWord);
         }
 
-        //Handle hSolnWordInst = get_target_neighbors(kv.second, REFERENCE_LINK)[0];
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
         // do a disjunct match for PredicateNodes as well
         if (kv.first->get_type() == PREDICATE_NODE and kv.second->get_type() == PREDICATE_NODE)
@@ -686,6 +691,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             logger().debug("[SuReal] grounding Interpreation: %s", n->to_short_string().c_str());
             m_results[n].push_back(shrinked_soln);
         }
+
         if (m_use_cache) {
             //SuRealCache::instance().add_grounding_match(var_soln, pred_soln, true);
             return true;
