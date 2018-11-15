@@ -15,7 +15,7 @@
 ;; |-
 ;; Set
 ;;   Evaluation (stv 1 1)
-;;     Predicate "shallow-abstraction"
+;;     Predicate "abstraction"
 ;;     List
 ;;       List
 ;;         <f1>
@@ -91,7 +91,7 @@
              (ms (get-ms minsup-g))
              (shabs-lists (cog-shallow-abstract g texts ms))
              (list->eval (lambda (x) (cog-set-tv!
-                                      (shallow-abstraction-eval x minsup-g)
+                                      (abstraction-eval x minsup-g)
                                       (stv 1 1))))
              (shabs-evals (map list->eval (cog-outgoing-set shabs-lists))))
         (Set shabs-evals))))

@@ -18,7 +18,7 @@
 ;;     <texts>
 ;;     <ms>
 ;; Evaluation <tv2>
-;;   Predicate "shallow-abstraction"
+;;   Predicate "abstraction"
 ;;   List
 ;;     List
 ;;       <x1>
@@ -91,7 +91,7 @@
          (vardecl (VariableList g-decl texts-decl ms-decl xs-f-decl))
          ;; Clauses
          (minsup-g (minsup-eval g texts ms))
-         (shabs-eval (shallow-abstraction-eval xs-f minsup-g))
+         (shabs-eval (abstraction-eval xs-f minsup-g))
          ;; Make sure the pattern has the minimum support
          (precond-1 (absolutely-true-eval minsup-g))
          (precond-2 (absolutely-true-eval shabs-eval))

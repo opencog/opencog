@@ -19,7 +19,7 @@ BUILD_DIR_NAME=build
 # Get the script directory
 PRG_PATH="$(readlink -f "$0")"
 PRG_DIR="$(dirname "$PRG_PATH")"
-UTEST_DIR="$PRG_DIR/../$BUILD_DIR_NAME"
+UTEST_DIR="$PRG_DIR/../$BUILD_DIR_NAME/tests/learning/miner"
 
 #############
 # Functions #
@@ -33,7 +33,8 @@ get_real_time() {
 # Run all query unit tests
 run_utests() {
     cd "$UTEST_DIR";
-    make -j4 test ARGS=-j4
+    ./MinerUTest
+    # make -j4 test ARGS=-j4
     cd -
 }
 
