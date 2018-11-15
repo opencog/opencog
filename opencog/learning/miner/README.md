@@ -384,15 +384,15 @@ The forward chaining way starts with the initial pattern as source and
 derive inferences with the rule
 ```
 minsup(P, T, ms)
-shallow-abstraction(S, P, T, ms)
+abstraction(S, P, T, ms)
 |-
 minsup((Put P S), T, ms)
 ```
-where `shallow-abstraction` is a predicate that not only `S` is a
-shallow abstraction of `P` over `T` but also if `P` is composed with
-such, the resulting pattern will reach minimum support, which can
-indeed be determined by looking at the valuation set used to generate
-the shallow abstractions, as mentioned earlier.
+where `abstraction` is a predicate that not only `S` is a shallow
+abstraction of `P` over `T` but also if `P` is composed with such, the
+resulting pattern will reach minimum support, which can indeed be
+determined by looking at the valuation set used to generate the
+shallow abstractions, as mentioned earlier.
 
 The advantage of the forward technique is that it requires no control
 for the a priori property as it is built into the rule.

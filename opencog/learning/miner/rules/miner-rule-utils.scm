@@ -17,9 +17,9 @@
 (define (get-body f)
   (cog-outgoing-atom f 1))
 
-(define (shallow-abstraction-eval shabs-list minsup-g)
+(define (abstraction-eval shabs-list minsup-g)
   (Evaluation
-    (Predicate "shallow-abstraction")
+    (Predicate "abstraction")
     (List
       shabs-list
       minsup-g)))
