@@ -14,19 +14,7 @@
 ;; -----------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-
-;; Generate variable (Variable prefix + "-" + to_string(i))
-(define (gen-variable prefix i)
-  (Variable (string-append prefix "-" (number->string i))))
-
-;; Generate a list of variables (Variable prefix + "-" + to_string(n))
-(define (gen-variables prefix n)
-  (if (= n 0)
-      ;; Base case
-      '()
-      ;; Recursive case
-      (append (gen-variables prefix (- n 1))
-              (list (gen-variable prefix (- n 1))))))
+(use-modules (opencog rule-engine))
 
 ;; Generate a fuzzy disjunction introduction rule for an n-ary
 ;; disjunction
