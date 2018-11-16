@@ -118,8 +118,7 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 	////////////////////////////////
 
 	// Add all subsequent factorizable variables
-	HandleSeq remvars(std::next(valuations.variables.varseq.begin()),
-	                  valuations.variables.varseq.end());
+	HandleSeq remvars = valuations.remaining_variables();
 	HandleUCounter facvars;
 	for (const Handle& rv : remvars) {
 		// Strongly connected valuations associated to that variable
