@@ -1,3 +1,7 @@
+;; Note: For now shallow specialization rule is used instead of
+;; shallow the abstraction rule. Using shallow specialization allows
+;; to perform in one step shallow abstraction and specialization.
+;;
 ;; Rule to generate shallow abstractions of a given pattern,
 ;; specifically
 ;;

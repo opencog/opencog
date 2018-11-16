@@ -418,6 +418,35 @@ HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
 	return shallow_abstract(valuations, ms);
 }
 
+HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
+                                         const HandleSet& texts,
+                                         unsigned ms)
+{
+	// Calculate all shallow abstractions of pattern
+	HandleSetSeq shabs_per_var = shallow_abstract(pattern, texts, ms);
+
+	// For each variable of pattern, generate the corresponding shallow
+	// specializations
+	const Variables& vars = MinerUtils::get_variables(pattern);
+	size_t vari = 0;
+	HandleSet results;
+	for (const HandleSet& shabs : shabs_per_var) {
+		for (const Handle& sa : shabs) {
+			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
+			// Shallow_abstract should already have eliminated shallow
+			// abstraction that do not have enough support. Put a
+			// temporary assert here to make sure that is the case.
+			// OC_ASSERT(enough_support(npat, texts, ms),
+			//           "shallow_abstract should guaranty that."
+			//           "If it doesn't, there is probably a bug");
+			if (enough_support(npat, texts, ms))
+				results.insert(npat);
+		}
+		vari++;
+	}
+	return results;
+}
+
 Handle MinerUtils::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
 {
 	Handle fvd = filter_vardecl(vardecl, clauses);

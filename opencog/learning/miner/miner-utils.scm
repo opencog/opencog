@@ -80,18 +80,14 @@
 
 (define (configure-mandatory-rules pm-rbs)
   ;; Load and associate mandatory rules to pm-rbs
-  (let* ((base-rule-files (list "shallow-abstraction.scm"
-                                "specialization.scm"))
+  (let* ((base-rule-files (list "shallow-specialization.scm"))
          (rule-files (map mk-full-rule-path base-rule-files))
-         (rules (list ;; TODO somehow shallow-abstraction-rule-name
-                      ;; and specialization-rule-name are not
-                      ;; accessible thom here after loading
-                      ;; shallow-abstraction.scm and
-                      ;; specialization.scm. For that reason we use
-                      ;; their Atomese definitions instead. This
+         (rules (list ;; TODO somehow shallow-specialization-rule-name
+                      ;; are not accessible thom here after loading
+                      ;; shallow-specialization.scm. For that reason
+                      ;; we use its Atomese definition instead. This
                       ;; might be a guile bug.
-                      (DefinedSchemaNode "shallow-abstraction-rule")
-                      (DefinedSchemaNode "specialization-rule"))))
+                      (DefinedSchemaNode "shallow-specialization-rule"))))
     (for-each load-from-path rule-files)
     (ure-add-rules pm-rbs rules)))
 

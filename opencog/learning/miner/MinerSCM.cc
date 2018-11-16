@@ -61,6 +61,27 @@ protected:
 
 	/**
 	 * Given a pattern, a texts concept and a minimum support, return
+	 * all shallow specializations reaching the minimum support.
+	 *
+	 * For instance, given
+	 *
+	 * pattern = (Lambda X Y (Inheritance X Y))
+	 * texts  = { (Inheritance A B),
+	 *            (Inheritance A C),
+	 *            (Inheritance D D),
+	 *            (Inheritance E E) }
+	 * ms = (Number 2)
+	 *
+	 * returns
+	 *
+	 * (Set
+	 *   (Lambda Y (Inheritance A Y))
+	 *   (Lambda Y (Inheritance Y Y)))
+	 */
+	Handle do_shallow_specialize(Handle pattern, Handle texts, Handle ms);
+
+	/**
+	 * Given a pattern, a texts concept and a minimum support, return
 	 * true iff the pattern has enough support.
 	 */
 	bool do_enough_support(Handle pattern, Handle texts, Handle ms);
@@ -94,6 +115,9 @@ void MinerSCM::init(void)
 {
 	define_scheme_primitive("cog-shallow-abstract",
 		&MinerSCM::do_shallow_abstract, this, "miner");
+
+	define_scheme_primitive("cog-shallow-specialize",
+		&MinerSCM::do_shallow_specialize, this, "miner");
 
 	define_scheme_primitive("cog-enough-support?",
 		&MinerSCM::do_enough_support, this, "miner");
@@ -136,6 +160,24 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	}
 
 	return as->add_link(SET_LINK, HandleSeq(sa_lists.begin(), sa_lists.end()));
+}
+
+Handle MinerSCM::do_shallow_specialize(Handle pattern,
+                                       Handle texts,
+                                       Handle ms)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-specialize");
+
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	// Fetch the minimum support
+	unsigned ms_uint = MinerUtils::get_ms(ms);
+
+	// Generate all shallow specializations
+	HandleSet shaspes = MinerUtils::shallow_specialize(pattern, texts_set, ms_uint);
+
+	return as->add_link(SET_LINK, HandleSeq(shaspes.begin(), shaspes.end()));
 }
 
 bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
