@@ -691,7 +691,7 @@ void MinerUTest::test_AB_AC()
 
 	// Run URE pattern miner (using _as for testing more diverse
 	// content)
-	Handle ure_results = ure_pm(_as, 2, 40),
+	Handle ure_results = ure_pm(_as, 2, 10),
 		ure_expected = mk_minsup_eval(2, al(LAMBDA_LINK, Y, InhAY));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
@@ -728,7 +728,7 @@ void MinerUTest::test_AB_AC_BC()
 	TS_ASSERT(content_eq(cpp_results, cpp_expected));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 100),
+	Handle ure_results = ure_pm(texts, 2, 10),
 		ure_expected = mk_minsup_evals(2,
 		                               { top,
 		                                 al(LAMBDA_LINK, VarXY, InhXY),
@@ -768,7 +768,7 @@ void MinerUTest::test_AB_ABC()
 	TS_ASSERT(content_eq(cpp_results, cpp_expected));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 100),
+	Handle ure_results = ure_pm(texts, 2, 10),
 		ure_expected = mk_minsup_evals(2,
 		                               { top,
 		                                 al(LAMBDA_LINK, VarXY, InhXY),
@@ -819,7 +819,7 @@ void MinerUTest::test_ABCD()
 	TS_ASSERT(content_eq(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 100, initpat),
+	Handle ure_results = ure_pm(texts, 2, 10, initpat),
 		ure_expected = mk_minsup_evals(2,
 		                               { al(LAMBDA_LINK, ImpXY),
 		                                 al(LAMBDA_LINK,
@@ -864,7 +864,7 @@ void MinerUTest::test_ABAB()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 100, initpat),
+	Handle ure_results = ure_pm(texts, 2, 10, initpat),
 		ure_expected = mk_minsup_eval(2,
 		                              al(LAMBDA_LINK,
 		                                 VarXY,
@@ -907,7 +907,7 @@ void MinerUTest::test_AAAA()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 100, initpat),
+	Handle ure_results = ure_pm(texts, 2, 50, initpat),
 		ure_expected = mk_minsup_eval(2,
 		                              al(LAMBDA_LINK,
 		                                 al(IMPLICATION_LINK,
@@ -993,7 +993,7 @@ void MinerUTest::test_2conjuncts_2()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 100, initpat),
+	Handle ure_results = ure_pm(texts, 2, 2, initpat),
 		ure_expected = mk_minsup_eval(2,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1036,7 +1036,7 @@ void MinerUTest::test_2conjuncts_3()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 500, mk_nconjunct(2)),
+	Handle ure_results = ure_pm(texts, 2, 10, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(2,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1080,7 +1080,7 @@ void MinerUTest::test_2conjuncts_4()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 4, 500, mk_nconjunct(2)),
+	Handle ure_results = ure_pm(texts, 4, 20, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(4,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1264,7 +1264,7 @@ void MinerUTest::test_InferenceControl()
 	TS_ASSERT(content_is_in(expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(_tmp_as, 2, 1000, initpat),
+	Handle ure_results = ure_pm(_tmp_as, 2, 200, initpat),
 		ure_expected = mk_minsup_eval(2, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
@@ -1318,7 +1318,7 @@ void MinerUTest::test_SodaDrinker()
 	TS_ASSERT(content_is_in(expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(_tmp_as, 5, 1000, initpat),
+	Handle ure_results = ure_pm(_tmp_as, 5, 100, initpat),
 		ure_expected = mk_minsup_eval(5, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
