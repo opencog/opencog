@@ -157,8 +157,6 @@ public:
 	static Handle local_quote(const Handle& h);
 
 	/**
-	 * TODO replace by RewriteLink::beta_reduce
-	 *
 	 * Given a pattern, and mapping from variables to sub-patterns,
 	 * compose (as in function composition) the pattern with the
 	 * sub-patterns. That is replace variables in the pattern by their
