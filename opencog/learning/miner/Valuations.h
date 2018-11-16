@@ -48,6 +48,11 @@ public:
 	const Handle& focus_variable() const;
 
 	/**
+	 * Return all variables following (and not including) the variable under focus.
+	 */
+	HandleSeq remaining_variables() const;
+
+	/**
 	 * Move focus to the next (or previous) variable. That is increment
 	 * (or decrement) _var_idx.
 	 */

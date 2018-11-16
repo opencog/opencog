@@ -56,6 +56,12 @@ const Handle& ValuationsBase::focus_variable() const
 	return variables.varseq[_var_idx];
 }
 
+HandleSeq ValuationsBase::remaining_variables() const
+{
+	return HandleSeq(std::next(variables.varseq.begin(), _var_idx + 1),
+	                 variables.varseq.end());
+}
+
 void ValuationsBase::inc_focus_variable() const
 {
 	_var_idx++;
