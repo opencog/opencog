@@ -166,7 +166,7 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 				}
 			}
 
-			// IF the minimum support has been reached, no need to
+			// If the minimum support has been reached, no need to
 			// keep counting
 			if (ms <= rv_count)
 				break;
@@ -525,8 +525,7 @@ Handle MinerUtils::gen_rand_variable()
 
 const Variables& MinerUtils::get_variables(const Handle& pattern)
 {
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern))
 		return RewriteLinkCast(pattern)->get_variables();
 	static Variables empty_variables;
 	return empty_variables;
@@ -534,8 +533,7 @@ const Variables& MinerUtils::get_variables(const Handle& pattern)
 
 Handle MinerUtils::get_vardecl(const Handle& pattern)
 {
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc) {
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern)) {
 		Handle vardecl = sc->get_vardecl();
 		if (not vardecl)
 			vardecl = sc->get_variables().get_vardecl();
@@ -546,9 +544,8 @@ Handle MinerUtils::get_vardecl(const Handle& pattern)
 
 const Handle& MinerUtils::get_body(const Handle& pattern)
 {
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
-		return RewriteLinkCast(pattern)->get_body();
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern))
+		return sc->get_body();
 	return pattern;
 }
 
