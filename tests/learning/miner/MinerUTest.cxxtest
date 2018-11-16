@@ -184,6 +184,7 @@ public:
 	void test_match();
 	void test_compose_1();
 	void test_compose_2();
+	void test_compose_3();
 	void test_expand_conjunction_disconnect();
 	void test_expand_conjunction_1();
 	void test_expand_conjunction_2();
@@ -522,6 +523,27 @@ void MinerUTest::test_compose_2()
 		                 al(EVALUATION_LINK,
 		                    gpn,
 		                    al(UNQUOTE_LINK, X))));
+
+	logger().debug() << "npat = " << oc_to_string(npat);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(npat, expected));
+}
+
+void MinerUTest::test_compose_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		pattern = al(LAMBDA_LINK,
+		             al(IMPLICATION_LINK, X, Y));
+
+	Handle npat = MinerUtils::compose(pattern, {{Y, Y}}),
+		expected = al(LAMBDA_LINK,
+		              VarXY,
+		              al(IMPLICATION_LINK, X, Y));
 
 	logger().debug() << "npat = " << oc_to_string(npat);
 	logger().debug() << "expected = " << oc_to_string(expected);

@@ -262,42 +262,11 @@ Handle MinerUtils::local_quote(const Handle& h)
 	return createLink(LOCAL_QUOTE_LINK, h);
 }
 
-// TODO: take care of removing local quote in the composed
-// sub-patterns, if it doesn't already
-// TODO: replace by PutLink, if possible
 Handle MinerUtils::compose(const Handle& pattern, const HandleMap& var2pat)
 {
-	// Split var2pat into 2 mappings, variable to sub-vardecl and
-	// variable to sub-body
-	HandleMap var2subdecl, var2subody;
-	for (const auto& el : var2pat) {
-		var2subdecl[el.first] = get_vardecl(el.second);
-		var2subody[el.first] = get_body(el.second);
-	}
-
-	// Get variable declaration of the composition
-	Handle vardecl = vardecl_compose(get_vardecl(pattern), var2subdecl);
-
-	// Perform composition of the pattern body with the sub-bodies)
-	// TODO: perhaps use RewriteLink partial_substitute
-	const Variables& variables = get_variables(pattern);
-	Handle body = variables.substitute_nocheck(get_body(pattern), var2subody);
-	body = RewriteLink::consume_quotations(vardecl, body, true);
-	// If root AndLink then simplify the pattern
-	if (body->get_type() == AND_LINK) {
-		body = remove_useless_clauses(vardecl, body);
-		body = remove_unary_and(body);
-	}
-
-	// Filter vardecl
-	vardecl = filter_vardecl(vardecl, body);
-
-	// Create the composed pattern
-	if (vardecl)
-		return createLink(HandleSeq{vardecl, body}, pattern->get_type());
-
-	// No variable, the pattern is the body itself
-	return body;
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern))
+		return remove_useless_clauses(sc->beta_reduce(var2pat));
+	return pattern;
 }
 
 Handle MinerUtils::vardecl_compose(const Handle& vardecl, const HandleMap& var2subdecl)
