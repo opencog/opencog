@@ -197,6 +197,12 @@ public:
 	static HandleSet get_texts(const Handle& texts_cpt);
 
 	/**
+	 * Given a number node holding the minimum support return the
+	 * positive integer.
+	 */
+	static unsigned get_ms(const Handle& ms);
+
+	/**
 	 * Given a pattern and a text corpus, calculate the pattern
 	 * frequency up to ms (to avoid unnecessary calculations).
 	 */

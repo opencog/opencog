@@ -112,8 +112,7 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
-	NumberNodePtr nn = NumberNodeCast(ms);
-	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
@@ -145,8 +144,7 @@ bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
-	NumberNodePtr nn = NumberNodeCast(ms);
-	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	return MinerUtils::enough_support(pattern, texts_set, ms_uint);
 }
@@ -160,8 +158,7 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
-	NumberNodePtr nn = NumberNodeCast(ms);
-	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	HandleSet results = MinerUtils::expand_conjunction(cnjtion, pattern,
 	                                                   texts_set, ms_uint);

@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -365,6 +366,12 @@ HandleSet MinerUtils::get_texts(const Handle& texts_cpt)
 			texts.insert(member);
 	}
 	return texts;
+}
+
+unsigned MinerUtils::get_ms(const Handle& ms)
+{
+	NumberNodePtr nn = NumberNodeCast(ms);
+	return (unsigned)std::round(nn->get_value());
 }
 
 unsigned MinerUtils::support(const Handle& pattern,
