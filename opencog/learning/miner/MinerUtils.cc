@@ -149,7 +149,7 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 
 		for (const HandleSeq& valuation : var_scv.valuations) {
 			// Value associated to var
-			const Handle& val = valuation[0];
+			const Handle& val = valuation[var_scv.focus_index()];
 
 			// If the value of var is equal to that of rv, then
 			// increase rv factorization count

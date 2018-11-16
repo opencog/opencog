@@ -48,6 +48,11 @@ public:
 	const Handle& focus_variable() const;
 
 	/**
+	 * Return the index of the variable under focus, _var_idx
+	 */
+	unsigned focus_index() const;
+
+	/**
 	 * Return all variables following (and not including) the variable under focus.
 	 */
 	HandleSeq remaining_variables() const;
