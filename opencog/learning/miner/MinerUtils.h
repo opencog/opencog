@@ -38,10 +38,10 @@ class MinerUtils
 public:
 
 	/**
-	 * Given valuations produce all shallow abstractions reachind
+	 * Given valuations produce all shallow abstractions reaching
 	 * minimum support, over all variables. It basically applies
-	 * front_shallow_abstract recursively. See the specification of
-	 * front_shallow_abstract for more information.
+	 * focus_shallow_abstract recursively. See the specification of
+	 * focus_shallow_abstract for more information.
 	 *
 	 * For instance, given
 	 *
