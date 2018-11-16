@@ -102,9 +102,8 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 			continue;
 
 		// Otherwise generate its shallow abstraction
-		Handle shabs = val_shallow_abstract(value);
-		if (shabs)
-			shapats[val_shallow_abstract(value)] += val_count;
+		if (Handle shabs = val_shallow_abstract(value))
+			shapats[shabs] += val_count;
 	}
 
 	// Only consider shallow abstractions that reach the minimum
