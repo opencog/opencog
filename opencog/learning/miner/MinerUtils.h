@@ -240,6 +240,14 @@ public:
 	                                     unsigned ms);
 
 	/**
+	 * Return all shallow specializations of pattern with support ms
+	 * according to texts.
+	 */
+	static HandleSet shallow_specialize(const Handle& pattern,
+	                                    const HandleSet& texts,
+	                                    unsigned ms);
+
+	/**
 	 * Given a vardecl and a body, filter the vardecl to contain only
 	 * variable of the body, and create a Lambda with them.
 	 */
