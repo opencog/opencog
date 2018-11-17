@@ -2162,6 +2162,288 @@ So, rather than imposing no-crossing as a constraint on the parser, instead,
  Just implement a plain-old MST parser, punt on crossing.
 \end_layout
 
+\begin_layout Subsection*
+Crossing and Copulas
+\end_layout
+
+\begin_layout Standard
+Here's a great example where multiple lingusitic desires cause trouble.
+ First, consider the planar diagram, no-links-cross, that indicates both
+ the head-noun and the head-verb:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     +-------->WV------->+
+\end_layout
+
+\begin_layout Plain Layout
+
+     +---->Wd---->+      |
+\end_layout
+
+\begin_layout Plain Layout
+
+     |      +<-Ds-+--Ss--+-->Pa->+
+\end_layout
+
+\begin_layout Plain Layout
+
+     |      |     |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+ LEFT-WALL the  dog.n   was    black 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above indicates the head-noun (
+\family typewriter
+Wd
+\family default
+), the head-verb (
+\family typewriter
+WV
+\family default
+) and a subject-verb relation (
+\family typewriter
+Ss
+\family default
+) and that these three for a cycle.
+ Its still a DAG, because the arrows point down from the root.
+ The 
+\family typewriter
+Pa
+\family default
+ link is a predicative-adjective link.
+\end_layout
+
+\begin_layout Standard
+A plausible alternative diagram is
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+    +---->Wd---->+      
+\end_layout
+
+\begin_layout Plain Layout
+
+    |            +-->adjcomp--->+
+\end_layout
+
+\begin_layout Plain Layout
+
+    |            |              |
+\end_layout
+
+\begin_layout Plain Layout
+
+    |      +<-Ds-+--Ss--+<-cop<-+
+\end_layout
+
+\begin_layout Plain Layout
+
+    |      |     |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+LEFT-WALL the  dog.n   was    black
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the 
+\family typewriter
+adjcomp
+\family default
+ arrow indicates the adjectival complement, and 
+\family typewriter
+cop
+\family default
+ indicates the copula.
+ Note that it is 
+\emph on
+impossible
+\emph default
+ to draw an arrow from the root to the head-verb, without forcing a link-crossin
+g! Interesting, eh? 
+\end_layout
+
+\begin_layout Standard
+The real question, the major question is: what happens to pair-wise MI?
+ What would that show? It seems unlikely that MI(dog, black) is going to
+ be all that high.
+ But what about MI(physical oject, color)? What is the correct way to compute
+ MI(physical oject, color)?
+\end_layout
+
+\begin_layout Standard
+The above is perhaps the simplest-possible example of the confusion surrounding
+ the transition from SSyntR to DSyntR (or to logical representations, a
+ la opencog).
+ That is, we want to convert the 
+\family typewriter
+adjcomp
+\family default
+ relation to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+  EvaluationLink
+\end_layout
+
+\begin_layout Plain Layout
+
+     PredicateNode "has color"
+\end_layout
+
+\begin_layout Plain Layout
+
+        ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+           Concept "dog"
+\end_layout
+
+\begin_layout Plain Layout
+
+           Concept "black"
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Following Poon & Domingos, we really want to convert it to
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+  LambdaLink
+\end_layout
+
+\begin_layout Plain Layout
+
+    VariableList
+\end_layout
+
+\begin_layout Plain Layout
+
+       Variable $PHY
+\end_layout
+
+\begin_layout Plain Layout
+
+       Variable $COL
+\end_layout
+
+\begin_layout Plain Layout
+
+    AndLink
+\end_layout
+
+\begin_layout Plain Layout
+
+       EvaluationLink
+\end_layout
+
+\begin_layout Plain Layout
+
+          PredicateNode "has color"
+\end_layout
+
+\begin_layout Plain Layout
+
+          ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+             Variable $PHY
+\end_layout
+
+\begin_layout Plain Layout
+
+             Variable $COL
+\end_layout
+
+\begin_layout Plain Layout
+
+       InheritanceLink
+\end_layout
+
+\begin_layout Plain Layout
+
+          Variable $PHY
+\end_layout
+
+\begin_layout Plain Layout
+
+          Concept "physical object"
+\end_layout
+
+\begin_layout Plain Layout
+
+       InheritanceLink
+\end_layout
+
+\begin_layout Plain Layout
+
+          Variable $COL
+\end_layout
+
+\begin_layout Plain Layout
+
+          Concept "color" 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Of course, this has to be done based on the evidence of many sentences,
+ discovered to be qusi-synonymous (a la Dekang Lin DIRT).
+\end_layout
+
 \begin_layout Section*
 11 January 2014
 \end_layout
