@@ -116,13 +116,6 @@ public:
 	const Handle& focus_value(const HandleSeq& values) const;
 
 	/**
-	 * Compare if 2 SCValuations are equal, in fact only looking at
-	 * their variables, as it is enough it the context in which they
-	 * will be used.
-	 */
-	bool operator==(const SCValuations& other) const;
-
-	/**
 	 * Less than relationship according to Variables, because it's
 	 * cheap and no 2 SCValuations with same variables will be in the
 	 * same set at once.

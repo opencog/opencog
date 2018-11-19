@@ -128,8 +128,8 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 		unsigned rv_idx = rv_scv.index(rv);
 
 		// Whether var and rv are in the same strongly connected
-		// valuations
-		bool same_scv = rv_scv == var_scv;
+		// valuations (using pointer equality to speed it up)
+		bool same_scv = &rv_scv == &var_scv;
 
 		// Ref to keep track of the number of text instances where the
 		// value of var is equal to the value to rv

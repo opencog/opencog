@@ -131,11 +131,6 @@ const Handle& SCValuations::focus_value(const HandleSeq& values) const
 	return values[_var_idx];
 }
 
-bool SCValuations::operator==(const SCValuations& other) const
-{
-	return variables == other.variables;
-}
-
 bool SCValuations::operator<(const SCValuations& other) const
 {
 	return variables < other.variables;
