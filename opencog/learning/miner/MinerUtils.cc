@@ -403,13 +403,8 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 		for (const Handle& sa : shabs) {
 			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
 			// Shallow_abstract should already have eliminated shallow
-			// abstraction that do not have enough support. Put a
-			// temporary assert here to make sure that is the case.
-			// OC_ASSERT(enough_support(npat, texts, ms),
-			//           "shallow_abstract should guaranty that."
-			//           "If it doesn't, there is probably a bug");
-			if (enough_support(npat, texts, ms))
-				results.insert(npat);
+			// abstraction that do not have enough support.
+			results.insert(npat);
 		}
 		vari++;
 	}
