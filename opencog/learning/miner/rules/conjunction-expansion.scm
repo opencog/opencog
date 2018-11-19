@@ -121,9 +121,9 @@
               ;; Fake conclusion, since we can't statistically define its
               ;; pattern ATM
               (minsup-eval (top) texts ms)
-              ;; Premises
-              minsup-f
-              minsup-g))))
+              ;; Premises, wrap in Set because their order does not matter
+              (Set minsup-f
+                   minsup-g)))))
 
       ;; Left pattern has 1 < nary arity
       (let* (;; Variables
@@ -154,21 +154,26 @@
             ;; Fake conclusion, since we can't statistically define its
             ;; pattern ATM
             (minsup-eval (top) texts ms)
-            ;; Premises
-            minsup-f
-            minsup-g))))))
+            ;; Premises, wrap in Set because their order does not matter
+            (Set minsup-f
+                 minsup-g)))))))
 
 ;; Conjunction expansion formula
 (define (conjunction-expansion-formula conclusion . premises)
   ;; (cog-logger-debug "conjunction-expansion-formula conclusion = ~a, premises = ~a" conclusion premises)
-  (if (= (length premises) 2)
-      (let* ((minsup-f (car premises))
-             (minsup-g (cadr premises))
+  (if (= (length premises) 1)
+      (let* ((minsup-fg (car premises))
+             (minsup-f (cog-outgoing-atom minsup-fg 0))
+             (minsup-g (cog-outgoing-atom minsup-fg 1))
              (f (get-pattern minsup-f))
              (g (get-pattern minsup-g))
              (texts (get-texts minsup-f))
              (ms (get-ms minsup-f))
-             (fgs (cog-expand-conjunction f g texts ms))
+             ;; Swap f and g to make sure the second argument of
+             ;; cog-expand-conjunction is never a conjunction
+             (fgs (if (unary-conjunction? (get-body g))
+                      (cog-expand-conjunction f g texts ms)
+                      (cog-expand-conjunction g f texts ms)))
              (mk-minsup (lambda (fg) (minsup-eval-true fg texts ms)))
              ;; cog-expand-conjunction only return patterns with
              ;; enough support
