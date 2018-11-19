@@ -1058,7 +1058,7 @@ void MinerUTest::test_2conjuncts_3()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 10, mk_nconjunct(2)),
+	Handle ure_results = ure_pm(texts, 2, 20, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(2,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1102,7 +1102,7 @@ void MinerUTest::test_2conjuncts_4()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 4, 20, mk_nconjunct(2)),
+	Handle ure_results = ure_pm(texts, 4, 50, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(4,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1286,7 +1286,7 @@ void MinerUTest::test_InferenceControl()
 	TS_ASSERT(content_is_in(expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(_tmp_as, 2, 200, initpat),
+	Handle ure_results = ure_pm(_tmp_as, 2, 50, initpat),
 		ure_expected = mk_minsup_eval(2, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
