@@ -728,11 +728,11 @@
 
   (set! rule-alist
     (assq-set! rule-alist rule-name
-      (list PATTERN ACTION (process-goal GOAL) GOAL rule-name TYPE is-rule-seq?)))
+      (list PATTERN ACTION (process-goal GOAL) GOAL rule-name TYPE is-rule-seq? rule-concept)))
 )
 
 ; ----------
-(define (instantiate-rule PATTERN ACTION ALL-GOALS RULE-LV-GOALS NAME TYPE ORDERED?)
+(define (instantiate-rule PATTERN ACTION ALL-GOALS RULE-LV-GOALS NAME TYPE ORDERED? RULE-CONCEPTS)
 "
   To process and create the rule in the AtomSpace.
 "
@@ -903,6 +903,9 @@
                   (equal? 'GroundedPredicateNode (cog-type x))))
             (append-map cog-get-all-nodes conds)))
 
+        ; Link it to concepts, if defined
+        (map (lambda (c) (Member a-rule (Concept c))) RULE-CONCEPTS)
+
         ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
 
         ; Return
@@ -949,6 +952,9 @@
   (set! top-lv-goals GOALS)
   (set! is-rule-seq? ORDERED)
 
+  ; Reset the rule-concept when a new topic is defined
+  (set! rule-concept '())
+
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
 
@@ -982,4 +988,13 @@
   Define a new user variable.
 "
   (ghost-set-user-variable (ghost-uvar UVAR) (List (Word VAL)))
+)
+
+(define (link-rule-to-concepts CONCEPTS)
+"
+  Link CONCEPTS to a rule by a MemberLink.
+
+  The actual linkages will be created when the rule is instantiated.
+"
+  (set! rule-concept CONCEPTS)
 )
