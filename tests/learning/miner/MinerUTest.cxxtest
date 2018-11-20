@@ -188,6 +188,7 @@ public:
 	void test_expand_conjunction_disconnect();
 	void test_expand_conjunction_1();
 	void test_expand_conjunction_2();
+	void test_shallow_abstract();
 
 	// Pattern miner
 	void test_A();
@@ -634,6 +635,60 @@ void MinerUTest::test_expand_conjunction_2()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_shallow_abstract()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Load ugly-male-soda-drinker-corpus.scm
+	std::string rs =
+		_tmp_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Define pattern
+	Handle VarXZW = al(VARIABLE_LIST, X, Z, W),
+		ugly = an(CONCEPT_NODE, "ugly"),
+		clauses = al(AND_LINK,
+		             al(INHERITANCE_LINK, X, ugly),
+		             al(INHERITANCE_LINK, X, Z),
+		             al(INHERITANCE_LINK, X, W)),
+		pattern = al(LAMBDA_LINK, VarXZW, clauses);
+
+	// Define texts
+	HandleSet texts;
+	_tmp_as.get_handles_by_type(std::inserter(texts, texts.end()),
+	                            opencog::ATOM, true);
+
+	// Define minimum support
+	int ms = 5;
+
+	// Calculate the shallow abstractions
+	HandleSetSeq result = MinerUtils::shallow_abstract(pattern, texts, ms);
+
+	// Construct expected shallow abstractions
+	Handle
+		Abe = an(CONCEPT_NODE, "Abe"),
+		Alaura = an(CONCEPT_NODE, "Alaura"),
+		Allen = an(CONCEPT_NODE, "Allen"),
+		Cason = an(CONCEPT_NODE, "Cason"),
+		Davion = an(CONCEPT_NODE, "Davion"),
+		Emily = an(CONCEPT_NODE, "Emily"),
+		Hessley = an(CONCEPT_NODE, "Hessley"),
+		Lily = an(CONCEPT_NODE, "Lily"),
+		Sophia = an(CONCEPT_NODE, "Sophia"),
+		human = an(CONCEPT_NODE, "human"),
+		man = an(CONCEPT_NODE, "man"),
+		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
+		woman = an(CONCEPT_NODE, "woman");
+	HandleSetSeq expect{ { Abe, Allen, Cason, Davion, Emily, Lily, Sophia },
+	                     { soda_drinker, W, ugly, man, human, woman },
+	                     { soda_drinker, ugly, man, human, woman } };
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT(content_eq(result, expect));
 }
 
 void MinerUTest::test_A()
