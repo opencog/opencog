@@ -81,6 +81,8 @@
     ((has-match? "#goal:" str) (result:suffix 'RGOAL location #f))
     ((has-match? "parallel-rules:" str)
       (result:suffix 'PARALLEL-RULES location #f))
+    ((has-match? "link-concept:" str)
+      (result:suffix 'LINK-CONCEPT location #f))
     ((has-match? "#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
@@ -246,7 +248,7 @@
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
-     SAMPLE_INPUT PARALLEL-RULES
+     SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
               SET_DELAY)
@@ -267,6 +269,7 @@
       (ordered-goal) :
         (create-top-lv-goal (eval-string (string-append "(list " $1 ")")) #t)
       (PARALLEL-RULES) : (create-top-lv-goal (list (cons "Parallel-Rules" 1)))
+      (link-concept) : (link-rule-to-concepts (string-split $1 #\sp))
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -439,6 +442,11 @@
       (LITERAL_APOS EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+    )
+
+    (link-concept
+      (LINK-CONCEPT LPAREN names RPAREN) :
+        (format #f "~a" $3)
     )
 
     (context
