@@ -354,8 +354,13 @@ public:
 	                                    HandleSeq& clauses);
 
 	/**
-	 * Remove redundant clauses, such as ones identical to clauses of
-	 * there subtrees.
+	 * Remove redundant subclauses, such as ones identical to clauses
+	 * of there subtrees.
+	 */
+	static void remove_redundant_subclauses(HandleSeq& clauses);
+
+	/**
+	 * Remove redundant clauses.
 	 */
 	static void remove_redundant_clauses(HandleSeq& clauses);
 
