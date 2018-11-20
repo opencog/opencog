@@ -574,7 +574,7 @@ Handle MinerUtils::remove_useless_clauses(const Handle& vardecl,
 void MinerUtils::remove_useless_clauses(const Handle& vardecl, HandleSeq& clauses)
 {
 	remove_constant_clauses(vardecl, clauses);
-	remove_redundant_clauses(clauses);
+	remove_redundant_subclauses(clauses);
 }
 
 void MinerUtils::remove_constant_clauses(const Handle& vardecl, HandleSeq& clauses)
@@ -589,7 +589,7 @@ void MinerUtils::remove_constant_clauses(const Handle& vardecl, HandleSeq& claus
 	boost::remove_erase_if(clauses, is_constant);
 }
 
-void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
+void MinerUtils::remove_redundant_subclauses(HandleSeq& clauses)
 {
 	// Check that each clause is not a subtree of another clause,
 	// remove it otherwise.
@@ -604,6 +604,15 @@ void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
 		else
 			++it;
 	}
+}
+
+void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
+{
+	boost::sort(clauses);
+	typedef std::equal_to<opencog::Handle> HandleEqual;
+	boost::erase(clauses,
+	             boost::unique<boost::return_found_end, HandleSeq, HandleEqual>
+	             (clauses, HandleEqual()));
 }
 
 Handle MinerUtils::alpha_convert(const Handle& pattern,
