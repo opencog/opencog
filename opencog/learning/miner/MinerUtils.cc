@@ -667,11 +667,7 @@ Handle MinerUtils::expand_conjunction_disconnect(const Handle& cnjtion,
 	nclauses.push_back(get_body(acpat));
 
 	// Remove redundant clauses
-	boost::sort(nclauses);
-	typedef std::equal_to<opencog::Handle> HandleEqual;
-	boost::erase(nclauses,
-	             boost::unique<boost::return_found_end, HandleSeq, HandleEqual>
-	             (nclauses, HandleEqual()));
+	remove_redundant_clauses(nclauses);
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
@@ -703,11 +699,7 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
 	nclauses.push_back(npat_body);
 
 	// Remove redundant clauses
-	boost::sort(nclauses);
-	typedef std::equal_to<opencog::Handle> HandleEqual;
-	boost::erase(nclauses,
-	             boost::unique<boost::return_found_end, HandleSeq, HandleEqual>
-	             (nclauses, HandleEqual()));
+	remove_redundant_clauses(nclauses);
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
