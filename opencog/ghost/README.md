@@ -121,6 +121,21 @@ parallel-rules:
 
 Parallel-rules are 'kept' by default, that means it can be triggered more than once unless you explicitly unkeep it using `^unkeep()`. The same input will still be handled by the normal GHOST rules even if one or more parallel-rules have been triggered by it. Currently, rejoinders are not supported in parallel-rules.
 
+One can also optionally link one or more concepts to a rule, so that the importance of a rule will change with the linked concepts. Similar to defining goals, both top-level and rule-level are supported:
+
+```
+; top-level
+link-concept: (pets animals)
+
+  ; ... rules link to both "pets" and "animals" concepts ...
+
+  ; rule-level
+  #link-concept: (fish)
+    ; ... the rule that will link to the concept "fist", as well as the top-level "pets" and "animals" concepts ...
+```
+
+Note, `link-concept` will be reset when another top-level goal is seen.
+
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
 ## How To Run
