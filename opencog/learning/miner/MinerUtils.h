@@ -288,7 +288,7 @@ public:
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
 	                                        const HandleSet& texts,
-	                                        unsigned ms);
+	                                        unsigned ms=UINT_MAX);
 
 	/**
 	 * Return true iff the pattern is totally abstract like

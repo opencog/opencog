@@ -165,7 +165,7 @@ Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 	Handle reduced_pattern = MinerUtils::remove_useless_clauses(pattern);
 	for (const Handle& cp : MinerUtils::get_component_patterns(reduced_pattern))
 	{
-		Handle satset = MinerUtils::restricted_satisfying_set(cp, texts, texts.size());
+		Handle satset = MinerUtils::restricted_satisfying_set(cp, texts);
 		scvs.insert(SCValuations(MinerUtils::get_variables(cp), satset));
 	}
 	setup_size();
