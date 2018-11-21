@@ -676,12 +676,14 @@ void MinerUTest::test_shallow_abstract()
 		Emily = an(CONCEPT_NODE, "Emily"),
 		Hessley = an(CONCEPT_NODE, "Hessley"),
 		Lily = an(CONCEPT_NODE, "Lily"),
+		Lucy = an(CONCEPT_NODE, "Lucy"),
 		Sophia = an(CONCEPT_NODE, "Sophia"),
 		human = an(CONCEPT_NODE, "human"),
 		man = an(CONCEPT_NODE, "man"),
 		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
 		woman = an(CONCEPT_NODE, "woman");
-	HandleSetSeq expect{ { Abe, Allen, Cason, Davion, Emily, Lily, Sophia },
+	HandleSetSeq expect{ { Abe, Alaura, Allen, Cason, Davion,
+	                       Emily, Hessley, Lily, Lucy, Sophia },
 	                     { soda_drinker, W, ugly, man, human, woman },
 	                     { soda_drinker, ugly, man, human, woman } };
 
