@@ -210,8 +210,32 @@
 (DefineLink conjunction-expansion-4ary-rule-name
   (gen-conjunction-expansion-rule 4))
 
-;; Define quaternary conjunction expansion
+;; Define quinary conjunction expansion
 (define conjunction-expansion-5ary-rule-name
   (DefinedSchemaNode "conjunction-expansion-5ary-rule"))
 (DefineLink conjunction-expansion-5ary-rule-name
   (gen-conjunction-expansion-rule 5))
+
+;; Define senary conjunction expansion
+(define conjunction-expansion-6ary-rule-name
+  (DefinedSchemaNode "conjunction-expansion-6ary-rule"))
+(DefineLink conjunction-expansion-6ary-rule-name
+  (gen-conjunction-expansion-rule 6))
+
+;; Define septenary conjunction expansion
+(define conjunction-expansion-7ary-rule-name
+  (DefinedSchemaNode "conjunction-expansion-7ary-rule"))
+(DefineLink conjunction-expansion-7ary-rule-name
+  (gen-conjunction-expansion-rule 7))
+
+;; Define octonary conjunction expansion
+(define conjunction-expansion-8ary-rule-name
+  (DefinedSchemaNode "conjunction-expansion-8ary-rule"))
+(DefineLink conjunction-expansion-8ary-rule-name
+  (gen-conjunction-expansion-rule 8))
+
+;; Define novenary conjunction expansion
+(define conjunction-expansion-9ary-rule-name
+  (DefinedSchemaNode "conjunction-expansion-9ary-rule"))
+(DefineLink conjunction-expansion-9ary-rule-name
+  (gen-conjunction-expansion-rule 9))
