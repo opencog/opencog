@@ -705,12 +705,15 @@
 )
 
 ; ----------
-(define (create-rule PATTERN ACTION GOAL NAME TYPE)
+(define (create-rule PATTERN ACTION GOAL NAME TYPE RCNPTS)
 "
   Top level translation function.
 
   PATTERN, ACTION, and GOAL are the basic components of a psi-rule,
   correspond to context, procedure, and goal respectively.
+
+  RCNPTS is the optional rule-level concepts that will be linked to
+  the rule being defined.
 
   NAME is like a label of a rule, so that one can reference this rule
   by using it.
@@ -728,7 +731,8 @@
 
   (set! rule-alist
     (assq-set! rule-alist rule-name
-      (list PATTERN ACTION (process-goal GOAL) GOAL rule-name TYPE is-rule-seq? rule-concept)))
+      (list PATTERN ACTION (process-goal GOAL) GOAL
+        rule-name TYPE is-rule-seq? (append rule-concept RCNPTS))))
 )
 
 ; ----------
