@@ -666,8 +666,10 @@ Handle MinerUtils::expand_conjunction_disconnect(const Handle& cnjtion,
 		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
 	nclauses.push_back(get_body(acpat));
 
-	// Remove redundant clauses
-	remove_redundant_clauses(nclauses);
+	// Remove redundant subclauses. This can happen if there's only one
+	// variable to connect, then some subclause turn out to be
+	// redundant.
+	remove_redundant_subclauses(nclauses);
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
@@ -698,8 +700,10 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
 		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
 	nclauses.push_back(npat_body);
 
-	// Remove redundant clauses
-	remove_redundant_clauses(nclauses);
+	// Remove redundant subclauses. This can happen if there's only one
+	// variable to connect, then some subclause turn out to be
+	// redundant.
+	remove_redundant_subclauses(nclauses);
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
