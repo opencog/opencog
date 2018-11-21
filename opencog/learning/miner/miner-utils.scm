@@ -121,11 +121,20 @@
         (load-from-path rule-pathfile)
         (ure-add-rules pm-rbs rules))))
 
-(define* (configure-rules pm-rbs #:key (incremental-expansion (stv 0 1)))
+(define* (configure-rules pm-rbs
+                          #:key
+                          (incremental-expansion (stv 0 1))
+                          (max-conjuncts 3))
   (configure-mandatory-rules pm-rbs)
-  (configure-optional-rules pm-rbs #:incremental-expansion incremental-expansion))
+  (configure-optional-rules pm-rbs
+                            #:incremental-expansion incremental-expansion
+                            #:max-conjuncts max-conjuncts))
 
-(define* (configure-miner pm-rbs #:key (maxiter -1) (incremental-expansion (stv 0 1)))
+(define* (configure-miner pm-rbs
+                          #:key
+                          (maxiter 1000)
+                          (incremental-expansion (stv 0 1))
+                          (max-conjuncts 3))
 "
   Given a Concept node representing a rule based system for the
   pattern miner. Automatically configure it with the appropriate
@@ -135,14 +144,25 @@
 
   pm-rbs: Concept node of the rule-based system to configure
 
-  mi: [optional] Maximum number of iterations of the rule-engine
+  mi: [optional, default=1000] Maximum number of iterations allocated.
+      If negative then the pattern miner keeps running till all patterns
+      have been exhausted (not recommended unless you know what you're doing).
 
-  tv: [optional] Truth value of a rule to expand existing conjunctions
-      of patterns. It will only expand conjunctions with enough support with
-      patterns with enough support.
+  tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
+      conjunctions of patterns. It will only expand conjunctions with enough
+      support with patterns with enough support.
+
+  mc: [optional, default=3] In case tv is set to a positive strength and
+      confidence, and thus incremental conjunction expansion is enabled, that
+      option allows to limit the number of conjuncts to mc. If negative then
+      the number of conjuncts can grow unlimited (not recommended unless you
+      know what you're doing). As of now mc can not be set above 9 (which
+      should be more than enough).
 "
   ;; Load and associate rules to pm-rbs
-  (configure-rules pm-rbs #:incremental-expansion incremental-expansion)
+  (configure-rules pm-rbs
+                   #:incremental-expansion incremental-expansion
+                   #:max-conjuncts max-conjuncts)
 
   ;; Set parameters
   (ure-set-maximum-iterations pm-rbs maxiter)
@@ -264,14 +284,20 @@
 
 (define* (cog-mine texts ms
                    #:key
-                   (maxiter -1)
+                   (maxiter 1000)
                    (initpat (top))
-                   (incremental-expansion (stv 0 1)))
+                   (incremental-expansion (stv 0 1))
+                   (max-conjuncts 3))
 "
   Mine patterns in texts with minimum support ms, optionally
   using maxiter iterations and starting from the initial pattern initpat.
 
-  Usage: (cog-mine texts ms #:maxiter mi #:initpat ip #:incremental-expansion tv)
+  Usage: (cog-mine texts ms
+                   ;; Optional arguments
+                   #:maxiter mi
+                   #:initpat ip
+                   #:incremental-expansion tv
+                   #:max-conjuncts mc)
 
   texts: Collection of texts to mine. It can be given in 3 forms
 
@@ -301,14 +327,23 @@
   ms: Minimum support. All pattern with frequency below ms are
       discarded
 
-  mi: [optional] Maximum number of iterations allocated
+  mi: [optional, default=1000] Maximum number of iterations allocated.
+      If negative then the pattern miner keeps running till all patterns
+      have been exhausted (not recommended unless you know what you're doing).
 
-  ip: [optional] Initial pattern to start the search from. All mined
-      pattern will be specializations of this pattern.
+  ip: [optional, default=(top)] Initial pattern to start the search from.
+      All mined patterns will be specializations of this pattern.
 
-  tv: [optional] Truth value of a rule to expand existing conjunctions
-      of patterns. It will only expand conjunctions with enough support with
-      patterns with enough support.
+  tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
+      conjunctions of patterns. It will only expand conjunctions with enough
+      support with patterns with enough support.
+
+  mc: [optional, default=3] In case tv is set to a positive strength and
+      confidence, and thus incremental conjunction expansion is enabled, that
+      option allows to limit the number of conjuncts to mc. If negative then
+      the number of conjuncts can grow unlimited (not recommended unless you
+      know what you're doing). As of now mc can not be set above 9 (which
+      should be more than enough).
 
   Under the hood it will create a rule base and a query for the rule
   engine, configure it according to the user's options and run it.
@@ -363,7 +398,8 @@
                (miner-rbs (random-miner-rbs-cpt)))
           (configure-miner miner-rbs
                            #:maxiter maxiter
-                           #:incremental-expansion incremental-expansion)
+                           #:incremental-expansion incremental-expansion
+                           #:max-conjuncts max-conjuncts)
           (let* (;; Run the pattern miner in a forward way
                  (results (cog-fc miner-rbs source))
                  ;; Fetch all relevant results
