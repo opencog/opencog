@@ -233,9 +233,3 @@
   (DefinedSchemaNode "conjunction-expansion-8ary-rule"))
 (DefineLink conjunction-expansion-8ary-rule-name
   (gen-conjunction-expansion-rule 8))
-
-;; Define novenary conjunction expansion
-(define conjunction-expansion-9ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-9ary-rule"))
-(DefineLink conjunction-expansion-9ary-rule-name
-  (gen-conjunction-expansion-rule 9))
