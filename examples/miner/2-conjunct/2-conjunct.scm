@@ -41,6 +41,22 @@
 ;;       (Variable "$Y")
 ;;       (Variable "$Z"))))
 ;;
+;; Starting from pattern (conjunct-pattern 2), that is
+;;
+;; (Lambda
+;;   (VariableList
+;;     (Variable "$X")
+;;     (Variable "$Y")
+;;     (Variable "$Z")
+;;     (Variable "$W"))
+;;   (And
+;;     (Inheritance
+;;       (Variable "$X")
+;;       (Variable "$Y"))
+;;     (Inheritance
+;;       (Variable "$Z")
+;;       (Variable "$W"))))
+;;
 ;; TODO: the following bugs for no reason
 ;; (cog-mine (cog-atomspace) 2 #:initpat (conjunct-pattern 2))
 (cog-mine (list AB BC DE EF) 2 #:initpat (conjunct-pattern 2))
