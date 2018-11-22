@@ -26,6 +26,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/random.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
