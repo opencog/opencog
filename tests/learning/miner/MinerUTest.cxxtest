@@ -1115,7 +1115,7 @@ void MinerUTest::test_2conjuncts_3()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 2, 20, mk_nconjunct(2)),
+	Handle ure_results = ure_pm(texts, 2, 50, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(2,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1159,7 +1159,7 @@ void MinerUTest::test_2conjuncts_4()
 	TS_ASSERT(content_is_in(cpp_expected, cpp_results));
 
 	// Run URE pattern miner
-	Handle ure_results = ure_pm(texts, 4, 50, mk_nconjunct(2)),
+	Handle ure_results = ure_pm(texts, 4, 100, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(4,
 		                              al(LAMBDA_LINK,
 		                                 VarXYZ,
@@ -1443,7 +1443,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
 	int max_conjuncts = 3;
 	double complexity_penalty = 1;
-	Handle ure_results = ure_pm(_tmp_as, 5, 100,
+	Handle ure_results = ure_pm(_tmp_as, 5, 200,
 	                            initpat,
 	                            incremental_expansion,
 	                            max_conjuncts,
