@@ -101,7 +101,7 @@
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
 
 ;; Complexity penalty
-(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+(ure-set-num-parameter pln-rbs "URE:complexity-penalty" 1)
 
 ;; BIT reduction parameters
 (ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)

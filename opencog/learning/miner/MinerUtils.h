@@ -38,10 +38,10 @@ class MinerUtils
 public:
 
 	/**
-	 * Given valuations produce all shallow abstractions reachind
+	 * Given valuations produce all shallow abstractions reaching
 	 * minimum support, over all variables. It basically applies
-	 * front_shallow_abstract recursively. See the specification of
-	 * front_shallow_abstract for more information.
+	 * focus_shallow_abstract recursively. See the specification of
+	 * focus_shallow_abstract for more information.
 	 *
 	 * For instance, given
 	 *
@@ -69,8 +69,8 @@ public:
 
 	/**
 	 * Given valuations produce all shallow abstractions reaching
-	 * minimum support based on the values associated to the front
-	 * variable first variable. This shallow abstractions include
+	 * minimum support based on the values associated to the variable
+	 * in focus. This shallow abstractions include
 	 *
 	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
 	 * 2. Constant nodes, like (Concept "A")
@@ -95,13 +95,18 @@ public:
 	 *                                            (Variable "$X1")
 	 *                                            (Variable "$X2"))) }
 	 */
-	static HandleSet front_shallow_abstract(const Valuations& valuations, unsigned ms);
+	static HandleSet focus_shallow_abstract(const Valuations& valuations, unsigned ms);
+
+	/**
+	 * Return true iff h is a node or a nullary link.
+	 */
+	static bool is_nullary(const Handle& h);
 
 	/**
 	 * Given an atom, a value, return its corresponding shallow
 	 * abstraction. A shallow abstraction of an atom is
 	 *
-	 * 1. itself if it is a node
+	 * 1. itself if it is nullary (see is_nullary)
 	 *
 	 * 2. (Lambda (VariableList X1 ... Xn) (L X1 ... Xn) if it is a
 	 *    link of arity n.
@@ -152,8 +157,6 @@ public:
 	static Handle local_quote(const Handle& h);
 
 	/**
-	 * TODO replace by RewriteLink::beta_reduce
-	 *
 	 * Given a pattern, and mapping from variables to sub-patterns,
 	 * compose (as in function composition) the pattern with the
 	 * sub-patterns. That is replace variables in the pattern by their
@@ -187,15 +190,15 @@ public:
 	static Handle remove_unary_and(const Handle& h);
 
 	/**
-	 * Call alpha_conversion if pattern is a scope, return itself
-	 * otherwise.
-	 */
-	static Handle alpha_conversion(const Handle& pattern);
-
-	/**
 	 * Given a texts concept node, retrieve all its members
 	 */
 	static HandleSet get_texts(const Handle& texts_cpt);
+
+	/**
+	 * Given a number node holding the minimum support return the
+	 * positive integer.
+	 */
+	static unsigned get_ms(const Handle& ms);
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
@@ -233,6 +236,14 @@ public:
 	static HandleSetSeq shallow_abstract(const Handle& pattern,
 	                                     const HandleSet& texts,
 	                                     unsigned ms);
+
+	/**
+	 * Return all shallow specializations of pattern with support ms
+	 * according to texts.
+	 */
+	static HandleSet shallow_specialize(const Handle& pattern,
+	                                    const HandleSet& texts,
+	                                    unsigned ms);
 
 	/**
 	 * Given a vardecl and a body, filter the vardecl to contain only
@@ -277,7 +288,7 @@ public:
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
 	                                        const HandleSet& texts,
-	                                        unsigned ms);
+	                                        unsigned ms=UINT_MAX);
 
 	/**
 	 * Return true iff the pattern is totally abstract like
@@ -343,10 +354,73 @@ public:
 	                                    HandleSeq& clauses);
 
 	/**
-	 * Remove redundant clauses, such as ones identical to clauses of
-	 * there subtrees.
+	 * Remove redundant subclauses, such as ones identical to clauses
+	 * of there subtrees.
+	 */
+	static void remove_redundant_subclauses(HandleSeq& clauses);
+
+	/**
+	 * Remove redundant clauses.
 	 */
 	static void remove_redundant_clauses(HandleSeq& clauses);
+
+	/**
+	 * Alpha convert pattern so that none of its variables collide with
+	 * the variables in other_vars.
+	 */
+	static Handle alpha_convert(const Handle& pattern,
+	                            const Variables& other_vars);
+
+	/**
+	 * Construct the conjunction of 2 patterns. If cnjtion is a
+	 * conjunction, then expand it with pattern (performing
+	 * alpha-conversion when necessary). It is assumed that pattern
+	 * cannot be a conjunction itself.
+	 *
+	 * This method will not attempt to connect the 2 patterns, thus,
+	 * assuming that cnjtion is itself strongly connected, the result
+	 * will be 2 strongly connected components.
+	 */
+	static Handle expand_conjunction_disconnect(const Handle& cnjtion,
+	                                            const Handle& pattern);
+
+	/**
+	 * Like expand_conjunction_disconnect but produced a single
+	 * strongly connected component, assuming that cnjtion is itself
+	 * strongly connected, given 2 connecting variables, one from
+	 * cnjtion, one from pattern.
+	 *
+	 * Unlike expand_conjunction_disconnect, no alpha conversion is
+	 * performed, cnjtion is assumed not to collide with pattern.
+	 */
+	static Handle expand_conjunction_connect(const Handle& cnjtion,
+	                                         const Handle& pattern,
+	                                         const Handle& cnjtion_var,
+	                                         const Handle& pattern_var);
+
+	/**
+	 * Given cnjtion and pattern, consider all possible connections and
+	 * expand cnjtion accordingly. For instance if
+	 *
+	 * cnjtion = (Inheritance X Y)
+	 * pattern = (Inheritance Z W)
+	 *
+	 * return
+	 *
+	 *   (And (Inheritance X Y) (Inheritance X W))
+	 *   (And (Inheritance X Y) (Inheritance Z X))
+	 *   (And (Inheritance X Y) (Inheritance Y W))
+	 *   (And (Inheritance X Y) (Inheritance X Y))
+	 *
+	 * It will also only include patterns with minimum support ms
+	 * according to texts, and perform alpha-conversion when necessary.
+	 * If an expansion is cnjtion itself it will be dismissed.
+	 */
+	static HandleSet expand_conjunction(const Handle& cnjtion,
+	                                    const Handle& pattern,
+	                                    const HandleSet& texts,
+	                                    unsigned ms);
+
 };
 
 } // ~namespace opencog

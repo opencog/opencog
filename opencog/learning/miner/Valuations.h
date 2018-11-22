@@ -37,15 +37,32 @@ public:
 	ValuationsBase();               // TODO: just till be use dummy valuations
 
 	/**
-	 * Return true iff the valuation contains no variable (thus is
-	 * empty).
+	 * Return true iff the valuation contains no variable to focus on
+	 * (empty or _var_idx is out of range).
 	 */
-	bool novar() const;
+	bool no_focus() const;
 
 	/**
-	 * Return the front variable.
+	 * Return the variable under focus (at _var_idx)
 	 */
-	Handle front_variable() const;
+	const Handle& focus_variable() const;
+
+	/**
+	 * Return the index of the variable under focus, _var_idx
+	 */
+	unsigned focus_index() const;
+
+	/**
+	 * Return all variables following (and not including) the variable under focus.
+	 */
+	HandleSeq remaining_variables() const;
+
+	/**
+	 * Move focus to the next (or previous) variable. That is increment
+	 * (or decrement) _var_idx.
+	 */
+	void inc_focus_variable() const;
+	void dec_focus_variable() const;
 
 	/**
 	 * Return the variable at index i.
@@ -63,6 +80,11 @@ public:
 	unsigned size() const;
 
 	Variables variables;
+
+protected:
+	// Index pointing to the current variable of focus. Useful for
+	// MinerUtils::shallow_abstract recursive calls.
+	mutable unsigned _var_idx;
 };
 
 /**
@@ -82,32 +104,16 @@ public:
 	SCValuations(const Variables& variables, const Handle& satset=Handle::UNDEFINED);
 
 	/**
-	 * Erase the front variable with all its corresponding values on a
-	 * copy of this valuations.
-	 *
-	 * TODO: instead of erasing the front it would be better to move
-	 * some pointer to the next variable.
-	 */
-	SCValuations erase_front() const;
-
-	/**
-	 * Erase the given variable, if exists, with all its corresponding
-	 * values on a copy of this valuations.
-	 */
-	SCValuations erase(const Handle& var) const;
-
-	/**
 	 * Return all counted values corresponding to var.
 	 */
 	HandleUCounter values(const Handle& var) const;
 	HandleUCounter values(unsigned var_idx) const;
 
 	/**
-	 * Compare if 2 SCValuations are equal, in fact only looking at
-	 * their variables, as it is enough it the context in which they
-	 * will be used.
+	 * Return the value under focus (at var_idx) of a give row of
+	 * values.
 	 */
-	bool operator==(const SCValuations& other) const;
+	const Handle& focus_value(const HandleSeq& values) const;
 
 	/**
 	 * Less than relationship according to Variables, because it's
@@ -121,6 +127,8 @@ public:
 	 * values.
 	 */
 	unsigned size() const;
+
+	std::string to_string(const std::string& indent=empty_string) const;
 
 	// Actual valuations, sequence of tuples of values associated to
 	// each variable.
@@ -145,12 +153,6 @@ public:
 	Valuations(const Handle& pattern, const HandleSet& texts);
 	Valuations(const Variables& variables, const SCValuationsSet& scvs);
 	Valuations(const Variables& variables);
-	
-	/**
-	 * Erase the front variable with all its corresponding associated
-	 * values on a copy of this valuations.
-	 */
-	Valuations erase_front() const;
 
 	/**
 	 * Get the SCValuations containing the given variable.
@@ -158,11 +160,26 @@ public:
 	const SCValuations& get_scvaluations(const Handle& var) const;
 
 	/**
+	 * Get the SCValuations containing the variable under focus
+	 */
+	const SCValuations& focus_scvaluations() const;
+
+	/**
+	 * Move focus to the next (or previous) variable. That is increment
+	 * (or decrement) _var_idx, as well as move focus of corresponding
+	 * variable of the corresponding strongly connected component.
+	 */
+	void inc_focus_variable() const;
+	void dec_focus_variable() const;
+
+	/**
 	 * Return the size of the Valuations, that is its totally number
 	 * of values accounting for the potential combinations of values
 	 * between the strongly connected valuations.
 	 */
 	unsigned size() const;
+
+	std::string to_string(const std::string& indent) const;
 
 	SCValuationsSet scvs;
 
