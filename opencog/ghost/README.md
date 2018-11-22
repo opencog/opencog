@@ -35,6 +35,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Range-restricted Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
 - [Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#_-match-variables)
 - [User Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
+  - There is one difference, in ChatScript when a user variable is placed in the context, e.g. `?: ( what is my name $firstname ) Your name is $firstname.`, it checks whether `$firstname` has been defined, and trigger the rule if it's been defined and the input is "what is my name". In GHOST, on the contrary, it also checks the value of that user variable against the input to see if they match, e.g. `u: (I'm $name) I know.` and `$name` == "Sam", then rule will only be triggered if the input is "I'm Sam".
 - [Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
   - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
