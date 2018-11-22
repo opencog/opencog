@@ -1,17 +1,14 @@
 ;; Contain the main inference control learning experiment loop
 
-;; Set parameters
-(define pss 100)                    ; Problem set size
-(define niter 1)                    ; Number of iterations
-(define piter 30)                   ; Number of iterations used for each problem
-
 ;; Load utils
+(load "icl-parameters.scm")
 (load "icl-utilities.scm")
 (load "mk-history.scm")
 (load "mk-control-rules.scm")
+(load "mine-control-rules.scm")
 
 ;; Set the random seed of the experiment
-(cog-randgen-set-seed! 0)
+(cog-randgen-set-seed! 1)
 
 ;; Set loggers levels
 (cog-logger-set-level! "info")
@@ -23,10 +20,10 @@
 (icl-logger-set-stdout! #t)
 ;; (ure-logger-set-stdout! #t)
 
-;; ;; Set loggers sync (for debugging)
-;; (cog-logger-set-sync! #t)
-;; (icl-logger-set-sync! #t)
-;; (ure-logger-set-sync! #t)
+;; Set loggers sync (for debugging)
+(cog-logger-set-sync! #t)
+(icl-logger-set-sync! #t)
+(ure-logger-set-sync! #t)
 
 ;; Clear and reload the kb and rb
 (define (reload)
@@ -66,7 +63,7 @@
          (results (map cdr histories-results))
          (sol_count (count values results)))
 
-    (icl-logger-info "Number of solved problems = ~a" sol_count)
+    (icl-logger-info "Number of solved problems = ~a/~a" sol_count pss)
 
     ;; Copy all atomspaces for histories to history-as
     (icl-logger-info "Move all problem histories to history-as")
@@ -80,7 +77,7 @@
     (remove-dangling-atoms history-as)
 
     ;; Build inference control rules for the next iteration
-    (icl-logger-info "Build inference control rules from the inference history")
+    (icl-logger-info "Build inference control rules from history-as")
     (mk-control-rules)
 
     ;; Return results for each problem

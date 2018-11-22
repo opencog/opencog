@@ -20,8 +20,8 @@
     (icl-cp local-history-as (cog-get-atoms-as trace-as 'ExecutionLink))
     (remove-dangling-atoms local-history-as)
 
-    (icl-logger-fine "Per Problem History AtomSpace:")
-    (icl-logger-fine-atomspace local-history-as)
+    ;; (icl-logger-fine "Per Problem History AtomSpace:")
+    ;; (icl-logger-fine-atomspace local-history-as)
 
     (icl-logger-debug "Size of local history: ~a" (icl-count-all local-history-as))
 
@@ -66,9 +66,7 @@
                      (Variable "$A")
                      (Variable "$T"))))
          (vardecl (VariableList
-                    (TypedVariable
-                      (Variable "$A")
-                      (Type "DontExecLink"))
+                    (dontexec-typed (Variable "$A"))
                     (Variable "$T")))
          ;; Run pep over trace-as
          (results (abp-bc target #:vardecl vardecl)))
