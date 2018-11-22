@@ -133,6 +133,7 @@
 (define* (configure-miner pm-rbs
                           #:key
                           (maxiter 1000)
+                          (complexity-penalty 1)
                           (incremental-expansion (stv 0 1))
                           (max-conjuncts 3))
 "
@@ -140,13 +141,23 @@
   pattern miner. Automatically configure it with the appropriate
   rules and parameters.
 
-  Usage: (configure-miner pm-rbs #:maxiter mi)
+  Usage: (configure-miner pm-rbs
+                          #:maxiter mi
+                          #:complexity-penalty cp
+                          #:incremental-expansion tv
+                          #:max-conjuncts mc)
 
   pm-rbs: Concept node of the rule-based system to configure
 
   mi: [optional, default=1000] Maximum number of iterations allocated.
       If negative then the pattern miner keeps running till all patterns
       have been exhausted (not recommended unless you know what you're doing).
+
+  cp: [optional, default=1] Complexity penalty parameter passed to the forward
+      chainer. It controls breadth vs depth search. A high value means more
+      breadth. A value of 0 means a equilibrium between breadth and depth.
+      A negative value means more depth. Possible range is (-inf, +inf)
+      but it's rarely necessary in practice to go outside of [-10, 10].
 
   tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
       conjunctions of patterns. It will only expand conjunctions with enough
@@ -166,6 +177,7 @@
 
   ;; Set parameters
   (ure-set-maximum-iterations pm-rbs maxiter)
+  (ure-set-complexity-penalty pm-rbs complexity-penalty)
 
   ;; If there is no incremental expansion then each rule is
   ;; deterministic, thus no need to retry exhausted sources
@@ -284,8 +296,9 @@
 
 (define* (cog-mine texts ms
                    #:key
-                   (maxiter 1000)
                    (initpat (top))
+                   (maxiter 1000)
+                   (complexity-penalty 1)
                    (incremental-expansion (stv 0 1))
                    (max-conjuncts 3))
 "
@@ -293,9 +306,9 @@
   using maxiter iterations and starting from the initial pattern initpat.
 
   Usage: (cog-mine texts ms
-                   ;; Optional arguments
-                   #:maxiter mi
                    #:initpat ip
+                   #:maxiter mi
+                   #:complexity-penalty cp
                    #:incremental-expansion tv
                    #:max-conjuncts mc)
 
@@ -327,12 +340,18 @@
   ms: Minimum support. All pattern with frequency below ms are
       discarded
 
+  ip: [optional, default=(top)] Initial pattern to start the search from.
+      All mined patterns will be specializations of this pattern.
+
   mi: [optional, default=1000] Maximum number of iterations allocated.
       If negative then the pattern miner keeps running till all patterns
       have been exhausted (not recommended unless you know what you're doing).
 
-  ip: [optional, default=(top)] Initial pattern to start the search from.
-      All mined patterns will be specializations of this pattern.
+  cp: [optional, default=1] Complexity penalty parameter passed to the forward
+      chainer. It controls breadth vs depth search. A high value means more
+      breadth. A value of 0 means an equilibrium between breadth and depth.
+      A negative value means more depth. Possible range is (-inf, +inf)
+      but it's rarely necessary in practice to go outside of [-10, 10].
 
   tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
       conjunctions of patterns. It will only expand conjunctions with enough
@@ -398,6 +417,7 @@
                (miner-rbs (random-miner-rbs-cpt)))
           (configure-miner miner-rbs
                            #:maxiter maxiter
+                           #:complexity-penalty complexity-penalty
                            #:incremental-expansion incremental-expansion
                            #:max-conjuncts max-conjuncts)
           (let* (;; Run the pattern miner in a forward way
