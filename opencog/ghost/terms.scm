@@ -372,8 +372,13 @@
 "
   Check if a user variable has been defined.
 "
-  (Evaluation (GroundedPredicate "scm: ghost-user-variable-exist?")
-              (List (ghost-uvar UVAR))))
+  (let* ((g (Glob (gen-var (string-append "user-variable-" UVAR "-grounding") #f)))
+         (v (list (TypedVariable g
+                    (TypeSet
+                      (Type "WordNode")
+                      (Interval (Number 1) (Number -1))))))
+         (c (list (compare-equal (get-user-variable UVAR) g))))
+    (list v c (list g) (list g))))
 
 (define-public (ghost-user-variable-exist? UVAR)
 "

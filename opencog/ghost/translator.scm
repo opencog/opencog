@@ -267,7 +267,7 @@
              (update-lists (process (cdr t)))
              (set! pat-vars (append pat-vars (last-pair ws))))
             ((equal? 'uvar_exist (car t))
-             (set! c (append c (list (uvar-exist? (cdr t)))))
+             (update-lists (uvar-exist? (cdr t)))
              ; User variable has a condition of checking if a particular
              ; user variable has been defined
              (set! specificity (+ specificity 1))
