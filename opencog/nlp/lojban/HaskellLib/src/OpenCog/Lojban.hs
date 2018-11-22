@@ -46,6 +46,8 @@ lojbanToAtomese rstate seed text = (fmap wrapAtom) . fst <$> evalRWST (apply loj
                         ,sNow = now_here
                         ,sCtx = [now_here]
                         ,sJAI = Nothing
+                        ,sDA  = id
+                        ,sDaM = M.empty
                         ,sXU = []}
 
 wrapAtom :: Atom -> Atom
@@ -63,6 +65,8 @@ atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply l
                         ,sNow = now_here
                         ,sCtx = [now_here]
                         ,sJAI = Nothing
+                        ,sDA  = id
+                        ,sDaM = M.empty
                         ,sXU = []}
 
 now_here = cCN "NowAndHere" noTv

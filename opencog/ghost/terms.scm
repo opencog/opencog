@@ -443,7 +443,7 @@
     (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))))
 
   ; Get the value
-  (define val (string->number (cog-name VALUE)))
+  (define val (cog-number VALUE))
 
   ; Update the TVs
   (for-each

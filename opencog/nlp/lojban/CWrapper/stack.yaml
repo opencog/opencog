@@ -40,11 +40,11 @@ packages:
 - '../HaskellLib'
 - location:
    git: https://github.com/rTreutlein/LojbanValidator
-   commit: e0d289628df9389c7f5ca921f52c84efd13e17fa
+   commit: cb19659bca234cc60598f35557683f152637f35d
   extra-dep: true
 - location:
    git: https://github.com/rTreutlein/IsoSyntax
-   commit: ebf2739edfac4568943edad389760386fe6535b5
+   commit: 8d50ccba82ece75143488dba49a7ac3eba709d14
   extra-dep: true
 
 # Dependency packages to be pulled from upstream that are not in the resolver

@@ -497,7 +497,7 @@
 		; it optional, but not sure how that would/wouldn't work with the
 		; rules.
 
-		(set! strength (string->number (cog-name strength)))
+		(set! strength (cog-number strength))
 		; Strength needs to be in [-1, 1]
 		(set! strength (max (min strength 1) -1))
 
@@ -580,9 +580,9 @@
 	(define ultradian-rhythm)
 
 	; Convert NumberNodes to numbers
-	(set! Beta (string->number (cog-name Beta)))
-	(set! omega (string->number (cog-name omega)))
-	(set! offset (string->number (cog-name offset)))
+	(set! Beta (cog-number Beta))
+	(set! omega (cog-number omega))
+	(set! offset (cog-number offset))
 
 	(if val
 		(begin
@@ -607,7 +607,7 @@
 "
 	(define val (psi-get-number-value var))
 	(define noise)
-	(set! width (string->number (cog-name width)))
+	(set! width (cog-number width))
 	(set! noise (- (random width) (/ width 2)))
 	(set! val (+ val noise))
 	(set! val (min (max 0 val) 1))

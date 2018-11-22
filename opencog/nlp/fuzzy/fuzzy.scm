@@ -159,7 +159,7 @@
         (let ( (max-score 0)
                (results '()))
             (for-each (lambda (s)
-                (let ( (score (string->number (cog-name (cadr (cog-outgoing-set s))))))
+                (let ( (score (cog-number (cadr (cog-outgoing-set s)))))
                     ; Make sure it can be used to generate a sentence by sureal
                     (if (and (>= score max-score) (not (equal? (sureal (car (cog-outgoing-set s))) '())))
                         (begin

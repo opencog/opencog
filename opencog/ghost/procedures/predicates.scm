@@ -72,7 +72,7 @@
 
   An atomese wrapper of the function since-true-transition-occurred?
 "
-  (if (since-true-transition-occurred? model (string->number (cog-name secs)))
+  (if (since-true-transition-occurred? model (cog-number secs))
     (stv 1 1)
     (stv 0 1)
   )
@@ -84,7 +84,7 @@
 
   An atomese wrapper of the function since-false-transition-occurred?
 "
-  (if (since-false-transition-occurred? model (string->number (cog-name secs)))
+  (if (since-false-transition-occurred? model (cog-number secs))
     (stv 1 1)
     (stv 0 1)
   )
@@ -304,7 +304,7 @@
   (if (null? t)
     (stv 0 1)
     (if (>= (current-time-us)
-            (+ t (* (string->number (cog-name minutes)) 60)))
+            (+ t (* (cog-number minutes) 60)))
         (stv 1 1)
         (stv 0 1)))
 )

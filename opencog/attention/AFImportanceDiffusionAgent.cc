@@ -42,7 +42,7 @@ AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
 
 void AFImportanceDiffusionAgent::run()
 {
-    // Read params
+    // Reread param values for dynamically updating the values.
     maxSpreadPercentage = std::stod(_atq.get_param_value(
                                     AttentionParamQuery::dif_spread_percentage));
     hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
@@ -77,7 +77,5 @@ void AFImportanceDiffusionAgent::spreadImportance()
  */
 AttentionValue::sti_t AFImportanceDiffusionAgent::calculateDiffusionAmount(Handle h)
 {
-    updateMaxSpreadPercentage();
-
     return (get_sti(h) * maxSpreadPercentage);
 }

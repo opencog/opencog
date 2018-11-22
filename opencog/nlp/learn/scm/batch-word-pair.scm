@@ -102,7 +102,7 @@
 	(let ((all-pairs '()))
 
 		; Get the observational count on ATOM.
-		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+		(define (get-count ATOM) (cog-count ATOM))
 
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))
@@ -233,7 +233,7 @@
 	(let ((all-pairs '()))
 
 		; Get the observational count on ATOM.
-		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+		(define (get-count ATOM) (cog-count ATOM))
 
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))
@@ -358,11 +358,11 @@
 			(all-pairs '()))
 
 		; Get the observational count on ATOM.
-		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+		(define (get-count ATOM) (cog-count ATOM))
 
 		; Get the numeric distance from the ExecutionLink
 		(define (get-dist ATOM)
-			(string->number (cog-name (cog-outgoing-atom ATOM 2))))
+			(cog-number (cog-outgoing-atom ATOM 2)))
 
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))

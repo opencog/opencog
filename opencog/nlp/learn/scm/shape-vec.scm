@@ -84,7 +84,7 @@
 ; In order to track statistics, including the entropies and the mutual
 ; information, pairs consisting of a word, and the left wild-card
 ; ("shape") must be created. The section will not do for this purpose,
-; because the section is ambiguous as to the pairing: multiple
+; because the section is ambiguous as to the pairing: multiple different
 ; word-shape pairs correspond to a single section.  Basically, if a
 ; connector sequence has N connectors in it, there are N shapes, and
 ; N word-shape pairs, but only one associated section.
@@ -112,10 +112,10 @@
 ; to the atomspace (opencog matrix) module.  That is because it
 ; generically explodes a section into all of it's constituent
 ; connector-shape pairs, which is presumably something everyone
-; will want to do.
+; will want to do. There's nothing special about WordNodes, here.
 ;
-; TODO: Create ShapeLink in the atomspace, and create the
-; CrossSection so that its a word-shape pair.
+; TODO: Create ShapeLink link type in the atomspace, and create the
+; CrossSection link type so that its a word-shape pair.
 ;
 ; ---------------------------------------------------------------------
 ;
@@ -160,11 +160,11 @@
 		; Get the observational count on the word-shape pair
 		(define (get-count SHAPE-PR) (cog-count SHAPE-PR))
 
-		; L-ATOM is a WordNode. R-ATOM is a shape.
+		; L-ATOM is a WordNode or WordClassNode. R-ATOM is a shape.
 		(define (get-pair L-ATOM R-ATOM)
 			(cog-link 'EvaluationLink pair-pred L-ATOM R-ATOM))
 
-		; As above, but force the creation of it
+		; As above, but force the creation of the pair.
 		(define (make-pair L-ATOM R-ATOM)
 			(EvaluationLink pair-pred L-ATOM R-ATOM))
 
@@ -212,21 +212,6 @@
 
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
-
-		; Fetch (from the database) all sections,
-		; as well as all the marginals.
-		(define (fetch-sections)
-			(define start-time (current-time))
-			; marginals are located on any-left, any-right
-			(fetch-incoming-set any-left)
-			(fetch-incoming-set any-right)
-			(load-atoms-of-type 'Section)
-			(format #t "Elapsed time to load word sections: ~A seconds\n"
-				(- (current-time) start-time))
-			(set! start-time (current-time))
-			(fetch-incoming-set pair-pred)
-			(format #t "Elapsed time to load word-shape pairs: ~A seconds\n"
-				(- (current-time) start-time)))
 
 		; -------------------------------------------------------
 		; Stars API.
@@ -324,6 +309,12 @@
 		)
 
 #! ========================  XXX THE CODE BELOW IS DEAD CODE
+Hang on ... how dead is this, really? I think we need to provide
+the ability to get left-duals and stars that have WordClassNodes
+in them, and not just WordNodes... so this code needs to be fixed
+up, right?  Or do we just get lucky, and everything works right?
+I'm confused ...
+
 I'm going to keep this code here for a while, because it does some
 interesting pattern matching to mine out section wild-cards that
 correspond to words, and to shapes. However, this is no longer
@@ -431,6 +422,39 @@ around for a while.
 		))
 ========================  XXX THE CODE ABOVE IS DEAD CODE
 !#
+		;-------------------------------------------
+		; Fetch (from the database) all sections,
+		; as well as all the marginals.
+		(define (fetch-sections)
+			(define start-time (current-time))
+			; marginals are located on any-left, any-right
+			(fetch-incoming-set any-left)
+			(fetch-incoming-set any-right)
+			(load-atoms-of-type 'Section)
+			(format #t "Elapsed time to load word sections: ~A seconds\n"
+				(- (current-time) start-time))
+			(set! start-time (current-time))
+			(fetch-incoming-set pair-pred)
+			(format #t "Elapsed time to load word-shape pairs: ~A seconds\n"
+				(- (current-time) start-time))
+
+			; It is just to easy for the user to forget to do this,
+			; yet its a very important step for some (but not all)
+			; applications.  If user forgets, its a painful debug
+			; session ahead for the user. If user does not actually
+			; need this, then its just a waste of RAM...
+			(explode-sections)
+		)
+
+		;-------------------------------------------
+		; Explain the non-default provided methods.
+		(define (provides meth)
+			(case meth
+				((left-basis)         get-left-basis)
+				((right-basis)        get-right-basis)
+				((left-basis-size)    get-left-size)
+				((right-basis-size)   get-right-size)
+		))
 
 		; Methods on the object
 		(lambda (message . args)
@@ -453,7 +477,7 @@ around for a while.
 				((explode-sections) explode-sections)
 				((get-section)      get-section)
 
-				((provides)         (lambda (symb) #f))
+				((provides)         provides)
 				((filters?)         (lambda () #f))
 				(else (error "Bad method call on cross-section:" message)))
 			args))

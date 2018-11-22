@@ -74,7 +74,7 @@
                   (new-conf (/ 1 (+ 1 default-k))))
                 (cog-set-tv! atom (cog-new-stv new-mean new-conf))
             )
-            (let* ((current-count (cog-tv-count (cog-tv atom)))
+            (let* ((current-count (cog-count atom))
                    (new-count (+ current-count 1))
                    (new-mean (/ new-count type-count))
                    (new-conf (/ new-count (+ new-count default-k))))
@@ -92,7 +92,7 @@
 "
     (let ((tv (cog-tv atom)))
 
-        (cog-set-tv! atom (etv (+ 1 (tv-positive-count tv)) (cog-tv-count tv)))
+        (cog-set-tv! atom (etv (+ 1 (tv-positive-count tv)) (cog-count atom)))
     )
 )
 

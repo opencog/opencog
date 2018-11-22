@@ -57,21 +57,17 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
 {
     _bank = &attentionbank(_as);
 
+    // Load diffusion parameters
+    maxSpreadPercentage = std::stod(_atq.get_param_value(
+                AttentionParamQuery::dif_spread_percentage));
+    hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
+                AttentionParamQuery::heb_max_alloc_percentage));
+    spreadHebbianOnly = std::stoi(_atq.get_param_value(
+                AttentionParamQuery::dif_spread_hebonly));
+
     // Provide a logger
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
                                   Logger::FINE, true));
-}
-
-/*
- * Allow the maximum diffusion percentage parameter to be varied dynamically by
- * modifying a configuration atom in the atomspace. This method checks for the
- * existence of the configuration atom, and if it exists, updates the parameter
- * to its current value. The value should be a probability between 0 and 1.
- */
-void ImportanceDiffusionBase::updateMaxSpreadPercentage()
-{
-    maxSpreadPercentage = std::stod(_atq.get_param_value(
-                AttentionParamQuery::dif_spread_percentage));
 }
 
 ImportanceDiffusionBase::~ImportanceDiffusionBase()

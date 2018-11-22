@@ -154,7 +154,7 @@
   (length (get-members C)))
 
 (define (size-ge texts ms)
-  (let* ((result (>= (get-cardinality texts) (atom->number ms))))
+  (let* ((result (>= (get-cardinality texts) (cog-number ms))))
     (bool->tv result)))
 
 (define (texts->atomspace texts)

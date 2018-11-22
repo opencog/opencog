@@ -76,7 +76,7 @@
         (begin
             (set-priority! face-id ordinary-face-priority)
             ordinary-face-priority)
-        (string->number (cog-name (gdar result)))
+        (cog-number (gdar result))
     )
 )
 
@@ -152,15 +152,15 @@
       (cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
 
 (define (loc-link-x at-loc-link)
-   (string->number (cog-name (car (space-nodes at-loc-link))))
+   (cog-number (car (space-nodes at-loc-link)))
 )
 
 (define (loc-link-y at-loc-link)
-   (string->number (cog-name (cadr (space-nodes at-loc-link))))
+   (cog-number (cadr (space-nodes at-loc-link)))
 )
 
 (define (loc-link-z at-loc-link)
-   (string->number (cog-name (caddr (space-nodes at-loc-link))))
+   (cog-number (caddr (space-nodes at-loc-link)))
 )
 
 (define (get-last-xyz map-name id-node elapse)
@@ -285,7 +285,7 @@
                             (Number face-id))))
     ; As long as the state updating psi-rule is executed, result shouldn't be
     ; (SetLink)
-    (string->number (cog-name (gdar result)))
+    (cog-number (gdar result))
 )
 
 (DefineLink
@@ -340,10 +340,10 @@
 "
 ; Checks are not required b/c this function wouldn't be called
 ; without the context being satisfied
-    (let* ((current-face-id (string->number (cog-name (gar
+    (let* ((current-face-id (cog-number (gar
                 (cog-execute!
-                    (DefinedSchema "Current interaction target"))))))
-           (face-id (string->number (cog-name face-id-node))))
+                    (DefinedSchema "Current interaction target")))))
+           (face-id (cog-number face-id-node)))
        ; This is for when the room is empty. When room is empty the
         (if (equal? 0.0 current-face-id)
             (set-transition-priority! face-id ordinary-face-priority)
@@ -386,7 +386,7 @@
     (if (null? faces)
         interaction-face
         (let* ((face-ids
-                    (par-map (lambda (x) (string->number (cog-name x))) faces))
+                    (par-map cog-number faces))
                (wp (par-map (lambda (x) (weighted-priority x)) face-ids))
                (max-wp (get-maximum wp))
                (max-faces

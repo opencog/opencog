@@ -44,6 +44,7 @@ infixl 8 ...
 pattern CN name <-Node "ConceptNode" name _
 pattern AN name <-Node "AnchorNode" name _
 pattern PN name <-Node "PredicateNode" name _
+pattern NN name <-Node "NumberNode" name _
 pattern GPN name <-Node "GroundedPredicateNode" name _
 pattern VN name <-Node "VariableNode" name _
 pattern DSN name <- Node "DefinedSchemaNode" name _
@@ -53,6 +54,7 @@ pattern LL l <- Link "ListLink" l _
 pattern NL l <- Link "NotLink" l _
 pattern DL l <- Link "DefineLink" l _
 pattern ImpL tv a b <- Link "ImplicationLink" [a,b] tv
+pattern ImpSL tv v a b <- Link "ImplicationScopeLink" [v,a,b] tv
 pattern InhL tv a b <- Link "InheritanceLink" [a,b] tv
 pattern SL l <- Link "SetLink" l _
 pattern SSScL l <- Link "SatisfyingSetScopeLink" l _
@@ -81,6 +83,7 @@ cSimL a b       = Link "SimilarityLink"                   [a,b]    noTv
 cVL a           = Link "VariableList"                         a     noTv
 cInhL tv a b    = Link "InheritanceLink"                  [a,b]     tv
 cImpL tv a b    = Link "ImplicationLink"                  [a,b]     tv
+cImpSL tv v a b = Link "ImplicationScopeLink"             [v,a,b]   tv
 cIImpL tv a b   = Link "IntensionalImplicationLink"       [a,b]     tv
 cIFaoIFL tv a b = Link "AndLink"          [cImpL tv a b,cImpL tv b a] tv
 cEvalL tv a b   = Link "EvaluationLink"                   [a,b]     tv
@@ -92,6 +95,7 @@ cGL     a       = Link "GetLink"                            [a]     noTv
 cAL  tv a       = Link "AndLink"                              a     tv
 cOL  tv a       = Link "OrLink"                               a     tv
 cNL  tv a       = Link "NotLink"                            [a]     tv
+cMNL tv a       = Link "MyNotLink"                          [a]     tv
 cDL  tv a       = Link "DefineLink"                           a     tv
 cEXOL tv a      = Link "ExecutionOutputLink"                  a     tv
 cEXL tv a b     = Link "ExecutionOutputLink"              [a,b]     tv

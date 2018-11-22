@@ -1,4 +1,6 @@
 
+INCLUDE_DIRECTORIES(${JSONCPP_INCLUDE_DIRS})
+
 ADD_LIBRARY (atomspacepublishermodule SHARED
 	AtomSpacePublisherModule
 )
@@ -6,7 +8,8 @@ ADD_LIBRARY (atomspacepublishermodule SHARED
 TARGET_LINK_LIBRARIES(atomspacepublishermodule
 	server
 	${ATOMSPACE_LIBRARIES}
-	json_spirit
+  ${JSONCPP_LIBRARIES}
+  ${ZMQ_LIBRARIES}
 	tbb
 )
 

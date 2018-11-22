@@ -13,6 +13,7 @@ ADD_DEPENDENCIES(LojbanModule LojbanLib)
 
 TARGET_LINK_LIBRARIES (LojbanModule
     opencog-lojban-wrapper-0.1.0.0
+    nlp-types
 )
 
 INSTALL (TARGETS LojbanModule

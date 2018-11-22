@@ -8,7 +8,6 @@ This page groups the libraries that are being build by the project.
 ignored by doxygen; used as markers for update-links.py;
 \endif
 - \subpage libserver
-- \subpage libspatial
 - \subpage libspacetime
 - \subpage libattention
 

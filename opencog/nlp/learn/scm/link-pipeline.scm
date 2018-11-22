@@ -18,9 +18,12 @@
 ; counts will be updated in the atomspace. The counts are flushed to
 ; the SQL database so that they're not forgotten.
 ;
-; This tracks multiple, independent counts:
+; Several different kinds of counts are maintained, depending on the
+; mode. Usually, not all of these are maintained at the same time, as
+; this will result in excessively large atomspaces. Some of the counts
+; that can be maintained are:
 ; *) how many sentences have been observed.
-; *) how many parses were observed.
+; *) how many parses were observed (when using parse-driven counting).
 ; *) how many words have been observed (counting once-per-word-per-parse)
 ; *) how many word-order pairs have been observed.
 ; *) the distance between words in the above pairs.
@@ -34,14 +37,22 @@
 ; in a parse.  That is, if a word appears twice in a parse, it is counted
 ; twice.
 ;
-; Word-pairs show up, and are counted in four different ways. First,
-; a count is made if two words appear, left-right ordered, in the same
-; sentence. This count is stored in the CountTV for the EvaluationLink
-; on (PredicateNode "*-Sentence Word Pair-*").  A second count is
-; maintained for this same pair, but including the distance between the
-; two words. This is on (SchemaNode "*-Pair Distance-*").  Since
-; sentences always start with LEFT-WALL, this can be used to reconstruct
-; the typical word-order in a sentence.
+; Word-pairs show up, and can be counted in four different ways. One
+; method  is a windowed clique-counter. If two words appear within a
+; fixed distance from each other (the window size), the corresponding
+; word-pair count is incremented. This is a clique-count, because every
+; possible pairing is considered. This count is stored in the CountTV
+; for the EvaluationLink on (PredicateNode "*-Sentence Word Pair-*").
+; A second count is maintained for this same pair, but including the
+; distance between the two words. This is kept on a link identified by
+; (SchemaNode "*-Pair Distance-*"). Please note that the pair-distance
+; counter can lead to very large atomspaces, because for window widths
+; of N, a given word-pair might be observed with every possible
+; distance between them, i.e. up to N times.
+;
+; XXX FIXME we shold probably not stor this way. We should probably
+; have just one wod-pair, and hold teh counts in different values,
+; instead. This needs a code redesign. XXX
 ;
 ; Word-pairs are also designated by means of Link Grammar parses of a
 ; sentence. A Link Grammar parse creates a list of typed links between
@@ -49,7 +60,7 @@
 ; each time that it occurs.  These counts are maintained in the CountTV
 ; on the EvaluationLink for the LinkGrammarRelationshipNode for that
 ; word-pair.  In addition, a count is maintained of the length of that
-; link.
+; link. XXX where??? This is not implemented ??? XXX
 ;
 ; For the initial stages of the language-learning project, the parses
 ; are produced by the "any" language parser, which produces random planar
@@ -59,10 +70,15 @@
 ; as a clique of edges drawn between all words. This is explored further
 ; in the diary, in a section devoted to this topic.
 ;
+; These different counting modes can be turned on and off with the
+; "mode" flag.
+;
 ; The Link Grammar parse also produces and reports the disjuncts that were
 ; used for each word. These are useful in and of themselves; they indicate
 ; the hubbiness (link-multiplicity) of each word. The disjunct counts are
-; maintained on the LgWordCset for a given word.
+; maintained on the LgWordCset for a given word. XXX This is currently
+; disabled in the code, and are not handled by the mode flag. This needs
+; to be (optionally) turned back on. XXX
 ;
 (use-modules (opencog) (opencog nlp) (opencog persist))
 (use-modules (opencog exec) (opencog nlp lg-parse))
@@ -90,7 +106,7 @@
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-number word-inst)
-		(string->number (cog-name (word-inst-get-number word-inst))))
+		(cog-number (word-inst-get-number word-inst)))
 
 	; A comparison function, for use as kons in fold
 	(define (least word-inst lim)
@@ -110,7 +126,7 @@
 	; Ahhh .. later code will be easier, if we return the list in
 	; sequential order. So, define a compare function and sort it.
 	(define (get-no seq-lnk)
-		(string->number (cog-name (gdr seq-lnk))))
+		(cog-number (gdr seq-lnk)))
 
 	(sort (map make-ordered-word (parse-get-words PARSE))
 		(lambda (wa wb)
@@ -227,7 +243,7 @@
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)
-		(string->number (cog-name (gdr seq-lnk))))
+		(cog-number (gdr seq-lnk)))
 
 	; Create and count a word-pair, and the distance.
 	(define (count-one-pair left-seq right-seq)
@@ -458,10 +474,10 @@
 
 (define-public (observe-text-mode plain-text observe-mode count-reach)
 "
- observe-text-public -- update word and word-pair counts by observing raw text.
- 
- There are currently three observing modes, set by observe-mode and taking
- another integer parameter:
+ observe-text-mode -- update word and word-pair counts by observing raw text.
+
+ There are currently two observing modes, set by observe-mode, both taking
+ an integer parameter:
  - any: counts pairs of words linked by the LG parser in 'any' language.
  	    In this case, 'count-reach' specifies how many linkages from LG-parser
  	    to use.
@@ -479,31 +495,11 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
-	; try-catch wrapper around the counters. Due to a buggy RelEx
-	; (see documentation for `word-inst-get-word`), the function
-	; `update-clique-pair-counts` might throw.  If it does throw,
-	; then avoid doing any counting at all for this sentence.
-	;
-	; Note: update-clique-pair-counts commented out. If you want this,
-	; then uncomment it, and adjust the length.
-	; Note: update-disjunct-counts commented out. It generates some
-	; data, but none of it will be interesting to most people.
-	(define (update-counts sent)
-		(catch 'wrong-type-arg
-			(lambda () (begin
-				; 6 == max distance between words to count.
-				; See docs above for explanation.
-				; (update-clique-pair-counts sent 6 #f)
-				(update-word-counts sent)
-				(update-lg-link-counts sent)
-				; If you uncomment this, be sure to also uncomment
-				; LgParseLink below, because LgParseMinimal is not enough.
-				; (update-disjunct-counts sent)
-			))
-			(lambda (key . args) #f)))
-
 	; Count the atoms in the sentence, according to the counting method
 	; passed as argument, then delete the sentence.
+
+	; Note: update-disjunct-counts commented out. It generates some
+	; data, but none of it will be interesting to most people.
 	(define (process-sent SENT cnt-mode win-size)
 		(update-word-counts SENT)
 		(cond
@@ -559,7 +555,8 @@
 		(define (do-all-sents)
 			(let ((sent (get-one-new-sentence)))
 				(if (not (null? sent))
-					(begin (process-sent sent) (do-all-sents)))))
+					(begin (process-sent sent obs-mode cnt-reach)
+						(do-all-sents)))))
 
 		(relex-parse TXT)
 		(do-all-sents)

@@ -223,7 +223,7 @@
     (define result (cog-outgoing-set (cog-execute!
         (Get (State (Anchor "luminance") (Variable "$x"))))))
     (if (not (null? result))
-		(set! result (string->number (cog-name (car result))))
+		(set! result (cog-number (car result)))
 		(set! result #f))
     ;(format #t "~a\n" result)
     result

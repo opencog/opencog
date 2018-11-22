@@ -71,7 +71,6 @@ AttentionModule::~AttentionModule()
 void AttentionModule::init()
 {
     AttentionParamQuery _atq(&_cogserver.getAtomSpace());
-    _atq.load_default_values(); // Load default ECAN param values into AS
 
     // Set params
     int af_size = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));

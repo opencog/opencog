@@ -126,7 +126,7 @@
 "
     (MemberLink psi-rule psi-controller-demand)
 
-    (psi-rule-set-atomese-weight psi-rule (cog-tv-mean (cog-tv psi-rule)))
+    (psi-rule-set-atomese-weight psi-rule (cog-mean psi-rule))
 
     (psi-rule-set-alias! psi-rule name)
 
@@ -190,8 +190,8 @@
         (let ((result (psi-rule-atomese-weight rule)))
             (if (not (null? result))
                 (cog-set-tv! rule
-                    (stv (string->number (cog-name (car result)))
-                         (cog-tv-confidence (cog-tv rule))))
+                    (stv (cog-number (car result))
+                         (cog-confidence rule)))
             )
         ))
 

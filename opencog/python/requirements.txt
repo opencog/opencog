@@ -1,4 +1,4 @@
-requests==2.2
+requests>=2.20.0
 argparse
 matplotlib
 nose
