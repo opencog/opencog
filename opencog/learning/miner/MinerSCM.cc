@@ -28,6 +28,8 @@
 #include <opencog/guile/SchemeModule.h>
 #include <opencog/atoms/core/NumberNode.h>
 
+#include "MinerUtils.h"
+
 namespace opencog {
 
 class MinerSCM : public ModuleWrap
@@ -47,7 +49,7 @@ protected:
 	 *            (Inheritance A C),
 	 *            (Inheritance D D),
 	 *            (Inheritance E E) }
-	 * ms = 2
+	 * ms = (Number 2)
 	 *
 	 * returns
 	 *
@@ -56,6 +58,12 @@ protected:
 	 *   List Y Y
 	 */
 	Handle do_shallow_abstract(Handle pattern, Handle texts, Handle ms);
+
+	/**
+	 * Given a pattern, a texts concept and a minimum support, return
+	 * true iff the pattern has enough support.
+	 */
+	bool do_enough_support(Handle pattern, Handle texts, Handle ms);
 
 public:
 	MinerSCM();
@@ -78,6 +86,9 @@ void MinerSCM::init(void)
 {
 	define_scheme_primitive("cog-shallow-abstract",
 		&MinerSCM::do_shallow_abstract, this, "miner");
+
+	define_scheme_primitive("cog-enough-support?",
+		&MinerSCM::do_enough_support, this, "miner");
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
@@ -87,13 +98,7 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
 	// Fetch all texts
-	HandleSet texts_set;
-	IncomingSet member_links = texts->getIncomingSetByType(MEMBER_LINK);
-	for (const LinkPtr l : member_links) {
-		Handle member = l->getOutgoingAtom(0);
-		if (member != texts)
-			texts_set.insert(member);
-	}
+	HandleSet texts_set = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	NumberNodePtr nn = NumberNodeCast(ms);
@@ -101,11 +106,11 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
-		Miner::shallow_abstract(pattern, texts_set, ms_uint);
+		MinerUtils::shallow_abstract(pattern, texts_set, ms_uint);
 
 	// Turn that sequence of handle sets into a set of ready to be
 	// applied shallow abstractions
-	const Variables& vars = Miner::get_variables(pattern);
+	const Variables& vars = MinerUtils::get_variables(pattern);
 	HandleSet sa_lists;
 	unsigned vari = 0;         // Index of the variable
 	for (const HandleSet& shabs : shabs_per_var) {
@@ -121,6 +126,18 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	}
 
 	return as->add_link(SET_LINK, HandleSeq(sa_lists.begin(), sa_lists.end()));
+}
+
+bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	// Fetch the minimum support
+	NumberNodePtr nn = NumberNodeCast(ms);
+	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+
+	return MinerUtils::enough_support(pattern, texts_set, ms_uint);
 }
 
 extern "C" {

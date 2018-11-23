@@ -122,11 +122,6 @@ private:
 	HandleSeq gen_variables(const std::string& prefix, int n);
 
 	/**
-	 * Return whether if a pattern has enough support.
-	 */
-	bool enough_support(const Handle& pat, int ms);
-
-	/**
 	 * Generate a query, run the URE forward to generate patterns,
 	 * then backward to gather the results, and output them.
 	 */
@@ -155,6 +150,7 @@ public:
 	void tearDown();
 
 	// Auxiliary methods
+	void test_remove_useless_clauses();
 	void test_match();
 	void test_compose_1();
 	void test_compose_2();
@@ -228,17 +224,6 @@ HandleSeq MinerUTest::gen_variables(const std::string& prefix, int n)
 	return vars;
 }
 
-bool MinerUTest::enough_support(const Handle& pat, int minsup)
-{
-	std::string support_query_str("(support\n");
-	support_query_str += pat->to_string();
-	support_query_str += texts_cpt->to_string();
-	support_query_str += std::to_string(minsup) + ")";
-	std::string rs = _scm.eval(support_query_str);
-	int freq = std::stoi(rs);
-	return minsup <= freq;
-}
-
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
                           int maxiter, Handle initpat)
 {
@@ -261,7 +246,7 @@ Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
 
 	// Add the axiom that initpat has enough support, and use it as
 	// source for the forward chainer
-	bool es = enough_support(initpat, minsup);
+	bool es = MinerUtils::enough_support(initpat, texts, minsup);
 
 	// If it doesn't have enough support return the empty solution
 	if (not es)
@@ -374,6 +359,20 @@ void MinerUTest::tearDown()
 	_tmp_as.clear();
 }
 
+void MinerUTest::test_remove_useless_clauses()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = an(VARIABLE_NODE, "$X"),
+		pattern = al(LAMBDA_LINK,
+		             X,
+		             al(AND_LINK, X, X)),
+		result = MinerUtils::remove_useless_clauses(pattern),
+		expected = al(LAMBDA_LINK, X, X);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
 void MinerUTest::test_match()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -405,7 +404,7 @@ void MinerUTest::test_compose_1()
 		             al(AND_LINK, X, al(INHERITANCE_LINK, Y, B))),
 		subpat = A;
 
-	Handle npat = Miner::compose(pattern, {{Y, subpat}}),
+	Handle npat = MinerUtils::compose(pattern, {{Y, subpat}}),
 		expected = al(LAMBDA_LINK, X, X);
 
 	logger().debug() << "npat = " << oc_to_string(npat);
@@ -430,7 +429,7 @@ void MinerUTest::test_compose_2()
 		gpn = an(GROUNDED_PREDICATE_NODE, "scm: absolutely-true"),
 		subpat = gpn;
 
-	Handle npat = Miner::compose(pattern, {{X, subpat}}),
+	Handle npat = MinerUtils::compose(pattern, {{X, subpat}}),
 		expected = al(LAMBDA_LINK,
 		              X,
 		              al(QUOTE_LINK,
