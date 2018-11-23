@@ -2319,7 +2319,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode)
 //        cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
         float diff = p - total_p;
-        diff = diff / total_p;
+        diff /= total_p;
 
         float abs_diff = std::abs(diff);
 
@@ -2335,7 +2335,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode)
 
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
-            HNode->surprisingnessInfo += ", expect = " + toString(total_p) + "x" + toString(allNum) + " = "
+            HNode->surprisingnessInfo += ", expect = " + toString(total_p) + "*" + toString(allNum) + " = "
                     + toString((total_p * ((float)allNum))) + ", nDiff = " + toString(diff) + "}";
         }
 
@@ -2349,7 +2349,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode)
     // debug:
 //    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
 
-    if (gram == param.MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, becasue it required gram +1 patterns
+    if (gram == param.MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, because it required gram +1 patterns
         return;
 
 
@@ -3129,7 +3129,7 @@ void PatternMiner::runInterestingnessEvaluation()
                 HTreeNode* pNode = patternsForGram[cur_gram-1][p];
 
                 // for patterns that have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
-                if ( (pNode->nII_Surprisingness < 0) || (pNode->nII_Surprisingness >= surprisingness_II_threshold) )
+                if ( (pNode->nII_Surprisingness < 0) || ((float)pNode->nII_Surprisingness >= surprisingness_II_threshold) )
                     finalPatternsForGram[cur_gram-1].push_back(pNode);
             }
 

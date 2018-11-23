@@ -160,7 +160,7 @@ struct MinedPatternInfo
 class PatternMiner
 {
     friend class ::PatternMinerUTest;
-	friend class opencog::PatternMinerSCM;
+    friend class opencog::PatternMinerSCM;
 
 protected:
 
@@ -183,7 +183,7 @@ protected:
 
     std::thread *threads;
 
-	Parameters param;
+    Parameters param;
 
     bool is_distributed;
 
@@ -349,12 +349,12 @@ protected:
      */
     void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
-	/**
-	 * Given a mapping between handles, substitute all encountered
-	 * handle keys by their values in h. The produced handle is added
-	 * to the pattern miner atomspace and returned.
-	 */
-	Handle substitute(const Handle& h, const HandleMap& h2h);
+    /**
+     * Given a mapping between handles, substitute all encountered
+     * handle keys by their values in h. The produced handle is added
+     * to the pattern miner atomspace and returned.
+     */
+    Handle substitute(const Handle& h, const HandleMap& h2h);
 
     /**
      * Retrieve all nodes from a given link and its descendents. For
@@ -383,20 +383,20 @@ protected:
      */
     void extractConstNodes(const Handle& link, HandleSet& constNodes);
 
-	/**
-	 * Return true iff an atom contains only pattern variable nodes,
-	 * no const nodes.
-	 */
+    /**
+     * Return true iff an atom contains only pattern variable nodes,
+     * no const nodes.
+     */
     bool containOnlyVariables(Handle h);
 
-	/**
-	 * Return true iff an atom contains some pattern variable nodes.
-	 */
+    /**
+     * Return true iff an atom contains some pattern variable nodes.
+     */
     bool containSomeVariables(Handle link);
 
     void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
-	/**
+    /**
      * Copy the outgoings of `link` to `to_as` and return the copies
      *
      * Pattern variables are turned into regular variables while being
@@ -414,7 +414,7 @@ protected:
     Handle copyAtom(AtomSpace& to_as, const Handle& link,
                     HandleSeq& variables);
 
-	/**
+    /**
      * Copy `links` to `to_as` and return the copies.
      *
      * Pattern variables are turned into regular variables while being
@@ -441,10 +441,19 @@ protected:
 
     bool existInOneThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs);
 
-    void extendAPatternForOneMoreGramRecursively(const Handle& extendedLink, AtomSpace& from_as, const Handle& extendedNode, const HandleSeq& lastGramLinks,
-                                                 HTreeNode* parentNode, const HandleMap& lastGramValueToVarMap, const HandleMap& lastGramPatternVarMap,
-                                                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*>& allHTreeNodesCurTask,
-                                                 vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
+    void extendPatternForOneMoreGramRecursively(const Handle& extendedLink,
+                                                AtomSpace& from_as,
+                                                const Handle& extendedNode,
+                                                const HandleSeq& lastGramLinks,
+                                                HTreeNode* parentNode,
+                                                const HandleMap& lastGramValueToVarMap,
+                                                const HandleMap& lastGramPatternVarMap,
+                                                bool isExtendedFromVar,
+                                                set<string>& allNewMinedPatternsCurTask,
+                                                vector<HTreeNode*>& allHTreeNodesCurTask,
+                                                vector<MinedPatternInfo>& allNewMinedPatternInfo,
+                                                unsigned int thread_index,
+                                                bool startFromLinkContainWhiteKeyword);
 
     /**
      * Return iff some sub-pattern contains only variables.
@@ -477,8 +486,18 @@ protected:
 
     void quoteAllThePatternSForGram(unsigned int gram);
 
-    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
-                                                      unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
+    HTreeNode* extractPatternFromVarCombination(HandleSeq &inputLinks,
+                                                HandleMap &patternVarMap,
+                                                HandleMap &orderedVarNameMap,
+                                                HandleSeqSeq &oneOfEachSeqShouldBeVars,
+                                                HandleSeq &leaves,
+                                                HandleSeq &shouldNotBeVars,
+                                                HandleSeq &shouldBeVars,
+                                                unsigned int &extendedLinkIndex,
+                                                set<string>& allNewMinedPatternsCurTask,
+                                                bool &notOutPutPattern,
+                                                bool &patternAlreadyExtractedInCurTask,
+                                                bool startFromLinkContainWhiteKeyword);
 
     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -496,9 +515,9 @@ protected:
 
     void evaluateInterestingnessTask();
 
-	/**
-	 * TODO Add comment + utest
-	 */
+    /**
+     * TODO Add comment + utest
+     */
     void generateNextCombinationGroup(bool* &indexes, int n_max);
 
     bool isLastNElementsAllTrue(bool* array, int size, int n);
@@ -611,12 +630,12 @@ public:
     void queryPatternsWithFrequencySurprisingnessIRanges(unsigned int min_frequency, unsigned int max_frequency, float min_surprisingness_I, float max_surprisingness_I, int gram);
 
     void queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_frequency, unsigned int max_frequency,
-                                                                   float min_surprisingness_I, float max_surprisingness_I,
-                                                                   float min_surprisingness_II, float max_surprisingness_II,int gram);
+                                                     float min_surprisingness_I, float max_surprisingness_I,
+                                                     float min_surprisingness_II, float max_surprisingness_II,int gram);
 
     void queryPatternsWithFrequencySurprisingnessBRanges(unsigned int min_frequency, unsigned int max_frequency,
-                                                                   float min_surprisingness_B, float max_surprisingness_B,
-                                                                   unsigned int min_subpattern_num, unsigned int max_subpattern_num,int gram);
+                                                         float min_surprisingness_B, float max_surprisingness_B,
+                                                         unsigned int min_subpattern_num, unsigned int max_subpattern_num,int gram);
 
     void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_ii, float max_ii, int gram);

@@ -1,7 +1,11 @@
-;; Rule to specialize a pattern by composing it with a shallow
-;; abstraction, which can be pattern with just one link and all
-;; variables as outgoings, a constant, or a variable, and checks that
-;; it has enough support.
+;; Note: For now shallow specialization rule is used instead of the
+;; generic specialization rule. Using shallow specialization allows to
+;; perform in one step shallow abstraction and specialization.
+;;
+;; Rule to specialize a pattern by composing it with an abstraction,
+;; which can be pattern with just one link and all variables as
+;; outgoings, a constant, or a variable, and checks that it has enough
+;; support.
 ;;
 ;; Given g with arity n and with support ms, and f, specialize g by
 ;; composing it with f over one of its variables, xi.
@@ -18,7 +22,7 @@
 ;;     <texts>
 ;;     <ms>
 ;; Evaluation <tv2>
-;;   Predicate "shallow-abstraction"
+;;   Predicate "abstraction"
 ;;   List
 ;;     List
 ;;       <x1>
@@ -91,7 +95,7 @@
          (vardecl (VariableList g-decl texts-decl ms-decl xs-f-decl))
          ;; Clauses
          (minsup-g (minsup-eval g texts ms))
-         (shabs-eval (shallow-abstraction-eval xs-f minsup-g))
+         (shabs-eval (abstraction-eval xs-f minsup-g))
          ;; Make sure the pattern has the minimum support
          (precond-1 (absolutely-true-eval minsup-g))
          (precond-2 (absolutely-true-eval shabs-eval))

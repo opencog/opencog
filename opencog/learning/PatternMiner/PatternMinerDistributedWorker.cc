@@ -383,9 +383,19 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
                 startFromLinkContainWhiteKeyword = true;
         }
 
-        extendAPatternForOneMoreGramRecursively(newLink, *observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
-
+        extendPatternForOneMoreGramRecursively(newLink,
+                                               *observing_as,
+                                               Handle::UNDEFINED,
+                                               lastGramLinks,
+                                               0,
+                                               lastGramValueToVarMap,
+                                               patternVarMap,
+                                               false,
+                                               allNewMinedPatternsCurTask,
+                                               allHTreeNodesCurTask,
+                                               allNewMinedPatternInfo,
+                                               thread_index,
+                                               startFromLinkContainWhiteKeyword);
 
         // send new mined patterns to the server
         for (MinedPatternInfo& pInfo : allNewMinedPatternInfo)

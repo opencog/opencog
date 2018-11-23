@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -47,29 +48,29 @@ namespace opencog
 HandleSetSeq MinerUtils::shallow_abstract(const Valuations& valuations, unsigned ms)
 {
 	// Base case
-	if (valuations.novar())
+	if (valuations.no_focus())
 		return HandleSetSeq();
 
 	// Recursive case
-	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations, ms)};
-	HandleSetSeq remaining = shallow_abstract(valuations.erase_front(), ms);
+	HandleSetSeq shabs_per_var{focus_shallow_abstract(valuations, ms)};
+	valuations.inc_focus_variable();
+	HandleSetSeq remaining = shallow_abstract(valuations, ms);
+	valuations.dec_focus_variable();
 	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
 	return shabs_per_var;
 }
 
-HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsigned ms)
+HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsigned ms)
 {
 	HandleSet shabs;
 
 	// No more variable to specialize from
-	if (valuations.novar())
+	if (valuations.no_focus())
 		return HandleSet();
 
-	// Variable to specialize
-	Handle var = valuations.front_variable();
-
-	// Strongly connected valuations associated to that variable
-	const SCValuations& var_scv(valuations.get_scvaluations(var));
+	// Strongly connected valuations associated to the variable under
+	// focus
+	const SCValuations& var_scv(valuations.focus_scvaluations());
 
 	////////////////////////////
 	// Shallow abtractions    //
@@ -83,12 +84,30 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 	// shallow abstractions
 	unsigned val_count = valuations.size() / var_scv.size();
 	for (const HandleSeq& valuation : var_scv.valuations) {
-		Handle shabs = val_shallow_abstract(valuation[0]);
-		if (shabs)
-			shapats[val_shallow_abstract(valuation[0])] += val_count;
+		const Handle& value = var_scv.focus_value(valuation);
+
+		// If var_scv contains only one variable, then ignore shallow
+		// abstractions of nodes and nullary links as they create
+		// constant abstractions and
+		//
+		// 1. In case there is only one strongly connected component,
+		//    constant patterns cannot have support > 1.
+		//
+		// 2. In case there are more than one strongly connected
+		//    component, constant patterns are essentially useless
+		//    (don't affect the support), and they will no longer
+		//    reconnect, so they will remain useless.
+		//
+		// For these 2 reasons they can be safely ignored.
+		if (valuation.size() == 1 and is_nullary(value))
+			continue;
+
+		// Otherwise generate its shallow abstraction
+		if (Handle shabs = val_shallow_abstract(value))
+			shapats[shabs] += val_count;
 	}
 
-	// Only consider the shallow abstractions that reach the minimum
+	// Only consider shallow abstractions that reach the minimum
 	// support
 	for (const auto& shapat : shapats)
 		if (ms <= shapat.second)
@@ -99,8 +118,7 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 	////////////////////////////////
 
 	// Add all subsequent factorizable variables
-	HandleSeq remvars(std::next(valuations.variables.varseq.begin()),
-	                  valuations.variables.varseq.end());
+	HandleSeq remvars = valuations.remaining_variables();
 	HandleUCounter facvars;
 	for (const Handle& rv : remvars) {
 		// Strongly connected valuations associated to that variable
@@ -110,8 +128,8 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 		unsigned rv_idx = rv_scv.index(rv);
 
 		// Whether var and rv are in the same strongly connected
-		// valuations
-		bool same_scv = rv_scv == var_scv;
+		// valuations (using pointer equality to speed it up)
+		bool same_scv = &rv_scv == &var_scv;
 
 		// Ref to keep track of the number of text instances where the
 		// value of var is equal to the value to rv
@@ -131,7 +149,7 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 
 		for (const HandleSeq& valuation : var_scv.valuations) {
 			// Value associated to var
-			const Handle& val = valuation[0];
+			const Handle& val = valuation[var_scv.focus_index()];
 
 			// If the value of var is equal to that of rv, then
 			// increase rv factorization count
@@ -147,7 +165,7 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 				}
 			}
 
-			// IF the minimum support has been reached, no need to
+			// If the minimum support has been reached, no need to
 			// keep counting
 			if (ms <= rv_count)
 				break;
@@ -163,10 +181,15 @@ HandleSet MinerUtils::front_shallow_abstract(const Valuations& valuations, unsig
 	return shabs;
 }
 
+bool MinerUtils::is_nullary(const Handle& h)
+{
+	return h->is_node() or h->get_arity() == 0;
+}
+
 Handle MinerUtils::val_shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
-	if (value->is_node() or value->get_arity() == 0)
+	if (is_nullary(value))
 		return value;
 
 	Type tt = value->get_type();
@@ -239,45 +262,11 @@ Handle MinerUtils::local_quote(const Handle& h)
 	return createLink(LOCAL_QUOTE_LINK, h);
 }
 
-// TODO: take care of removing local quote in the composed
-// sub-patterns, if it doesn't already
-// TODO: replace by PutLink, if possible
 Handle MinerUtils::compose(const Handle& pattern, const HandleMap& var2pat)
 {
-	// Split var2pat into 2 mappings, variable to sub-vardecl and
-	// variable to sub-body
-	HandleMap var2subdecl, var2subody;
-	for (const auto& el : var2pat) {
-		var2subdecl[el.first] = get_vardecl(el.second);
-		var2subody[el.first] = get_body(el.second);
-	}
-
-	// Get variable declaration of the composition
-	Handle vardecl = vardecl_compose(get_vardecl(pattern), var2subdecl);
-
-	// Turn the map into a vector of new bodies
-	const Variables variables = get_variables(pattern);
-	HandleSeq subodies = variables.make_sequence(var2subody);
-
-	// Perform composition of the pattern body with the sub-bodies)
-	// TODO: perhaps use RewriteLink partial_substitute
-	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
-	body = RewriteLink::consume_quotations(vardecl, body, true);
-	// If root AndLink then simplify the pattern
-	if (body->get_type() == AND_LINK) {
-		body = remove_useless_clauses(vardecl, body);
-		body = remove_unary_and(body);
-	}
-
-	// Filter vardecl
-	vardecl = filter_vardecl(vardecl, body);
-
-	// Create the composed pattern
-	if (vardecl)
-		return createLink(HandleSeq{vardecl, body}, pattern->get_type());
-
-	// No variable, the pattern is the body itself
-	return body;
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern))
+		return remove_useless_clauses(sc->beta_reduce(var2pat));
+	return pattern;
 }
 
 Handle MinerUtils::vardecl_compose(const Handle& vardecl, const HandleMap& var2subdecl)
@@ -334,14 +323,6 @@ Handle MinerUtils::remove_unary_and(const Handle& h)
 	return h;
 }
 
-Handle MinerUtils::alpha_conversion(const Handle& pattern)
-{
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
-		return sc->alpha_convert();
-	return pattern;
-}
-
 HandleSet MinerUtils::get_texts(const Handle& texts_cpt)
 {
 	// Retrieve all members of texts_cpt
@@ -353,6 +334,12 @@ HandleSet MinerUtils::get_texts(const Handle& texts_cpt)
 			texts.insert(member);
 	}
 	return texts;
+}
+
+unsigned MinerUtils::get_ms(const Handle& ms)
+{
+	NumberNodePtr nn = NumberNodeCast(ms);
+	return (unsigned)std::round(nn->get_value());
 }
 
 unsigned MinerUtils::support(const Handle& pattern,
@@ -396,7 +383,32 @@ HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
                                           const HandleSet& texts,
                                           unsigned ms)
 {
-	return shallow_abstract(Valuations(pattern, texts), ms);
+	Valuations valuations(pattern, texts);
+	return shallow_abstract(valuations, ms);
+}
+
+HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
+                                         const HandleSet& texts,
+                                         unsigned ms)
+{
+	// Calculate all shallow abstractions of pattern
+	HandleSetSeq shabs_per_var = shallow_abstract(pattern, texts, ms);
+
+	// For each variable of pattern, generate the corresponding shallow
+	// specializations
+	const Variables& vars = MinerUtils::get_variables(pattern);
+	size_t vari = 0;
+	HandleSet results;
+	for (const HandleSet& shabs : shabs_per_var) {
+		for (const Handle& sa : shabs) {
+			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
+			// Shallow_abstract should already have eliminated shallow
+			// abstraction that do not have enough support.
+			results.insert(npat);
+		}
+		vari++;
+	}
+	return results;
 }
 
 Handle MinerUtils::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
@@ -505,8 +517,7 @@ Handle MinerUtils::gen_rand_variable()
 
 const Variables& MinerUtils::get_variables(const Handle& pattern)
 {
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern))
 		return RewriteLinkCast(pattern)->get_variables();
 	static Variables empty_variables;
 	return empty_variables;
@@ -514,8 +525,7 @@ const Variables& MinerUtils::get_variables(const Handle& pattern)
 
 Handle MinerUtils::get_vardecl(const Handle& pattern)
 {
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc) {
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern)) {
 		Handle vardecl = sc->get_vardecl();
 		if (not vardecl)
 			vardecl = sc->get_variables().get_vardecl();
@@ -526,9 +536,8 @@ Handle MinerUtils::get_vardecl(const Handle& pattern)
 
 const Handle& MinerUtils::get_body(const Handle& pattern)
 {
-	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
-		return RewriteLinkCast(pattern)->get_body();
+	if (RewriteLinkPtr sc = RewriteLinkCast(pattern))
+		return sc->get_body();
 	return pattern;
 }
 
@@ -565,7 +574,7 @@ Handle MinerUtils::remove_useless_clauses(const Handle& vardecl,
 void MinerUtils::remove_useless_clauses(const Handle& vardecl, HandleSeq& clauses)
 {
 	remove_constant_clauses(vardecl, clauses);
-	remove_redundant_clauses(clauses);
+	remove_redundant_subclauses(clauses);
 }
 
 void MinerUtils::remove_constant_clauses(const Handle& vardecl, HandleSeq& clauses)
@@ -580,7 +589,7 @@ void MinerUtils::remove_constant_clauses(const Handle& vardecl, HandleSeq& claus
 	boost::remove_erase_if(clauses, is_constant);
 }
 
-void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
+void MinerUtils::remove_redundant_subclauses(HandleSeq& clauses)
 {
 	// Check that each clause is not a subtree of another clause,
 	// remove it otherwise.
@@ -595,6 +604,138 @@ void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
 		else
 			++it;
 	}
+}
+
+void MinerUtils::remove_redundant_clauses(HandleSeq& clauses)
+{
+	boost::sort(clauses);
+	typedef std::equal_to<opencog::Handle> HandleEqual;
+	boost::erase(clauses,
+	             boost::unique<boost::return_found_end, HandleSeq, HandleEqual>
+	             (clauses, HandleEqual()));
+}
+
+Handle MinerUtils::alpha_convert(const Handle& pattern,
+                                 const Variables& other_vars)
+{
+	const Variables& pattern_vars = get_variables(pattern);
+
+	// Detect collision between pattern_vars and other_vars
+	HandleMap aconv;
+	for (const Handle& var : pattern_vars.varset) {
+		if (other_vars.is_in_varset(var)) {
+			Handle nvar;
+			bool used;
+			do {
+				nvar = createNode(VARIABLE_NODE, randstr(var->get_name() + "-"));
+				// Make sure it is not in other_vars or pattern_vars
+				used = other_vars.is_in_varset(nvar) or pattern_vars.is_in_varset(nvar);
+			} while (used);
+			aconv[var] = nvar;
+		}
+	}
+
+	// No collision
+	if (aconv.empty())
+		return pattern;
+
+	// Collisions, need to alpha convert vardecl and body
+	Handle nvardecl = pattern_vars.substitute_nocheck(get_vardecl(pattern), aconv);
+	Handle nbody = pattern_vars.substitute_nocheck(get_body(pattern), aconv);
+
+	// Reconstruct alpha converted pattern
+	return Handle(createLambdaLink(nvardecl, nbody));
+}
+
+Handle MinerUtils::expand_conjunction_disconnect(const Handle& cnjtion,
+                                                 const Handle& pattern)
+{
+	// Copy variables from cnjtion as it will be extended
+	Variables cnjtion_vars = get_variables(cnjtion);
+
+	// Alpha convert pattern, if necessary, to avoid collisions between
+	// cnjtion_vars and pattern variables
+	Handle acpat = alpha_convert(pattern, cnjtion_vars);
+
+	// Extend cnjtion_vars with pattern variables
+	cnjtion_vars.extend(get_variables(acpat));
+
+	// Expand cnjtion_body with pattern, flattening cnjtion_body if necessary
+	const Handle& cnjtion_body = get_body(cnjtion);
+	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
+		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
+	nclauses.push_back(get_body(acpat));
+
+	// Remove redundant subclauses. This can happen if there's only one
+	// variable to connect, then some subclause turn out to be
+	// redundant.
+	remove_redundant_subclauses(nclauses);
+
+	// Recreate expanded conjunction
+	Handle nvardecl = cnjtion_vars.get_vardecl(),
+		nbody = createLink(nclauses, AND_LINK),
+		npattern = Handle(createLambdaLink(nvardecl, nbody));
+
+	return npattern;
+}
+
+Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
+                                              const Handle& pattern,
+                                              const Handle& cnjtion_var,
+                                              const Handle& pattern_var)
+{
+	// Substitute pattern_var by cnjtion_var in pattern
+	Variables pattern_vars = get_variables(pattern);
+	HandleMap p2c{{pattern_var, cnjtion_var}};
+	Handle npat_body = pattern_vars.substitute_nocheck(get_body(pattern), p2c);
+	pattern_vars.erase(pattern_var);
+
+	// Extend cnjtion variables with the pattern variables, except pattern_var
+	Variables cnjtion_vars = get_variables(cnjtion);
+	cnjtion_vars.extend(pattern_vars);
+
+	// Expand cnjtion body with npat_body, flattening cnjtion_body if necessary
+	const Handle& cnjtion_body = get_body(cnjtion);
+	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
+		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
+	nclauses.push_back(npat_body);
+
+	// Remove redundant subclauses. This can happen if there's only one
+	// variable to connect, then some subclause turn out to be
+	// redundant.
+	remove_redundant_subclauses(nclauses);
+
+	// Recreate expanded conjunction
+	Handle nvardecl = cnjtion_vars.get_vardecl(),
+		nbody = nclauses.size() == 1 ? nclauses[0] : createLink(nclauses, AND_LINK),
+		npattern = Handle(createLambdaLink(nvardecl, nbody));
+
+	return npattern;
+}
+
+HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
+                                         const Handle& pattern,
+                                         const HandleSet& texts,
+                                         unsigned ms)
+{
+	// Alpha convert pattern, if necessary, to avoid collisions between
+	// cnjtion variables and pattern variables
+	Handle apat = alpha_convert(pattern, get_variables(cnjtion));
+
+	// For each variable in apat and cnjtion, create a connected
+	// pattern, retain it if enough support.
+	const Variables& cnjtion_vars = get_variables(cnjtion);
+	const Variables& apat_vars = get_variables(apat);
+	HandleSet patterns;
+	for (const Handle& pvar : apat_vars.varseq) {
+		for (const Handle& cvar : cnjtion_vars.varseq) {
+			Handle cpat = expand_conjunction_connect(cnjtion, apat, cvar, pvar);
+			if (not content_eq(cpat, cnjtion) and enough_support(cpat, texts, ms))
+				patterns.insert(cpat);
+		}
+	}
+
+	return patterns;
 }
 
 } // namespace opencog
