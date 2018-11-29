@@ -18,8 +18,10 @@ sureal          - Demonstrates how to use the Surface Realization
                   language sentences from abstract conceptual
                   diagrams.
 
-openpsi        - An example implementation of openpsi to control a simple
+openpsi         - An example implementation of openpsi to control a simple
                   agent.
+
+learning        - Various learning algorithm examples. For now only the miner.
 
 Stale Examples:
 ---------------
