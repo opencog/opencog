@@ -1,7 +1,7 @@
 # Mine Ugly Male Soda Drinker Pattern
 
-Miner 3-conjunct (a.k.a. 3-gram) pattern by expanding pattern
-conjunctions in an incremental manner.
+Mine 3-conjunct (a.k.a. 3-gram) patterns by incrementally expanding
+pattern conjunctions.
 
 ## Overview
 
@@ -86,3 +86,10 @@ guile -l ugly-male-soda-drinker.scm
 ```
 
 or paste each scheme commend into guile.
+
+The results should have been stored in the `results` variable, which
+can be shown as follows:
+
+```scheme
+results
+```

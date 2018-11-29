@@ -100,7 +100,8 @@
                                    (max-conjuncts -1))
   ;; Load conjunction-expansion and associate to pm-rbs
   (if (not (or (false-tv? incremental-expansion) (= max-conjuncts 1)))
-      (let* ((rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
+      (let* ((ie-tv (if (equal? #t) (stv 0.01 0.5) incremental-expansion))
+             (rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
              (namify (lambda (i)
                        (string-concatenate
                         (cons "conjunction-expansion-"
@@ -108,8 +109,7 @@
                                   (list "rule")
                                   (list (number->string i) "ary-rule"))))))
              (rulify (lambda (i)
-                       (list (DefinedSchemaNode (namify i))
-                             incremental-expansion)))
+                       (list (DefinedSchemaNode (namify i)) ie-tv)))
              (max-conjuncts? (lambda (x) (<= max-conjuncts x)))
              (add1 (lambda (x) (+ x 1)))
              (1-to-max-conjuncts (unfold max-conjuncts? identity add1 1))
@@ -161,7 +161,9 @@
 
   tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
       conjunctions of patterns. It will only expand conjunctions with enough
-      support with patterns with enough support.
+      support with patterns with enough support. Alternatively the user can
+      provide #t instead of a truth value. In that case a default true value
+      will be selected.
 
   mc: [optional, default=3] In case tv is set to a positive strength and
       confidence, and thus incremental conjunction expansion is enabled, that
@@ -294,8 +296,9 @@
 (define* (cog-miner . args)
   (display ("The command you are looking for is cog-mine.")))
 
-(define* (cog-mine texts ms
+(define* (cog-mine texts
                    #:key
+                   (minsup 10)
                    (initpat (top))
                    (maxiter 1000)
                    (complexity-penalty 1)
@@ -305,7 +308,8 @@
   Mine patterns in texts with minimum support ms, optionally
   using maxiter iterations and starting from the initial pattern initpat.
 
-  Usage: (cog-mine texts ms
+  Usage: (cog-mine texts
+                   #:minsup ms
                    #:initpat ip
                    #:maxiter mi
                    #:complexity-penalty cp
@@ -337,8 +341,8 @@
               tn
               (Concept texts-name))
 
-  ms: Minimum support. All pattern with frequency below ms are
-      discarded
+  ms: [optional, default=10] Minimum support. All patterns with frequency below
+      ms are discarded. Can be a Scheme number or an Atomese number node.
 
   ip: [optional, default=(top)] Initial pattern to start the search from.
       All mined patterns will be specializations of this pattern.
@@ -355,7 +359,9 @@
 
   tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
       conjunctions of patterns. It will only expand conjunctions with enough
-      support with patterns with enough support.
+      support with patterns with enough support. Alternatively the user can
+      provide #t instead of a truth value. In that case a default true value
+      will be selected.
 
   mc: [optional, default=3] In case tv is set to a positive strength and
       confidence, and thus incremental conjunction expansion is enabled, that
@@ -400,7 +406,7 @@
                         (fill-texts-cpt (random-texts-cpt) texts)
                         ;; Otherwise texts is already a concept
                         texts))
-         (ms-nn (Number ms))
+         (ms-nn (if (number? minsup) (Number minsup) minsup))
          ;; Check that the initial pattern has enough support
          (es (cog-enough-support? initpat texts-cpt ms-nn)))
     (if (not es)
@@ -413,7 +419,7 @@
 
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
-        (let* ((source (minsup-eval-true initpat texts-cpt ms))
+        (let* ((source (minsup-eval-true initpat texts-cpt minsup))
                (miner-rbs (random-miner-rbs-cpt)))
           (configure-miner miner-rbs
                            #:maxiter maxiter
@@ -423,7 +429,7 @@
           (let* (;; Run the pattern miner in a forward way
                  (results (cog-fc miner-rbs source))
                  ;; Fetch all relevant results
-                 (patterns (fetch-patterns texts-cpt ms))
+                 (patterns (fetch-patterns texts-cpt minsup))
                  (patterns-lst (cog-outgoing-set patterns)))
             (cog-set-atomspace! parent-as)
             ;; TODO: delete tmp-as but without deleting its atoms, if

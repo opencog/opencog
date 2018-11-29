@@ -59,4 +59,6 @@
 ;;
 ;; TODO: the following bugs for no reason
 ;; (cog-mine (cog-atomspace) 2 #:initpat (conjunct-pattern 2))
-(cog-mine (list AB BC DE EF) 2 #:initpat (conjunct-pattern 2))
+(cog-mine (list AB BC DE EF)
+          #:minsup 2
+          #:initpat (conjunct-pattern 2))
