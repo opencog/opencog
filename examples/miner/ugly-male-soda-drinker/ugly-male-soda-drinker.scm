@@ -1,10 +1,10 @@
 ;; Load the miner module
 (use-modules (opencog miner))
 
-;; For debugging
-(use-modules (opencog logger))
-(use-modules (opencog rule-engine))
-(ure-logger-set-level! "debug")
+;; ;; For debugging
+;; (use-modules (opencog logger))
+;; (use-modules (opencog rule-engine))
+;; (ure-logger-set-level! "debug")
 
 ;; Load KB
 (load "kb.scm")
@@ -27,7 +27,8 @@
 ;;     (Inheritance
 ;;       (Variable "$X")
 ;;       (Concept "soda drinker"))))
-(cog-mine (cog-atomspace) 5
-          #:maxiter 100
-          #:incremental-expansion (stv 0.1 0.1)
-          #:max-conjuncts 3)
+(define results (cog-mine (cog-atomspace)
+                          #:minsup 5
+                          #:maxiter 100
+                          #:incremental-expansion #t
+                          #:max-conjuncts 3))

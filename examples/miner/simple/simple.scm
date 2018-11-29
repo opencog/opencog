@@ -20,7 +20,7 @@
 ;;   (Inheritance
 ;;     (Concept "A")
 ;;     (Variable "$X")))
-(cog-mine (cog-atomspace) 2)
+(cog-mine (cog-atomspace) #:minsup 2)
 
 ;; Call the miner on the text set of interest instead, should yield
 ;; the same results.
