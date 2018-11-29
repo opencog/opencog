@@ -332,7 +332,7 @@ and
   (Variable "$X")
   (Inheritance
     (Variable "$X")
-    (Concept "cat"))))
+    (Concept "cat")))
 ```
 
 one can consider their conjunction, using `(Variable "$X")` as
@@ -652,7 +652,7 @@ All available options are documented in
 (help cog-mine)
 ```
 
-Examples can be found in [examples/miner](../../../examples/miner).
+Examples can be found in [examples/learning/miner](../../../examples/learning/miner).
 
 Finally, if you wish to carry out manually the various steps
 automatically handled by `cog-mine`, configuring the URE and such, the
