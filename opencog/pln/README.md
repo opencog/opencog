@@ -11,10 +11,13 @@ PLN is able to encompass within uncertain logic such ideas as induction,
 abduction, analogy, fuzziness and speculation, and reasoning about time and
 causality.
 
-Further details can be found on the http://wiki.opencog.org/wikihome/index.php/PLN
+Further details can be found [here](http://wiki.opencog.org/wikihome/index.php/PLN).
 
 ## Implementation
 
 The current implementation uses the [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
 where PLN is one specific rule base, configured with scheme function and
 scheme rules.
+
+## Usage
+
