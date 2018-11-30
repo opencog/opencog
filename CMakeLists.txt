@@ -171,18 +171,15 @@ ENDIF (ATOMSPACE_FOUND)
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
+SET(MIN_BOOST 1.46)
 
 # Required boost packages
-# hypertable requires boost iostreams
-# boost-1.49 no longer has a libboost_iostreams
-# 1.46 is minimum for required filesystem support
-# program_options needed by some combo utilities
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
+FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
 ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
@@ -193,8 +190,8 @@ ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
-FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS python program_options QUIET)
+FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS math_c99 QUIET)
 
 # Arghhh. Except cmake is treating above as required, not optional. #$%**&
 IF(Boost_FOUND_SAVE)
@@ -605,92 +602,52 @@ ENDIF (NOT WIN32)
 
 # ===================================================================
 # Packaging
-# XXX FIXME: Does anyone use this? Does it even work? Not sure, but
-# I think this has been unused and dead since 2010, right ???
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
-SET(CPACK_PACKAGE_NAME "opencog")
-SET(CPACK_PACKAGE_VENDOR "opencog.org")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "1")
-SET(CPACK_PACKAGE_VERSION_PATCH "4")
-SET(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-SET(CPACK_BINARY_STGZ "OFF")
-SET(CPACK_BINARY_TBZ2 "OFF")
-SET(CPACK_BINARY_TGZ "OFF")
-SET(CPACK_BINARY_TZ "OFF")
-SET(CPACK_SOURCE_STGZ "OFF")
-SET(CPACK_SOURCE_TBZ2 "ON")
-SET(CPACK_SOURCE_TGZ "OFF")
-SET(CPACK_SOURCE_TZ "OFF")
+## Architecture the package is for.
+## TODO: Will give error on non debian distros, fix it.
+EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
+	OUTPUT_VARIABLE PACKAGE_ARCHITECTURE
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
+## It doesn't have a header-file declaring the version similar to cogutil and
+## atomspace.
+SET(SEMANTIC_VERSION 0.1.4)
+
+## Cpack configuration
+SET(CPACK_GENERATOR "DEB")
 SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
-SET(CPACK_GENERATOR "TBZ2;DEB")
-SET(CPACK_SOURCE_GENERATOR "TBZ2")
-SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
-SET(CPACK_SOURCE_IGNORE_FILES
-	"~$"
-	".a$"
-	".so$"
-	".log$"
-	".tar.z$"
-	".tar.gz$"
-	".tar.bz2$"
-	"/Makefile$"
-	"/CMakeFiles/"
-	"/CMakeCache.txt$"
-	"/DartTestfile.txt$"
-	"/cmake_install.cmake$"
-	"/Testfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"UTest$"
-	"UTest.cpp$"
-	"/_CPack_Packages/"
-	"/CPackConfig.cmake$"
-	"/CPackSourceConfig.cmake$"
-	"/sniff$"
-	"/install_manifest.txt$"
-	"${CPACK_PACKAGE_FILE_NAME}"
-	"^${PROJECT_SOURCE_DIR}/debian/"
-	"^${PROJECT_SOURCE_DIR}/.*spec$"
-	"^${PROJECT_SOURCE_DIR}/vendor/"
-	"^${PROJECT_SOURCE_DIR}/.bzr/"
-	"^${PROJECT_SOURCE_DIR}/.bzrignore$"
-	"^${PROJECT_SOURCE_DIR}/.git/"
-	"^${PROJECT_BINARY_DIR}/opencog/cogserver/server/cogserver$"
-	"^${PROJECT_BINARY_DIR}/examples/server/derivedserver$"
-	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
-	"^${PROJECT_SOURCE_DIR}/opencog/python/__init__.py$"
-)
-
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
+SET(CPACK_PACKAGE_NAME "opencog-dev")
+SET(CPACK_PACKAGE_VENDOR "opencog.org")
+SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_FILE_NAME
+	"${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}")
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "atomspace (>= 5.0.3)"
+SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
+
+## Debian specific configurations
+SET(DEPENDENCY_LIST
+	"guile-2.2-dev (>= 2.2.2)"
+	"python-dev (>= 2.7.5)"
+	"libboost-date-time-dev (>= ${MIN_BOOST})"
+	"libboost-filesystem-dev (>= ${MIN_BOOST})"
+	"libboost-program-options-dev (>= ${MIN_BOOST})"
+	"libboost-regex-dev (>= ${MIN_BOOST})"
+	"libboost-serialization-dev (>= ${MIN_BOOST})"
+	"libboost-thread-dev (>= ${MIN_BOOST})"
+	"libboost-system-dev (>= ${MIN_BOOST})"
+	"libboost-random-dev (>= ${MIN_BOOST})"
+	"libstdc++6 (>= 4.7)"
+	"libcogutil-dev (>= 2.0.2)"
+	"atomspace-dev (>= 5.0.3)"
 )
 
-SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-IF (WIN32)
-	# Its "not unix" is cygwin is being used.
-	IF (NOT UNIX)
-		# There is a bug in NSI that does not handle full unix paths
-		# properly. Make sure there is at least one set of four (4)
-		# backslashes.
-		SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}\\\\lib\\\\opencog.ico")
-		SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\cogserver.exe")
-		SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The Open Cognition Framework")
-		SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.opencog.org")
-		SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.opencog.org")
-		SET(CPACK_NSIS_CONTACT "opencog@googlegroups.com")
-		SET(CPACK_NSIS_MODIFY_PATH ON)
-	ELSE(NOT UNIX)
-		SET(CPACK_STRIP_FILES "bin/cogserver")
-		SET(CPACK_SOURCE_STRIP_FILES "")
-	ENDIF(NOT UNIX)
-ENDIF(WIN32)
-
-SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
+STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${MAIN_DEPENDENCIES}")
+SET(CPACK_DEBIAN_PACKAGE_SECTION "libdevel")
+SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://opencog.org")
 INCLUDE(CPack)
 
 # ===================================================================
