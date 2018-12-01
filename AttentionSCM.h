@@ -4,7 +4,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/atoms/proto/LinkValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/attentionbank/AFImplicator.h>
 
 
