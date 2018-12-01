@@ -128,7 +128,7 @@ Handle AttentionSCM::update_af(int n)
 	std::reverse(attentionalFocus.begin(), attentionalFocus.end());
 	attentionalFocus.resize(N);
 
-	std::vector<ProtoAtomPtr> af;
+	std::vector<ValuePtr> af;
 	for (Handle& h : attentionalFocus) {
 		af.push_back(h);
 	}
