@@ -41,5 +41,5 @@ AttentionValuePtr opencog::get_av(const Handle& h)
 
 void opencog::set_av(AtomSpace* as, const Handle& h, const AttentionValuePtr& av)
 {
-    as->set_value(h, attn_key(), ProtoAtomCast(av));
+    as->set_value(h, attn_key(), ValueCast(av));
 }
