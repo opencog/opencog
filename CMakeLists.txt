@@ -508,8 +508,8 @@ ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
 SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # include custom opencog cmake macros
-INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogFunctions.cmake")
+INCLUDE("${DATADIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${DATADIR}/cmake/OpenCogFunctions.cmake")
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs
