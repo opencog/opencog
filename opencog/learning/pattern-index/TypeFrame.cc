@@ -1,5 +1,5 @@
 #include "TypeFrame.h"
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 
 using namespace opencog;
 using namespace std;

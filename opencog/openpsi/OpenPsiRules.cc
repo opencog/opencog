@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
@@ -49,7 +49,7 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   if (_psi_rules.count(rule)) return rule;
 
   rule->setTruthValue(stv);
-  rule->setValue(_action_executed, ProtoAtomCast(TruthValue::FALSE_TV()));
+  rule->setValue(_action_executed, ValueCast(TruthValue::FALSE_TV()));
 
   // Construct the query atom that is used to check satisfiablity. This is
   // done here for performance. If context has only one atom and it is a

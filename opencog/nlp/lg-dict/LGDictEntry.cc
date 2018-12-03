@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "LGDictNode.h"
 #include "LGDictEntry.h"
@@ -92,7 +92,7 @@ LGDictEntry::LGDictEntry(const Link& l)
 
 // =================================================================
 
-ProtoAtomPtr LGDictEntry::execute() const
+ValuePtr LGDictEntry::execute() const
 {
 	if (WORD_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();

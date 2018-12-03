@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
@@ -129,14 +129,14 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
 
     Handle result =
       HandleCast(inst.instantiate(opr.get_action(rule), it->second, true));
-    rule->setValue(_action_executed, ProtoAtomCast(TruthValue::TRUE_TV()));
+    rule->setValue(_action_executed, ValueCast(TruthValue::TRUE_TV()));
 
     return result;
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it
     // is the responsibility of the action-selector for determining
     // what action is to be taken.
-    rule->setValue(_action_executed, ProtoAtomCast(TruthValue::FALSE_TV()));
+    rule->setValue(_action_executed, ValueCast(TruthValue::FALSE_TV()));
     return Handle::UNDEFINED;
   }
 }
