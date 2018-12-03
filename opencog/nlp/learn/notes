@@ -12209,7 +12209,7 @@ x/4a 0x7ffc6ba59e40
 
 (gdb) print *this
 $15 = {<> = {<> = {_M_weak_this = {<No data fields>}}, 
-    _vptr.ProtoAtom = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
+    _vptr.Value = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
     _type = 127}, _flags = 0 '\000', _content_hash = 11383300620556476978,
   _atom_space = 0x0, _truthValue = {<No data fields>},
   _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}
@@ -12282,7 +12282,7 @@ So the second addAtom fails to resolve or update ad the first failed to
 resolve.
 
 ValuationPtr  .. s a triple, and thus is too much.
-Atom has pairs of key, ProtoAtomPtr&  
+Atom has pairs of key, ValuePtr&
 
 Remove the valuation table, do not even build it. DONE
 remove special-case for tv in sql  DONE

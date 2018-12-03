@@ -47,7 +47,7 @@
 ; It controls the weight of other demands through the updater associated with
 ; it. It shouldn't be skipped.
 ; NOTE: This is a hack b/c once the weight of the rules is separated into atom
-; or protoatom wrapped in a StateLink then (or somehting like that) then it
+; or protoatom[now renamed value] wrapped in a StateLink then (or somehting like that) then it
 ; would be easier to update.
 (define psi-controller-demand (psi-demand "controller"))
 
