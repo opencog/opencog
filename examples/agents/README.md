@@ -8,6 +8,9 @@ how an agent can be written in C++.
 
 To test this agent, do the following:
 
+* In the `agents` folder, `mkdir build`, `cd build`, `cmake ..` and then `make`. 
+  Otherwise you won't have the `libexample_agent.so`.
+  
 * Start the cogserver: From a shell prompt, issue the command
    `./opencog/cogserver/server/cogserver -c ../lib/development.conf` from the
    build directory
