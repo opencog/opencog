@@ -25,7 +25,7 @@
 #include <uuid/uuid.h>
 #include <link-grammar/link-includes.h>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -137,7 +137,7 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-ProtoAtomPtr LGParseLink::execute() const
+ValuePtr LGParseLink::execute() const
 {
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();

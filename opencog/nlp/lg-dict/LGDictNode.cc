@@ -23,7 +23,7 @@
 #include <mutex>
 
 #include <link-grammar/link-includes.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/nlp/types/atom_types.h>
 

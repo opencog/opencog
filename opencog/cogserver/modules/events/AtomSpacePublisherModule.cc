@@ -36,7 +36,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/tbb.h>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/FuzzyTruthValue.h>

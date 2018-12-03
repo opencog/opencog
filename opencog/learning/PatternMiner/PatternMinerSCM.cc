@@ -27,7 +27,7 @@
 #ifndef _OPENCOG_PATTERNMINER_SCM_H
 #define _OPENCOG_PATTERNMINER_SCM_H
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
