@@ -579,16 +579,6 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
-	ADD_CUSTOM_TARGET(test_query
-		DEPENDS tests/query
-		#      ../reasoning/RuleEngine/RuleUTest
-		#      ../reasoning/RuleEngine/ForwardChainerUTest
-		#      ../nlp/sureal/SuRealUTest
-		#      ../nlp/microplanning/MicroplanningUTest
-		WORKING_DIRECTORY tests/query
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running pattern matcher tests..."
-	)
 ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
