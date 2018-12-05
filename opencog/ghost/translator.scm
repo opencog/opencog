@@ -99,10 +99,6 @@
                         (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
                         (equal? 'wildcard (car (first prev))))
                    (cons term (cdr prev)))
-                  ; Same as the above, but for optionals
-                  ((and (equal? 'optionals (car term))
-                        (equal? 'wildcard (car (first prev))))
-                   (cons term (cdr prev)))
                   ; Similarly if there is a wildcard followed by a variable
                   ; that matches to "zero or more", e.g.
                   ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
