@@ -1,5 +1,5 @@
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/guile/SchemeEval.h>

@@ -1,5 +1,5 @@
 #include "AttentionUtils.h"
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/attention/atom_types.h>
 
 namespace opencog

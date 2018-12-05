@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Config.h>
 #include "SCMLoader.h"

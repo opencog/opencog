@@ -5,8 +5,8 @@
 ; -----------------------------------------------------------------------------
 ; TODO: Make the set, get, & delete of properites into a utility template
 ; similar ot change-template and timestamp-template, as similar patterns
-; will be used for modeling the world. It should also make moving to protoatoms
-; simplier when they are ready.
+; will be used for modeling the world. It should also make moving to
+; protoatoms[now renamed values] simplier when they are ready.
 
 ; Usage:
 ; (cog-evaluate! (Put
