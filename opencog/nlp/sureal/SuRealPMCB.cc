@@ -68,7 +68,6 @@ SuRealPMCB::~SuRealPMCB()
  */
 bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 {
-
     if (m_use_cache) {
         int cached = SuRealCache::instance().variable_match(hPat, hSoln);
         if (cached >= 0) {
@@ -80,13 +79,14 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         }
     }
 
-    logger().debug("[SuReal] In variable_match, looking at %s",
-          hSoln->to_short_string().c_str());
+    logger().debug("[SuReal] In variable_match, trying to ground:\n%sto\n%s",
+        hPat->to_short_string().c_str(), hSoln->to_short_string().c_str());
 
     bool answer;
 
     // Reject if the solution is not of the same type.
     if (hPat->get_type() != hSoln->get_type()) {
+        logger().debug("[SuReal] In variable_match, type mismatch!");
         answer = false;
     } else {
         // VariableNode can be matched to any VariableNode, similarly
@@ -100,6 +100,8 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
             Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
             // no WordInstanceNode? reject!
             if (hSolnWordInst == Handle::UNDEFINED) {
+                logger().debug(
+                    "[SuReal] In variable_match, no word instance found!");
                 answer = false;
             } else {
                 answer = true;
@@ -175,8 +177,9 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         }
     }
 
-    logger().debug("[SuReal] In clause_match, looking at %s",
-        grnd_link_h->to_short_string().c_str());
+    logger().debug("[SuReal] In clause_match, trying to ground:\n%sto\n%s",
+        pattrn_link_h->to_short_string().c_str(),
+            grnd_link_h->to_short_string().c_str());
 
     HandleSeq qISet;
     grnd_link_h->getIncomingSetByType(back_inserter(qISet), SET_LINK);
@@ -203,6 +206,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         if (m_use_cache) {
             SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
         }
+
+        logger().debug("[SuReal] In clause_match, no target InterpretationNode found!");
         return false;
     }
 
@@ -217,6 +222,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         if (m_use_cache) {
             SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
         }
+
+        logger().debug("[SuReal] In clause_match, size mismatch!");
         return false;
     }
 
@@ -239,7 +246,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         if (it == m_words.end())
         {
             HandleSeq neighbor_win = get_target_neighbors(hPatNode, REFERENCE_LINK);
-            
+
             if (neighbor_win.size() != 0)
             {
                 HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
@@ -272,6 +279,11 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             if (m_use_cache) {
                 SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
             }
+
+            logger().debug("[SuReal] In clause_match, disjuncts mismatch:\n%s%s",
+                hPatWordNode->to_short_string().c_str(),
+                    hSolnWordInst->to_short_string().c_str());
+
             return false;
         }
     }
@@ -312,8 +324,6 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
         }
     }
 
-    logger().debug("[SuReal] grounding a solution");
-
     // helper to get the InterpretationNode
     auto getInterpretation = [&](const Handle& h)
     {
@@ -335,9 +345,15 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
     HandleSeq qItprNode = getInterpretation(pred_soln.begin()->second);
     std::sort(qItprNode.begin(), qItprNode.end());
 
+    logger().debug("[SuReal] In grounding, trying to find a common interpretation between:\n%s",
+        (pred_soln.begin()->second)->to_short_string().c_str());
+
     // try to find a common InterpretationNode to the solutions
+    // i.e. all the solution-clauses have to come from the same interpretation (of a sentence)
     for (HandleMap::const_iterator it = ++pred_soln.begin(); it != pred_soln.end(); ++it)
     {
+        logger().debug("[SuReal] ...and:\n%s", it->second->to_short_string().c_str());
+
         HandleSeq thisSeq = getInterpretation(it->second);
         std::sort(thisSeq.begin(), thisSeq.end());
 
@@ -352,6 +368,8 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
         if (m_use_cache) {
             SuRealCache::instance().add_grounding_match(pred_soln, false); // pred
         }
+
+        logger().debug("[SuReal] In grounding, no common InterpretationNode found!");
         return false;
     }
 
@@ -374,6 +392,8 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             if (m_use_cache) {
                 SuRealCache::instance().add_grounding_match(var_soln, false); // var
             }
+
+            logger().debug("[SuReal] In grounding, can't ground it to the same solution!");
             return false;
         }
 
@@ -386,14 +406,13 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             HandleSeq neighbor_wn = get_target_neighbors(neighbor_win[0], REFERENCE_LINK);
             hPatWord = neighbor_wn[0];
         }
-        else 
+        else
         {
             string sWord = sName.substr(0, sName.find_first_of('@'));
             sWord = sWord.substr(0, sWord.find_last_of('.'));
             hPatWord = m_as->get_handle(WORD_NODE, sWord);
         }
-        
-        //Handle hSolnWordInst = get_target_neighbors(kv.second, REFERENCE_LINK)[0];
+
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
         // do a disjunct match for PredicateNodes as well
         if (kv.first->get_type() == PREDICATE_NODE and kv.second->get_type() == PREDICATE_NODE)
@@ -409,6 +428,11 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                     if (m_use_cache) {
                         SuRealCache::instance().add_grounding_match(var_soln, false); // var
                     }
+
+                    logger().debug("[SuReal] In grounding, disjunct mismatch!\n%s%s",
+                        hPatWord->to_short_string().c_str(),
+                            hSolnWordInst->to_short_string().c_str());
+
                     return false;
                 }
 
@@ -434,7 +458,6 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                     std::string sName = qOS[0]->get_name();
                     std::string sWord = get_target_neighbors(qOS[0], REFERENCE_LINK)[0]->get_name();
 
-
                     // Skip if we have seen it before
                     if (std::find(qChkWords.begin(), qChkWords.end(), sWord) != qChkWords.end())
                         continue;
@@ -455,6 +478,10 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                                 qInhOS[1]->get_type() == DEFINED_LINGUISTIC_CONCEPT_NODE)
                         {
                             sTense = qInhOS[1]->get_name();
+
+                            logger().debug("[SuReal] In grounding, tense of %sis %s",
+                                kv.second->to_short_string().c_str(), sTense);
+
                             break;
                         }
                     }
@@ -473,13 +500,22 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                                 qInhOS[1]->get_type() == DEFINED_LINGUISTIC_CONCEPT_NODE) {
                                 has_tense = true;
                                 eq_tense = sTense == qInhOS[1]->get_name();
+
+                                logger().debug("[SuReal] In grounding, tense of %sis %s",
+                                    hPatPredNode->to_short_string().c_str(),
+                                        qInhOS[1]->get_name());
+
                                 break;
                             }
                         }
                     }
 
                     // reject if their tenses don't match
-                    if (has_tense and not eq_tense) continue;
+                    if (has_tense and not eq_tense)
+                    {
+                        logger().debug("[SuReal] In grounding, tense mismatch!");
+                        continue;
+                    }
 
                     Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
@@ -504,6 +540,8 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                     if (m_use_cache) {
                         SuRealCache::instance().add_grounding_match(var_soln, false); // var
                     }
+
+                    logger().debug("[SuReal] In grounding, no matching disjunct found!");
                     return false;
                 }
             }
@@ -518,7 +556,14 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                 if (disjunct_match(hPatWord, hSolnWordInst))
                     shrinked_soln[kv.first] = kv.second;
 
-                else return false;
+                else
+                {
+                    logger().debug("[SuReal] In grounding, disjunct mismatch!\n%s\n%s",
+                        hPatWord->to_short_string().c_str(),
+                            hSolnWordInst->to_short_string().c_str());
+
+                    return false;
+                }
             }
 
             // the above only takes care of the words, for nodes that do not correspond
@@ -621,6 +666,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                 // two or more words
                 if (cnt > 0)
                 {
+                    logger().debug("[SuReal] In grounding, solution is not good enough!");
                     isGoodEnough = false;
                     break;
                 }
@@ -645,6 +691,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             logger().debug("[SuReal] grounding Interpreation: %s", n->to_short_string().c_str());
             m_results[n].push_back(shrinked_soln);
         }
+
         if (m_use_cache) {
             //SuRealCache::instance().add_grounding_match(var_soln, pred_soln, true);
             return true;
@@ -669,6 +716,10 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
  */
 bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnWordInst)
 {
+    logger().debug("[SuReal] In disjunct_match, checking disjuncts for:\n%s%s",
+        hPatWordNode->to_short_string().c_str(),
+            hSolnWordInst->to_short_string().c_str());
+
     // the source connectors for the solution
     HandleSeq qTargetConns;
 
