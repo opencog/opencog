@@ -143,9 +143,19 @@
     ((has-match? "!" str) (result:suffix 'NOT location #f))
     ((has-match? "[?]" str) (result:suffix '? location "?"))
     ((has-match? "=" str) (result:suffix 'EQUAL location #f))
+    ; For time -- a.m. and p.m.
+    ; Just catch it to avoid it being splitted into multiple words
+    ; Should be done before any literal / lemma matching
+    ((has-match? "[ap]\\.m\\." str)
+      (result:suffix 'STRING location
+        (string-trim-both (match:substring current-match))))
     ; Words with apostrophe, e.g. I'm, it's etc
     ((has-match? "[a-zA-Z]+['’][a-zA-Z]+" str)
       (result:suffix 'LITERAL_APOS location
+        (string-trim-both (match:substring current-match))))
+    ; Literals for example: Mr. Dr. etc
+    ((has-match? "[a-zA-Z]+\\." str)
+      (result:suffix 'LITERAL location
         (string-trim-both (match:substring current-match))))
     ; Literals -- words start with a '
     ((has-match? "'[a-zA-Z]+\\b" str)
@@ -158,15 +168,15 @@
         ; Literals, words in the pattern that are not in their canonical forms
         (result:suffix 'LITERAL location
           (string-trim-both (match:substring current-match)))))
-    ((has-match? "[0-9]+[0-9.]*" str)
+    ((has-match? "[0-9]+[0-9.]*\\b" str)
       (result:suffix 'NUM location
         (string-trim-both (match:substring current-match))))
     ((has-match? "[|]" str)
       (result:suffix 'VLINE location
-         (string-trim-both (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ((has-match? "," str)
       (result:suffix 'COMMA location
-         (string-trim-both (match:substring current-match))))
+        (string-trim-both (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "[~’'._!?0-9a-zA-Z-]+" str)
       (result:suffix 'STRING location
@@ -507,6 +517,7 @@
 
     (literal
       (LITERAL) : (format #f "(cons 'word \"~a\")" $1)
+      (NUM) : (format #f "(cons 'word \"~a\")" $1)
       (STRING) : (format #f "(cons 'word \"~a\")" $1)
     )
 
