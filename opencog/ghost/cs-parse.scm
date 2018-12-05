@@ -455,6 +455,7 @@
       (variable) : $1
       (user-variable) : $1
       (function) : $1
+      (function-compare) : $1
       (choice) : $1
       (optional) : $1
       (variable ? concept) :
@@ -574,12 +575,19 @@
     (variable-grounding
       (MVAR) : (format #f "(cons 'get_lvar ~a)" $1)
       (MOVAR) : (format #f "(cons 'get_wvar ~a)" $1)
+      (MVAR operator right-compare) :
+        (format #f "(cons 'compare (list \"~a\" ~a ~a))"
+          $2 (format #f "(cons 'get_lvar ~a)" $1) $3)
+      (MOVAR operator right-compare) :
+        (format #f "(cons 'compare (list \"~a\" ~a ~a))"
+          $2 (format #f "(cons 'get_wvar ~a)" $1) $3)
     )
 
     (user-variable
       (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
-      (UVAR EQUAL name) :
-        (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
+      (UVAR operator right-compare) :
+        (format #f "(cons 'compare (list \"~a\" ~a ~a))"
+          $2 (format #f "(cons 'get_uvar \"~a\")" $1) $3)
     )
 
     (negation
@@ -599,6 +607,11 @@
       (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
+    )
+
+    (function-compare
+      (function operator right-compare) :
+        (format #f "(cons 'compare (list \"~a\" ~a ~a))" $2 $1 $3)
     )
 
     (function
@@ -706,6 +719,23 @@
       (COMMA) : ""
       (name) : (format #f "(cons 'str \"~a\")" $1)
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
+    )
+
+    (right-compare
+      (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
+      (name) : (format #f "(cons 'str \"~a\")" $1)
+      (DQUOTE phrase-terms DQUOTE) : (format #f "(cons 'str \"~a\")" $2)
+      (concept) : $1
+      (function) : $1
+    )
+
+    (operator
+      (<) : "smaller"
+      (>) : "greater"
+      (EQUAL EQUAL) : "equal"
+      (< EQUAL) : "smaller_equal"
+      (> EQUAL) : "greater_equal"
+      (NOT EQUAL) : "not_equal"
     )
   )
 )

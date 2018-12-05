@@ -53,6 +53,15 @@ There are different types of rules in ChatScript -- responders (`u:` `s:` `?:`) 
 
 [Rejoinder](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#fast-overview-of-topic-files-top) (`a:` to `q:`) is also supported. Rejoinders have a higher priority than responders and gambits so it will always be selected if it satisfies the context. If more than one rejoinders satisfy the current context, the one that's defined first will always be selected.
 
+Simple comparisons (`=` `!=` `<` `<=` `>` `>=`) can be done in the context of a rule, for variables, user variables, and functions, e.g.
+```
+(^get_arousal() > 0)
+
+(you are _* '_0!=lazy)
+
+(^get_value() <= $threshold)
+```
+
 The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them. The value assigned to a goal will affect the strength of the rules (`ImplicationLinks`) linked to that goal.
 
 There are two ways of creating goals,
@@ -158,13 +167,15 @@ agents-start opencog::AFImportanceDiffusionAgent opencog::WAImportanceDiffusionA
 
 Note, rules being created after running this will be slimmer (preferred) and can only work with this ECAN approach. They are NOT backward-compatible with the `test-ghost`.
 
-8) Start authoring, e.g.
+8) Start authoring by creating rules in a text file, e.g.
 
 ```
-(ghost-parse "#goal: (novelty=0.24) u: (eat apple) I want an apple")
+#goal: (novelty=0.24)
+
+u: (eat apple) I want an apple
 ```
 
-Or use `ghost-parse-files` to parse rule files.
+Then use `ghost-parse-files` to parse rule file(s).
 
 ```
 (ghost-parse-files "path/to/the/rule/file1" "path/to/the/rule/file2")
