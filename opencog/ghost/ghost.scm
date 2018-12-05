@@ -98,6 +98,10 @@
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
+; When set, all the rules created under it will be linked to this concept,
+; until a new top level goal is defined
+(define rule-concept '())
+
 ; The initial urge of goals
 (define initial-urges '())
 
@@ -141,6 +145,7 @@
 ; To clear the above states
 (define (clear-parsing-states)
   (set! rule-topic '())
+  (set! rule-concept '())
   (set! initial-urges '())
   (set! default-urge 0)
   (set! top-lv-goals '())

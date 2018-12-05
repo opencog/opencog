@@ -81,6 +81,10 @@
     ((has-match? "#goal:" str) (result:suffix 'RGOAL location #f))
     ((has-match? "parallel-rules:" str)
       (result:suffix 'PARALLEL-RULES location #f))
+    ((has-match? "link-concept:" str)
+      (result:suffix 'LINK-CONCEPT location #f))
+    ((has-match? "#link-concept:" str)
+      (result:suffix 'RLINK-CONCEPT location #f))
     ((has-match? "#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
@@ -246,7 +250,7 @@
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
-     SAMPLE_INPUT PARALLEL-RULES
+     SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT RLINK-CONCEPT
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
               SET_DELAY)
@@ -267,6 +271,7 @@
       (ordered-goal) :
         (create-top-lv-goal (eval-string (string-append "(list " $1 ")")) #t)
       (PARALLEL-RULES) : (create-top-lv-goal (list (cons "Parallel-Rules" 1)))
+      (link-concept) : (link-rule-to-concepts (string-split $1 #\sp))
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -326,91 +331,211 @@
 
     ; Rule grammar
     (rule
+      ; ----- Responders ----- ;
+      (rule-goal rule-lconcept RESPONDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $6 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          $4 $3 $2)
+      (rule-lconcept rule-goal RESPONDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $6 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          $4 $3 $1)
       (rule-goal RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          $3 $2)
+          $3 $2 (list))
+      (rule-lconcept RESPONDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (list) $3 $2 $1)
+      (rule-goal rule-lconcept RESPONDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $3 $2)
+      (rule-lconcept rule-goal RESPONDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          "" $3 $1)
       (rule-goal RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          "" $2)
+          "" $2 (list))
+      (rule-lconcept RESPONDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (list) "" $2 $1)
       (RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
-          (list) $2 $1)
+          (list) $2 $1 (list))
       (RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
-          (list) "" $1)
+          (list) "" $1 (list))
+      ; ----- Rejoinders ----- ;
+      (rule-goal rule-lconcept REJOINDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $6 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          $4 $3 $2)
+      (rule-lconcept rule-goal REJOINDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $6 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          $4 $3 $1)
       (rule-goal REJOINDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          $3 $2)
+          $3 $2 (list))
+      (rule-lconcept REJOINDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (list) $3 $2 $1)
+      (rule-goal rule-lconcept REJOINDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $3 $2)
+      (rule-lconcept rule-goal REJOINDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          "" $3 $1)
       (rule-goal REJOINDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          "" $2)
-      ; TODO: Make sure there is a parent rule before
-      ; accepting any rejoinders
+          "" $2 (list))
+      (rule-lconcept REJOINDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (list) "" $2 $1)
       (REJOINDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
-          (list) $2 $1)
+          (list) $2 $1 (list))
       (REJOINDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
-          (list) "" $1)
+          (list) "" $1 (list))
+      ; ----- Gambits ----- ;
       ; Note, do not support a gambit that has a "name"
       ; but no context -- it's ambiguous to determine
       ; whether it's really a "name" or just the first
       ; word of the "action"
+      (rule-goal rule-lconcept GAMBIT name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $6 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          $4 $3 $2)
+      (rule-lconcept rule-goal GAMBIT name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $6 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          $4 $3 $1)
       (rule-goal GAMBIT name context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          $3 $2)
+          $3 $2 (list))
+      (rule-lconcept GAMBIT name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (list) $3 $2 $1)
+      (rule-goal rule-lconcept GAMBIT context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $3 $2)
+      (rule-lconcept rule-goal GAMBIT context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          "" $3 $1)
       (rule-goal GAMBIT context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          "" $2)
+          "" $2 (list))
+      (rule-lconcept GAMBIT context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (list) "" $2 $1)
+      (rule-goal rule-lconcept GAMBIT action) :
+        (create-rule
+          (list)
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $3 $2)
+      (rule-lconcept rule-goal GAMBIT action) :
+        (create-rule
+          (list)
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $2 ")"))
+          "" $3 $1)
       (rule-goal GAMBIT action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          "" $2)
+          "" $2 (list))
+      (rule-lconcept GAMBIT action) :
+        (create-rule
+          (list)
+          (eval-string (string-append "(list " $3 ")"))
+          (list) "" $2 $1)
       ; Same as the above, context is needed for a
       ; named gambit
       (GAMBIT name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
-          (list) $2 $1)
+          (list) $2 $1 (list))
       (GAMBIT context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
-          (list) "" $1)
+          (list) "" $1 (list))
       (GAMBIT action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $2 ")"))
-          (list) "" $1)
+          (list) "" $1 (list))
     )
 
     (urge
@@ -439,6 +564,14 @@
       (LITERAL_APOS EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+    )
+
+    (link-concept
+      (LINK-CONCEPT LPAREN names RPAREN) : $3
+    )
+
+    (rule-lconcept
+      (RLINK-CONCEPT LPAREN names RPAREN) : (string-split $3 #\sp)
     )
 
     (context
