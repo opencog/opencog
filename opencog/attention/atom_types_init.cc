@@ -25,4 +25,4 @@
 #define INHERITANCE_FILE "opencog/attention/atom_types.inheritance"
 #define INITNAME attention_types_init
 
-#include <opencog/atoms/proto/atom_types.cc>
+#include <opencog/atoms/value/atom_types.cc>

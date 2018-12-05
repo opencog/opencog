@@ -35,7 +35,7 @@
 #include <ifaddrs.h>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>

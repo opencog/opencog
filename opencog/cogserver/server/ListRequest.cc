@@ -25,8 +25,8 @@
 #include "ListRequest.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/proto/NameServer.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/value/types.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;

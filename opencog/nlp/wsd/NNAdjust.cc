@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 

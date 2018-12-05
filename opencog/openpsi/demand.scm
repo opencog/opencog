@@ -12,7 +12,7 @@
 ; value is a NumberNode attached to the ConceptNode. Having two places
 ; to store this info is just asking for hard-to-find bugs to pop up.
 ; The long-term solution is probably to associate the value to the
-; demand using a protoatom.
+; demand using a protoatom[now renamed value].
 
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
 (use-modules (srfi srfi-1)) ; for `lset-difference`
