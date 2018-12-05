@@ -284,16 +284,16 @@ ELSE (UUID_FOUND)
 ENDIF (UUID_FOUND)
 
 
-# MOSES needed for ???
-FIND_PACKAGE(MOSES CONFIG)
-
-IF (MOSES_FOUND)
-	MESSAGE(STATUS "MOSES was found.")
-	ADD_DEFINITIONS(-DHAVE_MOSES)
-	SET(HAVE_MOSES 1)
-ELSE (MOSES_FOUND)
-	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
-ENDIF (MOSES_FOUND)
+## MOSES is not currently needed.
+#FIND_PACKAGE(MOSES CONFIG)
+#
+#IF (MOSES_FOUND)
+#	MESSAGE(STATUS "MOSES was found.")
+#	ADD_DEFINITIONS(-DHAVE_MOSES)
+#	SET(HAVE_MOSES 1)
+#ELSE (MOSES_FOUND)
+#	MESSAGE(STATUS "MOSES missing: needed for (nothing right now).")
+#ENDIF (MOSES_FOUND)
 
 # Octomap
 FIND_PACKAGE(Octomap)
@@ -306,38 +306,38 @@ ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
   SET(OCTOMAP_DIR_MESSAGE "Octomap missing: needed for the SpaceTime map.")
 ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
-# Google Protobuf library
-# The protocol buffer compiler is a separately installable package, and
-# it is needed for building the ZMQ messaging subsystem.
-FIND_PACKAGE(Protobuf)
-IF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-	SET(HAVE_PROTOBUF 1)
-	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-
-ELSE (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	# If we are here, then we are missing either the libraries, or the
-	# compiler. React appropriately.
-	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; ZMQ messaging can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-
-ENDIF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+## Google Protobuf library
+## The protocol buffer compiler is a separately installable package,
+## and it is needed for anything right now.
+#FIND_PACKAGE(Protobuf)
+#IF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
+#	SET(HAVE_PROTOBUF 1)
+#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
+#
+#ELSE (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#	# If we are here, then we are missing either the libraries, or the
+#	# compiler. React appropriately.
+#	IF (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
+#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; ZMQ messaging can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
+#
+#ENDIF (PROTOBUF_FOUND
+#		AND PROTOBUF_LIBRARY
+#		AND PROTOBUF_INCLUDE_DIR
+#		AND PROTOBUF_PROTOC_EXECUTABLE)
+#
+#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # -----------------------------------------------------------------------------
 # Python and Cython
@@ -408,14 +408,16 @@ ENDIF (HAVE_PY_INTERP)
 
 # -----------------------------------------------------------------------------
 
-# Threaded Building Blocks (Intel TBB) library
-FIND_PACKAGE(TBB)
-IF (TBB_FOUND)
-	SET(HAVE_TBB 1)
-ELSE (TBB_FOUND)
-	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
-ENDIF (TBB_FOUND)
-MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
+# Glasgow Haskell compiler
+FIND_PACKAGE(Stack)
+IF (STACK_FOUND)
+	ADD_DEFINITIONS(-DHAVE_STACK)
+	SET(HAVE_STACK 1)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
+ELSE (STACK_FOUND)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
+ENDIF (STACK_FOUND)
+MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
 
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
@@ -431,18 +433,14 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# ZeroMQ
-FIND_PACKAGE(ZMQ 3.2.4)
-IF (ZMQ_FOUND AND ZMQ_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-	SET(HAVE_ZMQ 1)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
-ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
-MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+# -----------------------------------------------------------------------------
+# XXX FIXME. The jsoncpp, TBB and ZeroMQ packages are needed by
+# the deprecated and/or obsolete AtomSpacePublisher module.
+# I'm not sure, but I suspect that module doesn't work.  It's
+# not maintained by anyone; it's certainly out of date, and doesn't
+# support any of the modern features. So ....!? FIXME
 
-#jsoncpp
+# jsoncpp
 FIND_PACKAGE(PkgConfig)
 IF(PKG_CONFIG_FOUND)
   pkg_check_modules(JSONCPP jsoncpp)
@@ -456,16 +454,25 @@ IF(PKG_CONFIG_FOUND)
 ENDIF(PKG_CONFIG_FOUND)
 MESSAGE(STATUS "${JSONCPP_DIR_MESSAGE}")
 
-# Glasgow Haskell compiler
-FIND_PACKAGE(Stack)
-IF (STACK_FOUND)
-	ADD_DEFINITIONS(-DHAVE_STACK)
-	SET(HAVE_STACK 1)
-	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
-ELSE (STACK_FOUND)
-	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
-ENDIF (STACK_FOUND)
-MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
+# Threaded Building Blocks (Intel TBB) library
+FIND_PACKAGE(TBB)
+IF (TBB_FOUND)
+	SET(HAVE_TBB 1)
+ELSE (TBB_FOUND)
+	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
+ENDIF (TBB_FOUND)
+MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
+
+# ZeroMQ
+FIND_PACKAGE(ZMQ 3.2.4)
+IF (ZMQ_FOUND AND ZMQ_LIBRARY)
+	ADD_DEFINITIONS(-DHAVE_ZMQ)
+	SET(HAVE_ZMQ 1)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
+ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
+ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
+MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -532,7 +539,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
-                        "${CMAKE_INSTALL_PREFIX}/lib/opencog//modules")
+                        "${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ADD_SUBDIRECTORY(lib)
@@ -570,15 +577,6 @@ IF (CXXTEST_FOUND)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-	ADD_CUSTOM_TARGET(test_python
-		DEPENDS PythonModuleUTest PyEvalUTest PythonEvalUTest CogServerUTest
-				PythonUtilitiesUTest
-				bindlink_cython cogserver_cython atomspace_cython
-				moses_cython scheme_wrapper logger_cython utilities_cython
-		WORKING_DIRECTORY tests/cython
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Python and Cython tests..."
-	)
 ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
