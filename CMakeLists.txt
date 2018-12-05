@@ -55,6 +55,8 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 # Cogutil
+# Check for cogutil first. It provides a bunch of CMake infrastructure
+# that is needed to get the rest to work.
 FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
 IF (COGUTIL_FOUND)
     MESSAGE(STATUS "CogUtil found.")
@@ -75,9 +77,9 @@ include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 IF (CMAKE_COMPILER_IS_GNUCXX)
 	# aiiee cmake version 2.8.8 or newer is needed for below to
 	# work...
-	# IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6.4)
-	#	MESSAGE(FATAL_ERROR "GCC version must be at least 4.6.4!")
-	# ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6.4)
+	# IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.3.0)
+	#	MESSAGE(FATAL_ERROR "GCC version must be at least 6.3.0!")
+	# ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.3.0)
 
 	IF (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
@@ -173,6 +175,7 @@ IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
 
 	# Boost.Signals2 requires this in signal_type.hpp
+	# XXX except we don't use Signals2 anywhere ???
 	SET(BOOST_PARAMETER_MAX_ARITY 7)
 	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
@@ -202,6 +205,8 @@ ELSE(Boost_MATH_C99_FOUND)
 ENDIF(Boost_MATH_C99_FOUND)
 
 # cpprest
+# XXX FIXME This is required only by the soon-to-be obsolete
+# PatternMiner. Remove this when the (old) PatternMiner is gone.
 FIND_PACKAGE(cpprest 2.6)
 IF (cpprest_FOUND AND cpprest_LIBRARY)
 	ADD_DEFINITIONS(-DHAVE_cpprest)
@@ -619,7 +624,10 @@ IF (NOT WIN32)
 ENDIF (NOT WIN32)
 
 
-# packaging
+# ===================================================================
+# Packaging
+# XXX FIXME: Does anyone use this? Does it even work? Not sure, but
+# I think this has been unused and dead since 2010, right ???
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
 SET(CPACK_PACKAGE_NAME "opencog")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
@@ -706,10 +714,12 @@ ENDIF(WIN32)
 SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
 INCLUDE(CPack)
 
+# ===================================================================
 # documentation
 FIND_PACKAGE(Doxygen)
 ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
+# ===================================================================
 # Show a summary of what we got
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
