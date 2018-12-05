@@ -368,20 +368,18 @@
   (True))
 
 ; ----------
-(define (uvar-exist? UVAR)
+(define (uvar-eval UVAR)
 "
-  Check if a user variable has been defined.
+  Check if a user variable has been defined and the value is checked against
+  the input.
 "
-  (Evaluation (GroundedPredicate "scm: ghost-user-variable-exist?")
-              (List (ghost-uvar UVAR))))
-
-(define-public (ghost-user-variable-exist? UVAR)
-"
-  Check if UVAR has been defined.
-"
-  (if (equal? (assoc-ref uvars UVAR) #f)
-      (stv 0 1)
-      (stv 1 1)))
+  (let* ((g (Glob (gen-var (string-append "user-variable-" UVAR "-grounding") #f)))
+         (v (list (TypedVariable g
+                    (TypeSet
+                      (Type "WordNode")
+                      (Interval (Number 1) (Number -1))))))
+         (c (list (compare-equal (get-user-variable UVAR) g))))
+    (list v c (list g) (list g))))
 
 ; ----------
 (define-public (ghost-execute-base-action . ACTIONS)

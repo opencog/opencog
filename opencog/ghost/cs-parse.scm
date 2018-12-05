@@ -731,7 +731,7 @@
     )
 
     (user-variable
-      (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
+      (UVAR) : (format #f "(cons 'uvar_eval \"~a\")" $1)
       (UVAR operator right-compare) :
         (format #f "(cons 'compare (list \"~a\" ~a ~a))"
           $2 (format #f "(cons 'get_uvar \"~a\")" $1) $3)
