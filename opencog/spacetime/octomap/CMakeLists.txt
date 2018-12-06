@@ -39,6 +39,7 @@ ADD_LIBRARY (atom_octomap SHARED
 	AtomOcTree.cc
 	AtomOcTreeNode.cc
 	OctoMapNode.cc
+	OctoMapValue.cc
 	TimeOctomap.cc
 )
 
