@@ -1,0 +1,6 @@
+// Octomap related
+OCTOMAP_NODE <- NODE
+
+// This is defined in atomspace repo since value factory
+// creation is handled there and type is required for that.
+//OCTO_VALUE <- FLOAT_VALUE                       
