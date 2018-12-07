@@ -8,8 +8,6 @@ jobs:
         environment:
           CCACHE_DIR: /ws/ccache
     working_directory: /ws/opencog
-    environment:
-      ORG: singnet
     steps:
       - attach_workspace:
           at: /ws
@@ -23,14 +21,14 @@ jobs:
       - run:
           name: Install cogutil
           command: |
-            git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
             cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
             ldconfig
       - run:
           name: Install AtomSpace
           command: |
-            git clone --depth 1 https://github.com/$ORG/atomspace /ws/atomspace
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace /ws/atomspace
             mkdir -p /ws/atomspace/build
             cd /ws/atomspace/build && cmake .. && make -j4 && make -j4 install
             ldconfig
