@@ -349,11 +349,15 @@ ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 #
 # NOTE: Python interpreter is needed for runing python unit tests,
 # and for running the FindCython module.
+#
+# Search for Python3 first, and use that, if found. Else use Python2.
+# To use Python2 only from the build directory run the following
+# rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
 
 FIND_PACKAGE(Python3Interp)
-IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
+IF (3.4.0 VERSION_LESS "${PYTHON3_VERSION_STRING}")
 	SET (HAVE_PY_INTERP 1)
-	SET (PYTHON_VER python3.5)
+	SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
 ENDIF()
 
@@ -361,7 +365,7 @@ IF (NOT HAVE_PY_INTERP)
 	FIND_PACKAGE(PythonInterp)
 	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
 		SET (HAVE_PY_INTERP 1)
-		SET (PYTHON_VER python2.7)
+		SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
 	ENDIF()
 ENDIF()
@@ -378,7 +382,7 @@ ELSE()
 ENDIF()
 
 # Cython is used to generate python bindings.
-IF (HAVE_PY_INTERP)
+IF(HAVE_PY_INTERP)
 	FIND_PACKAGE(Cython 0.23.0)
 
 	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
@@ -401,15 +405,15 @@ IF (HAVE_PY_INTERP)
 
 	# Nosetests will find and automatically run python tests.
 	IF (PYTHON3INTERP_FOUND)
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-3.4)
 	ELSE ()
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
 		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
-ENDIF (HAVE_PY_INTERP)
+ENDIF(HAVE_PY_INTERP)
 
 # -----------------------------------------------------------------------------
 
