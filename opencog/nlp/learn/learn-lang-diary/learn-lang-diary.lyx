@@ -1279,6 +1279,25 @@ reference "eq:Yuret's MI"
  (See my other notes for a graph.)
 \end_layout
 
+\begin_layout Standard
+References:
+\end_layout
+
+\begin_layout Itemize
+Apparently, MI is introduced here: Kenneth Ward Church and Patrick Hanks.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Word association norms, mutual information, and lexicography
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Computational linguistics, 16(1):22–29, 1990.
+ 
+\end_layout
+
 \begin_layout Section*
 1 January 2014
 \end_layout
@@ -2141,6 +2160,288 @@ The longest links, observed statistically, are of length 6 or less.
 So, rather than imposing no-crossing as a constraint on the parser, instead,
  let it find its own way into the grammar.
  Just implement a plain-old MST parser, punt on crossing.
+\end_layout
+
+\begin_layout Subsection*
+Crossing and Copulas
+\end_layout
+
+\begin_layout Standard
+Here's a great example where multiple lingusitic desires cause trouble.
+ First, consider the planar diagram, no-links-cross, that indicates both
+ the head-noun and the head-verb:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     +-------->WV------->+
+\end_layout
+
+\begin_layout Plain Layout
+
+     +---->Wd---->+      |
+\end_layout
+
+\begin_layout Plain Layout
+
+     |      +<-Ds-+--Ss--+-->Pa->+
+\end_layout
+
+\begin_layout Plain Layout
+
+     |      |     |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+ LEFT-WALL the  dog.n   was    black 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above indicates the head-noun (
+\family typewriter
+Wd
+\family default
+), the head-verb (
+\family typewriter
+WV
+\family default
+) and a subject-verb relation (
+\family typewriter
+Ss
+\family default
+) and that these three for a cycle.
+ Its still a DAG, because the arrows point down from the root.
+ The 
+\family typewriter
+Pa
+\family default
+ link is a predicative-adjective link.
+\end_layout
+
+\begin_layout Standard
+A plausible alternative diagram is
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+    +---->Wd---->+      
+\end_layout
+
+\begin_layout Plain Layout
+
+    |            +-->adjcomp--->+
+\end_layout
+
+\begin_layout Plain Layout
+
+    |            |              |
+\end_layout
+
+\begin_layout Plain Layout
+
+    |      +<-Ds-+--Ss--+<-cop<-+
+\end_layout
+
+\begin_layout Plain Layout
+
+    |      |     |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+LEFT-WALL the  dog.n   was    black
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the 
+\family typewriter
+adjcomp
+\family default
+ arrow indicates the adjectival complement, and 
+\family typewriter
+cop
+\family default
+ indicates the copula.
+ Note that it is 
+\emph on
+impossible
+\emph default
+ to draw an arrow from the root to the head-verb, without forcing a link-crossin
+g! Interesting, eh? 
+\end_layout
+
+\begin_layout Standard
+The real question, the major question is: what happens to pair-wise MI?
+ What would that show? It seems unlikely that MI(dog, black) is going to
+ be all that high.
+ But what about MI(physical oject, color)? What is the correct way to compute
+ MI(physical oject, color)?
+\end_layout
+
+\begin_layout Standard
+The above is perhaps the simplest-possible example of the confusion surrounding
+ the transition from SSyntR to DSyntR (or to logical representations, a
+ la opencog).
+ That is, we want to convert the 
+\family typewriter
+adjcomp
+\family default
+ relation to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+  EvaluationLink
+\end_layout
+
+\begin_layout Plain Layout
+
+     PredicateNode "has color"
+\end_layout
+
+\begin_layout Plain Layout
+
+        ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+           Concept "dog"
+\end_layout
+
+\begin_layout Plain Layout
+
+           Concept "black"
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Following Poon & Domingos, we really want to convert it to
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+  LambdaLink
+\end_layout
+
+\begin_layout Plain Layout
+
+    VariableList
+\end_layout
+
+\begin_layout Plain Layout
+
+       Variable $PHY
+\end_layout
+
+\begin_layout Plain Layout
+
+       Variable $COL
+\end_layout
+
+\begin_layout Plain Layout
+
+    AndLink
+\end_layout
+
+\begin_layout Plain Layout
+
+       EvaluationLink
+\end_layout
+
+\begin_layout Plain Layout
+
+          PredicateNode "has color"
+\end_layout
+
+\begin_layout Plain Layout
+
+          ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+             Variable $PHY
+\end_layout
+
+\begin_layout Plain Layout
+
+             Variable $COL
+\end_layout
+
+\begin_layout Plain Layout
+
+       InheritanceLink
+\end_layout
+
+\begin_layout Plain Layout
+
+          Variable $PHY
+\end_layout
+
+\begin_layout Plain Layout
+
+          Concept "physical object"
+\end_layout
+
+\begin_layout Plain Layout
+
+       InheritanceLink
+\end_layout
+
+\begin_layout Plain Layout
+
+          Variable $COL
+\end_layout
+
+\begin_layout Plain Layout
+
+          Concept "color" 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Of course, this has to be done based on the evidence of many sentences,
+ discovered to be qusi-synonymous (a la Dekang Lin DIRT).
 \end_layout
 
 \begin_layout Section*
@@ -29202,7 +29503,72 @@ The Molecular Level of Lexical Semantics
 
 , EA Nida, (1997) International Journal of Lexicography, 10(4): 265–274.
  https://www.academia.edu/36534355/The_Molecular_Level_of_Lexical_Semantics_by_EA_
-Nida
+Nida 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nida97"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Zellig Harris.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Distributional structure.
+\begin_inset Quotes erd
+\end_inset
+
+ Word, 10(23):146–162, 1954.
+ J.
+ R.
+ Firth.
+ A synopsis of linguistic theory, 1930–1955.
+ In J.
+ R.
+ Firth (Ed.), Studies in linguistic analysis, pages 1–32.
+ (1957) https://www.tandfonline.com/doi/pdf/10.1080/00437956.1954.11659520 –
+ Cited by 2660 
+\end_layout
+
+\begin_layout Itemize
+John R.
+ Firth (1935) 
+\begin_inset Quotes eld
+\end_inset
+
+The technique of semantics.
+\begin_inset Quotes erd
+\end_inset
+
+ Transactions of the Philological Society 34(1).
+ 36–73.
+ Quote: 
+\begin_inset Quotes eld
+\end_inset
+
+the complete meaning of a word is always contextual, and no study of meaning
+ apart from context can be taken seriously.
+\end_layout
+
+\begin_layout Itemize
+John R.
+ Firth (1957) A synopsis of linguistic theory 1930–1955.
+ In Studies in linguistic analysis, 1–32.
+ Oxford: Blackwell.
+ Quote: 
+\begin_inset Quotes eld
+\end_inset
+
+You shall know a word by the company it keeps
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*

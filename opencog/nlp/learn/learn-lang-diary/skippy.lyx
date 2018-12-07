@@ -12,7 +12,7 @@
 \maintain_unincluded_children false
 \language english
 \language_package default
-\inputencoding auto
+\inputencoding utf8
 \fontencoding global
 \font_roman "default" "default"
 \font_sans "default" "default"
@@ -90,10 +90,31 @@ Gradient Descent vs.
 
 \begin_layout Author
 Linas Vepstas
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Date
 6 July 2018; working draft of 29 October 2018
+\end_layout
+
+\begin_layout Address
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+Hanson Robotics; SingularityNET
 \end_layout
 
 \begin_layout Abstract
@@ -737,16 +758,50 @@ key "Vepstas2017sheaves"
 
 \begin_layout Standard
 A few words about word-senses and semantics are in order.
- It has been generally observed that Word2Vec seems to encode “semantics”
- in some opaque way, in that it can distinguish different word-senses, based
- on context.
- The same is true for Link Grammar: when a word is used in a specific context,
- the result of parsing selects a single disjunct.
+ The most common computational approach to semantics are 
+\begin_inset Quotes eld
+\end_inset
+
+vector space models
+\begin_inset Quotes erd
+\end_inset
+
+ (VSM).
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Turney2010"
+
+\end_inset
+
+ The Word2Vec model is in many ways a VSM; sharing many common properties.
+ Perhaps most annoying is that the “semantics” is encoded in some opaque
+ way.
+ VSMs can distinguish different word-senses, based on context, but exactly
+ what part of that context 
+\begin_inset Quotes eld
+\end_inset
+
+matters
+\begin_inset Quotes erd
+\end_inset
+
+ is unclear.
+ Link Grammar disjuncts can also distinguish word-senses; but now the 
+\begin_inset Quotes eld
+\end_inset
+
+reason why
+\begin_inset Quotes erd
+\end_inset
+
+ becomes understandable, or human-auditable.
+ So, in Link Grammar, when a word is used in a specific context, the result
+ of parsing selects a single disjunct.
  That disjunct can be thought of as a hyper-fine grammatical category; but
  these are strongly correlated with meaning.
- Synonyms can be discovered in similar ways in both systems: if two different
- words all share a lot of the same disjuncts, they are effectively synonymous,
- and can be used interchangeably in sentences.
+ Synonyms can be discovered in the same way that they are in VSM's: if two
+ different words all share a lot of the same disjuncts, they are effectively
+ synonymous, and can be used interchangeably in sentences.
 \end_layout
 
 \begin_layout Standard
@@ -764,7 +819,7 @@ Similarly, given two different words in Word2Vec/SkipGram, if they both
 
 \begin_layout Standard
 This is also where we have the largest, and the most important difference
- between neural net approaches, and Link Grammar.
+ between Link Grammar and other vector-space models.
  In the neural net approach, the intermediate neuron layer is a black box,
  completely opaque and unanalyzable, just some meaningless collection of
  floating-point numbers.
@@ -772,8 +827,8 @@ This is also where we have the largest, and the most important difference
  you can see exactly what it is encoding, because each disjunct tells you
  exactly the syntactic relationship between a word, and its neighbors.
  This is the great power of symbolic approaches to natural-language: they
- are human-auditable, human understandable in a way that neural nets are
- not.
+ are human-auditable, human understandable in a way that other vector-space
+ models are not.
  (Currently; I think that what this essay describes is an effective sketch
  for a technique for prying open the lid of the black box of neural nets.
  But that’s for a different day.)
@@ -799,6 +854,7 @@ flat
 
  corpus of text.
  Section 6...
+ is the triumphant section...
 \end_layout
 
 \begin_layout Standard
@@ -1924,6 +1980,13 @@ There is a fairly rich variety of such models.
 
 \begin_layout Subsection
 CBOW
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:CBOW"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3903,6 +3966,13 @@ coding theory
 
 \begin_layout Subsection
 MST models of Language
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:MST-parsing"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4006,9 +4076,9 @@ It is here that Yuret does one better: he proposes that the score be given
  by the mutual information (MI) between word-pairs; that is (aligning the
  different notation)
 \begin_inset Formula 
-\[
-s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}
-\]
+\begin{equation}
+s\left(i,j\right)=MI\left(w_{i},w_{j}\right)=\log_{2}\frac{p\left(w_{i},w_{j}\right)}{p\left(w_{i},*\right)p\left(*,w_{j}\right)}\label{eq:word-pair-MI}
+\end{equation}
 
 \end_inset
 
@@ -5472,7 +5542,9 @@ key "Ferrer2017"
 
 \end_inset
 
- When there are crossings, they are 
+ (That is, although long sentences tend to have more crossings, the fraction
+ drops sharply in proportion to the number they could have had.) When there
+ are crossings, they are 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6934,13 +7006,36 @@ reference "eq:factorize"
 on.
 \end_layout
 
+\begin_layout Standard
+Of these, perhaps the most important point is that the space of joint probabilit
+ies is not the same as Eucliden space.
+ This is a terminological issue that unintentionally becomes a technical
+ issue.
+ Properly speaking, frequency counts are multisets or bags; these resemble
+ vectors, and are commonly thought of and treated as vectors; they are not.
+ The risk of envisioning vectors is that it leads one to think of dot-products,
+ cosine angles and rotational invariance.
+ These are all valid concepts for Euclidean space; but probability does
+ not live in a Euclidean space.
+ The shape of the space 
+\begin_inset Formula $\sum_{i}p_{i}=1$
+\end_inset
+
+ is a convex polytope; a rotation applied to a point in this space will
+ typically rotate it out.
+ That is, bags/multisets are neither rotationally invariant, nor rotationally
+ covariant.
+ Yet, many matrix factorization frameworks assume rotational invariance.
+ This creates issues, and so is a point to focus on in what follows.
+\end_layout
+
 \begin_layout Subsubsection
 Probabilistic Matrix Factorization
 \end_layout
 
 \begin_layout Standard
-Probabilistic matrix factorization (PMF) assumes that the observation counts
- 
+Probabilistic matrix factorization (PMF) (alternately, stochastic matrix
+ factorization (SMF)) assumes that the observation counts 
 \begin_inset Formula $N\left(w,d\right)$
 \end_inset
 
@@ -7081,7 +7176,20 @@ key "WP-Homogenous-space"
 \end_inset
 
  – that is, the spaces behave like actual vector spaces, so that concepts
- like PCA and SVD can be applied.
+ like Principle Component Analysis (PCA) and Singular Value Decomposition
+ (SVD) can be applied.
+ SVD is particularly appealing, as it provides the best possible approximate
+ decomposition of a given rank.
+ Fixing the rank 
+\begin_inset Formula $\left|G\right|$
+\end_inset
+
+, the SVD is that decomposition which minimizes the mean square error for
+ that rank; that is, it minimizes the objective function 
+\begin_inset Formula $U$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -7125,6 +7233,30 @@ not
  to a probability, such that the result is still a probability.
  Applying the notion of a trace, which is implicitly defined as being invariant
  under orthogonal transformations, is inappropriate for the problem at hand.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Perhaps this explains why results based on SVD are often underwhelming as
+ compared to others.
+ See, for example 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+ for precisely such a report: the conception that SVD could have or should
+ have given a better result, followed by the disappointment of noting that
+ it does not.
+ Of course, other explanations are also posible: one is that SVD behaves
+ poorly when some matrix elements are missing or unknown.
+ This shortcoming is one reason why PMF, above, and LLORMA, below, have
+ been proposed.
+\end_layout
+
+\end_inset
+
  What would be appropriate is some sort of trace-like invariant that transforms
  as a scalar under Markov transformations.
 \end_layout
@@ -7298,99 +7430,6 @@ reference "subsec:Zipf's-Law;-Noise"
 \end_layout
 
 \begin_layout Subsubsection
-Neural Net Matrix Factorization
-\end_layout
-
-\begin_layout Standard
-The factorization
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\sum_{g\in G}p\left(w|g\right)p\left(g,d\right)
-\]
-
-\end_inset
-
-can be viewed as just one special function of the vector components indexed
- by 
-\begin_inset Formula $g$
-\end_inset
-
-.
- More generally, one can consider the function
-\begin_inset Formula 
-\[
-f\left(q_{1},q_{2},\cdots,q_{n}\right)
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $q_{g}=p\left(w|g\right)p\left(g,d\right)$
-\end_inset
-
- and 
-\begin_inset Formula $n=\left|G\right|$
-\end_inset
-
- the number of elements in 
-\begin_inset Formula $G$
-\end_inset
-
-.
- Thus, the matrix factorization is just the function 
-\begin_inset Formula $f\left(q_{1},q_{2},\cdots,q_{n}\right)=q_{1}+q_{2}+\cdots+q_{n}$
-\end_inset
-
-.
- The neural net matrix factorization
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Dzuigaite2015"
-
-\end_inset
-
- replaces the simple sum by a multi-layer feed-forward neural net.
-\end_layout
-
-\begin_layout Standard
-The loss of linearity in this model seems like a rather extreme proposal.
- The fact that it is effective may in fact be a symptom of unknown, underlying
- structure.
- For example, there is nothing in the current formulation of the natural
- language problem that suggests this as an appropriate model of language.
- See, however, the next section, on factorization ambiguity, that suggests
- that the 
-\begin_inset Quotes eld
-\end_inset
-
-shape
-\begin_inset Quotes erd
-\end_inset
-
- of language consists of a tight, highly-interconnected nucleus, attached
- to sparse feeder trees.
- That nucleus itself has additional structure.
- It might be the case that this complex structure can be captured by an
- 
-\emph on
-ad hoc
-\emph default
- model consisting of some non-linear function 
-\begin_inset Formula $f$
-\end_inset
-
-.
- However, in the end, this just suggests that the function 
-\begin_inset Formula $f$
-\end_inset
-
- is just hiding or modeling or leaving unexplored some deeper linear structure.
-\end_layout
-
-\begin_layout Subsubsection
 Local Low Rank Matrix Factorization
 \end_layout
 
@@ -7496,8 +7535,308 @@ I-RBM (Restricted Boltzmann Machine)
 I-AutoRec
 \end_layout
 
+\begin_layout Itemize
+Neural networks
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dzuigaite2015"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 These are not reviewed here.
+\end_layout
+
+\begin_layout Subsection
+Neural Networks as Matrix Factorization
+\end_layout
+
+\begin_layout Standard
+The need to perform a matrix factorization, of the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorize"
+
+\end_inset
+
+ was arrived at indirectly, by making an explicit appeal to grammatical
+ categories and semantics.
+ To recap: it was argued that N-grams and SkipGrams resemble grammatical
+ disjuncts.
+ Grammatical disjuncts can in turn be understood as extremely fine-grained
+ parts-of-speech.
+ That parts of speech are correlated with semantic meaning dates back to
+ the earliest dictionaries.
+ These arguments, combined together, motivated the correctness of factorization;
+ they explain why factorization is meaningful and desirable, and why it
+ aligns with natural, intuitive notions of grammatical category.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nida97"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One can skip this round-about route, ingoring the philosophical ruminations
+ and motivations, and skip directly to matrix factorization.
+ Levy and Golberg do so, by observing that maximization of the SkipGram
+ objective function is mathematically equivalent to matrix factorization.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+ More generally, Qui 
+\emph on
+et al.
+
+\emph default
+ show that a number of different neural network techniques, used to embed
+ very large network graphs into low-dimensional vector spaces, are formally
+ equivalent to low-rank matrix factorizations.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Qiu2017"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In practice, rather than working with an objective function defined directly
+ from eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CBOW"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SkipGram"
+
+\end_inset
+
+, Mikolov
+\emph on
+ etal.
+\emph default
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013b"
+
+\end_inset
+
+ explain that it is more effective to work with a variant invloving a sigmoid
+ function, together with a 
+\begin_inset Quotes eld
+\end_inset
+
+negative sampling
+\begin_inset Quotes erd
+\end_inset
+
+ term, designed to suppress word-context pairings that are not observed.
+ The negative-sampling term helps draw a sharper distinction between word-contex
+t pairings that are infrequently observed, and those that are never observed.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Other work
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017connectors"
+
+\end_inset
+
+ suggests that infrequently-observed word-context pairings play an (unexpectedly
+) important role in classification, and that explicit filtering to remove
+ infrequently observed pairings causes significant damage to the quality
+ of the results.
+ Thus, rather than discarding infrequent observations, adding a 
+\begin_inset Quotes eld
+\end_inset
+
+negative sampling
+\begin_inset Quotes erd
+\end_inset
+
+ to guess at those pairings that can 
+\emph on
+never
+\emph default
+ happen does indeed seem like a reasonable tactic.
+\end_layout
+
+\end_inset
+
+ The suitablly revised objective function (using the notation from section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:CBOW"
+
+\end_inset
+
+) is built from the observation counts 
+\begin_inset Formula $N(w_{t},w_{i})$
+\end_inset
+
+ of a target word 
+\begin_inset Formula $w_{t}$
+\end_inset
+
+ and a context word 
+\begin_inset Formula $w_{i}\in I$
+\end_inset
+
+, together with the dimensionaly reduced vectors 
+\begin_inset Formula $\vec{u}_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+.
+ It is not reviewed here; the details are readily available in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mikolov2013b"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The remarkable result of Levy and Golberg
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Levy2014"
+
+\end_inset
+
+ is that the maximization of this objective function is mathematically identical
+ to the factorization of the word-pair mutual information of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:word-pair-MI"
+
+\end_inset
+
+.
+ The explicit result is that the dimensionaly reduced vectors 
+\begin_inset Formula $\vec{u}_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{v}_{i}$
+\end_inset
+
+ are related to the mutial information as
+\begin_inset Formula 
+\[
+\vec{u}_{t}\cdot\vec{v}_{i}=MI\left(w_{t},w_{i}\right)-\log k
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $k$
+\end_inset
+
+ the negative-sampling weighting coefficient.
+ Just so that importance of this sinks in, it is worth stating again, with
+ different words: the SkipGram technique is equivalent to a low-rank matrix
+ factorization of the mutual information between word-pairs.
+ 
+\end_layout
+
+\begin_layout Standard
+This can be used as yet a different vindication of the MST parsing of the
+ Yuret approach, described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:MST-parsing"
+
+\end_inset
+
+.
+ Summations over context words, of the form 
+\begin_inset Formula 
+\[
+\sum_{i\in I}\vec{u}_{t}\cdot\vec{v}_{i}
+\]
+
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+appearing in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:CBOW"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SkipGram"
+
+\end_inset
+
+ are nothing more than summations over the mutual information between a
+ word and it's context.
+ It now becomes readily apparent that perhaps a summation that discards
+ low MI values, while also taking into account the entire sentence, can
+ perhaps yeild a superior result.
+ The two approaches butress one-another, and mutually explain one-another.
+ The effectiveness of the SkipGram model is explained by it's resemblance
+ to MST parsing with word-pair MI, which in turn has strong connections
+ to symbolic approaches to linguistics.
+ Grammatical structure as given in the symbolic approach to linguistics
+ is intellectually overt and comprehensible.
+ It now appears that the 
+\begin_inset Quotes eld
+\end_inset
+
+subsymbolic
+\begin_inset Quotes erd
+\end_inset
+
+, neural network approach, at first seemingly opaque and hidden in a black
+ box of neural net weights, can be seen as a somewhat obfuscated form of
+ traditional symbolic linguistics.
 \end_layout
 
 \begin_layout Subsection
@@ -9440,6 +9779,33 @@ Greedy clustering essentially provides a mechanism for controlling this
  It dis-incentivizes the partitioning of a word into a large number of grammatic
 al categories.
  
+\end_layout
+
+\begin_layout Subsection
+TODO
+\end_layout
+
+\begin_layout Standard
+This: PMI stuff.
+\end_layout
+
+\begin_layout Itemize
+Sanjeev Arora, Yuanzhi Li, Yingyu Liang, Tengyu Ma, and Andrej Risteski.
+ 2016.
+ A latent variable model approach to pmi-based word embeddings.
+ TACL 4 (2016), 385–399.
+\end_layout
+
+\begin_layout Itemize
+Tatsunori B Hashimoto, David Alvarez-Melis, and Tommi S Jaakkola.
+ 2016.
+ Word embeddings as metric recovery in semantic spaces.
+ TACL 4 (2016), 273–286.
+ 
+\end_layout
+
+\begin_layout Standard
+Arghhh.
 \end_layout
 
 \begin_layout Section
