@@ -113,7 +113,8 @@
 
     (define result '())
     (define (last-sent sent)
-        (let ((sent-time (cog-number (gar sent))))
+        ; NOTE cog-number doesn't work with TimeNodes
+        (let ((sent-time  (string->number (cog-name (gar sent)))))
             (if (>= sent-time from-time)
                 (set! result (append result (list (gdr sent))))
             )

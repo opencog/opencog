@@ -83,6 +83,9 @@
 
   Surealize and return the string of the TRAIL's inferred results.
 "
+  (define (get-sureal-results pln-output)
+    (sureal (Set (car (filter
+      (lambda (x) (equal? 'EvaluationLink (cog-type x))) pln-output)))))
   (define pln-outputs (cog-value->list (get-inferred-atoms trail)))
   (define candidates
     (if (null? pln-outputs)
@@ -94,7 +97,9 @@
   (if (null? candidates)
     ""
     ; FIXME: This only works for trail-3
-    (string-join (car (sureal (Set (car (filter
-			(lambda (x) (equal? 'EvaluationLink (cog-type x))) candidates))))))
-  )
+    (let ((sureal-results (get-sureal-results candidates)))
+      (if (null? sureal-results)
+        ""
+        (string-join (car (sureal-results))))
+    ))
 )
