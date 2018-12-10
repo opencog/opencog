@@ -9,5 +9,5 @@ ADD_GUILE_MODULE (FILES
 	helpers.scm
 	main.scm
 	sentence-forms.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/microplanning"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/microplanning"
 )

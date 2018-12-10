@@ -4,5 +4,5 @@ ADD_GUILE_MODULE (FILES
 	faces.scm
 	time-map.scm
 	utilities.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/eva-model"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/eva-model"
 )

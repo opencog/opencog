@@ -59,5 +59,5 @@ ADD_GUILE_MODULE (FILES
 	whichsubjSVQ.scm
 	why-cop-q.scm
 	why-q.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/relex2logic/rules"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/relex2logic/rules"
 )

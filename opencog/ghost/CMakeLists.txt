@@ -9,5 +9,5 @@ ADD_GUILE_MODULE (FILES
 	stimulation.scm
 	utils.scm
 	test.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/ghost"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/ghost"
 )

@@ -11,5 +11,5 @@ ADD_GUILE_MODULE (FILES
 	cfg-tools.scm
 	cfg-eva.scm
 	cfg-sophia.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/eva-behavior"
 )

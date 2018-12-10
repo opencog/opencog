@@ -4,5 +4,5 @@ ADD_GUILE_MODULE (FILES
   specialization.scm
   shallow-specialization.scm
   conjunction-expansion.scm
-  MODULE_DESTINATION "${DATADIR}/scm/opencog/miner/rules"
+  MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/miner/rules"
 )

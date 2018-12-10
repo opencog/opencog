@@ -4,7 +4,7 @@ ADD_GUILE_MODULE (FILES
 	openpsi.scm
 	rule.scm
 	utilities.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/openpsi"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/openpsi"
 )
 
 ADD_SUBDIRECTORY (dynamics)

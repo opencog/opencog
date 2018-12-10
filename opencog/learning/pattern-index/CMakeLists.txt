@@ -12,7 +12,7 @@ ADD_LIBRARY (patternindex SHARED
 )
 
 ADD_DEPENDENCIES (patternindex
-	nlp_atom_types			
+	nlp_atom_types
 )
 
 TARGET_LINK_LIBRARIES(patternindex
@@ -51,5 +51,5 @@ INSTALL (TARGETS patternindex DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 ADD_GUILE_MODULE (FILES
 	pattern-index.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/learning/pattern-index"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/learning/pattern-index"
 )

@@ -61,13 +61,13 @@ INSTALL (TARGETS attention
 
 INSTALL (FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/attention.scm
-	DESTINATION "${DATADIR}/scm/opencog"
+	DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/attention_types.scm
 	${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm
-	DESTINATION "${DATADIR}/scm/opencog/attention"
+	DESTINATION "${GUILE_SITE_DIR}/opencog/attention"
 )
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm

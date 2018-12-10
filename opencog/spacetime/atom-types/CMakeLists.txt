@@ -24,10 +24,10 @@ INSTALL (TARGETS spacetime-types
 
 INSTALL (FILES
 	spacetime.scm
-	DESTINATION "${DATADIR}/scm/opencog"
+	DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
-	DESTINATION "${DATADIR}/scm/opencog/spacetime"
+	DESTINATION "${GUILE_SITE_DIR}/opencog/spacetime"
 )

@@ -69,5 +69,5 @@ ADD_GUILE_MODULE(FILES
 	negation-introduction.scm
 	temp-deduction.scm
 	formulas.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules/wip"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/pln/rules/wip"
 )

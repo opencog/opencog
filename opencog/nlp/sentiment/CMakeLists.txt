@@ -1,6 +1,6 @@
 ADD_GUILE_MODULE (FILES
 	sentiment.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/sentiment"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/sentiment"
 )
 
 INSTALL (FILES

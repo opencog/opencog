@@ -8,4 +8,4 @@ ADD_GUILE_MODULE (FILES
 	model-query.scm
 	self-model.scm
 	semantics.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/chatbot-eva")
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/chatbot-eva")
