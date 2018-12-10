@@ -95,6 +95,6 @@
     ""
     ; FIXME: This only works for trail-3
     (string-join (car (sureal (Set (car (filter
-			(lambda (x) (equal? 'EvaluationLink (cog-type x))) candidates))))))
+      (lambda (x) (equal? 'EvaluationLink (cog-type x))) candidates))))))
   )
 )
