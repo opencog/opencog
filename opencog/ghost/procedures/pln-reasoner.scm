@@ -32,6 +32,10 @@
 ;; ;; Question about happiness. Answer should be: crazy people are happy
 ;; (mock-HEAD-chat "p-1" "Eddie" "What do you know about happy?")
 
+; Since this file isn't loaded when ghost-procedures is loaded, import required
+; modules. It is not loaded with the module it is an experimental feature.
+(use-modules (opencog nlp sureal))
+
 ;-------------------------------------------------------------------------------
 (define (infer-on-r2l rule-base r2l-outputs steps)
     (let* ((inference-results
