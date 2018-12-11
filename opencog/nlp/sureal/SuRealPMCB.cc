@@ -257,6 +257,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             {
                 string sPat = hPatNode->get_name();
                 string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
+                sPatWord = sPatWord.substr(0, sPatWord.find_last_of('.'));
                 hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
             }
         }
