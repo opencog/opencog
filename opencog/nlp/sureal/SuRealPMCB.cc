@@ -481,7 +481,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                             sTense = qInhOS[1]->get_name();
 
                             logger().debug("[SuReal] In grounding, tense of %sis %s",
-                                kv.second->to_short_string().c_str(), sTense);
+                                kv.second->to_short_string().c_str(), sTense.c_str());
 
                             break;
                         }
@@ -504,7 +504,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
                                 logger().debug("[SuReal] In grounding, tense of %sis %s",
                                     hPatPredNode->to_short_string().c_str(),
-                                        qInhOS[1]->get_name());
+                                        qInhOS[1]->get_name().c_str());
 
                                 break;
                             }
