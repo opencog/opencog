@@ -40,7 +40,7 @@
 
 (use-modules (ice-9 regex))
 (use-modules (srfi srfi-1))
-(use-modules (opencog))
+(use-modules (ice-9 textual-ports)) ; For get-string-all
 
 ; --------------------------------------------------------------------
 (define-public (parse-get-relex-relations parse-node)
@@ -463,6 +463,12 @@
 )
 
 ; ---------------------------------------------------------------------
+; User-modifiable config parameters.
+; We'll keep these here for backwards-compat, for now, but it is
+; recommended that (use-relex-server HOST PORT) be used instead...
+(define-public relex-server-host "127.0.0.1")
+(define-public relex-server-port 4444)
+
 (define-public (use-relex-server HOSTNAME PORTNUM)
 "
   use-relex-server HOSTNAME PORTNUM

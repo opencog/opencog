@@ -1,3 +1,5 @@
+# NOTE: relex-utils.scm is used by cmake for configuring relex dependent tests.
+# Update relevant paths should you move it.
 ADD_GUILE_MODULE (FILES
 	nlp.scm
 	nlp-utils.scm

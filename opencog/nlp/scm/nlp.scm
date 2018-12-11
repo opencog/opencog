@@ -1,19 +1,17 @@
 (use-modules (opencog))
 
-(define-module (opencog nlp))
+(define-module (opencog nlp)
+  #:use-module (opencog)
+)
 
 ; Load the C library; this calls the nameserver to load the types.
 (load-extension "libnlp-types" "nlp_types_init")
 
-; User-modifiable config parameters.
-; We'll keep these here for backwards-compat, for now, but it is
-; recommended that (use-relex-server HOST PORT) be used instead...
-(define-public relex-server-host "127.0.0.1")
-(define-public relex-server-port 4444)
-
 ; Load various parts....
 (load "nlp/types/nlp_types.scm")
 (load "nlp/nlp-utils.scm")
+; NOTE: relex-utils.scm is used by cmake for configuring relex dependent tests.
+; Update relevant paths should you move it.
 (load "nlp/relex-utils.scm")
 (load "nlp/processing-utils.scm")
 
