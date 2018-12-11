@@ -1,5 +1,5 @@
 
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/guile/SchemeEval.h>
@@ -119,5 +119,5 @@ HandleSeq AttentionParamQuery::get_params(void)
 void AttentionParamQuery::load_default_values(void)
 {
      SchemeEval scm(_as);
-     scm.eval("(load \"" GUILE_SITE_DIR "/opencog/attention/default-param-values.scm\")");
+     scm.eval("(load \" GUILE_SITE_DIR/opencog/attention/default-param-values.scm\")");
 }

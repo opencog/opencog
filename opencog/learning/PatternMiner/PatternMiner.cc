@@ -43,7 +43,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 
 #include "PatternMiner.h"
