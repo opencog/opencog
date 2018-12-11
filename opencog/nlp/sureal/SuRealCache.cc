@@ -23,7 +23,7 @@
 
 #include "SuRealCache.h"
 
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Atom.h>
 
 using namespace opencog::nlp;

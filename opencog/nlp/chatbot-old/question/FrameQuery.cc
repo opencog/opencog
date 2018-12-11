@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/platform.h>
 

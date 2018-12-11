@@ -34,7 +34,7 @@
 #include <thread>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 

@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>

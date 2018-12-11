@@ -25,7 +25,7 @@
 #include <uuid/uuid.h>
 #include <link-grammar/link-includes.h>
 
-#include <opencog/atoms/value/NameServer.h>
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
