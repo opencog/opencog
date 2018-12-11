@@ -257,6 +257,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             {
                 string sPat = hPatNode->get_name();
                 string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
+                sPatWord = sPatWord.substr(0, sPatWord.find_last_of('.'));
                 hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
             }
         }
@@ -480,7 +481,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                             sTense = qInhOS[1]->get_name();
 
                             logger().debug("[SuReal] In grounding, tense of %sis %s",
-                                kv.second->to_short_string().c_str(), sTense);
+                                kv.second->to_short_string().c_str(), sTense.c_str());
 
                             break;
                         }
@@ -503,7 +504,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
                                 logger().debug("[SuReal] In grounding, tense of %sis %s",
                                     hPatPredNode->to_short_string().c_str(),
-                                        qInhOS[1]->get_name());
+                                        qInhOS[1]->get_name().c_str());
 
                                 break;
                             }
