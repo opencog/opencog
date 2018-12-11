@@ -12,5 +12,5 @@ INSTALL (TARGETS nlpfz DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 ADD_GUILE_MODULE (FILES
 	fuzzy.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/fuzzy"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/fuzzy"
 )

@@ -34,7 +34,7 @@ INSTALL (TARGETS lg-dict DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 ADD_GUILE_MODULE (FILES
 	lg-dict.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/lg-dict"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/lg-dict"
 )
 
 INSTALL (FILES

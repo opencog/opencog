@@ -1,4 +1,4 @@
 ADD_GUILE_MODULE (FILES
 	patternminer.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/"
 )

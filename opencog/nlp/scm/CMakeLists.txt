@@ -3,5 +3,5 @@ ADD_GUILE_MODULE (FILES
 	nlp-utils.scm
 	relex-utils.scm
 	processing-utils.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp"
 )

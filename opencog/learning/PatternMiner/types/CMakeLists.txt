@@ -38,5 +38,5 @@ INSTALL (FILES
 )
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/patternminer_types.scm
-	DESTINATION "${DATADIR}/scm/opencog/patternminer/"
+	DESTINATION "${GUILE_SITE_DIR}/opencog/patternminer/"
 )

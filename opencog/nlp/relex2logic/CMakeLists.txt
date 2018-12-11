@@ -5,7 +5,7 @@ ADD_GUILE_MODULE (FILES
     rule-utils.scm
     r2l-utilities.scm
     tv-utilities.scm
-    MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/relex2logic"
+    MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/relex2logic"
 )
 
 ADD_SUBDIRECTORY (loader)

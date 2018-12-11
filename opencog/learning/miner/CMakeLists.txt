@@ -35,7 +35,7 @@ IF (HAVE_GUILE)
   ADD_GUILE_MODULE (FILES
     miner.scm
     miner-utils.scm
-    MODULE_DESTINATION "${DATADIR}/scm/opencog/miner"
+    MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/miner"
   )
 
   ADD_SUBDIRECTORY (rules)

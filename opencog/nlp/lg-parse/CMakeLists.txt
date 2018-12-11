@@ -23,5 +23,5 @@ INSTALL (TARGETS lg-parse DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 ADD_GUILE_MODULE (FILES
 	lg-parse.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/"
 )
