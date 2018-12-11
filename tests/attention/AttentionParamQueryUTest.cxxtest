@@ -86,7 +86,13 @@ void AttentionParamQueryUTest::test_set_param()
 void AttentionParamQueryUTest::test_get_params()
 {
     HandleSeq hseq = _atq.get_params();
-    TS_ASSERT_EQUALS(5, hseq.size());
+
+    // At this time, there are 22 paramters loaded from
+    // default-param-values.scm whenever an instance of
+    // AttentionParamQuery is created. This unit test
+    // creates 5 more, so that there are 27 in total now.
+    // This number subject to change.
+    TS_ASSERT_EQUALS(27, hseq.size());
     for(const std::string& pname : params){
         Handle h = as.add_node(CONCEPT_NODE, pname);
         auto it = std::find(hseq.begin(), hseq.end(), h);
