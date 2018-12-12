@@ -39,6 +39,12 @@ OctoMapNode::OctoMapNode(const std::string& name)
                  std::chrono::milliseconds(100));
 }
 
+
+OctoMapNode::OctoMapNode(const std::string& name, TimeOctomapPtr ocmap) : Node(OCTOMAP_NODE, name)
+{
+  octomapPtr = ocmap;
+}
+
 OctoMapNode::OctoMapNode(const Node& n)
     : Node(n)
 {
