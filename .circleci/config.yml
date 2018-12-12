@@ -7,6 +7,9 @@ jobs:
         user: root
         environment:
           CCACHE_DIR: /ws/ccache
+      - image: opencog/relex
+        name: relex
+        command: /bin/sh -c "./opencog-server.sh"
     working_directory: /ws/opencog
     steps:
       - attach_workspace:
