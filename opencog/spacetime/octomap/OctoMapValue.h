@@ -32,7 +32,7 @@ private:
     Handle _octo_atom;
 
 protected:
-    void update();
+    void update() const;
 
 public:
     /**

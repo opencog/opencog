@@ -8,11 +8,10 @@
 using namespace opencog;
 
 
-void OctoValue::update()
+void OctoValue::update() const
 {
-    //point3d p = (_om->get_locations_of_atom(_octo_atom)).front();
-    //_value = {p.x(), p.y(), p.z()};
-    _om->insert_atom(point3d(_value[0], _value[1], _value[2]), _item);
+    auto it = (_om->get_locations_of_atom(_item)).rbegin(); //We need the last.
+    _value = {it->x(), it->y(), it->z()};
 }
 
 OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
@@ -26,8 +25,7 @@ OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
     _item = hseq[0];
     _octo_atom = hseq[1];
     _om = OctoMapNodeCast(_octo_atom)->get_map();
-
-    update();
+    // TODO start tracking _item by saying sth like _om->insert(_item)
 }
 
 bool OctoValue::operator==(const Value& other) const
@@ -43,6 +41,7 @@ bool OctoValue::operator==(const Value& other) const
 
 std::string OctoValue::to_string(const std::string& indent) const
 {
+    update(); // Update values
     std::string rv = indent + "(" + nameserver().getTypeName(_type);
     rv += ("\n " + _item->to_short_string() + " ");
     rv += (_octo_atom->to_short_string() + " (");
