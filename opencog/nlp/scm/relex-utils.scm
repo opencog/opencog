@@ -525,10 +525,11 @@
       ; An explicit port-encoding is needed by guile-2.0.9. Doesn't hurt for
       ; higher versions as well.
       (set-port-encoding! s "utf-8")
-      (display "A circuit breaker.\n" s)
+      ; Send whitespace so as to not pollute atomspace while checking
+      (display " \n" s)
       (set! result (get-string-all s))
       (close-port s)
-      (if (string-match "; ##### END OF A PARSE #####\n" result) #t #f))
+      (if (string-match "; NO PARSES\n" result) #t #f))
     #f
   )
 )

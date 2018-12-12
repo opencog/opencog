@@ -7,6 +7,9 @@ jobs:
         user: root
         environment:
           CCACHE_DIR: /ws/ccache
+      - image: opencog/relex
+        name: relex
+        command: /bin/sh -c "./opencog-server.sh"
     working_directory: /ws/opencog
     steps:
       - attach_workspace:
@@ -40,7 +43,7 @@ jobs:
           name: Build
           command: cd build && make -j4
       - run:
-          name: Install AtomSpace
+          name: Install OpenCog
           command: cd build && make -j4 install && ldconfig
       - run:
           name: Build tests
