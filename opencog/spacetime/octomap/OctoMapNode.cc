@@ -35,7 +35,7 @@ OctoMapNode::OctoMapNode(const std::string& name)
     : Node(OCTOMAP_NODE, name)
 {
     //TODO make the params configurable.
-    octomapPtr = std::make_shared<TimeOctomap<Handle>>(60, 0.1,
+    octomapPtr = std::make_shared<TimeOctomap<Handle>>(60, 0.001,
                  std::chrono::milliseconds(100));
 }
 
