@@ -454,7 +454,6 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                   hPatWord->to_short_string().c_str());
 
                 bool found = false;
-                std::set<std::string> qChkWords;
 
                 for (LinkPtr lpll : qLemmaLinks)
                 {
@@ -466,11 +465,6 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
                     std::string sName = qOS[0]->get_name();
                     std::string sWord = get_target_neighbors(qOS[0], REFERENCE_LINK)[0]->get_name();
-
-                    // Skip if we have seen it before
-                    if (std::find(qChkWords.begin(), qChkWords.end(), sWord) != qChkWords.end())
-                        continue;
-                    else qChkWords.insert(sWord);
 
                     // make sure the tense matches
                     // first get the tense of the solution instance node
