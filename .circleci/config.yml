@@ -43,7 +43,7 @@ jobs:
           name: Build
           command: cd build && make -j4
       - run:
-          name: Install AtomSpace
+          name: Install OpenCog
           command: cd build && make -j4 install && ldconfig
       - run:
           name: Build tests
