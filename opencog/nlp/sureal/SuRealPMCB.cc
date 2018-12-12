@@ -346,14 +346,13 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
     HandleSeq qItprNode = getInterpretation(pred_soln.begin()->second);
     std::sort(qItprNode.begin(), qItprNode.end());
 
-    logger().debug("[SuReal] In grounding, trying to find a common interpretation between:\n%s",
-        (pred_soln.begin()->second)->to_short_string().c_str());
+    string debug_str = (pred_soln.begin()->second)->to_short_string();
 
     // try to find a common InterpretationNode to the solutions
     // i.e. all the solution-clauses have to come from the same interpretation (of a sentence)
     for (HandleMap::const_iterator it = ++pred_soln.begin(); it != pred_soln.end(); ++it)
     {
-        logger().debug("[SuReal] ...and:\n%s", it->second->to_short_string().c_str());
+        debug_str.append(it->second->to_short_string());
 
         HandleSeq thisSeq = getInterpretation(it->second);
         std::sort(thisSeq.begin(), thisSeq.end());
@@ -363,6 +362,9 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
         qItprNode = overlapSeq;
     }
+
+    logger().debug("[SuReal] In grounding, trying to find a common interpretation between:\n%s",
+      debug_str.c_str());
 
     // no common InterpretationNode, ignore this grounding
     if (qItprNode.empty()) {
@@ -424,6 +426,9 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             // not a lemma, so just do a disjunct match for it
             if (qLemmaLinks.size() == 0)
             {
+                logger().debug("[SuReal] In grounding, this predicate is probably not a lemma: %s",
+                  hPatWord->to_short_string().c_str());
+
                 // reject it if disjuncts do not match
                 if (not disjunct_match(hPatWord, hSolnWordInst)) {
                     if (m_use_cache) {
@@ -445,6 +450,9 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             // and do a disjunct match for each of them
             else
             {
+                logger().debug("[SuReal] In grounding, this predicate is a lemma: %s",
+                  hPatWord->to_short_string().c_str());
+
                 bool found = false;
                 std::set<std::string> qChkWords;
 
