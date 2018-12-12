@@ -44,7 +44,7 @@ public:
      * the item to be stored in Octomap.  
      *
      */
-    OctoValue(const HandleSeq& hseq, std::vector<double> values = {});
+    OctoValue(const HandleSeq& hseq);
     virtual ~OctoValue()
     {
     }
@@ -60,10 +60,9 @@ static inline OctoValuePtr OctoValueCast(const ValuePtr& a)
     return std::dynamic_pointer_cast<const OctoValue>(a);
 }
 
-static inline std::shared_ptr<OctoValue> createOctoValue(const HandleSeq& hseq,
-        const std::vector<double> values)
-{
-    return std::make_shared<OctoValue>(hseq, values);
+template<typename ... Type>
+static inline std::shared_ptr<OctoValue> createOctoValue(Type&&... args) {
+	return std::make_shared<OctoValue>(std::forward<Type>(args)...);
 }
 
 /** @}*/

@@ -15,8 +15,7 @@ void OctoValue::update()
     _om->insert_atom(point3d(_value[0], _value[1], _value[2]), _item);
 }
 
-OctoValue::OctoValue(const HandleSeq& hseq,
-                     std::vector<double> values) : FloatValue(OCTO_VALUE, values)
+OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
 {
 
     if( hseq.size() != 2) {
@@ -58,12 +57,4 @@ std::string OctoValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when the library is loaded.
-static __attribute__ ((constructor)) void init(void)
-{
-    valueserver().addFactory(OCTO_VALUE,(ValueFactory)&createOctoValue,
-                             std::vector<std::type_index> {
-                               std::type_index(typeid(HandleSeq)),
-                               std::type_index(typeid(std::vector<double>))
-                             });
-}
-
+DEFINE_VALUE_FACTORY(OCTO_VALUE, createOctoValue, HandleSeq)
