@@ -20,9 +20,8 @@ namespace opencog
  *  @{
  */
 
-// OctoValue holds 3d coordinates of an atom. When it is
-// set, it stores in the TimeOctoMap instance provided by
-// OctoMapNode.
+// OctoValue provides the latest 3d coordinate position
+// of an atom.
 
 class OctoValue : public FloatValue
 {

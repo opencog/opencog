@@ -25,7 +25,6 @@ OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
     _item = hseq[0];
     _octo_atom = hseq[1];
     _om = OctoMapNodeCast(_octo_atom)->get_map();
-    // TODO start tracking _item by saying sth like _om->insert(_item)
 }
 
 bool OctoValue::operator==(const Value& other) const
