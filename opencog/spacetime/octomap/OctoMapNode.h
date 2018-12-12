@@ -45,18 +45,21 @@ namespace opencog
 // already existing Scheme interface for values and atoms and without additional
 // effort.
 
+using TimeOctomapPtr = std::shared_ptr<TimeOctomap<Handle>>;
+
 class OctoMapNode : public Node
 {
 private:
-    std::shared_ptr<TimeOctomap<Handle>> octomapPtr;
+   TimeOctomapPtr octomapPtr;
 protected:
 
 public:
     OctoMapNode(const std::string&);
+    OctoMapNode(const std::string&, TimeOctomapPtr);
     OctoMapNode(const Node&);
     virtual ~OctoMapNode();
 
-    inline std::shared_ptr<TimeOctomap<Handle>> get_map(void)
+    inline TimeOctomapPtr get_map(void)
     {
         return octomapPtr;
     }
