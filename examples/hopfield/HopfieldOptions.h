@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <fstream>
 
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 
 #define HDEMO_DEFAULT_VERBOSE 0
 #define HDEMO_DEFAULT_SCHEME SEQUENCE

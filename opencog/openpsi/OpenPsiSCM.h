@@ -23,7 +23,7 @@
 #define _OPENCOG_OPENPSI_SCM_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {

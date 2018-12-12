@@ -12,8 +12,8 @@
 
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/util/platform.h>
 

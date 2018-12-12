@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/nlp/wsd/MihalceaEdge.h>

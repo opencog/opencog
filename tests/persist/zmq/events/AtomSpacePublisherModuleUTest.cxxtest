@@ -36,8 +36,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/attention/atom_types.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/CogServer.h>
 

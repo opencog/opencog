@@ -11,7 +11,7 @@
 #ifndef _OPENCOG_SENSE_SIMILARITY_LCH_H
 #define _OPENCOG_SENSE_SIMILARITY_LCH_H
 
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/SenseSimilarity.h>
 
 namespace opencog {

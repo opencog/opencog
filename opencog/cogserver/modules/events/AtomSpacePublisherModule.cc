@@ -37,9 +37,9 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 
-#include <opencog/truthvalue/ProbabilisticTruthValue.h>
-#include <opencog/truthvalue/FuzzyTruthValue.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/atoms/truthvalue/ProbabilisticTruthValue.h>
+#include <opencog/atoms/truthvalue/FuzzyTruthValue.h>
+#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>

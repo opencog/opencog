@@ -15,7 +15,7 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 
 #define DEBUG
