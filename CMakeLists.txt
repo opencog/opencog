@@ -456,8 +456,8 @@ INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogFunctions.cmake")
 # -------------------------------------------------
 # Library configuration
 
-# small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
-# default lib path on 64 bit archs
+# Small hack to handle unixes that use "/usr/lib64" instead of
+# "/usr/lib" as the default lib path on 64 bit archs.
 IF (NOT DEFINED LIB_DIR_SUFFIX)
 	EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} -print-search-dirs OUTPUT_VARIABLE PRINT_SEARCH_DIRS_OUTPUT)
 	STRING(REGEX MATCH "\r?\nlibraries:.*\r?\n" COMPILER_LIB_SEARCH_DIRS ${PRINT_SEARCH_DIRS_OUTPUT})
