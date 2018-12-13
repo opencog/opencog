@@ -1,0 +1,58 @@
+//TestAtomOcTree.cpp
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spacetime/octomap/AtomOcTree.h>
+#include <opencog/spacetime/octomap/OctoMapNode.h>
+#include <opencog/spacetime/octomap/OctoMapValue.h>
+#include <opencog/spacetime/octomap/atom_types.h>
+#include <opencog/spacetime/octomap/TimeOctomap.h>
+
+
+using namespace std;
+using namespace opencog;
+using namespace octomap;
+
+#define TOLERANCE  0.001
+
+class OctoValueUTest : public CxxTest::TestSuite
+{
+public:
+    AtomSpace as;
+    Handle hoctomap;
+    Handle hitem;
+    Handle hkey;
+    TimeOctomapPtr ocmap;
+    OctoValue* value;
+
+    void setUp()
+    {
+        hoctomap = as.add_node(OCTOMAP_NODE, "octomap_0");
+        hitem = as.add_node(CONCEPT_NODE,"item_0");
+        hkey = as.add_node(PREDICATE_NODE,"spacetime");
+        ocmap = OctoMapNodeCast(hoctomap)->get_map(); 
+        value = new OctoValue(HandleSeq{hitem, hoctomap});
+    }
+
+    void tearDown()
+    {
+        delete value;
+    }
+
+    void testValueUpdate(void)
+    {
+        ocmap->insert_atom(point3d( 2.5, 2.5, 4.0), hitem);
+        std::vector<double> values_prev = value->value();
+
+        ocmap->insert_atom(point3d( 2.7, 3.5, 3.6), hitem);
+        std::vector<double> values_now = value->value();
+
+        TS_ASSERT_EQUALS(values_prev.size(), 3);
+        TS_ASSERT_EQUALS(values_now.size(), 3);
+
+        TS_ASSERT_DIFFERS(values_prev[0], values_now[0]);
+        TS_ASSERT_DIFFERS(values_prev[1], values_now[1]);
+        TS_ASSERT_DIFFERS(values_prev[2], values_now[2]);
+
+    }
+};
