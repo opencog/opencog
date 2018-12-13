@@ -2,6 +2,7 @@ ADD_GUILE_MODULE (FILES
 	procedures.scm
 	predicates.scm
 	schemas.scm
+	sq-bind.scm
 	pln-actions.scm
 	pln-reasoner.scm
 	pln-utils.scm

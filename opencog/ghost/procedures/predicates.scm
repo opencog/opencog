@@ -277,6 +277,19 @@
 )
 
 ; --------------------------------------------------------------
+(define (any_stochastic_question)
+"
+  any_stochastic_question
+
+  Check if there is any stochastic question generated.
+  Returns (stv 1 1) if so, (stv 0 1) otherwise.
+"
+  (if (null? (cog-value (ghost-get-curr-sent) (Concept "StochasticQuestion")))
+    (stv 0 1)
+    (stv 1 1))
+)
+
+; --------------------------------------------------------------
 (define (is_neck_direction dir)
 "
   is_neck_direction DIR

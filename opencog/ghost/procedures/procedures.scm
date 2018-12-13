@@ -115,6 +115,11 @@
     ask-wolframalpha
     ask-pln
 
+    ; Stochastic Question
+    send_stochastic_question
+    any_stochastic_question
+    get_stochastic_question
+
     ; -------------------- Utilities -------------------- ;
     set-dti!
     get-dti
@@ -147,6 +152,7 @@
   Returns a list containing all the atoms that have the pattern defined by
   the SignatureLink SIGN.
 "
+
   (cog-outgoing-set (cog-execute!
     (Get
       (TypedVariable
@@ -998,6 +1004,7 @@
 (load "procedures/focus-set.scm")
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
+(load "procedures/sq-bind.scm")
 ; TODO: move genric steps to the pln module
 ;(load "procedures/pln-reasoner.scm")
 ;(load "procedures/pln-trail-3.scm")
