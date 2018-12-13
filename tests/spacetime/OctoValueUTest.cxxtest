@@ -15,7 +15,7 @@ using namespace octomap;
 
 #define TOLERANCE  0.001
 
-class SpaceServerUTest : public CxxTest::TestSuite
+class OctoValueUTest : public CxxTest::TestSuite
 {
 public:
     AtomSpace as;
