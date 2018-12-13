@@ -3,7 +3,7 @@ ADD_DEFINITIONS(-DNDEBUG)
 
 LINK_DIRECTORIES (
 	${PROJECT_BINARY_DIR}/opencog/atomspace
-	${PROJECT_BINARY_DIR}/opencog/truthvalue
+	${PROJECT_BINARY_DIR}/opencog/atoms/truthvalue
 	${PROJECT_BINARY_DIR}/opencog/cogserver/server
 	${PROJECT_BINARY_DIR}/opencog/attention
 )

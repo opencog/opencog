@@ -33,7 +33,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>

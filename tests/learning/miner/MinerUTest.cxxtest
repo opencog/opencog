@@ -27,8 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/random.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/learning/miner/HandleTree.h>

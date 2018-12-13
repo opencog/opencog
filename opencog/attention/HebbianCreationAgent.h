@@ -26,7 +26,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/attentionbank/AttentionBank.h>
 

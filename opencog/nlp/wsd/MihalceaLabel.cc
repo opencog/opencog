@@ -17,7 +17,7 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 
 // #define DEBUG
