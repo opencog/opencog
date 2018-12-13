@@ -438,22 +438,19 @@ MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 # ===================================================================
 # Global includes
 
-# set confdir and datadir
-IF (NOT DEFINED CONFDIR)
-	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
-ENDIF (NOT DEFINED CONFDIR)
-IF (NOT DEFINED DATADIR)
-	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
-ENDIF (NOT DEFINED DATADIR)
-ADD_DEFINITIONS(-DCONFDIR="${CONFDIR}")
-ADD_DEFINITIONS(-DDATADIR="${DATADIR}")
+# -------------------------------------------------
+# Include configuration.
 
-# (re?)define MAN_INSTALL_DIR
-SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
+# Set default include paths.
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
+	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
 
 # include custom opencog cmake macros
 INCLUDE("${DATADIR}/cmake/OpenCogMacros.cmake")
 INCLUDE("${DATADIR}/cmake/OpenCogFunctions.cmake")
+
+# -------------------------------------------------
+# Library configuration
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs
@@ -468,22 +465,39 @@ IF (NOT DEFINED LIB_DIR_SUFFIX)
 	ENDIF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
 ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
-# set default include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
-	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
-
-# rpath handling
+# RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
+# Note: RPATH only supported under Linux!
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
-                        "${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
+SET(CMAKE_INSTALL_RPATH
+	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
+	"${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
+
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# -------------------------------------------------
+# Install configuration
+
+# Only list install files that have actually changed.
+SET(CMAKE_INSTALL_MESSAGE "LAZY")
+
+# Set confdir and datadir
+IF (NOT DEFINED CONFDIR)
+	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
+ENDIF (NOT DEFINED CONFDIR)
+
+IF (NOT DEFINED DATADIR)
+	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
+ENDIF (NOT DEFINED DATADIR)
+
+ADD_DEFINITIONS(-DCONFDIR="${CONFDIR}")
+ADD_DEFINITIONS(-DDATADIR="${DATADIR}")
+
+# (re?)define MAN_INSTALL_DIR
+SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
-
-IF(Boost_FOUND)
-ENDIF(Boost_FOUND)
 
 IF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 	SET(HAVE_ATTENTION 1)
@@ -578,7 +592,6 @@ IF (NOT WIN32)
 		COMMENT "Building experiments"
 	)
 ENDIF (NOT WIN32)
-
 
 # ===================================================================
 # Packaging
@@ -676,7 +689,8 @@ FIND_PACKAGE(Doxygen)
 ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # ===================================================================
-# Show a summary of what we got
+# Show a summary of what we found, what we will do.
+
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
