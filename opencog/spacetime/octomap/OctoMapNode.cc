@@ -31,8 +31,8 @@
 
 using namespace opencog;
 
-OctoMapNode::OctoMapNode(const std::string& name)
-    : Node(OCTOMAP_NODE, name)
+OctoMapNode::OctoMapNode(Type t, const std::string& name)
+    : Node(t, name)
 {
     //TODO make the params configurable.
     octomapPtr = std::make_shared<TimeOctomap<Handle>>(60, 0.001,
@@ -60,18 +60,8 @@ OctoMapNode::~OctoMapNode()
 {
 }
 
-Handle OctoMapNode::factory(const Handle& base)
-{
-    if (OctoMapNodeCast(base)) return base;
-    Handle h(createOctoMapNode(base->get_name()));
-    return h;
-}
-
-/* This runs when the shared lib is loaded. */
-static __attribute__ ((constructor)) void init(void)
-{
-    classserver().addFactory(OCTOMAP_NODE, &OctoMapNode::factory);
-}
+/*Add factory.*/
+DEFINE_NODE_FACTORY(OctoMapNode, OCTOMAP_NODE)
 
 /* This allows guile to load this shared library */
 extern "C" {

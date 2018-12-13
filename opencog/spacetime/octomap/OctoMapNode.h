@@ -54,7 +54,7 @@ private:
 protected:
 
 public:
-    OctoMapNode(const std::string&);
+    OctoMapNode(Type t, const std::string&);
     OctoMapNode(const std::string&, TimeOctomapPtr);
     OctoMapNode(const Node&);
     virtual ~OctoMapNode();
