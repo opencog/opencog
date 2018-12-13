@@ -62,8 +62,3 @@ OctoMapNode::~OctoMapNode()
 
 /*Add factory.*/
 DEFINE_NODE_FACTORY(OctoMapNode, OCTOMAP_NODE)
-
-/* This allows guile to load this shared library */
-extern "C" {
-    void opencog_spacetime_octomap_init(void) {}
-};
