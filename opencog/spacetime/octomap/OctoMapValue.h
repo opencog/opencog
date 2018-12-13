@@ -28,7 +28,7 @@ class OctoValue : public FloatValue
 private:
     std::shared_ptr<TimeOctomap<Handle>>   _om;
     Handle _item;
-    Handle _octo_atom;
+    Handle _octo_node;
 
 protected:
     void update() const;

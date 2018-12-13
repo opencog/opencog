@@ -23,8 +23,8 @@ OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
     }
 
     _item = hseq[0];
-    _octo_atom = hseq[1];
-    _om = OctoMapNodeCast(_octo_atom)->get_map();
+    _octo_node = hseq[1];
+    _om = OctoMapNodeCast(_octo_node)->get_map();
 }
 
 bool OctoValue::operator==(const Value& other) const
@@ -33,7 +33,7 @@ bool OctoValue::operator==(const Value& other) const
 
     const OctoValue* fov = (const OctoValue*) &other;
 
-    if (_octo_atom == fov->_octo_atom) return true;
+    if (_octo_node == fov->_octo_node) return true;
 
     return false;
 }
@@ -43,7 +43,7 @@ std::string OctoValue::to_string(const std::string& indent) const
     update(); // Update values
     std::string rv = indent + "(" + nameserver().getTypeName(_type);
     rv += ("\n " + _item->to_short_string() + " ");
-    rv += (_octo_atom->to_short_string() + " (");
+    rv += (_octo_node->to_short_string() + " (");
     for (double v : _value) {
         char buf[40];
         snprintf(buf, 40, "%.17g", v);
