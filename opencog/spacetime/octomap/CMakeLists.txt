@@ -25,12 +25,12 @@ INSTALL (TARGETS octomap-types
 
 INSTALL (FILES
 	octomap.scm
-	DESTINATION "${DATADIR}/scm/opencog"
+	DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/octomap_types.scm
-	DESTINATION "${DATADIR}/scm/opencog/spacetime/octomap"
+	DESTINATION "${GUILE_SITE_DIR}/opencog/spacetime/octomap"
 
 )
 
