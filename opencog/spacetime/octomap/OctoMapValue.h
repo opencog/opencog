@@ -4,7 +4,7 @@
 
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/value/ValueFactory.h>
