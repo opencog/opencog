@@ -30,7 +30,7 @@
 #include <unordered_map>
 
 #include <opencog/util/sigslot.h>
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
 #include <opencog/atomspace/AtomSpace.h>
 

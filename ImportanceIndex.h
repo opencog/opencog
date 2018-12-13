@@ -27,7 +27,7 @@
 #include <mutex>
 #include <opencog/util/recent_val.h>
 
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/AtomBins.h>
 #include <opencog/attentionbank/AVUtils.h>
 

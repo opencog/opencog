@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_AVUTILS_H
 #define _OPENCOG_AVUTILS_H
 
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 
