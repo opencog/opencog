@@ -9,11 +9,10 @@
 # -- print pretty summary
 #
 
-# Seems to work fine with cmake-2.6
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+# cogutils already requires 2.8.12.2, so may as well ask for that.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
-	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
 
 IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
@@ -22,10 +21,9 @@ ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 
 PROJECT(opencog)
 
-# To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
-# Remove when CMake >= 2.8.4 is required to build the project
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-
+# ----------------------------------------------------------
+# User-modifiable options. Feel free to change these!
+#
 # uncomment to be in Release mode [default]
 # SET(CMAKE_BUILD_TYPE Release)
 
@@ -48,8 +46,8 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
 MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
-                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
+ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+                -DPROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 # add the 'lib' dir to cmake's module search path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
@@ -517,8 +515,8 @@ ENDIF (NOT DEFINED CONFDIR)
 IF (NOT DEFINED DATADIR)
 	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
 ENDIF (NOT DEFINED DATADIR)
-ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
-ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
+ADD_DEFINITIONS(-DCONFDIR="${CONFDIR}")
+ADD_DEFINITIONS(-DDATADIR="${DATADIR}")
 
 # (re?)define MAN_INSTALL_DIR
 SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
