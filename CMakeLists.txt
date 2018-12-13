@@ -445,9 +445,13 @@ MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
 	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
 
-# include custom opencog cmake macros
-INCLUDE("${DATADIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${DATADIR}/cmake/OpenCogFunctions.cmake")
+# Macros that define how atom types get declared.
+IF (NOT DEFINED ATOMSPACE_DATA_DIR)
+	SET (ATOMSPACE_DATA_DIR "${COGUTIL_DATA_DIR}")
+ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
+
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogFunctions.cmake")
 
 # -------------------------------------------------
 # Library configuration
