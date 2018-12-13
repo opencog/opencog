@@ -93,6 +93,15 @@
    ...
 }
 
+# Use of uninitialised value of size 8
+{
+   <new_gc_mark_from_uninit>
+   Memcheck:Value8
+   ...
+   fun:GC_mark_from
+   ...
+}
+
 {
    <new_gc_malloc>
    Memcheck:Cond
@@ -183,12 +192,13 @@
 }
 
 {
-   <gc_condjmp>
+   <2.2-gc>
    Memcheck:Cond
    ...
    fun:GC_promote_black_lists
    ...
 }
+
 # ------------------------------------------
 # libuistring stuff
 

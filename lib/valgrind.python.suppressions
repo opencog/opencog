@@ -38,3 +38,55 @@
    fun:PyObject_Realloc
    ...
 }
+#
+# -----------------------------------------------------------
+# All new all imrpoved python3 stuff
+{
+   <py3_framex>
+   Memcheck:Cond
+   ...
+   fun:PyEval_EvalFrameEx
+   ...
+}
+{
+   <py3_framex>
+   Memcheck:Addr4
+   ...
+   fun:PyEval_EvalFrameEx
+   ...
+}
+{
+   <py3_framex>
+   Memcheck:Value8
+   ...
+   fun:PyEval_EvalFrameEx
+   ...
+}
+{
+   <py3_malloc>
+   Memcheck:Addr4
+   ...
+   fun:_PyObject_GC_Malloc
+   ...
+}
+{
+   <py3_string>
+   Memcheck:Addr4
+   ...
+   fun:PyRun_StringFlags
+   ...
+}
+{
+   <py3_frozen>
+   Memcheck:Cond
+   ...
+   fun:PyImport_ImportFrozenModuleObject
+   ...
+}
+{
+   <py3_frozen>
+   Memcheck:Addr4
+   ...
+   fun:PyImport_ImportFrozenModuleObject
+   ...
+}
