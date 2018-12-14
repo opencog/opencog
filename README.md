@@ -1,5 +1,6 @@
 OpenCog
 =======
+bogus ...wtf
 
 [![CircleCI](https://img.shields.io/circleci/project/github/singnet/opencog.svg)](https://circleci.com/gh/singnet/opencog)
 
