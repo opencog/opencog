@@ -146,7 +146,7 @@ IF (COGUTIL_FOUND)
     ADD_DEFINITIONS(-DHAVE_COGUTIL)
     SET(HAVE_COGUTIL 1)
 ELSE (COGUTIL_FOUND)
-    MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+    MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF (COGUTIL_FOUND)
 
 # add the 'cmake' directory from cogutil to search path
@@ -164,7 +164,7 @@ IF (ATOMSPACE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
 	SET(HAVE_ATOMSPACE 1)
 ELSE (ATOMSPACE_FOUND)
-	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed for everything!")
+	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed!")
 ENDIF (ATOMSPACE_FOUND)
 
 # ----------------------------------------------------------
