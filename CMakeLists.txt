@@ -9,11 +9,10 @@
 # -- print pretty summary
 #
 
-# Seems to work fine with cmake-2.6
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+# cogutils already requires 2.8.12.2, so may as well ask for that.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
-	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
 
 IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
@@ -22,10 +21,9 @@ ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 
 PROJECT(opencog)
 
-# To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
-# Remove when CMake >= 2.8.4 is required to build the project
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-
+# ----------------------------------------------------------
+# User-modifiable options. Feel free to change these!
+#
 # uncomment to be in Release mode [default]
 # SET(CMAKE_BUILD_TYPE Release)
 
@@ -48,38 +46,17 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
 MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
-                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
-
-# add the 'lib' dir to cmake's module search path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
-
-# Cogutil
-# Check for cogutil first. It provides a bunch of CMake infrastructure
-# that is needed to get the rest to work.
-FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
-IF (COGUTIL_FOUND)
-    MESSAGE(STATUS "CogUtil found.")
-    ADD_DEFINITIONS(-DHAVE_COGUTIL)
-    SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-    MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
-
-# add the 'cmake' directory from cogutil to search path
-list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
-
-include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
+ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+                -DPROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-	# aiiee cmake version 2.8.8 or newer is needed for below to
-	# work...
-	# IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.3.0)
-	#	MESSAGE(FATAL_ERROR "GCC version must be at least 6.3.0!")
-	# ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.3.0)
+	# Atomspace is already asking for version 5.0, so ask for that.
+	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+		MESSAGE(FATAL_ERROR "GCC version must be at least 5.0!")
+	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
 
 	IF (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
@@ -119,7 +96,9 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
-# Do the windows build
+# ----------------------------------------------------
+# Do the windows build.
+
 IF (WIN32)
 	ADD_DEFINITIONS(-DWIN32)
 	IF (CYGWIN)
@@ -146,6 +125,29 @@ IF (WIN32)
 	ENDIF (NOT UNIX)
 ENDIF (WIN32)
 
+# ===============================================================
+# Check for existance of various required, optional packages.
+# Listed in alphabetical order, more or less.
+# CogUtil must come first, because it supplies various FindXXX macros.
+
+# Add the 'lib' dir to cmake's module search path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+
+# Cogutil
+FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
+IF (COGUTIL_FOUND)
+    MESSAGE(STATUS "CogUtil found.")
+    ADD_DEFINITIONS(-DHAVE_COGUTIL)
+    SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+    MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
+
+# add the 'cmake' directory from cogutil to search path
+list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
+
+include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
+
 # ===================================================================
 # Check for existance of various required, optional packages.
 
@@ -159,7 +161,7 @@ ELSE (ATOMSPACE_FOUND)
 	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed for everything!")
 ENDIF (ATOMSPACE_FOUND)
 
-
+# ----------------------------------------------------------
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
@@ -173,11 +175,6 @@ FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex se
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
-
-	# Boost.Signals2 requires this in signal_type.hpp
-	# XXX except we don't use Signals2 anywhere ???
-	SET(BOOST_PARAMETER_MAX_ARITY 7)
-	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
 	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
@@ -198,12 +195,7 @@ IF(Boost_FOUND_SAVE)
 	SET(Boost_FOUND 1)
 ENDIF(Boost_FOUND_SAVE)
 
-IF(Boost_MATH_C99_FOUND)
-	MESSAGE(STATUS "Found Boost::math")
-ELSE(Boost_MATH_C99_FOUND)
-	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
-ENDIF(Boost_MATH_C99_FOUND)
-
+# ----------------------------------------------------------
 # cpprest
 # XXX FIXME This is required only by the soon-to-be obsolete
 # PatternMiner. Remove this when the (old) PatternMiner is gone.
@@ -217,11 +209,15 @@ ELSE (cpprest_FOUND AND cpprest_LIBRARY)
 ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
 MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
 
+# ----------------------------------------------------------
+# Needed for unit tests
+
 FIND_PACKAGE(Cxxtest)
 IF (NOT CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
 ENDIF (NOT CXXTEST_FOUND)
 
+# ----------------------------------------------------------
 # Glasgow Haskell compiler
 FIND_PACKAGE(GHC)
 IF (GHC_FOUND)
@@ -232,6 +228,17 @@ ELSE (GHC_FOUND)
 	MESSAGE(STATUS "${GHC_DIR_MESSAGE}")
 ENDIF (GHC_FOUND)
 
+FIND_PACKAGE(Stack)
+IF (STACK_FOUND)
+	ADD_DEFINITIONS(-DHAVE_STACK)
+	SET(HAVE_STACK 1)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
+ELSE (STACK_FOUND)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
+ENDIF (STACK_FOUND)
+MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
+
+# ----------------------------------------------------------
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
@@ -258,6 +265,7 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
+# ----------------------------------------------------------
 # Lapack is needed for BLOPEX
 FIND_PACKAGE(LAPACK)
 IF (LAPACK_FOUND)
@@ -268,8 +276,8 @@ ELSE (LAPACK_FOUND)
 	MESSAGE(STATUS "LAPACK missing: needed for blopex-based clustering.")
 ENDIF (LAPACK_FOUND)
 
-
-# Link-Gramar is needed for several NLP subsystems
+# ----------------------------------------------------------
+# Link-Grammar is needed for several NLP subsystems
 # Only 5.4.0 or newer has the required API in it.
 FIND_PACKAGE(LinkGrammar 5.4.0)
 IF (LINK_GRAMMAR_FOUND)
@@ -288,18 +296,7 @@ ELSE (UUID_FOUND)
 	MESSAGE(STATUS "UUID library missing: needed for NLP.")
 ENDIF (UUID_FOUND)
 
-
-## MOSES is not currently needed.
-#FIND_PACKAGE(MOSES CONFIG)
-#
-#IF (MOSES_FOUND)
-#	MESSAGE(STATUS "MOSES was found.")
-#	ADD_DEFINITIONS(-DHAVE_MOSES)
-#	SET(HAVE_MOSES 1)
-#ELSE (MOSES_FOUND)
-#	MESSAGE(STATUS "MOSES missing: needed for (nothing right now).")
-#ENDIF (MOSES_FOUND)
-
+# ----------------------------------------------------------
 # Octomap
 FIND_PACKAGE(Octomap)
 IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
@@ -311,40 +308,7 @@ ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
   SET(OCTOMAP_DIR_MESSAGE "Octomap missing: needed for the SpaceTime map.")
 ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
-## Google Protobuf library
-## The protocol buffer compiler is a separately installable package,
-## and it is needed for anything right now.
-#FIND_PACKAGE(Protobuf)
-#IF (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-#	SET(HAVE_PROTOBUF 1)
-#	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-#
-#ELSE (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#	# If we are here, then we are missing either the libraries, or the
-#	# compiler. React appropriately.
-#	IF (PROTOBUF_PROTOC_EXECUTABLE)
-#		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-#	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-#		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; ZMQ messaging can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-#	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-#
-#ENDIF (PROTOBUF_FOUND
-#		AND PROTOBUF_LIBRARY
-#		AND PROTOBUF_INCLUDE_DIR
-#		AND PROTOBUF_PROTOC_EXECUTABLE)
-#
-#MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
-
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------
 # Python and Cython
 #
 # NOTE: Python interpreter is needed for runing python unit tests,
@@ -415,19 +379,7 @@ IF(HAVE_PY_INTERP)
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 ENDIF(HAVE_PY_INTERP)
 
-# -----------------------------------------------------------------------------
-
-# Glasgow Haskell compiler
-FIND_PACKAGE(Stack)
-IF (STACK_FOUND)
-	ADD_DEFINITIONS(-DHAVE_STACK)
-	SET(HAVE_STACK 1)
-	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
-ELSE (STACK_FOUND)
-	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
-ENDIF (STACK_FOUND)
-MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
-
+# ----------------------------------------------------------
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -483,11 +435,73 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
+# ===================================================================
+# Global includes
+
+# -------------------------------------------------
+# Include configuration.
+
+# Set default include paths.
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
+	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
+
+# Macros that define how atom types get declared.
+IF (NOT DEFINED ATOMSPACE_DATA_DIR)
+	SET (ATOMSPACE_DATA_DIR "${COGUTIL_DATA_DIR}")
+ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
+
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogFunctions.cmake")
+
+# -------------------------------------------------
+# Library configuration
+
+# Small hack to handle unixes that use "/usr/lib64" instead of
+# "/usr/lib" as the default lib path on 64 bit archs.
+IF (NOT DEFINED LIB_DIR_SUFFIX)
+	EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} -print-search-dirs OUTPUT_VARIABLE PRINT_SEARCH_DIRS_OUTPUT)
+	STRING(REGEX MATCH "\r?\nlibraries:.*\r?\n" COMPILER_LIB_SEARCH_DIRS ${PRINT_SEARCH_DIRS_OUTPUT})
+	IF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
+		STRING(REGEX MATCH "/lib64/:|/lib64:|/lib64\n" HAS_LIB64 ${COMPILER_LIB_SEARCH_DIRS})
+		IF (NOT ${HAS_LIB64} STREQUAL "")
+			SET(LIB_DIR_SUFFIX "64")
+		ENDIF (NOT ${HAS_LIB64} STREQUAL "")
+	ENDIF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
+ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
+
+# RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
+# Note: RPATH only supported under Linux!
+SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH
+	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
+	"${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
+
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# -------------------------------------------------
+# Install configuration
+
+# Only list install files that have actually changed.
+SET(CMAKE_INSTALL_MESSAGE "LAZY")
+
+# Set confdir and datadir
+IF (NOT DEFINED CONFDIR)
+	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
+ENDIF (NOT DEFINED CONFDIR)
+
+IF (NOT DEFINED DATADIR)
+	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
+ENDIF (NOT DEFINED DATADIR)
+
+ADD_DEFINITIONS(-DCONFDIR="${CONFDIR}")
+ADD_DEFINITIONS(-DDATADIR="${DATADIR}")
+
+# (re?)define MAN_INSTALL_DIR
+SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
+
 # ==========================================================
 # Decide what to build, based on the packages found.
-
-IF(Boost_FOUND)
-ENDIF(Boost_FOUND)
 
 IF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 	SET(HAVE_ATTENTION 1)
@@ -506,50 +520,6 @@ ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR AND HAVE_UUID)
 IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ AND HAVE_JSONCPP)
   SET(HAVE_EVENT_PUBLISHING_DEPENDENCIES 1)
 ENDIF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ AND HAVE_JSONCPP)
-
-# ===================================================================
-# global includes
-
-# set confdir and datadir
-IF (NOT DEFINED CONFDIR)
-	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
-ENDIF (NOT DEFINED CONFDIR)
-IF (NOT DEFINED DATADIR)
-	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
-ENDIF (NOT DEFINED DATADIR)
-ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
-ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
-
-# (re?)define MAN_INSTALL_DIR
-SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
-
-# include custom opencog cmake macros
-INCLUDE("${DATADIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${DATADIR}/cmake/OpenCogFunctions.cmake")
-
-# small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
-# default lib path on 64 bit archs
-IF (NOT DEFINED LIB_DIR_SUFFIX)
-	EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} -print-search-dirs OUTPUT_VARIABLE PRINT_SEARCH_DIRS_OUTPUT)
-	STRING(REGEX MATCH "\r?\nlibraries:.*\r?\n" COMPILER_LIB_SEARCH_DIRS ${PRINT_SEARCH_DIRS_OUTPUT})
-	IF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
-		STRING(REGEX MATCH "/lib64/:|/lib64:|/lib64\n" HAS_LIB64 ${COMPILER_LIB_SEARCH_DIRS})
-		IF (NOT ${HAS_LIB64} STREQUAL "")
-			SET(LIB_DIR_SUFFIX "64")
-		ENDIF (NOT ${HAS_LIB64} STREQUAL "")
-	ENDIF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
-ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
-
-# set default include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
-	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
-
-# rpath handling
-SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
-                        "${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(opencog)
@@ -626,7 +596,6 @@ IF (NOT WIN32)
 		COMMENT "Building experiments"
 	)
 ENDIF (NOT WIN32)
-
 
 # ===================================================================
 # Packaging
@@ -724,7 +693,8 @@ FIND_PACKAGE(Doxygen)
 ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # ===================================================================
-# Show a summary of what we got
+# Show a summary of what we found, what we will do.
+
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
