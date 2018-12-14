@@ -6,5 +6,6 @@ ADD_GUILE_MODULE (FILES
 	pln-reasoner.scm
 	pln-utils.scm
 	pln-trail-3.scm
+   focus-set.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/ghost/procedures"
 )
