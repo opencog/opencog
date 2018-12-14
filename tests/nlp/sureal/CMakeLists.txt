@@ -14,6 +14,7 @@ LINK_DIRECTORIES(
 # when building this test.
 LINK_LIBRARIES(
 	sureal
+	${NO_AS_NEEDED}
 	${ATOMSPACE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
