@@ -66,12 +66,18 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# Vital to do this otherwise unresolved symbols everywhere:
 		SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
 		SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
+
+		# The Apple linker does not support the --no-as-needed flag.
+		SET(NO_AS_NEEDED "")
+
 	ELSE (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -fPIC")
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
 		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
+
+		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
 	ENDIF (APPLE)
 
 	# 1) -Wno-variadic-macros is to avoid warnings regarding using
