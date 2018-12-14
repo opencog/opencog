@@ -16,7 +16,8 @@ those. The folders are organized as follows
   instantiation and generalization.
 - `term` contains rules dealing with deduction, abduction,
   induction and inversion.
-- `wip` contains work-in-progress rules, incomplete or broken.
+- `wip` contains work-in-progress rules, incomplete or broken. Often
+  only compatible with the forward chainer.
 
 ## PLN Examples
 
