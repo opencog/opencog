@@ -3,4 +3,3 @@
 (use-modules (opencog))
 
 (load "pln/utilities.scm")
-(load "pln/focus-set.scm")

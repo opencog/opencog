@@ -1001,6 +1001,7 @@
 ; --------------------------------------------------------------
 ; Because macros require all the bindings used before expansion load
 ; the files last.
+(load "procedures/focus-set.scm")
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
 ; TODO: move genric steps to the pln module
