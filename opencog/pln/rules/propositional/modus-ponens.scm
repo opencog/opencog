@@ -14,7 +14,25 @@
 ;;       modus-ponens-subset-rule
 ;;
 ;; This rule contains less premises but thus is less precises than
-;; PreciseModusPonens.
+;; PreciseModusPonens. In order to properly calculate P(B) it must
+;; account for P(B|A) and P(B|Not A), as follows
+;;
+;; P(B) = P(B|A)*P(A) + P(B|Not A)*P(Not A)
+;;
+;; However in this rule to avoid requiring too many premises it is
+;; assumed
+;;
+;; P(B|Not A) = 0.2
+;;
+;; which is a temporary hack. Maybe the resulting confidence could at
+;; least be degraded to conpensate for that hack. But ideally one
+;; should use a precise modus ponens (requiring P(B|Not A) as
+;; premises), and then if missing, these premises could be estimated
+;; via other rules.
+;;
+;; Precise modus ponens rule is implemented in
+;;
+;; opencog/pln/rules/wip/precise-modus-ponens.scm
 ;;
 ;; -----------------------------------------------------------------------------
 (load "formulas.scm")
@@ -66,7 +84,7 @@
        (cA (cog-stv-confidence A))
        (sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB))
-       (snotAB 0.2)
+       (snotAB 0.2)                     ; Huge hack
        (cnotAB 1))
     (cog-set-tv!
      B
