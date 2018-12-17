@@ -1,145 +1,89 @@
-; e.g. she runs
-(define bind-subj
-  (Bind
-    (VariableList
+; Helper for generating a new BindLink with the base elements
+(define (generate-bindlink . elmts)
+  (define vars (append (car sq-base) (append-map car elmts)))
+  (define pats (append (cadr sq-base) (append-map cadr elmts)))
+  (define rws (append (caddr sq-base) (append-map caddr elmts)))
+  (Bind (VariableList vars) (And pats) (Set rws)))
+
+(define sq-base
+  (list
+    (list
       (TypedVariable (Variable "$sent") (Type "SentenceNode"))
       (TypedVariable (Variable "$parse") (Type "ParseNode"))
       (TypedVariable (Variable "$tense") (Type "DefinedLinguisticConceptNode"))
       (TypedVariable (Variable "$word-inst-p") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$word-inst-s") (Type "WordInstanceNode"))
       (TypedVariable (Variable "$pred-inst") (Type "PredicateNode"))
-      (TypedVariable (Variable "$cnpt-inst") (Type "ConceptNode"))
-      (TypedVariable (Variable "$pred") (Type "PredicateNode"))
-      (TypedVariable (Variable "$cnpt") (Type "ConceptNode")))
-    (And
+      (TypedVariable (Variable "$pred") (Type "PredicateNode")))
+    (list
       (State (Anchor "GHOST Currently Processing") (Variable "$sent"))
       (Parse (Variable "$parse") (Variable "$sent"))
       (WordInstance (Variable "$word-inst-p") (Variable "$parse"))
-      (WordInstance (Variable "$word-inst-s") (Variable "$parse"))
       (Reference (Variable "$pred-inst") (Variable "$word-inst-p"))
-      (Reference (Variable "$cnpt-inst") (Variable "$word-inst-s"))
       (Implication (Variable "$pred-inst") (Variable "$pred"))
-      (Inheritance (Variable "$cnpt-inst") (Variable "$cnpt"))
-      (Tense (Variable "$word-inst-p") (Variable "$tense"))
+      (Tense (Variable "$word-inst-p") (Variable "$tense")))
+    (list
+      (Inheritance
+        (InterpretationNode "MicroplanningNewSentence")
+        (DefinedLinguisticConcept "InterrogativeSpeechAct"))
+      (Inheritance
+        (Variable "$pred")
+        (ExecutionOutput
+          (GroundedSchema "scm: tense-to-inf")
+          (List (Variable "$tense")))))))
+
+(define sq-subj
+  (list
+    (list
+      (TypedVariable (Variable "$word-inst-s") (Type "WordInstanceNode"))
+      (TypedVariable (Variable "$subj-inst") (Type "ConceptNode")))
+    (list
+      (WordInstance (Variable "$word-inst-s") (Variable "$parse"))
+      (Reference (Variable "$subj-inst") (Variable "$word-inst-s"))
       (Evaluation
         (DefinedLinguisticRelationship "_subj")
         (List (Variable "$word-inst-p") (Variable "$word-inst-s"))))
-    (Set
-      (Inheritance
-        (InterpretationNode "MicroplanningNewSentence")
-        (DefinedLinguisticConcept "InterrogativeSpeechAct"))
-      (Inheritance
-        (Variable "$pred")
-        (ExecutionOutput
-          (GroundedSchema "scm: tense-to-inf")
-          (List (Variable "$tense"))))
+    (list
       (Evaluation
         (Variable "$pred")
-        (List (Variable "$cnpt-inst"))))))
+        (List (Variable "$subj-inst"))))))
 
-; e.g. he builds houses
-(define bind-subj-obj
-  (Bind
-    (VariableList
-      (TypedVariable (Variable "$sent") (Type "SentenceNode"))
-      (TypedVariable (Variable "$parse") (Type "ParseNode"))
-      (TypedVariable (Variable "$tense") (Type "DefinedLinguisticConceptNode"))
-      (TypedVariable (Variable "$word-inst-p") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$word-inst-s") (Type "WordInstanceNode"))
+(define sq-obj
+  (list
+    (list
       (TypedVariable (Variable "$word-inst-o") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$pred-inst") (Type "PredicateNode"))
-      (TypedVariable (Variable "$subj-inst") (Type "ConceptNode"))
-      (TypedVariable (Variable "$obj-inst") (Type "ConceptNode"))
-      (TypedVariable (Variable "$pred") (Type "PredicateNode"))
-      (TypedVariable (Variable "$subj") (Type "ConceptNode"))
-      (TypedVariable (Variable "$obj") (Type "ConceptNode")))
-    (And
-      (State (Anchor "GHOST Currently Processing") (Variable "$sent"))
-      (Parse (Variable "$parse") (Variable "$sent"))
-      (WordInstance (Variable "$word-inst-p") (Variable "$parse"))
-      (WordInstance (Variable "$word-inst-s") (Variable "$parse"))
+      (TypedVariable (Variable "$obj-inst") (Type "ConceptNode")))
+    (list
       (WordInstance (Variable "$word-inst-o") (Variable "$parse"))
-      (Reference (Variable "$pred-inst") (Variable "$word-inst-p"))
-      (Reference (Variable "$subj-inst") (Variable "$word-inst-s"))
       (Reference (Variable "$obj-inst") (Variable "$word-inst-o"))
-      (Implication (Variable "$pred-inst") (Variable "$pred"))
-      (Inheritance (Variable "$subj-inst") (Variable "$subj"))
-      (Inheritance (Variable "$obj-inst") (Variable "$obj"))
-      (Tense (Variable "$word-inst-p") (Variable "$tense"))
-      (Evaluation
-        (DefinedLinguisticRelationship "_subj")
-        (List (Variable "$word-inst-p") (Variable "$word-inst-s")))
       (Evaluation
         (DefinedLinguisticRelationship "_obj")
         (List (Variable "$word-inst-p") (Variable "$word-inst-o"))))
-    (Set
-      (Inheritance
-        (InterpretationNode "MicroplanningNewSentence")
-        (DefinedLinguisticConcept "InterrogativeSpeechAct"))
-      (Inheritance
-        (Variable "$pred")
-        (ExecutionOutput
-          (GroundedSchema "scm: tense-to-inf")
-          (List (Variable "$tense"))))
+    (list
       (Evaluation
         (Variable "$pred")
         (List (Variable "$subj-inst") (Variable "$obj-inst"))))))
 
-; it likes those apples
-(define bind-subj-obj-det
-  (Bind
-    (VariableList
-      (TypedVariable (Variable "$sent") (Type "SentenceNode"))
-      (TypedVariable (Variable "$parse") (Type "ParseNode"))
-      (TypedVariable (Variable "$tense") (Type "DefinedLinguisticConceptNode"))
-      (TypedVariable (Variable "$word-inst-p") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$word-inst-s") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$word-inst-o") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$word-inst-d") (Type "WordInstanceNode"))
-      (TypedVariable (Variable "$pred-inst") (Type "PredicateNode"))
-      (TypedVariable (Variable "$subj-inst") (Type "ConceptNode"))
-      (TypedVariable (Variable "$obj-inst") (Type "ConceptNode"))
-      (TypedVariable (Variable "$pred") (Type "PredicateNode"))
-      (TypedVariable (Variable "$subj") (Type "ConceptNode"))
-      (TypedVariable (Variable "$obj") (Type "ConceptNode")))
-    (And
-      (State (Anchor "GHOST Currently Processing") (Variable "$sent"))
-      (Parse (Variable "$parse") (Variable "$sent"))
-      (WordInstance (Variable "$word-inst-p") (Variable "$parse"))
-      (WordInstance (Variable "$word-inst-s") (Variable "$parse"))
-      (WordInstance (Variable "$word-inst-o") (Variable "$parse"))
-      (WordInstance (Variable "$word-inst-d") (Variable "$parse"))
-      (Reference (Variable "$pred-inst") (Variable "$word-inst-p"))
-      (Reference (Variable "$subj-inst") (Variable "$word-inst-s"))
-      (Reference (Variable "$obj-inst") (Variable "$word-inst-o"))
-      (Implication (Variable "$pred-inst") (Variable "$pred"))
-      (Inheritance (Variable "$subj-inst") (Variable "$subj"))
-      (Inheritance (Variable "$obj-inst") (Variable "$obj"))
-      (Tense (Variable "$word-inst-p") (Variable "$tense"))
-      (Evaluation
-        (DefinedLinguisticRelationship "_subj")
-        (List (Variable "$word-inst-p") (Variable "$word-inst-s")))
-      (Evaluation
-        (DefinedLinguisticRelationship "_obj")
-        (List (Variable "$word-inst-p") (Variable "$word-inst-o")))
+(define sq-det
+  (list
+    (list
+      (TypedVariable (Variable "$word-inst-d") (Type "WordInstanceNode")))
+    (list
       (Evaluation
         (DefinedLinguisticRelationship "_det")
         (List (Variable "$word-inst-o") (Variable "$word-inst-d"))))
-    (Set
-      (Inheritance
-        (InterpretationNode "MicroplanningNewSentence")
-        (DefinedLinguisticConcept "InterrogativeSpeechAct"))
-      (Inheritance
-        (Variable "$pred")
-        (ExecutionOutput
-          (GroundedSchema "scm: tense-to-inf")
-          (List (Variable "$tense"))))
+    (list
       (Evaluation
         (DefinedLinguisticPredicate "definite")
-        (List (Variable "$obj-inst")))
-      (Evaluation
-        (Variable "$pred")
-        (List (Variable "$subj-inst") (Variable "$obj-inst"))))))
+        (List (Variable "$obj-inst"))))))
+
+; e.g. she runs
+(define bind-subj (generate-bindlink sq-subj))
+
+; e.g. he builds houses
+(define bind-subj-obj (generate-bindlink sq-subj sq-obj))
+
+; e.g. it likes those apples
+(define bind-subj-obj-det (generate-bindlink sq-subj sq-obj sq-det))
 
 (define-public (tense-to-inf dlcn)
 "
