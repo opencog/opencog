@@ -5,6 +5,7 @@ INSTALL (FILES
 
 INSTALL (FILES
 	web/api/apiatomcollection.py
+	web/api/apighost.py
 	web/api/apimain.py
 	web/api/apischeme.py
 	web/api/apishell.py
