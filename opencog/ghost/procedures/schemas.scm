@@ -682,7 +682,8 @@
 
   Return the stochastic question generated for the current input.
 "
-  (cog-value (ghost-get-curr-sent) (Concept "StochasticQuestion"))
+  (Concept (cog-value-ref
+    (cog-value (ghost-get-curr-sent) (Concept "StochasticQuestion")) 0))
 )
 
 ; --------------------------------------------------------------
