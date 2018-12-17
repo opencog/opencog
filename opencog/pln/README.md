@@ -33,12 +33,12 @@ That folder contains
 ## Status
 
 PLN is a work in progress. Rules are often crudely implemented,
-usually for the sake of efficiency to allow preliminary
+usually for the sake of efficiency while allowing preliminary
 experimentations. In particular
 
-1. Many rules are only compatible with forward chaining, not the
+1. Many rules are only compatible with the forward chainer, not the
    backward chainer. That is because backward chaining requires that
-   the conclusion pattern be fully defined in statically, which makes
+   the conclusion pattern be fully statically defined, which makes
    some rules more difficult or less efficient to implement.
 2. Confidence calculation is usually very crude, that is because by
    its nature it requires either some forms of numerical integration,
@@ -46,4 +46,7 @@ experimentations. In particular
 
 ## Usage
 
-PLN contains helpers to configure the URE
+PLN is a scheme module containing various helpers to load PLN rules or
+subsets thereof.
+
+
