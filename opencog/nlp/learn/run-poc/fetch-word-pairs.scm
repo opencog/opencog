@@ -5,11 +5,9 @@
 ; NOTE: This script assumes that the databas already contains 
 ; the mutual information for the pairs obtained from an observe
 ; pass over the same sentences to be parsed.
-;
-;  Written by glicerico
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
-(use-modules (opencog nlp))
+(use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (opencog matrix))
 
 (define (fetch-wp cnt-mode)
@@ -17,7 +15,7 @@
   (define star-obj '())
   (display "Fetching all word-pairs from the database. This may take a few minutes.\n")
   (cond
-    ((equal? cnt-mode "lg")
+    ((equal? cnt-mode "any")
       (set! pair-obj (make-any-link-api)))
 
     ((or (equal? cnt-mode "clique")

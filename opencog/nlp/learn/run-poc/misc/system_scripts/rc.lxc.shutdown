@@ -1,0 +1,14 @@
+#!/bin/sh -e
+#
+# Edit this script and replace the username 'linas' by your usernname.
+#
+# Copy this script to /etc/rc.local.shutdown
+#
+# This script is executed during system shutdown
+#
+echo "Shut down user LXC containers" > /root/lxc-shutdown.log
+date >> /root/lxc-shutdown.log
+
+sudo -u linas lxc-ls --active | xargs -r -n1 lxc-stop -n >> /root/lxc-shutdown.log
+
+exit 0
