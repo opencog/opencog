@@ -152,7 +152,6 @@
   Returns a list containing all the atoms that have the pattern defined by
   the SignatureLink SIGN.
 "
-
   (cog-outgoing-set (cog-execute!
     (Get
       (TypedVariable

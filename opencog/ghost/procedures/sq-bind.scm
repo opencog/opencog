@@ -76,6 +76,19 @@
         (DefinedLinguisticPredicate "definite")
         (List (Variable "$obj-inst"))))))
 
+(define sq-nn
+  (list
+    (list
+      (TypedVariable (Variable "$word-inst-nn") (Type "WordInstanceNode"))
+      (TypedVariable (Variable "$nn-inst") (Type "ConceptNode")))
+    (list
+      (Reference (Variable "$nn-inst") (Variable "$word-inst-nn"))
+      (Evaluation
+        (DefinedLinguisticRelationship "_nn")
+        (List (Variable "$word-inst-o") (Variable "$word-inst-nn"))))
+    (list
+      (Inheritance (Variable "$obj-inst") (Variable "$nn-inst")))))
+
 ; e.g. she runs
 (define bind-subj (generate-bindlink sq-subj))
 
@@ -84,6 +97,12 @@
 
 ; e.g. it likes those apples
 (define bind-subj-obj-det (generate-bindlink sq-subj sq-obj sq-det))
+
+; e.g. I eat chocolate cakes
+(define bind-subj-obj-nn (generate-bindlink sq-subj sq-obj sq-nn))
+
+; e.g. we found that stone cave
+(define bind-subj-obj-det-nn (generate-bindlink sq-subj sq-obj sq-det sq-nn))
 
 (define-public (tense-to-inf dlcn)
 "
