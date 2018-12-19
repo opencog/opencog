@@ -7,9 +7,33 @@
 ;
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog cogserver))
-(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog nlp))
 (use-modules (system repl common))
 (use-modules (system repl server))
+
+; NOTE
+; 1. The files are loaded in pipeline order. In general, the later files
+;  depend on definitions contained
+; in the earlier files.
+; 2. Poc changes are loaded after files of the same name are loaded so as to
+; redfefine the functions.
+; 3. load-from-path is used so as to be able to redfine some functions. If
+; (opencog nlp learn) that will not be possilbe as some of the functions
+; are not exported.
+(load-from-path "opencog/nlp/learn/common.scm")
+(load "common.scm")
+(load-from-path "opencog/nlp/learn/utilities.scm")
+(load-from-path "opencog/nlp/learn/link-pipeline.scm")
+(load "link-pipeline.scm")
+(load-from-path "opencog/nlp/learn/singletons.scm")
+(load-from-path "opencog/nlp/learn/batch-word-pair.scm")
+(load-from-path "opencog/nlp/learn/mst-parser.scm")
+(load "mst-parser.scm")
+(load-from-path "opencog/nlp/learn/pseudo-csets.scm")
+(load-from-path "opencog/nlp/learn/shape-vec.scm")
+(load-from-path "opencog/nlp/learn/summary.scm")
+(load-from-path "opencog/nlp/learn/gram-class.scm")
+(load-from-path "opencog/nlp/learn/gram-agglo.scm")
 
 (add-to-load-path ".")
 (load "utilities.scm")
@@ -21,7 +45,7 @@
 
 ; set the prompt for the given language and mode
 ;(if (condicion)
-(repl-default-option-set! 'prompt (string-append "scheme@(" 
+(repl-default-option-set! 'prompt (string-append "scheme@("
     language "-" cog-mode ")> "))
 ;(else statement))
 
