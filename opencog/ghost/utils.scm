@@ -307,11 +307,11 @@
   (append-map
     (lambda (x)
       (if (equal? 'ListLink (cog-type x))
-        (cog-outgoing-set x)
+        (flatten-list (cog-outgoing-set x))
         (list x)))
     LST))
 
- ; ----------
+; ----------
 (define (flatten LST)
 "
   Flatten a list of lists.
