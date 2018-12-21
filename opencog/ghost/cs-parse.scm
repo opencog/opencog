@@ -640,6 +640,9 @@
       ; e.g. $username='_0
       (UVAR EQUAL variable-grounding) :
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
+      ; e.g. $username=^get_name()
+      (UVAR EQUAL function) :
+        (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
       (function) : $1
       (tts-feature) : $1
       (SET_DELAY) : (format #f "(cons 'set-delay \"~a\")" $1)
