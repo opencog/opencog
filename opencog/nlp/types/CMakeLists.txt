@@ -36,7 +36,9 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/types"
 )
-INSTALL (FILES
+
+ADD_GUILE_MODULE (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/nlp_types.scm
-	DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/types"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/types"
+	DEPENDS nlp_atom_types
 )

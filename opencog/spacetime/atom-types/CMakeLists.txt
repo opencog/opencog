@@ -23,12 +23,9 @@ INSTALL (TARGETS spacetime-types
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
-INSTALL (FILES
+ADD_GUILE_MODULE (FILES
 	spacetime.scm
-	DESTINATION "${GUILE_SITE_DIR}/opencog"
-)
-
-INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
-	DESTINATION "${GUILE_SITE_DIR}/opencog/spacetime"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/spacetime"
+	DEPENDS spacetime_atom_types
 )
