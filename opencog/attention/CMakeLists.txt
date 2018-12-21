@@ -63,12 +63,9 @@ INSTALL (TARGETS attention
 ADD_GUILE_MODULE (FILES
 	attention.scm
 	default-param-values.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/attention"
-)
-
-INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/attention_types.scm
-	DESTINATION "${GUILE_SITE_DIR}/opencog/attention"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/attention"
+	DEPENDS attention_atom_types
 )
 
 INSTALL (FILES

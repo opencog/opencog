@@ -36,7 +36,9 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner/types"
 )
-INSTALL (FILES
+
+ADD_GUILE_MODULE (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/patternminer_types.scm
-	DESTINATION "${GUILE_SITE_DIR}/opencog/patternminer/"
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/patternminer/"
+	DEPENDS patternminer_atom_types
 )
