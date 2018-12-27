@@ -65,6 +65,8 @@
            (ListLink (map Word (string-split (cdr t) #\sp))))
           ((equal? 'concept (car t))
            (ConceptNode (cdr t)))
+          ((equal? 'get_uvar (car t))
+           (get-user-variable (cdr t)))
           ((equal? 'sequence (car t))
            (List (flatten-list (terms-to-atomese (cdr t)))))
           (else (begin
@@ -271,9 +273,9 @@
                   (equal? 1 (length GRD))
                   (equal? (cog-name m) (get-lemma (cog-name (car GRD)))))
              (and (equal? 'ListLink (cog-type m))
-                  (equal? (length (cog-outgoing-set m)) (length GRD))
+                  (equal? (length (flatten-list (cog-outgoing-set m))) (length GRD))
                   (every (lambda (x y) (is-member? (list x) (list y)))
-                         GRD (cog-outgoing-set m)))))
+                         GRD (flatten-list (cog-outgoing-set m))))))
        MEMB))
 
 ; ----------

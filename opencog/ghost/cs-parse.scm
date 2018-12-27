@@ -706,6 +706,7 @@
       (phrase) : $1
       (concept) : $1
       (sequence) : $1
+      (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
 
     (wildcard
