@@ -65,6 +65,8 @@
            (ListLink (map Word (string-split (cdr t) #\sp))))
           ((equal? 'concept (car t))
            (ConceptNode (cdr t)))
+          ((equal? 'get_uvar (car t))
+           (get-user-variable (cdr t)))
           ((equal? 'sequence (car t))
            (List (flatten-list (terms-to-atomese (cdr t)))))
           (else (begin
