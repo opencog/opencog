@@ -287,7 +287,7 @@
 
   Decrease the urge of GOAL by VALUE.
 "
-  (psi-decrease-urge (Concept (cog-name goal)) (cog-number value))
+  (psi-decrease-urge (Concept (cog-name goal)) (string->number (cog-name value)))
   fini
 )
 
@@ -301,7 +301,7 @@
   (define related-psi-rules
     (filter psi-rule? (cog-incoming-set goal-node)))
 
-  (psi-increase-urge goal-node (cog-number value))
+  (psi-increase-urge goal-node (string->number (cog-name value)))
 
   ; Stimulate the rules associate with this goal
   (for-each
@@ -466,7 +466,7 @@
 "
   (cog-set-sti!
     (get-rule-from-alias (cog-name rule-label))
-    (cog-number val))
+    (string->number (cog-name val)))
 )
 
 (define (max_sti_words . words)
