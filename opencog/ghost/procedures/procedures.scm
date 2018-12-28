@@ -755,7 +755,7 @@
   returns (stv 0 1). All times passed as argument should be in seconds.
 "
   (perceived? atom (current-time-us)
-    (cog-number time-interval))
+    (string->number (cog-name time-interval)))
 )
 
 ; --------------------------------------------------------------
