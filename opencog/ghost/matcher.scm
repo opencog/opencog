@@ -220,50 +220,6 @@
         rejoinder))))
 
 ; ----------
-(define-public (ghost-find-rules-duallink SENT)
-"
-  The action selector. It first searches for the rules using DualLink,
-  and then does the filtering by evaluating the context of the rules.
-  Eventually returns a list of weighted rules that can satisfy the demand.
-"
-  (let* ((input-lseq (gddr (car (filter (lambda (e)
-           (equal? ghost-lemma-seq (gar e)))
-             (cog-get-pred SENT 'PredicateNode)))))
-         ; The ones that contains no variables/globs
-         (exact-match (filter psi-rule? (cog-get-trunk input-lseq)))
-         ; The ones that contains no constant terms
-         (no-const (filter psi-rule? (append-map cog-get-trunk
-           (map gar (cog-incoming-by-type ghost-no-constant 'MemberLink)))))
-         ; The ones found by the recognizer
-         (dual-match (filter psi-rule? (append-map cog-get-trunk
-           (cog-outgoing-set (cog-execute! (Dual input-lseq))))))
-         ; Get the psi-rules associate with them with duplicates removed
-         (rules-candidates
-           (fold (lambda (rule prev)
-             ; Since a psi-rule can satisfy multiple goals and an
-             ; ImplicationLink will be generated for each of them,
-             ; we are comparing the implicant of the rules instead
-             ; of the rules themselves, and create a list of rules
-             ; with unique implicants
-             (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
-                 prev (append prev (list rule))))
-           (list) (append exact-match no-const dual-match)))
-         ; Evaluate the matched rules one by one and see which of them satisfy
-         ; the current context
-         ; One of them, if any, will be selected and executed
-         (selected (eval-and-select (delete-duplicates
-           (append exact-match no-const dual-match)) #t)))
-
-        (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
-        (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
-        (cog-logger-debug ghost-logger "Exact match:\n~a" exact-match)
-        (cog-logger-debug ghost-logger "Dual match:\n~a" dual-match)
-        (cog-logger-debug ghost-logger "To-be-evaluated:\n~a" rules-candidates)
-        (cog-logger-debug ghost-logger "Selected:\n~a" selected)
-
-        (List selected)))
-
-; ----------
 (define-public (ghost-get-rules)
 "
   The action selector that works with ECAN.

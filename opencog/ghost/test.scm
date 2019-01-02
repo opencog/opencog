@@ -40,8 +40,6 @@
   ; Keep the current ghost-loop state
   (define loop-was-running (psi-running? ghost-component))
 
-  (define all-rules (psi-get-rules ghost-component))
-
   ; Halt the GHOST loop temporarily
   (ghost-halt)
 
