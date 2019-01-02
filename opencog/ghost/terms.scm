@@ -206,8 +206,10 @@
 "
   (let* ; Get the raw text input
         ((sent (ghost-get-curr-sent))
-         (rtxt (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
-         (ltxt (string-join (map get-lemma (string-split rtxt #\sp)))))
+         (txt-node (cog-chase-link 'ListLink 'Node sent))
+         (rtxt (if (null? txt-node) "" (cog-name (car txt-node))))
+         (ltxt (if (string-null? rtxt) ""
+                 (string-join (map get-lemma (string-split rtxt #\sp))))))
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
             (stv 0 1)
             (stv 1 1))))
