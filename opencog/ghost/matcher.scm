@@ -11,7 +11,7 @@
               (cog-value RULE ghost-time-last-executed))))
          refractory-period)))
 
-(define* (eval-and-select RULES #:optional (SKIP-STI #f))
+(define (eval-and-select RULES)
 "
   This is the goal-driven action selection.
 
@@ -28,12 +28,6 @@
   Sc = Satisfiability of the context of the psi-rule
   Icag = Importance (STI) of the rule
   Ug = Urge of the goal
-
-  SKIP-STI is for backward compatibility, used to decide whether to
-  include STI of a rule (Icag) in action selection or not. It's needed
-  as the default STI is zero. So if one runs GHOST without running
-  ECAN (as the earlier version of GHOST permits) then no action will
-  ever be triggered.
 "
   ; ----------
   ; Store the evaluation results for the contexts, so that the same context
@@ -72,11 +66,9 @@
       (if (> context-weight 0)
         (* context-weight
           (assoc-ref context-alist (psi-get-context R))) 1))
-    (define sti (if SKIP-STI
-      ; Weight higher if the rule is in the current topic
-      (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+    (define sti
       (if (> sti-weight 0)
-        (* sti-weight (cog-av-sti R)) 1)))
+        (* sti-weight (cog-av-sti R)) 1))
     (define urge
       (if (> urge-weight 0)
         (* urge-weight (psi-urge (psi-get-goal R))) 1))
@@ -93,10 +85,9 @@
   ; Check if a rule should be skipped or not, based on
   ; its current STI, strength, and the last executed time
   (define (accept-rule? r)
-    (or SKIP-STI
-        (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
-             (or (= strength-weight 0) (> (cog-stv-strength r) 0))
-             (not-within-refractory? r))))
+    (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
+         (or (= strength-weight 0) (> (cog-stv-strength r) 0))
+         (not-within-refractory? r)))
 
   ; ----------
   (for-each
@@ -218,50 +209,6 @@
           )
         )
         rejoinder))))
-
-; ----------
-(define-public (ghost-find-rules-duallink SENT)
-"
-  The action selector. It first searches for the rules using DualLink,
-  and then does the filtering by evaluating the context of the rules.
-  Eventually returns a list of weighted rules that can satisfy the demand.
-"
-  (let* ((input-lseq (gddr (car (filter (lambda (e)
-           (equal? ghost-lemma-seq (gar e)))
-             (cog-get-pred SENT 'PredicateNode)))))
-         ; The ones that contains no variables/globs
-         (exact-match (filter psi-rule? (cog-get-trunk input-lseq)))
-         ; The ones that contains no constant terms
-         (no-const (filter psi-rule? (append-map cog-get-trunk
-           (map gar (cog-incoming-by-type ghost-no-constant 'MemberLink)))))
-         ; The ones found by the recognizer
-         (dual-match (filter psi-rule? (append-map cog-get-trunk
-           (cog-outgoing-set (cog-execute! (Dual input-lseq))))))
-         ; Get the psi-rules associate with them with duplicates removed
-         (rules-candidates
-           (fold (lambda (rule prev)
-             ; Since a psi-rule can satisfy multiple goals and an
-             ; ImplicationLink will be generated for each of them,
-             ; we are comparing the implicant of the rules instead
-             ; of the rules themselves, and create a list of rules
-             ; with unique implicants
-             (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
-                 prev (append prev (list rule))))
-           (list) (append exact-match no-const dual-match)))
-         ; Evaluate the matched rules one by one and see which of them satisfy
-         ; the current context
-         ; One of them, if any, will be selected and executed
-         (selected (eval-and-select (delete-duplicates
-           (append exact-match no-const dual-match)) #t)))
-
-        (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
-        (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
-        (cog-logger-debug ghost-logger "Exact match:\n~a" exact-match)
-        (cog-logger-debug ghost-logger "Dual match:\n~a" dual-match)
-        (cog-logger-debug ghost-logger "To-be-evaluated:\n~a" rules-candidates)
-        (cog-logger-debug ghost-logger "Selected:\n~a" selected)
-
-        (List selected)))
 
 ; ----------
 (define-public (ghost-get-rules)

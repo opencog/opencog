@@ -69,7 +69,6 @@
     ((has-match? "\\)" str) (result:suffix 'RPAREN location #f))
     ; Chatscript declarations
     ((has-match? "concept:" str) (result:suffix 'CONCEPT location #f))
-    ((has-match? "topic:" str) (result:suffix 'TOPIC location #f))
     ; The token value for 'CR is empty-string so as to handle multiline
     ; rules.
     ((has-match? "\r" str) (result:suffix 'CR location ""))
@@ -249,7 +248,7 @@
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
-    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
+    (CONCEPT RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
      SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT RLINK-CONCEPT
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
@@ -292,19 +291,6 @@
     (declarations
       (CONCEPT ID declaration-sequence) :
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
-      (TOPIC ID declaration-sequence) :
-        (create-topic $2 (list) (eval-string (string-append "(list " $3 ")")))
-      (TOPIC ID LPAREN RPAREN) : (create-topic $2 (list) (list))
-      (TOPIC ID LSBRACKET RSBRACKET) : (create-topic $2 (list) (list))
-      ; Note, "names" here are the topic-level features/functions that will
-      ; be applied to every single rules under this topic
-      (TOPIC ID names declaration-sequence) :
-        (create-topic $2 (string-split $3 #\sp)
-          (eval-string (string-append "(list " $4 ")")))
-      (TOPIC ID names LPAREN RPAREN) :
-        (create-topic $2 (string-split $3 #\sp) (list))
-      (TOPIC ID names LSBRACKET RSBRACKET) :
-        (create-topic $2 (string-split $3 #\sp) (list))
       (UVAR EQUAL name) : (create-user-variable $1 $3)
     )
 
@@ -909,17 +895,17 @@
   (cs-lexer (open-file-input-port file-path))
 )
 
-(define-public (test-parse line)
+(define-public (cs-parse line)
 "
-  Parse a text string in a Guile shell, for debugging mainly.
+  Parse a text string in a Guile shell.
 "
   (define parser (cs-parser))
   (parser (cs-lexer (open-input-string line)) error)
 )
 
-(define-public (test-parse-file file)
+(define-public (cs-parse-file file)
 "
-  Parse a topic file in a Guile shell, for debugging mainly.
+  Parse a GHOST rule file in a Guile shell.
 "
   (define parser (cs-parser))
   (define fp (open-file-input-port file))

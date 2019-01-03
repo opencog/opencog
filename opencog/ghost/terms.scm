@@ -25,10 +25,7 @@
     (list (list) (list)
       (if is-time?
         (list (WordNode time-1pt) (WordNode time-2pt))
-        (list (WordNode str-dc)))
-      (if is-time?
-        (list (WordNode time-1pt) (WordNode time-2pt))
-        (list (WordNode (get-lemma str-dc)))))))
+        (list (WordNode str-dc))))))
 
 ; ----------
 (define (word-apos STR)
@@ -39,7 +36,7 @@
   (let* (; This turns ’ into ' just to treat them as the same thing
          (nstr (regexp-substitute/global #f "’" STR 'pre "'" 'post))
          (w (WordNode (string-downcase nstr))))
-    (list (list) (list) (list w) (list w))))
+    (list (list) (list) (list w))))
 
 ; ----------
 (define (lemma STR)
@@ -59,7 +56,7 @@
                   ; "(LemmaLink v2 l)" in the context
                   (Evaluation (GroundedPredicate "scm: ghost-lemma?")
                               (List var l)))))
-    (list v c (list var) (list l))))
+    (list v c (list var))))
 
 (define-public (ghost-lemma? GRD LEMMA)
 "
@@ -80,9 +77,8 @@
   (fold (lambda (wd lst)
                 (list (append (car lst) (car wd))
                       (append (cadr lst) (cadr wd))
-                      (append (caddr lst) (caddr wd))
-                      (append (cadddr lst) (cadddr wd))))
-        (list '() '() '() '())
+                      (append (caddr lst) (caddr wd))))
+        (list '() '() '())
         (map word (string-split STR #\sp))))
 
 ; ----------
@@ -90,21 +86,14 @@
 "
   Occurrence of a concept.
 "
-  (let ((g1 (Glob (gen-var STR #t)))
-        (g2 (Glob (gen-var STR #f)))
+  (let ((g (Glob (gen-var STR #t)))
         (clength (concept-length (Concept STR))))
-    (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
-                                           (Interval (Number 1)
-                                                     (Number clength))))
-                (if ghost-with-ecan
-                  (list)
-                  (TypedVariable g2 (TypeSet (Type "WordNode")
-                                             (Interval (Number 1)
-                                                       (Number clength))))))
+    (list (list (TypedVariable g (TypeSet (Type "WordNode")
+                                          (Interval (Number 1)
+                                                    (Number clength)))))
           (list (Evaluation (GroundedPredicate "scm: ghost-concept?")
-                            (List (Concept STR) g1)))
-          (list g1)
-          (list g2))))
+                            (List (Concept STR) g)))
+          (list g))))
 
 (define-public (ghost-concept? CONCEPT . GRD)
 "
@@ -124,21 +113,14 @@
   Existence of either one of the items in the list will be
   considered as a match.
 "
-  (let ((g1 (Glob (gen-var "choices" #t)))
-        (g2 (Glob (gen-var "choices" #f)))
+  (let ((g (Glob (gen-var "choices" #t)))
         (tlength (term-length TERMS)))
-    (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
-                                           (Interval (Number 1)
-                                                     (Number tlength))))
-                (if ghost-with-ecan
-                  (list)
-                  (TypedVariable g2 (TypeSet (Type "WordNode")
-                                             (Interval (Number 1)
-                                                       (Number tlength))))))
+    (list (list (TypedVariable g (TypeSet (Type "WordNode")
+                                          (Interval (Number 1)
+                                                    (Number tlength)))))
           (list (Evaluation (GroundedPredicate "scm: ghost-choices?")
-                            (List (List (terms-to-atomese TERMS)) g1)))
-          (list g1)
-          (list g2))))
+                            (List (List (terms-to-atomese TERMS)) g)))
+          (list g))))
 
 (define-public (ghost-choices? CHOICES . GRD)
 "
@@ -158,21 +140,14 @@
 "
   Occurrence of one or a list of terms that is optional.
 "
-  (let ((g1 (Glob (gen-var "optionals" #t)))
-        (g2 (Glob (gen-var "optionals" #f)))
+  (let ((g (Glob (gen-var "optionals" #t)))
         (tlength (term-length TERMS)))
-    (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
-                                  (Interval (Number 0)
-                                            (Number tlength))))
-                (if ghost-with-ecan
-                  (list)
-                  (TypedVariable g2 (TypeSet (Type "WordNode")
-                                    (Interval (Number 0)
-                                              (Number tlength))))))
+    (list (list (TypedVariable g (TypeSet (Type "WordNode")
+                                 (Interval (Number 0)
+                                           (Number tlength)))))
           (list (Evaluation (GroundedPredicate "scm: ghost-optionals?")
-                            (List (List (terms-to-atomese TERMS)) g1)))
-          (list g1)
-          (list g2))))
+                            (List (List (terms-to-atomese TERMS)) g)))
+          (list g))))
 
 (define-public (ghost-optionals? OPTIONALS . GRD)
 "
@@ -197,8 +172,8 @@
   (list '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: ghost-negation?")
                           (List (terms-to-atomese TERMS))))
-        ; Nothing for the word-seq and lemma-seq
-        '() '()))
+        ; Nothing for the word-seq
+        '()))
 
 (define-public (ghost-negation? . TERMS)
 "
@@ -206,8 +181,10 @@
 "
   (let* ; Get the raw text input
         ((sent (ghost-get-curr-sent))
-         (rtxt (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
-         (ltxt (string-join (map get-lemma (string-split rtxt #\sp)))))
+         (txt-node (cog-chase-link 'ListLink 'Node sent))
+         (rtxt (if (null? txt-node) "" (cog-name (car txt-node))))
+         (ltxt (if (string-null? rtxt) ""
+                 (string-join (map get-lemma (string-split rtxt #\sp))))))
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
             (stv 0 1)
             (stv 1 1))))
@@ -219,20 +196,13 @@
   can be restricted.
   Note: -1 in the upper bound means infinity.
 "
-  (let* ((g1 (Glob (gen-var "wildcard" #t)))
-         (g2 (Glob (gen-var "wildcard" #f))))
+  (let* ((g (Glob (gen-var "wildcard" #t))))
     (list (list
-      (TypedVariable g1
+      (TypedVariable g
         (TypeSet (Type "WordNode")
-                 (Interval (Number LOWER) (Number UPPER))))
-      (if ghost-with-ecan
-        (list)
-        (TypedVariable g2
-          (TypeSet (Type "WordNode")
-                   (Interval (Number LOWER) (Number UPPER))))))
+                 (Interval (Number LOWER) (Number UPPER)))))
         '()
-        (list g1)
-        (list g2))))
+        (list g))))
 
 ; ----------
 (define (tts-feature ARGS)

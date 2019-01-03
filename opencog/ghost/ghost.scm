@@ -66,15 +66,11 @@
 ; Various anchors, predicates, values etc that will be used
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
-(define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
-(define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
-(define ghost-topic (Concept (ghost-prefix "Topic")))
-(define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
@@ -94,9 +90,6 @@
 
 ;; --------------------
 ;; For rule parsing
-
-; When set, all the rules created will be under this topic
-(define rule-topic '())
 
 ; When set, all the rules created under it will be linked to this concept,
 ; until a new top level goal is defined
@@ -144,7 +137,6 @@
 
 ; To clear the above states
 (define (clear-parsing-states)
-  (set! rule-topic '())
   (set! rule-concept '())
   (set! initial-urges '())
   (set! default-urge 0)
@@ -257,7 +249,7 @@
            (equal? (cog-type ghost-buffer) 'SentenceNode))
     (begin
       (set! ghost-processed ghost-buffer)
-      (generate-word-seqs ghost-buffer)
+      (generate-word-seq ghost-buffer)
       (append-to-sent-seq ghost-buffer)
       (State ghost-curr-proc ghost-buffer)))
 )
@@ -271,7 +263,7 @@
 
   Parse the TXT, convert them into atomese.
 "
-  (test-parse TXT)
+  (cs-parse TXT)
   (process-rule-stack)
 )
 
@@ -282,7 +274,7 @@
 
   Parse everything in the FILE, and convert them into atomese.
 "
-  (test-parse-file FILE)
+  (cs-parse-file FILE)
   (process-rule-stack)
 )
 
@@ -293,7 +285,7 @@
 
   Parse everything in the FILES, and convert them into atomese.
 "
-  (for-each (lambda (f) (test-parse-file f)) FILES)
+  (for-each (lambda (f) (cs-parse-file f)) FILES)
   (process-rule-stack)
 )
 

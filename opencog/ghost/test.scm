@@ -15,37 +15,43 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
-(define ghost-with-ecan #f)
-
-(define-public (ecan-based-ghost-rules flag)
-"
-  For experimental purpose
-  To create GHOST rules that are slimmer.
-"
-  (set! ghost-with-ecan flag)
-)
-
-; ----------
 ; TODO: Remove once experimentation is over
 (define expt-var '())
-; TODO: Should be removed as this is using 'ghost-find-rules-duallink',
-; which will be obsolete soon
 (define-public (test-ghost TXT)
 "
-  Try to find (and execute) the matching rules given an input TXT.
+  test-ghost TXT
+
+  (This is just meant to be a quick test for debugging purpose only!)
+
+  Parse the input TXT, evaluate all the GHOST rules in the system, and
+  trigger all of which that are satisfiable.
 "
+  ; Keep the current ghost-loop state
+  (define loop-was-running (psi-running? ghost-component))
+
+  ; Halt the GHOST loop temporarily
+  (ghost-halt)
+
+  ; Reset any previous results
   (set! ghost-result '())
-  (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
+
+  ; Process the input
+  (ghost TXT)
   (process-ghost-buffer)
 
-  (let ((rule (cog-outgoing-set
-          (ghost-find-rules-duallink (ghost-get-curr-sent)))))
-    (map (lambda (r) (psi-imply r)) rule)
-    ; not using ghost-last-executed, because getting back to the rule
-    ; from the alias atom is a hassle.
-    (set! expt-var rule)
-  )
+  ; Evaluate all the GHOST rules and trigger those that are satisfiable
+  (for-each
+    (lambda (rule)
+      (if (equal? (psi-satisfiable? rule) (stv 1 1))
+        (begin
+          (psi-imply rule)
+          (set! expt-var rule))))
+    (psi-get-rules ghost-component))
 
+  ; Restore the loop state
+  (if loop-was-running (ghost-run))
+
+  ; Return the result of the last triggered rule
   ghost-result
 )
 
@@ -123,13 +129,6 @@
 "
   (define sent (cog-chase-link 'StateLink 'SentenceNode ghost-curr-proc))
   (if (null? sent) '() (car sent)))
-
-; ----------
-(define-public (ghost-get-curr-topic)
-"
-  Get the current topic.
-"
-  (gar (cog-execute! (Get (State ghost-curr-topic (Variable "$x"))))))
 
 ; ----------
 (define-public (ghost-currently-processing)
