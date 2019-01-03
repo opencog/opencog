@@ -21,14 +21,14 @@
 ; (opencog nlp learn) that will not be possilbe as some of the functions
 ; are not exported.
 (load-from-path "opencog/nlp/learn/common.scm")
-(load "common.scm")
+(load "redefine-common.scm")
 (load-from-path "opencog/nlp/learn/utilities.scm")
 (load-from-path "opencog/nlp/learn/link-pipeline.scm")
-(load "link-pipeline.scm")
+(load "redefine-link-pipeline.scm")
 (load-from-path "opencog/nlp/learn/singletons.scm")
 (load-from-path "opencog/nlp/learn/batch-word-pair.scm")
 (load-from-path "opencog/nlp/learn/mst-parser.scm")
-(load "mst-parser.scm")
+(load "redefine-mst-parser.scm")
 (load-from-path "opencog/nlp/learn/pseudo-csets.scm")
 (load-from-path "opencog/nlp/learn/shape-vec.scm")
 (load-from-path "opencog/nlp/learn/summary.scm")

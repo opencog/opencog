@@ -1,31 +1,3 @@
-;
-; common.scm
-;
-; Common functions shared between multpile functional units.
-;
-; Copyright (c) 2017 Linas Vepstas
-;
-; ---------------------------------------------------------------------
-;
-(use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog persist))
-
-; ---------------------------------------------------------------------
-; Define locations where statistics will be stored.
-
-; These are used to store/maintain counts for clique-pair counting.
-; See `link-pipeline.scm` for usage.
-(define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
-(define pair-dist (SchemaNode "*-Pair Distance-*"))
-
-; get-count ATOM - return the raw observational count on ATOM.
-(define-public (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
-
-; set-count ATOM CNT - Set the raw observational count on ATOM.
-(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
-
-; ---------------------------------------------------------------------
-
 (define (count-one-atom ATM)
 "
   count-one-atom ATM -- increment the count by one on ATM, and
@@ -67,14 +39,3 @@
 		(store-atom ATM)) ; save to SQL
 )
 
-; ---------------------------------------------------------------------
-
-(define-public (get-all-words)
-"
-  get-all-words - return a list holding all of the observed words
-  This does NOT fetch the words from the backing store.
-"
-	(cog-get-atoms 'WordNode)
-)
-
-; ---------------------------------------------------------------------
