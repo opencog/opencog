@@ -7,7 +7,7 @@
 ;
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog cogserver))
-(use-modules (opencog nlp) (opencog nlp ull-parser))
+(use-modules (opencog nlp))
 (use-modules (system repl common))
 (use-modules (system repl server))
 
@@ -19,7 +19,7 @@
 (define language (get-lang))
 
 ; set the prompt for the given language
-(repl-default-option-set! 'prompt (string-append "scheme@(" 
+(repl-default-option-set! 'prompt (string-append "scheme@("
     language "-pairs)> "))
 
 ; Start the cogserver with configs for the given language
