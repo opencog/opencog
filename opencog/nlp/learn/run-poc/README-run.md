@@ -13,7 +13,7 @@ Connecting to Cogserver:
                       takes as language the processing mode and the language
                       (inside config folder).
 
- -- `opencog-pairs-??.conf` contains configuration settings for the cogserver, 
+ -- `opencog-pairs-??.conf` contains configuration settings for the cogserver,
                       including the language-specific port to use (inside
                       config folder).
 
@@ -38,7 +38,7 @@ Text Processing / Parsing:
  -- `run-multiple-terminals.sh` the top-level shell script; it opens multiple terminal
                                 sessions with tmux/byobu where you can keep an eye on
                                 the processes. One terminal one of the `launch-??.scm`
-                                scripts to start the cogserver, and another one telnets 
+                                scripts to start the cogserver, and another one telnets
                                 into it using a language-specific port. You need to pass
                                 it the parsing mode (pair counting or mst), the language
                                 of the text to process and the database credentials as
@@ -49,7 +49,7 @@ Text Processing / Parsing:
  -- `text-process.sh` the top-level parser script; it performs batch processing of
                       input text files in the specified mode and language you pass as
                       arguments. It pulls text files, one by one, from the `beta-pages`
-                      or `gamma-pages` directory accordingly, and submits them to 
+                      or `gamma-pages` directory accordingly, and submits them to
                       `process-one.sh` for later parsing and/or counting. This script
                       should be manually launched in the 'parse' byobu window. Be
                       sure to open the database first.
