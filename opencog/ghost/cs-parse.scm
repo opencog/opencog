@@ -895,17 +895,17 @@
   (cs-lexer (open-file-input-port file-path))
 )
 
-(define-public (test-parse line)
+(define-public (cs-parse line)
 "
-  Parse a text string in a Guile shell, for debugging mainly.
+  Parse a text string in a Guile shell.
 "
   (define parser (cs-parser))
   (parser (cs-lexer (open-input-string line)) error)
 )
 
-(define-public (test-parse-file file)
+(define-public (cs-parse-file file)
 "
-  Parse a GHOST rule file in a Guile shell, for debugging mainly.
+  Parse a GHOST rule file in a Guile shell.
 "
   (define parser (cs-parser))
   (define fp (open-file-input-port file))

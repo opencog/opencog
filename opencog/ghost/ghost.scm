@@ -263,7 +263,7 @@
 
   Parse the TXT, convert them into atomese.
 "
-  (test-parse TXT)
+  (cs-parse TXT)
   (process-rule-stack)
 )
 
@@ -274,7 +274,7 @@
 
   Parse everything in the FILE, and convert them into atomese.
 "
-  (test-parse-file FILE)
+  (cs-parse-file FILE)
   (process-rule-stack)
 )
 
@@ -285,7 +285,7 @@
 
   Parse everything in the FILES, and convert them into atomese.
 "
-  (for-each (lambda (f) (test-parse-file f)) FILES)
+  (for-each (lambda (f) (cs-parse-file f)) FILES)
   (process-rule-stack)
 )
 
