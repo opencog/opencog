@@ -359,10 +359,11 @@
         ; if it's an unordered match
         (for-each
           (lambda (t)
-            (let ((wc (wildcard 0 -1)))
-              (set! vars (append vars (list-ref wc 0)))
+            (let ((wc1 (wildcard 0 -1))
+                  (wc2 (wildcard 0 -1)))
+              (set! vars (append vars (list-ref wc1 0) (list-ref wc2 0)))
               (set! conds (append conds (list (generate-eval ghost-word-seq
-                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
+                (list (car (list-ref wc1 2)) t (car (list-ref wc2 2)))))))))
           word-seq)
         ; Otherwise it's an ordered match
         (set! conds (append conds (list
