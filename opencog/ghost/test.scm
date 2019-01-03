@@ -15,17 +15,6 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
-(define ghost-with-ecan #f)
-
-(define-public (ecan-based-ghost-rules flag)
-"
-  For experimental purpose
-  To create GHOST rules that are slimmer.
-"
-  (set! ghost-with-ecan flag)
-)
-
-; ----------
 ; TODO: Remove once experimentation is over
 (define expt-var '())
 (define-public (test-ghost TXT)

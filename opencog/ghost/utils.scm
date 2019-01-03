@@ -143,65 +143,7 @@
       (List (map
         (lambda (w)
           (WordNode (string-downcase (cog-name w))))
-        final-word-seq))))
-
-  ; Generate this lemma-seq only for backward compatibility
-  (if (not ghost-with-ecan)
-    (let (; In some rare situation, particularly if the input
-          ; sentence is not grammatical, RelEx may not lemmatize a
-          ; word because of the ambiguity.
-          ; As a result the lemma sequence may contain non-lemmatized
-          ; words, which will become a problem during rule-matching.
-          ; As a quick workaround, do "ghost-get-lemma" for each of
-          ; the words in the lemma sequence
-          (lemma-seq (cog-outgoing-set
-            (apply ghost-get-lemma
-              ; For idioms, they will be joined by a "_",
-              ; e.g. "allows_for"
-              ; Split it so that DualLink can find the rule
-              (append-map
-                (lambda (w)
-                  (if (equal? #f (string-contains (cog-name w) "_"))
-                    (list w)
-                    (map Word (string-split (cog-name w) #\_))))
-                (get-seq 'LemmaLink)))))
-          (final-lemma-seq '()))
-      ; Get the contractions found above, if any, and put it in the lemma-seq
-      ; Use their original form in matching, instead of their lemmas
-      (do ((i 0 (1+ i)))
-          ((>= i (length lemma-seq)))
-        (set! final-lemma-seq (append final-lemma-seq (list
-          (cond
-            ; For the next-word-prefix-with-apos? case
-            ((assoc-ref word-apos-alist (cons i (1+ i)))
-             (set! i (1+ i))
-             (assoc-ref word-apos-alist (cons (1- i) i)))
-            ; For having apos in the same word
-            ((assoc-ref word-apos-alist (cons i i))
-             (assoc-ref word-apos-alist (cons i i)))
-            ; For nonbreaking-prefix like Mr. Mrs. etc
-            ((and (< (1+ i) (length lemma-seq))
-                  (string=? "." (cog-name (list-ref lemma-seq (1+ i))))
-                  (is-nonbreaking-prefix? (cog-name (list-ref lemma-seq i))))
-             (set! i (1+ i))
-             (WordNode (string-append (cog-name (list-ref lemma-seq (1- i))) ".")))
-            ; For time, regardless of the format e.g. "2am", "2 am", "2 a.m." or "2a.m.",
-            ; will all get splitted into two words, and this is a quick workaround for
-            ; the problem of RelEx lemmatizing "a.m." to "be"
-            ((and (< (1+ i) (length lemma-seq))
-                  (string->number (cog-name (list-ref lemma-seq i)))
-                  (string=? "be" (cog-name (list-ref lemma-seq (1+ i)))))
-             (set! i (1+ i))
-             (list (list-ref lemma-seq (1- i)) (list-ref final-word-seq i)))
-            ; Just a normal word
-            (else (list-ref lemma-seq i)))))))
-    (Evaluation
-      ghost-lemma-seq
-      (List SENT
-        (List (map
-          (lambda (w)
-            (WordNode (string-downcase (cog-name w))))
-          (flatten final-lemma-seq))))))))
+        final-word-seq)))))
 
 ; ----------
 (define (get-lemma-from-relex WORD)

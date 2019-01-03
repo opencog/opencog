@@ -95,12 +95,7 @@
         (clength (concept-length (Concept STR))))
     (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
                                            (Interval (Number 1)
-                                                     (Number clength))))
-                (if ghost-with-ecan
-                  (list)
-                  (TypedVariable g2 (TypeSet (Type "WordNode")
-                                             (Interval (Number 1)
-                                                       (Number clength))))))
+                                                     (Number clength)))))
           (list (Evaluation (GroundedPredicate "scm: ghost-concept?")
                             (List (Concept STR) g1)))
           (list g1)
@@ -129,12 +124,7 @@
         (tlength (term-length TERMS)))
     (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
                                            (Interval (Number 1)
-                                                     (Number tlength))))
-                (if ghost-with-ecan
-                  (list)
-                  (TypedVariable g2 (TypeSet (Type "WordNode")
-                                             (Interval (Number 1)
-                                                       (Number tlength))))))
+                                                     (Number tlength)))))
           (list (Evaluation (GroundedPredicate "scm: ghost-choices?")
                             (List (List (terms-to-atomese TERMS)) g1)))
           (list g1)
@@ -163,12 +153,7 @@
         (tlength (term-length TERMS)))
     (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
                                   (Interval (Number 0)
-                                            (Number tlength))))
-                (if ghost-with-ecan
-                  (list)
-                  (TypedVariable g2 (TypeSet (Type "WordNode")
-                                    (Interval (Number 0)
-                                              (Number tlength))))))
+                                            (Number tlength)))))
           (list (Evaluation (GroundedPredicate "scm: ghost-optionals?")
                             (List (List (terms-to-atomese TERMS)) g1)))
           (list g1)
@@ -226,12 +211,7 @@
     (list (list
       (TypedVariable g1
         (TypeSet (Type "WordNode")
-                 (Interval (Number LOWER) (Number UPPER))))
-      (if ghost-with-ecan
-        (list)
-        (TypedVariable g2
-          (TypeSet (Type "WordNode")
-                   (Interval (Number LOWER) (Number UPPER))))))
+                 (Interval (Number LOWER) (Number UPPER)))))
         '()
         (list g1)
         (list g2))))
