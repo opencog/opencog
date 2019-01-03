@@ -72,7 +72,6 @@
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
-(define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
 (define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
@@ -257,7 +256,7 @@
            (equal? (cog-type ghost-buffer) 'SentenceNode))
     (begin
       (set! ghost-processed ghost-buffer)
-      (generate-word-seqs ghost-buffer)
+      (generate-word-seq ghost-buffer)
       (append-to-sent-seq ghost-buffer)
       (State ghost-curr-proc ghost-buffer)))
 )

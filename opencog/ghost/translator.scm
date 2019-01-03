@@ -164,12 +164,10 @@
     (define v '())
     (define c '())
     (define ws '())
-    (define ls '())
     (define (update-lists t)
       (set! v (append v (list-ref t 0)))
       (set! c (append c (list-ref t 1)))
-      (set! ws (append ws (list-ref t 2)))
-      (set! ls (append ls (list-ref t 3))))
+      (set! ws (append ws (list-ref t 2))))
 
     (for-each (lambda (t)
       (cond ((equal? 'unordered-matching (car t))
@@ -236,8 +234,7 @@
                         (* (length (string-split (cdr ph) #\sp)) spec-word))
                        (else max-spec)))
                    spec-word
-                   (cdr t)
-                 )
+                   (cdr t))
                  (cdr t))))
              (set! has-words? #t))
             ((equal? 'optionals (car t))
@@ -332,7 +329,7 @@
                 "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
               (throw 'FeatureNotSupported (car t) (cdr t))))))
       terms)
-    (list v c ws ls))
+    (list v c ws))
 
   (define (generate-eval pred seq)
     (Evaluation pred (List (Variable "$S") (List (flatten-list seq)))))
@@ -342,7 +339,6 @@
   (define vars (list-ref terms 0))
   (define conds (list-ref terms 1))
   (define word-seq (list-ref terms 2))
-  (define lemma-seq (list-ref terms 3))
 
   ; If there is no word in the pattern, then don't put the seqs
   ; and the other sentence related stuffs in the context

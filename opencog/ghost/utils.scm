@@ -76,10 +76,9 @@
        TERMS))
 
 ; ----------
-(define (generate-word-seqs SENT)
+(define (generate-word-seq SENT)
 "
-  Get the words and their corresponding lemmas associate with SENT
-  and put them into two lists -- word-seq and lemma-seq.
+  Get the words and generate a word-seq for matching.
 "
   (define input-word-seq (car (sent-get-words-in-order SENT)))
 
