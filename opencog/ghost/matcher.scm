@@ -72,9 +72,7 @@
       (if (> context-weight 0)
         (* context-weight
           (assoc-ref context-alist (psi-get-context R))) 1))
-    (define sti (if SKIP-STI
-      ; Weight higher if the rule is in the current topic
-      (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+    (define sti (if SKIP-STI 1
       (if (> sti-weight 0)
         (* sti-weight (cog-av-sti R)) 1)))
     (define urge

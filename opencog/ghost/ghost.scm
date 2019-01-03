@@ -66,14 +66,11 @@
 ; Various anchors, predicates, values etc that will be used
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
-(define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
-(define ghost-topic (Concept (ghost-prefix "Topic")))
-(define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
@@ -93,9 +90,6 @@
 
 ;; --------------------
 ;; For rule parsing
-
-; When set, all the rules created will be under this topic
-(define rule-topic '())
 
 ; When set, all the rules created under it will be linked to this concept,
 ; until a new top level goal is defined
@@ -143,7 +137,6 @@
 
 ; To clear the above states
 (define (clear-parsing-states)
-  (set! rule-topic '())
   (set! rule-concept '())
   (set! initial-urges '())
   (set! default-urge 0)

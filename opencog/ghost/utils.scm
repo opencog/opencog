@@ -54,7 +54,7 @@
 (define (terms-to-atomese TERMS)
 "
   Helper function to convert a list of terms into atomese.
-  For use of choices, negation, and topic etc.
+  For use of choices, negation etc.
 "
   (map (lambda (t)
     (cond ((or (equal? 'word (car t)) (equal? 'word-apos (car t)))
@@ -272,36 +272,6 @@
   Return the rejoinder level, e.g. a = level 1, b = level 2, and so on...
 "
   (- (char->integer TYPE) 96))
-
-; ----------
-(define (get-rule-topic RULE)
-"
-  Get which topic(s) the RULE is in.
-"
-  (filter
-    (lambda (x)
-      (any (lambda (y) (equal? ghost-topic y))
-           (cog-chase-link 'InheritanceLink 'ConceptNode x)))
-    (cog-chase-link 'InheritanceLink 'ConceptNode RULE)))
-
-; ----------
-(define (is-rule-in-topic? RULE TOPIC)
-"
-  Check if RULE is a member of TOPIC.
-
-  It is not impossible that the exact same rule exists in
-  multiple topics, so get and check all of them.
-"
-  (any (lambda (t) (equal? TOPIC t)) (get-rule-topic RULE)))
-
-; ----------
-(define (topic-has-feature? TOPIC FEATURE)
-"
-  Check if TOPIC has a certain feature named FEATURE.
-"
-  (not (equal? #f
-    (find (lambda (f) (equal? (StringValue FEATURE) f))
-          (cog-value->list (cog-value TOPIC ghost-topic-feature))))))
 
 ; ----------
 (define (get-related-psi-rules ATOM)

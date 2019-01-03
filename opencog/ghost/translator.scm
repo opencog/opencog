@@ -376,7 +376,7 @@
 "
   ; The system functions that are commonly used
   (define reuse #f)
-  (define keep (topic-has-feature? rule-topic "keep"))
+  (define keep #f)
   (define unkeep #f)
 
   ; The GroundedSchemaNode that will be used
@@ -723,11 +723,6 @@
         (LinkValue CRULE)
         (apply LinkValue (append (cog-value->list val) (list CRULE))))))
 
-  ; First of all, make sure the topic is set
-  ; so that it can be used when we are processing the action
-  (if (null? rule-topic)
-    (set! rule-topic (create-topic "Default Topic")))
-
   ; Reset the list of local variables
   (set! pat-vars '())
 
@@ -919,36 +914,11 @@
   (set! top-lv-goals GOALS)
   (set! is-rule-seq? ORDERED)
 
-  ; Reset the rule-concept when a new topic is defined
+  ; Reset the rule-concept when a new goal is defined
   (set! rule-concept '())
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
-
-(define* (create-topic TOPIC-NAME #:optional (FEATURES (list)) (KEYWORDS (list)))
-"
-  Create a GHOST topic named TOPIC-NAME.
-
-  FEATURES are the topic level features that will be applied to every
-  single rules under this topic.
-
-  KEYWORDS are kind of like the concepts related to this topic.
-  Currently it doesn't have any effect on the action selection, so may
-  be removed in the future.
-"
-  ; A topic will be defined when loading a (topic) file
-  (set! rule-topic (Concept (ghost-prefix TOPIC-NAME)))
-  (Inheritance rule-topic ghost-topic)
-
-  ; The set of features associate with the topic
-  ; The features will be stored as "values"
-  (cog-set-value! rule-topic ghost-topic-feature
-    (apply LinkValue (map (lambda (f) (StringValue f)) FEATURES)))
-
-  ; The set of keywords associate with the topic
-  (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
-
-  rule-topic)
 
 (define (create-user-variable UVAR VAL)
 "

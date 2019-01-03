@@ -131,13 +131,6 @@
   (if (null? sent) '() (car sent)))
 
 ; ----------
-(define-public (ghost-get-curr-topic)
-"
-  Get the current topic.
-"
-  (gar (cog-execute! (Get (State ghost-curr-topic (Variable "$x"))))))
-
-; ----------
 (define-public (ghost-currently-processing)
 "
   Get the sentence that is currently being processed.

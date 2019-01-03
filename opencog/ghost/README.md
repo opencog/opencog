@@ -12,7 +12,7 @@ context AND procedure -> goal
 
 When a GHOST rule is being created, it will firstly be passed to the parser (`cs-parser.scm`) for syntax checking and preliminary interpretation. Any rules that is not syntactically correct or with unsupported features will be rejected at this stage.
 
-The parser will then pass the intermediate interpretations (aka terms) to the translator (`translator.scm`) by calling either `create-rule` / `create-concept` / `create-topic` for creating a psi-rule / concept / topic respectively. Those terms will be converted into OpenCog atoms (defined in `terms.scm`) and stored in the AtomSpace.
+The parser will then pass the intermediate interpretations (aka terms) to the translator (`translator.scm`) by calling either `create-rule` / `create-concept` for creating a psi-rule / concept respectively. Those terms will be converted into OpenCog atoms (defined in `terms.scm`) and stored in the AtomSpace.
 
 Action selector is implemented in `matcher.scm`, which is responsible for selecting a rule that is applicable to a given context in each psi-step. ECAN is used to help with rule discovery. When sensory input is received, certain atoms, which can be `WordNodes`, `PredicateNodes`, or some other types of atoms, will be stimulated, results in an increase in their importance value. For now, we focus on the short-term importance (STI) only. The [Importance Diffusion Agent](https://github.com/opencog/opencog/blob/master/opencog/attention/ImportanceDiffusionBase.h) will then diffuse the STI from the atoms being stimulated to their neighboring atoms and, depending on the situation, may bring some actual psi-rules that are potentially applicable to the context to the attentional focus. The action selector in GHOST will look at the attentional focus, pick and evaluate any psi-rules that are in there, and eventually return the most appropriate one that can be executed.
 
@@ -47,7 +47,7 @@ Here is a list of features that are fully supported in GHOST:
       - `^reuse(some_label)` will reuse the action of another rule with a label named "some_label". It's recommended to use a unique label for each of the rules in the rulebase, `topic.label` is not supported.
       - Once triggered, the rule being reused will also be considered as triggered, so it will not be triggered again unless you `^keep()` it.
       - Note, currently reusing a rule with local variables in the action of the rule is not supported, but user variables are fine.
-    - `keep`, to keep the rule in the system so that it can be selected and executed more than once, this can be used at topic level too.
+    - `keep`, to keep the rule in the system so that it can be selected and executed more than once.
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 There are different types of rules in ChatScript -- responders (`u:` `s:` `?:`) and gambits (`r:` `t:`). Currently they are handled without distinction, except for questions (`?:`) which will only be triggered if the input is a question.
@@ -184,15 +184,7 @@ agents-start opencog::AFImportanceDiffusionAgent opencog::WAImportanceDiffusionA
              (opencog ghost procedures))
 ```
 
-7) Before creating any rules, run
-
-```
-(ecan-based-ghost-rules #t)
-```
-
-Note, rules being created after running this will be slimmer (preferred) and can only work with this ECAN approach. They are NOT backward-compatible with the `test-ghost`.
-
-8) Start authoring by creating rules in a text file, e.g.
+7) Start authoring by creating rules in a text file, e.g.
 
 ```
 #goal: (novelty=0.24)
@@ -206,13 +198,13 @@ Then use `ghost-parse-files` to parse rule file(s).
 (ghost-parse-files "path/to/the/rule/file1" "path/to/the/rule/file2")
 ```
 
-9) Start GHOST
+8) Start GHOST
 
 ```
 (ghost-run)
 ```
 
-10) Send some input, e.g.
+9) Send some input, e.g.
 
 ```
 (ghost "I eat apples")
