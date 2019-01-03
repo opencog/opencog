@@ -11,7 +11,7 @@
               (cog-value RULE ghost-time-last-executed))))
          refractory-period)))
 
-(define* (eval-and-select RULES #:optional (SKIP-STI #f))
+(define (eval-and-select RULES)
 "
   This is the goal-driven action selection.
 
@@ -28,12 +28,6 @@
   Sc = Satisfiability of the context of the psi-rule
   Icag = Importance (STI) of the rule
   Ug = Urge of the goal
-
-  SKIP-STI is for backward compatibility, used to decide whether to
-  include STI of a rule (Icag) in action selection or not. It's needed
-  as the default STI is zero. So if one runs GHOST without running
-  ECAN (as the earlier version of GHOST permits) then no action will
-  ever be triggered.
 "
   ; ----------
   ; Store the evaluation results for the contexts, so that the same context
@@ -72,9 +66,9 @@
       (if (> context-weight 0)
         (* context-weight
           (assoc-ref context-alist (psi-get-context R))) 1))
-    (define sti (if SKIP-STI 1
+    (define sti
       (if (> sti-weight 0)
-        (* sti-weight (cog-av-sti R)) 1)))
+        (* sti-weight (cog-av-sti R)) 1))
     (define urge
       (if (> urge-weight 0)
         (* urge-weight (psi-urge (psi-get-goal R))) 1))
@@ -91,10 +85,9 @@
   ; Check if a rule should be skipped or not, based on
   ; its current STI, strength, and the last executed time
   (define (accept-rule? r)
-    (or SKIP-STI
-        (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
-             (or (= strength-weight 0) (> (cog-stv-strength r) 0))
-             (not-within-refractory? r))))
+    (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
+         (or (= strength-weight 0) (> (cog-stv-strength r) 0))
+         (not-within-refractory? r)))
 
   ; ----------
   (for-each
