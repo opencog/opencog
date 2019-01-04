@@ -84,8 +84,8 @@
 \begin_body
 
 \begin_layout Title
-Gradient Descent vs.
- Graphical Models
+Neural-Net vs.
+ Symbolic Machine Learning
 \end_layout
 
 \begin_layout Author
@@ -157,6 +157,12 @@ Although vector spaces are linear, semantics isn't; not really.
  with each word) can be stitched together into a unified whole, using concepts
  from sheaf theory.
  This completes the exposition here.
+\end_layout
+
+\begin_layout Abstract
+DRAFT: This is NOT the final form of this text; it is an unfinished WORKING
+ DRAFT.
+ The last 1/4th of this text needs a do-over.
 \end_layout
 
 \begin_layout Section
