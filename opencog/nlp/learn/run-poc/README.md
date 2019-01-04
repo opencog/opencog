@@ -28,7 +28,7 @@ and L. Vepstas (2014) on [ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372).
 A shorter sketch is given below. Most of this README concerns the
 practical details of configuring and operating the system, and some
 diary-like notes about system configuration and operation. A diary of
-scientific notes and results is in the [`nlp/learn/learn-lang-diary`](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary) directory.
+scientific notes and results is in the [`nlp/learn/learn-lang-diary`](../learn-lang-diary) directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 
@@ -55,7 +55,7 @@ Steps A-C are "well-known" in the academic literature, with results
 reported by many researchers over the last two decades. The results
 from Steps D & E are new, and have never been published before.
 (Results from Step D can be found in the `drafts/connector-sets.lyx` file,
-inside the [`nlp/learn/learn-lang-diary`](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary) directory, the PDF of which was posted to the mailing lists)
+inside the [`nlp/learn/learn-lang-diary`](../learn-lang-diary) directory, the PDF of which was posted to the mailing lists)
 
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
@@ -155,8 +155,7 @@ Now, let's set up the **text-ingestion pipeline:**
    which creates a `byobu` session with different processes in different
    terminals so you can keep an eye on them. However, the first
    time through, it is better to do it by hand. So, for now in a terminal
-   create your own working directory and copy all the files from the `run`
-   directory into it. Now start the REPL server by writting:
+   start the REPL server by writting:
    ```
      guile -l launch-cogserver  -- --mode pairs --lang en --db learn_pairs --user opencog_user --password cheese
    ```
@@ -232,17 +231,30 @@ battles, etc. that get mistaken for sentences, and leads to unusual
 deductions of grammar.  Thus, Wikipedia is not a good choice for
 learning text.
 
-There are various scripts in the [nlp/learn/download](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/download)
+There are various scripts in the [nlp/learn/download](../download)
 directory for downloading and pre-processing texts from Project Gutenberg, Wikipedia, and the "Archive of Our Own"
 fan-fiction website. Once you are sure you have the right material to start, follow the next steps:
 
 
-1) Put all the training plain text files of the same language in one
-   directory inside your working directory. The scripts used in this
-   section use by default the name `beta-pages` for such a directory,
-   so if you want to use a different name make sure you change the
-   respective path inside the `text-process.sh` script. Also, keep in
-   mind that the files will be removed from the folder after being
+1) Setup the working directory by running the following commands from the
+   root of your opencog clone, if you haven't already.
+   ```
+   /opencog$ mkdir build
+   /opencog$ cd build
+   /opencog/build$ rm -rf *
+   /opencog/build$ cmake ..
+   /opencog/build$ make run-ull
+   ```
+
+   Review the file [README-run.md](./README-run.md) if you want to have a
+   general understanding of what each of these scripts/files do.
+
+2) Put all the training plain text files of the same language in a separate
+   directory inside your working directory, at `/opencog/build/run-ull/`.
+   The scripts used in this section use by default the name `beta-pages`
+   for such a directory,  so if you want to use a different name make sure
+   you change the respective path inside the `text-process.sh` script. Also,
+   keep in mind that the files will be removed from the folder after being
    processed, so make sure you keep a back-up of them somewhere else
    (you don't want to mess up the original files after all the work
    done to get them).
@@ -254,21 +266,13 @@ fan-fiction website. Once you are sure you have the right material to start, fol
       cp -pr alpha-pages beta-pages
    ```
 
-2) Set up distinct databases, one for each language you will work with:
+3) Set up distinct databases, one for each language you will work with:
    ```
       createdb fr_pairs lt_pairs pl_pairs en_pairs
       cat $ATOMSPACE_SOURCE_DIR/opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
    ```
 
-3) Copy all files from the `opencog/opencog/nlp/learn/run-ull`
-   directory into your working directory (if you don't have them
-   already).
-
-   Review the file [opencog/nlp/learn/run-ull/README-run.md](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/run-ull)
-   if you want to have a general understanding of what each of these scripts/files do.
-
 4) If you are familiar with the counting and parsing methods used in the
-
    pipeline, open `config/params.txt` and choose the counting mode you want to use.
    Otherwise, just leave the default values.
    There are currently three observing modes, set by cnt_mode and taking
@@ -283,7 +287,7 @@ fan-fiction website. Once you are sure you have the right material to start, fol
     - clique-dist: same word-pairs as 'clique', but the count in each word
            pair is incremented by 'cnt_reach / distance'
 
-5) In your working directory run the following:
+5) In your working directory at `/opencog/build/run-ull` run the following:
    ```
       ./run-multiple-terminals.sh pairs lang ??_pairs your_user your_password
    ```
@@ -381,10 +385,16 @@ mutual entropy between them. Follow the next steps to do so. Note that
 if the parsing is interrupted, you can restart the various scripts; they
 will automatically pick up where they left off.
 
-1) Copy all files from the [opencog/opencog/nlp/learn/run-ull](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
-   directory into your working directory (if you don't have them already).
-
-2) In your working directory run the following:
+1) Setup the working directory by running the following commands from the
+   root of your opencog clone, if you haven't already.
+   ```
+   /opencog$ mkdir build
+   /opencog$ cd build
+   /opencog/build$ rm -rf *
+   /opencog/build$ cmake ..
+   /opencog/build$ make run-ull
+   ```
+2) In your working directory at `/opencog/build/run-ull` run the following:
    ```
       ./run-multiple-terminals.sh cmi lang ??_pairs your_user your_password
    ```
@@ -417,7 +427,7 @@ will automatically pick up where they left off.
    It uses the `(opencog matrix)` subsystem to perform the core work.
 
 
-General remakrs:
+General remarks:
 
 * The system might not be robust enough at this stage yet, so if you
   find an error while executing this code, run each command from the
@@ -481,11 +491,18 @@ MI have been accomplished.
 The minimum spanning tree code is in `scm/mst-parser.scm`. The current
 version works well. To run it follow the next steps:
 
-1) Copy all files from the [opencog/opencog/nlp/learn/run-ull](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
-   directory into your working directory (if you don't have them already):
+1) Setup the working directory by running the following commands from the
+   root of your opencog clone, if you haven't already.
+   ```
+   /opencog$ mkdir build
+   /opencog$ cd build
+   /opencog/build$ rm -rf *
+   /opencog/build$ cmake ..
+   /opencog/build$ make run-ull
+   ```
 
-   Review the file [opencog/nlp/learn/run-ull/README-run.md](https://github.com/opencog/opencog/tree/master/opencog/nlp/ull-parser/run)
-   if you want to have a general understanding of what each of these scripts/files do.
+   Review the file [README-run.md](./README-run.md) if you want to have a
+   general understanding of what each of these scripts/files do.
 
 2) Copy again all your text files, now to the `gamma-pages` directory
    (or edit `text-process.sh` and change the corresponding directory
@@ -509,7 +526,7 @@ version works well. To run it follow the next steps:
    The parameter cnt_reach does not
    have an effect at this stage, you can leave it as is.
 
-5) In your working directory run the following:
+5) In your working directory at `/opencog/build/run-ull` run the following:
    ```
       ./run-multiple-terminals.sh mst lang dbname your_user your_password
    ```
@@ -562,7 +579,7 @@ Exploring Connector-Sets
 -------------------------
 Once you have a database with some fair number of connector sets in it,
 you can start exploring. For ideas checkout the original version of this
-README in [opencog/nlp/learn](https://github.com/opencog/opencog/tree/master/opencog/nlp/learn).
+README in [opencog/nlp/learn](../README.md).
 
 I add here some links to other usefull resources for understanding:
 * Structure of the atomstpace: [atoms](https://wiki.opencog.org/w/Atom) and its [types](https://wiki.opencog.org/w/Atom_types)
@@ -624,11 +641,15 @@ Before you follow the next steps make sure you have cloned the repositories from
    ~/docker/opencog$ docker-compose run dev
    ```
 
-7) Create a working directory inside your container and copy all the files from the `run` folder
+7) Setup the working directory by running the following commands from the
+   root of your opencog clone, if you haven't already.
    ```
-   ~$ cp -pr /opencog/opencog/nlp/learn/run-ull $HOME/my_working_dir
+   /opencog$ mkdir build
+   /opencog$ cd build
+   /opencog/build$ rm -rf *
+   /opencog/build$ cmake ..
+   /opencog/build$ make run-ull
    ```
-
 8) Test that everything is working:
 
    a) Create and format a database (password is cheese):
@@ -639,9 +660,9 @@ Before you follow the next steps make sure you have cloned the repositories from
    Use tmux to create parallel sessions of the container. If you are not familiar with
    it you can use this cheatsheet in [here](https://gist.github.com/MohamedAlaa/2961058).
 
-   b) In a separate session start the REPL server. Make sure you are inside
-      your working directory (`my_working_dir`):
+   b) In a separate session start the REPL server.
    ```
+    $ cd /opencog/build/run-ull/
     $ guile -l launch-cogserver.scm  -- --mode pairs --lang en --db learn_pairs --user opencog_user --password cheese
    ```
 
