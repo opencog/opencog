@@ -21,7 +21,7 @@
 (define language (get-lang))
 
 ; set the prompt for the given language
-(repl-default-option-set! 'prompt (string-append "scheme@(" 
+(repl-default-option-set! 'prompt (string-append "scheme@("
     language "-mst)> "))
 
 ; Start the cogserver with configs for the given language
