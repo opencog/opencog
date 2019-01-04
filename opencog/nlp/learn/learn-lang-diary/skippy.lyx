@@ -909,7 +909,7 @@ Kevin threw the ball
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename parse.ps
+	filename skimage/parse.ps
 	lyxscale 160
 	width 30col%
 
