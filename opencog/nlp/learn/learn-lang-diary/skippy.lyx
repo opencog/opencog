@@ -165,6 +165,44 @@ DRAFT: This is NOT the final form of this text; it is an unfinished WORKING
  The last 1/4th of this text needs a do-over.
 \end_layout
 
+\begin_layout Address
+ACM Subject Classification: 
+\begin_inset Newline newline
+\end_inset
+
+Theory of computation—Theory and algorithms for application domains—Machine
+ learning theory—Unsupervised learning and clustering;500,
+\begin_inset Newline newline
+\end_inset
+
+Computing methodologies—Machine learning—Machine learning approaches—Neural
+ networks;500,
+\begin_inset Newline newline
+\end_inset
+
+Computing methodologies—Machine learning—Machine learning approaches—Logical
+ and relational learning—Statistical relational learning;500,
+\begin_inset Newline newline
+\end_inset
+
+Computing methodologies—Machine learning—Machine learning approaches—Learning
+ in probabilistic graphical models—Maximum entropy modeling;500,
+\begin_inset Newline newline
+\end_inset
+
+Computing methodologies—Machine learning—Machine learning approaches—Learning
+ latent representations;500,
+\begin_inset Newline newline
+\end_inset
+
+Computing methodologies—Artificial intelligence—Natural language processing;500,
+\begin_inset Newline newline
+\end_inset
+
+Computing methodologies—Machine learning—Learning paradigms—Unsupervised
+ learning—Dimensionality reduction and manifold learning;300
+\end_layout
+
 \begin_layout Section
 Introduction
 \end_layout
