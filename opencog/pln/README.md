@@ -40,18 +40,17 @@ experimentations. In particular
    backward chainer. That is because backward chaining requires that
    the conclusion pattern be statically defined, which makes some
    rules more difficult or less efficient to implement.
-2. Confidence calculation is usually very crude, that is because by
-   its nature it requires either some forms of numerical integration
-   to handle with second order probabilities, which is costly and thus
-   has been neglected so far.
-3. Strength calculation are rather approximate too (though better than
-   confidence) because ultimately the result depends not only on the
-   strengths of the premises but also their confidences.
+2. Confidence calculation is usually very crude, that is because it
+   requires some forms of numerical integration to handle second order
+   probabilities, which is costly and thus has been neglected so far.
+3. Strength calculations are rather approximate too (though better
+   than confidence) because ultimately their results depends not only
+   on premises strengths but also their confidences.
 
 ## Usage
 
-PLN is a scheme module containing various helpers to load PLN rules
-and rule PLN inferences.
+PLN has a scheme module containing various helpers to load rules and
+run PLN inferences.
 
 ### Configure
 
@@ -61,34 +60,34 @@ First, the module must be loaded
 (use-modules (opencog pln))
 ```
 
-Then the PLN rule-base must be loaded
+Then a PLN rule-base must be loaded
 
 ```scheme
 (pln-load)
 ```
 
-At the moment only one rule-base is included, in the future that same
+At the moment only one rule-base is provided, in the future that same
 command will likely accept optional arguments to load subsets or
 supersets of PLN.
 
 The rules are loaded in an auxilary atomspace in order not to pollute
 the current atomspace. That auxilary atomspace can be accessed via the
-`pln-atomspace` variable. However the `pln` modules offers helpers to
-display its content without having to switch to it
+`pln-atomspace` variable. In addition the `pln` modules offers helpers
+to display its content without having to switch to it
 
 ```scheme
 (pln-prt-atomspace)
 ```
 
-or to list its rule names and weights
+To simply list its rule names and weights
 
 ```scheme
 (pln-list-rules)
 ```
 
-By default all rules have as weight the default TV, corresponding to a
-flat second order distribution as of today. One may change the weights
-as follows
+By default all rules have a default TV as weight, corresponding to a
+flat second order distribution (as of today). One may change the
+weights as follows
 
 ```scheme
 (pln-set-rule-tv! rule-name tv)
@@ -104,13 +103,13 @@ sets the weight of the deduction implication rule to `(stv 0.7 0.2)`.
 
 ### Call Chainers
 
-To call the forward chainer on a given target
+To call the forward chainer on a given target, simply type
 
 ```scheme
 (pln-fc target)
 ```
 
-Likewise to call the backward chainer on a given source
+Likewise to call the backward chainer on a given source, type
 
 ```scheme
 (pln-bc source)
