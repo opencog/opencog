@@ -67,7 +67,6 @@
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
-(define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
