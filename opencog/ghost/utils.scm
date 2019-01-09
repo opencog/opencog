@@ -267,6 +267,21 @@
 )
 
 ; ----------
+(define (flatten-linkval LV)
+"
+  Given a LinkValue LV, flatten any nested LinkValues,
+  with an assumption that the values are all atoms.
+
+  A Scheme list will be returned as a result.
+"
+  (append-map
+    (lambda (x)
+      (if (cog-atom? x)
+        (list x)
+        (flatten-linkval x)))
+    (cog-value->list LV)))
+
+; ----------
 (define (get-rejoinder-level TYPE)
 "
   Return the rejoinder level, e.g. a = level 1, b = level 2, and so on...
