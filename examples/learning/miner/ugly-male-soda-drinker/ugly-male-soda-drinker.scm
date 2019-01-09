@@ -1,5 +1,6 @@
 ;; Load the miner module
-(use-modules (opencog miner))
+(use-modules (opencog)
+             (opencog miner))
 
 ;; ;; For debugging
 ;; (use-modules (opencog logger))
@@ -13,7 +14,7 @@
 ;; 100 iterations of forward chaining, a 0.1 strength and confidence
 ;; of expanding conjunctions up at most 3 conjuncts.
 ;;
-;; Expect to learn, amonst others, the following pattern
+;; Expect to learn, among others, the following pattern
 ;;
 ;; (Lambda
 ;;   (Variable "$X")

@@ -30,4 +30,11 @@ Run `simple.scm` in the guile interpreter
 guile -l simple.scm
 ```
 
-or paste scheme commends one by one in guile.
+or paste scheme commands one by one in guile.
+
+The results should have been stored in the `results` variable, which
+can be shown as follows:
+
+```scheme
+results
+```
