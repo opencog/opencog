@@ -114,6 +114,9 @@
 ; during rule parsing & creation
 (define pat-vars '())
 
+; A list of features for a rule, will be used during instantiation
+(define rule-features '())
+
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
@@ -143,6 +146,7 @@
   (set! is-rule-seq? #f)
   (set! goal-rule-cnt 0)
   (set! pat-vars '())
+  (set! rule-features '())
   (set! rule-label-list '())
   (set! rule-type-alist '())
   (set! rule-alist '())

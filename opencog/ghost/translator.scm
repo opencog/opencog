@@ -451,6 +451,11 @@
                            IS-PARALLEL-RULE?))))
                    (begin
                      (set! reuse #t)
+                     ; Get all the rule features and append them to the
+                     ; current rule-features list
+                     (set! rule-features (append rule-features
+                       (map (lambda (k) (cons k (cog-value reused-rule k)))
+                         (cog-keys reused-rule))))
                      (psi-get-action reused-rule)))))
               ; Other functions
               ((equal? 'function (car n))
@@ -484,80 +489,63 @@
   ; the additional ones that are in the same TrueLink
   ; TODO: Handle variables as well
   (define (get-reused-action atomese)
-    (define action-atomese
-      (append-map
-        (lambda (x)
-          (cond ; "x" could just be a list if ^keep() is used
-                ; in the same rule, skip it if that's the case
-                ((and keep (list? x) (null? x)) (list))
-                ((equal? 'TrueLink (cog-type x))
-                 (get-reused-action (cog-outgoing-set x)))
-                ((and (equal? 'ExecutionOutputLink (cog-type x))
-                      (equal? gsn-action (gar x)))
-                 (get-reused-action (cog-outgoing-set (gdr x))))
-                (else (list x))))
-        atomese))
-      ; Filter out duplicate PutLinks in the action -- the ones that
-      ; are updating the same state, e.g. if there are (Put (State A) B)
-      ; and (Put (State A) C) in a list, then only (Put (State A) C)
-      ; is kept as it's the last one in the list
-      ; Filtering may be needed when "reuse" is called more than once,
-      ; either in a single rule, or other rule in the chain
-      ; The fold-right and reverse are there to perserve the execution order
-      (reverse
-        (fold-right
-          (lambda (atom rtn)
-            (if (and (equal? 'PutLink (cog-type atom))
-                     (equal? 'StateLink (cog-type (gar atom)))
-                     (find (lambda (x) (equal? (gar atom) (gar x))) rtn))
-              rtn
-              (append rtn (list atom))))
-          (list)
-          action-atomese)))
+    (append-map
+      (lambda (x)
+        (cond
+           ; "x" could just be a list if ^keep() is used
+           ; in the same rule, skip it if that's the case
+           ((and keep (list? x) (null? x)) (list))
+           ((equal? 'TrueLink (cog-type x))
+            (get-reused-action (cog-outgoing-set x)))
+           ((and (equal? 'ExecutionOutputLink (cog-type x))
+                 (equal? gsn-action (gar x)))
+            (get-reused-action (cog-outgoing-set (gdr x))))
+           (else (list x))))
+      atomese))
 
   (define action-atomese (to-atomese (cdar ACTION)))
 
+  ; Handle the rule features below
+  ; The default behavior is to not executed the same action
+  ; more than once -- update the TV strength to zero so that
+  ; the action selector won't select it again
+  ; Except if the rule is supposed to be kept or it's
+  ; a rejoinder (rejoinders are kept by default, because it
+  ; won't be triggered anyway if the parent is not triggered
+  ; and if the parent is triggered, one would expect the
+  ; rejoinders can be triggered too for the next input),
+  ; or it's a parallel-rule that's supposed to be evaluated
+  ; all the time in the background
+  (if (or (not (or keep
+               (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder)))
+          (and IS-PARALLEL-RULE? unkeep))
+    (set! rule-features
+      (append rule-features (list
+        (cons (Predicate "unkeep") (Concept RULENAME))))))
+  ; Keep a record of which rule is the last executed one, just for rejoinders
+  ; And when a "reuse" is used, it becomes slightly more complicated
+  ; The expected behavior is that, when (the action of) a rule is reused,
+  ; the rule will be considered as fired, so mark the last executed rule
+  ; as the reused one instead of the one that calls the reuse function,
+  ; so that the rejoinders (if any) of the reused rule can be triggered
+  ; correctly
+  (if (not reuse)
+    (set! rule-features
+      (append rule-features (list
+        (cons (Predicate "last-executed") (Concept RULENAME))))))
+  ; Keep a record of which rule has been executed, applicable to
+  ; all of the rules
+  (set! rule-features
+    (append rule-features (list
+      (cons (Predicate "mark-executed") (Concept RULENAME)))))
+
   (True
-    (list
-      (ExecutionOutput
-        gsn-action
-        (List
-          (if reuse
-            (get-reused-action action-atomese)
-            action-atomese)))
-      ; Keep a record of which rule is the last executed one, just for rejoinders
-      ; And when a "reuse" is used, it becomes slightly more complicated
-      ; The expected behavior is that, when (the action of) a rule is reused,
-      ; the rule will be considered as fired, so mark the last executed rule
-      ; as the reused one instead of the one that calls the reuse function,
-      ; so that the rejoinders (if any) of the reused rule can be triggered
-      ; correctly
-      (if reuse
-        (list)
-        (Put (State ghost-last-executed (Variable "$x"))
-             concept-rule-name))
-      ; The default behavior is to not executed the same action
-      ; more than once -- update the TV strength to zero so that
-      ; the action selector won't select it again
-      ; Except if the rule is supposed to be kept or it's
-      ; a rejoinder (rejoinders are kept by default, because it
-      ; won't be triggered anyway if the parent is not triggered
-      ; and if the parent is triggered, one would expect the
-      ; rejoinders can be triggered too for the next input),
-      ; or it's a parallel-rule that's supposed to be evaluated
-      ; all the time in the background
-      (if (or keep
-              (equal? (assoc-ref rule-type-alist RULENAME) strval-rejoinder)
-              (and IS-PARALLEL-RULE? (not unkeep)))
-          (list)
-          (ExecutionOutput
-            (GroundedSchema "scm: ghost-update-rule-strength")
-            ; Note: This is generated by psi-rule-set-alias!
-            (List concept-rule-name (Number 0))))
-      ; Keep a record of which rule has been executed
-      (ExecutionOutput
-        (GroundedSchema "scm: ghost-record-executed-rule")
-        (List concept-rule-name)))))
+    (ExecutionOutput
+      gsn-action
+      (List
+        (if reuse
+          (get-reused-action action-atomese)
+          action-atomese)))))
 
 ; ----------
 (define (process-goal GOAL)
@@ -725,8 +713,9 @@
         (LinkValue CRULE)
         (apply LinkValue (append (cog-value->list val) (list CRULE))))))
 
-  ; Reset the list of local variables
+  ; Reset the list of local variables and rule features
   (set! pat-vars '())
+  (set! rule-features '())
 
   ; Reset the rule hierarchy if we are looking at a rule with
   ; a different set of goals, or it has been changed from
@@ -802,6 +791,35 @@
               (stv (cdr goal) .9)
               (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
             ghost-component))
+
+        ; Associate the features with the rule
+        (for-each
+          (lambda (f)
+            (define key-str (cog-name (car f)))
+            (define val (cog-value a-rule (car f)))
+            (cond
+              ((or (string=? "unkeep" key-str)
+                   (string=? "mark-executed" key-str))
+               (cond
+                 ; If 'val' is null, that means no such value has been
+                 ; assigned to this rule yet
+                 ((null? val)
+                  (cog-set-value! a-rule (car f) (LinkValue (cdr f))))
+                 ; If 'val' is not null and it's an atom, just append it
+                 ; it to 'val'
+                 ((cog-atom? (cdr f))
+                  (cog-set-value! a-rule (car f)
+                    (apply LinkValue (append (flatten-linkval val)
+                      (list (cdr f))))))
+                 ; If 'val' is not null and it's not an atom, it's a
+                 ; LinkValue, based on the way it's being used here in
+                 ; GHOST, so turn it into a list and append it to 'val'
+                 (else (cog-set-value! a-rule (car f)
+                   (apply LinkValue (append (flatten-linkval val)
+                     (flatten-linkval (cdr f))))))))
+              ((string=? "last-executed" key-str)
+               (cog-set-value! a-rule (car f) (cdr f)))))
+          rule-features)
 
         ; If the rule can possibly be satisfied by input sentence
         ; tag it as such.
