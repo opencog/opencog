@@ -25,5 +25,4 @@
 
 ;; Call the miner on the text set of interest instead, should yield
 ;; the same results.
-; FIXME: The following fails
-;(cog-mine (list AB AC) 2)
+(cog-mine (list AB AC) #:minsup 2)

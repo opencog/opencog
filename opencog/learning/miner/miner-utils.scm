@@ -305,8 +305,9 @@
                    (incremental-expansion (stv 0 1))
                    (max-conjuncts 3))
 "
-  Mine patterns in texts with minimum support ms, optionally
-  using maxiter iterations and starting from the initial pattern initpat.
+  Mine patterns in texts (text trees, a.k.a. grounded hypergraphs) with minimum
+  support ms, optionally using maxiter iterations and starting from the initial
+  pattern initpat.
 
   Usage: (cog-mine texts
                    #:minsup ms
