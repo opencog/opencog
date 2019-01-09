@@ -1,5 +1,6 @@
 ;; Load the miner module
-(use-modules (opencog miner))
+(use-modules (opencog)
+             (opencog miner))
 
 ;; (use-modules (opencog logger))
 ;; (cog-logger-set-level! (cog-ure-logger) "debug")
@@ -26,7 +27,7 @@
 ;; Call the pattern miner with a minimum support of 2, starting with
 ;; an initial pattern with 2 conjuncts.
 ;;
-;; Expect to learn, amonst others, the following pattern
+;; Expect to learn, among others, the following pattern
 ;;
 ;; (Lambda
 ;;   (VariableList
@@ -45,20 +46,15 @@
 ;;
 ;; (Lambda
 ;;   (VariableList
-;;     (Variable "$X")
-;;     (Variable "$Y")
-;;     (Variable "$Z")
-;;     (Variable "$W"))
+;;     (Variable "$X-0")
+;;     (Variable "$X-1"))
 ;;   (And
 ;;     (Inheritance
-;;       (Variable "$X")
-;;       (Variable "$Y"))
-;;     (Inheritance
-;;       (Variable "$Z")
-;;       (Variable "$W"))))
+;;       (Variable "$X-0")
+;;       (Variable "$X-1"))))
 ;;
 ;; TODO: the following bugs for no reason
 ;; (cog-mine (cog-atomspace) 2 #:initpat (conjunct-pattern 2))
-(cog-mine (list AB BC DE EF)
-          #:minsup 2
-          #:initpat (conjunct-pattern 2))
+(define results (cog-mine (list AB BC DE EF)
+                          #:minsup 2
+                          #:initpat (conjunct-pattern 2)))

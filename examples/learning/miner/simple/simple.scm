@@ -1,5 +1,6 @@
 ;; Load the miner module
-(use-modules (opencog miner))
+(use-modules (opencog)
+             (opencog miner))
 
 ;; Setup the KB
 (define AB
@@ -13,15 +14,16 @@
 
 ;; Call the miner on the entire atomspace with minimum support of 2
 ;;
-;; Expect to learn, amonst others, the following pattern
+;; Expect to learn, among others, the following pattern
 ;;
 ;; (Lambda
 ;;   (Variable "$X")
 ;;   (Inheritance
 ;;     (Concept "A")
 ;;     (Variable "$X")))
-(cog-mine (cog-atomspace) #:minsup 2)
+(define results (cog-mine (cog-atomspace) #:minsup 2))
 
 ;; Call the miner on the text set of interest instead, should yield
 ;; the same results.
-(cog-mine (list AB AC) 2)
+; FIXME: The following fails
+;(cog-mine (list AB AC) 2)
