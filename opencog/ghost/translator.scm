@@ -381,6 +381,7 @@
   (define reuse #f)
   (define keep #f)
   (define unkeep #f)
+  (define set_used #f)
 
   ; The GroundedSchemaNode that will be used
   (define gsn-action
@@ -434,7 +435,7 @@
               ((and (equal? 'function (car n))
                     (equal? "reuse" (cadr n)))
                (let* ((label (cdaddr n))
-                      (reused-rule (car (get-rules-from-label label))))
+                      (reused-rule (get-rules-from-label label)))
                  (if (null? reused-rule)
                    (let ((reused-rule-from-alist (assoc-ref rule-alist label)))
                      (if (null? reused-rule-from-alist)
@@ -454,9 +455,40 @@
                      ; Get all the rule features and append them to the
                      ; current rule-features list
                      (set! rule-features (append rule-features
-                       (map (lambda (k) (cons k (cog-value reused-rule k)))
-                         (cog-keys reused-rule))))
-                     (psi-get-action reused-rule)))))
+                       (map (lambda (k) (cons k (cog-value (car reused-rule) k)))
+                         (cog-keys (car reused-rule)))))
+                     (psi-get-action (car reused-rule))))))
+              ; A system function -- set_used
+              ((and (equal? 'function (car n))
+                    (equal? "set_used" (cadr n)))
+               (let* ((label (cdaddr n))
+                      (used-rule (get-rules-from-label label)))
+                 (if (null? used-rule)
+                   (let ((used-rule-from-alist (assoc-ref rule-alist label)))
+                     (if (null? used-rule-from-alist)
+                       (cog-logger-error ghost-logger
+                         "Please make sure the rule with label \"~a\" is defined!" label)
+                       (begin
+                         (cog-logger-debug ghost-logger
+                           "Found the rule \"~a\" in the rule-alist" label)
+                         (set! set_used #t)
+                         ; Calling process-action just to get all the rule-features
+                         ; of the rule that will set used
+                         (process-action
+                           ; The 2nd item in the list is the action
+                           (list-ref used-rule-from-alist 1)
+                           label
+                           IS-PARALLEL-RULE?))))
+                   (begin
+                     (set! set_used #t)
+                     ; Get all the rule features and append them to the
+                     ; current rule-features list
+                     (set! rule-features (append rule-features
+                       (map (lambda (k) (cons k (cog-value (car used-rule) k)))
+                         (cog-keys (car used-rule))))))))
+               ; We don't actually need to generate anything for 'set_used'
+               ; apart from getting the rule-features which is done above
+               (list))
               ; Other functions
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
@@ -505,7 +537,8 @@
 
   (define action-atomese (to-atomese (cdar ACTION)))
 
-  ; Handle the rule features below
+  ; Get the rule features
+  ; -----
   ; The default behavior is to not executed the same action
   ; more than once -- update the TV strength to zero so that
   ; the action selector won't select it again
@@ -528,8 +561,8 @@
   ; the rule will be considered as fired, so mark the last executed rule
   ; as the reused one instead of the one that calls the reuse function,
   ; so that the rejoinders (if any) of the reused rule can be triggered
-  ; correctly
-  (if (not reuse)
+  ; correctly. Same applies to 'set_used'.
+  (if (not (or reuse set_used))
     (set! rule-features
       (append rule-features (list
         (cons (Predicate "last-executed") (Concept RULENAME))))))
