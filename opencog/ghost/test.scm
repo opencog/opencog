@@ -44,6 +44,7 @@
     (lambda (rule)
       (if (equal? (psi-satisfiable? rule) (stv 1 1))
         (begin
+          (handle-rule-features rule)
           (psi-imply rule)
           (set! expt-var rule))))
     (psi-get-rules ghost-component))
