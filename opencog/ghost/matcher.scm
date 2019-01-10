@@ -255,6 +255,38 @@
       (let ((next-responder (cog-value rule-selected ghost-next-responder))
             (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
             (av-alist (cog-av->alist (cog-av rule-selected))))
+        ; Handle the rule features
+        (for-each
+          (lambda (k)
+            (define key-str (cog-name k))
+            (define val (cog-value rule-selected k))
+            (cond
+              ((string=? "unkeep" key-str)
+               ; 'val' here should be a LinkValue of rule labels
+               (for-each
+                 (lambda (r)
+                   (cog-set-tv! r (cog-new-stv 0 (cog-stv-confidence r))))
+                 (filter psi-rule?
+                   (append-map (lambda (lb)
+                     (cog-chase-link 'ListLink 'ImplicationLink lb))
+                       (cog-value->list val)))))
+              ((string=? "mark-executed" key-str)
+               ; 'val' here should be a LinkValue of rule labels
+               (for-each
+                 (lambda (lb)
+                   (Evaluation ghost-rule-executed (List lb))
+                   (for-each
+                     (lambda (r)
+                       (cog-set-value! r
+                         ghost-time-last-executed
+                           (FloatValue (current-time))))
+                     (filter psi-rule?
+                       (cog-chase-link 'ListLink 'ImplicationLink lb))))
+                  (cog-value->list val)))
+              ((string=? "last-executed" key-str)
+               (State ghost-last-executed val))))
+          (cog-keys rule-selected))
+
         ; Stimulate the next rules in the sequence and lower the STI of
         ; the current one
         ; Rejoinders will have a bigger boost than responders by default
