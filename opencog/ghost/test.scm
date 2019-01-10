@@ -171,21 +171,21 @@
 "
   Return the rule with the given label.
 "
-  (get-rule-from-label LABEL))
+  (get-rules-from-label LABEL))
 
 ; ----------
 (define-public (ghost-rule-av LABEL)
 "
   Given the label of a rule in string, return the AV of the rule with that label.
 "
-  (cog-av (get-rule-from-label LABEL)))
+  (map cog-av (get-rules-from-label LABEL)))
 
 ; ----------
 (define-public (ghost-rule-tv LABEL)
 "
   Given the label of a rule in string, return the TV of the rule with that label.
 "
-  (cog-tv (get-rule-from-label LABEL)))
+  (map cog-tv (get-rules-from-label LABEL)))
 
 ; ----------
 (define-public (ghost-show-rule-status LABEL)
@@ -193,7 +193,7 @@
   Given the label of a rule in string, return both the STI and TV of the rule
   with that label.
 "
-  (define rule (get-rule-from-label LABEL))
+  (define rule (car (get-rules-from-label LABEL)))
   (define next-responder (cog-value rule ghost-next-responder))
   (define next-rejoinder (cog-value rule ghost-next-rejoinder))
   (if (not (null? rule))

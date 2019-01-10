@@ -296,20 +296,20 @@
   (filter psi-rule? (cog-get-trunk ATOM)))
 
 ; ----------
-(define (get-rule-from-label LABEL)
+(define (get-rules-from-label LABEL)
 "
-  Given the label of a rule in string, return the rule with that label.
+  Given the label of a rule in string, return the psi-rule(s) with that label.
 "
-  (define rule (filter psi-rule?
+  (define rules (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
       (Concept LABEL))))
 
-  (if (null? rule)
+  (if (null? rules)
       (begin
         (cog-logger-debug ghost-logger
-          "Failed to find the GHOST rule \"~a\"" LABEL)
+          "Failed to find any GHOST rule with label \"~a\"" LABEL)
         (list))
-      (car rule)))
+      rules))
 
 ; ----------
 (define (is-nonbreaking-prefix? WORD)

@@ -434,7 +434,7 @@
               ((and (equal? 'function (car n))
                     (equal? "reuse" (cadr n)))
                (let* ((label (cdaddr n))
-                      (reused-rule (get-rule-from-label label)))
+                      (reused-rule (car (get-rules-from-label label))))
                  (if (null? reused-rule)
                    (let ((reused-rule-from-alist (assoc-ref rule-alist label)))
                      (if (null? reused-rule-from-alist)
@@ -603,8 +603,8 @@
          (throw (ghost-prefix
            "Please define a responder first before defining a rejoinder.")))
         ((equal? "Parallel-Rules"
-           (cog-name (psi-get-goal (get-rule-from-label
-             (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1)))))))
+           (cog-name (psi-get-goal (car (get-rules-from-label
+             (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1))))))))
          (clear-parsing-states)
          (throw (ghost-prefix "Rejoinder is not supported for parallel rules.")))
         ; For rejoinders, put the condition (the last rule executed is
@@ -845,9 +845,9 @@
           ; defined beforehand so rule-hierarchy is not empty
           (begin
             (set-next-rule
-              (get-rule-from-label
+              (car (get-rules-from-label
                 (last (list-ref rule-hierarchy
-                  (1- (get-rejoinder-level TYPE)))))
+                  (1- (get-rejoinder-level TYPE))))))
               a-rule ghost-next-rejoinder)
             (add-to-rule-hierarchy
               (get-rejoinder-level TYPE) NAME)
@@ -867,7 +867,7 @@
                   (for-each
                     (lambda (r)
                       (set-next-rule
-                        (get-rule-from-label r)
+                        (car (get-rules-from-label r))
                           a-rule ghost-next-responder))
                     lv))
                 rule-hierarchy))
