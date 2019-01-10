@@ -44,7 +44,7 @@
 
 (define-public pln-atomspace (cog-new-atomspace))
 
-(define-public (pln-rb)
+(define-public (pln-mk-rb)
 "
   Create
 
@@ -52,6 +52,19 @@
 "
   (cog-new-node 'ConceptNode "pln-rb")
 )
+
+(define-public (pln-rb)
+"
+  Get
+
+  (Concept \"pln-rb\")
+
+  from pln-atomspace
+"
+  (define current-as (cog-set-atomspace! pln-atomspace))
+  (define pln-atomspace-rb (pln-mk-rb))
+  (cog-set-atomspace! current-as)
+  pln-atomspace-rb)
 
 (define-public (pln-load)
 "
@@ -75,41 +88,42 @@
   (pln-load-meta-rules "predicate/conditional-partial-instantiation")
 
   ;; Attach rules to PLN rule-base
-  (ure-add-rules
-   (pln-rb)
+  (ure-add-rules-by-names
+   (pln-mk-rb)
    (list
     ;; Deduction
-    (DefinedSchemaNode "deduction-implication-rule")
-    (DefinedSchemaNode "deduction-subset-rule")
-    (DefinedSchemaNode "deduction-inheritance-rule")
+    "deduction-implication-rule"
+    "deduction-subset-rule"
+    "deduction-inheritance-rule"
 
     ;; Modus Ponens
-    (DefinedSchemaNode "modus-ponens-inheritance-rule")
-    (DefinedSchemaNode "modus-ponens-implication-rule")
-    (DefinedSchemaNode "modus-ponens-subset-rule")
+    "modus-ponens-inheritance-rule"
+    "modus-ponens-implication-rule"
+    "modus-ponens-subset-rule"
 
     ;; Contraposition
-    (DefinedSchemaNode "crisp-contraposition-implication-scope-rule")
-    (DefinedSchemaNode "contraposition-implication-rule")
-    (DefinedSchemaNode "contraposition-inheritance-rule")
+    "crisp-contraposition-implication-scope-rule"
+    "contraposition-implication-rule"
+    "contraposition-inheritance-rule"
 
     ;; Fuzzy Conjunction Introduction
-    (DefinedSchema "fuzzy-conjunction-introduction-1ary-rule")
-    (DefinedSchema "fuzzy-conjunction-introduction-2ary-rule")
-    (DefinedSchema "fuzzy-conjunction-introduction-3ary-rule")
-    (DefinedSchema "fuzzy-conjunction-introduction-4ary-rule")
-    (DefinedSchema "fuzzy-conjunction-introduction-5ary-rule")
+    "fuzzy-conjunction-introduction-1ary-rule"
+    "fuzzy-conjunction-introduction-2ary-rule"
+    "fuzzy-conjunction-introduction-3ary-rule"
+    "fuzzy-conjunction-introduction-4ary-rule"
+    "fuzzy-conjunction-introduction-5ary-rule"
 
     ;; Fuzzy Disjunction Introduction
-    (DefinedSchema "fuzzy-disjunction-introduction-1ary-rule")
-    (DefinedSchema "fuzzy-disjunction-introduction-2ary-rule")
-    (DefinedSchema "fuzzy-disjunction-introduction-3ary-rule")
-    (DefinedSchema "fuzzy-disjunction-introduction-4ary-rule")
-    (DefinedSchema "fuzzy-disjunction-introduction-5ary-rule")
+    "fuzzy-disjunction-introduction-1ary-rule"
+    "fuzzy-disjunction-introduction-2ary-rule"
+    "fuzzy-disjunction-introduction-3ary-rule"
+    "fuzzy-disjunction-introduction-4ary-rule"
+    "fuzzy-disjunction-introduction-5ary-rule"
 
     ;; Conditional Full Instantiation
-    (DefinedSchemaNode "conditional-full-instantiation-implication-meta-rule")
-    (DefinedSchemaNode "conditional-full-instantiation-inheritance-meta-rule")))
+    "conditional-full-instantiation-implication-scope-meta-rule"
+    "conditional-full-instantiation-implication-meta-rule"
+    "conditional-full-instantiation-inheritance-meta-rule"))
 
   ;; Switch back to previous space
   (cog-set-atomspace! current-as)
@@ -128,19 +142,11 @@
   ;; Avoid confusing the user with a return value
   *unspecified*)
 
-(define-public (pln-rules)
+(define-public (pln-weighted-rules)
 "
-  List rule names, i.e. DefinedSchemaNodes, with their weights,
-  associated to the PLN rule base.
+  List all weighted rules in the PLN rule base.
 "
-  (define current-as (cog-set-atomspace! pln-atomspace))
-  (let* ((get-rule-weight (lambda (x) (cons x (cog-tv (MemberLink x (pln-rb))))))
-         (rules-weights (cog-map-chase-link 'MemberLink
-                                            'DefinedSchemaNode
-                                            get-rule-weight
-                                            (pln-rb))))
-    (cog-set-atomspace! current-as)
-    rules-weights))
+  (ure-weighted-rules (pln-rb)))
 
 (define-public (pln-set-rule-tv! rule-name tv)
 "
@@ -153,7 +159,14 @@
     (ConceptNode \"pln-rb\")
 "
   (define current-as (cog-set-atomspace! pln-atomspace))
-  (cog-set-tv! (MemberLink rule-name (pln-rb)) tv)
+  (cog-set-tv! (MemberLink rule-name (pln-mk-rb)) tv)
+  (cog-set-atomspace! current-as)
+
+  *unspecified*)
+
+(define-public (pln-rm-rules-by-names rule-names)
+  (define current-as (cog-set-atomspace! pln-atomspace))
+  (ure-rm-rules-by-names (pln-mk-rb) rule-names)
   (cog-set-atomspace! current-as)
 
   *unspecified*)
