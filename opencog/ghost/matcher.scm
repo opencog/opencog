@@ -243,7 +243,7 @@
         rejoinder))))
 
 ; ----------
-(define-public (ghost-get-rules)
+(define-public (ghost-find-rules)
 "
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
@@ -313,4 +313,4 @@
 ; The action selector for OpenPsi
 (psi-set-action-selector!
   ghost-component
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules") (List)))
+  (ExecutionOutput (GroundedSchema "scm: ghost-find-rules") (List)))
