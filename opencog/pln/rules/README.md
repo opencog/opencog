@@ -16,7 +16,8 @@ those. The folders are organized as follows
   instantiation and generalization.
 - `term` contains rules dealing with deduction, abduction,
   induction and inversion.
-- `wip` contains work-in-progress rules, incomplete or broken.
+- `wip` contains work-in-progress rules, incomplete or broken. Often
+  only compatible with the forward chainer.
 
 ## PLN Examples
 
@@ -25,33 +26,3 @@ Multiple examples can be found under
 ```
 <OPENCOG_REPO>/examples/pln
 ```
-
-## Relex2Logic Example
-
-The r2l subdirectory has the initial specification of the
-R2L-RuleBase for the English language.
-
-   ```
-   opencog/nlp/relex2logic/rules
-   ```
-
-To test the rules, use the following steps.
-
-- Start the relex server, using for instance docker
-
-   ```
-   <DOCKER_REPO>/opencog/relex/run-opencog-relex.sh
-   ```
-
-- Either start the cogserver and enter the scm shell, or start guile directly
-
-- Load the nlp module
-
-    ```
-    (use-modules (opencog nlp))
-    ```
-
-- In the opencog scheme shell run (relex-parse "some sentence"),
-  preferably sentences on which the rules are applicable.
-
-- Run (cog-execute! rule-which-should-be-a-BindLink)
