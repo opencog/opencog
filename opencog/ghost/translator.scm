@@ -825,7 +825,7 @@
               (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
             ghost-component))
 
-        ; Associate the features with the rule
+        ; Assign the features to the rule
         (for-each
           (lambda (f)
             (define key-str (cog-name (car f)))
