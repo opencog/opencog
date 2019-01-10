@@ -129,4 +129,6 @@ and
 
 ### Examples
 
-TODO
+PLN examples can be found under the `examples/pln` directory. In
+particular for an example using the PLN module see
+`examples/pln/good-songs`.
