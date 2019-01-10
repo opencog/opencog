@@ -22,10 +22,8 @@
          (for-each
            (lambda (r)
              (cog-set-tv! r (cog-new-stv 0 (cog-stv-confidence r))))
-           (filter psi-rule?
-             (append-map (lambda (lb)
-               (cog-chase-link 'ListLink 'ImplicationLink lb))
-                 (cog-value->list val)))))
+           (append-map (lambda (x) (get-rules-from-label (cog-name x)))
+             (cog-value->list val))))
         ((string=? "mark-executed" key-str)
          ; 'val' here should be a LinkValue of rule labels
          (for-each
@@ -36,8 +34,7 @@
                  (cog-set-value! r
                    ghost-time-last-executed
                      (FloatValue (current-time))))
-               (filter psi-rule?
-                 (cog-chase-link 'ListLink 'ImplicationLink lb))))
+               (get-rules-from-label (cog-name lb))))
             (cog-value->list val)))
         ((string=? "last-executed" key-str)
          (State ghost-last-executed val))))

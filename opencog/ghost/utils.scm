@@ -300,9 +300,13 @@
 "
   Given the label of a rule in string, return the psi-rule(s) with that label.
 "
-  (define rules (filter psi-rule?
-    (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept LABEL))))
+  (define rules
+    (map gar (filter
+      (lambda (x)
+        (and (psi-rule? (gar x))
+             (any (lambda (p) (string=? "alias" (cog-name p)))
+               (cog-chase-link 'EvaluationLink 'PredicateNode x))))
+      (cog-incoming-by-type (Concept LABEL) 'ListLink))))
 
   (if (null? rules)
       (begin
