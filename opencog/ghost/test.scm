@@ -44,6 +44,7 @@
     (lambda (rule)
       (if (equal? (psi-satisfiable? rule) (stv 1 1))
         (begin
+          (process-ghost-rule rule)
           (psi-imply rule)
           (set! expt-var rule))))
     (psi-get-rules ghost-component))
@@ -170,21 +171,21 @@
 "
   Return the rule with the given label.
 "
-  (get-rule-from-label LABEL))
+  (get-rules-from-label LABEL))
 
 ; ----------
 (define-public (ghost-rule-av LABEL)
 "
   Given the label of a rule in string, return the AV of the rule with that label.
 "
-  (cog-av (get-rule-from-label LABEL)))
+  (map cog-av (get-rules-from-label LABEL)))
 
 ; ----------
 (define-public (ghost-rule-tv LABEL)
 "
   Given the label of a rule in string, return the TV of the rule with that label.
 "
-  (cog-tv (get-rule-from-label LABEL)))
+  (map cog-tv (get-rules-from-label LABEL)))
 
 ; ----------
 (define-public (ghost-show-rule-status LABEL)
@@ -192,9 +193,7 @@
   Given the label of a rule in string, return both the STI and TV of the rule
   with that label.
 "
-  (define rule (get-rule-from-label LABEL))
-  (define next-responder (cog-value rule ghost-next-responder))
-  (define next-rejoinder (cog-value rule ghost-next-rejoinder))
+  (define rule (get-rules-from-label LABEL))
   (if (not (null? rule))
     (format #t (string-append
       "AV = ~a\n"
@@ -203,21 +202,23 @@
       "Time last executed: ~a\n"
       "Next responder: ~a\n"
       "Next rejoinder: ~a\n")
-      (cog-av rule)
-      (cog-tv rule)
+      (map cog-av rule)
+      (map cog-tv rule)
       (every
         (lambda (x) (> (cdr (assoc 'mean (cog-tv->alist (cog-evaluate! x)))) 0))
-        (psi-get-context rule))
-      (if (null? (cog-value rule ghost-time-last-executed))
+        (psi-get-context (car rule)))
+      (if (null? (cog-value (car rule) ghost-time-last-executed))
         "N.A."
         (strftime "%D %T" (localtime (inexact->exact
-          (car (cog-value->list (cog-value rule ghost-time-last-executed)))))))
-      (if (null? next-responder)
+          (car (cog-value->list (cog-value (car rule) ghost-time-last-executed)))))))
+      (if (null? (cog-value (car rule) ghost-next-responder))
         (list)
-        (append-map psi-rule-alias (cog-value->list next-responder)))
-      (if (null? next-rejoinder)
+        (append-map psi-rule-alias
+          (cog-value->list (cog-value (car rule) ghost-next-responder))))
+      (if (null? (cog-value (car rule) ghost-next-rejoinder))
         (list)
-        (append-map psi-rule-alias (cog-value->list next-rejoinder))))))
+        (append-map psi-rule-alias
+          (cog-value->list (cog-value (car rule) ghost-next-rejoinder)))))))
 
 ; ----------
 (define-public (ghost-show-status)
