@@ -132,7 +132,7 @@
 
 (define* (configure-miner pm-rbs
                           #:key
-                          (maxiter 1000)
+                          (maximum-iterations 1000)
                           (complexity-penalty 1)
                           (incremental-expansion (stv 0 1))
                           (max-conjuncts 3))
@@ -142,7 +142,7 @@
   rules and parameters.
 
   Usage: (configure-miner pm-rbs
-                          #:maxiter mi
+                          #:maximum-iterations mi
                           #:complexity-penalty cp
                           #:incremental-expansion tv
                           #:max-conjuncts mc)
@@ -178,7 +178,7 @@
                    #:max-conjuncts max-conjuncts)
 
   ;; Set parameters
-  (ure-set-maximum-iterations pm-rbs maxiter)
+  (ure-set-maximum-iterations pm-rbs maximum-iterations)
   (ure-set-complexity-penalty pm-rbs complexity-penalty)
 
   ;; If there is no incremental expansion then each rule is
@@ -300,19 +300,19 @@
                    #:key
                    (minsup 10)
                    (initpat (top))
-                   (maxiter 1000)
+                   (maximum-iterations 1000)
                    (complexity-penalty 1)
                    (incremental-expansion (stv 0 1))
                    (max-conjuncts 3))
 "
   Mine patterns in texts (text trees, a.k.a. grounded hypergraphs) with minimum
-  support ms, optionally using maxiter iterations and starting from the initial
+  support ms, optionally using mi iterations and starting from the initial
   pattern initpat.
 
   Usage: (cog-mine texts
                    #:minsup ms
                    #:initpat ip
-                   #:maxiter mi
+                   #:maximum-iterations mi
                    #:complexity-penalty cp
                    #:incremental-expansion tv
                    #:max-conjuncts mc)
@@ -423,7 +423,7 @@
         (let* ((source (minsup-eval-true initpat texts-cpt minsup))
                (miner-rbs (random-miner-rbs-cpt)))
           (configure-miner miner-rbs
-                           #:maxiter maxiter
+                           #:maximum-iterations maximum-iterations
                            #:complexity-penalty complexity-penalty
                            #:incremental-expansion incremental-expansion
                            #:max-conjuncts max-conjuncts)

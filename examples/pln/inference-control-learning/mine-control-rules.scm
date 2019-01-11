@@ -45,7 +45,7 @@
          (ipat (initpat inference-rule negative))
          (patterns (cog-mine texts-cpt
                              minsup
-                             #:maxiter miter
+                             #:maximum-iterations miter
                              #:initpat ipat))
          (patterns-lst (cog-outgoing-set patterns))
          (ctrl-rules (map pattern->ctrl-rule patterns-lst)))

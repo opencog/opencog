@@ -262,7 +262,7 @@ HandleSeq MinerUTest::gen_variables(const std::string& prefix, int n)
 }
 
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
-                          int maxiter, Handle initpat,
+                          int maximum_iterations, Handle initpat,
                           TruthValuePtr incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
@@ -270,12 +270,12 @@ Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
 	HandleSet texts;
 	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                             opencog::ATOM, true);
-	return ure_pm(texts, minsup, maxiter, initpat,
+	return ure_pm(texts, minsup, maximum_iterations, initpat,
 	              incremental_expansion, max_conjuncts, complexity_penalty);
 }
 
 Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
-                          int maxiter, Handle initpat,
+                          int maximum_iterations, Handle initpat,
                           TruthValuePtr incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
@@ -307,7 +307,7 @@ Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
 
 	// Run the forward chainer from the initial pattern
 	ForwardChainer fc(_as, pm_rb, source);
-	fc.get_config().set_maximum_iterations(maxiter);
+	fc.get_config().set_maximum_iterations(maximum_iterations);
 	fc.get_config().set_retry_exhausted_sources(inc_exp_enabled);
 	fc.get_config().set_complexity_penalty(complexity_penalty);
 	fc.do_chain();
