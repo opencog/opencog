@@ -209,6 +209,7 @@ public:
 	void test_SodaDrinker();
 	void test_SodaDrinker_incremental();
 	void xtest_lojban();         // TODO: add support
+	void test_vqa();
 };
 
 Handle MinerUTest::mk_minsup_eval(int minsup,
@@ -1419,7 +1420,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 		_tmp_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	// Define initial pattern (to speed up mining)
+	// Start from top, conjunctions will be grown incrementally
 	Handle initpat = top;
 
 	// The pattern of interest looks like
@@ -1511,6 +1512,45 @@ void MinerUTest::xtest_lojban()
 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
 	TS_ASSERT(content_is_in(expected_pattern, results));
+}
+
+void MinerUTest::test_vqa()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define texts
+	//
+	// Unit test built from Visual Question Answer data set from
+	// https://github.com/singnet/semantic-vision/tree/master/experiments/opencog/pattern_miner_4_vqa
+	std::string rs =
+		_tmp_scm.eval("(load-from-path \"QA_knowledge_base_v2_no_duplicates.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Start from top, conjunctions will be grown incrementally
+	Handle initpat = top;
+
+	// The pattern of interest looks like
+	//
+	// TBD
+	Handle expected = top;
+
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	// Run URE pattern miner
+	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	int max_conjuncts = 3;
+	double complexity_penalty = 1;
+	Handle ure_results = ure_pm(_tmp_as, 5, 200,
+	                            initpat,
+	                            incremental_expansion,
+	                            max_conjuncts,
+	                            complexity_penalty),
+		ure_expected = mk_minsup_eval(5, expected);
+
+	logger().debug() << "ure_results = " << oc_to_string(ure_results);
+	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
+
+	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
 }
 
 #undef al
