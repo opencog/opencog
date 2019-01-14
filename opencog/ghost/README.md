@@ -48,6 +48,8 @@ Here is a list of features that are fully supported in GHOST:
       - Once triggered, the rule being reused will also be considered as triggered, so it will not be triggered again unless you `^keep()` it.
       - Note, currently reusing a rule with local variables in the action of the rule is not supported, but user variables are fine.
     - `keep`, to keep the rule in the system so that it can be selected and executed more than once.
+    - `unkeep`, parallel-rules are kept by default (see below for details), call this to unkeep it.
+    - `set_used`, to set another rule as triggered, so that it will not be triggered again.
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 There are different types of rules in ChatScript -- responders (`u:` `s:` `?:`) and gambits (`r:` `t:`). Currently they are handled without distinction, except for questions (`?:`) which will only be triggered if the input is a question.

@@ -11,6 +11,75 @@
               (cog-value RULE ghost-time-last-executed))))
          refractory-period)))
 
+(define (stimulate-next-rules RULE)
+"
+  Stimulate the next rule in the sequence and the rejoinders as well,
+  if applicable, and de-stimulate the selected rule.
+"
+  ; Keep a record of which rule got executed, just for rejoinders
+  (let ((next-responder (cog-value RULE ghost-next-responder))
+        (next-rejoinder (cog-value RULE ghost-next-rejoinder))
+        (av-alist (cog-av->alist (cog-av RULE))))
+    ; Stimulate the next rules in the sequence and lower the STI of
+    ; the current one
+    ; Rejoinders will have a bigger boost than responders by default
+    (if (not (null? next-responder))
+      (for-each
+        (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
+        (cog-value->list next-responder)))
+    (if (not (null? next-rejoinder))
+      (for-each
+        (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
+        (cog-value->list next-rejoinder)))
+    ; Lower the STI of the selected one
+    (cog-set-av!
+      RULE
+      (cog-new-av 0
+        (cdr (assoc 'lti av-alist)) (cdr (assoc 'vlti av-alist)))))
+)
+
+(define (handle-rule-features RULE)
+"
+  Handle each of the GHOST rule-features for the selected rule.
+"
+  (for-each
+    (lambda (k)
+      (define key-str (cog-name k))
+      (define val (cog-value RULE k))
+      (cond
+        ((string=? "unkeep" key-str)
+         ; 'val' here should be a LinkValue of rule labels
+         (for-each
+           (lambda (r)
+             (cog-set-tv! r (cog-new-stv 0 (cog-stv-confidence r))))
+           (append-map (lambda (x) (get-rules-from-label (cog-name x)))
+             (cog-value->list val))))
+        ((string=? "mark-executed" key-str)
+         ; 'val' here should be a LinkValue of rule labels
+         (for-each
+           (lambda (lb)
+             (Evaluation ghost-rule-executed (List lb))
+             (for-each
+               (lambda (r)
+                 (cog-set-value! r
+                   ghost-time-last-executed
+                     (FloatValue (current-time))))
+               (get-rules-from-label (cog-name lb))))
+            (cog-value->list val)))
+        ((string=? "last-executed" key-str)
+         (State ghost-last-executed val))))
+    (cog-keys RULE))
+)
+
+(define (process-ghost-rule RULE)
+"
+  A wrapper for doing GHOST specific things that are needed for
+  the selected rule.
+"
+  (handle-rule-features RULE)
+  (stimulate-next-rules RULE)
+)
+
 (define (eval-and-select RULES)
 "
   This is the goal-driven action selection.
@@ -211,7 +280,7 @@
         rejoinder))))
 
 ; ----------
-(define-public (ghost-get-rules)
+(define-public (ghost-find-rules)
 "
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
@@ -250,27 +319,8 @@
     (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
     (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
-    ; Keep a record of which rule got executed, just for rejoinders
-    (if (not (null? rule-selected))
-      (let ((next-responder (cog-value rule-selected ghost-next-responder))
-            (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
-            (av-alist (cog-av->alist (cog-av rule-selected))))
-        ; Stimulate the next rules in the sequence and lower the STI of
-        ; the current one
-        ; Rejoinders will have a bigger boost than responders by default
-        (if (not (null? next-responder))
-          (for-each
-            (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
-            (cog-value->list next-responder)))
-        (if (not (null? next-rejoinder))
-          (for-each
-            (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
-            (cog-value->list next-rejoinder)))
-        ; Lower the STI of the selected one
-        (cog-set-av!
-          rule-selected
-          (cog-new-av 0
-            (cdr (assoc 'lti av-alist)) (cdr (assoc 'vlti av-alist))))))
+    ; Do some GHOST specific processing if a satisfiable GHOST rule is found
+    (if (not (null? rule-selected)) (process-ghost-rule rule-selected))
 
     (List rule-selected)))
 
@@ -278,4 +328,4 @@
 ; The action selector for OpenPsi
 (psi-set-action-selector!
   ghost-component
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules") (List)))
+  (ExecutionOutput (GroundedSchema "scm: ghost-find-rules") (List)))

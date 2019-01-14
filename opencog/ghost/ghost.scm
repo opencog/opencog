@@ -67,7 +67,6 @@
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
-(define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
@@ -115,6 +114,9 @@
 ; during rule parsing & creation
 (define pat-vars '())
 
+; A list of features for a rule, will be used during instantiation
+(define rule-features '())
+
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
@@ -144,6 +146,7 @@
   (set! is-rule-seq? #f)
   (set! goal-rule-cnt 0)
   (set! pat-vars '())
+  (set! rule-features '())
   (set! rule-label-list '())
   (set! rule-type-alist '())
   (set! rule-alist '())

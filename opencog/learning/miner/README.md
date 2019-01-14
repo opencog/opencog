@@ -5,9 +5,10 @@ New pattern miner implementation which should eventually replace
 Shujing Ke pattern miner (see [learning/README.md](../README.md)).
 
 It is more open-ended than the old pattern miner, that is, at least in
-imprinciple, can reach any pattern expressible as virtual clause free
-pattern interpretable by the pattern matcher. Due to that, it can also
-be slower than the previous pattern miner but is easy to configure to
+in principle, can reach any pattern expressible as conjunction of
+clauses (with some minor limitations, no support for virtual clause or
+typed variables) by the pattern matcher. Due to that, it can also be
+slower than the previous pattern miner but is easy to configure to
 overcome that.
 
 If you just want to use the pattern miner, jump straight ahead to the
@@ -24,15 +25,17 @@ additional twist that patterns are Atomese programs.
 
 Let us recall the important terms
 
-* Text tree: a tree that is part of the data set to be mined.
-* Pattern tree: a tree representing a pattern, that is capturing a
-  collection of text trees.
-* Frequency (of a pattern): number of text trees and subtrees matching
-  a given pattern.
-* Support (of a pattern): similar to frequency.
-* Minimum support: parameter of the mining algorithm to discard
+* *Text tree*: a tree (or hypergraph) that is part of the data set to
+  be mined. Can be imply called *tree*. Generally speaking any atom of
+  an atomspace.
+* *Pattern tree*: a tree representing a pattern, that is capturing a
+  collection of text trees. Can be simply called *pattern*.
+* *Frequency*: number of text trees and subtrees matching a given
+  pattern.
+* *Support*: similar to frequency.
+* *Minimum support*: parameter of the mining algorithm to discard
   patterns with frequency below that value.
-* A priori property: assumption that allows to systematically prune
+* *A priori property*: assumption that allows to systematically prune
   the search space. In its least abstract form, it expresses the fact
   that if a pattern tree has a certain frequency `f` then a
   specialization of it can only have a frequency that is equal to or
@@ -51,11 +54,14 @@ minimum support), then recursively specialize those, and so on.
 
 Here pattern trees are Atomese programs. So for instance the most
 abstract pattern, called Top, is the following program
+
 ```scheme
 (Lambda (Variable "$X") (Variable "$X"))
 ```
-that is the identity. When passed to the pattern matcher, it results
-in a program that matches all atoms in the AtomSpace.
+
+that is the identity. When passed to the pattern matcher it becomes a
+pattern (see https:://wiki.opencog.org/w/GetLink#Overview), resulting
+here in a program that matches all atoms in the AtomSpace.
 
 As another example, a pattern matching only `Inheritance` links would
 look like
@@ -145,6 +151,25 @@ then the satisfying set of `P` over `T` is
 ```
 
 and its valuation set `V` is
+
+```
+{(Variable "$X")->(Concept "A"), (Variable "$Y")->(Concept "B")}
+{(Variable "$X")->(Concept "A"), (Variable "$Y")->(Concept "C")}
+{(Variable "$X")->(Concept "D"), (Variable "$Y")->(Concept "D")}
+```
+
+#### Step 3: Determine Shallow Abstractions
+
+A shallow abstraction of a valuation set `V` over a variable `X` is
+any pattern that match the values associated to `X`. Possible patterns
+are
+
+1. Constant node, such as `(Concept "A")`
+2. Variable node positioned in the definition of `P` after `X`, such
+   as `(Variable "$Y")`. The reason it must be positioned after `X` is
+   to avoid redundancy.
+3. Lambda links, such as
+
 ```scheme
 (Lambda
   (VariableLink
@@ -163,8 +188,10 @@ For example for the valuation set `V` defined above over variable
 3. `(Variable "$Y")`
 
 The last one comes the fact that in the last valuation of `V`, the
-value associaed to `(Variable "$Y")` is equal to the value associated
-to `(Variable "$X")` as well, `(Concept "D")`.
+value associated to `(Variable "$Y")` is equal to the value associated
+to `(Variable "$X")` as well, `(Concept "D")`, allowing to capture a
+connection between `(Variable "$Y")` and `(Variable "$X")` as
+potentional pattern specialization.
 
 Likewise the shallow abstractions of `(Variable "$Y")` would be
 
@@ -197,14 +224,15 @@ because it corresponds to a pattern matching its value.
 Given all shallow abstractions associated to a certain pattern `P`
 over all its variables, we can compose `P` with each of them to
 produce specializations. For instance reusing `P`, `T` and `V` as
-defined in the section detailing [Step
-2](#step-2:-extract-valuation-set), let's recall that the shallow
+defined in the section detailing
+[Step 2](#step-2:-extract-valuation-set), let's recall that the shallow
 abstractions over variable `(Variable "$X")` are `(Concept "A")`,
 `(Concept "D")` and `(Variable "$Y")`. Likewise the shallow
 abstractions over variable `(Variable "$Y")` are `(Concept "B")`,
 `(Concept "C")` and `(Concept "D")`.
 
 To carry out the composition `Put` is used as follows
+
 ```scheme
 (Put
   P
@@ -222,8 +250,11 @@ To carry out the composition `Put` is used as follows
     (Variable "$Y")
     (Variable "$Y")))
 ```
-to replace `(Variable "$X")` by `(Concept "A")`, `(Concept "D")` and
+
+to substitute (or beta-reducebeta-reduce, as defined in the Lambda
+Calculus) `(Variable "$X")` by `(Concept "A")`, `(Concept "D")` and
 `(Variable "$Y")` in `P`, producing
+
 ```scheme
 (Lambda
   (Variable "$Y")
@@ -241,8 +272,11 @@ to replace `(Variable "$X")` by `(Concept "A")`, `(Concept "D")` and
     (Variable "$Y")
     (Variable "$Y")))
 ```
+
+while keeping the variable `$Y` untouched.
 
 Then
+
 ```scheme
 (Put
   P
@@ -261,8 +295,10 @@ Then
     (Concept "D")))
 ```
 
-to replace `(Variable "$Y")` by `(Concept "B")`, `(Concept "C")` and
-`(Concept "D")` in `P`, producing
+to substitute (or beta-reduce, as defined in the Lambda Calculus)
+`(Variable "$Y")` by `(Concept "B")`, `(Concept "C")` and `(Concept
+"D")` in `P`, producing
+
 ```scheme
 (Lambda
   (Variable "$X")
@@ -280,6 +316,10 @@ to replace `(Variable "$Y")` by `(Concept "B")`, `(Concept "C")` and
     (Variable "$X")
     (Concept "D")))
 ```
+
+while keeping the variable `$X` untouched.
+
+See https://wiki.opencog.org/w/PutLink for more information about `PutLink`.
 
 #### Step 5: Add Resulting Specializations with Enough Support
 
@@ -671,6 +711,9 @@ TODO
 1. Support surprisingness.
 2. Support links such as `DefineLink`, `DefinedSchemaNode`,
    `ExecutionOutputLink`, etc.
+3. Store more information about the pattern, such as frequency and
+   surprisingness, and make accessible to the user. Maybe store this
+   as values attached to patterns.
 
 References
 ----------

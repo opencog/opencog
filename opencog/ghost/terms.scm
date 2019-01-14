@@ -404,48 +404,6 @@
   (State ghost-curr-proc (Concept "Default State")))
 
 ; ----------
-(define-public (ghost-update-rule-strength RULENAME VALUE)
-"
-  Update the TruthValue strength of the rule with alias RULENAME to VALUE.
-"
-  ; Get the action of the rule with alias RULENAME, and then
-  ; find all the rules that also contains this same action
-  ; TODO: Better if the label the action instead of the rule?
-  (define rules (get-related-psi-rules (psi-get-action
-    (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))))
-
-  ; Get the value
-  (define val (cog-number VALUE))
-
-  ; Update the TVs
-  (for-each
-    (lambda (rule)
-      (cog-set-tv! rule (cog-new-stv val (cog-stv-confidence rule))))
-    rules)
-
-  ; Return an atom
-  (True))
-
-; ----------
-(define-public (ghost-record-executed-rule RULENAME)
-"
-  ghost-record-executed-rule RULENAME
-
-  Keep a record of which rule is triggered and when.
-  This information is used during action selection.
-"
-  (Evaluation ghost-rule-executed (List RULENAME))
-
-  (cog-set-value!
-    (get-rule-from-label (cog-name RULENAME))
-    ghost-time-last-executed
-    (FloatValue (current-time)))
-
-  ; Return an atom
-  (True)
-)
-
-; ----------
 (define (compare-equal LV RV)
   (Evaluation
     (GroundedPredicate "scm: ghost-compare-equal?")

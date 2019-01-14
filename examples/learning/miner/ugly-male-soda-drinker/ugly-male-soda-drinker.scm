@@ -1,5 +1,6 @@
 ;; Load the miner module
-(use-modules (opencog miner))
+(use-modules (opencog)
+             (opencog miner))
 
 ;; ;; For debugging
 ;; (use-modules (opencog logger))
@@ -10,10 +11,11 @@
 (load "kb.scm")
 
 ;; Call the miner on the entire atomspace with minimum support of 5,
-;; 100 iterations of forward chaining, a 0.1 strength and confidence
-;; of expanding conjunctions up at most 3 conjuncts.
+;; 100 iterations of forward chaining, incremental conjunction
+;; expansion heuristic enabled, for expanding conjunctions up at most
+;; 3 conjuncts.
 ;;
-;; Expect to learn, amonst others, the following pattern
+;; Expect to learn, among others, the following pattern
 ;;
 ;; (Lambda
 ;;   (Variable "$X")

@@ -1,5 +1,6 @@
 ;; =============================================================================
-;; Crisp conjunction introduction rule
+;; Crisp conjunction introduction rule that only considers the
+;; conjunction of true premises
 ;;
 ;; A1
 ;; ...
@@ -16,9 +17,9 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog rule-engine))
 
-;; Generate a crisp conjunction introduction rule for an n-ary
+;; Generate a crisp true conjunction introduction rule for an n-ary
 ;; conjunction
-(define (gen-crisp-conjunction-introduction-rule nary)
+(define (gen-true-conjunction-introduction-rule nary)
   (let* ((variables (gen-variables "$X" nary))
          (EvaluationT (Type "EvaluationLink"))
          (InheritanceT (Type "InheritanceLink"))
@@ -33,7 +34,7 @@
          (preconditions (map gen-precondition variables))
          (pattern (And variables preconditions))
          (rewrite (ExecutionOutput
-                    (GroundedSchema "scm: crisp-conjunction-introduction-formula")
+                    (GroundedSchema "scm: true-conjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order
                     ;; doesn't matter and this may speed up the URE.
                     (List (And variables) (Set variables)))))
@@ -42,7 +43,7 @@
       pattern
       rewrite)))
 
-(define (crisp-conjunction-introduction-formula A S)
+(define (true-conjunction-introduction-formula A S)
   (let* ((andees (cog-outgoing-set S))
          (min-s-atom (min-element-by-key andees cog-stv-strength))
          (min-c-atom (min-element-by-key andees cog-stv-confidence))
@@ -55,28 +56,28 @@
 ;; Name the rules
 ;;
 ;; Lame enumeration, maybe scheme can do better?
-(define crisp-conjunction-introduction-1ary-rule-name
-  (DefinedSchema "crisp-conjunction-introduction-1ary-rule"))
+(define true-conjunction-introduction-1ary-rule-name
+  (DefinedSchema "true-conjunction-introduction-1ary-rule"))
 (DefineLink
-  crisp-conjunction-introduction-1ary-rule-name
-  (gen-crisp-conjunction-introduction-rule 1))
-(define crisp-conjunction-introduction-2ary-rule-name
-  (DefinedSchema "crisp-conjunction-introduction-2ary-rule"))
+  true-conjunction-introduction-1ary-rule-name
+  (gen-true-conjunction-introduction-rule 1))
+(define true-conjunction-introduction-2ary-rule-name
+  (DefinedSchema "true-conjunction-introduction-2ary-rule"))
 (DefineLink
-  crisp-conjunction-introduction-2ary-rule-name
-  (gen-crisp-conjunction-introduction-rule 2))
-(define crisp-conjunction-introduction-3ary-rule-name
-  (DefinedSchema "crisp-conjunction-introduction-3ary-rule"))
+  true-conjunction-introduction-2ary-rule-name
+  (gen-true-conjunction-introduction-rule 2))
+(define true-conjunction-introduction-3ary-rule-name
+  (DefinedSchema "true-conjunction-introduction-3ary-rule"))
 (DefineLink
-  crisp-conjunction-introduction-3ary-rule-name
-  (gen-crisp-conjunction-introduction-rule 3))
-(define crisp-conjunction-introduction-4ary-rule-name
-  (DefinedSchema "crisp-conjunction-introduction-4ary-rule"))
+  true-conjunction-introduction-3ary-rule-name
+  (gen-true-conjunction-introduction-rule 3))
+(define true-conjunction-introduction-4ary-rule-name
+  (DefinedSchema "true-conjunction-introduction-4ary-rule"))
 (DefineLink
-  crisp-conjunction-introduction-4ary-rule-name
-  (gen-crisp-conjunction-introduction-rule 4))
-(define crisp-conjunction-introduction-5ary-rule-name
-  (DefinedSchema "crisp-conjunction-introduction-5ary-rule"))
+  true-conjunction-introduction-4ary-rule-name
+  (gen-true-conjunction-introduction-rule 4))
+(define true-conjunction-introduction-5ary-rule-name
+  (DefinedSchema "true-conjunction-introduction-5ary-rule"))
 (DefineLink
-  crisp-conjunction-introduction-5ary-rule-name
-  (gen-crisp-conjunction-introduction-rule 5))
+  true-conjunction-introduction-5ary-rule-name
+  (gen-true-conjunction-introduction-rule 5))

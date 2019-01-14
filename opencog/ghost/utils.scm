@@ -267,6 +267,21 @@
 )
 
 ; ----------
+(define (flatten-linkval LV)
+"
+  Given a LinkValue LV, flatten any nested LinkValues,
+  with an assumption that the values are all atoms.
+
+  A Scheme list will be returned as a result.
+"
+  (append-map
+    (lambda (x)
+      (if (cog-atom? x)
+        (list x)
+        (flatten-linkval x)))
+    (cog-value->list LV)))
+
+; ----------
 (define (get-rejoinder-level TYPE)
 "
   Return the rejoinder level, e.g. a = level 1, b = level 2, and so on...
@@ -281,20 +296,24 @@
   (filter psi-rule? (cog-get-trunk ATOM)))
 
 ; ----------
-(define (get-rule-from-label LABEL)
+(define (get-rules-from-label LABEL)
 "
-  Given the label of a rule in string, return the rule with that label.
+  Given the label of a rule in string, return the psi-rule(s) with that label.
 "
-  (define rule (filter psi-rule?
-    (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept LABEL))))
+  (define rules
+    (map gar (filter
+      (lambda (x)
+        (and (psi-rule? (gar x))
+             (any (lambda (p) (string=? "alias" (cog-name p)))
+               (cog-chase-link 'EvaluationLink 'PredicateNode x))))
+      (cog-incoming-by-type (Concept LABEL) 'ListLink))))
 
-  (if (null? rule)
+  (if (null? rules)
       (begin
         (cog-logger-debug ghost-logger
-          "Failed to find the GHOST rule \"~a\"" LABEL)
+          "Failed to find any GHOST rule with label \"~a\"" LABEL)
         (list))
-      (car rule)))
+      rules))
 
 ; ----------
 (define (is-nonbreaking-prefix? WORD)
