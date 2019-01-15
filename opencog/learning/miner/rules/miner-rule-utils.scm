@@ -27,7 +27,8 @@
 (define (unary-conjunction-eval body)
   (Evaluation
     (GroundedPredicate "scm: unary-conjunction")
-    body))
+    ;; Wrap the single argument in List in case it is itself a list
+    (List body)))
 
 (define (unary-conjunction? body)
   (let ((body-type (cog-type body)))
