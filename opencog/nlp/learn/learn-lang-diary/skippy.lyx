@@ -11414,6 +11414,33 @@ key "Vepstas2017sheaves"
 \end_layout
 
 \begin_layout Standard
+That appears to be the view from up-on-high.
+ Paying a bit more attention to the details, one is forced to reconcile
+ the concept of hill-climbing or gradient descent commonly used in neural-net
+ models, with the a statistical counting approach used in symbolic models.
+ Here, the apparent resolution is to understand that different practitioners
+ use different names for similar, if not identical concepts.
+ The “softmax model” of neural-net training appears to be nothing other
+ than a Markov model to statisticians, and a Gibbs measure to physicists.
+ The machine learning crowd looks at Gibbs measures, and defines Bayesian
+ networks (when not Markov networks) according to them, and calls the whole
+ idea the “principle of maximum entropy”.
+ A bit farther away, the physicists, chemists and biologists look at such
+ networks as a generalizing of Ising models, which have a well-described
+ perturbative field theory, and a much more poorly understood set of non-perturb
+ative solutions.
+ What is missing from the entire enterprise seems to be a dictionary that
+ translates and crosses over argot and ideas used in different academic
+ fields, a cross-reference for language that describes the same thing.
+ This text attempts to provide some portion of that cross-over.
+\end_layout
+
+\begin_layout Standard
+What can be learned by comparing different ways of talking about the same
+ thing? Perhaps the most important
+\end_layout
+
+\begin_layout Standard
 
 \end_layout
 
