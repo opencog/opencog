@@ -1564,21 +1564,48 @@ void MinerUTest::test_vqa()
 
 	// The pattern of interest looks like
 	//
-	// TBD
-	Handle expected = top;
+	// (LambdaLink
+	//   (VariableList
+	//     (VariableNode "$PM-24b2cd09")
+	//     (VariableNode "$PM-1b1cc2ca")
+	//     (VariableNode "$PM-24b2cd09-1de71072")
+	//   )
+	//   (AndLink
+	//     (MemberLink
+	//       (VariableNode "$PM-24b2cd09")
+	//       (VariableNode "$PM-1b1cc2ca")
+	//     )
+	//     (MemberLink
+	//       (VariableNode "$PM-24b2cd09-1de71072")
+	//       (VariableNode "$PM-1b1cc2ca")
+	//     )
+	//   )
+	// )
+	//
+	// TODO: find a better pattern of interest
+	Handle
+		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
+		MemXY = al(MEMBER_LINK, X, Y),
+		MemZY = al(MEMBER_LINK, Z, Y),
+		expected = al(LAMBDA_LINK,
+		              VarXYZ,
+		              al(AND_LINK,
+		                 MemXY,
+		                 MemZY));
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Run URE pattern miner
 	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
-	int max_conjuncts = 3;
+	int minsup = 500;
+	int max_conjuncts = 2;
 	double complexity_penalty = 1;
-	Handle ure_results = ure_pm(_tmp_as, 5, 200,
+	Handle ure_results = ure_pm(_tmp_as, minsup, 100,
 	                            initpat,
 	                            incremental_expansion,
 	                            max_conjuncts,
 	                            complexity_penalty),
-		ure_expected = mk_minsup_eval(5, expected);
+		ure_expected = mk_minsup_eval(minsup, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
