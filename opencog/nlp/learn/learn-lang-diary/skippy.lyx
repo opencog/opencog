@@ -11350,6 +11350,73 @@ non-uniform spreading
  results in a high-quality language model.
 \end_layout
 
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+A naive comparison of neural net and symbolic approaches to AI suggest that
+ these are entirely unrelated approaches, competing descriptions of observed
+ reality.
+ In fact, the two approaches are quite similar.
+ Neural nets are quite obviously linear and tensorial.
+ Symbolic systems are quite obviously graphical.
+ Taking a more abstract view, that of category theory, and specifically
+ that of monoidal categories, exposes the similarities.
+ 
+\end_layout
+
+\begin_layout Standard
+Linear algebra, tensor algebra, Hilbert spaces, in any of thier guises,
+ are known to be governed by symmetric monoidal categories.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Baez2009"
+
+\end_inset
+
+ Natural language has a long history of being described in algebraic and
+ categorial terms.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Marcus1967"
+
+\end_inset
+
+ The commonality between these two are the monoidal categories, neccesaily
+ non-symmetric, as evinced by the pregroup grammars.
+ Grasping the non-symmetric monoidal structure in both reveals the commonality.
+ 
+\end_layout
+
+\begin_layout Standard
+One can go farther: linearity and non-linearity commonly work hand-in-hand;
+ for example, curved manifolds have tangent vector spaces that are manifestly
+ linear.
+ There are many approaches to gluing together linear spaces to arrive at
+ curved structures; the formalism that seems to be the most appropriate
+ to graphical representations of knowledge is that of sheaf theory.
+ Small subsets of graphs: a vertex, and all of it's nearest neighbors, can
+ be stitched together to form a larger graph.
+ The vertex, and all of its nearest neighbors, is effectively just a Link
+ Grammar disjunct.
+ The stitching-together obeys the axioms of sheaf theory.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vepstas2017sheaves"
+
+\end_inset
+
+ Sheaves have long provided a useful, if rather abstract tool in other branches
+ of mathematics for assembling larger complex structures out of simpler,
+ easier to comprehend parts; it appears that they can also be used for knowledge
+ representation.
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
