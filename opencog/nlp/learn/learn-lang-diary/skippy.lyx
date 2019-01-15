@@ -11367,7 +11367,7 @@ A naive comparison of neural net and symbolic approaches to AI suggest that
 \end_layout
 
 \begin_layout Standard
-Linear algebra, tensor algebra, Hilbert spaces, in any of thier guises,
+Linear algebra, tensor algebra, Hilbert spaces, in any of their guises,
  are known to be governed by symmetric monoidal categories.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -11383,7 +11383,7 @@ key "Marcus1967"
 
 \end_inset
 
- The commonality between these two are the monoidal categories, neccesaily
+ The commonality between these two are the monoidal categories, necessarily
  non-symmetric, as evinced by the pregroup grammars.
  Grasping the non-symmetric monoidal structure in both reveals the commonality.
  
@@ -11442,7 +11442,7 @@ n between cosine distance and mutual information.
  When one works only with linear vector spaces, there is a very strong desire
  to treat those spaces as having rotational symmetry.
  This is only natural: physicists have known for many centuries that space
- is rotationally synmmetric; mathematicians state that the symmetry group
+ is rotationally symmetric; mathematicians state that the symmetry group
  of real Euclidean space 
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
@@ -11464,15 +11464,15 @@ n between cosine distance and mutual information.
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
 
- is the correct prepresentation of the data? By comparing to statistical
+ is the correct representation of the data? By comparing to statistical
  techniques, ranging from statistical physics to machine learning to maximum
- entropy, the answwer seems to be no.
+ entropy, the answer seems to be no.
  The systems under study do NOT live in 
 \begin_inset Formula $\mathbb{R}^{n}$
 \end_inset
 
  and the vectors are actually points in a space of probabilities.
- Proobabilities are described by a “vector” 
+ Probabilities are described by a “vector” 
 \begin_inset Formula $\vec{p}=\left(p_{1},p_{2,}\cdots,p_{n}\right)$
 \end_inset
 
@@ -11496,7 +11496,7 @@ n between cosine distance and mutual information.
 A unified theory of semantic meaning based on graphical representations
  does not yet exist.
  Many important details remain unclear.
- For natural langauge understanding, perhaps the most important step is
+ For natural language understanding, perhaps the most important step is
  to get the details of word-sense similarity worked out correctly.
  For the language learning project
 \begin_inset CommandInset citation
@@ -11518,7 +11518,7 @@ key "Vepstas2018stiching"
  by means of monoidal categories and sheaves; consistently apply Gibbs-entropy
  principles in such a framework, using mutual information as the proper
  metric, and then factorize and dimensionally reduce to extract general
- conclusions from specific commonly occuring examples.
+ conclusions from specific commonly occurring examples.
  The future seems bright.
 \end_layout
 
