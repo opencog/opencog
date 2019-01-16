@@ -1478,7 +1478,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
 	int max_conjuncts = 3;
 	double complexity_penalty = 1;
-	Handle ure_results = ure_pm(_tmp_as, 5, 1000,
+	Handle ure_results = ure_pm(_tmp_as, 5, 2000,
 	                            initpat,
 	                            incremental_expansion,
 	                            max_conjuncts,
