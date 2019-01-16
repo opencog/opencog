@@ -887,7 +887,7 @@ The remainder of this essay is structured as follows: Section 2 provides
  Section 4 defines a graph network model of language, emphasizing that statistic
 al physics provides a well-developed toolset for working with graph networks.
  Section 5 reviews several different techniques by which statistical information
- can be gathered, and the graphical structure can be infered, given a large
+ can be gathered, and the graphical structure can be inferred, given a large
  
 \begin_inset Quotes eld
 \end_inset
@@ -1530,7 +1530,7 @@ name "fig:Rhisome"
 This image illustrates the general concept of a rhizome.
  It is meant only to provide a suggestive inspiration for visualizing a
  graphical sheaf.
- Lines correspond to dependency grammar link contraints between tangent
+ Lines correspond to dependency grammar link constraints between tangent
  vector spaces.
  Since any given word in a sentence can have dependency relationships to
  a number of other words, each vertex here (a word) has multiple edges attached
@@ -1999,7 +1999,7 @@ tely) equal to one-another, or that they can be grouped or summed in some
  More correctly, one hypothesizes that the vast majority of the probabilities
  are either zero or fall into classes where they are equal.
  If one can find a model that captures that all but one in ten-thousand
- such probabilities are zero, then tht model becomes compuitationally tractable
+ such probabilities are zero, then that model becomes computationally tractable
  again.
  An alternate model is to hypothesize that certain linear combinations of
  the probabilities are all equal to one-another.
@@ -2415,7 +2415,7 @@ By convention,
 \end_inset
 
 .
- Knowledgable readers are encouraged to correct my misperception.
+ Knowledgeable readers are encouraged to correct my misperception.
 \end_layout
 
 \begin_layout Subsection
@@ -2798,7 +2798,7 @@ Both the neural network and the symbolic graphical approaches to language
  the factors of a factored Bayesian network.
  Next, the loss functions of the CBOW/SkipGram model can be seen as a manifestat
 ion of standard (statistical mechanics) maximum entropy principles.
- Equiped with this insight, one can proceed along a common track in physics:
+ Equipped with this insight, one can proceed along a common track in physics:
  derive the statistical models from a partition function.
  The partition function encodes 
 \begin_inset Quotes eld
@@ -3003,7 +3003,7 @@ output
  More precisely, the disjunct notation actively skips over some of the words
  in the context.
  Rather than specifying a fixed offset from the target word, the disjunct
- provides a relative squential ordering of the context-words, left to right,
+ provides a relative sequential ordering of the context-words, left to right,
  without specifying distance.
 \end_layout
 
@@ -3052,7 +3052,7 @@ more bits of info
 \begin_inset Quotes erd
 \end_inset
 
- than the index notatin can.
+ than the index notation can.
 \end_layout
 
 \begin_layout Subsection
@@ -3296,7 +3296,7 @@ which also does not fit in an
 \end_layout
 
 \begin_layout Standard
-Another difficulty in a naive correspondance with index notation is that
+Another difficulty in a naive correspondence with index notation is that
  dependency grammars are naturally 
 \begin_inset Quotes eld
 \end_inset
@@ -3551,7 +3551,7 @@ The principle of maximum entropy states that the above should be solved
 \end_inset
 
 .
- This can be solved without the need to provide any addtional statements
+ This can be solved without the need to provide any additional statements
  or constraints.
  Standard texts on statistical mechanics exhibit the solution; it is the
  Boltzmann distribution, namely
@@ -4253,7 +4253,7 @@ name "fig:Feynman-Diagrams"
 \end_layout
 
 \begin_layout Plain Layout
-This figure illustrates the energy functional for a particular English langauge
+This figure illustrates the energy functional for a particular English language
  sentence, chosen out of the statistical ensemble of all possible English
  language sentences.
  The arcs above the sentence show the standard unlabeled dependency parse
@@ -4426,7 +4426,7 @@ Pair-wise mutual information is not the same thing as the two-point function
 ; the MI includes one-point terms in it.
  For many applications, including chemistry, the one-point vacuum contributions
  to the MI are clearly inappropriate.
- Atoms, amino acids and protiens don't respond to other atoms that 
+ Atoms, amino acids and proteins don't respond to other atoms that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4436,7 +4436,7 @@ might have been there, but weren't
 
 .
  For those applications, MI can only provide a rough approximation for a
- starting point for a more acurate solution of the 
+ starting point for a more accurate solution of the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4481,7 +4481,7 @@ key "Mezard2008,Weigt2009"
 \end_layout
 
 \begin_layout Standard
-The preceeding two sections potentially sow a point of confusion: Should
+The preceding two sections potentially sow a point of confusion: Should
  one consider a 
 \begin_inset Quotes eld
 \end_inset
@@ -4498,7 +4498,7 @@ pure
 \end_layout
 
 \begin_layout Standard
-For natural language, most words have valancies of 3, 4 or 5, and so it
+For natural language, most words have valencies of 3, 4 or 5, and so it
  seems that they would be better described by 3-point, 4-point or 5-point
  Ising interaction energies, as opposed to a bag of 2-point interactions.
  How true is this? Consider a transitive verb: it has a subject and an object.
@@ -4536,8 +4536,8 @@ subject
  The object must be chosen from the class of physical objects that can be
  thrown.
  Although these two classes are fairly narrow, they still seem uncorrelated.
- This illusion can be broken: further restricing the class of subjects to
- humans forces the restriction of objects to the class of physical items
+ This illusion can be broken: further restricting the class of subjects
+ to humans forces the restriction of objects to the class of physical items
  weighing between a few grams and ten kilograms.
  But there is only one word 
 \begin_inset Quotes eld
@@ -4547,7 +4547,7 @@ throw
 \begin_inset Quotes erd
 \end_inset
 
-, and not some hypothectical 
+, and not some hypothetical 
 \begin_inset Formula $\mbox{throw}_{1}$
 \end_inset
 
@@ -4612,7 +4612,7 @@ so that any kind of machine can
 \begin_inset Formula $\mbox{throw}_{3}$
 \end_inset
 
- thier riders, but there is no statistical correlation (no three-point function)
+ their riders, but there is no statistical correlation (no three-point function)
  between the thrower, and the rider.
 \end_layout
 
@@ -4625,8 +4625,8 @@ This kind of factorization into components might even provide a plausible
 
 .
  Exactly how far this can be pushed, without grinding into the floor of
- statistically noisey data is unclear: only horses throw cowboys, and only
- elephants throw maharajis.
+ statistically noisy data is unclear: only horses throw cowboys, and only
+ elephants throw maharajahs.
 \end_layout
 
 \begin_layout Subsection
@@ -4719,7 +4719,7 @@ key "Hud84,Hud07"
 The primary point here is that Link Grammar is interesting because it provides
  a bridge to both traditional, symbolic structural linguistics (per above)
  and while also allowing an interpretation as an Ising model of language.
- Following Yuret's ansatz, one includes energy terms of not only 
+ Following Yuret's Ansatz, one includes energy terms of not only 
 \begin_inset Formula $J_{ijk\cdots}$
 \end_inset
 
@@ -4925,7 +4925,7 @@ Graph Algorithms vs.
 The difference between graphical and Monte Carlo methods is perhaps best
  illustrated by example.
  Yuret (implicitly) assumes an Ising model of natural language, and considers
- only pair-wise word realtionships.
+ only pair-wise word relationships.
  To obtain an energy functional, it suffices to count the frequency 
 \begin_inset Formula $N\left(w_{left},w_{right}\right)$
 \end_inset
@@ -4950,8 +4950,8 @@ nal linguists, maximum spanning trees are constructed, taking into account
 \end_inset
 
 .
- The result is an explict dependency graph for every possible sentence.
- That the ensemble is an explict Boltzmann distribution is a primary point
+ The result is an explicit dependency graph for every possible sentence.
+ That the ensemble is an explicit Boltzmann distribution is a primary point
  of figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -5025,7 +5025,7 @@ The Monte Carlo approach presumes that the
 a priori
 \emph default
  model consists of a high-dimensional space of hidden parameters, and that
- the space must be searched to find those paramters that best reproduce
+ the space must be searched to find those parameters that best reproduce
  the observed probabilities.
  For example, eqn 
 \begin_inset CommandInset ref
@@ -5064,7 +5064,7 @@ reference "eq:SkipGram"
 \end_inset
 
 .
- This is a reasonable approach to modelling language; the primary critique
+ This is a reasonable approach to modeling language; the primary critique
  here is that the CBOW/SkipGram models are not graphical, at least, not
  in the sense of providing an explicit symbolic, syntactic representation
  of language.
@@ -5080,7 +5080,7 @@ key "Goertzel2014"
 
 , which is overtly graphical at each step, and does produce a symbolic,
  syntactic representation of language at its conclusion.
- The proceedure replaces the directly observed probability 
+ The procedure replaces the directly observed probability 
 \begin_inset Formula $p\left(w,w_{I}\right)$
 \end_inset
 
@@ -5092,7 +5092,7 @@ key "Goertzel2014"
 \begin_inset Formula $d$
 \end_inset
 
- occuring on word 
+ occurring on word 
 \begin_inset Formula $w$
 \end_inset
 
@@ -5119,8 +5119,8 @@ key "Goertzel2014"
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
 
-, with no further modification, redefintion or processing, can be used with
- a parser to obtain a syntactic parse.
+, with no further modification, redefinition or processing, can be used
+ with a parser to obtain a syntactic parse.
  The probabilities 
 \begin_inset Formula $p\left(w,d\right)$
 \end_inset
@@ -5371,7 +5371,7 @@ reference "fig:Disjuncts-from-Dependency"
  This may seem to put the cart before the horse, but for two reasons: the
  dependency parse does not have to be labeled, and, most importantly, it
  doesn't have to have a high accuracy.
- It nees only to have a accuracy that is better than random chance.
+ It needs only to have a accuracy that is better than random chance.
  The law of large numbers should allow correct disjunct to accumulate large
  counts, while the rest wash out into background noise.
 \end_layout
@@ -5516,7 +5516,7 @@ Given a dependency clique, one wishes to select a subset of the edges, so
 \begin_inset Quotes eld
 \end_inset
 
-unlabelled dependency graph
+unlabeled dependency graph
 \begin_inset Quotes erd
 \end_inset
 
@@ -5639,7 +5639,7 @@ l and grammatical errors that defy strict grammatical analysis; for example,
 
 \begin_layout Standard
 Neither the acyclic condition, nor the connectivity condition need to be
- satisfied, when the goal is to obtain statisical counts of disjuncts.
+ satisfied, when the goal is to obtain statistical counts of disjuncts.
  The reasons for this should be clear: the frequency count of spurious,
  incorrect disjuncts will remain low, disappearing in the noise.
  Ungrammatical sentences in the input corpus require no special treatment.
@@ -5647,7 +5647,7 @@ Neither the acyclic condition, nor the connectivity condition need to be
  Not all dependencies are planar or projective.
  Thus, the mechanism for generating disjuncts, so that they can be statistically
  counted, need not be subjected to any particularly strong theory of grammar.
- A weak, frequently-correct unlabelled dependency graph should be enough.
+ A weak, frequently-correct unlabeled dependency graph should be enough.
  Weaker systems might take longer to converge, but should also perhaps introduce
  less 
 \emph on
@@ -5672,8 +5672,7 @@ reference "fig:Dependency-Clique"
 
 \end_inset
 
-) only some are selected; the weights of all other edges are expressily
- zero.
+) only some are selected; the weights of all other edges are expressly zero.
 \end_layout
 
 \begin_layout Standard
@@ -6652,7 +6651,7 @@ p\left(*,d\right) & = & \sum_{w}p\left(w,d\right)\\
 
 \end_inset
 
-and all joint probabilites normalize correctly: 
+and all joint probabilities normalize correctly: 
 \begin_inset Formula $p\left(*,*\right)=1$
 \end_inset
 
@@ -7052,7 +7051,7 @@ on.
 
 \begin_layout Standard
 Of these, perhaps the most important point is that the space of joint probabilit
-ies is not the same as Eucliden space.
+ies is not the same as Euclidean space.
  This is a terminological issue that unintentionally becomes a technical
  issue.
  Properly speaking, frequency counts are multisets or bags; these resemble
@@ -7165,7 +7164,7 @@ Some words occur with frequencies that are many orders of magnitude larger
  It leads to a situation where improving the factorization by 1% for a high
  frequency word is equivalent to being wrong by factors of 2 or 3 on low-frequen
 cy words.
- This does not seem like a plusible weighting scheme.
+ This does not seem like a plausible weighting scheme.
  The Frobenius norm seems less than ideal for the problem at hand.
 \end_layout
 
@@ -7293,7 +7292,7 @@ key "Levy2014"
  for precisely such a report: the conception that SVD could have or should
  have given a better result, followed by the disappointment of noting that
  it does not.
- Of course, other explanations are also posible: one is that SVD behaves
+ Of course, other explanations are also possible: one is that SVD behaves
  poorly when some matrix elements are missing or unknown.
  This shortcoming is one reason why PMF, above, and LLORMA, below, have
  been proposed.
@@ -7415,7 +7414,7 @@ Clearly, the point
 \end_layout
 
 \begin_layout Standard
-This implies that nurclear norms, or Frobenius norms might be quite appropriate,
+This implies that nuclear norms, or Frobenius norms might be quite appropriate,
  if, instead of working with 
 \begin_inset Formula $\vec{p}$
 \end_inset
@@ -7468,7 +7467,7 @@ reference "subsec:Zipf's-Law;-Noise"
 , this is a faulty assumption.
  As noted before, this error matrix causes high-frequency words to strongly
  dominate over low-frequency words in the factorization.
- Again, this seems like an implausbile objective function for natural language
+ Again, this seems like an implausible objective function for natural language
  or any Zipfian distributions.
  
 \end_layout
@@ -7553,8 +7552,8 @@ reference "eq:KL-MI-factorization-loss"
 \end_inset
 
 .
- It seems reasonable to beleive that combining kernel smoothing with local
- regression and the information-theoretic norm might yeild an excellent
+ It seems reasonable to believe that combining kernel smoothing with local
+ regression and the information-theoretic norm might yield an excellent
  algorithm for factoring joint probabilities.
  As an algorithm, it belongs to the gradient-descent class.
 \end_layout
@@ -7627,9 +7626,9 @@ key "Nida97"
 \end_layout
 
 \begin_layout Standard
-One can skip this round-about route, ingoring the philosophical ruminations
+One can skip this round-about route, ignoring the philosophical ruminations
  and motivations, and skip directly to matrix factorization.
- Levy and Golberg do so, by observing that maximization of the SkipGram
+ Levy and Goldberg do so, by observing that maximization of the SkipGram
  objective function is mathematically equivalent to matrix factorization.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -7681,7 +7680,7 @@ key "Mikolov2013b"
 
 \end_inset
 
- explain that it is more effective to work with a variant invloving a sigmoid
+ explain that it is more effective to work with a variant involving a sigmoid
  function, together with a 
 \begin_inset Quotes eld
 \end_inset
@@ -7725,7 +7724,7 @@ never
 
 \end_inset
 
- The suitablly revised objective function (using the notation from section
+ The suitably revised objective function (using the notation from section
  
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -7745,7 +7744,7 @@ reference "subsec:CBOW"
 \begin_inset Formula $w_{i}\in I$
 \end_inset
 
-, together with the dimensionaly reduced vectors 
+, together with the dimensionally reduced vectors 
 \begin_inset Formula $\vec{u}_{t}$
 \end_inset
 
@@ -7772,7 +7771,7 @@ key "Levy2014"
 \end_layout
 
 \begin_layout Standard
-The remarkable result of Levy and Golberg
+The remarkable result of Levy and Goldberg
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Levy2014"
@@ -7788,7 +7787,7 @@ reference "eq:word-pair-MI"
 \end_inset
 
 .
- The explicit result is that the dimensionaly reduced vectors 
+ The explicit result is that the dimensionally reduced vectors 
 \begin_inset Formula $\vec{u}_{t}$
 \end_inset
 
@@ -7796,7 +7795,7 @@ reference "eq:word-pair-MI"
 \begin_inset Formula $\vec{v}_{i}$
 \end_inset
 
- are related to the mutial information as
+ are related to the mutual information as
 \begin_inset Formula 
 \[
 \vec{u}_{t}\cdot\vec{v}_{i}=MI\left(w_{t},w_{i}\right)-\log k
@@ -7863,8 +7862,8 @@ reference "eq:SkipGram"
  word and it's context.
  It now becomes readily apparent that perhaps a summation that discards
  low MI values, while also taking into account the entire sentence, can
- perhaps yeild a superior result.
- The two approaches butress one-another, and mutually explain one-another.
+ perhaps yield a superior result.
+ The two approaches buttress one-another, and mutually explain one-another.
  The effectiveness of the SkipGram model is explained by it's resemblance
  to MST parsing with word-pair MI, which in turn has strong connections
  to symbolic approaches to linguistics.
@@ -7874,7 +7873,7 @@ reference "eq:SkipGram"
 \begin_inset Quotes eld
 \end_inset
 
-subsymbolic
+sub-symbolic
 \begin_inset Quotes erd
 \end_inset
 
@@ -8740,7 +8739,7 @@ status collapsed
 In physics, such an ambiguity of factorization is known as a global gauge
  symmetry; fixing a gauge removes the ambiguity.
  In natural language, the ambiguity is spontaneously broken: words have
- only a few senses, and are often sysnonymous, making the left and right
+ only a few senses, and are often synonymous, making the left and right
  factors sparse.
  For this reason, the analogy to physics is entertaining but mostly pointless.
 \end_layout
@@ -10078,7 +10077,7 @@ key "Vepstas2017connectors"
 \end_inset
 
 , it becomes quite clear that there is a practical, common-sense cutoff
- for similarlity.
+ for similarity.
  If two words 
 \begin_inset Formula $w_{1}$
 \end_inset
@@ -10132,7 +10131,7 @@ key "VerSteeg2014"
 
 \begin_layout Standard
 There is some appeal in this idea for the language problem: a large cluster
- of approximate synonyms should be factorizable into smaller clusters of
+ of approximate synonyms should be factorisable into smaller clusters of
  more tightly-related synonyms.
  Conversely, one should be able to consolidate small blocks into bigger
  ones, with a minimum of information loss.
