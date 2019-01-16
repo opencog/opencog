@@ -35,7 +35,10 @@ using namespace opencog;
 class PatternIndexAPIUTest : public CxxTest::TestSuite
 {
 private:
-    std::string fname;          // Temporary KB file name for querying
+    // KB file names for querying and mining
+    std::string toy_query_fname;
+    std::string toy_mining_fname;
+
     AtomSpace atomSpace;
     SchemeEval *schemeEval;
 
@@ -72,29 +75,10 @@ PatternIndexAPIUTest::PatternIndexAPIUTest()
     config().set("PatternIndex::CoherenceModulatorG", "oneOverCoherence");
     config().set("PatternIndex::CoherenceModulatorH", "coherence");
 
-    // Fill temporary kb file for querying
-    fname = std::tmpnam(nullptr);
-    FILE *f = std::fopen(fname.c_str(), "w");
-    fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"monkey\"))\n", f);
-    fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"chimp\"))\n", f);
-    fputs("(SimilarityLink (ConceptNode \"chimp\") (ConceptNode \"monkey\"))\n", f);
-    fputs("(SimilarityLink (ConceptNode \"snake\") (ConceptNode \"earthworm\"))\n", f);
-    fputs("(SimilarityLink (ConceptNode \"rhino\") (ConceptNode \"triceratops\"))\n", f);
-    fputs("(SimilarityLink (ConceptNode \"snake\") (ConceptNode \"vine\"))\n", f);
-    fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"ent\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"human\") (ConceptNode \"mammal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"monkey\") (ConceptNode \"mammal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"chimp\") (ConceptNode \"mammal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"mammal\") (ConceptNode \"animal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"reptile\") (ConceptNode \"animal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"snake\") (ConceptNode \"reptile\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"dinosaur\") (ConceptNode \"reptile\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"triceratops\") (ConceptNode \"dinosaur\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"earthworm\") (ConceptNode \"animal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"rhino\") (ConceptNode \"mammal\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"vine\") (ConceptNode \"plant\"))\n", f);
-    fputs("(InheritanceLink (ConceptNode \"ent\") (ConceptNode \"plant\"))\n", f);
-    fclose(f);
+    // KB file names for querying and mining
+    std::string pwd(PROJECT_SOURCE_DIR "/tests/learning/pattern-index/");
+    toy_query_fname = pwd + "toy-example-query.scm";
+    toy_mining_fname = pwd + "toy-example-mining.scm";
 }
 
 PatternIndexAPIUTest::~PatternIndexAPIUTest()
@@ -112,9 +96,9 @@ void PatternIndexAPIUTest::tearDown()
 
 void PatternIndexAPIUTest::test_createAndDelete()
 {
-    Handle key1 = PatternIndexAPI::getInstance().createIndex(fname);
-    Handle key2 = PatternIndexAPI::getInstance().createIndex(fname);
-    Handle key3 = PatternIndexAPI::getInstance().createIndex(fname);
+    Handle key1 = PatternIndexAPI::getInstance().createIndex(toy_query_fname);
+    Handle key2 = PatternIndexAPI::getInstance().createIndex(toy_query_fname);
+    Handle key3 = PatternIndexAPI::getInstance().createIndex(toy_query_fname);
     TS_ASSERT_EQUALS(key1->get_type(), ANCHOR_NODE);
     TS_ASSERT_EQUALS(key2->get_type(), ANCHOR_NODE);
     TS_ASSERT_EQUALS(key3->get_type(), ANCHOR_NODE);
@@ -134,7 +118,7 @@ void PatternIndexAPIUTest::test_createAndDelete()
 
 void PatternIndexAPIUTest::test_query()
 {
-    Handle indexKey = PatternIndexAPI::getInstance().createIndex(fname);
+    Handle indexKey = PatternIndexAPI::getInstance().createIndex(toy_query_fname);
     bool flag1 = false;
     bool flag2 = false;
     bool flag3 = false;
