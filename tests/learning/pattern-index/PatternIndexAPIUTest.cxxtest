@@ -40,11 +40,11 @@ private:
     SchemeEval *schemeEval;
 
 public:
-	PatternIndexAPIUTest();
-	~PatternIndexAPIUTest();
+    PatternIndexAPIUTest();
+    ~PatternIndexAPIUTest();
 
-	void setUp();
-	void tearDown();
+    void setUp();
+    void tearDown();
 
     void test_createAndDelete();
     void test_query();
@@ -57,8 +57,8 @@ PatternIndexAPIUTest::PatternIndexAPIUTest()
     SchemeEval::set_scheme_as(&atomSpace);
     schemeEval = new SchemeEval(&atomSpace);
 
-	// Configure Pattern Miner parameters
-	config().set("Pattern_Max_Gram", "4");
+    // Configure Pattern Miner parameters
+    config().set("Pattern_Max_Gram", "4");
     config().set("PatternIndex::PatternCountCacheEnabled", "TRUE");
     config().set("PatternIndex::DifferentAssignmentForDifferentVars", "TRUE");
     config().set("PatternIndex::PermutationsOfVarsConsideredEquivalent", "TRUE");
