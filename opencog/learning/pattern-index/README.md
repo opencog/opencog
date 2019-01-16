@@ -273,7 +273,7 @@ Which return the same answer as the first syntax described above for C++.
 
 To illustrate the pattern mining using Pattern Index, we'll use
 "toy-example-mining.scm" which is exactly the same dataset
-```ugly_male_soda-drinker_corpus.scm``` used as example in OpenCog's PatternMiner.
+`ugly_male_soda-drinker_corpus.scm` used as example in OpenCog's PatternMiner.
 
 #### C++
 
@@ -393,8 +393,11 @@ First query is:
         )
 ```
 
-So we are searching the input database for X, Y and Z | exist (SimilarityLink X
-Y) and (SimilarityLink Y Z).
+So we are searching the input database for
+
+```
+{X, Y and Z | exist (SimilarityLink X Y) and (SimilarityLink Y Z)}
+```
 
 The querying algorithm interprets AndLink, OrLink and NotLink as logical
 operators. The resulting sub-queries are recursively processed and then joined
