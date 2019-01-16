@@ -51,9 +51,9 @@ public:
 
     void test_createAndDelete();
     void test_query();
+    void test_mining();
 };
 
-// PatternIndexAPIUTest::PatternIndexAPIUTest() : _scm(&atomSpace) {}
 PatternIndexAPIUTest::PatternIndexAPIUTest()
 {
     SchemeEval::init_scheme();
@@ -165,4 +165,41 @@ void PatternIndexAPIUTest::test_query()
         }
     }
     TS_ASSERT(flag1 && flag2 && flag3 && flag4)
+}
+
+void PatternIndexAPIUTest::test_mining()
+{
+    Handle indexKey = patternindex().createIndex(toy_mining_fname);
+
+    patternindex().setProperty(indexKey,
+                               "PatternCountCacheEnabled",
+                               "false");
+
+    std::vector<PatternIndexAPI::MiningResult> resultPatterns;
+    patternindex().minePatterns(resultPatterns, indexKey);
+
+    printf("Top %zu results\n", resultPatterns.size());
+    for (const auto& pattern : resultPatterns) {
+        printf("%f: %s",
+               pattern.first,
+               pattern.second->to_string().c_str());
+    }
+
+    Handle expected =
+        schemeEval->eval_h("(AndLink"
+                           "  (InheritanceLink"
+                           "    (VariableNode \"V0\")"
+                           "    (ConceptNode \"ugly\")"
+                           "  )"
+                           "  (InheritanceLink"
+                           "    (VariableNode \"V0\")"
+                           "    (ConceptNode \"soda drinker\")"
+                           "  )"
+                           "  (InheritanceLink"
+                           "    (VariableNode \"V0\")"
+                           "    (ConceptNode \"man\")"
+                           "  )"
+                           ")");
+
+    TS_ASSERT(content_eq(resultPatterns.front().second, expected));
 }
