@@ -31,6 +31,6 @@
 ;;       (Concept "soda drinker"))))
 (define results (cog-mine (cog-atomspace)
                           #:minsup 5
-                          #:maxiter 100
+                          #:maximum-iterations 100
                           #:incremental-expansion #t
                           #:max-conjuncts 3))

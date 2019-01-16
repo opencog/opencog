@@ -204,7 +204,8 @@ Handle MinerUtils::val_shallow_abstract(const Handle& value)
 	// Links wrapped with QuoteLink and UnquoteLinks
 	if (tt == BIND_LINK or       // TODO: should probabably be replaced
                                 // by scope link and its subtypes
-	    tt == EVALUATION_LINK or
+	    (tt == EVALUATION_LINK and
+	     value->getOutgoingAtom(0)->get_type() == GROUNDED_PREDICATE_NODE) or
 	    nameserver().isA(tt, FUNCTION_LINK) or
 	    nameserver().isA(tt, VIRTUAL_LINK))
 	{
