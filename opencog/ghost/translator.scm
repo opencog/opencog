@@ -743,8 +743,8 @@
     (define val (cog-value PRULE KEY))
     (cog-set-value! PRULE KEY
       (if (null? val)
-        (LinkValue CRULE)
-        (apply LinkValue (append (cog-value->list val) (list CRULE))))))
+        (SeqValue CRULE)
+        (apply SeqValue (append (cog-value->list val) (list CRULE))))))
 
   ; Reset the list of local variables and rule features
   (set! pat-vars '())
@@ -837,18 +837,18 @@
                  ; If 'val' is null, that means no such value has been
                  ; assigned to this rule yet
                  ((null? val)
-                  (cog-set-value! a-rule (car f) (LinkValue (cdr f))))
+                  (cog-set-value! a-rule (car f) (SeqValue (cdr f))))
                  ; If 'val' is not null and it's an atom, just append it
                  ; it to 'val'
                  ((cog-atom? (cdr f))
                   (cog-set-value! a-rule (car f)
-                    (apply LinkValue (append (flatten-linkval val)
+                    (apply SeqValue (append (flatten-linkval val)
                       (list (cdr f))))))
                  ; If 'val' is not null and it's not an atom, it's a
-                 ; LinkValue, based on the way it's being used here in
+                 ; SeqValue, based on the way it's being used here in
                  ; GHOST, so turn it into a list and append it to 'val'
                  (else (cog-set-value! a-rule (car f)
-                   (apply LinkValue (append (flatten-linkval val)
+                   (apply SeqValue (append (flatten-linkval val)
                      (flatten-linkval (cdr f))))))))
               ((string=? "last-executed" key-str)
                (cog-set-value! a-rule (car f) (cdr f)))))

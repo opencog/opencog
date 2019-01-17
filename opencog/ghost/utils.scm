@@ -269,7 +269,7 @@
 ; ----------
 (define (flatten-linkval LV)
 "
-  Given a LinkValue LV, flatten any nested LinkValues,
+  Given a SeqValue LV, flatten any nested SeqValues,
   with an assumption that the values are all atoms.
 
   A Scheme list will be returned as a result.

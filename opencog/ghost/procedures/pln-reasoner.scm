@@ -167,7 +167,7 @@
 "
   get-inference-inputs TRAIL
 
-  Retuns a LinkValue of the latest inputs passed to be inferred by using TRAIL
+  Retuns a SeqValue of the latest inputs passed to be inferred by using TRAIL
 "
   (cog-value trail inference-inputs-key)
 )

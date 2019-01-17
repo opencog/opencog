@@ -2,7 +2,7 @@
 
 (define (get-inferred-atoms trail)
     (define result (cog-value trail inference-results-key))
-    (if (null? result) (LinkValue) result)
+    (if (null? result) (SeqValue) result)
 )
 
 (define (get-names atom-list)

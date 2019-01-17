@@ -48,14 +48,14 @@
       (define val (cog-value RULE k))
       (cond
         ((string=? "unkeep" key-str)
-         ; 'val' here should be a LinkValue of rule labels
+         ; 'val' here should be a SeqValue of rule labels
          (for-each
            (lambda (r)
              (cog-set-tv! r (cog-new-stv 0 (cog-stv-confidence r))))
            (append-map (lambda (x) (get-rules-from-label (cog-name x)))
              (cog-value->list val))))
         ((string=? "mark-executed" key-str)
-         ; 'val' here should be a LinkValue of rule labels
+         ; 'val' here should be a SeqValue of rule labels
          (for-each
            (lambda (lb)
              (Evaluation ghost-rule-executed (List lb))

@@ -101,7 +101,7 @@ some pretty important.
 
 * The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
   the `lg-dict-entry` method instead. Alternately, perhaps the
-  `lg-get-dict-entry` could be redesigned to return a LinkValue,
+  `lg-get-dict-entry` could be redesigned to return a SeqValue,
   instead?
 
 * The `lg-get-dict-entry` and `lg-dict-entry` methods fail to perform

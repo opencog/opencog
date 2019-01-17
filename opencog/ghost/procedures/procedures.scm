@@ -955,16 +955,16 @@
   set-value! SENT SOURCE VALUE
 
   Returns SENT after associating SOURCE with VALUE. It differs from cog-value
-  b/c it uses a LinkValue of values so as to store time information.
+  b/c it uses a SeqValue of values so as to store time information.
 "
-  (cog-set-value! sent source (LinkValue value (FloatSeqValue (current-time-us))))
+  (cog-set-value! sent source (SeqValue value (FloatSeqValue (current-time-us))))
 )
 
 (define (get-value sent source index)
 "
   get-value SENT SOURCE INDEX
 
-  Returns the value at INDEX of the LinkValue, that is returned when
+  Returns the value at INDEX of the SeqValue, that is returned when
   running (cog-value SENT SOURCE).
 "
   (let ((link-value (cog-value sent source)))
