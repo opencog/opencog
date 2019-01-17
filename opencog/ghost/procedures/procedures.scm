@@ -858,7 +858,7 @@
 "
   (define src (Concept name))
   (Inheritance src source-node)
-  (cog-set-value! src source-func-name-key (StringValue func-name))
+  (cog-set-value! src source-func-name-key (StringSeqValue func-name))
 )
 
 (define (source-func-name source)
@@ -876,7 +876,7 @@
 
   Returns SENT after recording the QUERY, which is a string.
 "
-  (cog-set-value! sent source-query-key (StringValue query))
+  (cog-set-value! sent source-query-key (StringSeqValue query))
 )
 
 (define (source-query sent)
@@ -920,7 +920,7 @@
   It also signals that processing is completed.
 "
   ; The order here matters for source-has-result?
-  (set-value! sent source (StringValue result))
+  (set-value! sent source (StringSeqValue result))
   (source-set-processing! source sent (stv 0 1))
   *unspecified*
 )

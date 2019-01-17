@@ -53,7 +53,7 @@
   (cog-set-value!
     function
     (Predicate "is_evaluatable?")
-    (StringValue is-eval))
+    (StringSeqValue is-eval))
 
   ; Record the function with the component-node used to represent it.
   (cog-set-value!

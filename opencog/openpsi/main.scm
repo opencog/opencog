@@ -55,7 +55,7 @@
     )
 
     ; Add a value for controlling whether to keep on running the loop or not.
-    (cog-set-value! component (Predicate "run-loop") (StringValue "#f"))
+    (cog-set-value! component (Predicate "run-loop") (StringSeqValue "#f"))
 
     ; Add a value for counting the number of times the psi-step has
     ; been executed
@@ -101,7 +101,7 @@
 "
   (if (not (psi-running? component))
     (begin
-      (cog-set-value! component (Predicate "run-loop") (StringValue "#t"))
+      (cog-set-value! component (Predicate "run-loop") (StringSeqValue "#t"))
       (call-with-new-thread
         (lambda () (cog-evaluate! (cog-value component (Predicate "loop"))))))
   )
@@ -141,7 +141,7 @@
   Halts COMPONENT's previously-started psi loop thread. The thread is
   started by calling `(psi-run COMPONENT)`.
 "
-  (cog-set-value! component (Predicate "run-loop") (StringValue "#f"))
+  (cog-set-value! component (Predicate "run-loop") (StringSeqValue "#f"))
 )
 
 ; --------------------------------------------------------------

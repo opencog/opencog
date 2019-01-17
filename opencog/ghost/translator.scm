@@ -600,7 +600,7 @@
 (define (process-type TYPE NAME)
 "
   Figure out what the type of the rule is, generate the needed atomese, and
-  return the type as a StringValue.
+  return the type as a StringSeqValue.
 "
   (cond ((or (equal? #\u TYPE)
              (equal? #\s TYPE))

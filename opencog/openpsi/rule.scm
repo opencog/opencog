@@ -198,7 +198,7 @@
   ;(cog-set-value!
   ;  rule
   ;  psi-rule-name-predicate-node
-  ;  (StringValue name))
+  ;  (StringSeqValue name))
 )
 
 ; --------------------------------------------------------------

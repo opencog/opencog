@@ -75,10 +75,10 @@
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
 (define ghost-rej-seq-num (Predicate (ghost-prefix "Rejoinder Sequence Number")))
 (define ghost-context-specificity (Predicate (ghost-prefix "Context Specificity")))
-(define strval-rejoinder (StringValue "rejoinder"))
-(define strval-responder (StringValue "responder"))
-(define strval-random-gambit (StringValue "random gambit"))
-(define strval-gambit (StringValue "gambit"))
+(define strval-rejoinder (StringSeqValue "rejoinder"))
+(define strval-responder (StringSeqValue "responder"))
+(define strval-random-gambit (StringSeqValue "random gambit"))
+(define strval-gambit (StringSeqValue "gambit"))
 
 ;; --------------------
 (define-public (ghost-word-seq-pred)
