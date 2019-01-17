@@ -28,6 +28,9 @@ jobs:
             mkdir -p /ws/cogutil/build
             cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
             ldconfig
+      - run:
+          name: Checkout AtomSpace
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace /ws/atomspace
       - restore_cache:
           name: Restore GCH Cache
           keys:
@@ -39,7 +42,6 @@ jobs:
       - run:
           name: Install AtomSpace
           command: |
-            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace /ws/atomspace
             mkdir -p /ws/atomspace/build
             cd /ws/atomspace/build && cmake .. && make -j4 && make -j4 install
             ldconfig
