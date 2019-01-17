@@ -2818,7 +2818,7 @@ void PatternMiner::quoteAPattern(HTreeNode* hTreeNode)
     valuelist.push_back((double)hTreeNode->interactionInformation);
     valuelist.push_back((double)hTreeNode->nI_Surprisingness);
     valuelist.push_back((double)hTreeNode->nII_Surprisingness);
-    ValuePtr pv = createFloatValue(valuelist);
+    ValuePtr pv = createFloatSeqValue(valuelist);
     quotedPatternLink->setValue(PatternValuesHandle, pv);
 }
 

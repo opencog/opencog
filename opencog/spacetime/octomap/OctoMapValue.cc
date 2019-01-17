@@ -14,7 +14,7 @@ void OctoValue::update() const
     _value = {it->x(), it->y(), it->z()};
 }
 
-OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
+OctoValue::OctoValue(const HandleSeq& hseq) : FloatSeqValue(OCTO_VALUE)
 {
 
     if( hseq.size() != 2) {

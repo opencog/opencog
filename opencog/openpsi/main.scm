@@ -59,7 +59,7 @@
 
     ; Add a value for counting the number of times the psi-step has
     ; been executed
-    (cog-set-value! component (Predicate "loop-count") (FloatValue 0))
+    (cog-set-value! component (Predicate "loop-count") (FloatSeqValue 0))
 
     ; Define the loop that would be run. This is stored as value so as
     ; to save on searching for it in the atomspace and make it accessible
@@ -172,7 +172,7 @@
       component rule))
 
   (let ((lc (psi-loop-count component)))
-    (cog-set-value! component (Predicate "loop-count") (FloatValue (+ lc 1)))
+    (cog-set-value! component (Predicate "loop-count") (FloatSeqValue (+ lc 1)))
 
     (cog-logger-debug opl
       "In component ~a taking one psi-step, loop-count = ~a" component lc)

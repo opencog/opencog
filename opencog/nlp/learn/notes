@@ -3088,7 +3088,7 @@ select count(*) from  atoms where type =73;   396255 this is words
 select count(*) from  atoms where type =47;   9045489 this is pairs
 select count(*) from  atoms where type =8;    9045489 this is list links
 
-select count(*) from valuations where type=121;  -- FloatValue
+select count(*) from valuations where type=121;  -- FloatSeqValue
  select * from valuations where type != 176 and type != 177 limit 50;
 select count(*) from valuations where type != 176 and type != 177;
 
@@ -3614,7 +3614,7 @@ generality; so for example the normalized word frequency is stored as
 (Valuation
     (WordNode "foo")
     (PredicateNode "*-Frequency Key-*")
-    (FloatValue 0.1234567 3.018))
+    (FloatSeqValue 0.1234567 3.018))
 
 Note that "Valuation" is like an EvaluationLink but different.
 The first number is the normalized frequency of observation N(foo) / N(all words)
@@ -4514,7 +4514,7 @@ all pairs of above with cosine > 0.5
 
 store-sim
  (sim-pair WORD-A WORD-B) cos-key
-            (FloatValue SIM (get-angle SIM)))
+            (FloatSeqValue SIM (get-angle SIM)))
 (define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
 (define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
@@ -10766,7 +10766,7 @@ what's faster: looking it up, or on-the-fly recompute?
 	(define (get-val PR)
 		(cog-value-ref (cog-value PR cos-fkey) 0))
 	(define (set-val PR VAL)
-		(cog-set-value! PR cos-fkey (FloatValue VAL)))
+		(cog-set-value! PR cos-fkey (FloatSeqValue VAL)))
 	(define wpr (ListLink wa wb))
 	(define got
 		(catch #t
@@ -11311,7 +11311,7 @@ is correct.
 
 Ohhh....
 
-(cog-set-value! (Word "the") (Predicate "foobar") (FloatValue 1.0e-12))
+(cog-set-value! (Word "the") (Predicate "foobar") (FloatSeqValue 1.0e-12))
 
 Fuuuuuu
 
@@ -12246,7 +12246,7 @@ $26 = (struct Handle &) @0x7ffc6ba59d90: {<No data fields>}
 
 (define foo (Predicate "foo"))
 (cog-value sec foo)
-(cog-set-value! sec foo (FloatValue 1 ))
+(cog-set-value! sec foo (FloatSeqValue 1 ))
 wtf
 "Atom not in atomspace" ??? Ahh!
 
@@ -12551,7 +12551,7 @@ Fuu
 (define (mov-sim ato)
 	(define sim (cog-value ato cos-key))
 	(cog-set-value! ato cut-key sim)
-	(cog-set-value! ato cos-key (FloatValue 0.0))
+	(cog-set-value! ato cos-key (FloatSeqValue 0.0))
 	#f)
 (cog-map-type mov-sim 'SimilarityLink)
 
@@ -12559,7 +12559,7 @@ Fuu
 (define psb (batch-similarity psa #f))
 (define (new-sim ato)
 	(define fsim (pss 'compute-similarity (gar ato) (gdr ato)))
-	(cog-set-value! ato cos-key (FloatValue fsim))
+	(cog-set-value! ato cos-key (FloatSeqValue fsim))
 	#f)
 
 (cog-map-type new-sim 'SimilarityLink)
@@ -12624,7 +12624,7 @@ A (length (cog-incoming-by-type A 'Section))
 B (length (cog-incoming-by-type B 'Section)))
       (psm 'set-pair-similarity
            (SimilarityLink A B) 
-          (FloatValue (pac 'right-cosine A  B))))))
+          (FloatSeqValue (pac 'right-cosine A  B))))))
 
 ;          (compute-right-cosine A  B)))))
 
@@ -14637,7 +14637,7 @@ What's with the NaN's ?
 (cog-value
  (List (Any "cross-connector word") (Any "cross-connector section"))
  (Predicate "*-Total Entropy Key-*"))
-(FloatValue 21.192079534319085 -nan 23.187774484654337)
+(FloatSeqValue 21.192079534319085 -nan 23.187774484654337)
 (compute-right-entropy)
 
  (define (right-sum FN)
@@ -14670,7 +14670,7 @@ OK, great, but that is not the total MI ... Why ???
 which is 
 (cog-value (List (Any "cross-connector word") (Any "cross-connector section"))
 (PredicateNode "*-Total MI Key-*"))
-$34 = (FloatValue 9.0982793869337666)
+$34 = (FloatSeqValue 9.0982793869337666)
 
 (right-sum (lambda (x) (frqobj 'right-wild-mi x))) $35 = 9.098279386856897
 (left-sum (lambda (x) (frqobj 'left-wild-mi x)))   $36 = 9.098279386933767
@@ -16167,7 +16167,7 @@ wtf
 (SimilarityLink (WordNode "Your") (WordNode "indeed"))
 (bmi 'compute-similarity (WordNode "hour") (WordNode "Let"))
 ahh its -infity
-(FloatValue -inf)
+(FloatSeqValue -inf)
 
 
 (define (prt-sim sim port)

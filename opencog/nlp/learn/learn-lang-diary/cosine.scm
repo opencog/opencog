@@ -136,7 +136,7 @@
 	(define (get-val PR)
 		(cog-value-ref (cog-value PR KEY) 0))
 	(define (set-val PR VAL)
-		(cog-set-value! PR KEY (FloatValue VAL)))
+		(cog-set-value! PR KEY (FloatSeqValue VAL)))
 
 	; Where to check for values
 	(define wpr (ListLink wa wb))

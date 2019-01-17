@@ -54,7 +54,7 @@
 (define (set-freq ATOM FREQ)
 	; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 	(define ln2 (* -1.4426950408889634 (log FREQ)))
-	(cog-set-value! ATOM freq-key (FloatValue FREQ ln2))
+	(cog-set-value! ATOM freq-key (FloatSeqValue FREQ ln2))
 )
 
 ; ---------------------------------------------------------------------

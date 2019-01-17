@@ -293,10 +293,10 @@
 
 (define (record-perception model new-conf)
   (let ((old-conf (cog-confidence model))
-    (time (FloatValue (current-time-us))))
+    (time (FloatSeqValue (current-time-us))))
 
     (if percep (begin
-      (set-time-perceived! model (FloatValue (current-time-us)))
+      (set-time-perceived! model (FloatSeqValue (current-time-us)))
       (set-event-times! model old-conf new-conf time)
       (cog-set-tv! model (stv 1 new-conf))
       (cog-stimulate model default-stimulus)))
@@ -390,7 +390,7 @@
   (define wn (Word word))
   (define cn (Concept word))
   (if percep (begin
-    (set-time-perceived! wn (FloatValue (current-time-us)))
+    (set-time-perceived! wn (FloatSeqValue (current-time-us)))
     (run-hook hook-perceive-word)
     (perception-stimulate wn)
     (perception-stimulate cn)))
@@ -957,7 +957,7 @@
   Returns SENT after associating SOURCE with VALUE. It differs from cog-value
   b/c it uses a LinkValue of values so as to store time information.
 "
-  (cog-set-value! sent source (LinkValue value (FloatValue (current-time-us))))
+  (cog-set-value! sent source (LinkValue value (FloatSeqValue (current-time-us))))
 )
 
 (define (get-value sent source index)

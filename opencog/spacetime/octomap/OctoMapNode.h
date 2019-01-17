@@ -36,7 +36,7 @@ namespace opencog
 // OctomapNode is a wrapper class around the TimeOctoMap library
 // and inherits from Node. The need for this wrapper arose while
 // designing a new API for TimeOctoMap where cordinates are returned
-// as FloatValues instead of atoms(which is more expensive both computationally
+// as FloatSeqValues instead of atoms(which is more expensive both computationally
 // and memory wise). Since these values must be persisited in the Time
 // OctoMap via the API provided by the Value system, we needed a mechanism
 // to directly access the TimeOctoMap library from Scheme without spending

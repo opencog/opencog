@@ -867,7 +867,7 @@
         (cog-set-value! a-rule ghost-rule-type type)
 
         ; Set how specific the context of the rule is
-        (cog-set-value! a-rule ghost-context-specificity (FloatValue specificity))
+        (cog-set-value! a-rule ghost-context-specificity (FloatSeqValue specificity))
 
         ; Keep track of the rule hierarchy, and link rules that
         ; are defined in a sequence
@@ -888,7 +888,7 @@
             ; This is used during matching, basically rejoinders is treated
             ; as a sequence, and the one defined first will be matched first
             ; if it satisfies the context
-            (cog-set-value! a-rule ghost-rej-seq-num (FloatValue
+            (cog-set-value! a-rule ghost-rej-seq-num (FloatSeqValue
               (length (list-ref rule-hierarchy (get-rejoinder-level TYPE))))))
           (begin
             ; If it's not a rejoinder, its parent rules should

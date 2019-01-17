@@ -63,7 +63,7 @@
                (lambda (r)
                  (cog-set-value! r
                    ghost-time-last-executed
-                     (FloatValue (current-time))))
+                     (FloatSeqValue (current-time))))
                (get-rules-from-label (cog-name lb))))
             (cog-value->list val)))
         ((string=? "last-executed" key-str)

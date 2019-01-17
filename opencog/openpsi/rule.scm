@@ -31,7 +31,7 @@
 
   Set the goal-value of GOAL to GV. GV is a number.
 "
-  (cog-set-value! goal (Predicate "value") (FloatValue gv))
+  (cog-set-value! goal (Predicate "value") (FloatSeqValue gv))
 )
 
 ; --------------------------------------------------------------
@@ -54,7 +54,7 @@
 
   Returns GOAL after setting its desired-goal-value to NUM.
 "
-  (cog-set-value! goal dgv-key (FloatValue num))
+  (cog-set-value! goal dgv-key (FloatSeqValue num))
 )
 
 ; --------------------------------------------------------------

@@ -105,7 +105,7 @@
 (define value-key (Predicate "psi-param-value"))
 
 (define (set-value! atom num)
-  (cog-set-value! atom value-key (FloatValue num))
+  (cog-set-value! atom value-key (FloatSeqValue num))
 )
 
 (define (psi-param name)

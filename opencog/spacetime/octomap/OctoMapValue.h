@@ -3,7 +3,7 @@
 
 
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/FloatSeqValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -23,7 +23,7 @@ namespace opencog
 // OctoValue provides the latest 3d coordinate position
 // of an atom.
 
-class OctoValue : public FloatValue
+class OctoValue : public FloatSeqValue
 {
 private:
     std::shared_ptr<TimeOctomap<Handle>>   _om;

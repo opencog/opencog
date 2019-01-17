@@ -277,7 +277,7 @@
   If TIMER-ID is not given, a default timer will be used.
 "
   (set-time-perceived! (Concept (cog-name timer-id))
-    (FloatValue (current-time-us)))
+    (FloatSeqValue (current-time-us)))
   fini
 )
 
