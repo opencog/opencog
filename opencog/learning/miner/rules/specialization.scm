@@ -56,7 +56,7 @@
 ;;     <ms>
 ;;
 ;; assuming that tv1 and tv2 are equal to (stv 1 1), then calculate
-;; the frequency of the composed pattern and set tv3 accordingly, (stv
+;; the support of the composed pattern and set tv3 accordingly, (stv
 ;; 1 1) if g composed with f has support ms, (stv 0 1) otherwise.
 ;;
 ;; <f> may either a pattern with one link all variables as outgoings,

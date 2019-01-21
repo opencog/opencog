@@ -238,12 +238,12 @@ HandleTree Miner::specialize_shapat(const Handle& pattern,
 bool Miner::enough_support(const Handle& pattern,
                            const HandleSet& texts) const
 {
-	return param.minsup <= freq(pattern, texts, param.minsup);
+	return param.minsup <= support(pattern, texts, param.minsup);
 }
 
-unsigned Miner::freq(const Handle& pattern,
-                     const HandleSet& texts,
-                     unsigned ms) const
+unsigned Miner::support(const Handle& pattern,
+                        const HandleSet& texts,
+                        unsigned ms) const
 {
 	HandleSeq cps(MinerUtils::get_component_patterns(pattern));
 
@@ -251,18 +251,18 @@ unsigned Miner::freq(const Handle& pattern,
 	if (cps.empty())
 	    return 1;
 
-	// Otherwise aggregate the frequencies in a heuristic fashion
-	std::vector<unsigned> freqs;
-	boost::transform(cps, std::back_inserter(freqs),
+	// Otherwise aggregate the counts in a heuristic fashion
+	std::vector<unsigned> supports;
+	boost::transform(cps, std::back_inserter(supports),
 	                 [&](const Handle& cp)
 	                 { return MinerUtils::component_support(cp, texts, ms); });
-	return freq(freqs);
+	return support(supports);
 }
 
-unsigned Miner::freq(const std::vector<unsigned>& freqs) const
+unsigned Miner::support(const std::vector<unsigned>& supports) const
 {
-	double minf = *boost::min_element(freqs),
-		timesf = boost::accumulate(freqs, 1, std::multiplies<unsigned>()),
+	double minf = *boost::min_element(supports),
+		timesf = boost::accumulate(supports, 1, std::multiplies<unsigned>()),
 		f = param.info * minf + (1 - param.info) * timesf;
 	return std::floor(f);
 }
