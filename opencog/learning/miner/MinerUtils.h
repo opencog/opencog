@@ -421,6 +421,16 @@ public:
 	                                    const HandleSet& texts,
 	                                    unsigned ms);
 
+	/**
+	 * Return an atom to serve as key to store the count value.
+	 */
+	static const Handle& count_key();
+
+	/**
+	 * Set/get the count of a pattern.
+	 */
+	static void set_count(Handle& pattern, unsigned count);
+	static unsigned get_count(const Handle& pattern);
 };
 
 } // ~namespace opencog

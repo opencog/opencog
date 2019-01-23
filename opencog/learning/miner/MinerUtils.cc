@@ -40,6 +40,7 @@
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace opencog
 {
@@ -736,6 +737,24 @@ HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
 	}
 
 	return patterns;
+}
+
+const Handle& MinerUtils::count_key()
+{
+	static Handle ck(createNode(NODE, "*-CountValueKey-*"));
+	return ck;
+}
+
+void MinerUtils::set_count(Handle& pattern, unsigned count)
+{
+	FloatValuePtr count_fv = createFloatValue(boost::numeric_cast<double>(count));
+	pattern->setValue(count_key(), ValueCast(count_fv));
+}
+
+unsigned MinerUtils::get_count(const Handle& pattern)
+{
+	FloatValuePtr count_fv = FloatValueCast(pattern->getValue(count_key()));
+	return boost::numeric_cast<unsigned>(count_fv->value().front());
 }
 
 } // namespace opencog
