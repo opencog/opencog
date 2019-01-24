@@ -291,7 +291,7 @@
     (declarations
       (CONCEPT ID declaration-sequence) :
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
-      (UVAR EQUAL name) : (create-user-variable $1 $3)
+      (UVAR EQUAL strs) : (create-user-variable $1 $3)
     )
 
     (declaration-sequence
@@ -318,25 +318,25 @@
     ; Rule grammar
     (rule
       ; ----- Responders ----- ;
-      (rule-goal rule-lconcept RESPONDERS name context action) :
+      (rule-goal rule-lconcept RESPONDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $4 $3 $2)
-      (rule-lconcept rule-goal RESPONDERS name context action) :
+      (rule-lconcept rule-goal RESPONDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $2 ")"))
           $4 $3 $1)
-      (rule-goal RESPONDERS name context action) :
+      (rule-goal RESPONDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $3 $2 (list))
-      (rule-lconcept RESPONDERS name context action) :
+      (rule-lconcept RESPONDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
@@ -364,7 +364,7 @@
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (list) "" $2 $1)
-      (RESPONDERS name context action) :
+      (RESPONDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
@@ -375,25 +375,25 @@
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $1 (list))
       ; ----- Rejoinders ----- ;
-      (rule-goal rule-lconcept REJOINDERS name context action) :
+      (rule-goal rule-lconcept REJOINDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $4 $3 $2)
-      (rule-lconcept rule-goal REJOINDERS name context action) :
+      (rule-lconcept rule-goal REJOINDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $2 ")"))
           $4 $3 $1)
-      (rule-goal REJOINDERS name context action) :
+      (rule-goal REJOINDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $3 $2 (list))
-      (rule-lconcept REJOINDERS name context action) :
+      (rule-lconcept REJOINDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
@@ -421,7 +421,7 @@
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (list) "" $2 $1)
-      (REJOINDERS name context action) :
+      (REJOINDERS str context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
@@ -432,29 +432,29 @@
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $1 (list))
       ; ----- Gambits ----- ;
-      ; Note, do not support a gambit that has a "name"
+      ; Note, do not support a gambit that has a label
       ; but no context -- it's ambiguous to determine
-      ; whether it's really a "name" or just the first
+      ; whether it's really a label or just the first
       ; word of the "action"
-      (rule-goal rule-lconcept GAMBIT name context action) :
+      (rule-goal rule-lconcept GAMBIT str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $4 $3 $2)
-      (rule-lconcept rule-goal GAMBIT name context action) :
+      (rule-lconcept rule-goal GAMBIT str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $2 ")"))
           $4 $3 $1)
-      (rule-goal GAMBIT name context action) :
+      (rule-goal GAMBIT str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $3 $2 (list))
-      (rule-lconcept GAMBIT name context action) :
+      (rule-lconcept GAMBIT str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
@@ -506,8 +506,8 @@
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $2 $1)
       ; Same as the above, context is needed for a
-      ; named gambit
-      (GAMBIT name context action) :
+      ; labeled gambit
+      (GAMBIT str context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
@@ -553,11 +553,11 @@
     )
 
     (link-concept
-      (LINK-CONCEPT LPAREN names RPAREN) : $3
+      (LINK-CONCEPT LPAREN strs RPAREN) : $3
     )
 
     (rule-lconcept
-      (RLINK-CONCEPT LPAREN names RPAREN) : (string-split $3 #\sp)
+      (RLINK-CONCEPT LPAREN strs RPAREN) : (string-split $3 #\sp)
     )
 
     (context
@@ -621,7 +621,7 @@
       ; e.g. $username
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
       ; e.g. $username=Bob
-      (UVAR EQUAL name) :
+      (UVAR EQUAL str) :
         (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
       ; e.g. $username='_0
       (UVAR EQUAL variable-grounding) :
@@ -752,22 +752,23 @@
     )
 
     (function
-      (^ name LPAREN args RPAREN) :
+      (^ str LPAREN args RPAREN) :
         (format #f "(cons 'function (list \"~a\" ~a))" $2 $4)
-      (^ name LPAREN RPAREN) :
+      (^ str LPAREN RPAREN) :
         (format #f "(cons 'function (list \"~a\"))" $2)
-      (^ name) :
+      (^ str) :
         (format #f "(cons 'function (list \"~a\"))" $2)
     )
 
-    (names
-      (name) : $1
-      (names name) : (format #f "~a ~a" $1 $2)
+    (strs
+      (str) : $1
+      (strs str) : (format #f "~a ~a" $1 $2)
     )
 
-    (name
+    (str
       (LEMMA) : $1
       (LITERAL) : $1
+      (LITERAL_APOS) : $1
       (STRING) : $1
       (NUM) : $1
     )
@@ -854,13 +855,13 @@
 
     (tts-member
       (COMMA) : ""
-      (name) : (format #f "(cons 'str \"~a\")" $1)
+      (str) : (format #f "(cons 'str \"~a\")" $1)
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
 
     (right-compare
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
-      (name) : (format #f "(cons 'str \"~a\")" $1)
+      (str) : (format #f "(cons 'str \"~a\")" $1)
       (DQUOTE phrase-terms DQUOTE) : (format #f "(cons 'str \"~a\")" $2)
       (concept) : $1
       (function) : $1
