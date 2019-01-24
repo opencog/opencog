@@ -768,6 +768,7 @@
     (str
       (LEMMA) : $1
       (LITERAL) : $1
+      (LITERAL_APOS) : $1
       (STRING) : $1
       (NUM) : $1
     )
