@@ -270,7 +270,7 @@
       (ordered-goal) :
         (create-top-lv-goal (eval-string (string-append "(list " $1 ")")) #t)
       (PARALLEL-RULES) : (create-top-lv-goal (list (cons "Parallel-Rules" 1)))
-      (link-concept) : (link-rule-to-concepts (string-split $1 #\sp))
+      (link-concept) : (link-rule-to-concepts $1)
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -558,7 +558,7 @@
     )
 
     (link-concept
-      (LINK-CONCEPT LPAREN strs RPAREN) : $3
+      (LINK-CONCEPT LPAREN strs RPAREN) : (string-split $3 #\sp)
     )
 
     (rule-lconcept
