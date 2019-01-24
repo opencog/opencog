@@ -291,7 +291,7 @@
     (declarations
       (CONCEPT ID declaration-sequence) :
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
-      (UVAR EQUAL name) : (create-user-variable $1 $3)
+      (UVAR EQUAL names) : (create-user-variable $1 $3)
     )
 
     (declaration-sequence
