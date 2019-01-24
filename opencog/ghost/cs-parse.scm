@@ -542,7 +542,12 @@
 
     (goal-members
       (goal-member) : $1
+      ; Support both space-separated and comma-separated declaration
+      ; For example:
+      ; goal: (novelty=0.67 please_user=0.4)
+      ; goal: (novelty=0.67, please_user=0.4)
       (goal-members goal-member) : (format #f "~a ~a" $1 $2)
+      (goal-members COMMA goal-member) : (format #f "~a ~a" $1 $3)
     )
 
     (goal-member
