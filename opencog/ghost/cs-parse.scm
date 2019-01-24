@@ -558,11 +558,16 @@
     )
 
     (link-concept
-      (LINK-CONCEPT LPAREN strs RPAREN) : (string-split $3 #\sp)
+      (LINK-CONCEPT LPAREN lconcept-members RPAREN) : (string-split $3 #\,)
     )
 
     (rule-lconcept
-      (RLINK-CONCEPT LPAREN strs RPAREN) : (string-split $3 #\sp)
+      (RLINK-CONCEPT LPAREN lconcept-members RPAREN) : (string-split $3 #\,)
+    )
+
+    (lconcept-members
+      (strs) : $1
+      (strs COMMA strs) : (format #f "~a,~a" $1 $3)
     )
 
     (context
