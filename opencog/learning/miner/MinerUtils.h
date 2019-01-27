@@ -422,15 +422,15 @@ public:
 	                                    unsigned ms);
 
 	/**
-	 * Return an atom to serve as key to store the count value.
+	 * Return an atom to serve as key to store the support value.
 	 */
-	static const Handle& count_key();
+	static const Handle& support_key();
 
 	/**
-	 * Set/get the count of a pattern.
+	 * Set/get the support of a pattern.
 	 */
-	static void set_count(Handle& pattern, unsigned count);
-	static unsigned get_count(const Handle& pattern);
+	static void set_support(const Handle& pattern, unsigned support);
+	static unsigned get_support(const Handle& pattern);
 };
 
 } // ~namespace opencog

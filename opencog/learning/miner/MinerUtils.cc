@@ -110,8 +110,10 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 	// Only consider shallow abstractions that reach the minimum
 	// support
 	for (const auto& shapat : shapats)
-		if (ms <= shapat.second)
+		if (ms <= shapat.second) {
+			set_support(shapat.first, shapat.second);
 			shabs.insert(shapat.first);
+		}
 
 	////////////////////////////////
 	// Variable factorizations    //
@@ -175,8 +177,10 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 	// Only consider variable factorizations reaching the minimum
 	// support
 	for (const auto& fvar : facvars)
-		if (ms <= fvar.second)
+		if (ms <= fvar.second) {
+			set_support(fvar.first, fvar.second);
 			shabs.insert(fvar.first);
+		}
 
 	return shabs;
 }
@@ -403,6 +407,8 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 	for (const HandleSet& shabs : shabs_per_var) {
 		for (const Handle& sa : shabs) {
 			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
+			// Set the count of npat, stored in its shallow abstraction
+			set_support(npat, get_support(sa));
 			// Shallow_abstract should already have eliminated shallow
 			// abstraction that do not have enough support.
 			results.insert(npat);
@@ -739,22 +745,22 @@ HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
 	return patterns;
 }
 
-const Handle& MinerUtils::count_key()
+const Handle& MinerUtils::support_key()
 {
-	static Handle ck(createNode(NODE, "*-CountValueKey-*"));
+	static Handle ck(createNode(NODE, "*-SupportValueKey-*"));
 	return ck;
 }
 
-void MinerUtils::set_count(Handle& pattern, unsigned count)
+void MinerUtils::set_support(const Handle& pattern, unsigned support)
 {
-	FloatValuePtr count_fv = createFloatValue(boost::numeric_cast<double>(count));
-	pattern->setValue(count_key(), ValueCast(count_fv));
+	FloatValuePtr support_fv = createFloatValue(boost::numeric_cast<double>(support));
+	pattern->setValue(support_key(), ValueCast(support_fv));
 }
 
-unsigned MinerUtils::get_count(const Handle& pattern)
+unsigned MinerUtils::get_support(const Handle& pattern)
 {
-	FloatValuePtr count_fv = FloatValueCast(pattern->getValue(count_key()));
-	return boost::numeric_cast<unsigned>(count_fv->value().front());
+	FloatValuePtr support_fv = FloatValueCast(pattern->getValue(support_key()));
+	return boost::numeric_cast<unsigned>(support_fv->value().front());
 }
 
 } // namespace opencog
