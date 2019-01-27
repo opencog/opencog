@@ -42,3 +42,35 @@
 
 (define (not-equal-top x)
   (Not (equal-top x)))
+
+(define (powerset l)
+  (if (null? l)
+      '(())
+      (let ((rst (powerset (cdr l))))
+        (append (map (lambda (x) (cons (car l) x)) rst)
+                rst))))
+
+(define (copy-insert a l)
+"
+  Given `l`, a list of lists, insert `a` in each sublists `s` of `l`,
+  and return the list of all modifications of `l`. For instance
+
+  a = 4
+  l = ((1) (2 3))
+
+  return
+
+  ( ((4 1) (2 3)) ((1) (4 2 3)) ((1) (2 3) (4)) )
+"
+  (if (null? l)
+      (list (list (list a)))
+      (let ((rst (map (lambda (x) (cons (car l) x)) (copy-insert a (cdr l))))
+            (fst (cons (cons a (car l)) (cdr l))))
+        (cons fst rst))))
+
+(define (partitions l)
+  (if (null? l)
+      '(())
+      (let* ((rst (partitions (cdr l)))
+             (groups (map (lambda (x) (copy-insert (car l) x)) rst)))
+        (concatenate groups))))

@@ -29,6 +29,7 @@
 #include <opencog/atoms/core/NumberNode.h>
 
 #include "MinerUtils.h"
+#include "Surprisingness.h"
 
 namespace opencog {
 
@@ -94,6 +95,8 @@ protected:
 	Handle do_expand_conjunction(Handle cnjtion, Handle pattern,
 	                             Handle texts, Handle ms);
 
+	double do_ISurprisingness(Handle pattern, Handle partitions, Handle texts);
+
 public:
 	MinerSCM();
 };
@@ -124,6 +127,9 @@ void MinerSCM::init(void)
 
 	define_scheme_primitive("cog-expand-conjunction",
 		&MinerSCM::do_expand_conjunction, this, "miner");
+
+	define_scheme_primitive("cog-I-Surprisingness",
+		&MinerSCM::do_ISurprisingness, this, "miner");
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,

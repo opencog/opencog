@@ -773,7 +773,8 @@ void MinerUTest::test_AB_AC()
 	// Run URE pattern miner (using _as for testing more diverse
 	// content)
 	Handle ure_results = ure_pm(_as, 2, 10),
-		ure_expected = mk_minsup_eval(2, al(LAMBDA_LINK, Y, InhAY));
+		expected_pattern = al(LAMBDA_LINK, Y, InhAY),
+		ure_expected = mk_minsup_eval(2, expected_pattern);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -1488,6 +1489,9 @@ void MinerUTest::test_SodaDrinker_incremental()
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
 
 	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
+
+	// Test I-Surprisingness
+	// TODO
 }
 
 void MinerUTest::xtest_lojban()
