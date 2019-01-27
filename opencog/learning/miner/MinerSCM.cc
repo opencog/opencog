@@ -203,8 +203,17 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	HandleSet results = MinerUtils::expand_conjunction(cnjtion, pattern,
-	                                                   texts_set, ms_uint);
+	                                                   texts_set,
+	                                                   ms_uint);
 	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
+}
+
+double MinerSCM::do_ISurprisingness(Handle pattern, Handle partitions, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::ISurprisingness(pattern, partitions, texts_set, true);
 }
 
 extern "C" {
