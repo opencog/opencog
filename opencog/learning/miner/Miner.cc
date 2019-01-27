@@ -208,7 +208,7 @@ HandleTree Miner::specialize_shabs(const Handle& pattern,
 }
 
 HandleTree Miner::specialize_shapat(const Handle& pattern,
-                                    const HandleSet texts,
+                                    const HandleSet& texts,
                                     const Handle& var,
                                     const Handle& shapat,
                                     int maxdepth)
