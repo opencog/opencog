@@ -270,7 +270,7 @@
       (ordered-goal) :
         (create-top-lv-goal (eval-string (string-append "(list " $1 ")")) #t)
       (PARALLEL-RULES) : (create-top-lv-goal (list (cons "Parallel-Rules" 1)))
-      (link-concept) : (link-rule-to-concepts (string-split $1 #\sp))
+      (link-concept) : (link-rule-to-concepts $1)
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -542,7 +542,12 @@
 
     (goal-members
       (goal-member) : $1
+      ; Support both space (backward compatibility) and comma as the delimiter
+      ; For example:
+      ; goal: (novelty=0.67 please_user=0.4)
+      ; goal: (novelty=0.67, please_user=0.4)
       (goal-members goal-member) : (format #f "~a ~a" $1 $2)
+      (goal-members COMMA goal-member) : (format #f "~a ~a" $1 $3)
     )
 
     (goal-member
@@ -553,11 +558,17 @@
     )
 
     (link-concept
-      (LINK-CONCEPT LPAREN strs RPAREN) : $3
+      (LINK-CONCEPT LPAREN lconcept-members RPAREN) : (string-split $3 #\,)
     )
 
     (rule-lconcept
-      (RLINK-CONCEPT LPAREN strs RPAREN) : (string-split $3 #\sp)
+      (RLINK-CONCEPT LPAREN lconcept-members RPAREN) : (string-split $3 #\,)
+    )
+
+    ; Can only use comma as the delimiter for link-concept
+    (lconcept-members
+      (strs) : $1
+      (strs COMMA strs) : (format #f "~a,~a" $1 $3)
     )
 
     (context

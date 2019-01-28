@@ -97,7 +97,7 @@ Another experimantal feature has been added -- to select rules based on the patt
 2) Rule level goal(s)
 
 ```
-#goal: (novelty=0.67 please_user=0.4)
+#goal: (novelty=0.67, please_user=0.4)
 u: (what be you name) I forgot; what's YOUR name, sweet wonderful human
 ```
 
@@ -106,7 +106,7 @@ In this case, the goals will only be linked to the rule created immediately afte
 There is also an urge associated with a goal. The urge of a goal is 1 (maximum) by default. The default urge can be changed, and it should be done before creating the goal, for example:
 
 ```
-urge: (please_user=1 novelty=0.5)
+urge: (please_user=1, novelty=0.5)
 
 goal: (please_user=0.9)
   ; ... rules under the please_user goal ...
@@ -128,7 +128,7 @@ One can also optionally link one or more concepts to a rule, so that the importa
 
 ```
 ; top-level
-link-concept: (pets animals)
+link-concept: (pets, animals)
 
   ; ... rules link to both "pets" and "animals" concepts ...
 
