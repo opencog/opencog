@@ -542,7 +542,7 @@
 
     (goal-members
       (goal-member) : $1
-      ; Support both space and comma as the delimiter
+      ; Support both space (backward compatibility) and comma as the delimiter
       ; For example:
       ; goal: (novelty=0.67 please_user=0.4)
       ; goal: (novelty=0.67, please_user=0.4)
