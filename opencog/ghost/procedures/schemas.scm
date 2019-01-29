@@ -67,7 +67,7 @@
   )
 )
 
-(define (gaze_at face-id speed)
+(define (look face-id speed)
   (cog-execute! (Put (DefinedSchema "gaze-at") (List face-id speed)))
 )
 
@@ -81,7 +81,7 @@
   )
 )
 
-(define (gaze_at_cancel)
+(define (look_cancel)
   (cog-execute! (Put (DefinedSchema "gaze-at-cancel") (List)))
 )
 

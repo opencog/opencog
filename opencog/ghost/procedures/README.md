@@ -25,8 +25,8 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - emote
 - expression
 - fallback_on
-- gaze_at
-- gaze_at_cancel
+- look
+- look_cancel
 - gesture
 - get_neck_dir
 - increase_urge

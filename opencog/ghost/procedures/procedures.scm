@@ -83,8 +83,8 @@
     print-by-action-logger
     fallback_on
     shutup
-    gaze_at
-    gaze_at_cancel
+    look
+    look_cancel
     blink
     blink_cancel
     emote
