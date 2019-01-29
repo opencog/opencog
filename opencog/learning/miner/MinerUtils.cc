@@ -752,16 +752,18 @@ const Handle& MinerUtils::support_key()
 	return ck;
 }
 
-void MinerUtils::set_support(const Handle& pattern, unsigned support)
+void MinerUtils::set_support(const Handle& pattern, double support)
 {
 	FloatValuePtr support_fv = createFloatValue(boost::numeric_cast<double>(support));
 	pattern->setValue(support_key(), ValueCast(support_fv));
 }
 
-unsigned MinerUtils::get_support(const Handle& pattern)
+double MinerUtils::get_support(const Handle& pattern)
 {
 	FloatValuePtr support_fv = FloatValueCast(pattern->getValue(support_key()));
-	return boost::numeric_cast<unsigned>(support_fv->value().front());
+	if (support_fv)
+		return support_fv->value().front();
+	return -1.0;
 }
 
 } // namespace opencog

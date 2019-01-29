@@ -47,8 +47,13 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 	                         (double)MinerUtils::conjuncts(pattern));
 
 	// Function calculating the probability of a pattern
-	auto prob = [&total_count](const Handle& pattern) {
-		return (double)MinerUtils::get_support(pattern) / total_count;
+	auto prob = [&](const Handle& pattern) {
+		double sup = MinerUtils::get_support(pattern);
+		if (sup < 0) {
+			sup = MinerUtils::support(pattern, texts, (unsigned)total_count);
+			MinerUtils::set_support(pattern, sup);
+		}
+		return sup / total_count;
 	};
 
 	// Calculate the probability of pattern
@@ -82,6 +87,17 @@ double Surprisingness::ISurprisingness(const Handle& patterns,
 		                 return partition->getOutgoingSet();
 	                 });
 	return ISurprisingness(patterns, partitions_ss, texts, normalize);
+}
+
+Handle Surprisingness::ISurprisingness_key()
+{
+	static Handle isurp_key = createNode(NODE, "*-I-SurprisingnessValueKey-*");
+	return isurp_key;
+}
+
+double Surprisingness::get_ISurprisingness(const Handle& pattern)
+{
+	return FloatValueCast(pattern->getValue(ISurprisingness_key()))->value().front();
 }
 
 double Surprisingness::dst_from_interval(double l, double u, double v)

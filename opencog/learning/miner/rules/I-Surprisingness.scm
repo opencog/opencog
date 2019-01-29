@@ -33,15 +33,17 @@
 ;;     <texts>
 ;;     <ms>
 ;; |-
-;; Lambda (*-I-SurprisingnessValueKey-*: s)
-;;   <f-vardecl>
-;;   And
-;;     <cnj-body-1>
-;;     ...
-;;     <cnj-body-n>
-;;
-;; Where (*-I-SurprisingnessValueKey-*: s) stores the I-Surprisingness
-;; of the pattern.
+;; Evaluation (stv 1 1)
+;;   Predicate "I-Surprisingness"
+;;   List
+;;     Lambda
+;;       <f-vardecl>
+;;       And
+;;        <cnj-body-1>
+;;        ...
+;;        <cnj-body-n>
+;;     <texts>
+;;     <isurp>
 
 ;; Generate a rule to calculate the I-Surprisingness of a pattern that
 ;; is the conjunction of nary components.
@@ -64,7 +66,7 @@
   (define typed-ms (TypedVariable ms NumberT))
 
   (if (< 1 nary)
-      (let* ((cnj-vardecls (gen-variable "$cnj-vardecls" nary))
+      (let* ((cnj-vardecls (gen-variables "$cnj-vardecls" nary))
              (typed-var (lambda (x) (TypedVariable x varT)))
              (typed-cnj-vardecls (map typed-var cnj-vardecls))
              (cnj-bodies (gen-variables "$cnj-bodies" nary))
@@ -77,9 +79,10 @@
                   (Lambda
                     (Unquote f-vardecl)
                     (And
-                      (map Unquote f-cnj-bodies)))))
+                      (map Unquote cnj-bodies)))))
              (f-minsup (minsup-eval f texts ms))
-             (cnjs-minsups (map (lamdba (x) (minsup-eval x texts ms)) cnjs)))
+             (cnjs-minsups (map (lambda (x) (minsup-eval x texts ms)) cnjs))
+             (f-isurp (isurp-eval f texts)))
         (Bind
           (VariableList
             typed-f-vardecl
@@ -89,33 +92,35 @@
             typed-ms)
           (And
             f-minsup
-            cnj-minsups
+            cnjs-minsups
             (absolutely-true-eval f-minsup)
-            (map absolutely-true-eval cnj-minsups))
+            (map absolutely-true-eval cnjs-minsups))
           (ExecutionOutput
             (GroundedSchema "scm: I-Surprisingness-formula")
             (List
-              f
+              f-isurp
+              f-minsup
               (Set cnjs-minsups)))))))
 
 ;; I-Suprisingness formula
 (define (I-Surprisingness-formula conclusion . premises)
-  (let* ((pattern conclusion)
-         (cnjs-bodies (map get-body (map get-pattern premise)))
-         (cnjs-bodies-partitions (cdr (partitions cnjs-bodies)))
-         (texts (get-texts (car premise)))
-         (mk-and-block (lambda (block) (if (< 1 (length block))
-                                        (And block)
-                                        (car block))))
-         (mk-and-partition (lambda (partition) (List (map mk-and-block partition))))
-         (mk-and-partitions (lambda (partitions) (List (map mk-and-partition partitions))))
-         ;; List cnjs-bodies-partitions, but all blocks of length
-         ;; above 1 have been replaced by AndLinks, all partition
-         ;; blocks are represented as ListLinks, and the partition set
-         ;; is represented as ListLink
-         (partitions (List (mk-and-partitions cnjs-bodies-partitions)))
-         (I-Surprisingness (cog-I-surprisingness pattern partitions texts)))
-    (cog-set-value! pattern (Node "*-I-SurprisingnessValueKey-*") (FloatValue I-Surprisingness))))
+  ;; (cog-logger-debug "(I-Surprisingness-formula conclusion = ~a, premises = ~a"
+  ;;                   conclusion premises)
+
+  (if (= 2 (length premises))
+      (let* ((pat-isurp conclusion)
+             (pat-minsup (car premises))
+             (pat (get-pattern pat-minsup))
+             (cnjs-minsups (cog-outgoing-set (cadr premises)))
+             (cnjs (map get-pattern cnjs-minsups))
+             (texts (get-texts (car premises)))
+
+             ;; For now only consider conjuncts independently
+             (partitions (List (List cnjs)))
+
+             ;; Calculate I-Surprisingness of pat
+             (isurp (cog-I-Surprisingness pat partitions texts)))
+        (cog-set-tv! pat-isurp (stv isurp 1)))))
 
 ;; Define binary I-Surprisingness
 (define I-Surprisingness-2ary-rule-name

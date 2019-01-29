@@ -427,10 +427,18 @@ public:
 	static const Handle& support_key();
 
 	/**
-	 * Set/get the support of a pattern.
+	 * Attach the support of a pattern to support_key(). The support is
+	 * encoded as double because it is stored as a FloatValue, and its
+	 * subsequent processing (probability estimate, etc) requires a
+	 * double anyway.
 	 */
-	static void set_support(const Handle& pattern, unsigned support);
-	static unsigned get_support(const Handle& pattern);
+	static void set_support(const Handle& pattern, double support);
+
+	/**
+	 * Get the support of a pattern stored as associated value to
+	 * support_key(). If no such value exist then return -1.0.
+	 */
+	static double get_support(const Handle& pattern);
 };
 
 } // ~namespace opencog

@@ -128,6 +128,19 @@
                             #:incremental-expansion incremental-expansion
                             #:max-conjuncts max-conjuncts))
 
+(define* (configure-I-Surprisingness isurp-rbs max-conjuncts)
+  ;; Load I-Surprisingess rules
+  (let* ((base-rule-file "I-Surprisingness.scm")
+         (rule-pathfile (mk-full-rule-path base-rule-file))
+         (rule-fule (mk-full-rule-path base-rule-file))
+         (mk-rule-name (lambda (i) (string-append "I-Surprisingness-"
+                                                  (number->string i)
+                                                  "ary-rule")))
+         (mk-rule-alias (lambda (i) (DefinedSchema (mk-rule-name i))))
+         (rules (map mk-rule-alias (cdr (cdr (iota (+ max-conjuncts 1)))))))
+    (load-from-path rule-pathfile)
+    (ure-add-rules isurp-rbs rules)))
+
 (define* (configure-miner pm-rbs
                           #:key
                           (maximum-iterations 1000)
@@ -208,6 +221,21 @@
 "
   (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
 
+(define (isurp-eval pattern texts)
+"
+  Construct
+
+  Evaluation
+    Predicate \"I-Surprisingness\"
+    List
+      pattern
+      texts
+"
+  (Evaluation
+    (Predicate "I-Surprisingness")
+    (List
+      pattern
+      texts)))
 
 (define (get-members C)
 "
@@ -445,9 +473,11 @@
     configure-mandatory-rules
     configure-optional-rules
     configure-rules
+    configure-I-Surprisingness
     configure-miner
     minsup-eval
     minsup-eval-true
+    isurp-eval
     get-members
     get-cardinality
     fetch-patterns

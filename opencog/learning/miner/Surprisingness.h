@@ -81,6 +81,17 @@ public:
 	                              bool normalize=true);
 
 	/**
+	 * Return (Node "*-I-SurprisingnessValueKey-*")
+	 */
+	static Handle ISurprisingness_key();
+
+	/**
+	 * Retrieve the I-Surprisingness value of the given pattern
+	 * associated to (Node "*-I-SurprisingnessValueKey-*").
+	 */
+	static double get_ISurprisingness(const Handle& pattern);
+
+	/**
 	 * Return the distance between a value and an interval
 	 *
 	 * That is if the value, v, is higher than the upper bound, u, then it
