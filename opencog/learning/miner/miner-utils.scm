@@ -73,7 +73,7 @@
   texts-cpt)
 
 (define (mk-full-rule-path brf)
-  (let ((rule-path "opencog/miner/rules/"))
+  (let ((rule-path "opencog/learning/miner/rules/"))
     (string-append rule-path brf)))
 
 (define (configure-mandatory-rules pm-rbs)
@@ -85,7 +85,7 @@
                       ;; shallow-specialization.scm. For that reason
                       ;; we use its Atomese definition instead. This
                       ;; might be a guile bug.
-                      (DefinedSchemaNode "shallow-specialization-rule"))))
+                      (DefinedSchema "shallow-specialization-rule"))))
     (for-each load-from-path rule-files)
     (ure-add-rules pm-rbs rules)))
 

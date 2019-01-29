@@ -109,11 +109,12 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 
 	// Only consider shallow abstractions that reach the minimum
 	// support
-	for (const auto& shapat : shapats)
+	for (const auto& shapat : shapats) {
 		if (ms <= shapat.second) {
 			set_support(shapat.first, shapat.second);
 			shabs.insert(shapat.first);
 		}
+	}
 
 	////////////////////////////////
 	// Variable factorizations    //

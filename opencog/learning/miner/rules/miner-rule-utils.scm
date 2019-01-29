@@ -5,6 +5,8 @@
 
 ;; Given an atom created with minsup-eval, get the pattern, texts and
 ;; ms
+;;
+;; get-pattern and get-texts also work for isurp constructs
 (define (get-pattern minsup-f)
   (cog-outgoing-atom (gdr minsup-f) 0))
 (define (get-texts minsup-f)
