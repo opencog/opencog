@@ -40,20 +40,13 @@
     is_word_perceived
 
     ; Perceptual predicates for a talking face
-    new_talking
-    talking
-    end_talking
-    not_talking
+    is_talking
 
     ; Perceptual predicates for visibility of a face
-    new_face
-    face
-    end_face
+    is_face_perceived
 
     ; Perceptual predicates for emotion of a face
-    new_emotion
-    emotion
-    end_emotion
+    is_emotion
 
     ; Time related predicates
     is_after_min

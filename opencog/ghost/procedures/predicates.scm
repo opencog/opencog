@@ -100,190 +100,104 @@
   )
 )
 
-(define-syntax-rule
-  (define-face-predicates (model-func face-feature-nodes ...)
-    predicate-node signature-link
-    t-transitioning? t-occuring? f-transitioning? f-occuring?)
-  ; The definitons are not public so as to be able to control which
-  ; of them are exported by this module.
-  (begin
-    (define* (t-transitioning? face-feature-nodes ... #:optional face-id)
-      (if face-id
-        (true-event-occuring?
-          (get-model model-func face-id face-feature-nodes ...))
-        (any-check true-event-occuring? signature-link)
-      )
-    )
-    (Implication
-      (GroundedPredicate (format #f "scm: ~a" 't-transitioning?))
-       predicate-node)
+(define-syntax define-face-predicates (lambda (x)
+  (define (new-id id suffix)
+  "prefix = a string
+   id = a pattern variable(aka keyword, template-identifier).
+   See https://scheme.com/tspl4/syntax.html#./syntax:h4 for details.
+  "
+    (datum->syntax id (symbol-append (syntax->datum id) suffix)))
 
-    (define* (t-occuring? face-feature-nodes ... #:optional face-id)
-      (if face-id
-        (true-perception-occuring?
-          (get-model model-func face-id face-feature-nodes ...))
-        (any-check true-perception-occuring? signature-link)
-      )
-    )
-    (Implication
-      (GroundedPredicate (format #f "scm: ~a" 't-occuring?))
-       predicate-node)
+  (syntax-case x ()
+    ((_ (model-func face-feature-nodes ...)
+      predicate-node signature-link func-name)
+      (with-syntax ((new (new-id #'func-name '_new))
+                    (current (new-id #'func-name '_current))
+                    (end (new-id #'func-name '_end)))
+        #'(begin
+          ; NOTE: 'face-feature-nodes ...' will match 0 or more arguments that
+          ; 'func-name' accept.
+          (define* (new face-feature-nodes ... #:optional face-id)
+          ; Return (stv 1 1) if the face identified by FACE-ID is starting to
+          ; show the state that is identified by face-feature-node, within
+          ; the last event-period, otherwise returns (stv 0 1).
+          ; IF FACE-ID is not passed then the return value is for any person.
+            (if face-id
+              (true-event-occuring?
+                (get-model model-func face-id face-feature-nodes ...))
+              (any-check true-event-occuring? signature-link)
+            )
+          )
 
-    ; FIXME: This has issues when the window of perception (dti) is passed.
-    ; Just because we don't know it doesn't mean it is true
-    ;(define* (since-t? secs #:optional (face-id any-node))
-    ;  (since-event-started-occuring?
-    ;    (get-model model-func face-id face-feature-nodes ...)))
-    ;(Implication
-    ;  (GroundedPredicate (format #f "scm: ~a" 'since-t?))
-    ;   predicate-node)
+          (define* (current face-feature-nodes ... #:optional face-id)
+          ; Check if face with FACE-ID is showing the state that is identified
+          ; by face-feature-node.
+          ; IF FACE-ID is not passed then the return value is for any person.
+            (if face-id
+              (true-perception-occuring?
+                (get-model model-func face-id face-feature-nodes ...))
+              (any-check true-perception-occuring? signature-link)
+            )
+          )
 
-    (define* (f-transitioning? face-feature-nodes ... #:optional face-id)
-      (if face-id
-        (false-event-occuring?
-          (get-model model-func face-id face-feature-nodes ...))
-        (any-check false-event-occuring? signature-link)
-      )
-    )
-    (Implication
-      (GroundedPredicate (format #f "scm: ~a" 'f-transitioning?))
-       predicate-node)
+          (define* (end face-feature-nodes ... #:optional face-id)
+          ; Return (stv 1 1) if the face identified by FACE-ID is stopping
+          ; showing the state that is identified by face-feature-node,
+          ; within the last event-period, otherwise returns (stv 0 1).
+          ; IF FACE-ID is not passed then the return value is for any person.
+            (if face-id
+              (false-event-occuring?
+                (get-model model-func face-id face-feature-nodes ...))
+              (any-check false-event-occuring? signature-link)
+            )
+          )
 
-    (define* (f-occuring? face-feature-nodes ... #:optional face-id)
-      (define (not-occuring? faceid) (negate-stv! (t-occuring? faceid)))
-      (if face-id
-        (not-occuring? face-id)
-        (any-check not-occuring? signature-link #f)
-      )
-    )
-    (Implication
-      (GroundedPredicate (format #f "scm: ~a" 'f-occuring?))
-       predicate-node)
+          (define* (func-name state face-feature-nodes ... #:optional face-id)
+            (cond
+              ((equal? "new" (cog-name state))
+                 ('new face-feature-nodes ... face-id))
+              ((equal? "current" (cog-name state))
+                 ('current face-feature-nodes ... face-id))
+              ((equal? "end" (cog-name state))
+                 ('end face-feature-nodes ... face-id)))
+          )
+          ; NOTE: When the predicate-node is stimulated then rules that have
+          ; the GroundedPredicate will get stimulated during propogation of
+          ; the stimulation.
+          (Implication
+            (GroundedPredicate (format #f "scm: ~a" 'func-name))
+             predicate-node)
 
-    ; FIXME: This has issues when the window of perception (dti) is passed.
-    ; Just because we don't know it doesn't mean it is true
-    ;(define* (since-f? secs  #:optional (face-id any-node))
-    ;  (since-event-stopped-occuring?
-    ;    (get-model model-func face-id face-feature-nodes ...)))
-    ;(Implication
-    ;  (GroundedPredicate (format #f "scm: ~a" 'since-f?))
-    ;   predicate-node)
+;          (define* (f-occuring? face-feature-nodes ... #:optional face-id)
+           ; Check if face with FACE-ID is not showing the state that is
+           ; identified by face-feature-node.
+           ; IF FACE-ID is not passed then the return value is for any person.
+;            (define (not-occuring? faceid) (negate-stv! ('current faceid)))
+;            (if face-id
+;              (not-occuring? face-id)
+;              (any-check not-occuring? signature-link #f)
+;            )
+;          )
+          )))
   )
-)
+))
 
 ; --------------------------------------------------------------
 ; Define predicates for face-talking
 (define-face-predicates (face-talking)
-   face-talking-predicate face-talking-sign
-   new_talking
-   talking
-   end_talking
-   not_talking
+  face-talking-predicate face-talking-sign is_talking
 )
-
-(set-procedure-property! new_talking 'documentation
-"
-  new_talking [FACE-ID]
-
-  Return (stv 1 1) if the face identified by FACE-ID is starting to talk
-  within the last event-period, otherwise returns (stv 0 1).
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-)
-
-(set-procedure-property! talking 'documentation
-"
-  talking [FACE-ID]
-
-  Check if face with FACE-ID is talking.
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-)
-
-;(set-procedure-property! after_user_started_talking 'documentation
-;"
-;  after_user_started_talking SECS [FACE-ID]
-;
-;  Returns (stv 1 1) if current time >= the time that the user identified by
-;  FACE-ID started talking + SECS. Otherwise, returns (stv 0 1).
-;
-;  IF FACE-ID is not passed then the return value is for any person.
-;"
-;)
-
-(set-procedure-property! end_talking 'documentation
-"
-  end_talking [FACE-ID]
-
-  Return (stv 1 1) if the face identified by FACE-ID is stopping to talk
-  within the last event-period, otherwise returns (stv 0 1).
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-)
-
-(set-procedure-property! not_talking 'documentation
-"
-  not_talking [FACE-ID]
-
-  Check if face with FACE-ID is not talking.
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
-)
-
-;(set-procedure-property! after_user_stopped_talking 'documentation
-;"
-;  after_user_stopped_talking SECS [FACE-ID]
-;
-;  Returns (stv 1 1) if current time >= the time that the user identified by
-;  FACE-ID stopped talking + SECS. Otherwise, returns (stv 0 1).
-;
-;  IF FACE-ID is not passed then the return value is for any person.
-;"
-;)
 
 ; --------------------------------------------------------------
 ; Define predicates for face-visiblity
-(define-face-predicates (see-face) see-face-predicate see-face-sign
-   new_face
-   face
-   end_face
-   no_face
-)
-
-(set-procedure-property! face 'documentation
-"
-  face [FACE-ID]
-
-  Check if face with FACE-ID was seen.
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
+(define-face-predicates (see-face)
+  see-face-predicate see-face-sign is_face_perceived
 )
 
 ; --------------------------------------------------------------
 ; Define predicates for emotions of faces
 (define-face-predicates (face-emotion emotion-type)
-   face-emotion-predicate face-emotion-sign
-   new_emotion
-   emotion
-   end_emotion
-   no_emotion
-)
-
-(set-procedure-property! emotion 'documentation
-"
-  emotion EMOTION-TYPE [FACE-ID]
-
-  Check if face with FACE-ID was seen to have EMOTION-TYPE emotion.
-  Returns (stv 1 1) if the the model associated with FACE-ID is true,
-  within the default-time-interval, otherwise it returns (stv 0 1).
-
-  IF FACE-ID is not passed then the return value is for any person.
-"
+   face-emotion-predicate face-emotion-sign is_emotion
 )
 
 ; --------------------------------------------------------------
