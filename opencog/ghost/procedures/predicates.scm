@@ -310,9 +310,9 @@
 )
 
 ; --------------------------------------------------------------
-(define* (any_answer #:optional source)
+(define* (is_answer_received #:optional source)
 "
-  any_answer [SOURCE]
+  is_answer_received [SOURCE]
 
   Returns (stv 1 1) if SOURCE has a result and (stv 0 1) if not. If SOURCE
   is not passed then it will check if any of the sources have an answer, and

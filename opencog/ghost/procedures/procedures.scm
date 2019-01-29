@@ -59,7 +59,7 @@
     is_after_min
 
     ; Source predicates
-    any_answer
+    is_answer_received
 
     ; self-model
     neck_dir

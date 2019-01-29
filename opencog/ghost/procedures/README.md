@@ -3,7 +3,7 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 
 ## Predicates
 - is_after_min
-- any_answer
+- is_answer_received
 - emotion
 - end_emotion
 - end_face
