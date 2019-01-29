@@ -349,9 +349,9 @@
 )
 
 ; --------------------------------------------------------------
-(define (neck_dir dir)
+(define (is_neck_direction dir)
 "
-  neck_dir DIR
+  is_neck_direction DIR
 
   Check if the current neck direction is equal to DIR.
 "

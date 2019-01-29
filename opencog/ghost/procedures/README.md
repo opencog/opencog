@@ -9,7 +9,7 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - end_face
 - end_talking
 - face
-- neck_dir
+- is_neck_direction
 - new_emotion
 - new_face
 - new_talking

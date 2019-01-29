@@ -62,7 +62,7 @@
     is_answer_received
 
     ; self-model
-    neck_dir
+    is_neck_direction
 
     ; -------------------- Schemas -------------------- ;
     animation
