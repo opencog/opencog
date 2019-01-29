@@ -795,9 +795,12 @@
     )
 
     ; For multi-worded arguments
+    ; e.g. ^stimulate_concept(being alive)
     (alphanum-args
       (alphanum-arg) : $1
-      (alphanum-args alphanum-arg) : (format #f "~a ~a" $1 $2)
+      (alphanum-args alphanum-arg) :
+        (format #f "(cons 'arg \"~a\")"
+          (string-append (cdr (eval-string $1)) " " (cdr (eval-string $2))))
     )
 
     (alphanum-arg
