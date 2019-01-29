@@ -790,12 +790,29 @@
     )
 
     (arg
+      (alphanum-args) : $1
+      (var-arg) : $1
+    )
+
+    ; For multi-worded arguments
+    ; e.g. ^stimulate_concept(being alive)
+    (alphanum-args
+      (alphanum-arg) : $1
+      (alphanum-args alphanum-arg) :
+        (format #f "(cons 'arg \"~a\")"
+          (string-append (cdr (eval-string $1)) " " (cdr (eval-string $2))))
+    )
+
+    (alphanum-arg
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL_APOS) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL NUM) : (format #f "(cons 'arg \"~a~a\")" $1 $2)
       (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
+    )
+
+    (var-arg
       (variable-grounding) : $1
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
