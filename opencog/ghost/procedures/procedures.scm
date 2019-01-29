@@ -56,7 +56,7 @@
     end_emotion
 
     ; Time related predicates
-    after_min
+    is_after_min
 
     ; Source predicates
     any_answer

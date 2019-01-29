@@ -291,9 +291,9 @@
   (was-perceived? (Word (cog-name word)) time-interval)
 )
 
-(define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
+(define* (is_after_min minutes #:optional (timer-id (Concept "Default-Timer")))
 "
-  after_min MINUTES TIMER-ID (optional)
+  is_after_min MINUTES TIMER-ID (optional)
 
   Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
   Otherwise, returns (stv 0 1)
@@ -368,5 +368,5 @@
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
 ; TODO: Replace the ConceptNode with a PredicateNode
-(Implication (GroundedPredicate "scm: after_min") timer-predicate)
+(Implication (GroundedPredicate "scm: is_after_min") timer-predicate)
 (Implication (GroundedPredicate "scm: emotion") (Predicate "emotion"))

@@ -2,7 +2,7 @@
 Here is a list of procedures (predicates and schemas) that can be used in GHOST. Predicates should be used in the context of a rule while schemas should be used in the action.
 
 ## Predicates
-- after_min
+- is_after_min
 - any_answer
 - emotion
 - end_emotion
