@@ -361,8 +361,7 @@ Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
 
 	// Add incremental conjunction expansion if necessary
 	bool inc_exp_enabled = incremental_expansion != TruthValue::FALSE_TV();
-	if (inc_exp_enabled)
-		configure_optional_rules(incremental_expansion, max_conjuncts);
+	configure_optional_rules(incremental_expansion, max_conjuncts);
 
 	// Otherwise prepare the source
 	TruthValuePtr tv = TruthValue::TRUE_TV();
@@ -1568,7 +1567,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	int max_conjuncts = 3;
 	double complexity_penalty = 1;
 	int minsup = 5;
-	int max_iteration = 2000;
+	int max_iteration = 200;
 	Handle ure_results = ure_pm(_tmp_as, minsup, max_iteration,
 	                            initpat,
 	                            incremental_expansion,

@@ -77,17 +77,19 @@
     (string-append rule-path brf)))
 
 (define (configure-mandatory-rules pm-rbs)
+  ;; Maybe remove, nothing is mandatory anymore
+  *unspecified*
+)
+
+(define (configure-shallow-specialization-rule pm-rbs unary)
   ;; Load and associate mandatory rules to pm-rbs
-  (let* ((base-rule-files (list "shallow-specialization.scm"))
-         (rule-files (map mk-full-rule-path base-rule-files))
-         (rules (list ;; TODO somehow shallow-specialization-rule-name
-                      ;; are not accessible thom here after loading
-                      ;; shallow-specialization.scm. For that reason
-                      ;; we use its Atomese definition instead. This
-                      ;; might be a guile bug.
-                      (DefinedSchema "shallow-specialization-rule"))))
-    (for-each load-from-path rule-files)
-    (ure-add-rules pm-rbs rules)))
+  (let* ((base-rule-file "shallow-specialization.scm")
+         (rule-file (mk-full-rule-path base-rule-file))
+         (rule (if unary
+                   (DefinedSchema "shallow-specialization-unary-rule")
+                   (DefinedSchema "shallow-specialization-rule"))))
+    (load-from-path rule-file)
+    (ure-add-rule pm-rbs rule)))
 
 (define (false-tv? tv)
   (equal? tv (stv 0 1)))
@@ -96,8 +98,15 @@
                                    #:key
                                    (incremental-expansion (stv 0 1))
                                    (max-conjuncts -1))
+  (define enable-incremental-expansion (not (or (false-tv? incremental-expansion)
+                                                (= max-conjuncts 1))))
+
+  ;; Load shallow specialization, either unary, if
+  ;; incremental-expansion is enabled, or not
+  (configure-shallow-specialization-rule pm-rbs enable-incremental-expansion)
+
   ;; Load conjunction-expansion and associate to pm-rbs
-  (if (not (or (false-tv? incremental-expansion) (= max-conjuncts 1)))
+  (if enable-incremental-expansion
       (let* ((ie-tv (if (equal? #t) (stv 0.01 0.5) incremental-expansion))
              (rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
              (namify (lambda (i)

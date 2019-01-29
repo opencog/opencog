@@ -25,12 +25,6 @@
       shabs-list
       minsup-g)))
 
-(define (unary-conjunction-eval body)
-  (Evaluation
-    (GroundedPredicate "scm: unary-conjunction")
-    ;; Wrap the single argument in List in case it is itself a list
-    (List body)))
-
 (define (unary-conjunction? body)
   (let ((body-type (cog-type body)))
     (and (not (equal? body-type 'PresentLink))
@@ -38,6 +32,24 @@
 
 (define (unary-conjunction body)
   (bool->tv (unary-conjunction? body)))
+
+(define (unary-conjunction-eval body)
+  (Evaluation
+    (GroundedPredicate "scm: unary-conjunction")
+    ;; Wrap the single argument in List in case it is itself a list
+    (List body)))
+
+(define (unary-conjunction-pattern? pattern)
+  (and (equal? (cog-type pattern) 'LambdaLink)
+       (unary-conjunction? (get-body pattern))))
+
+(define (unary-conjunction-pattern pattern)
+  (bool->tv (unary-conjunction-pattern? pattern)))
+
+(define (unary-conjunction-pattern-eval pattern)
+  (Evaluation
+    (GroundedPredicate "scm: unary-conjunction-pattern")
+    pattern))
 
 (define (equal-top x)
   (Equal x (top)))
