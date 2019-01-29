@@ -287,7 +287,7 @@
 )
 
 ; --------------------------------------------------------------
-(define* (word_perceived word #:optional (time-interval dti-node))
+(define* (is_word_perceived word #:optional (time-interval dti-node))
   (was-perceived? (Word (cog-name word)) time-interval)
 )
 

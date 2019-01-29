@@ -37,7 +37,7 @@
 
     ; -------------------- Predicates -------------------- ;
     ; Perceptual predicates
-    word_perceived
+    is_word_perceived
 
     ; Perceptual predicates for a talking face
     new_talking

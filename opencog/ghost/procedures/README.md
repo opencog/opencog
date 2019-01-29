@@ -15,7 +15,7 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - new_talking
 - not_talking
 - talking
-- word_perceived
+- is_word_perceived
 
 ## Schemas
 - animation
