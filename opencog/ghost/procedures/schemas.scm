@@ -673,6 +673,8 @@
 
   ; Try from the most specific one to the least
   (cond
+    ((s2q bind-subj-obj-det) (record-sq-output))
+    ((s2q bind-subj-obj) (record-sq-output))
     ((s2q bind-subj) (record-sq-output)))
 )
 
