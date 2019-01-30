@@ -41,6 +41,7 @@
 
     ; Perceptual predicates for a talking face
     is_talking
+    is_not_talking
 
     ; Perceptual predicates for visibility of a face
     is_face_perceived

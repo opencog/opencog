@@ -188,13 +188,18 @@
               (not-occuring? face-id)
               (any-check not-occuring? signature-link #f)
             )
-        )))
+        )
+        (Implication
+          (GroundedPredicate (format #f "scm: ~a" 'negated-func-name))
+          predicate-node)
+
+        ))
   )))
 
 ; --------------------------------------------------------------
 ; Define predicates for face-talking
 (define-face-predicates (face-talking)
-  face-talking-predicate face-talking-sign is_talking
+  face-talking-predicate face-talking-sign is_talking is_not_talking
 )
 
 ; --------------------------------------------------------------

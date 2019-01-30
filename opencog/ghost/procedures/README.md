@@ -7,6 +7,7 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - is_neck_direction
 - is_word_perceived
 - is_talking
+- is_not_talking
 - is_face_perceived
 - is_emotion
 
