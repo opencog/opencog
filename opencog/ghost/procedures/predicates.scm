@@ -155,11 +155,11 @@
           (define* (func-name state face-feature-nodes ... #:optional face-id)
             (cond
               ((equal? "new" (cog-name state))
-                 ('new face-feature-nodes ... face-id))
+                 (new face-feature-nodes ... face-id))
               ((equal? "current" (cog-name state))
-                 ('current face-feature-nodes ... face-id))
+                 (current face-feature-nodes ... face-id))
               ((equal? "end" (cog-name state))
-                 ('end face-feature-nodes ... face-id)))
+                 (end face-feature-nodes ... face-id)))
           )
           ; NOTE: When the predicate-node is stimulated then rules that have
           ; the GroundedPredicate will get stimulated during propogation of

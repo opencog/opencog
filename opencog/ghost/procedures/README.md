@@ -4,18 +4,11 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 ## Predicates
 - is_after_min
 - is_answer_received
-- emotion
-- end_emotion
-- end_face
-- end_talking
-- face
 - is_neck_direction
-- new_emotion
-- new_face
-- new_talking
-- not_talking
-- talking
 - is_word_perceived
+- is_talking
+- is_face_perceived
+- is_emotion
 
 ## Schemas
 - animation
