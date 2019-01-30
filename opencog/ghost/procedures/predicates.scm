@@ -109,8 +109,9 @@
     (datum->syntax id (symbol-append (syntax->datum id) suffix)))
 
   (syntax-case x ()
+    ; 'func-name' is the name of the predicate function.
     ((_ (model-func face-feature-nodes ...)
-      predicate-node signature-link func-name)
+        predicate-node signature-link func-name)
       (with-syntax ((new (new-id #'func-name '_new))
                     (current (new-id #'func-name '_current))
                     (end (new-id #'func-name '_end)))
@@ -168,19 +169,27 @@
             (GroundedPredicate (format #f "scm: ~a" 'func-name))
              predicate-node)
 
-;          (define* (f-occuring? face-feature-nodes ... #:optional face-id)
-           ; Check if face with FACE-ID is not showing the state that is
-           ; identified by face-feature-node.
-           ; IF FACE-ID is not passed then the return value is for any person.
-;            (define (not-occuring? faceid) (negate-stv! ('current faceid)))
-;            (if face-id
-;              (not-occuring? face-id)
-;              (any-check not-occuring? signature-link #f)
-;            )
-;          )
           )))
-  )
-))
+
+    ; 'func-name' is the name of the predicate function.
+    ; 'negated-func-name' is the name of the negated predicate of 'func-name'
+    ((_ (model-func face-feature-nodes ...)
+        predicate-node signature-link func-name negated-func-name)
+      #'(begin
+        (define-face-predicates (mode-func face-feature-nodes ...)
+          predicate-node signature-link func-name)
+
+        (define* (negated-func-name face-feature-nodes ... #:optional face-id)
+        ; Check if face with FACE-ID is not showing the state that is
+        ; identified by face-feature-node.
+        ; IF FACE-ID is not passed then the return value is for any person.
+          (define (not-occuring? faceid) (negate-stv! ('current faceid)))
+            (if face-id
+              (not-occuring? face-id)
+              (any-check not-occuring? signature-link #f)
+            )
+        )))
+  )))
 
 ; --------------------------------------------------------------
 ; Define predicates for face-talking
