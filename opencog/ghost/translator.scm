@@ -141,6 +141,19 @@
   ; - be related to a particular "concept"
   (define spec-concept 2)
 
+  (define (generate-context-function name args)
+    (context-function name
+      (map (lambda (a)
+        (cond ((equal? 'get_wvar (car a))
+               (list-ref pat-vars (cdr a)))
+              ((equal? 'get_lvar (car a))
+               (get-var-lemmas (list-ref pat-vars (cdr a))))
+              ((equal? 'get_uvar (car a))
+               (get-user-variable (cdr a)))
+              (else (ConceptNode (cdr a)))))
+        args))
+  )
+
   (define (compare-item x)
     (cond
       ((equal? 'get_uvar (car x))
@@ -237,6 +250,23 @@
                    (cdr t))
                  (cdr t))))
              (set! has-words? #t))
+            ((equal? 'seqor (car t))
+             ; Just assume the specificity of it is 1.
+             (set! specificity (1+ specificity))
+             (set! c (append c (list (SequentialOr
+               (map
+                 (lambda (f)
+                   (cond
+                     ((equal? 'anyinput (car f))
+                      (generate-context-function "ghost-any-text-input?" (list)))
+                     ; This is basically assuming that the function in the
+                     ; list of choice is a predicate, instead of a schema
+                     ; that returns something to be matched against --
+                     ; probably a new syntex is needed in order to support
+                     ; both as there is no way to distinguish them
+                     ((equal? 'function (car f))
+                      (generate-context-function (cadr f) (cddr f)))))
+                 (cdr t)))))))
             ((equal? 'optionals (car t))
              (update-lists (optionals (cdr t)))
              ; The specificity of optionals is almost identical to concept,
@@ -274,17 +304,8 @@
              ; on what that function is doing (and it could be anything)
              ; For now, just assume the specificity of a function is 1.
              (set! specificity (+ specificity 1))
-             (set! c (append c
-               (list (context-function (cadr t)
-                 (map (lambda (a)
-                   (cond ((equal? 'get_wvar (car a))
-                          (list-ref pat-vars (cdr a)))
-                         ((equal? 'get_lvar (car a))
-                          (get-var-lemmas (list-ref pat-vars (cdr a))))
-                         ((equal? 'get_uvar (car a))
-                          (get-user-variable (cdr a)))
-                         (else (ConceptNode (cdr a)))))
-                   (cddr t)))))))
+             (set! c (append c (list
+               (generate-context-function (cadr t) (cddr t))))))
             ((equal? 'sequence (car t))
              (let ((pt (process (cdr t))))
                   ; Wrap the sequences with a ListLink

@@ -689,6 +689,8 @@
     (choice
       (LSBRACKET choice-terms RSBRACKET) :
         (format #f "(cons 'choices (list ~a))" $2)
+      (LSBRACKET choice-pred-terms RSBRACKET) :
+        (format #f "(cons 'seqor (list ~a))" $2)
     )
 
     (choice-terms
@@ -704,6 +706,19 @@
       (concept) : $1
       (sequence) : $1
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
+    )
+
+    (choice-pred-terms
+      (choice-pred-term) : $1
+      (choice-pred-terms choice-pred-term) : (format #f "~a ~a" $1 $2)
+    )
+
+    ; For example,
+    ; u: ( [ ^is_word_perceived(stop) ^is_word_preceived(wait) ] )
+    ; u: ( [ ^is_after_min(.2) * ] )
+    (choice-pred-term
+      (*) : "(cons 'anyinput (list))"
+      (function) : $1
     )
 
     (wildcard
