@@ -36,7 +36,7 @@
   Helper function to find the maximum number of words CONCEPT has.
 "
   (define c (cog-outgoing-set (cog-execute!
-              (Get (Reference (Variable "$x") CONCEPT)))))
+              (Get (Member (Variable "$x") CONCEPT)))))
 
   (if (null? c)
       -1  ; This may happen if the concept is not yet defined in the system...
@@ -198,7 +198,7 @@
             ((eq? 'VariableNode (cog-type g)) '())
             (else (list g))))
     (cog-outgoing-set
-      (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
+      (cog-execute! (Get (Member (Variable "$x") CONCEPT))))))
 
 ; ----------
 (define (is-member? GRD MEMB)
