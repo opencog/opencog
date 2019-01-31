@@ -31,6 +31,7 @@
              (every
                (lambda (t)
                  (or (equal? 'function (car t))
+                     (equal? 'seqor (car t))
                      (equal? 'compare (car t))))
                TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
