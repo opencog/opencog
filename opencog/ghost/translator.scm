@@ -935,7 +935,7 @@
   NAME is the name of the concept, and the rest is the list of words
   and/or concepts that will be considered as the members of the concept.
 "
-  (map (lambda (m) (Reference m (Concept NAME)))
+  (map (lambda (m) (Member m (Concept NAME)))
        (terms-to-atomese MEMBERS)))
 
 (define (set-initial-urge URGES)
