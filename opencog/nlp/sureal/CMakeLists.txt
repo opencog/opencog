@@ -14,6 +14,7 @@ ADD_DEPENDENCIES (sureal
 
 TARGET_LINK_LIBRARIES(sureal
 	lg-dict
+	neighbors
 	nlp-types
 	${ATOMSPACE_LIBRARIES}
 )
