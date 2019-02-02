@@ -1,0 +1,157 @@
+/*
+ * tests/nlp/fuzzy/FuzzyPatternUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Author: Leung Man Hin <https://github.com/leungmanhin>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/nlp/fuzzy/FuzzyMatchBasic.h>
+
+using namespace opencog;
+
+#define an as->add_node
+#define al as->add_link
+
+class FuzzyPatternUTest : public CxxTest::TestSuite
+{
+    private:
+        AtomSpace* as;
+
+    public:
+        FuzzyPatternUTest(void)
+        {
+            logger().set_level(Logger::DEBUG);
+            logger().set_print_to_stdout_flag(true);
+
+            as = new AtomSpace();
+        }
+
+        ~FuzzyPatternUTest()
+        {
+            delete as;
+            // Erase the log file if no assertions failed.
+            if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().get_filename().c_str());
+        }
+
+        void setUp(void);
+        void tearDown(void);
+
+        void test_basic_fuzzy_match(void);
+};
+
+void FuzzyPatternUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void FuzzyPatternUTest::setUp(void)
+{
+}
+
+Handle find_approximate_match(AtomSpace* as, const Handle& hp)
+{
+    FuzzyMatchBasic fpm;
+    RankedHandleSeq ranked_solns = fpm.perform_search(hp);
+    HandleSeq solns;
+    for (auto rs: ranked_solns)
+        solns.emplace_back(rs.first);
+    return as->add_link(LIST_LINK, solns);
+}
+
+void FuzzyPatternUTest::test_basic_fuzzy_match(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    // The solution
+    Handle soln = al(EVALUATION_LINK,
+                     an(PREDICATE_NODE, "eats"),
+                        al(LIST_LINK,
+                           an(CONCEPT_NODE, "Tom"),
+                           an(CONCEPT_NODE, "apples")
+                        )
+                  );
+
+    // Construct three queries, each of them share at least one common node
+    //  with soln, and they should always match to soln
+
+    // Query 1
+    Handle q1 = al(EVALUATION_LINK,
+                       an(PREDICATE_NODE, "eats"),
+                           al(LIST_LINK,
+                               an(CONCEPT_NODE, "Ray"),
+                               an(CONCEPT_NODE, "banana")
+                       )
+                   );
+
+    Handle r1 = find_approximate_match(as, q1);
+    HandleSeq rs1 = r1->getOutgoingSet();
+
+    TSM_ASSERT_EQUALS("Wrong number of solutions", rs1.size(), 1);
+    TSM_ASSERT_EQUALS("Wrong match", rs1[0].value(), soln.value());
+
+    // Query 2
+    Handle q2 = al(EVALUATION_LINK,
+                       an(PREDICATE_NODE, "plays"),
+                           al(LIST_LINK,
+                               an(CONCEPT_NODE, "Tom"),
+                               an(CONCEPT_NODE, "football")
+                       )
+                   );
+
+    Handle r2 = find_approximate_match(as, q2);
+    HandleSeq rs2 = r2->getOutgoingSet();
+
+    TSM_ASSERT_EQUALS("Wrong number of solutions", rs2.size(), 1);
+    TSM_ASSERT_EQUALS("Wrong match", rs2[0].value(), soln.value());
+
+    // Query 3
+    Handle q3 = al(EVALUATION_LINK,
+                       an(PREDICATE_NODE, "loves"),
+                           al(LIST_LINK,
+                               an(CONCEPT_NODE, "Jane"),
+                               an(CONCEPT_NODE, "apples")
+                       )
+                   );
+
+    Handle r3 = find_approximate_match(as, q3);
+    HandleSeq rs3 = r3->getOutgoingSet();
+
+    TSM_ASSERT_EQUALS("Wrong number of solutions", rs3.size(), 1);
+    TSM_ASSERT_EQUALS("Wrong match", rs3[0].value(), soln.value());
+
+    // Query 4 : Should return nothing
+    Handle q4 = al(EVALUATION_LINK,
+                       an(PREDICATE_NODE, "writes"),
+                           al(LIST_LINK,
+                               an(CONCEPT_NODE, "Alex"),
+                               an(CONCEPT_NODE, "books")
+                       )
+                   );
+
+    Handle r4 = find_approximate_match(as, q4);
+    HandleSeq rs4 = r4->getOutgoingSet();
+
+    TSM_ASSERT_EQUALS("Wrong number of solutions", rs4.size(), 0);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
