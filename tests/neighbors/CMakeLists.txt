@@ -3,4 +3,5 @@ LINK_LIBRARIES(
    atomspace
 )
 
+ADD_CXXTEST(GetPredicatesUTest)
 ADD_CXXTEST(NeighborUTest)

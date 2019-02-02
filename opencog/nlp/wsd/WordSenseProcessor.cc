@@ -14,7 +14,7 @@
 #include <pthread.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/ForeachChaseLink.h>
+#include <opencog/neighbors/ForeachChaseLink.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/guile/SchemePrimitive.h>

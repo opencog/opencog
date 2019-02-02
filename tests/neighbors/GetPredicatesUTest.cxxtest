@@ -1,0 +1,136 @@
+/*
+ * tests/neighbors/GetPredicatesUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/neighbors/GetPredicates.h>
+#include <opencog/util/Logger.h>
+#include <opencog/guile/SchemeEval.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+const bool NO_SUBCLASSES = false;
+
+class AtomUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    AtomUtilsUTest()
+    {
+        logger().set_print_to_stdout_flag(true);
+    }
+
+	void test_get_predicates();
+	void test_get_predicates_for();
+};
+
+HandleSet cvt(HandleSeq predlist)
+{
+	HandleSet preds;
+	for (auto it = predlist.begin(); it != predlist.end(); it++)
+		preds.insert(*it);
+	return preds;
+}
+
+
+// Test get_outgoing_nodes()
+void AtomUtilsUTest::test_get_predicates()
+{
+	AtomSpace as;
+	Handle programmer = as.add_node(CONCEPT_NODE, "programmer");
+	Handle bacon = as.add_node(CONCEPT_NODE, "bacon");
+	Handle programmer_bacon = as.add_link(LIST_LINK, programmer, bacon);
+
+	// eats (programmers, bacon)
+	Handle eats = as.add_node(PREDICATE_NODE, "eats");
+	Handle programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
+	                                         programmer_bacon);
+
+	// lover (programmers, bacon)
+	Handle lover = as.add_node(GROUNDED_PREDICATE_NODE, "lover");
+	Handle programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
+	                                          programmer_bacon);
+
+	Handle anotherNode = as.add_node(CONCEPT_NODE, "pigs");
+	Handle anotherLink = as.add_link(LIST_LINK, anotherNode, bacon);
+
+	// Test get_predicates(default).
+	HandleSet baconReferences {programmerEatsBacon, programmerBaconLover};
+	TS_ASSERT_EQUALS(cvt(get_predicates(bacon)), baconReferences);
+
+	// Test get_predicates with specific type.
+	HandleSeq baconLovers {programmerBaconLover};
+	TS_ASSERT_EQUALS(get_predicates(bacon, GROUNDED_PREDICATE_NODE),
+					 baconLovers);
+
+	// Test get_predicates with specific type and no subclasses.
+	HandleSeq eatersOfBacon {programmerEatsBacon};
+	TS_ASSERT_EQUALS(get_predicates(bacon, PREDICATE_NODE, NO_SUBCLASSES),
+	                 eatersOfBacon);
+}
+
+// Test get_outgoing_nodes()
+void AtomUtilsUTest::test_get_predicates_for()
+{
+	AtomSpace as;
+	Handle
+		// Dog is a mammal, canine, animal.
+		dog = as.add_node(CONCEPT_NODE, "dog"),
+		mammal = as.add_node(CONCEPT_NODE, "mammal"),
+		dog_mammal = as.add_link(LIST_LINK, dog, mammal),
+		canine = as.add_node(CONCEPT_NODE, "canine"),
+		dog_canine = as.add_link(LIST_LINK, dog, canine),
+		animal = as.add_node(CONCEPT_NODE, "animal"),
+		dog_animal = as.add_link(LIST_LINK, dog, animal),
+		isA = as.add_node(PREDICATE_NODE, "IsA"),
+		dogIsAMammal = as.add_link(EVALUATION_LINK, isA, dog_mammal),
+		dogIsACanine = as.add_link(EVALUATION_LINK, isA, dog_canine),
+		dogIsAAnimal = as.add_link(EVALUATION_LINK, isA, dog_animal),
+
+		// Dog eats bacon.
+		bacon = as.add_node(CONCEPT_NODE, "bacon"),
+		dog_bacon = as.add_link(LIST_LINK, dog, bacon),
+		eats = as.add_node(PREDICATE_NODE, "eats"),
+		dogEatsBacon = as.add_link(EVALUATION_LINK, eats, dog_bacon),
+
+		// Programmer eats bacon.
+		programmer = as.add_node(CONCEPT_NODE, "programmer"),
+		programmer_bacon = as.add_link(LIST_LINK, programmer, bacon),
+		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats, programmer_bacon);
+		
+	// Test for dog IsA.
+	HandleSet dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(dog, isA)), dogIsA);
+
+	// Test for dog eats.
+	HandleSet dogEats {dogEatsBacon};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(dog, eats)), dogEats);
+
+	// Test for programmer eats.
+	HandleSet programmerEats {programmerEatsBacon};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(programmer, eats)), programmerEats);
+
+	// Test for eats bacon.
+	HandleSet eatsBacon {dogEatsBacon, programmerEatsBacon};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(bacon, eats)), eatsBacon);
+}

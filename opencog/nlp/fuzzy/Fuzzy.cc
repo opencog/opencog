@@ -23,10 +23,10 @@
  */
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/neighbors/Neighbors.h>
 #include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/neighbors/GetPredicates.h>
+#include <opencog/neighbors/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "Fuzzy.h"
