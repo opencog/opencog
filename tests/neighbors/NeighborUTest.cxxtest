@@ -1,0 +1,74 @@
+/*
+ * tests/atomutils/NeighborUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Logger.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomutils/Neighbors.h>
+
+using namespace opencog;
+
+class NeighborUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    NeighborUTest()
+    {
+        logger().set_print_to_stdout_flag(true);
+    }
+
+	void test_get_distant_neighbors();
+};
+
+// Test get_distant_neighbors()
+void NeighborUTest::test_get_distant_neighbors()
+{
+	// Fill atomspace
+	AtomSpace as;
+	Handle A = as.add_node(CONCEPT_NODE, "A"),
+		B = as.add_node(CONCEPT_NODE, "B"),
+		C = as.add_node(CONCEPT_NODE, "C"),
+		D = as.add_node(CONCEPT_NODE, "D"),
+		AB = as.add_link(INHERITANCE_LINK, A, B),
+		BC = as.add_link(INHERITANCE_LINK, B, C),
+		CD = as.add_link(INHERITANCE_LINK, C, D);
+
+	// Test neighbors at distance 1 of A
+	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
+	                 UnorderedHandleSet({AB}));
+
+	// Test neighbors at distance 1 of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 1),
+	                 UnorderedHandleSet({A, B}));
+
+	// Test neighbors at distance 2 of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 2),
+	                 UnorderedHandleSet({A, B, BC}));
+
+	// Test all neighbors of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, -1),
+	                 UnorderedHandleSet({A, B, C, D, BC, CD}));
+}
