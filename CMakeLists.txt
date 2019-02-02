@@ -5,7 +5,6 @@ LINK_LIBRARIES(
 	atomspace
 	atomspaceutils
 	atombase
-	atomutils
 )
 
 ADD_CXXTEST(AttentionValueUTest)
