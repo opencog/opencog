@@ -1,6 +1,6 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atomutils/Neighbors.h>
+#include <opencog/neighbors/Neighbors.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>

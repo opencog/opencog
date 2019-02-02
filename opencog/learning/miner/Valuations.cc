@@ -21,18 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Valuations.h"
-
-#include "MinerUtils.h"
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
-#include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
-#include <boost/range/algorithm/find.hpp>
+#include "MinerUtils.h"
+#include "Valuations.h"
 
 namespace opencog
 {
