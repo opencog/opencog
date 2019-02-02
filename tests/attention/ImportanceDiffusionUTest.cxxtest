@@ -28,14 +28,13 @@
 #include <opencog/attention/ImportanceDiffusionBase.h>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/atomutils/Neighbors.h>
+#include <opencog/neighbors/Neighbors.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/atoms/truthvalue/AttentionValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>

@@ -32,9 +32,9 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/RewriteLink.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/FindUtils.h>
 #include <opencog/query/BindLinkAPI.h>
 
 #include <boost/range/algorithm/transform.hpp>

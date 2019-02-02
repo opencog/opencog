@@ -27,7 +27,7 @@
 #include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
-#include <opencog/atomutils/Neighbors.h>
+#include <opencog/neighbors/Neighbors.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attentionbank/AttentionBank.h>
