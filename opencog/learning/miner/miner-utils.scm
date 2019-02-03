@@ -20,6 +20,13 @@
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
+(define (iota-one x)
+"
+  Like iota but goes from 1 to x included instead of going
+  from 0 to x excluded.
+"
+  (map (lambda (x) (+ x 1)) (iota x)))
+
 (define (top)
 "
   Insert the top abstraction in the current atomspace
@@ -78,8 +85,7 @@
 
 (define (configure-mandatory-rules pm-rbs)
   ;; Maybe remove, nothing is mandatory anymore
-  *unspecified*
-)
+  *unspecified*)
 
 (define (configure-shallow-specialization-rule pm-rbs unary)
   ;; Load and associate mandatory rules to pm-rbs
@@ -117,14 +123,11 @@
                                   (list (number->string i) "ary-rule"))))))
              (rulify (lambda (i)
                        (list (DefinedSchemaNode (namify i)) ie-tv)))
-             (max-conjuncts? (lambda (x) (<= max-conjuncts x)))
-             (add1 (lambda (x) (+ x 1)))
-             (1-to-max-conjuncts (unfold max-conjuncts? identity add1 1))
              (rules (if (<= max-conjuncts 0)
                         ;; No maximum conjuncts
                         (list (rulify 0))
                         ;; At most max-conjuncts conjuncts
-                        (map rulify 1-to-max-conjuncts))))
+                        (map rulify (iota-one (- max-conjuncts 1))))))
         (load-from-path rule-pathfile)
         (ure-add-rules pm-rbs rules))))
 
@@ -146,7 +149,7 @@
                                                   (number->string i)
                                                   "ary-rule")))
          (mk-rule-alias (lambda (i) (DefinedSchema (mk-rule-name i))))
-         (rules (map mk-rule-alias (cdr (cdr (iota (+ max-conjuncts 1)))))))
+         (rules (map mk-rule-alias (cdr (iota-one max-conjuncts)))))
     (load-from-path rule-pathfile)
     (ure-add-rules isurp-rbs rules)))
 
