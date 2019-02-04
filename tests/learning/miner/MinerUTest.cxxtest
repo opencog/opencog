@@ -417,13 +417,14 @@ Handle MinerUTest::mk_ugly_soda_drinker()
 		is_man = al(INHERITANCE_LINK, X, man),
 		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
 		is_ugly = al(INHERITANCE_LINK, X, ugly),
+		is_ugly_soda_man = al(AND_LINK,
+		                      is_man,
+		                      is_soda_drinker,
+		                      is_ugly),
 		ugly_soda_drinker = al(LAMBDA_LINK,
 		                       X,
-		                       al(AND_LINK,
-		                          is_man,
-		                          is_soda_drinker,
-		                          is_ugly));
-	return ugly_soda_drinker;
+		                       is_ugly_soda_man);
+	return ugly_soda_man;
 }
 
 void MinerUTest::configure_mandatory_rules()
@@ -1575,7 +1576,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	                            complexity_penalty),
 		ure_expected = mk_minsup_eval(minsup, expected);
 
-	logger().debug() << "ure_results = " << oc_to_string(ure_results);
+	logger().debug() << "ure_results = " << oc_to_string(ure_results->getOutgoingSet());
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
 
 	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
