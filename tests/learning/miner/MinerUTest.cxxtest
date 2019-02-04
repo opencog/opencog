@@ -1267,7 +1267,7 @@ void MinerUTest::test_SodaDrinker()
 	//     Inheritance
 	//       X
 	//       Concept "ugly"
-	Handle expected = MinerUTestUtils::add_ugly_soda_drinker(_as);
+	Handle expected = MinerUTestUtils::add_ugly_man_soda_drinker_pattern(_as);
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
@@ -1319,7 +1319,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	//     Inheritance
 	//       X
 	//       Concept "ugly"
-	Handle expected = MinerUTestUtils::add_ugly_soda_drinker(_as);
+	Handle expected = MinerUTestUtils::add_ugly_man_soda_drinker_pattern(_as);
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 

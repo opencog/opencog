@@ -206,6 +206,34 @@ public:
 	                         double info=1.0);
 
 	/**
+	 * Add
+	 *
+	 * Lambda
+	 *   X
+	 *   Inheritance
+	 *     X
+	 *     cpt
+	 *
+	 * to as.
+	 */
+	static Handle add_is_cpt_pattern(AtomSpace& as, const Handle& cpt);
+
+	/**
+	 * Add
+	 *
+	 * Lambda
+	 *   X
+	 *   Inheritance
+	 *     X
+	 *     {Concept "ugly", Concept "man", Concept "soda_drinker"}
+	 *
+	 * to as.
+	 */
+	static Handle add_ugly_pattern(AtomSpace& as);
+	static Handle add_man_pattern(AtomSpace& as);
+	static Handle add_soda_drinker_pattern(AtomSpace& as);
+
+	/**
 	 * Add the following pattern
 	 *
 	 * Lambda
@@ -223,7 +251,7 @@ public:
 	 *
 	 * to as.
 	 */
-	static Handle add_ugly_soda_drinker(AtomSpace& as);
+	static Handle add_ugly_man_soda_drinker_pattern(AtomSpace& as);
 
 	static void configure_mandatory_rules(SchemeEval& scm);
 	static void configure_optional_rules(SchemeEval& scm,

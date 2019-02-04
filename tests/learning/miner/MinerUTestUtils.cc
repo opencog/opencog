@@ -234,7 +234,32 @@ HandleTree MinerUTestUtils::cpp_pm(const HandleSet& texts,
 	return pm(texts);
 }
 
-Handle MinerUTestUtils::add_ugly_soda_drinker(AtomSpace& as)
+Handle MinerUTestUtils::add_is_cpt_pattern(AtomSpace& as, const Handle& cpt)
+{
+	Handle X = an(VARIABLE_NODE, "$X"),
+		is_cpt = al(INHERITANCE_LINK, X, cpt),
+		pattern = al(LAMBDA_LINK,
+		                 X,
+		                 is_cpt);
+	return pattern;
+}
+
+Handle MinerUTestUtils::add_ugly_pattern(AtomSpace& as)
+{
+	return add_is_cpt_pattern(as, an(CONCEPT_NODE, "ugly"));
+}
+
+Handle MinerUTestUtils::add_man_pattern(AtomSpace& as)
+{
+	return add_is_cpt_pattern(as, an(CONCEPT_NODE, "man"));
+}
+
+Handle MinerUTestUtils::add_soda_drinker_pattern(AtomSpace& as)
+{
+	return add_is_cpt_pattern(as, an(CONCEPT_NODE, "soda_drinker"));
+}
+
+Handle MinerUTestUtils::add_ugly_man_soda_drinker_pattern(AtomSpace& as)
 {
 	Handle X = an(VARIABLE_NODE, "$X"),
 		man = an(CONCEPT_NODE, "man"),
@@ -243,14 +268,9 @@ Handle MinerUTestUtils::add_ugly_soda_drinker(AtomSpace& as)
 		is_man = al(INHERITANCE_LINK, X, man),
 		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
 		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		is_ugly_soda_man = al(AND_LINK,
-		                      is_man,
-		                      is_soda_drinker,
-		                      is_ugly),
-		ugly_soda_drinker = al(LAMBDA_LINK,
-		                       X,
-		                       is_ugly_soda_man);
-	return ugly_soda_drinker;
+		is_ugly_man_soda = al(AND_LINK, is_ugly, is_man, is_soda_drinker),
+		pattern = al(LAMBDA_LINK, X, is_ugly_man_soda);
+	return pattern;
 }
 
 void MinerUTestUtils::configure_mandatory_rules(SchemeEval& scm)
