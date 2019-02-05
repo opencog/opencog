@@ -36,7 +36,6 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 

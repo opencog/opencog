@@ -35,7 +35,6 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/unique.hpp>
@@ -475,7 +474,7 @@ Handle MinerUtils::restricted_satisfying_set(const Handle& pattern,
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
 		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = satisfying_set(&tmp_texts_as, gl, ms);
+		results = HandleCast(gl->execute(&tmp_texts_as));
 	return results;
 }
 

@@ -25,7 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 

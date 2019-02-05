@@ -56,7 +56,7 @@ public:
 	LGParseLink(const Link&);
 
 	// Return a pointer to the atom being specified.
-	virtual ValuePtr execute() const;
+	virtual ValuePtr execute();
 
 	static Handle factory(const Handle&);
 };

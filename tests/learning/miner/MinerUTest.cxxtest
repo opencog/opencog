@@ -30,7 +30,6 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/learning/miner/HandleTree.h>
 #include <opencog/learning/miner/Miner.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
@@ -322,7 +321,7 @@ Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
 		vardecl = al(TYPED_VARIABLE_LINK, patvar, an(TYPE_NODE, "LambdaLink")),
 		abs_true = mk_abs_true_eval(target),
 		bl = al(BIND_LINK, vardecl, al(AND_LINK, target, abs_true), target),
-		results = bindlink(&_as, bl);
+		results = HandleCast(bl->execute(&_as));
 
 	return results;
 }

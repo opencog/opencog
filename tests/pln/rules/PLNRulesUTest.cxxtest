@@ -28,7 +28,6 @@
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <cxxtest/TestSuite.h>
 #include <string>
 #include <vector>
@@ -126,6 +125,11 @@ void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
 }
 
 #define getarity(hand) hand->get_arity()
+
+static inline Handle bindlink(AtomSpace* as, const Handle& hlink)
+{
+   return HandleCast(hlink->execute(as));
+}
 
 /**
  * tests the deduction rule (deduction-rule) defined in:
