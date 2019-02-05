@@ -4,7 +4,6 @@
 ; Processing of query-questions about the robot self-model.
 ;
 (use-modules (srfi srfi-1))
-(use-modules (opencog query))
 (use-modules (opencog nlp sureal))
 
 ; Rule-utils needed for defintion of var-decl, etc.

@@ -18,7 +18,6 @@
 (use-modules (opencog))
 (use-modules (opencog logger))
 (use-modules (opencog exec))
-(use-modules (opencog query))
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 

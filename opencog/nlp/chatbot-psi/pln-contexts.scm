@@ -3,7 +3,6 @@
 (use-modules (srfi srfi-1))
 
 (use-modules (opencog logger))
-(use-modules (opencog query))
 
 (load "pln-utils.scm")
 (load "contexts.scm")

@@ -11,7 +11,7 @@
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
-(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog exec))
 (use-modules (opencog atom-types))
 (use-modules (opencog logger))
 (use-modules (opencog eva-model))

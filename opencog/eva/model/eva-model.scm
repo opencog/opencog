@@ -6,7 +6,6 @@
 	#:use-module (opencog)
 	#:use-module (opencog atom-types)
 	#:use-module (opencog exec)
-	#:use-module (opencog query)
 )
 
 ; Load various parts....

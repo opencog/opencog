@@ -16,7 +16,6 @@
 ;; know, we still need to calculate the conjunctions).
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog query))
 (use-modules (opencog logger))
 
 ;; TODO: turn that into a generator
