@@ -39,7 +39,6 @@
 #include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 
 #include "DistributedPatternMiner.h"

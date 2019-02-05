@@ -35,7 +35,6 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/unique.hpp>
