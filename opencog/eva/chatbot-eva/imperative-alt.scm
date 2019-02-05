@@ -55,7 +55,7 @@
 ; possible direction to explore.
 
 ;--------------------------------------------------------------------
-(use-modules (opencog) (opencog nlp) (opencog query) (opencog exec))
+(use-modules (opencog) (opencog nlp) (opencog exec))
 (use-modules (opencog nlp fuzzy))
 (use-modules (opencog nlp relex2logic))
 

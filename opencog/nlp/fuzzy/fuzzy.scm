@@ -5,7 +5,6 @@
 
 (use-modules (srfi srfi-1)
              (ice-9 optargs)      ; for doing define*-public
-             (opencog query)      ; for fuzzy-match
              (opencog nlp)
              (opencog nlp sureal)
              (opencog nlp microplanning))

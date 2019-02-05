@@ -85,7 +85,6 @@ class PyCogExecute(Singleton):
         scheme_eval(
             cls.a,
             '(use-modules (opencog))' +
-            '(use-modules (opencog query))' +
             '(use-modules (opencog exec))' +
             '(use-modules (opencog rule-engine))'
         )

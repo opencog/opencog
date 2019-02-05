@@ -17,7 +17,7 @@
 ;
 ; Example usage:
 ;; Load the needed modules.
-; (use-modules (opencog) (opencog query) (opencog exec))
+; (use-modules (opencog) (opencog exec))
 ; (use-modules (opencog atom-types) (opencog movement))
 ; (use-modules (opencog eva-model))
 ;
