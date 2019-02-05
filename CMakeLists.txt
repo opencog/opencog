@@ -1,5 +1,4 @@
 LINK_LIBRARIES(
-	query
 	attentionbank
 	atomspace
 )
