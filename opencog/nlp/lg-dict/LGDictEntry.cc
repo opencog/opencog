@@ -92,7 +92,7 @@ LGDictEntry::LGDictEntry(const Link& l)
 
 // =================================================================
 
-ValuePtr LGDictEntry::execute() const
+ValuePtr LGDictEntry::execute()
 {
 	if (WORD_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();

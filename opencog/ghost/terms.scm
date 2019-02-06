@@ -244,6 +244,16 @@
 )
 
 ; ----------
+(define-public (ghost-any-text-input?)
+"
+  Check if there is any text input to GHOST that is currently being processed.
+"
+  (if (null? (ghost-get-curr-sent))
+    (stv 0 1)
+    (stv 1 1))
+)
+
+; ----------
 (define (context-function NAME ARGS)
 "
   Occurrence of a function in the context of a rule.

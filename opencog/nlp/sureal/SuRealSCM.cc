@@ -22,11 +22,11 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Neighbors.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/neighbors/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "SuRealSCM.h"

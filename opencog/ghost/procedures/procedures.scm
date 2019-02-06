@@ -37,32 +37,26 @@
 
     ; -------------------- Predicates -------------------- ;
     ; Perceptual predicates
-    word_perceived
+    is_word_perceived
 
     ; Perceptual predicates for a talking face
-    new_talking
-    talking
-    end_talking
-    not_talking
+    is_talking
+    is_not_talking
 
     ; Perceptual predicates for visibility of a face
-    new_face
-    face
-    end_face
+    is_face_perceived
 
     ; Perceptual predicates for emotion of a face
-    new_emotion
-    emotion
-    end_emotion
+    is_emotion
 
     ; Time related predicates
-    after_min
+    is_after_min
 
     ; Source predicates
-    any_answer
+    is_answer_received
 
     ; self-model
-    neck_dir
+    is_neck_direction
 
     ; -------------------- Schemas -------------------- ;
     animation
@@ -83,8 +77,8 @@
     print-by-action-logger
     fallback_on
     shutup
-    gaze_at
-    gaze_at_cancel
+    look
+    look_cancel
     blink
     blink_cancel
     emote
@@ -120,6 +114,11 @@
     ask-duckduckgo
     ask-wolframalpha
     ask-pln
+
+    ; Stochastic Question
+    send_stochastic_question
+    any_stochastic_question
+    get_stochastic_question
 
     ; -------------------- Utilities -------------------- ;
     set-dti!
@@ -1004,6 +1003,7 @@
 (load "procedures/focus-set.scm")
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
+(load "procedures/sq-bind.scm")
 ; TODO: move genric steps to the pln module
 ;(load "procedures/pln-reasoner.scm")
 ;(load "procedures/pln-trail-3.scm")

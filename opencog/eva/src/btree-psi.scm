@@ -27,7 +27,6 @@
 
 (use-modules (opencog))
 (use-modules (opencog logger))
-(use-modules (opencog query))  ; XXX work-around relex2logic bug
 (use-modules (opencog eva-model))
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.

@@ -10,7 +10,7 @@
 #include <thread>
 #include <boost/filesystem.hpp>
 
-#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/neighbors/GetPredicates.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>

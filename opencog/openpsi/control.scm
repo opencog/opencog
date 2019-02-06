@@ -11,7 +11,7 @@
 
 (use-modules (ice-9 receive))
 
-(use-modules (opencog) (opencog exec) (opencog query))
+(use-modules (opencog) (opencog exec))
 
 (load "demand.scm")
 (load "rule.scm")

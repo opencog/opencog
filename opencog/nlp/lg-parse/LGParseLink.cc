@@ -137,7 +137,7 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-ValuePtr LGParseLink::execute() const
+ValuePtr LGParseLink::execute()
 {
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();

@@ -9,7 +9,6 @@
 
 (use-modules (opencog))
 (use-modules (opencog exec))
-(use-modules (opencog query))
 
 ;; XXX FIXME: This file defines a "Room State", which currently can
 ;; be "empty" or "non-empty", depending on whether faces are visible

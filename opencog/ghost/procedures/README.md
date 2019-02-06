@@ -2,20 +2,14 @@
 Here is a list of procedures (predicates and schemas) that can be used in GHOST. Predicates should be used in the context of a rule while schemas should be used in the action.
 
 ## Predicates
-- after_min
-- any_answer
-- emotion
-- end_emotion
-- end_face
-- end_talking
-- face
-- neck_dir
-- new_emotion
-- new_face
-- new_talking
-- not_talking
-- talking
-- word_perceived
+- is_after_min
+- is_answer_received
+- is_neck_direction
+- is_word_perceived
+- is_talking
+- is_not_talking
+- is_face_perceived
+- is_emotion
 
 ## Schemas
 - animation
@@ -25,8 +19,8 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - emote
 - expression
 - fallback_on
-- gaze_at
-- gaze_at_cancel
+- look
+- look_cancel
 - gesture
 - get_neck_dir
 - increase_urge

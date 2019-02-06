@@ -44,7 +44,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/query/BindLinkAPI.h>
 
 #include "PatternMiner.h"
 
@@ -751,7 +750,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //    std::cout << std::endl << hBindLink->to_short_string() << std::endl;
 
     // Run pattern matcher
-    Handle hResultListLink = opencog::bindlink(&_as, hBindLink);
+    Handle hResultListLink = HandleCast(hBindLink->execute(&_as));
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink
@@ -3841,7 +3840,7 @@ void PatternMiner::testPatternMatcher()
               << hBindLink->to_short_string().c_str() << std::endl;
 
     // Run pattern matcher
-    Handle hResultListLink = bindlink(&original_as, hBindLink);
+    Handle hResultListLink = HandleCast(hBindLink->execute(&original_as));
 
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink

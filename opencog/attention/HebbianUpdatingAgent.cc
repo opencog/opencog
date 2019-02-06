@@ -33,7 +33,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomutils/Neighbors.h>
+#include <opencog/neighbors/Neighbors.h>
 #include "HebbianUpdatingAgent.h"
 
 //#define DEBUG

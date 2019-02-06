@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atomutils/ForeachChaseLink.h>
+#include <opencog/neighbors/ForeachChaseLink.h>
 #include <opencog/atoms/base/Node.h>
 
 using namespace opencog;
