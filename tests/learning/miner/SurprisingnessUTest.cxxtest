@@ -1,0 +1,463 @@
+/*
+ * opencog/tests/learning/miner/SurprisingnessUTest.cxxtest
+ *
+ * Copyright (C) 2019 by SingularityNET Foundation
+ * All Rights Reserved
+ *
+ * Written by Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/random.h>
+
+#include <opencog/learning/miner/Surprisingness.h>
+#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/rule-engine/URELogger.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include "MinerUTestUtils.h"
+
+using namespace opencog;
+using namespace std;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class SurprisingnessUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _scm;
+
+	// I-Surprisingness rule base
+	Handle _isurp_rb;
+
+	// Concept holding the texts
+	Handle _texts_cpt;
+
+	void load_ugly_male_soda_drinker_corpus();
+	HandleSeq ure_isurp(unsigned max_conjuncts);
+	
+public:
+	SurprisingnessUTest();
+	~SurprisingnessUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_ISurprisingness_ugly_man();
+	void test_ISurprisingness_ugly_man_soda_drinker();
+};
+
+void SurprisingnessUTest::load_ugly_male_soda_drinker_corpus()
+{
+	std::string rs =
+		_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
+	logger().debug() << "rs = " << rs;
+	HandleSet texts;
+	_as.get_handles_by_type(std::inserter(texts, texts.end()),
+	                        opencog::INHERITANCE_LINK, true);
+	for (const Handle text : texts)
+		al(MEMBER_LINK, text, MinerUTestUtils::add_texts_cpt(_as));
+}
+
+HandleSeq SurprisingnessUTest::ure_isurp(unsigned max_conjuncts)
+{
+	return MinerUTestUtils::ure_isurp(_as, _scm, _isurp_rb, max_conjuncts);
+}
+
+SurprisingnessUTest::SurprisingnessUTest() : _scm(&_as)
+{
+	randGen().seed(0);
+
+	// Main logger
+	logger().set_level(Logger::FINE);
+	logger().set_timestamp_flag(false);
+	logger().set_sync_flag(true);
+	logger().set_print_to_stdout_flag(true);
+
+	// URE logger
+	ure_logger().set_level(Logger::DEBUG);
+	ure_logger().set_timestamp_flag(false);
+	ure_logger().set_sync_flag(true);
+	ure_logger().set_print_to_stdout_flag(true);
+
+	// Configure scheme load-paths that are common for all tests.
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/tests/learning/miner/scm\")");
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/opencog/learning/miner\")");
+
+	// Load modules
+	_scm.eval("(use-modules (opencog))");
+	std::string rs = _scm.eval("(use-modules (opencog miner))");
+	logger().debug() << "MinerUTest() rs = " << rs;
+}
+
+SurprisingnessUTest::~SurprisingnessUTest() {}
+
+void SurprisingnessUTest::setUp()
+{
+	_texts_cpt = an(CONCEPT_NODE, "texts");
+	_isurp_rb = an(CONCEPT_NODE, "isurp_rb");
+}
+
+void SurprisingnessUTest::tearDown()
+{
+	_as.clear();
+}
+
+// Test I-Surprisingess for the ugly male
+void SurprisingnessUTest::test_ISurprisingness_ugly_man()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define texts
+	load_ugly_male_soda_drinker_corpus();
+
+	// Add
+	//
+	// Lambda
+	//   X
+	//   And
+	//     Inheritance
+	//       X
+	//       Concept "man"
+	//     Inheritance
+	//       X
+	//       Concept "soda drinker"
+	//     Inheritance
+	//       X
+	//       Concept "ugly"
+	//
+	// and its conjuncts.
+	Handle ugly_pattern = MinerUTestUtils::add_ugly_pattern(_as),
+		man_pattern = MinerUTestUtils::add_man_pattern(_as),
+		ugly_man_pattern = MinerUTestUtils::add_ugly_man_pattern(_as);
+
+	// Wrap pattern and its conjuncts in minsup predicates
+	int ms = 5;
+	MinerUTestUtils::add_minsup_eval(_as, ugly_pattern, ms, TruthValue::TRUE_TV());
+	MinerUTestUtils::add_minsup_eval(_as, man_pattern, ms, TruthValue::TRUE_TV());
+	MinerUTestUtils::add_minsup_eval(_as, ugly_man_pattern, ms, TruthValue::TRUE_TV());
+
+	// Test I-Surprisingness
+	unsigned max_conjuncts = 2;
+	HandleSeq isurp_results = ure_isurp(max_conjuncts);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, ugly_man_pattern);
+
+	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
+
+	TS_ASSERT(not isurp_results.empty());
+
+	Handle isurp_front = isurp_results.front();
+
+	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "isurp_front = " << oc_to_string(isurp_front);
+	
+	TS_ASSERT(content_eq(expected, isurp_front));
+}
+
+// Test I-Surprisingess for the ugly male soda drinker
+void SurprisingnessUTest::test_ISurprisingness_ugly_man_soda_drinker()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Define texts
+	load_ugly_male_soda_drinker_corpus();
+
+	// Add
+	//
+	// Lambda
+	//   X
+	//   And
+	//     Inheritance
+	//       X
+	//       Concept "man"
+	//     Inheritance
+	//       X
+	//       Concept "soda drinker"
+	//     Inheritance
+	//       X
+	//       Concept "ugly"
+	//
+	// and its conjuncts.
+	Handle ugly_pattern = MinerUTestUtils::add_ugly_pattern(_as),
+		man_pattern = MinerUTestUtils::add_man_pattern(_as),
+		soda_drinker_pattern = MinerUTestUtils::add_soda_drinker_pattern(_as),
+		umsd_pattern = MinerUTestUtils::add_ugly_man_soda_drinker_pattern(_as);
+
+	// Wrap pattern and its conjuncts in minsup predicates
+	int ms = 5;
+	MinerUTestUtils::add_minsup_eval(_as, ugly_pattern, ms, TruthValue::TRUE_TV());
+	MinerUTestUtils::add_minsup_eval(_as, man_pattern, ms, TruthValue::TRUE_TV());
+	MinerUTestUtils::add_minsup_eval(_as, soda_drinker_pattern, ms, TruthValue::TRUE_TV());
+	MinerUTestUtils::add_minsup_eval(_as, umsd_pattern, ms, TruthValue::TRUE_TV());
+
+	Handle rule_h = _scm.eval_h(
+"(BindLink"
+"  (VariableList"
+"    (TypedVariableLink"
+"      (VariableNode \"$f-vardecl-6c74a409\") ; [6831941805065935824][9]"
+"      (TypeChoice"
+"        (TypeNode \"VariableNode\") ; [5990295986950129794][1]"
+"        (TypeNode \"VariableList\") ; [7312252727523305239][1]"
+"      ) ; [17498333966149494574][1]"
+"    ) ; [13890481487615171761][9]"
+"    (VariableNode \"$cnj-bodies-0-e84bdd8\") ; [6134493240747358582][9]"
+"    (VariableNode \"$cnj-bodies-1-45cccd8c\") ; [8633581757078624641][9]"
+"    (VariableNode \"$cnj-bodies-2-6229393a\") ; [3056148645236567329][9]"
+"    (TypedVariableLink"
+"      (VariableNode \"$cnj-vardecls-0-6266d6f2\") ; [407494837069400611][9]"
+"      (TypeChoice"
+"        (TypeNode \"VariableNode\") ; [5990295986950129794][1]"
+"        (TypeNode \"VariableList\") ; [7312252727523305239][1]"
+"      ) ; [17498333966149494574][1]"
+"    ) ; [15533673380627512185][9]"
+"    (TypedVariableLink"
+"      (VariableNode \"$cnj-vardecls-1-7005b724\") ; [7567256007560352570][9]"
+"      (TypeChoice"
+"        (TypeNode \"VariableNode\") ; [5990295986950129794][1]"
+"        (TypeNode \"VariableList\") ; [7312252727523305239][1]"
+"      ) ; [17498333966149494574][1]"
+"    ) ; [12752856180611533040][9]"
+"    (TypedVariableLink"
+"      (VariableNode \"$cnj-vardecls-2-4c2b3a57\") ; [6505380175488719842][9]"
+"      (TypeChoice"
+"        (TypeNode \"VariableNode\") ; [5990295986950129794][1]"
+"        (TypeNode \"VariableList\") ; [7312252727523305239][1]"
+"      ) ; [17498333966149494574][1]"
+"    ) ; [14763832564771510582][9]"
+"    (TypedVariableLink"
+"      (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"      (TypeNode \"NumberNode\") ; [3775585484345440295][1]"
+"    ) ; [15733727541932153598][9]"
+"  ) ; [15886146869430984511][9]"
+"  (AndLink"
+"    (EvaluationLink"
+"      (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"      (ListLink"
+"        (QuoteLink"
+"          (LambdaLink"
+"            (UnquoteLink"
+"              (VariableNode \"$cnj-vardecls-2-4c2b3a57\") ; [6505380175488719842][9]"
+"            ) ; [14431445939078774924][9]"
+"            (UnquoteLink"
+"              (VariableNode \"$cnj-bodies-2-6229393a\") ; [3056148645236567329][9]"
+"            ) ; [17761990280970843179][9]"
+"          ) ; [17468332301184108511][9]"
+"        ) ; [10393456046834923491][9]"
+"        (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"        (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"      ) ; [16500982006372333004][9]"
+"    ) ; [9505701919427952055][9]"
+"    (EvaluationLink"
+"      (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"      (ListLink"
+"        (QuoteLink"
+"          (LambdaLink"
+"            (UnquoteLink"
+"              (VariableNode \"$cnj-vardecls-1-7005b724\") ; [7567256007560352570][9]"
+"            ) ; [12302238916623223698][9]"
+"            (UnquoteLink"
+"              (VariableNode \"$cnj-bodies-1-45cccd8c\") ; [8633581757078624641][9]"
+"            ) ; [16022414622604176883][9]"
+"          ) ; [10022418559007684231][9]"
+"        ) ; [16966805598249572612][9]"
+"        (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"        (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"      ) ; [17221165853237940507][9]"
+"    ) ; [11546970907086738813][9]"
+"    (EvaluationLink"
+"      (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"      (ListLink"
+"        (QuoteLink"
+"          (LambdaLink"
+"            (UnquoteLink"
+"              (VariableNode \"$cnj-vardecls-0-6266d6f2\") ; [407494837069400611][9]"
+"            ) ; [14070749724965987280][9]"
+"            (UnquoteLink"
+"              (VariableNode \"$cnj-bodies-0-e84bdd8\") ; [6134493240747358582][9]"
+"            ) ; [15597547327830251736][9]"
+"          ) ; [15120097588988827099][9]"
+"        ) ; [10352687498426357127][9]"
+"        (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"        (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"      ) ; [13378628584799433791][9]"
+"    ) ; [14021583381831727787][9]"
+"    (EvaluationLink"
+"      (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"      (ListLink"
+"        (QuoteLink"
+"          (LambdaLink"
+"            (UnquoteLink"
+"              (VariableNode \"$f-vardecl-6c74a409\") ; [6831941805065935824][9]"
+"            ) ; [18406721125186110416][9]"
+"            (AndLink"
+"              (UnquoteLink"
+"                (VariableNode \"$cnj-bodies-0-e84bdd8\") ; [6134493240747358582][9]"
+"              ) ; [15597547327830251736][9]"
+"              (UnquoteLink"
+"                (VariableNode \"$cnj-bodies-1-45cccd8c\") ; [8633581757078624641][9]"
+"              ) ; [16022414622604176883][9]"
+"              (UnquoteLink"
+"                (VariableNode \"$cnj-bodies-2-6229393a\") ; [3056148645236567329][9]"
+"              ) ; [17761990280970843179][9]"
+"            ) ; [13521380399137125262][9]"
+"          ) ; [12524575324616156385][9]"
+"        ) ; [10029438338175410844][9]"
+"        (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"        (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"      ) ; [16773590878829693982][9]"
+"    ) ; [15873279451189631472][9]"
+"  ) ; [15646026487425754519][9]"
+"  (ExecutionOutputLink"
+"    (GroundedSchemaNode \"scm: I-Surprisingness-formula\") ; [5951397641036590535][1]"
+"    (ListLink"
+"      (EvaluationLink"
+"        (PredicateNode \"I-Surprisingness\") ; [4244956773770359276][1]"
+"        (ListLink"
+"          (QuoteLink"
+"            (LambdaLink"
+"              (UnquoteLink"
+"                (VariableNode \"$f-vardecl-6c74a409\") ; [6831941805065935824][9]"
+"              ) ; [18406721125186110416][9]"
+"              (AndLink"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-0-e84bdd8\") ; [6134493240747358582][9]"
+"                ) ; [15597547327830251736][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-1-45cccd8c\") ; [8633581757078624641][9]"
+"                ) ; [16022414622604176883][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-2-6229393a\") ; [3056148645236567329][9]"
+"                ) ; [17761990280970843179][9]"
+"              ) ; [13521380399137125262][9]"
+"            ) ; [12524575324616156385][9]"
+"          ) ; [10029438338175410844][9]"
+"          (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"        ) ; [14378903414107760003][9]"
+"      ) ; [17656689533809894343][9]"
+"      (EvaluationLink"
+"        (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"        (ListLink"
+"          (QuoteLink"
+"            (LambdaLink"
+"              (UnquoteLink"
+"                (VariableNode \"$f-vardecl-6c74a409\") ; [6831941805065935824][9]"
+"              ) ; [18406721125186110416][9]"
+"              (AndLink"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-0-e84bdd8\") ; [6134493240747358582][9]"
+"                ) ; [15597547327830251736][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-1-45cccd8c\") ; [8633581757078624641][9]"
+"                ) ; [16022414622604176883][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-2-6229393a\") ; [3056148645236567329][9]"
+"                ) ; [17761990280970843179][9]"
+"              ) ; [13521380399137125262][9]"
+"            ) ; [12524575324616156385][9]"
+"          ) ; [10029438338175410844][9]"
+"          (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"          (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"        ) ; [16773590878829693982][9]"
+"      ) ; [15873279451189631472][9]"
+"      (SetLink"
+"        (EvaluationLink"
+"          (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"          (ListLink"
+"            (QuoteLink"
+"              (LambdaLink"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-vardecls-2-4c2b3a57\") ; [6505380175488719842][9]"
+"                ) ; [14431445939078774924][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-2-6229393a\") ; [3056148645236567329][9]"
+"                ) ; [17761990280970843179][9]"
+"              ) ; [17468332301184108511][9]"
+"            ) ; [10393456046834923491][9]"
+"            (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"            (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"          ) ; [16500982006372333004][9]"
+"        ) ; [9505701919427952055][9]"
+"        (EvaluationLink"
+"          (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"          (ListLink"
+"            (QuoteLink"
+"              (LambdaLink"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-vardecls-1-7005b724\") ; [7567256007560352570][9]"
+"                ) ; [12302238916623223698][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-1-45cccd8c\") ; [8633581757078624641][9]"
+"                ) ; [16022414622604176883][9]"
+"              ) ; [10022418559007684231][9]"
+"            ) ; [16966805598249572612][9]"
+"            (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"            (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"          ) ; [17221165853237940507][9]"
+"        ) ; [11546970907086738813][9]"
+"        (EvaluationLink"
+"          (PredicateNode \"minsup\") ; [7652290809321766691][1]"
+"          (ListLink"
+"            (QuoteLink"
+"              (LambdaLink"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-vardecls-0-6266d6f2\") ; [407494837069400611][9]"
+"                ) ; [14070749724965987280][9]"
+"                (UnquoteLink"
+"                  (VariableNode \"$cnj-bodies-0-e84bdd8\") ; [6134493240747358582][9]"
+"                ) ; [15597547327830251736][9]"
+"              ) ; [15120097588988827099][9]"
+"            ) ; [10352687498426357127][9]"
+"            (ConceptNode \"texts\") ; [2601045397858227549][1]"
+"            (VariableNode \"$ms-7adfc8ae\") ; [1698407809373855879][9]"
+"          ) ; [13378628584799433791][9]"
+"        ) ; [14021583381831727787][9]"
+"      ) ; [14527283785784962763][9]"
+"    ) ; [16466207160583835583][9]"
+"  ) ; [13211414945017084582][9]"
+") ; [11336494581197214333][9]"
+);
+
+	// Test I-Surprisingness
+	// unsigned max_conjuncts = 3;
+	// HandleSeq isurp_results = ure_isurp(max_conjuncts);
+	Instantiator inst(&_as);
+	ValuePtr pap(inst.execute(rule_h));
+	Handle rh(HandleCast(pap));
+	HandleSeq isurp_results{rh};
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, umsd_pattern);
+
+	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
+
+	TS_ASSERT(not isurp_results.empty());
+
+	Handle isurp_front = isurp_results.front();
+
+	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "isurp_front = " << oc_to_string(isurp_front);
+
+	TS_ASSERT(content_eq(expected, isurp_front));
+}
+
+#undef al
+#undef an
