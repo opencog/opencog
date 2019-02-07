@@ -45,6 +45,8 @@
 ;;     <texts>
 ;;     <isurp>
 
+(load "miner-rule-utils.scm")
+
 ;; Generate a rule to calculate the I-Surprisingness of a pattern that
 ;; is the conjunction of nary components.
 ;;
