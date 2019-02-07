@@ -27,7 +27,6 @@
 #include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 
@@ -205,7 +204,7 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 		vardecl = al(TYPED_VARIABLE_LINK, patvar, an(TYPE_NODE, "LambdaLink")),
 		abs_true = add_abs_true_eval(as, target),
 		bl = al(BIND_LINK, vardecl, al(AND_LINK, target, abs_true), target),
-		results = bindlink(&as, bl);
+		results = HandleCast(bl->execute(&as));
 
 	return results;
 }

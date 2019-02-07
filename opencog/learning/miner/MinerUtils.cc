@@ -34,7 +34,10 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/GetLink.h>
+#include <opencog/query/Satisfier.h>
 
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/unique.hpp>
@@ -476,14 +479,19 @@ Handle MinerUtils::restricted_satisfying_set(const Handle& pattern,
 	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
 		return tmp_texts_as.add_link(SET_LINK, tmp_texts);
 
-	// Run the pattern matcher
+	// Define pattern to run
 	AtomSpace tmp_query_as(&tmp_texts_as);
 	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
-		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = HandleCast(gl->execute(&tmp_texts_as));
-	return results;
+		gl = tmp_query_as.add_link(GET_LINK, vardecl, body);
+
+	// Run pattern matcher
+	SatisfyingSet sater(&tmp_texts_as);
+	sater.max_results = ms;
+	GetLinkCast(gl)->satisfy(sater);
+
+	return Handle(createUnorderedLink(sater._satisfying_set, SET_LINK));
 }
 
 bool MinerUtils::totally_abstract(const Handle& pattern)
