@@ -36,17 +36,17 @@ using namespace opencog;
 #define an as.add_node
 #define al as.add_link
 
-Handle MinerUTestUtils::add_texts(AtomSpace& as)
+Handle MinerUTestUtils::add_texts_cpt(AtomSpace& as)
 {
 	return an(CONCEPT_NODE, "texts");
 }
 
-Handle MinerUTestUtils::add_minsup(AtomSpace& as)
+Handle MinerUTestUtils::add_minsup_prd(AtomSpace& as)
 {
 	return an(PREDICATE_NODE, "minsup");
 }
 
-Handle MinerUTestUtils::add_isurp(AtomSpace& as)
+Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as)
 {
 	return an(PREDICATE_NODE, "I-Surprisingness");
 }
@@ -63,10 +63,10 @@ Handle MinerUTestUtils::add_minsup_eval(AtomSpace& as,
                                         TruthValuePtr tv)
 {
 	Handle minsup_eval_h = al(EVALUATION_LINK,
-	                          add_minsup(as),
+	                          add_minsup_prd(as),
 	                          al(LIST_LINK,
 	                             pattern,
-	                             add_texts(as),
+	                             add_texts_cpt(as),
 	                             an(NUMBER_NODE, std::to_string(minsup))));
 	// Warning: if minsup_eval_h existed, this may erase its TV
 	minsup_eval_h->setTruthValue(tv);
@@ -88,10 +88,10 @@ Handle MinerUTestUtils::add_isurp_eval(AtomSpace& as,
                                        const Handle& pattern)
 {
 	Handle isurp_eval_h = al(EVALUATION_LINK,
-	                         add_isurp(as),
+	                         add_isurp_prd(as),
 	                         al(LIST_LINK,
 	                            pattern,
-	                            add_texts(as)));
+	                            add_texts_cpt(as)));
 	return isurp_eval_h;
 }
 
@@ -168,7 +168,7 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 {
 	// Make (Member text (Concept "texts)) links
 	for (const Handle& text : texts)
-		al(MEMBER_LINK, text, add_texts(as));
+		al(MEMBER_LINK, text, add_texts_cpt(as));
 
 	// If init is not defined then use top
 	if (not initpat)
@@ -259,6 +259,18 @@ Handle MinerUTestUtils::add_soda_drinker_pattern(AtomSpace& as)
 	return add_is_cpt_pattern(as, an(CONCEPT_NODE, "soda_drinker"));
 }
 
+Handle MinerUTestUtils::add_ugly_man_pattern(AtomSpace& as)
+{
+	Handle X = an(VARIABLE_NODE, "$X"),
+		man = an(CONCEPT_NODE, "man"),
+		ugly = an(CONCEPT_NODE, "ugly"),
+		is_man = al(INHERITANCE_LINK, X, man),
+		is_ugly = al(INHERITANCE_LINK, X, ugly),
+		is_ugly_man = al(AND_LINK, is_ugly, is_man),
+		pattern = al(LAMBDA_LINK, X, is_ugly_man);
+	return pattern;
+}
+
 Handle MinerUTestUtils::add_ugly_man_soda_drinker_pattern(AtomSpace& as)
 {
 	Handle X = an(VARIABLE_NODE, "$X"),
@@ -294,9 +306,11 @@ void MinerUTestUtils::configure_optional_rules(SchemeEval& scm,
 }
 
 void MinerUTestUtils::configure_ISurprisingness(SchemeEval& scm,
+                                                const Handle& isurp_rb,
                                                 unsigned max_conjuncts)
 {
-	std::string call = "(configure-I-Surprisingness (Concept \"isurp-rbs\") ";
+	std::string call = "(configure-I-Surprisingness (Concept \""
+		+ isurp_rb->get_name() + "\") ";
 	call += std::to_string(max_conjuncts);
 	call += ")";
 	std::string rs = scm.eval(call);
@@ -308,7 +322,7 @@ HandleSeq MinerUTestUtils::ure_isurp(AtomSpace& as,
                                      const Handle& isurp_rb,
                                      unsigned max_conjuncts)
 {
-	configure_ISurprisingness(scm, max_conjuncts);
+	configure_ISurprisingness(scm, isurp_rb, max_conjuncts);
 	Handle X = an(VARIABLE_NODE, "$X"),
 		target = add_isurp_eval(as, X),
 		vardecl = al(TYPED_VARIABLE_LINK, X, an(TYPE_NODE, "LambdaLink"));

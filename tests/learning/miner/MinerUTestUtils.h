@@ -40,7 +40,7 @@ public:
 	 *
 	 * to as.
 	 */
-	static Handle add_texts(AtomSpace& as);
+	static Handle add_texts_cpt(AtomSpace& as);
 
 	/**
 	 * Add
@@ -49,7 +49,7 @@ public:
 	 *
 	 * to as.
 	 */
-	static Handle add_minsup(AtomSpace& as);
+	static Handle add_minsup_prd(AtomSpace& as);
 
 	/**
 	 * Add
@@ -58,7 +58,7 @@ public:
 	 *
 	 * to as.
 	 */
-	static Handle add_isurp(AtomSpace& as);
+	static Handle add_isurp_prd(AtomSpace& as);
 
 	/**
 	 * Add
@@ -234,6 +234,23 @@ public:
 	static Handle add_soda_drinker_pattern(AtomSpace& as);
 
 	/**
+	 * Add
+	 *
+	 * Lambda
+	 *   X
+	 *   And
+	 *     Inheritance
+	 *       X
+	 *       Concept "ugly"
+	 *     Inheritance
+	 *       X
+	 *       Concept "man"
+	 *
+	 * to as.
+	 */
+	static Handle add_ugly_man_pattern(AtomSpace& as);
+
+	/**
 	 * Add the following pattern
 	 *
 	 * Lambda
@@ -258,6 +275,7 @@ public:
 	                                     TruthValuePtr incremental_expansion,
 	                                     int max_conjuncts=-1);
 	static void configure_ISurprisingness(SchemeEval& scm,
+	                                      const Handle& isurp_rb,
 	                                      unsigned max_conjuncts);
 
 	/**

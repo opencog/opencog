@@ -1305,6 +1305,18 @@ void MinerUTest::test_SodaDrinker_incremental()
 	// Start from top, conjunctions will be grown incrementally
 	Handle initpat = top;
 
+	// Run URE pattern miner
+	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	int max_conjuncts = 3;
+	double complexity_penalty = 1;
+	int minsup = 5;
+	int max_iteration = 200;
+	Handle ure_results = ure_pm(_tmp_as, minsup, max_iteration,
+	                            initpat,
+	                            incremental_expansion,
+	                            max_conjuncts,
+	                            complexity_penalty);
+
 	// The pattern of interest looks like
 	//
 	// Lambda
@@ -1323,18 +1335,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
-	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
-	int max_conjuncts = 3;
-	double complexity_penalty = 1;
-	int minsup = 5;
-	int max_iteration = 200;
-	Handle ure_results = ure_pm(_tmp_as, minsup, max_iteration,
-	                            initpat,
-	                            incremental_expansion,
-	                            max_conjuncts,
-	                            complexity_penalty),
-		ure_expected = mk_minsup_eval(minsup, expected);
+	Handle ure_expected = mk_minsup_eval(minsup, expected);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results->getOutgoingSet());
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
