@@ -255,7 +255,7 @@ Handle MinerUTestUtils::add_man_pattern(AtomSpace& as)
 
 Handle MinerUTestUtils::add_soda_drinker_pattern(AtomSpace& as)
 {
-	return add_is_cpt_pattern(as, an(CONCEPT_NODE, "soda_drinker"));
+	return add_is_cpt_pattern(as, an(CONCEPT_NODE, "soda drinker"));
 }
 
 Handle MinerUTestUtils::add_ugly_man_pattern(AtomSpace& as)
