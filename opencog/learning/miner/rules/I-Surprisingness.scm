@@ -121,7 +121,10 @@
              (texts (get-texts (car premises)))
 
              ;; For now only consider conjuncts independently
-             (partitions (List (List cnjs)))
+             (cnjs-bodies (map get-body cnjs))
+             (mk-block (lambda (blk) (if (< 1 (length blk)) (And blk) blk)))
+             (mk-partition (lambda (prt) (List (map Lambda (map mk-block prt)))))
+             (partitions (List (map mk-partition (cdr (partitions cnjs-bodies)))))
 
              ;; Calculate I-Surprisingness of pat
              (isurp (cog-I-Surprisingness pat partitions texts)))
