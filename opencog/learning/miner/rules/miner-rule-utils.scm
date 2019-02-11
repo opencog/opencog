@@ -83,6 +83,15 @@
         (cons fst rst))))
 
 (define (partitions l)
+"
+  Given `l`, a list of elements, produce all partitions of `l`. For instance
+
+  l = (1 2 3)
+
+  return
+
+  (((1 2 3)) ((2 3) (1)) ((1 3) (2)) ((3) (1 2)) ((3) (2) (1)))
+"
   (if (null? l)
       '(())
       (let* ((rst (partitions (cdr l)))
