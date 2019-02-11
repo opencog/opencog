@@ -1305,6 +1305,9 @@ void MinerUTest::test_SodaDrinker_incremental()
 	// Start from top, conjunctions will be grown incrementally
 	Handle initpat = top;
 
+	// Note: move the definition of 'expected' here to reproduce weird
+	// bug (the pattern is ignored by surprisingness).
+
 	// Run URE pattern miner
 	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
 	int max_conjuncts = 3;
