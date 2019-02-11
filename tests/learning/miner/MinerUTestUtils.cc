@@ -67,8 +67,8 @@ Handle MinerUTestUtils::add_minsup_eval(AtomSpace& as,
 	                             pattern,
 	                             add_texts_cpt(as),
 	                             an(NUMBER_NODE, std::to_string(minsup))));
-	// Warning: if minsup_eval_h existed, this may erase its TV
-	minsup_eval_h->setTruthValue(tv);
+	if (TruthValue::DEFAULT_TV() != tv)
+		minsup_eval_h->setTruthValue(tv);
 	return minsup_eval_h;
 }
 
