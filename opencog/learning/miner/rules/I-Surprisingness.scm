@@ -93,8 +93,11 @@
             typed-texts
             typed-ms)
           (And
-            f-minsup
-            cnjs-minsups
+            (Present
+               f-minsup
+               cnjs-minsups)
+            (Absent
+               f-isurp)
             (absolutely-true-eval f-minsup)
             (map absolutely-true-eval cnjs-minsups))
           (ExecutionOutput
