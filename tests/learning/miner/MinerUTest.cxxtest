@@ -1347,7 +1347,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
-	// TS_ASSERT(content_eq(expected, MinerUTestUtils::get_pattern(isurp_results.front())));
+	TS_ASSERT(content_eq(expected, MinerUTestUtils::get_pattern(isurp_results.front())));
 }
 
 void MinerUTest::xtest_lojban()

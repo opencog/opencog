@@ -95,7 +95,7 @@ SurprisingnessUTest::SurprisingnessUTest() : _scm(&_as)
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
-	ure_logger().set_level(Logger::DEBUG);
+	ure_logger().set_level(Logger::INFO);
 	ure_logger().set_timestamp_flag(false);
 	ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
@@ -227,6 +227,7 @@ void SurprisingnessUTest::test_ISurprisingness_ugly_man_soda_drinker()
 	logger().debug() << "isurp_front = " << oc_to_string(isurp_front);
 
 	TS_ASSERT(content_eq(expected, isurp_front));
+	TS_ASSERT_DELTA(0.9997, expected->getTruthValue()->get_mean(), 0.0001);
 }
 
 #undef al
