@@ -32,6 +32,7 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/numeric.hpp>
+#include <boost/math/special_functions/binomial.hpp>
 
 #include <cmath>
 #include <functional>
@@ -43,8 +44,15 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
                                        const HandleSet& texts,
                                        bool normalize)
 {
-	double total_count = pow((double)texts.size(),
-	                         (double)MinerUtils::conjuncts(pattern));
+	// TODO: Binomial is used to calculate total_count for backward
+	// compatibility with Shujing's code, but in theory power should be
+	// used because the conjunction pattern considers duplicates
+	// occuring in conjuncts.
+
+	// double total_count = pow((double)texts.size(),
+	//                          (double)MinerUtils::conjuncts(pattern));
+	unsigned int n = texts.size(), k = MinerUtils::conjuncts(pattern);
+	double total_count = boost::math::binomial_coefficient<double>(n, k);
 
 	// Function calculating the probability of a pattern
 	auto prob = [&](const Handle& pattern) {
