@@ -54,7 +54,7 @@ public:
 	/**
 	 * Add
 	 *
-	 * (Predicate "I-Surprisingness")
+	 * (Predicate "isurp")
 	 *
 	 * to as.
 	 */

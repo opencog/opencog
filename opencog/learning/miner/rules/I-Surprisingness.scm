@@ -15,23 +15,6 @@
 ;;         <cnj-body-n>
 ;;     <texts>
 ;;     <ms>
-;; Evaluation (stv 1 1)
-;;   Predicate "minsup"
-;;   List
-;;     Lambda
-;;       <cnj-vardecl-1>
-;;       <cnj-body-1>
-;;     <texts>
-;;     <ms>
-;; ...
-;; Evaluation (stv 1 1)
-;;   Predicate "minsup"
-;;   List
-;;     Lambda
-;;       <cnj-vardecl-n>
-;;       <cnj-body-n>
-;;     <texts>
-;;     <ms>
 ;; |-
 ;; Evaluation (stv 1 1)
 ;;   Predicate "I-Surprisingness"
@@ -68,60 +51,45 @@
   (define typed-ms (TypedVariable ms NumberT))
 
   (if (< 1 nary)
-      (let* ((cnj-vardecls (gen-variables "$cnj-vardecls" nary))
-             (typed-var (lambda (x) (TypedVariable x varT)))
-             (typed-cnj-vardecls (map typed-var cnj-vardecls))
-             (cnj-bodies (gen-variables "$cnj-bodies" nary))
-             (quoted-lambda (lambda (vardecl body) (Quote
-                                                     (Lambda
-                                                       (Unquote vardecl)
-                                                       (Unquote body)))))
-             (cnjs (map quoted-lambda cnj-vardecls cnj-bodies))
+      (let* ((cnj-bodies (gen-variables "$cnj-bodies" nary))
              (f (Quote
                   (Lambda
                     (Unquote f-vardecl)
                     (And
                       (map Unquote cnj-bodies)))))
              (f-minsup (minsup-eval f texts ms))
-             (cnjs-minsups (map (lambda (x) (minsup-eval x texts ms)) cnjs))
              (f-isurp (isurp-eval f texts)))
         (Bind
           (VariableList
             typed-f-vardecl
-            typed-cnj-vardecls
             cnj-bodies
             typed-texts
             typed-ms)
           (And
             (Present
-               f-minsup
-               cnjs-minsups)
+               f-minsup)
             (Absent
                f-isurp)
-            (absolutely-true-eval f-minsup)
-            (map absolutely-true-eval cnjs-minsups))
+            (absolutely-true-eval f-minsup))
           (ExecutionOutput
             (GroundedSchema "scm: I-Surprisingness-formula")
             (List
               f-isurp
-              f-minsup
-              (Set cnjs-minsups)))))))
+              f-minsup))))))
 
 ;; I-Suprisingness formula
 (define (I-Surprisingness-formula conclusion . premises)
   ;; (cog-logger-debug "(I-Surprisingness-formula conclusion = ~a, premises = ~a"
   ;;                   conclusion premises)
 
-  (if (= 2 (length premises))
+  (if (= 1 (length premises))
       (let* ((pat-isurp conclusion)
              (pat-minsup (car premises))
              (pat (get-pattern pat-minsup))
-             (cnjs-minsups (cog-outgoing-set (cadr premises)))
-             (cnjs (map get-pattern cnjs-minsups))
-             (texts (get-texts (car premises)))
+             (cnjs-bodies (cog-outgoing-set (get-body pat)))
+             (texts (get-texts pat-minsup))
 
              ;; For now only consider conjuncts independently
-             (cnjs-bodies (map get-body cnjs))
              (mk-block (lambda (blk) (if (< 1 (length blk)) (And blk) blk)))
              (mk-partition (lambda (prt) (List (map Lambda (map mk-block prt)))))
              (partitions (List (map mk-partition (cdr (partitions cnjs-bodies)))))

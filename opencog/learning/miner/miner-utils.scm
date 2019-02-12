@@ -48,6 +48,12 @@
 "
   (random-node 'ConceptNode 16 "pattern-miner-rbs-"))
 
+(define (random-surprisingness-rbs-cpt)
+"
+  Create a random Concept node for defining a rule base for surprisingness
+"
+  (random-node 'ConceptNode 16 "surprisingness-rbs-"))
+
 (define (fill-texts-cpt texts-cpt texts)
 "
   For each element text of texts create
@@ -140,7 +146,7 @@
                             #:incremental-expansion incremental-expansion
                             #:max-conjuncts max-conjuncts))
 
-(define* (configure-I-Surprisingness isurp-rbs max-conjuncts)
+(define* (configure-isurp isurp-rbs max-conjuncts)
   ;; Load I-Surprisingess rules
   (let* ((base-rule-file "I-Surprisingness.scm")
          (rule-pathfile (mk-full-rule-path base-rule-file))
@@ -152,6 +158,15 @@
          (rules (map mk-rule-alias (cdr (iota-one max-conjuncts)))))
     (load-from-path rule-pathfile)
     (ure-add-rules isurp-rbs rules)))
+
+(define pattern-var
+  (Variable "$pattern"))
+
+(define (isurp-target texts-cpt)
+  (isurp-eval pattern-var texts-cpt))
+
+(define (isurp-vardecl)
+  (TypedVariable pattern-var (Type "LambdaLink")))
 
 (define* (configure-miner pm-rbs
                           #:key
@@ -238,13 +253,13 @@
   Construct
 
   Evaluation
-    Predicate \"I-Surprisingness\"
+    Predicate \"isurp\"
     List
       pattern
       texts
 "
   (Evaluation
-    (Predicate "I-Surprisingness")
+    (Predicate "isurp")
     (List
       pattern
       texts)))
@@ -342,7 +357,7 @@
                    (complexity-penalty 1)
                    (incremental-expansion (stv 0 1))
                    (max-conjuncts 3)
-                   (surprisingness "I-Surprisingness"))
+                   (surprisingness "isurp"))
 "
   Mine patterns in texts (text trees, a.k.a. grounded hypergraphs) with minimum
   support ms, optionally using mi iterations and starting from the initial
@@ -411,18 +426,18 @@
       know what you're doing). As of now mc can not be set above 9 (which
       should be more than enough).
 
-  su: [optional, default=\"I-Surprisingness\"] After running the pattern miner,
-      patterns can be ranked according to some surprisingness measure. Currently,
-      only \"I-Surprisingness\" is implemented.
+  su: [optional, default=\"isurp\"] After running the pattern miner,
+      patterns can be ranked according to some surprisingness measure.
+      Currently, only \"isurp\" (for I-Surprisingness) is implemented.
 
   Under the hood it will create a rule base and a query for the rule
   engine, configure it according to the user's options and run it.
   Everything takes place in a child atomspace. After the job is done
-  it will remove the child atomspace after having copied the solution
-  set in the parent atomspace.
+  it will remove the child atomspace after copying the solution set
+  in the parent atomspace.
 
-  Pattern mining is a computationally demanding. There are three
-  ways to improve performances at this time.
+  Pattern mining is computationally demanding. There are three ways
+  to improve performances at this time.
 
   1. Set ms as high as possible. The higher the minium support the
      more pruning will take place in search tree. That is because
@@ -430,15 +445,18 @@
      abstraction.
 
   2. If it takes too long to complete, it means the search tree is
-     too large to explorer entirely. Set mi to a positive value to
-     halt the exploration after a certain number of iterations of
-     the rule engine.
+     too large to explore entirely. Lower the number of iterations
+     of the rule engine, mi, to halt the exploration earlier.
 
   3. If you have any idea of the kind of patterns you are looking
      for, you can provide an initial pattern, ip. All mined patterns
      will be specialized from that pattern. This can considerably
      reduce the search space as only a subtree of the whole search
      tree is considered.
+
+  4. If your pattern is a conjunction of multiple clauses, you can
+     enable incremental conjunction expansion, see the
+     #:incremental-expansion option.
 "
   (let* (;; Create a temporary child atomspace for the URE         
          (parent-as (cog-push-atomspace))
@@ -460,21 +478,34 @@
 
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
-        (let* ((source (minsup-eval-true initpat texts-cpt minsup))
-               (miner-rbs (random-miner-rbs-cpt)))
-          (configure-miner miner-rbs
-                           #:maximum-iterations maximum-iterations
-                           #:complexity-penalty complexity-penalty
-                           #:incremental-expansion incremental-expansion
-                           #:max-conjuncts max-conjuncts)
-          (let* (;; Run the pattern miner in a forward way
-                 (results (cog-fc miner-rbs source))
-                 ;; Fetch all relevant results
-                 (patterns (fetch-patterns texts-cpt minsup))
-                 (patterns-lst (cog-outgoing-set patterns)))
-            (cog-pop-atomspace)
-            ;; TODO: copy atoms from temp atomspace to main atomspace.
-            (Set patterns-lst))))))
+        (let* (;; Configure pattern miner forward chainer
+               (source (minsup-eval-true initpat texts-cpt minsup))
+               (miner-rbs (random-miner-rbs-cpt))
+               (cfg-m (configure-miner miner-rbs
+                                       #:maximum-iterations maximum-iterations
+                                       #:complexity-penalty complexity-penalty
+                                       #:incremental-expansion incremental-expansion
+                                       #:max-conjuncts max-conjuncts))
+
+               ;; Run pattern miner in a forward way
+               (results (cog-fc miner-rbs source))
+               ;; Fetch all relevant results
+               (patterns (fetch-patterns texts-cpt minsup))
+               (patterns-lst (cog-outgoing-set patterns))
+
+               ;; Configure surprisingness backward chainer
+               ;; (I-Surprisingness for now)
+               (isurp-rbs (random-surprisingness-rbs-cpt))
+               (target (isurp-target texts-cpt))
+               (vardecl (isurp-vardecl))
+               (cfg-s (configure-isurp isurp-rbs max-conjuncts))
+
+               ;; Run surprisingness in backward way
+               (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
+
+          (cog-pop-atomspace)
+
+          isurp-results))))
 
 (define (export-miner-utils)
   (export
@@ -485,7 +516,7 @@
     configure-mandatory-rules
     configure-optional-rules
     configure-rules
-    configure-I-Surprisingness
+    configure-isurp
     configure-miner
     minsup-eval
     minsup-eval-true

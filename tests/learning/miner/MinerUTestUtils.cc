@@ -47,7 +47,7 @@ Handle MinerUTestUtils::add_minsup_prd(AtomSpace& as)
 
 Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as)
 {
-	return an(PREDICATE_NODE, "I-Surprisingness");
+	return an(PREDICATE_NODE, "isurp");
 }
 
 Handle MinerUTestUtils::add_top(AtomSpace& as)
@@ -308,7 +308,7 @@ void MinerUTestUtils::configure_ISurprisingness(SchemeEval& scm,
                                                 const Handle& isurp_rb,
                                                 unsigned max_conjuncts)
 {
-	std::string call = "(configure-I-Surprisingness (Concept \""
+	std::string call = "(configure-isurp (Concept \""
 		+ isurp_rb->get_name() + "\") ";
 	call += std::to_string(max_conjuncts);
 	call += ")";

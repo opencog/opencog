@@ -285,7 +285,7 @@ void MinerUTest::setUp()
 	isurp_rb = an(CONCEPT_NODE, "isurp-rbs");
 	texts_cpt = an(CONCEPT_NODE, "texts");
 	minsup_prd = an(PREDICATE_NODE, "minsup");
-	isurp_prd = an(PREDICATE_NODE, "I-Surprisingness");
+	isurp_prd = an(PREDICATE_NODE, "isurp");
 	top = al(LAMBDA_LINK, X, X);
 
 	// Load URE-based pattern miner
