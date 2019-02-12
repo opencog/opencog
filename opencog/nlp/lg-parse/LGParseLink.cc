@@ -137,26 +137,13 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-ValuePtr LGParseLink::execute()
+ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 {
+	// XXX FIXME -- these should throw, instead of returning null handle!
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 	if (3 == _outgoing.size() and
 	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
-
-	// Due to the way that parsing generates big piles of atoms, they
-	// have to be placed into some atomspace. First choice is the same
-	// atomspace as this atom; however, this atom might not be in any
-	// atomspace, if it is begin created by some complex execution
-	// chain. Second attempt is to put it where the phrase is. If
-	// that's not available, then surely the dictionary is available
-	// as a long-lived atom.
-	AtomSpace* as = getAtomSpace();
-	if (nullptr == as) as = _outgoing[0]->getAtomSpace();
-	if (nullptr == as) as = _outgoing[1]->getAtomSpace();
-	if (nullptr == as)
-		throw InvalidParamException(TRACE_INFO,
-			"LgParseLink requires an atomspace to parse");
 
 	// Link grammar, for some reason, has a different error handler
 	// per thread. Don't know why. So we have to set it every time,
@@ -174,7 +161,7 @@ ValuePtr LGParseLink::execute()
 	// Set up the sentence
 	const char* phrstr = _outgoing[0]->get_name().c_str() ;
 	Sentence sent = sentence_create(phrstr, dict);
-	if (nullptr == sent) return Handle();
+	if (nullptr == sent) return Handle(); // XXX FIXME should throw, instead!
 
 	// Work with the default parse options (mostly).
 	// Suppress printing of combinatorial-overflow warning.
@@ -194,7 +181,7 @@ ValuePtr LGParseLink::execute()
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		return Handle();
+		return Handle(); // XXX FIXMEE should throw, instead.
 	}
 
 	// if num_links is zero, we should try again with null links.
@@ -209,7 +196,7 @@ ValuePtr LGParseLink::execute()
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		return Handle();
+		return Handle(); // XXX FIXME should throw, instead!
 	}
 
 	// The number of linkages to process.
@@ -236,6 +223,9 @@ ValuePtr LGParseLink::execute()
 	strncat(sentstr, idstr, sizeof(idstr) - 1);
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
+
+	// Due to the way that parsing generates big piles of atoms,
+	// they have to be placed into some atomspace.
 
 	bool minimal = (get_type() == LG_PARSE_MINIMAL);
 	for (int i=0; i<num_linkages; i++)

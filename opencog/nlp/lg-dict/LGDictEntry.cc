@@ -92,19 +92,10 @@ LGDictEntry::LGDictEntry(const Link& l)
 
 // =================================================================
 
-ValuePtr LGDictEntry::execute()
+ValuePtr LGDictEntry::execute(AtomSpace* as, bool silent)
 {
 	if (WORD_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
-
-	AtomSpace* as = this->getAtomSpace();
-	if (nullptr == as)
-		as = _outgoing[0]->getAtomSpace();
-	if (nullptr == as)
-		as = _outgoing[1]->getAtomSpace();
-	if (nullptr == as)
-		throw InvalidParamException(TRACE_INFO,
-			"LgDictEntry requires an atomspace to work");
 
 	// Get the dictionary
 	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
