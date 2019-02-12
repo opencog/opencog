@@ -145,6 +145,11 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	if (3 == _outgoing.size() and
 	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
 
+// Temp hack, while waiting for pull req for circle-ci unit tests
+as = getAtomSpace();
+if (nullptr == as) as = _outgoing[0]->getAtomSpace();
+if (nullptr == as) as = _outgoing[1]->getAtomSpace();
+
 	// Link grammar, for some reason, has a different error handler
 	// per thread. Don't know why. So we have to set it every time,
 	// because we don't know what thread we are in.
