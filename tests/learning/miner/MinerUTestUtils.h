@@ -276,6 +276,7 @@ public:
 	                                     int max_conjuncts=-1);
 	static void configure_ISurprisingness(SchemeEval& scm,
 	                                      const Handle& isurp_rb,
+	                                      const std::string& mode,
 	                                      unsigned max_conjuncts);
 
 	/**
@@ -285,6 +286,7 @@ public:
 	static HandleSeq ure_isurp(AtomSpace& as,
 	                           SchemeEval& scm,
 	                           const Handle& isurp_rb,
+	                           const std::string& mode,
 	                           unsigned max_conjuncts);
 };
 

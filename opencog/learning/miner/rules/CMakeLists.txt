@@ -4,6 +4,6 @@ ADD_GUILE_MODULE (FILES
   specialization.scm
   shallow-specialization.scm
   conjunction-expansion.scm
-  I-Surprisingness.scm
+  i-surprisingness.scm
   MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/learning/miner/rules"
 )

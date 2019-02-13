@@ -70,7 +70,7 @@ MinerParameters::MinerParameters(unsigned ms, unsigned iconjuncts,
 	}
 
 	// Overwrite initconjuncts if necessary
-	initconjuncts = MinerUtils::conjuncts(initpat);
+	initconjuncts = MinerUtils::n_conjuncts(initpat);
 }
 
 Miner::Miner(const MinerParameters& prm)
@@ -217,7 +217,7 @@ HandleTree Miner::specialize_shapat(const Handle& pattern,
 	Handle npat = MinerUtils::compose(pattern, {{var, shapat}});
 
 	// If the specialization has too few conjuncts, dismiss it.
-	if (MinerUtils::conjuncts(npat) < param.initconjuncts)
+	if (MinerUtils::n_conjuncts(npat) < param.initconjuncts)
 		return HandleTree();
 
 	// Generate the corresponding text
@@ -276,7 +276,7 @@ HandleSet Miner::filter_texts(const Handle& pattern,
 
 	// If it has more than one conjunct, then TODO: it's probably the
 	// union of the texts of all its conjuncts.
-	if (1 < MinerUtils::conjuncts(pattern))
+	if (1 < MinerUtils::n_conjuncts(pattern))
 		return texts;
 
 	// Otherwise it is a single conjunct pattern

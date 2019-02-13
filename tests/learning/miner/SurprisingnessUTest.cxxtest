@@ -81,7 +81,8 @@ void SurprisingnessUTest::load_ugly_male_soda_drinker_corpus()
 
 HandleSeq SurprisingnessUTest::ure_isurp(unsigned max_conjuncts)
 {
-	return MinerUTestUtils::ure_isurp(_as, _scm, _isurp_rb, max_conjuncts);
+	std::string mode = "nisurp-old";
+	return MinerUTestUtils::ure_isurp(_as, _scm, _isurp_rb, mode, max_conjuncts);
 }
 
 SurprisingnessUTest::SurprisingnessUTest() : _scm(&_as)

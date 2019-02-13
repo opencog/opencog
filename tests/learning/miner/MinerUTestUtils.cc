@@ -306,10 +306,12 @@ void MinerUTestUtils::configure_optional_rules(SchemeEval& scm,
 
 void MinerUTestUtils::configure_ISurprisingness(SchemeEval& scm,
                                                 const Handle& isurp_rb,
+                                                const std::string& mode,
                                                 unsigned max_conjuncts)
 {
 	std::string call = "(configure-isurp (Concept \""
 		+ isurp_rb->get_name() + "\") ";
+	call += std::string("'") + mode + " ";
 	call += std::to_string(max_conjuncts);
 	call += ")";
 	std::string rs = scm.eval(call);
@@ -319,9 +321,10 @@ void MinerUTestUtils::configure_ISurprisingness(SchemeEval& scm,
 HandleSeq MinerUTestUtils::ure_isurp(AtomSpace& as,
                                      SchemeEval& scm,
                                      const Handle& isurp_rb,
+                                     const std::string& mode,
                                      unsigned max_conjuncts)
 {
-	configure_ISurprisingness(scm, isurp_rb, max_conjuncts);
+	configure_ISurprisingness(scm, isurp_rb, mode, max_conjuncts);
 	Handle X = an(VARIABLE_NODE, "$X"),
 		target = add_isurp_eval(as, X),
 		vardecl = al(TYPED_VARIABLE_LINK, X, an(TYPE_NODE, "LambdaLink"));

@@ -44,24 +44,11 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
                                        const HandleSet& texts,
                                        bool normalize)
 {
-	// TODO: Binomial is used to calculate total_count for backward
-	// compatibility with Shujing's code, but in theory power should be
-	// used because the conjunction pattern considers duplicates
-	// occuring in conjuncts.
-
-	// double total_count = pow((double)texts.size(),
-	//                          (double)MinerUtils::conjuncts(pattern));
-	unsigned int n = texts.size(), k = MinerUtils::conjuncts(pattern);
-	double total_count = boost::math::binomial_coefficient<double>(n, k);
-
 	// Function calculating the probability of a pattern
 	auto prob = [&](const Handle& pattern) {
-		double sup = MinerUtils::get_support(pattern);
-		if (sup < 0) {
-			sup = MinerUtils::support(pattern, texts, (unsigned)total_count);
-			MinerUtils::set_support(pattern, sup);
-		}
-		return sup / total_count;
+		double ucount = pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
+		double sup = MinerUtils::calc_support(pattern, texts, (unsigned)ucount);
+		return sup / ucount;
 	};
 
 	// Calculate the probability of pattern
@@ -95,6 +82,55 @@ double Surprisingness::ISurprisingness(const Handle& patterns,
 		                 return partition->getOutgoingSet();
 	                 });
 	return ISurprisingness(patterns, partitions_ss, texts, normalize);
+}
+
+double Surprisingness::ISurprisingness_old(const Handle& pattern,
+                                           const HandleSeqSeq& partitions,
+                                           const HandleSet& texts,
+                                           bool normalize)
+{
+	// Strictly speaking it should be the power but we use binomial for
+	// backward compatibility.
+	unsigned int n = texts.size(), k = MinerUtils::n_conjuncts(pattern);
+	double total_count = boost::math::binomial_coefficient<double>(n, k);
+
+	// Function calculating the probability of a pattern
+	auto prob = [&](const Handle& pattern) {
+		double sup = MinerUtils::calc_support(pattern, texts, (unsigned)total_count);
+		return sup / total_count;
+	};
+
+	// Calculate the probability of pattern
+	double pattern_prob = prob(pattern);
+
+	// Calculate the probability estimate of each partition based on
+	// independent assumption of between each partition block, and
+	// derive the min and max probability estimates.
+	auto iprob = [&](const HandleSeq& partition) {
+		return boost::accumulate(partition | boost::adaptors::transformed(prob),
+		                         1.0, std::multiplies<double>());
+	};
+	std::vector<double> estimates(partitions.size());
+	boost::transform(partitions, estimates.begin(), iprob);
+	auto p = std::minmax_element(estimates.begin(), estimates.end());
+	double emin = *p.first, emax = *p.second;
+
+	// Calculate the I-Surprisingness, normalized if requested.
+	double dst = dst_from_interval(emin, emax, pattern_prob);
+	return normalize ? dst / pattern_prob : dst;
+}
+
+double Surprisingness::ISurprisingness_old(const Handle& patterns,
+                                           const Handle& partitions,
+                                           const HandleSet& texts,
+                                           bool normalize)
+{
+	HandleSeqSeq partitions_ss(partitions->get_arity());
+	boost::transform(partitions->getOutgoingSet(), partitions_ss.begin(),
+	                 [&](const Handle& partition) {
+		                 return partition->getOutgoingSet();
+	                 });
+	return ISurprisingness_old(patterns, partitions_ss, texts, normalize);
 }
 
 Handle Surprisingness::ISurprisingness_key()

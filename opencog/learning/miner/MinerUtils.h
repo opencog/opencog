@@ -333,7 +333,7 @@ public:
 	 * if the body is not an AndLink, then return 1, and if it's not a
 	 * pattern at all (i.e. not a LambdaLink), then return 0.
 	 */
-	static unsigned conjuncts(const Handle& pattern);
+	static unsigned n_conjuncts(const Handle& pattern);
 
 	/**
 	 * Remove useless clauses from a body pattern. Useless clauses are
@@ -439,6 +439,14 @@ public:
 	 * support_key(). If no such value exist then return -1.0.
 	 */
 	static double get_support(const Handle& pattern);
+
+	/**
+	 * Like get_support, but if there is no value associated to
+	 * support_key() then calculate and set the support.
+	 */
+	static double calc_support(const Handle& pattern,
+	                           const HandleSet& texts,
+	                           unsigned ms);
 };
 
 } // ~namespace opencog

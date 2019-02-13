@@ -81,6 +81,19 @@ public:
 	                              bool normalize=true);
 
 	/**
+	 * Like above but contain verbatim port of Shujing's code.
+	 */
+	static double ISurprisingness_old(const Handle& pattern,
+	                                  const HandleSeqSeq& partitions,
+	                                  const HandleSet& texts,
+	                                  bool normalize=true);
+	static double ISurprisingness_old(const Handle& pattern,
+	                                  const Handle& partitions,
+	                                  const HandleSet& texts,
+	                                  bool normalize=true);
+
+
+	/**
 	 * Return (Node "*-I-SurprisingnessValueKey-*")
 	 */
 	static Handle ISurprisingness_key();

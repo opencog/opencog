@@ -476,7 +476,7 @@ Handle MinerUtils::restricted_satisfying_set(const Handle& pattern,
 		tmp_texts.push_back(tmp_texts_as.add_atom(text));
 
 	// Avoid pattern matcher warning
-	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
+	if (totally_abstract(pattern) and n_conjuncts(pattern) == 1)
 		return tmp_texts_as.add_link(SET_LINK, tmp_texts);
 
 	// Define pattern to run
@@ -557,7 +557,7 @@ const Handle& MinerUtils::get_body(const Handle& pattern)
 	return pattern;
 }
 
-unsigned MinerUtils::conjuncts(const Handle& pattern)
+unsigned MinerUtils::n_conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {
 		if (get_body(pattern)->get_type() == AND_LINK)
@@ -772,6 +772,18 @@ double MinerUtils::get_support(const Handle& pattern)
 	if (support_fv)
 		return support_fv->value().front();
 	return -1.0;
+}
+
+double MinerUtils::calc_support(const Handle& pattern,
+                                const HandleSet& texts,
+                                unsigned ms)
+{
+	double sup = get_support(pattern);
+	if (sup < 0) {
+		sup = support(pattern, texts, ms);
+		set_support(pattern, sup);
+	}
+	return sup;
 }
 
 } // namespace opencog

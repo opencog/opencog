@@ -95,7 +95,19 @@ protected:
 	Handle do_expand_conjunction(Handle cnjtion, Handle pattern,
 	                             Handle texts, Handle ms);
 
-	double do_ISurprisingness(Handle pattern, Handle partitions, Handle texts);
+	/**
+	 * Calculate the I-Surprisingness of the pattern (and its
+	 * partitions) with respect to texts.
+	 *
+	 * do_isurp_old: Shujing I-Surprisingness
+	 * do_nisurp_old: Shujing normalized I-Surprisingness
+	 * do_isurp: I-Surprisingness
+	 * do_nisurp: normalized I-Surprisingness
+	 */
+	double do_isurp_old(Handle pattern, Handle partitions, Handle texts);
+	double do_nisurp_old(Handle pattern, Handle partitions, Handle texts);
+	double do_isurp(Handle pattern, Handle partitions, Handle texts);
+	double do_nisurp(Handle pattern, Handle partitions, Handle texts);
 
 public:
 	MinerSCM();
@@ -128,8 +140,17 @@ void MinerSCM::init(void)
 	define_scheme_primitive("cog-expand-conjunction",
 		&MinerSCM::do_expand_conjunction, this, "miner");
 
-	define_scheme_primitive("cog-I-Surprisingness",
-		&MinerSCM::do_ISurprisingness, this, "miner");
+	define_scheme_primitive("cog-isurp-old",
+		&MinerSCM::do_isurp_old, this, "miner");
+
+	define_scheme_primitive("cog-nisurp-old",
+		&MinerSCM::do_nisurp_old, this, "miner");
+
+	define_scheme_primitive("cog-isurp",
+		&MinerSCM::do_isurp, this, "miner");
+
+	define_scheme_primitive("cog-nisurp",
+		&MinerSCM::do_nisurp, this, "miner");
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
@@ -214,7 +235,31 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
 }
 
-double MinerSCM::do_ISurprisingness(Handle pattern, Handle partitions, Handle texts)
+double MinerSCM::do_isurp_old(Handle pattern, Handle partitions, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::ISurprisingness_old(pattern, partitions, texts_set, false);
+}
+
+double MinerSCM::do_nisurp_old(Handle pattern, Handle partitions, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::ISurprisingness_old(pattern, partitions, texts_set, true);
+}
+
+double MinerSCM::do_isurp(Handle pattern, Handle partitions, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::ISurprisingness(pattern, partitions, texts_set, false);
+}
+
+double MinerSCM::do_nisurp(Handle pattern, Handle partitions, Handle texts)
 {
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);

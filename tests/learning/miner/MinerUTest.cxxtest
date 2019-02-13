@@ -1346,11 +1346,18 @@ void MinerUTest::test_SodaDrinker_incremental()
 	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
 
 	// Test I-Surprisingness
-	HandleSeq isurp_results = MinerUTestUtils::ure_isurp(_as, _scm, isurp_rb, max_conjuncts);
+	std::string mode("nisurp-old");
+	HandleSeq isurp_results = MinerUTestUtils::ure_isurp(_as, _scm, isurp_rb,
+	                                                     mode, max_conjuncts);
+
+	// We get the second, because due to the old I-Surprisingness not
+	// accounting for linkage, the ugly male soda drinker comes second
+	// not first.
+	Handle isurp_result = isurp_results[1];
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
-	TS_ASSERT(content_eq(expected, MinerUTestUtils::get_pattern(isurp_results.front())));
+	TS_ASSERT(content_eq(expected, MinerUTestUtils::get_pattern(isurp_result)));
 }
 
 void MinerUTest::xtest_lojban()

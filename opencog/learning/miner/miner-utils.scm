@@ -20,7 +20,7 @@
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
-(define (iota-one x)
+(define (iota-plus-one x)
 "
   Like iota but goes from 1 to x included instead of going
   from 0 to x excluded.
@@ -133,7 +133,7 @@
                         ;; No maximum conjuncts
                         (list (rulify 0))
                         ;; At most max-conjuncts conjuncts
-                        (map rulify (iota-one (- max-conjuncts 1))))))
+                        (map rulify (iota-plus-one (- max-conjuncts 1))))))
         (load-from-path rule-pathfile)
         (ure-add-rules pm-rbs rules))))
 
@@ -146,16 +146,16 @@
                             #:incremental-expansion incremental-expansion
                             #:max-conjuncts max-conjuncts))
 
-(define* (configure-isurp isurp-rbs max-conjuncts)
+(define* (configure-isurp isurp-rbs mode max-conjuncts)
   ;; Load I-Surprisingess rules
-  (let* ((base-rule-file "I-Surprisingness.scm")
+  (let* ((base-rule-file "i-surprisingness.scm")
          (rule-pathfile (mk-full-rule-path base-rule-file))
          (rule-fule (mk-full-rule-path base-rule-file))
-         (mk-rule-name (lambda (i) (string-append "I-Surprisingness-"
+         (mk-rule-name (lambda (i) (string-append (symbol->string mode) "-"
                                                   (number->string i)
                                                   "ary-rule")))
          (mk-rule-alias (lambda (i) (DefinedSchema (mk-rule-name i))))
-         (rules (map mk-rule-alias (cdr (iota-one max-conjuncts)))))
+         (rules (map mk-rule-alias (cdr (iota-plus-one max-conjuncts)))))
     (load-from-path rule-pathfile)
     (ure-add-rules isurp-rbs rules)))
 
@@ -357,7 +357,7 @@
                    (complexity-penalty 1)
                    (incremental-expansion (stv 0 1))
                    (max-conjuncts 3)
-                   (surprisingness "isurp"))
+                   (surprisingness 'isurp))
 "
   Mine patterns in texts (text trees, a.k.a. grounded hypergraphs) with minimum
   support ms, optionally using mi iterations and starting from the initial
@@ -426,9 +426,19 @@
       know what you're doing). As of now mc can not be set above 9 (which
       should be more than enough).
 
-  su: [optional, default=\"isurp\"] After running the pattern miner,
+  su: [optional, default='isurp] After running the pattern miner,
       patterns can be ranked according to some surprisingness measure.
-      Currently, only \"isurp\" (for I-Surprisingness) is implemented.
+      The following surported modes are:
+
+      'isurp-old:  Verbatim port of Shujing I-Surprisingness.
+
+      'nisurp-old: Verbatim port of Shujing nornalized I-Surprisingness.
+
+      'isurp:      New implementation of I-Surprisingness that takes
+                   linkage into account.
+
+      'nisurp:     New implementation of normalized I-Surprisingness
+                   that takeslinkage into account.
 
   Under the hood it will create a rule base and a query for the rule
   engine, configure it according to the user's options and run it.
@@ -498,7 +508,7 @@
                (isurp-rbs (random-surprisingness-rbs-cpt))
                (target (isurp-target texts-cpt))
                (vardecl (isurp-vardecl))
-               (cfg-s (configure-isurp isurp-rbs max-conjuncts))
+               (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
 
                ;; Run surprisingness in backward way
                (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
@@ -509,6 +519,7 @@
 
 (define (export-miner-utils)
   (export
+    iota-plus-one
     top
     random-texts-cpt
     random-miner-rbs-cpt
