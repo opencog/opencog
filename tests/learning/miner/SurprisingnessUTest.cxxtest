@@ -231,5 +231,62 @@ void SurprisingnessUTest::test_ISurprisingness_ugly_man_soda_drinker()
 	TS_ASSERT_DELTA(0.9997, expected->getTruthValue()->get_mean(), 0.0001);
 }
 
+// TODO add unit test of isurp with
+//
+// $1 = (ListLink
+//    (EvaluationLink (stv 0.99996355 1)
+//       (PredicateNode "isurp")
+//       (ListLink
+//          (LambdaLink
+//             (VariableList
+//                (VariableNode "$PM-294b9483")
+//                (VariableNode "$PM-40d7b7e8")
+//                (VariableNode "$PM-294b9483-161ccd43")
+//                (VariableNode "$PM-294b9483-2b8ba669")
+//             )
+//             (AndLink
+//                (InheritanceLink
+//                   (VariableNode "$PM-294b9483-161ccd43")
+//                   (VariableNode "$PM-40d7b7e8")
+//                )
+//                (InheritanceLink
+//                   (VariableNode "$PM-294b9483-2b8ba669")
+//                   (VariableNode "$PM-40d7b7e8")
+//                )
+//                (InheritanceLink
+//                   (VariableNode "$PM-294b9483")
+//                   (VariableNode "$PM-40d7b7e8")
+//                )
+//             )
+//          )
+//          (ConceptNode "texts-487049909-RZp2q19pQePSd1dn")
+//       )
+//    )
+//    (EvaluationLink (stv 0.99990887 1)
+//       (PredicateNode "isurp")
+//       (ListLink
+//          (LambdaLink
+//             (VariableNode "$PM-294b9483")
+//             (AndLink
+//                (InheritanceLink
+//                   (VariableNode "$PM-294b9483")
+//                   (ConceptNode "soda drinker")
+//                )
+//                (InheritanceLink
+//                   (VariableNode "$PM-294b9483")
+//                   (ConceptNode "man")
+//                )
+//                (InheritanceLink
+//                   (VariableNode "$PM-294b9483")
+//                   (ConceptNode "ugly")
+//                )
+//             )
+//          )
+//          (ConceptNode "texts-487049909-RZp2q19pQePSd1dn")
+//       )
+//    )
+//
+// showing ugly male soda drinker coming on top
+
 #undef al
 #undef an
