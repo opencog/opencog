@@ -27,6 +27,19 @@
 "
   (map (lambda (x) (+ x 1)) (iota x)))
 
+(define (greater-tv-strength x y)
+"
+  Return #t if the tv strength of x is greater than that of y
+"
+  (> (cog-mean x) (cog-mean y)))
+
+(define (desc-sort-by-tv-strength l)
+"
+  Given a link of atoms, sort these atom in descending order according
+  to their tv strengths.
+"
+  (List (sort (cog-outgoing-set l) greater-tv-strength)))
+
 (define (top)
 "
   Insert the top abstraction in the current atomspace
@@ -515,7 +528,7 @@
 
           (cog-pop-atomspace)
 
-          isurp-results))))
+          (desc-sort-by-tv-strength isurp-results)))))
 
 (define (export-miner-utils)
   (export
