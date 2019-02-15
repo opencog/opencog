@@ -16,7 +16,6 @@
 ;;
 
 (use-modules (opencog))
-(use-modules (opencog logger))
 (use-modules (opencog exec))
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
@@ -396,8 +395,7 @@
      tree is considered.
 "
   (let* (;; Create a temporary child atomspace for the URE         
-         (tmp-as (cog-new-atomspace (cog-atomspace)))
-         (parent-as (cog-set-atomspace! tmp-as))
+         (parent-as (cog-push-atomspace))
          (texts-concept? (and (cog-atom? texts)
                               (eq? (cog-type texts) 'ConceptNode)))
          (texts-cpt (if (not texts-concept?)
@@ -411,11 +409,8 @@
          (es (cog-enough-support? initpat texts-cpt ms-nn)))
     (if (not es)
         ;; The initial pattern doesn't have enough support, thus the
-        ;; solution set is empty
-        (and ;; Use and to sequence statements
-             (cog-set-atomspace! parent-as)
-             ;; TODO: delete tmp-as if possible
-             (Set))
+        ;; solution set is empty.
+        (begin (cog-pop-atomspace) (Set))
 
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
@@ -431,9 +426,8 @@
                  ;; Fetch all relevant results
                  (patterns (fetch-patterns texts-cpt minsup))
                  (patterns-lst (cog-outgoing-set patterns)))
-            (cog-set-atomspace! parent-as)
-            ;; TODO: delete tmp-as but without deleting its atoms, if
-            ;; possible
+            (cog-pop-atomspace)
+            ;; TODO: copy atoms from temp atomspace to main atomspace.
             (Set patterns-lst))))))
 
 (define (export-miner-utils)
