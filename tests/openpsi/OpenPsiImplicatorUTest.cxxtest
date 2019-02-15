@@ -76,16 +76,17 @@ public:
 
   void tearDown()
   {
-    delete _as;
-    _as = nullptr;
-    delete _scm;
-    _scm = nullptr;
-
     // Reset the caches between each test.
     delete _opi;
     _opi = nullptr;
     delete _opr;
     _opr = nullptr;
+
+    delete _scm;
+    _scm = nullptr;
+
+    delete _as;
+    _as = nullptr;
   }
 
   // Test OpenPsiImplicator::check_satisfiability
