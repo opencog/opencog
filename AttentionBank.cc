@@ -69,26 +69,19 @@ This generates warnings whenever the unit tests run.
 
 AttentionBank::~AttentionBank()
 {
-    // Making the call below leads to a crash in various situations.
-    // This can occur when the cogserver is being shutdown, when
-    // atomspaces are being deleted, and during Python unit tests.
-    // Basically, the teardown sequence is somehow wrong, and I'm
-    // too lazy to figure it out. Having a singleton instance is
-    // probably the main flaw; it does not play nice with the rest
-    // of the code, which is working with several atomspaces.
-    // _remove_signal->disconnect(_remove_connection);
+    _remove_signal->disconnect(_remove_connection);
 }
 
 void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 {
-    AFMutex.lock();
+    std::unique_lock<std::mutex> AFL(AFMutex);
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
                 [atom](std::pair<Handle, AttentionValuePtr> p)
                 { return p.first == Handle(atom);});
 
     if (it != attentionalFocus.end())
         attentionalFocus.erase(it);
-    AFMutex.unlock();
+    AFL.unlock();
 
     Handle h(atom);
     _importanceIndex.removeAtom(h);
