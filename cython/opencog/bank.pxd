@@ -68,3 +68,9 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
         output_iterator get_handle_set_in_attentional_focus(output_iterator)
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
+
+cdef extern from "opencog/attentionbank/AFImplicator.h" namespace "opencog":
+    # C++:
+    #   Handle af_bindlink(AtomSpace*, Handle);
+    #
+    cdef cHandle c_af_bindlink "af_bindlink" (cAtomSpace*, cHandle)

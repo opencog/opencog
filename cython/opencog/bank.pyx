@@ -46,3 +46,10 @@ cdef class AttentionBank:
         pass
 #        attentionbank(self.as.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
 #        return convert_handle_seq_to_python_list(handle_vector, self)
+
+#def af_bindlink(AtomSpace atomspace, Atom atom):
+#    if atom == None: raise ValueError("af_bindlink atom is: None")
+#    cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
+#                                          deref(atom.handle))
+#    cdef Atom result = Atom.createAtom(c_result, atomspace)
+#    return result
