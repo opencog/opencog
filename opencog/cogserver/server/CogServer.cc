@@ -43,7 +43,6 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 #ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
@@ -111,7 +110,11 @@ CogServer::~CogServer()
 
     // Shut down the system activity table.
     _systemActivityTable.halt();
-    if (_private_as) delete _private_as;
+    if (_private_as)
+    {
+        attentionbank(nullptr);
+        delete _private_as;
+    }
 
     logger().debug("[CogServer] exit destructor");
 }
