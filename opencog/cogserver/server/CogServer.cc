@@ -110,7 +110,11 @@ CogServer::~CogServer()
 
     // Shut down the system activity table.
     _systemActivityTable.halt();
-    if (_private_as) delete _private_as;
+    if (_private_as)
+    {
+        attentionbank(nullptr);
+        delete _private_as;
+    }
 
     logger().debug("[CogServer] exit destructor");
 }
