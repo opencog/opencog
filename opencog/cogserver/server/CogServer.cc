@@ -43,7 +43,6 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 #ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
