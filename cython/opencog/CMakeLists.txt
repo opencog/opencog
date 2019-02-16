@@ -45,6 +45,7 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 # list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bank.cpp")
 
 CYTHON_ADD_MODULE_PYX(bank
+	# "../../../cython/opencog/atomspace.pxd"
 	"bank.pyx"
 	opencog_atom_types
 )

@@ -1,6 +1,42 @@
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 from libcpp.memory cimport shared_ptr
+from libcpp.string cimport string
+
+ctypedef public short av_type
+
+# This import doesn't work for some reason.
+# from opencog.atomspace cimport cHandle
+
+# --------------------------------------------------------
+cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
+    cdef cppclass cProtoAtom "opencog::ProtoAtom":
+        string to_string()
+    
+    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
+
+cdef class ProtoAtom:
+    cdef cProtoAtomPtr shared_ptr
+
+cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr)
+
+cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
+    cdef cppclass cAtom "opencog::Atom" (cProtoAtom):
+        cAtom()
+
+cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
+    ctypedef shared_ptr[cAtom] cAtomPtr "opencog::AtomPtr"
+
+    cdef cppclass cHandle "opencog::Handle" (cAtomPtr):
+        cHandle()
+        cHandle(const cHandle&)
+        string to_string()
+        cHandle UNDEFINED
+
+cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
+    cdef cppclass cAtomSpace "opencog::AtomSpace":
+        AtomSpace()
+# --------------------------------------------------------
 
 cdef extern from "opencog/attentionbank/AVUtils.h" namespace "opencog":
     cdef av_type get_sti(const cHandle&)
