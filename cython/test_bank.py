@@ -66,3 +66,12 @@ class AtomSpaceTest(TestCase):
         result = self.space.get_atoms_in_attentional_focus()
         assert len(result) == 4
         assert set(result) == set([a1, a2, a3, a4])
+
+    def test_attention_value(self):
+        a = Node("test2")
+
+        self.assertEqual(a.av, {'lti': 0, 'sti': 0, 'vlti': False})
+
+        # test set av
+        a.av = { "sti": 10, "lti": 1, "vlti": True }
+        self.assertEqual(a.av, {'sti': 10, 'lti': 1, 'vlti': True})
