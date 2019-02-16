@@ -25,14 +25,14 @@ class AttentionSCM
 		~AttentionSCM();
 
 		AttentionValuePtr get_av(const Handle&);
-		Handle set_av(const Handle&, const AttentionValuePtr&);
+		Handle set_av(const Handle&, const ValuePtr&);
 		Handle inc_vlti(const Handle&);
 		Handle dec_vlti(const Handle&);
 
 		Handle update_af(int);
 		int af_size(void);
 		int set_af_size(int);
-		Handle stimulate (const Handle&, double);
+		Handle stimulate(const Handle&, double);
 
 		Handle af_bindlink(const Handle&);
 };
@@ -97,10 +97,10 @@ AttentionValuePtr AttentionSCM::get_av(const Handle& h)
 	return opencog::get_av(h);
 }
 
-Handle AttentionSCM::set_av(const Handle& h, const AttentionValuePtr& av)
+Handle AttentionSCM::set_av(const Handle& h, const ValuePtr& av)
 {
 	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-set-av!");
-	attentionbank(atomspace).change_av(h, av);
+	attentionbank(atomspace).change_av(h, AttentionValueCast(av));
 	return h;
 }
 
