@@ -75,3 +75,8 @@ class AtomSpaceTest(TestCase):
         # test set av
         a.av = { "sti": 10, "lti": 1, "vlti": True }
         self.assertEqual(a.av, {'sti': 10, 'lti': 1, 'vlti': True})
+
+    def test_af_bindlink(self):
+        atom = af_bindlink(self.atomspace, self.bindlink_atom)
+        # The SetLink is empty. ??? Should it be.
+        self._check_result_setlink(atom, 0)
