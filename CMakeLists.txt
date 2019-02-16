@@ -1,4 +1,6 @@
 
+ADD_SUBDIRECTORY (cython)
+
 ADD_LIBRARY (attentionbank
 	AFImplicator.cc
 	AtomBins.cc
