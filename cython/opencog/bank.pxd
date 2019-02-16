@@ -9,6 +9,11 @@ ctypedef public short av_type
 # from opencog.atomspace cimport cHandle
 
 # --------------------------------------------------------
+
+cdef extern from "opencog/cython/opencog/Python.h":
+    cdef void* PyLong_AsVoidPtr(object)
+    cdef object PyLong_FromVoidPtr(void *p)
+
 cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
     cdef cppclass cProtoAtom "opencog::ProtoAtom":
         string to_string()
@@ -17,8 +22,6 @@ cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
 
 cdef class ProtoAtom:
     cdef cProtoAtomPtr shared_ptr
-
-cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr)
 
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cProtoAtom):
@@ -33,9 +36,18 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         string to_string()
         cHandle UNDEFINED
 
+cdef extern from "<vector>" namespace "std":
+    cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
+    cdef output_iterator back_inserter(vector[cHandle])
+
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
+
+cdef class AtomSpace:
+    cdef cAtomSpace *atomspace
+    cdef bint owns_atomspace
+
 # --------------------------------------------------------
 
 cdef extern from "opencog/attentionbank/AVUtils.h" namespace "opencog":
@@ -58,3 +70,4 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
         output_iterator get_handle_set_in_attentional_focus(output_iterator)
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
+    cdef cAttentionBank attentionbank()

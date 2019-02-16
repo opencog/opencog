@@ -2,7 +2,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from atomspace cimport *
+# from atomspace cimport *
 # from opencog.atomspace cimport cHandle
 
 # @todo use the guide here to separate out into a hierarchy
@@ -10,7 +10,6 @@ from atomspace cimport *
 
 
 cdef class AttentionBank:
-
 
     def __init__(self, aspace):
         attentionbank(aspace)
