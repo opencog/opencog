@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_AF_IMPLICATOR_H
 #define _OPENCOG_AF_IMPLICATOR_H
 
-#include <opencog/attentionbank/AttentionalFocusCB.h>
+#include <opencog/attentionbank/bank/AttentionalFocusCB.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/InitiateSearchCB.h>

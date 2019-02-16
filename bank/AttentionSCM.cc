@@ -9,7 +9,7 @@
 #ifdef HAVE_GUILE
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/guile/SchemePrimitive.h>
 
 namespace opencog {
@@ -42,7 +42,7 @@ class AttentionSCM
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/attentionbank/AFImplicator.h>
+#include <opencog/attentionbank/bank/AFImplicator.h>
 
 using namespace opencog;
 

@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/attentionbank/AttentionalFocusCB.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionalFocusCB.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 
 using namespace opencog;
 
