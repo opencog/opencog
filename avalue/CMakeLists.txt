@@ -1,5 +1,6 @@
 ADD_LIBRARY (attentionvalue
 	AttentionValue.cc
+	AttentionValueOf.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
