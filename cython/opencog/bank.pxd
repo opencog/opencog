@@ -10,21 +10,19 @@ ctypedef public short av_type
 
 # --------------------------------------------------------
 
-cdef extern from "opencog/cython/opencog/Python.h":
+cdef extern from "Python.h":
     cdef void* PyLong_AsVoidPtr(object)
     cdef object PyLong_FromVoidPtr(void *p)
 
-cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
-    cdef cppclass cProtoAtom "opencog::ProtoAtom":
+# Value
+cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
+    cdef cppclass cValue "opencog::Value":
         string to_string()
-    
-    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
 
-cdef class ProtoAtom:
-    cdef cProtoAtomPtr shared_ptr
+    ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
 
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
-    cdef cppclass cAtom "opencog::Atom" (cProtoAtom):
+    cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
 
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
