@@ -20,14 +20,3 @@ INSTALL (FILES
 	AttentionValueOfLink.h
 	DESTINATION "include/opencog/attentionbank/avalue"
 )
-
-# Temporary backwards-compat for opencog.
-INSTALL (FILES
-	AttentionValue.h
-	DESTINATION "include/opencog/atoms/truthvalue"
-)
-
-INSTALL (FILES
-	AttentionValueOfLink.h
-	DESTINATION "include/opencog/atoms/core"
-)
