@@ -159,19 +159,17 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     // result to the correct/valid handle.
 
     Handle result;
-    Handle node(atom);
-    if (node) {
-        result = as.get_handle(node->get_type(), node->get_name());
+    if (atom->is_node()) {
+        result = as.get_handle(atom->get_type(), atom->get_name());
         if (result == Handle::UNDEFINED) {
-            Handle h = as.add_node(node->get_type(), node->get_name());
+            Handle h = as.add_node(atom->get_type(), atom->get_name());
             h->setTruthValue(newTV);
             return h;
         }
     } else {
-        Handle link(atom);
-        result = as.get_handle(link->get_type(), link->getOutgoingSet());
+        result = as.get_handle(atom->get_type(), atom->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
-            Handle h = as.add_link(link->get_type(), link->getOutgoingSet());
+            Handle h = as.add_link(atom->get_type(), atom->getOutgoingSet());
             h->setTruthValue(newTV);
             return h;
         }
