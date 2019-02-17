@@ -26,9 +26,9 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 #include "AttentionParamQuery.h"
 

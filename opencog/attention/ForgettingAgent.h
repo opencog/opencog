@@ -28,8 +28,8 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
 
 namespace opencog

@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/neighbors/Neighbors.h>
 #include "HebbianUpdatingAgent.h"

@@ -29,7 +29,7 @@
 
 #include <opencog/util/RandGen.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/attentionbank/StochasticImportanceDiffusion.h>
+#include <opencog/attentionbank/bank/StochasticImportanceDiffusion.h>
 
 #include "RentCollectionBaseAgent.h"
 

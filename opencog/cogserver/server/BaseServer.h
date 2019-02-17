@@ -26,7 +26,7 @@
 #define _OPENCOG_BASE_SERVER_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 
 namespace opencog
 {
