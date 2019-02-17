@@ -18,7 +18,7 @@ INSTALL (TARGETS attentionvalue EXPORT AtomSpaceTargets
 INSTALL (FILES
 	AttentionValue.h
 	AttentionValueOfLink.h
-	DESTINATION "include/opencog/attentiontionbank/avalue"
+	DESTINATION "include/opencog/attentionbank/avalue"
 )
 
 # Temporary backwards-compat for opencog.
