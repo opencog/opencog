@@ -11,6 +11,7 @@ ADD_LIBRARY (attentionbank
 )
 
 TARGET_LINK_LIBRARIES(attentionbank
+	attentionvalue
 	query-engine
 	execution
 	smob
