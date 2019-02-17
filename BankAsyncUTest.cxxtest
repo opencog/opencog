@@ -31,11 +31,9 @@
 #include <string.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/atoms/base/Node.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
 
 using namespace opencog;
 using namespace std;
