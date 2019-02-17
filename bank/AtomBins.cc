@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/AtomBins.cc
+ * opencog/attentionbank/bank/AtomBins.cc
  *
  * Copyright (C) 2016 Roman Treutlein <roman.treutlein@gmail.com>
  * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
@@ -21,8 +21,8 @@
  */
 #include <chrono>
 
-#include <opencog/attentionbank/AtomBins.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/attentionbank/bank/AtomBins.h>
 
 using namespace opencog;
 using namespace std::chrono;

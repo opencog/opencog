@@ -1,6 +1,6 @@
 ADD_LIBRARY (attentionvalue
 	AttentionValue.cc
-	AttentionValueOf.cc
+	AttentionValueOfLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -17,5 +17,6 @@ INSTALL (TARGETS attentionvalue EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	AttentionValue.h
-	DESTINATION "include/opencog/atoms/truthvalue"
+	AttentionValueOfLink.h
+	DESTINATION "include/opencog/attiontionbank/avalue"
 )

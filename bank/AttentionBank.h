@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/AttentionBank.h
+ * opencog/attentionbank/bank/AttentionBank.h
  *
  * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2016, 2017 Linas Vepstas <linasvepstas@gmail.com>
@@ -30,8 +30,8 @@
 #include <unordered_map>
 
 #include <opencog/util/sigslot.h>
-#include <opencog/atoms/truthvalue/AttentionValue.h>
-#include <opencog/attentionbank/ImportanceIndex.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
+#include <opencog/attentionbank/bank/ImportanceIndex.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog

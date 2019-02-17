@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/AVUtils.cc
+ * opencog/attentionbank/bank/AVUtils.cc
  *
  * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -22,7 +22,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/attentionbank/AVUtils.h>
+#include <opencog/attentionbank/bank/AVUtils.h>
 
 using namespace opencog;
 

@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/StochasticImportanceDiffusion.h
+ * opencog/attentionbank/bank/StochasticImportanceDiffusion.cc
  *
  * Copyright (C) 2016 Opencog Foundation
  *
@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <math.h>
 
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include "StochasticImportanceDiffusion.h"
 
 using namespace opencog;

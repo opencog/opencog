@@ -48,12 +48,12 @@ cdef class AtomSpace:
 
 # --------------------------------------------------------
 
-cdef extern from "opencog/attentionbank/AVUtils.h" namespace "opencog":
+cdef extern from "opencog/attentionbank/bank/AVUtils.h" namespace "opencog":
     cdef av_type get_sti(const cHandle&)
     cdef av_type get_lti(const cHandle&)
     cdef av_type get_vlti(const cHandle&)
 
-cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
+cdef extern from "opencog/attentionbank/bank/AttentionBank.h" namespace "opencog":
     cdef cppclass cAttentionBank "opencog::AttentionBank":
         void set_sti(const cHandle&, av_type stiValue)
         void set_lti(const cHandle&, av_type ltiValue)
@@ -69,7 +69,7 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
 
-cdef extern from "opencog/attentionbank/AFImplicator.h" namespace "opencog":
+cdef extern from "opencog/attentionbank/bank/AFImplicator.h" namespace "opencog":
     # C++:
     #   Handle af_bindlink(AtomSpace*, Handle);
     #

@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/AttentionBank.cc
+ * opencog/attentionbank/bank/AttentionBank.cc
  *
  * Copyright (C) 2013,2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -23,7 +23,6 @@
  */
 
 #include <functional>
-#include <opencog/util/Config.h>
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/atoms/base/Handle.h>

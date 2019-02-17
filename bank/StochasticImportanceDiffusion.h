@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/StochasticImportanceDiffusion.h
+ * opencog/attentionbank/bank/StochasticImportanceDiffusion.h
  *
  * Copyright (C) 2016 Opencog Foundation
  * 

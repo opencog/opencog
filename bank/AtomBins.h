@@ -1,5 +1,5 @@
 /*
- * opencog/attentinbank/AtomBins.h
+ * opencog/attentionbank/bank/AtomBins.h
  *
  * Copyright (C) 2016 Roman Treutlein <roman.treutlein@gmail.com>
  * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>

@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/AVUtils.h
+ * opencog/attentionbank/bank/AVUtils.h
  *
  * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_AVUTILS_H
 #define _OPENCOG_AVUTILS_H
 
-#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 

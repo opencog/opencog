@@ -1,5 +1,5 @@
 /*
- * opencog/attentionbank/ImportanceIndex.cc
+ * opencog/attentionbank/bank/ImportanceIndex.cc
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
@@ -26,10 +26,9 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <opencog/util/functional.h>
-#include <opencog/util/Config.h>
 
-#include <opencog/attentionbank/AVUtils.h>
-#include <opencog/attentionbank/ImportanceIndex.h>
+#include <opencog/attentionbank/bank/AVUtils.h>
+#include <opencog/attentionbank/bank/ImportanceIndex.h>
 
 using namespace opencog;
 

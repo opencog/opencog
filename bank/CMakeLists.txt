@@ -33,5 +33,5 @@ INSTALL (FILES
 	AVUtils.h
 	ImportanceIndex.h
 	StochasticImportanceDiffusion.h
-	DESTINATION "include/opencog/attentionbank"
+	DESTINATION "include/opencog/attentionbank/bank"
 )
