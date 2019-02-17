@@ -24,7 +24,7 @@
 
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/neighbors/GetPredicates.h>
 #include <opencog/neighbors/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
