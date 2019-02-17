@@ -35,3 +35,13 @@ INSTALL (FILES
 	StochasticImportanceDiffusion.h
 	DESTINATION "include/opencog/attentionbank/bank"
 )
+
+# Below is temporary backwards-compat for opencog.
+INSTALL (FILES
+	AtomBins.h
+	AttentionBank.h
+	AVUtils.h
+	ImportanceIndex.h
+	StochasticImportanceDiffusion.h
+	DESTINATION "include/opencog/attentionbank"
+)
