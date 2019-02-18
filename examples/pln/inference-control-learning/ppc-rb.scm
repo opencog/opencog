@@ -13,9 +13,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define ppc-rbs (ConceptNode "post-process-corpus-rule-base"))
-(InheritanceLink
-   ppc-rbs
-   (ConceptNode "URE"))
 
 ;; Define ppc-bc for convenience
 (define (ppc-bc . args)
