@@ -576,8 +576,6 @@
       (LPAREN negation RPAREN) : $2
       (LPAREN context-patterns RPAREN) : $2
       (LPAREN negation context-patterns RPAREN) : (format #f "~a ~a" $2 $3)
-      (LPAREN unordered-matching RPAREN) : $2
-      (LPAREN negation unordered-matching RPAREN) : (format #f "~a ~a" $2 $3)
     )
 
     (context-patterns
@@ -604,6 +602,7 @@
       (variable ? concept) :
         (format #f "(cons 'is_member (list ~a ~a))" $1 $3)
       (sequence) : $1
+      (unordered-matching) : $1
     )
 
     (action
