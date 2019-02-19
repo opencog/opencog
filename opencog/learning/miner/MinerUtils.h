@@ -399,8 +399,8 @@ public:
 	                                         const Handle& pattern_var);
 
 	/**
-	 * Given cnjtion and pattern, consider all possible connections and
-	 * expand cnjtion accordingly. For instance if
+	 * Given cnjtion and pattern, consider all possible connections
+	 * (a.k.a linkages) and expand cnjtion accordingly. For instance if
 	 *
 	 * cnjtion = (Inheritance X Y)
 	 * pattern = (Inheritance Z W)
