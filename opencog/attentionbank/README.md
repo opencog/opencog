@@ -12,20 +12,22 @@ Scheme bindings
 ---------------
 These are the scheme bindings.
 
-=== cog-new-av sti lti vlti ===
-      Create an AttentionValue with the given STI, LTI and VLTI.
-      Unlike atoms, attention values are ephemeral: they are automatically
-      garbage-collected when no longer needed.
+=== cog-new-av sti lti vlti
 
-      Example:
+Create an AttentionValue with the given STI, LTI and VLTI.
+Unlike atoms, attention values are ephemeral: they are automatically
+garbage-collected when no longer needed.
+
+Example:
           ; Create a new attention value:
           guile> (cog-new-av 10 20 0)
 
 
-=== cog-av? exp ===
-      Return #t if exp is an attention value, else return #f
+=== cog-av? exp
 
-      Example:
+Return #t if exp is an attention value, else return #f
+
+Example:
          ; Define a simple attention value
          guile> (define x (cog-new-av 15 25 0))
          guile> (define y (+ 2 2))
@@ -34,10 +36,11 @@ These are the scheme bindings.
          guile> (cog-av? y)
          #f
 
-=== cog-av atom ===
-      Return the attention value of the atom.
+=== cog-av atom
 
-      Example:
+Return the attention value of the atom.
+
+Example:
          ; Define a node
          guile> (define x
                    (cog-new-node 'ConceptNode "abc"
@@ -47,10 +50,10 @@ These are the scheme bindings.
          guile> (cog-av? (cog-av x))
          #t
 
-=== cog-set-av! atom av ===
-      Set the attention value of the atom.
+=== cog-set-av! atom av
+Set the attention value of the atom.
 
-      Example:
+Example:
          ; Define a node
          guile> (define x (cog-new-node 'ConceptNode "def"))
          guile> (cog-av x)
@@ -60,10 +63,10 @@ These are the scheme bindings.
          guile> (cog-av x)
          (av 44 55 1)
 
-=== cog-inc-vlti! atom av ===
-      Increase the vlti of the atom by 1.
+=== cog-inc-vlti! atom av
+Increase the vlti of the atom by 1.
 
-      Example:
+Example:
          ; Define a node
          guile> (define x
                    (cog-new-node 'ConceptNode "abc"
@@ -77,10 +80,10 @@ These are the scheme bindings.
          guile> (cog-av x)
          (av 11 21 2)
 
-=== cog-dec-vlti! atom av ===
-      Decrease the vlti of the atom by 1.
+=== cog-dec-vlti! atom av
+Decrease the vlti of the atom by 1.
 
-      Example:
+Example:
          ; Define a node
          guile> (define x
                    (cog-new-node 'ConceptNode "abc"
@@ -90,10 +93,10 @@ These are the scheme bindings.
          guile> (cog-av x)
          (av 11 21 0)
 
-=== cog-av->alist av ===
-      Convert an attention value to an association list (alist).
+=== cog-av->alist av
+Convert an attention value to an association list (alist).
 
-      Example:
+Example:
          guile> (define x (cog-new-av 99 88 0))
          guile> (cog-av->alist x)
          ((sti . 99) (lti . 88) (vlti . 0))
