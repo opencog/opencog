@@ -56,8 +56,8 @@ ADD_LIBRARY(bank_cython
 
 TARGET_LINK_LIBRARIES(bank_cython
 	${NO_AS_NEEDED}
-	attentionbank
-	atomspace
+	attentionbonk
+	${ATOMSPACE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
 )

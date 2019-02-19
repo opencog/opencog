@@ -38,7 +38,7 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
-	${ATOMSPACE_attentionbank_LIBRARY}
+	attentionbonk
 	${ATOMSPACE_execution_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}
 	${COGUTIL_LIBRARY}
