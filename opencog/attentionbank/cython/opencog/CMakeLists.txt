@@ -62,11 +62,6 @@ TARGET_LINK_LIBRARIES(bank_cython
 	${PYTHON_LIBRARIES}
 )
 
-
-# XXX FIXME Cython should not static link the atom-types, but
-# but should instead dynamic-load them, as needed.
-ADD_DEPENDENCIES(bank_cython opencog_atom_types)
-
 SET_TARGET_PROPERTIES(bank_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME bank)
