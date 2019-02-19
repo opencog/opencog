@@ -1,4 +1,4 @@
-ADD_LIBRARY (attentionval
+ADD_LIBRARY (attentionval SHARED
 	AttentionValue.cc
 	AttentionValueOfLink.cc
 )

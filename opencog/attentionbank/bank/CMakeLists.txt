@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (attentionbonk
+ADD_LIBRARY (attentionbonk SHARED
 	AFImplicator.cc
 	AtomBins.cc
 	AttentionalFocusCB.cc
