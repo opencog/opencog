@@ -4,7 +4,7 @@ ADD_LIBRARY (attentionval
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(attentionval opencog_atom_types)
+# ADD_DEPENDENCIES(attentionval opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(attentionval
 	value
