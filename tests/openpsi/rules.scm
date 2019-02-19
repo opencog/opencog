@@ -289,8 +289,6 @@
   ; not be started at the same time.
   (sleep 1)
   (psi-run d2)
-  (groundable-content-1)
-  (groundable-content-2)
 
   (let ((l1 (psi-loop-count d1))
     (l2 (psi-loop-count d2)))
