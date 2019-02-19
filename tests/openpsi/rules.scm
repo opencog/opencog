@@ -277,6 +277,9 @@
 )
 
 ; --------------------------------------------------------------
+(define (component-5) (psi-component "component-5"))
+(define (component-6) (psi-component "component-6"))
+
 (define (test-psi-run)
 "
   If the loop-count is increasing then it means the loop is running
