@@ -32,7 +32,7 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 
-#include "../atomspace/makeVirtualAtom.h"
+#include "makeVirtualAtom.h"
 #include "sorting.h"
 
 using namespace opencog;
