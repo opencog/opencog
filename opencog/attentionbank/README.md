@@ -12,7 +12,7 @@ Scheme bindings
 ---------------
 These are the scheme bindings.
 
-=== cog-new-av sti lti vlti
+===cog-new-av sti lti vlti
 
 Create an AttentionValue with the given STI, LTI and VLTI.
 Unlike atoms, attention values are ephemeral: they are automatically
@@ -23,7 +23,7 @@ Example:
           guile> (cog-new-av 10 20 0)
 
 
-=== cog-av? exp
+===cog-av? exp
 
 Return #t if exp is an attention value, else return #f
 
@@ -36,7 +36,7 @@ Example:
          guile> (cog-av? y)
          #f
 
-=== cog-av atom
+===cog-av atom
 
 Return the attention value of the atom.
 
@@ -50,7 +50,7 @@ Example:
          guile> (cog-av? (cog-av x))
          #t
 
-=== cog-set-av! atom av
+===cog-set-av! atom av
 Set the attention value of the atom.
 
 Example:
@@ -63,7 +63,7 @@ Example:
          guile> (cog-av x)
          (av 44 55 1)
 
-=== cog-inc-vlti! atom av
+===cog-inc-vlti! atom av
 Increase the vlti of the atom by 1.
 
 Example:
@@ -80,7 +80,7 @@ Example:
          guile> (cog-av x)
          (av 11 21 2)
 
-=== cog-dec-vlti! atom av
+===cog-dec-vlti! atom av
 Decrease the vlti of the atom by 1.
 
 Example:
@@ -93,7 +93,7 @@ Example:
          guile> (cog-av x)
          (av 11 21 0)
 
-=== cog-av->alist av
+===cog-av->alist av
 Convert an attention value to an association list (alist).
 
 Example:
