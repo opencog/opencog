@@ -8,18 +8,26 @@
 ;
 (define-public (mst-parse-text-file plain-text mst-dist)
 "
-	Procedure to mst-parse sentences coming from an instance-pair weight file.
-	Pre-process the sentence to assign word ids, and also store the weights
-	corresponding to the instance-pairs in the atomspace. Finally flush
-	this newly created atoms to avoid RAM explosion.
+	Procedure to MST-parse sentences coming from an instance-pair weight file.
 "
-	; Tokenize the given input into a list of words.
-	### assume sentence is tokenized, just separate by spaces
-	;(define (word-strs text-line)
-	;	(tokenize-text text-line)
-	;)
+	(define inst-pair-pred (PredicateNode "*-Sentence Instance Pair-*"))
+	(define weight-key (PredicateNode "*-Pair Weight Key-*"))
 
-	; Append the given id-str to the given word
+	; Return the atom holding the count, if it exists, else return nil.
+	(define (get-pair-instances L-ATOM R-ATOM)
+		(define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
+		(if (null? maybe-list) 
+			'()
+			(cog-link 'EvaluationLink inst-pair-pred maybe-list)
+		)
+	)
+
+	; Assuming input is tokenized, just separate by spaces
+	(define (word-strs text-line)
+		(string-split text-line #\ )
+	)
+
+	; Append the given id-str to the given word instance
 	(define (append-id word id-str)
 		(string-append word "_" id-str)
 	)
@@ -37,15 +45,49 @@
 		)
 	)	
 
-	; define scoring function to look for weights in atoms
-	###(define scorer ())
+	; Create instance-pair atom with id-tagged instances
+	; Also attach the corresponding weight as a value
+	(define (make-pair-atom text-pair)
+		(define tokens (word-strs plain-text))
+		(define left-word (append-id (second tokens) (first tokens)))
+		(define right-word (append-id (fourth tokens) (third tokens)))
+		(define pair-weight (FloatValue (string->number (fifth tokens))))
+		(define pare ListLink (WordNode left-word) (WordNode right-word))
+
+		; Create atom and assign value
+		(cog-set-value! 
+			(EvaluationLink inst-pair-pred pare) 
+			weight-key pair-weight
+		)
+	)
+
+	; Define scoring function to look for weights in atoms
+	(define scorer 
+		(define bad-weight -1e40) ; losing score
+
+		; We take care here to not actually create the atoms,
+		; if they aren't already in the atomspace. get-pair returns
+		; nil if the atoms can't be found.
+		(lambda (left-atom right-atom)
+			(define wpr
+				(if (and (not (null? left-atom)) (not (null? right-atom)))
+					(get-pair-instances left-atom right-atom)
+					'()
+				)
+			)
+			(if (null? wpr) 
+				bad-weight 
+				(cog-value wpr weight-key)
+			)
+		)
+	)
 
 	; Check if blank line
 	(if (equal? plain-text "\n")
 		; Parse stored sentence and set new-sentence flag to true
 		(begin
 			(set! new-sent-flag #t)
-			(word-list (tokenize-text current-sentence))
+			(word-list (word-strs current-sentence))
 			(mst-parse-atom-seq word-list trunc-scorer)
 		)
 
@@ -54,16 +96,14 @@
 		(if new-sent-flag
 			; store current sent, set new-sent-flag to false, flush prev instance-pairs
 			(begin
-				###; delete old word-pairs
+				;###After parsing, flush the newly created atoms to avoid RAM explosion.
 				(define current-sentence plain-text)
 				(set! new-sent-flag #f)
 			)
-			; Create atom with instance-pair weight, tag instances with id
-			###
+			; if not a new-sentence, create instance-pair atom
+			(make-pair-atom plain-text)
 		)
 	)
-
-
 )
 
 
