@@ -277,6 +277,9 @@
 )
 
 ; --------------------------------------------------------------
+(define (component-5) (psi-component "component-5"))
+(define (component-6) (psi-component "component-6"))
+
 (define (test-psi-run)
 "
   If the loop-count is increasing then it means the loop is running
@@ -286,8 +289,6 @@
   ; not be started at the same time.
   (sleep 1)
   (psi-run d2)
-  (groundable-content-1)
-  (groundable-content-2)
 
   (let ((l1 (psi-loop-count d1))
     (l2 (psi-loop-count d2)))

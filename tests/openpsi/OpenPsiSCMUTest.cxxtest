@@ -247,14 +247,14 @@ public:
     }
 
     // Check the scheme functions `psi-run` and `psi-halt`
-    void x_test_psi_run_and_psi_halt()
+    void test_psi_run_and_psi_halt()
     {
       logger().info("BEGIN TEST: %s", __FUNCTION__);
 
       // Common Setup
-      _scm->eval("(define d1 (component-1))");
+      _scm->eval("(define d1 (component-5))");
       CHKERR
-      _scm->eval("(define d2 (component-2))");
+      _scm->eval("(define d2 (component-6))");
       CHKERR
 
       // Tests
