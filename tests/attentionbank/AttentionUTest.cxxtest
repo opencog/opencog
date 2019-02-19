@@ -1,0 +1,89 @@
+/*
+ * tests/atomspace/AttentionUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Misgana Bayetta <misgana.bayetta@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
+
+using namespace opencog;
+
+class AttentionUTest :  public CxxTest::TestSuite
+{
+    private:
+        AtomSpace _as;
+
+    public:
+        AttentionUTest() {}
+
+        void testTopSTIValues()
+        {
+            AttentionBank _ab(&_as);
+            _ab.set_af_size(10);
+            for(int i = 0; i < 50; i++) {
+                Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
+                _ab.set_sti(h, i*10);
+            }
+
+            HandleSeq hseq;
+            _ab.get_handle_set_in_attentional_focus(std::back_inserter(hseq));
+
+            TS_ASSERT_EQUALS(_as.get_size(), 50);
+            TS_ASSERT_EQUALS(hseq.size(), 10);
+            TS_ASSERT_EQUALS(get_sti(hseq[0]), 400);
+            TS_ASSERT_EQUALS(_ab.get_af_min_sti(), 400);
+            TS_ASSERT_EQUALS(_ab.get_af_max_sti(), 490);
+        }
+
+        void testGetRandomAtoms()
+        {
+            AttentionBank _ab(&_as);
+            _ab.set_af_size(10);
+            // Check Valid atoms are selected.
+            for(int i = 0; i < 1000; i++) {
+                Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
+                _ab.set_sti(h, i*10);
+            }
+
+            for( int i = 0; i < 50; i++) {
+                Handle h = _ab.getRandomAtomNotInAF();
+                TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+            }
+        }
+
+        void testGetRandomAtomsBigAF()
+        {
+            AttentionBank _ab(&_as);
+            _ab.set_af_size(999);
+
+            // Check Valid atoms are selected.
+            for(int i = 0; i < 1000; i++) {
+                Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
+                _ab.set_sti(h, 1 + i*10);
+            }
+
+            for( int i = 0; i < 50; i++) {
+                Handle h = _ab.getRandomAtomNotInAF();
+                TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+            }
+        }
+};
