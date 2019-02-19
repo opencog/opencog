@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (attentionbank
+ADD_LIBRARY (attention_bank
 	AFImplicator.cc
 	AtomBins.cc
 	AttentionalFocusCB.cc
@@ -10,7 +10,7 @@ ADD_LIBRARY (attentionbank
 	StochasticImportanceDiffusion.cc
 )
 
-TARGET_LINK_LIBRARIES(attentionbank
+TARGET_LINK_LIBRARIES(attention_bank
 	attentionval
 	query-engine
 	execution
@@ -24,7 +24,7 @@ IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
     ADD_DEFINITIONS(-DECAN_EXPERIMENT)
 ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
-INSTALL (TARGETS attentionbank EXPORT AtomSpaceTargets
+INSTALL (TARGETS attention_bank EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
