@@ -8,6 +8,7 @@ ADD_LIBRARY (nlpfz SHARED
 TARGET_LINK_LIBRARIES (nlpfz
 	neighbors
 	nlp-types
+	attentionbonk
 	${ATOMSPACE_LIBRARIES}
 )
 

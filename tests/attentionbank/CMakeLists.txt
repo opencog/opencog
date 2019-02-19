@@ -1,7 +1,7 @@
 LINK_LIBRARIES(
-	attentionvalue
-	attentionbank
-	atomspace
+	attentionval
+	attentionbonk
+	${ATOMSPACE_LIBRARIES}
 )
 
 ADD_CXXTEST(AttentionValueUTest)
