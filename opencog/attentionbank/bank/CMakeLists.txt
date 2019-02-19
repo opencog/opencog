@@ -29,6 +29,7 @@ INSTALL (TARGETS attentionbank EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	AFImplicator.h
 	AtomBins.h
 	AttentionBank.h
 	AVUtils.h
