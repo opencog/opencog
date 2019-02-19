@@ -247,7 +247,7 @@ public:
     }
 
     // Check the scheme functions `psi-run` and `psi-halt`
-    void x_test_psi_run_and_psi_halt()
+    void test_psi_run_and_psi_halt()
     {
       logger().info("BEGIN TEST: %s", __FUNCTION__);
 
