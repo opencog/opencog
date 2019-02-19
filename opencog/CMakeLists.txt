@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
-ADD_SUBDIRECTORY (attention-bank)
+ADD_SUBDIRECTORY (attentionbank)
 ADD_SUBDIRECTORY (neighbors)
 ADD_SUBDIRECTORY (learning)
 
