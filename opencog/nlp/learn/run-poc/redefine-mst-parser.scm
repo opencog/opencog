@@ -12,6 +12,7 @@
 "
 	(define inst-pair-pred (PredicateNode "*-Sentence Instance Pair-*"))
 	(define weight-key (PredicateNode "*-Pair Weight Key-*"))
+	(define current-sentence "")
 
 	; Return the atom holding the count, if it exists, else return nil.
 	(define (get-pair-instances L-ATOM R-ATOM)
@@ -97,7 +98,7 @@
 			; store current sent, set new-sent-flag to false, flush prev instance-pairs
 			(begin
 				;###After parsing, flush the newly created atoms to avoid RAM explosion.
-				(define current-sentence plain-text)
+				(set! current-sentence plain-text)
 				(set! new-sent-flag #f)
 			)
 			; if not a new-sentence, create instance-pair atom
@@ -219,8 +220,15 @@
   This is the second part of the learning algo: simply count how
   often pseudo-disjuncts show up.
 "
-	(define parse (mst-parse-text-mode plain-text CNT-MODE MST-DIST))
-	(if EXPORT-MST (export-mst-parse plain-text parse "mst-parses.ull"))
+	(define parse 
+		(if (equal? CNT-MODE "file")
+			(mst-parse-text-file plain-text MST-DIST)
+			(mst-parse-text-mode plain-text CNT-MODE MST-DIST)
+		)
+
+	(if (and EXPORT-MST (list? parse))
+		(export-mst-parse plain-text parse "mst-parses.ull")
+	)
 
 	; The count-one-atom function fetches from the SQL database,
 	; increments the count by one, and stores the result back
