@@ -27,34 +27,45 @@
 		(string-split text-line #\ )
 	)
 
-	; Append the given id-str to the given word instance
-	(define (append-id word id-str)
-		(string-append word "_" id-str)
-	)
-
-	; Create a sequence of atoms from the sequence of strings.
-	; Also appends the word position to every word as instance marker
+	; Create a list of atoms from the sequence of strings and their position
+	; Atoms have the structure:
+	; (WordSequenceLink
+	;		(WordNode "example") 
+	;		(NumberNode 2)
+	; )
 	(define (word-list list-of-words)
 		(define cnt -1)
 		(map 
 			(lambda (str) 
 				(set! cnt (+ cnt 1))
-				(WordNode (append-id str (number->string cnt)))
+				(WordSequenceLink
+					(WordNode str)
+					(NumberNode cnt)
+				)
 			)
 			list-of-words
 		)
 	)	
 
-	; Create instance-pair atom with id-tagged instances
+	; Create instance-pair atom with position-tagged words
 	; Also attach the corresponding weight as a value
 	(define (make-pair-atom text-pair)
 		(define tokens (word-strs plain-text))
-		(define left-word (append-id (second tokens) (first tokens)))
-		(define right-word (append-id (fourth tokens) (third tokens)))
 		(define pair-weight (FloatValue (string->number (fifth tokens))))
-		(define pare (ListLink (WordNode left-word) (WordNode right-word)))
+		(define pare  ; Create ListLink with numbered words
+			(ListLink 
+				(WordSequenceLink
+					(WordNode (second tokens))
+					(NumberNode (first tokens))
+				) 
+				(WordSequenceLink
+					(WordNode (fourth tokens))
+					(NumberNode (third tokens))
+				)
+			) 
+		)
 
-		; Create atom and assign value
+		; Create EvaluationLink and assign weight
 		(cog-set-value! 
 			(EvaluationLink inst-pair-pred pare) 
 			weight-key pair-weight
@@ -186,9 +197,21 @@
 	(define (get-rindex link)
 		(- (car (cdr (car link))) 1))
 	(define (get-lword link)
-		(cog-name (cdr (car (car link)))))
+		(let ((atom (cdr (car (car link)))))
+			(if (cog-link? atom)
+				(cog-name (gar atom))
+				(cog-name atom)
+			)
+		)
+	)
 	(define (get-rword link)
-		(cog-name (cdr (cdr (car link)))))
+		(let ((atom (cdr (cdr (car link)))))
+			(if (cog-link? atom)
+				(cog-name (gar atom))
+				(cog-name atom)
+			)
+		)
+	)
 
 	; link comparator to use in sort func
 	(define link-comparator
@@ -251,7 +274,7 @@
 				(make-sections parse)
 			)
 			(if EXPORT-MST
-				(if cnt-file-mode
+				(if file-cnt-mode
 					(export-mst-parse current-sentence parse "mst-parses.ull")
 					(export-mst-parse plain-text parse "mst-parses.ull")
 				)
