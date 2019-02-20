@@ -35,7 +35,7 @@
 	; Create a sequence of atoms from the sequence of strings.
 	; Also appends the word position to every word as instance marker
 	(define (word-list list-of-words)
-		(define cnt 0)
+		(define cnt -1)
 		(map 
 			(lambda (str) 
 				(set! cnt (+ cnt 1))
