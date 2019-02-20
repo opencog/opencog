@@ -234,8 +234,9 @@
   This is the second part of the learning algo: simply count how
   often pseudo-disjuncts show up.
 "
+	(define file-cnt-mode (if (equal? CNT-MODE "file") #t #f))
 	(define parse 
-		(if (equal? CNT-MODE "file")
+		(if file-cnt-mode
 			(mst-parse-text-file plain-text MST-DIST)
 			(mst-parse-text-mode plain-text CNT-MODE MST-DIST)
 		)
@@ -250,7 +251,10 @@
 				(make-sections parse)
 			)
 			(if EXPORT-MST
-				(export-mst-parse plain-text parse "mst-parses.ull")
+				(if cnt-file-mode
+					(export-mst-parse current-sentence parse "mst-parses.ull")
+					(export-mst-parse plain-text parse "mst-parses.ull")
+				)
 			)
 		)
 	)
