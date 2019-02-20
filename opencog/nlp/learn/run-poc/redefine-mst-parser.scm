@@ -99,7 +99,7 @@
 				(+ modifier (scorer LW RW LEN)))))
 
 	; Check if blank line, which marks sentence end
-	(if (equal? plain-text "\n")
+	(if (equal? plain-text "")
 		; Parse stored sentence and set new-sentence flag to true
 		(begin
 			(set! new-sent-flag #t)
