@@ -87,8 +87,16 @@
 	; longer than 16. This is a sharp cutoff.
 	; This causes parser to run at O(N^3) for LEN < 16 and
 	; a faster rate, O(N^2.3) for 16<LEN. This should help.
+	; Otherwise, assign modification to scorer depending on
+	; mst-parsing mode. If mst-distance accounting is activated
+	; shift all mi-values by 1/LEN, where LEN is the difference
+	; in positions in a sentence between words in word-pair.
 	(define (trunc-scorer LW RW LEN)
-		(if (< 16 LEN) -2e25 (scorer LW RW LEN)))
+		(if (< 16 LEN)
+			-2e25
+			(let
+				((modifier (if mst-dist (/ 1 LEN) 0)))
+				(+ modifier (scorer LW RW LEN)))))
 
 	; Check if blank line
 	(if (equal? plain-text "\n")
