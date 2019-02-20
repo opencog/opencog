@@ -46,7 +46,6 @@ case $1 in
          mkdir -p $(dirname "$parsesdir/$rest")
       fi
       params="$cnt_mode $mst_dist $exp_parses"
-      nc $coghost $cogport 
       ;;
 esac
 
