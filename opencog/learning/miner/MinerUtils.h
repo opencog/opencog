@@ -318,14 +318,30 @@ public:
 	static Handle gen_rand_variable();
 
 	/**
-	 * Given a pattern, return its vardecl and body. If the pattern is
-	 * not a scope link (i.e. a constant/text), then get_variables and
-	 * get_vardecl return the empty Variables and vardecl
-	 * respectively, and get_body returns the pattern itself.
+	 * Given a pattern return its variables. If the pattern is not a
+	 * scope link (i.e. a constant/text), then return the empty
+	 * Variables.
 	 */
 	static const Variables& get_variables(const Handle& pattern);
+
+	/**
+	 * Given a pattern, return its vardecl. If the pattern is not a
+	 * scope link (i.e. a constant/text), then return the empty
+	 * vardecl.
+	 */
 	static Handle get_vardecl(const Handle& pattern);
+
+	/**
+	 * Given a pattern, return its body. If the pattern is not a scope
+	 * link (i.e. a constant/text), then return pattern itself.
+	 */
 	static const Handle& get_body(const Handle& pattern);
+
+	/**
+	 * Given a pattern, return its clause. If the pattern is not a
+	 * scope link (i.e. a constant/text), then behavior is undefined.
+	 */
+	static const HandleSeq& get_clauses(const Handle& pattern);
 
 	/**
 	 * Return the number of conjuncts in a pattern. That is, if the

@@ -104,10 +104,10 @@ protected:
 	 * do_isurp: I-Surprisingness
 	 * do_nisurp: normalized I-Surprisingness
 	 */
-	double do_isurp_old(Handle pattern, Handle partitions, Handle texts);
-	double do_nisurp_old(Handle pattern, Handle partitions, Handle texts);
-	double do_isurp(Handle pattern, Handle partitions, Handle texts);
-	double do_nisurp(Handle pattern, Handle partitions, Handle texts);
+	double do_isurp_old(Handle pattern, Handle texts);
+	double do_nisurp_old(Handle pattern, Handle texts);
+	double do_isurp(Handle pattern, Handle texts);
+	double do_nisurp(Handle pattern, Handle texts);
 
 public:
 	MinerSCM();
@@ -235,36 +235,36 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
 }
 
-double MinerSCM::do_isurp_old(Handle pattern, Handle partitions, Handle texts)
+double MinerSCM::do_isurp_old(Handle pattern, Handle texts)
 {
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness_old(pattern, partitions, texts_set, false);
+	return Surprisingness::ISurprisingness_old(pattern, texts_set, false);
 }
 
-double MinerSCM::do_nisurp_old(Handle pattern, Handle partitions, Handle texts)
+double MinerSCM::do_nisurp_old(Handle pattern, Handle texts)
 {
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness_old(pattern, partitions, texts_set, true);
+	return Surprisingness::ISurprisingness_old(pattern, texts_set, true);
 }
 
-double MinerSCM::do_isurp(Handle pattern, Handle partitions, Handle texts)
+double MinerSCM::do_isurp(Handle pattern, Handle texts)
 {
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness(pattern, partitions, texts_set, false);
+	return Surprisingness::ISurprisingness(pattern, texts_set, false);
 }
 
-double MinerSCM::do_nisurp(Handle pattern, Handle partitions, Handle texts)
+double MinerSCM::do_nisurp(Handle pattern, Handle texts)
 {
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness(pattern, partitions, texts_set, true);
+	return Surprisingness::ISurprisingness(pattern, texts_set, true);
 }
 
 extern "C" {

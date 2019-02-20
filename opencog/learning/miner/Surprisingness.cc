@@ -28,9 +28,11 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
 
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/min_element.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/math/special_functions/binomial.hpp>
 
@@ -40,7 +42,6 @@
 namespace opencog {
 
 double Surprisingness::ISurprisingness_old(const Handle& pattern,
-                                           const HandleSeqSeq& partitions,
                                            const HandleSet& texts,
                                            bool normalize)
 {
@@ -54,18 +55,22 @@ double Surprisingness::ISurprisingness_old(const Handle& pattern,
 		double sup = MinerUtils::calc_support(pattern, texts, (unsigned)total_count);
 		return sup / total_count;
 	};
+	auto blk_prob = [&](const HandleSeq& block) {
+		return prob(add_pattern(block, *pattern->getAtomSpace()));
+	};
 
 	// Calculate the probability of pattern
 	double pattern_prob = prob(pattern);
 
 	// Calculate the probability estimate of each partition based on
 	// independent assumption of between each partition block.
-	auto iprob = [&](const HandleSeq& partition) {
-		return boost::accumulate(partition | boost::adaptors::transformed(prob),
+	auto iprob = [&](const HandleSeqSeq& partition) {
+		return boost::accumulate(partition | boost::adaptors::transformed(blk_prob),
 		                         1.0, std::multiplies<double>());
 	};
-	std::vector<double> estimates(partitions.size());
-	boost::transform(partitions, estimates.begin(), iprob);
+	HandleSeqSeqSeq prtns = partitions_no_set(MinerUtils::get_clauses(pattern));
+	std::vector<double> estimates(prtns.size());
+	boost::transform(prtns, estimates.begin(), iprob);
 	auto p = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *p.first, emax = *p.second;
 
@@ -74,21 +79,7 @@ double Surprisingness::ISurprisingness_old(const Handle& pattern,
 	return normalize ? dst / pattern_prob : dst;
 }
 
-double Surprisingness::ISurprisingness_old(const Handle& patterns,
-                                           const Handle& partitions,
-                                           const HandleSet& texts,
-                                           bool normalize)
-{
-	HandleSeqSeq partitions_ss(partitions->get_arity());
-	boost::transform(partitions->getOutgoingSet(), partitions_ss.begin(),
-	                 [&](const Handle& partition) {
-		                 return partition->getOutgoingSet();
-	                 });
-	return ISurprisingness_old(patterns, partitions_ss, texts, normalize);
-}
-
 double Surprisingness::ISurprisingness(const Handle& pattern,
-                                       const HandleSeqSeq& partitions,
                                        const HandleSet& texts,
                                        bool normalize)
 {
@@ -107,20 +98,59 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 	// independent assumption of between each partition block, taking
 	// into account the linkage probability (probability that 2
 	// variables have the same value).
-	auto iprob = [&](const HandleSeq& partition) {
-		// Calculate the product of the probability of each conjuncts
-		double p = boost::accumulate(partition | boost::adaptors::transformed(prob),
+	const Variables& vars = MinerUtils::get_variables(pattern);
+	auto iprob = [&](const HandleSeqSeq& partition) {
+		// Generate subpatterns from blocks
+		HandleSeq subpatterns(partition.size());
+		AtomSpace& pat_as = *pattern->getAtomSpace();
+		boost::transform(partition, subpatterns.begin(), [&](const HandleSeq& blk) {
+				return add_pattern(blk, pat_as); });
+
+		// Calculate the product of the probability across subpatterns
+		double p = boost::accumulate(subpatterns | boost::adaptors::transformed(prob),
 		                             1.0, std::multiplies<double>());
 
-		// Calculate the linkage probability
+		logger().debug() << "p = " << p;
 
-		// TODO
+		// Calculate the probability of a variable taking the same value
+		// across all blocks/subpatterns where that variable appears.
+		for (const Handle& var : vars.varseq) {
+			// Calculate the support estimate of var in each block
+			std::vector<double> sup_ests(partition.size());
+			for (size_t i = 0; i < sup_ests.size(); i++) {
+				double sup_est = 0.0;
+				if (is_free_in_any_tree(partition[i], var)) {
+					size_t vs = MinerUtils::get_variables(subpatterns[i]).varseq.size();
+					double sup = MinerUtils::get_support(subpatterns[i]);
+					sup_est = std::pow(sup, 1.0/vs);
+				}
+				sup_ests[i] = sup_est;
+				logger().debug() << "sup_ests[" << i << "] = " << sup_est;
+			}
+
+			// Calculate the probability that var takes the same value
+			// across all subpatterns
+			double pe = 1.0;
+			for (double s : sup_ests)
+				if (0 < s)
+					pe /= s;
+			pe *= *boost::min_element(sup_ests);
+
+			logger().debug() << "P(Equal) = " << pe;
+
+			p *= pe;
+		}
+
+		logger().debug() << "iprob(" << oc_to_string(partition) << ") = " << p;
+
+		logger().debug() << "ratio = " << p / pattern_prob;
 
 		return p;
 	};
 
-	std::vector<double> estimates(partitions.size());
-	boost::transform(partitions, estimates.begin(), iprob);
+	HandleSeqSeqSeq prtns = partitions_no_set(MinerUtils::get_clauses(pattern));
+	std::vector<double> estimates(prtns.size());
+	boost::transform(prtns, estimates.begin(), iprob);
 	auto p = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *p.first, emax = *p.second;
 	logger().debug() << "emin = " << emin << ", emax = " << emax;
@@ -128,19 +158,6 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, pattern_prob);
 	return normalize ? dst / pattern_prob : dst;
-}
-
-double Surprisingness::ISurprisingness(const Handle& patterns,
-                                       const Handle& partitions,
-                                       const HandleSet& texts,
-                                       bool normalize)
-{
-	HandleSeqSeq partitions_ss(partitions->get_arity());
-	boost::transform(partitions->getOutgoingSet(), partitions_ss.begin(),
-	                 [&](const Handle& partition) {
-		                 return partition->getOutgoingSet();
-	                 });
-	return ISurprisingness(patterns, partitions_ss, texts, normalize);
 }
 
 Handle Surprisingness::ISurprisingness_key()
@@ -207,6 +224,18 @@ HandleSeqSeqSeq Surprisingness::partitions(HandleSeq::const_iterator from,
 		res.insert(res.end(), subparts.begin(), subparts.end());
 	}
 	return res;
+}
+
+HandleSeqSeqSeq Surprisingness::partitions_no_set(const HandleSeq& hs)
+{
+	HandleSeqSeqSeq prtns = partitions(hs);
+	prtns.resize(prtns.size() - 1);
+	return prtns;
+}
+
+Handle Surprisingness::add_pattern(const HandleSeq& block, AtomSpace& as)
+{
+	return as.add_link(LAMBDA_LINK, as.add_link(AND_LINK, block));
 }
 
 std::string oc_to_string(const HandleSeqSeqSeq& hsss, const std::string& indent)

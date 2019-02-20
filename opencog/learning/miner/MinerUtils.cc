@@ -557,6 +557,11 @@ const Handle& MinerUtils::get_body(const Handle& pattern)
 	return pattern;
 }
 
+const HandleSeq& MinerUtils::get_clauses(const Handle& pattern)
+{
+	return get_body(pattern)->getOutgoingSet();
+}
+
 unsigned MinerUtils::n_conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {

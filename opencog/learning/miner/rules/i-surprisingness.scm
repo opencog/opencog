@@ -101,17 +101,12 @@
                (cnjs-bodies (cog-outgoing-set (get-body pat)))
                (texts (get-texts pat-minsup))
 
-               ;; For now only consider conjuncts independently
-               (mk-block (lambda (blk) (if (< 1 (length blk)) (And blk) blk)))
-               (mk-partition (lambda (prt) (List (map Lambda (map mk-block prt)))))
-               (partitions (List (map mk-partition (cdr (partitions cnjs-bodies)))))
-
                ;; Calculate I-Surprisingness of pat
                (isurp-op (cond ((equal? mode 'isurp-old) cog-isurp-old)
                                ((equal? mode 'nisurp-old) cog-nisurp-old)
                                ((equal? mode 'isurp) cog-isurp)
                                ((equal? mode 'nisurp) cog-nisurp)))
-               (isurp (isurp-op pat partitions texts)))
+               (isurp (isurp-op pat texts)))
           (cog-set-tv! pat-isurp (stv isurp 1))))))
 
 ;; Old I-Surprisingness
