@@ -98,7 +98,7 @@
 				((modifier (if mst-dist (/ 1 LEN) 0)))
 				(+ modifier (scorer LW RW LEN)))))
 
-	; Check if blank line
+	; Check if blank line, which marks sentence end
 	(if (equal? plain-text "\n")
 		; Parse stored sentence and set new-sentence flag to true
 		(begin
