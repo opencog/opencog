@@ -12,7 +12,6 @@
 "
 	(define inst-pair-pred (PredicateNode "*-Sentence Instance Pair-*"))
 	(define weight-key (PredicateNode "*-Pair Weight Key-*"))
-	(define current-sentence "")
 
 	; Return the atom holding the count, if it exists, else return nil.
 	(define (get-pair-instances L-ATOM R-ATOM)
@@ -53,7 +52,7 @@
 		(define left-word (append-id (second tokens) (first tokens)))
 		(define right-word (append-id (fourth tokens) (third tokens)))
 		(define pair-weight (FloatValue (string->number (fifth tokens))))
-		(define pare ListLink (WordNode left-word) (WordNode right-word))
+		(define pare (ListLink (WordNode left-word) (WordNode right-word)))
 
 		; Create atom and assign value
 		(cog-set-value! 
@@ -64,32 +63,39 @@
 
 	; Define scoring function to look for weights in atoms
 	(define scorer 
-		(define bad-weight -1e40) ; losing score
+		(let ((bad-weight -1e40)) ; losing score
 
-		; We take care here to not actually create the atoms,
-		; if they aren't already in the atomspace. get-pair returns
-		; nil if the atoms can't be found.
-		(lambda (left-atom right-atom)
-			(define wpr
-				(if (and (not (null? left-atom)) (not (null? right-atom)))
-					(get-pair-instances left-atom right-atom)
-					'()
+			; We take care here to not actually create the atoms,
+			; if they aren't already in the atomspace. get-pair returns
+			; nil if the atoms can't be found.
+			(lambda (left-atom right-atom distance)
+				(define wpr
+					(if (and (not (null? left-atom)) (not (null? right-atom)))
+						(get-pair-instances left-atom right-atom)
+						'()
+					)
 				)
-			)
-			(if (null? wpr) 
-				bad-weight 
-				(cog-value wpr weight-key)
+				(if (null? wpr) 
+					bad-weight 
+					(cog-value-ref (cog-value wpr weight-key) 0)
+				)
 			)
 		)
 	)
+
+	; Assign a bad cost to links that are too long --
+	; longer than 16. This is a sharp cutoff.
+	; This causes parser to run at O(N^3) for LEN < 16 and
+	; a faster rate, O(N^2.3) for 16<LEN. This should help.
+	(define (trunc-scorer LW RW LEN)
+		(if (< 16 LEN) -2e25 (scorer LW RW LEN)))
 
 	; Check if blank line
 	(if (equal? plain-text "\n")
 		; Parse stored sentence and set new-sentence flag to true
 		(begin
 			(set! new-sent-flag #t)
-			(word-list (word-strs current-sentence))
-			(mst-parse-atom-seq word-list trunc-scorer)
+			(mst-parse-atom-seq (word-list (word-strs current-sentence)) trunc-scorer)
 		)
 
 		; Check if it's the first line in a block (contains sentence to parse)
@@ -225,16 +231,20 @@
 			(mst-parse-text-file plain-text MST-DIST)
 			(mst-parse-text-mode plain-text CNT-MODE MST-DIST)
 		)
-
-	(if (and EXPORT-MST (list? parse))
-		(export-mst-parse plain-text parse "mst-parses.ull")
 	)
 
-	; The count-one-atom function fetches from the SQL database,
-	; increments the count by one, and stores the result back
-	(for-each
-		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
-		(make-sections parse)
+	(if (list? parse)
+		(begin
+			; The count-one-atom function fetches from the SQL database,
+			; increments the count by one, and stores the result back
+			(for-each
+				(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
+				(make-sections parse)
+			)
+			(if EXPORT-MST
+				(export-mst-parse plain-text parse "mst-parses.ull")
+			)
+		)
 	)
 )
 
