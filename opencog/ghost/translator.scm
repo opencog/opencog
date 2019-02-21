@@ -624,12 +624,15 @@
   Figure out what the type of the rule is, generate the needed atomese, and
   return the type as a StringValue.
 "
-  (cond ((or (equal? #\u TYPE)
-             (equal? #\s TYPE))
+  (cond ((or (string=? "r" TYPE)
+             ; For backward compatibility
+             (string=? "u" TYPE)
+             (string=? "s" TYPE))
          (set! rule-type-alist
            (assoc-set! rule-type-alist NAME strval-responder))
          (list '() '()))
-        ((equal? #\? TYPE)
+        ; For backward compatibility
+        ((equal? "?" TYPE)
          (set! rule-type-alist
            (assoc-set! rule-type-alist NAME strval-responder))
          (let ((var (Variable (gen-var "Interpretation" #f))))
@@ -642,11 +645,9 @@
                    (DefinedLinguisticConcept "InterrogativeSpeechAct"))
                  (InheritanceLink var
                    (DefinedLinguisticConcept "TruthQuerySpeechAct")))))))
-        ((equal? #\r TYPE)
-         (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-random-gambit))
-         (list '() '()))
-        ((equal? #\t TYPE)
+        ((or (string=? "p" TYPE)
+             ; For backward compatibility
+             (string=? "t" TYPE))
          (set! rule-type-alist
            (assoc-set! rule-type-alist NAME strval-gambit))
          (list '() '()))
