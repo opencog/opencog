@@ -1,4 +1,10 @@
-A mom is a human .
+###LEFT-WALL### A mom is a human .
+0 ###LEFT-WALL### 1 A 0.1
+0 ###LEFT-WALL### 2 mom 0.1
+0 ###LEFT-WALL### 3 is 0.1
+0 ###LEFT-WALL### 4 a 0.1
+0 ###LEFT-WALL### 5 human 0.1
+0 ###LEFT-WALL### 6 . 0.1
 1 A 2 mom 0.1
 1 A 3 is 0.2
 1 A 4 a 0.3
@@ -31,6 +37,12 @@ A mom is a human .
 6 . 5 human 0.55
 
 A dad is a human .
+0 ###LEFT-WALL### 1 A 0.1
+0 ###LEFT-WALL### 2 dad 0.1
+0 ###LEFT-WALL### 3 is 0.1
+0 ###LEFT-WALL### 4 a 0.1
+0 ###LEFT-WALL### 5 human 0.1
+0 ###LEFT-WALL### 6 . 0.1
 1 A 2 dad 0.1
 1 A 3 is 0.2
 1 A 4 a 0.3
