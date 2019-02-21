@@ -109,8 +109,8 @@
         (substring (string-trim-both
           (match:substring current-match)) 0 1)))
     ; Proactive rules (aka Gambits)
-    ; Starts with "p:"; "r:" and "t:" are for backward compatibility
-    ((has-match? "[prt]:" str)
+    ; Starts with "p:"; "t:" is for backward compatibility
+    ((has-match? "[pt]:" str)
       (result:suffix 'PROACTIVE-RULES location
         (substring (string-trim-both
           (match:substring current-match)) 0 1)))
