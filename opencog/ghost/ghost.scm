@@ -71,14 +71,13 @@
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
-(define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
+(define ghost-next-reactive-rule (Predicate (ghost-prefix "Next Reactive Rule")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
 (define ghost-rej-seq-num (Predicate (ghost-prefix "Rejoinder Sequence Number")))
 (define ghost-context-specificity (Predicate (ghost-prefix "Context Specificity")))
 (define strval-rejoinder (StringValue "rejoinder"))
-(define strval-responder (StringValue "responder"))
-(define strval-random-gambit (StringValue "random gambit"))
-(define strval-gambit (StringValue "gambit"))
+(define strval-reactive-rule (StringValue "reactive-rule"))
+(define strval-proactive-rule (StringValue "proactive-rule"))
 
 ;; --------------------
 (define-public (ghost-word-seq-pred)
@@ -120,7 +119,7 @@
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
-; An association list of the types (responders, rejoinders etc)
+; An association list of the types (reactive rules, rejoinders etc)
 ; of the rules
 (define rule-type-alist '())
 
@@ -179,7 +178,7 @@
 (define context-weight 1)
 (define sti-weight 1)
 (define urge-weight 1)
-(define responder-sti-boost 1)
+(define reactive-rule-sti-boost 1)
 (define rejoinder-sti-boost 10)
 (define refractory-period 1)
 (define specificity-based-action-selection #t)

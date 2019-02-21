@@ -332,7 +332,7 @@
 
     ; Rule grammar
     (rule
-      ; ----- Responders ----- ;
+      ; ----- Reactive Rules ----- ;
       (rule-goal rule-lconcept REACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
@@ -446,9 +446,9 @@
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $1 (list))
-      ; ----- Gambits ----- ;
-      ; Note, do not support a gambit that has a label
-      ; but no context -- it's ambiguous to determine
+      ; ----- Proactive Rules ----- ;
+      ; Note, do not support a proactive rule that has a
+      ; label but no context -- it's ambiguous to determine
       ; whether it's really a label or just the first
       ; word of the "action"
       (rule-goal rule-lconcept PROACTIVE-RULES str context action) :
@@ -521,7 +521,7 @@
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $2 $1)
       ; Same as the above, context is needed for a
-      ; labeled gambit
+      ; labeled proactive rule
       (PROACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))

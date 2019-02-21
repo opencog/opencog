@@ -629,12 +629,12 @@
              (string=? "u" TYPE)
              (string=? "s" TYPE))
          (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-responder))
+           (assoc-set! rule-type-alist NAME strval-reactive-rule))
          (list '() '()))
         ; For backward compatibility
         ((equal? "?" TYPE)
          (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-responder))
+           (assoc-set! rule-type-alist NAME strval-reactive-rule))
          (let ((var (Variable (gen-var "Interpretation" #f))))
            (list
              (list (TypedVariable var (Type "InterpretationNode")))
@@ -649,15 +649,15 @@
              ; For backward compatibility
              (string=? "t" TYPE))
          (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-gambit))
+           (assoc-set! rule-type-alist NAME strval-proactive-rule))
          (list '() '()))
         ((null? rule-hierarchy)
          (clear-parsing-states)
          ; If we are here, it has to be a rejoinder, so make sure
-         ; rule-hierarchy is not empty, i.e. a responder should
+         ; rule-hierarchy is not empty, i.e. a reactive rule should
          ; be defined in advance
          (throw (ghost-prefix
-           "Please define a responder first before defining a rejoinder.")))
+           "Please define a reactive rule first before defining a rejoinder.")))
         ((equal? "Parallel-Rules"
            (cog-name (psi-get-goal (car (get-rules-from-label
              (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1))))))))
@@ -731,8 +731,9 @@
   NAME is like a label of a rule, so that one can reference this rule
   by using it.
 
-  TYPE is a grouping idea from ChatScript, e.g. responders, rejoinders,
-  gambits etc.
+  TYPE is a grouping idea from ChatScript, i.e. responders, rejoinders,
+  and gambits. Note, here in GHOST, responders are called reactive rules
+  and gambits are called proactive rules.
 "
   ; Label the rule with NAME, if given, generate one otherwise
   (define rule-name
@@ -897,8 +898,8 @@
         (if is-rejoinder?
           ; If it's a rejoinder, its parent rule should be the
           ; last rule one level up in rule-hierarchy
-          ; 'process-type' will make sure there is a responder
-          ; defined beforehand so rule-hierarchy is not empty
+          ; 'process-type' will make sure there is a reactive
+          ; rule defined beforehand so rule-hierarchy is not empty
           (begin
             (set-next-rule
               (car (get-rules-from-label
@@ -924,7 +925,7 @@
                     (lambda (r)
                       (set-next-rule
                         (car (get-rules-from-label r))
-                          a-rule ghost-next-responder))
+                          a-rule ghost-next-reactive-rule))
                     lv))
                 rule-hierarchy))
             (add-to-rule-hierarchy 0 NAME)))
