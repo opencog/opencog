@@ -93,26 +93,27 @@
     ; Starts with "r:"; "s:", "?:" and "u:" are for backward compatibility
     ((has-match? "[rs?u]:" str)
       (result:suffix 'REACTIVE-RULES location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
+        (substring (string-trim-both
+          (match:substring current-match)) 0 1)))
     ; Rejoinders
     ; Starts with "j" follow by a number to denote the level
     ((has-match? "j[0-9]+:" str)
       (result:suffix 'REJOINDERS location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
+        (substring (string-trim-both
+          (match:substring current-match)) 0
+            (- (string-length (match:substring current-match)) 1))))
     ; Rejoinders again, for backward compatibility, but limit the support
     ; up to the letter "e" instead of "q" as in ChatScript
     ((has-match? "[a-e]:" str)
       (result:suffix 'REJOINDERS location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
+        (substring (string-trim-both
+          (match:substring current-match)) 0 1)))
     ; Proactive rules (aka Gambits)
     ; Starts with "p:"; "r:" and "t:" are for backward compatibility
     ((has-match? "[prt]:" str)
       (result:suffix 'PROACTIVE-RULES location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
+        (substring (string-trim-both
+          (match:substring current-match)) 0 1)))
     ((has-match? "[{][%] set delay=[0-9]+ [%][}]" str)
       (result:suffix 'SET_DELAY location
         (string-trim-both (match:substring current-match))))
