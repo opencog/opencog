@@ -1,3 +1,34 @@
+;; 20 Persons:
+;;
+;; (ConceptNode "Allen")
+;; (ConceptNode "Abe")
+;; (ConceptNode "Cason")
+;; (ConceptNode "Davion")
+;; (ConceptNode "Hessley")
+;; (ConceptNode "Jadrian")
+;; (ConceptNode "Rio")
+;; (ConceptNode "Bob")
+;; (ConceptNode "Mike")
+;; (ConceptNode "Zac")
+;; (ConceptNode "Lily")
+;; (ConceptNode "Emily")
+;; (ConceptNode "Lucy")
+;; (ConceptNode "Sophia")
+;; (ConceptNode "Alaura")
+;; (ConceptNode "Breonna")
+;; (ConceptNode "Jaleesa")
+;; (ConceptNode "Jassy")
+;; (ConceptNode "Jenica")
+;; (ConceptNode "Kecia")
+;;
+;; 5 Classes:
+;;
+;; (ConceptNode "human")
+;; (ConceptNode "man")
+;; (ConceptNode "woman")
+;; (ConceptNode "ugly")
+;; (ConceptNode "soda drinker")
+
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "Allen")
   (ConceptNode "human")
