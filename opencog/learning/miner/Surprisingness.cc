@@ -38,6 +38,7 @@
 
 #include <cmath>
 #include <functional>
+#include <limits>
 
 namespace opencog {
 
@@ -114,7 +115,10 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 
 		// Calculate the probability of a variable taking the same value
 		// across all blocks/subpatterns where that variable appears.
+		// TODO: only consider linked variables
 		for (const Handle& var : vars.varseq) {
+			logger().debug() << "var = " << oc_to_string(var);
+
 			// Calculate the support estimate of var in each block
 			std::vector<double> sup_ests(partition.size());
 			for (size_t i = 0; i < sup_ests.size(); i++) {
@@ -157,10 +161,15 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 	boost::transform(prtns, estimates.begin(), iprob);
 	auto p = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *p.first, emax = *p.second;
-	logger().debug() << "emin = " << emin << ", emax = " << emax;
+	logger().debug() << "emin = " << emin << ", emax = " << emax
+	                 << ", pattern_prob = " << pattern_prob;
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, pattern_prob);
+	logger().debug() << "dst = " << dst
+	                 << ", normalize = " << normalize
+	                 << ", ndst = " << dst / pattern_prob;
+
 	return normalize ? dst / pattern_prob : dst;
 }
 
@@ -233,7 +242,8 @@ HandleSeqSeqSeq Surprisingness::partitions(HandleSeq::const_iterator from,
 HandleSeqSeqSeq Surprisingness::partitions_no_set(const HandleSeq& hs)
 {
 	HandleSeqSeqSeq prtns = partitions(hs);
-	prtns.resize(prtns.size() - 1);
+	// prtns.resize(prtns.size() - 1);
+	prtns.resize(1);
 	return prtns;
 }
 
