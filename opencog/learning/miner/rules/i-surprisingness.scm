@@ -141,7 +141,7 @@
 
 ;; New normalized I-Surprisingness
 
-(define nisurp-formula (gen-i-surprisingness-formula 'isurp))
+(define nisurp-formula (gen-i-surprisingness-formula 'nisurp))
 (define (define-nisurp-rule x)
   (let ((rule-name (string-append "nisurp-" (number->string x) "ary-rule")))
     (DefineLink
