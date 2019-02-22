@@ -131,10 +131,14 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 			// Calculate the probability that var takes the same value
 			// across all subpatterns
 			double pe = 1.0;
-			for (double s : sup_ests)
-				if (0 < s)
+			double min_s = std::numeric_limits<double>::max();
+			for (double s : sup_ests) {
+				if (0 < s) {
 					pe /= s;
-			pe *= *boost::min_element(sup_ests);
+					min_s = std::min(min_s, s);
+				}
+			}
+			pe *= min_s;
 
 			logger().debug() << "P(Equal) = " << pe;
 
