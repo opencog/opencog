@@ -89,19 +89,34 @@
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
     ((has-match? "*#" str)
       (cons (make-lexical-token 'COMMENT location #f) ""))
-    ; Chatscript rules
-    ((has-match? "[s?u]:" str)
-      (result:suffix 'RESPONDERS location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
-    ((has-match? "[a-q]:" str)
+    ; Reactive rules (aka Responders)
+    ; Starts with "r:"; "s:", "?:" and "u:" are for backward compatibility
+    ((has-match? "[rs?u]:" str)
+      (result:suffix 'REACTIVE-RULES location
+        (string-trim-both
+          (match:substring current-match)
+            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+    ; Rejoinders
+    ; Starts with "j" follow by a number to denote the level
+    ((has-match? "j[0-9]+:" str)
       (result:suffix 'REJOINDERS location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
-    ((has-match? "[rt]:" str)
-      (result:suffix 'GAMBIT location
-        (car (string->list (substring (string-trim-both
-          (match:substring current-match)) 0 1)))))
+        (string-trim-both
+          (match:substring current-match)
+            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+    ; Rejoinders again, for backward compatibility, but limit the support
+    ; up to the letter "e" instead of "q" as in ChatScript
+    ((has-match? "[a-e]:" str)
+      (result:suffix 'REJOINDERS location
+        (string-trim-both
+          (match:substring current-match)
+            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+    ; Proactive rules (aka Gambits)
+    ; Starts with "p:"; "t:" is for backward compatibility
+    ((has-match? "[pt]:" str)
+      (result:suffix 'PROACTIVE-RULES location
+        (string-trim-both
+          (match:substring current-match)
+            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
     ((has-match? "[{][%] set delay=[0-9]+ [%][}]" str)
       (result:suffix 'SET_DELAY location
         (string-trim-both (match:substring current-match))))
@@ -248,7 +263,7 @@
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
-    (CONCEPT RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
+    (CONCEPT REACTIVE-RULES REJOINDERS PROACTIVE-RULES URGE ORD-GOAL GOAL RGOAL COMMENT
      SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT RLINK-CONCEPT
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
@@ -317,59 +332,59 @@
 
     ; Rule grammar
     (rule
-      ; ----- Responders ----- ;
-      (rule-goal rule-lconcept RESPONDERS str context action) :
+      ; ----- Reactive Rules ----- ;
+      (rule-goal rule-lconcept REACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $4 $3 $2)
-      (rule-lconcept rule-goal RESPONDERS str context action) :
+      (rule-lconcept rule-goal REACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $2 ")"))
           $4 $3 $1)
-      (rule-goal RESPONDERS str context action) :
+      (rule-goal REACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $3 $2 (list))
-      (rule-lconcept RESPONDERS str context action) :
+      (rule-lconcept REACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (list) $3 $2 $1)
-      (rule-goal rule-lconcept RESPONDERS context action) :
+      (rule-goal rule-lconcept REACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $3 $2)
-      (rule-lconcept rule-goal RESPONDERS context action) :
+      (rule-lconcept rule-goal REACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $2 ")"))
           "" $3 $1)
-      (rule-goal RESPONDERS context action) :
+      (rule-goal REACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $2 (list))
-      (rule-lconcept RESPONDERS context action) :
+      (rule-lconcept REACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (list) "" $2 $1)
-      (RESPONDERS str context action) :
+      (REACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (list) $2 $1 (list))
-      (RESPONDERS context action) :
+      (REACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
@@ -431,93 +446,93 @@
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $1 (list))
-      ; ----- Gambits ----- ;
-      ; Note, do not support a gambit that has a label
-      ; but no context -- it's ambiguous to determine
+      ; ----- Proactive Rules ----- ;
+      ; Note, do not support a proactive rule that has a
+      ; label but no context -- it's ambiguous to determine
       ; whether it's really a label or just the first
       ; word of the "action"
-      (rule-goal rule-lconcept GAMBIT str context action) :
+      (rule-goal rule-lconcept PROACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $4 $3 $2)
-      (rule-lconcept rule-goal GAMBIT str context action) :
+      (rule-lconcept rule-goal PROACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $6 ")"))
           (eval-string (string-append "(list " $2 ")"))
           $4 $3 $1)
-      (rule-goal GAMBIT str context action) :
+      (rule-goal PROACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           $3 $2 (list))
-      (rule-lconcept GAMBIT str context action) :
+      (rule-lconcept PROACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (list) $3 $2 $1)
-      (rule-goal rule-lconcept GAMBIT context action) :
+      (rule-goal rule-lconcept PROACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $3 $2)
-      (rule-lconcept rule-goal GAMBIT context action) :
+      (rule-lconcept rule-goal PROACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $2 ")"))
           "" $3 $1)
-      (rule-goal GAMBIT context action) :
+      (rule-goal PROACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $2 (list))
-      (rule-lconcept GAMBIT context action) :
+      (rule-lconcept PROACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (list) "" $2 $1)
-      (rule-goal rule-lconcept GAMBIT action) :
+      (rule-goal rule-lconcept PROACTIVE-RULES action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $3 $2)
-      (rule-lconcept rule-goal GAMBIT action) :
+      (rule-lconcept rule-goal PROACTIVE-RULES action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $2 ")"))
           "" $3 $1)
-      (rule-goal GAMBIT action) :
+      (rule-goal PROACTIVE-RULES action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $2 (list))
-      (rule-lconcept GAMBIT action) :
+      (rule-lconcept PROACTIVE-RULES action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $2 $1)
       ; Same as the above, context is needed for a
-      ; labeled gambit
-      (GAMBIT str context action) :
+      ; labeled proactive rule
+      (PROACTIVE-RULES str context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (list) $2 $1 (list))
-      (GAMBIT context action) :
+      (PROACTIVE-RULES context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $1 (list))
-      (GAMBIT action) :
+      (PROACTIVE-RULES action) :
         (create-rule
           (list)
           (eval-string (string-append "(list " $2 ")"))

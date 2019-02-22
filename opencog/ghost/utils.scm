@@ -284,9 +284,13 @@
 ; ----------
 (define (get-rejoinder-level TYPE)
 "
-  Return the rejoinder level, e.g. a = level 1, b = level 2, and so on...
+  Return the rejoinder level, e.g. j1 = level 1, j2 = level 2, and so on...
 "
-  (- (char->integer TYPE) 96))
+  (if (string-prefix? "j" TYPE)
+    (string->number (string-trim TYPE (lambda (c) (eqv? c #\j))))
+    ; For backward compatibility,
+    ; e.g. a = level 1, b = level 2, and so on...
+    (- (char->integer (string-ref TYPE 0)) 96)))
 
 ; ----------
 (define (get-related-psi-rules ATOM)
