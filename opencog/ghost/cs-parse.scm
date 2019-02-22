@@ -95,21 +95,21 @@
       (result:suffix 'REACTIVE-RULES location
         (string-trim-both
           (match:substring current-match)
-            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+            (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ; Rejoinders
     ; Starts with "j" follow by a number to denote the level
     ((has-match? "j[0-9]+:" str)
       (result:suffix 'REJOINDERS location
         (string-trim-both
           (match:substring current-match)
-            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+            (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ; Rejoinders again, for backward compatibility, but limit the support
     ; up to the letter "e" instead of "q" as in ChatScript
     ((has-match? "[a-e]:" str)
       (result:suffix 'REJOINDERS location
         (string-trim-both
           (match:substring current-match)
-            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+            (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ; Proactive rules (aka Gambits)
     ; Starts with "p:"; "t:" is for backward compatibility
     ((has-match? "[pt]:" str)
