@@ -210,7 +210,11 @@ public:
 	 *
 	 * return
 	 *
-	 * [[[A,B,C]],[[B,C],[A]],[[A,C],[B]],[[C],[A,B]],[[C],[B],[A]]]
+	 * [[[A],[C],[B]],
+	 *  [[C,A],[B]],
+	 *  [[C],[B,A]],
+	 *  [[A],[C,B]],
+	 *  [[C,B,A]]]
 	 */
 	static HandleSeqSeqSeq partitions(const HandleSeq& hs);
 	static HandleSeqSeqSeq partitions(HandleSeq::const_iterator from,
@@ -224,7 +228,10 @@ public:
 	 *
 	 * return
 	 *
-	 * [[[B,C],[A]],[[A,C],[B]],[[C],[A,B]],[[C],[B],[A]]]
+	 * [[[A],[C],[B]],
+	 *  [[C,A],[B]],
+	 *  [[C],[B,A]],
+	 *  [[A],[C,B]]]
 	 */
 	static HandleSeqSeqSeq partitions_no_set(const HandleSeq& hs);
 
