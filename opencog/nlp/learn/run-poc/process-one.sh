@@ -56,7 +56,7 @@ if [[ "$cnt_mode" == "file" ]]; then
 fi
 
 # Punt if the cogserver has crashed: use netcat to ping it.
-haveping=`echo foo | nc -N $coghost $cogport`
+haveping=`echo foo | nc $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
@@ -78,7 +78,7 @@ fi
 cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe $params
 
 # Punt if the cogserver has crashed (second test, before doing the mv and rm below)
-haveping=`echo foo | nc -N $coghost $cogport`
+haveping=`echo foo | nc $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
