@@ -116,7 +116,7 @@
       (result:suffix 'PROACTIVE-RULES location
         (string-trim-both
           (match:substring current-match)
-            (lambda (c) (or (eqv? c #\space) (eqv? c #\:))))))
+            (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ((has-match? "[{][%] set delay=[0-9]+ [%][}]" str)
       (result:suffix 'SET_DELAY location
         (string-trim-both (match:substring current-match))))
