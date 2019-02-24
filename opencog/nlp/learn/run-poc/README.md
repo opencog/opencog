@@ -420,7 +420,19 @@ will automatically pick up where they left off.
    open `process-word-pairs.sh` and remove the -N option from the nc commands
    (some old version of netcat still support this option).
 
-4) Wait some time, possibly a few days. When finished, stop the cogserver.
+4) Wait some time, possibly a few days. When finished, you can export the
+   word-pair MI values to a file if you want. Start by loading the file in
+   the cogserver:
+   ```
+      (load "export-mi.scm")
+   ```
+   and running the export comand (change "any" to the mode used when
+   pair counting):
+   ```
+      (export-mi "any")
+   ```
+   This will generate a file called `mi-pairs.txt` in your working directory.
+   Then stop the cogserver.
 
    These scripts use commands from the scripts in the `scm` directory.
    The code for computing word-pair MI is in `batch-word-pair.scm`.
