@@ -1,7 +1,7 @@
 /*
- * Miner.cc
+ * Surprisingness.cc
  *
- * Copyright (C) 2017 OpenCog Foundation
+ * Copyright (C) 2019 OpenCog Foundation
  *
  * Author: Nil Geisweiller
  *
