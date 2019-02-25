@@ -221,10 +221,16 @@ public:
 	                                  HandleSeq::const_iterator to);
 
 	/**
-	 * Like partitions but the block corresponding to the full set has
-	 * been removed. For instance
+	 * Like partitions but takes a pattern. Also the partition block
+	 * corresponding to the full set has been removed (since it is
+	 * already the block corresponding to the full pattern). For
+	 * instance
 	 *
-	 * c = [A,B,C]
+	 * pattern = Lambda
+	 *             And
+	 *               A
+	 *               B
+	 *               C
 	 *
 	 * return
 	 *
@@ -233,7 +239,7 @@ public:
 	 *  [[C],[B,A]],
 	 *  [[A],[C,B]]]
 	 */
-	static HandleSeqSeqSeq partitions_no_set(const HandleSeq& hs);
+	static HandleSeqSeqSeq partitions(const Handle& pattern);
 
 	/**
 	 * Convert a partition block [A,B] into a pattern like
@@ -246,6 +252,69 @@ public:
 	 * and insert it in as.
 	 */
 	static Handle add_pattern(const HandleSeq& block, AtomSpace& as);
+
+	/**
+	 * Return the set of variables that appear in more than one clause.
+	 *
+	 * For instance
+	 *
+	 * pattern
+	 * =
+	 * Lambda
+	 *   X Y Z
+	 *   Inheritance X Y
+	 *   Inheritance Y Z
+	 *
+	 * returns
+	 *
+	 * [Y]
+	 */
+	static HandleSeq joint_variables(const Handle& pattern);
+
+	/**
+	 * Return the probability distribution over value of var in the
+	 * given subpattern/block against a given database.
+	 */
+	static HandleCounter value_distribution(const HandleSeq& block,
+	                                        const Handle& var,
+	                                        const HandleSet& texts);
+
+	/**
+	 * Perform the inner product of a collection of distributions.
+	 *
+	 * For instance
+	 *
+	 * dists
+	 * =
+	 * { {A->0.5, B->0.5},
+	 *   {B->0.4, C->0.3, D->0.3} }
+	 *
+	 * returns
+	 *
+	 * 0.5*0        // A
+	 * + 0.5*0.4    // B
+	 * + 0*0.3      // C
+	 * + 0*0.3      // D
+	 * = 0.2
+	 */
+	static double inner_product(const std::vector<HandleCounter>& dists);
+
+	/**
+	 * Calculate the empiric probability of a pattern according to a
+	 * database texts.
+	 */
+	static double emp_prob(const Handle& pattern, const HandleSet& texts);
+
+	/**
+	 * Calculate probability estimate of a pattern given a partition,
+	 * assuming all blocks are independent, but takes into account the
+	 * joint variables.
+	 *
+	 * An atomspace is provided to memoize the support of subpatterns.
+	 */
+	static double jiprob(const HandleSeqSeq& partition,
+	                     const Handle& pattern,
+	                     const HandleSet& texts);
 };
 
 /**
