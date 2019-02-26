@@ -718,7 +718,7 @@
 )
 
 ; ----------
-(define* (create-default-rule RULE-TYPE #:optional (CONTEXT '()) (ACTION '()))
+(define (create-default-rule RULE-TYPE CONTEXT ACTION)
 "
   Record the context and/or action that will be shared among all
   the rules with the same rule type.
@@ -800,13 +800,13 @@
 
   (let* ((default-rule (assoc-ref global-default-rule-alist TYPE))
          (rule-pattern
-           (if default-rule
-              (append (car default-rule) PATTERN)
-              PATTERN))
+           (if (null? (car default-rule))
+              PATTERN
+              (append (car default-rule) PATTERN)))
          (rule-action
-           (if default-rule
-              (list (cons 'action (append (cdadr default-rule) (cdar ACTION))))
-              ACTION))
+           (if (null? (cdr default-rule))
+              ACTION
+              (list (cons 'action (append (cdadr default-rule) (cdar ACTION))))))
          (proc-type (process-type TYPE NAME))
          (ordered-terms (order-terms rule-pattern))
          (proc-terms (process-pattern-terms ordered-terms))

@@ -340,9 +340,9 @@
           (eval-string (string-append "(list " $4 ")")))
       (GLOBAL-DEFAULT-RULE REACTIVE-RULES context) :
         (create-default-rule $2
-          (eval-string (string-append "(list " $3 ")")))
+          (eval-string (string-append "(list " $3 ")")) (list))
       (GLOBAL-DEFAULT-RULE REACTIVE-RULES action) :
-        (create-default-rule $2
+        (create-default-rule $2 (list)
           (eval-string (string-append "(list " $3 ")")))
       (GLOBAL-DEFAULT-RULE PROACTIVE-RULES context action) :
         (create-default-rule $2
@@ -350,9 +350,9 @@
           (eval-string (string-append "(list " $4 ")")))
       (GLOBAL-DEFAULT-RULE PROACTIVE-RULES context) :
         (create-default-rule $2
-          (eval-string (string-append "(list " $3 ")")))
+          (eval-string (string-append "(list " $3 ")")) (list))
       (GLOBAL-DEFAULT-RULE PROACTIVE-RULES action) :
-        (create-default-rule $2
+        (create-default-rule $2 (list)
           (eval-string (string-append "(list " $3 ")")))
     )
 
