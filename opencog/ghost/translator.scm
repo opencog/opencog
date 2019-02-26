@@ -800,11 +800,11 @@
 
   (let* ((default-rule (assoc-ref global-default-rule-alist TYPE))
          (rule-pattern
-           (if (null? (car default-rule))
+           (if (or (not default-rule) (null? (car default-rule)))
               PATTERN
               (append (car default-rule) PATTERN)))
          (rule-action
-           (if (null? (cdr default-rule))
+           (if (or (not default-rule) (null? (cdr default-rule)))
               ACTION
               (list (cons 'action (append (cdadr default-rule) (cdar ACTION))))))
          (proc-type (process-type TYPE NAME))
