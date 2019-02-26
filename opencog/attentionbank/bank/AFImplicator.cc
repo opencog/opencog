@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/pattern/BindLink.h>
 #include "AFImplicator.h"
-#include <opencog/query/DefaultImplicator.h>
 
 using namespace opencog;
 
@@ -36,9 +36,18 @@ namespace opencog
  */
 Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
 {
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+
 	// Now perform the search.
 	AFImplicator impl(as);
-	return do_imply(as, hbindlink, impl, false);
+	impl.implicand = bl->get_implicand();
+	bl->imply(impl, false);
+
+	// The result_list contains a list of the grounded expressions.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, cache it, and return that.
+	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+	return as->add_atom(rewr);
 }
 
 }
