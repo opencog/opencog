@@ -123,6 +123,9 @@
 ; of the rules
 (define rule-type-alist '())
 
+; An association list for storing the default rule contexts and actions
+(define global-default-rule-alist '())
+
 ; An association list that contains all the terms needed to create
 ; the actual rules
 ; The key of this list is the labels of the rules
@@ -148,6 +151,7 @@
   (set! rule-features '())
   (set! rule-label-list '())
   (set! rule-type-alist '())
+  (set! global-default-rule-alist '())
   (set! rule-alist '())
   (set! rule-hierarchy '())
   (set! goals-of-prev-rule '())

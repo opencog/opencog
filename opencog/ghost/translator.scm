@@ -718,6 +718,20 @@
 )
 
 ; ----------
+(define* (create-default-rule RULE-TYPE #:optional (CONTEXT '()) (ACTION '()))
+"
+  Record the context and/or action that will be shared among all
+  the rules with the same rule type.
+"
+  (cog-logger-debug ghost-logger
+    "Global default rule:\nType: ~a\nContext: ~a\nAction: ~a"
+      RULE-TYPE CONTEXT ACTION)
+
+  (set! global-default-rule-alist
+    (assoc-set! global-default-rule-alist RULE-TYPE (cons CONTEXT ACTION)))
+)
+
+; ----------
 (define (create-rule PATTERN ACTION GOAL NAME TYPE RCNPTS)
 "
   Top level translation function.
@@ -784,8 +798,17 @@
       (set! goals-of-prev-rule (cons ALL-GOALS ORDERED?))
       (set! rule-hierarchy '())))
 
-  (let* ((proc-type (process-type TYPE NAME))
-         (ordered-terms (order-terms PATTERN))
+  (let* ((default-rule (assoc-ref global-default-rule-alist TYPE))
+         (rule-pattern
+           (if default-rule
+              (append (car default-rule) PATTERN)
+              PATTERN))
+         (rule-action
+           (if default-rule
+              (list (cons 'action (append (cdadr default-rule) (cdar ACTION))))
+              ACTION))
+         (proc-type (process-type TYPE NAME))
+         (ordered-terms (order-terms rule-pattern))
          (proc-terms (process-pattern-terms ordered-terms))
          (vars (append (list-ref proc-terms 0)
                        (list-ref proc-type 0)))
@@ -793,7 +816,7 @@
                         (list-ref proc-type 1)))
          (specificity (list-ref proc-terms 3))
          (type (assoc-ref rule-type-alist NAME))
-         (action (process-action ACTION NAME
+         (action (process-action rule-action NAME
                    (find
                      (lambda (g) (string=? "Parallel-Rules" (car g)))
                      ALL-GOALS)))
@@ -801,7 +824,7 @@
          (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
     (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
-    (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+    (cog-logger-debug ghost-logger "Procedure: ~a" rule-action)
     (cog-logger-debug ghost-logger "Goal: ~a" ALL-GOALS)
 
     ; Update the count -- how many rules we've seen under this top level goal
