@@ -84,6 +84,8 @@
       (result:suffix 'LINK-CONCEPT location #f))
     ((has-match? "#link-concept:" str)
       (result:suffix 'RLINK-CONCEPT location #f))
+    ((has-match? "global-default-rule:" str)
+      (result:suffix 'GLOBAL-DEFAULT-RULE location #f))
     ((has-match? "#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
@@ -264,7 +266,7 @@
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
     (CONCEPT REACTIVE-RULES REJOINDERS PROACTIVE-RULES URGE ORD-GOAL GOAL RGOAL COMMENT
-     SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT RLINK-CONCEPT
+     SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT RLINK-CONCEPT GLOBAL-DEFAULT-RULE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
               SET_DELAY)
@@ -280,6 +282,7 @@
 
     (input
       (declarations) : $1
+      (global-default-rule) : $1
       (urge) : (set-initial-urge (eval-string (string-append "(list " $1 ")")))
       (goal) : (create-top-lv-goal (eval-string (string-append "(list " $1 ")")))
       (ordered-goal) :
@@ -328,6 +331,29 @@
       (sequence) : $1
       (DICTKEY) :
         (format #f "(cons 'dictkey (cons \"~a\" \"~a\"))" (car $1) (cdr $1))
+    )
+
+    (global-default-rule
+      (GLOBAL-DEFAULT-RULE REACTIVE-RULES context action) :
+        (create-default-rule $2
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")")))
+      (GLOBAL-DEFAULT-RULE REACTIVE-RULES context) :
+        (create-default-rule $2
+          (eval-string (string-append "(list " $3 ")")))
+      (GLOBAL-DEFAULT-RULE REACTIVE-RULES action) :
+        (create-default-rule $2
+          (eval-string (string-append "(list " $3 ")")))
+      (GLOBAL-DEFAULT-RULE PROACTIVE-RULES context action) :
+        (create-default-rule $2
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")")))
+      (GLOBAL-DEFAULT-RULE PROACTIVE-RULES context) :
+        (create-default-rule $2
+          (eval-string (string-append "(list " $3 ")")))
+      (GLOBAL-DEFAULT-RULE PROACTIVE-RULES action) :
+        (create-default-rule $2
+          (eval-string (string-append "(list " $3 ")")))
     )
 
     ; Rule grammar
