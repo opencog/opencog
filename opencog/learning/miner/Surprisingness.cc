@@ -95,21 +95,21 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 	// into account the linkage probability.
 	std::vector<double> estimates;
 	for (const HandleSeqSeq& partition : partitions(pattern)) {
-		double jip = jiprob(partition, pattern, texts);
+		double jip = ji_prob(partition, pattern, texts);
 		estimates.push_back(jip);
-		double ratio = jip / emp;
-		logger().debug() << "ratio = " << ratio;
+		// double ratio = jip / emp;
+		// logger().debug() << "ratio = " << ratio;
 	}
 	auto mmp = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *mmp.first, emax = *mmp.second;
-	logger().debug() << "emin = " << emin << ", emax = " << emax
-	                 << ", emp = " << emp;
+	// logger().debug() << "emin = " << emin << ", emax = " << emax
+	//                  << ", emp = " << emp;
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, emp);
-	logger().debug() << "dst = " << dst
-	                 << ", normalize = " << normalize
-	                 << ", ndst = " << dst / emp;
+	// logger().debug() << "dst = " << dst
+	//                  << ", normalize = " << normalize
+	//                  << ", ndst = " << dst / emp;
 
 	return normalize ? dst / emp : dst;
 }
@@ -183,8 +183,9 @@ HandleSeqSeqSeq Surprisingness::partitions(HandleSeq::const_iterator from,
 HandleSeqSeqSeq Surprisingness::partitions(const Handle& pattern)
 {
 	HandleSeqSeqSeq prtns = partitions(MinerUtils::get_clauses(pattern));
-	// prtns.resize(prtns.size() - 1);
-	prtns.resize(1);
+	prtns.resize(prtns.size() - 1);
+	// prtns.resize(1); // comment this output to only consider
+	                    // singleton blocks (convenient for debugging)
 	return prtns;
 }
 
@@ -193,29 +194,58 @@ Handle Surprisingness::add_pattern(const HandleSeq& block, AtomSpace& as)
 	return as.add_link(LAMBDA_LINK, as.add_link(AND_LINK, block));
 }
 
-HandleSeq Surprisingness::joint_variables(const Handle& pattern)
+LambdaLinkPtr Surprisingness::mk_lambda(const HandleSeq& block)
+{
+	return createLambdaLink(HandleSeq{createLink(block, AND_LINK)});
+}
+
+Handle Surprisingness::mk_pattern(const HandleSeq& block)
+{
+	return Handle(mk_lambda(block));
+}
+
+HandleSeq Surprisingness::add_subpatterns(const HandleSeqSeq& partition,
+                                          const Handle& pattern,
+                                          AtomSpace& as)
+{
+	HandleSeq subpatterns(partition.size());
+	boost::transform(partition, subpatterns.begin(), [&](const HandleSeq& blk) {
+			return add_pattern(blk, as); });
+	return subpatterns;
+}
+
+HandleSeq Surprisingness::joint_variables(const Handle& pattern,
+                                          const HandleSeqSeq& partition)
 {
 	HandleUCounter var_count;
 
 	for (const Handle& var : MinerUtils::get_variables(pattern).varset)
-		for (const Handle& clause : MinerUtils::get_clauses(pattern))
-			if (is_free_in_tree(clause, var))
+		for (const HandleSeq& blk : partition)
+			if (is_free_in_any_tree(blk, var))
 				++var_count[var];
 
 	HandleSeq jvs;
-	for (const auto vc : var_count)
+	for (const auto& vc : var_count)
 		if (1 < vc.second)
 			jvs.push_back(vc.first);
 
 	return jvs;
 }
 
+unsigned Surprisingness::value_count(const HandleSeq& block,
+                                     const Handle& var,
+                                     const HandleSet& texts)
+{
+	Valuations vs(mk_pattern(block), texts);
+	HandleUCounter values = vs.values(var);
+	return values.keys().size();
+}
+
 HandleCounter Surprisingness::value_distribution(const HandleSeq& block,
                                                  const Handle& var,
                                                  const HandleSet& texts)
 {
-	Handle ll = Handle(createLambdaLink(HandleSeq{createLink(block, AND_LINK)}));
-	Valuations vs(ll, texts);
+	Valuations vs(mk_pattern(block), texts);
 	HandleUCounter values = vs.values(var);
 	HandleCounter dist;
 	double total = values.total_count();
@@ -247,50 +277,131 @@ double Surprisingness::emp_prob(const Handle& pattern, const HandleSet& texts)
 {
 	double ucount = pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
 	double sup = MinerUtils::calc_support(pattern, texts, (unsigned)ucount);
-	logger().debug() << "prob(" << oc_to_string(pattern) << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount;
+	// logger().debug() << "prob(" << oc_to_string(pattern) << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount;
 	return sup / ucount;
 }
 
-double Surprisingness::jiprob(const HandleSeqSeq& partition,
-                              const Handle& pattern,
-                              const HandleSet& texts)
+double Surprisingness::ji_prob(const HandleSeqSeq& partition,
+                               const Handle& pattern,
+                               const HandleSet& texts)
 {
-	// Generate subpatterns from blocks
-	HandleSeq subpatterns(partition.size());
-	AtomSpace& as = *pattern->getAtomSpace();
-	boost::transform(partition, subpatterns.begin(), [&](const HandleSeq& blk) {
-			return add_pattern(blk, as); });
+	// Generate subpatterns from blocks (add them in the atomspace to
+	// memoize support calculation)
+	HandleSeq subpatterns = add_subpatterns(partition, pattern,
+	                                        *pattern->getAtomSpace());
 
-	// Calculate the product of the probability across subpatterns
+	// Calculate the product of the probability over subpatterns
 	double p = 1.0;
 	for (const Handle& subpattern : subpatterns)
 		p *= emp_prob(subpattern, texts);
+	// logger().debug() << "ji_prob subpattern emp product = " << p;
 
-	logger().debug() << "p = " << p;
+	// Calculate the probability that all joint variables take the same
+	// value
+	double eq_p = eq_prob(partition, pattern, texts);
+	// logger().debug() << "ji_prob P(equal) = " << eq_p;
+	p *= eq_p;
 
+	return p;
+}
+
+bool Surprisingness::is_equivalent(const HandleSeq& l_blk,
+                                   const HandleSeq& r_blk,
+                                   const Handle& var)
+{
+	Handle l_pat = mk_pattern(l_blk);
+	Handle r_pat = mk_pattern(r_blk);
+	if (content_eq(l_pat, r_pat)) {
+		const Variables& lv = LambdaLinkCast(l_pat)->get_variables();
+		const Variables& rv = LambdaLinkCast(r_pat)->get_variables();
+		auto lvit = lv.index.find(var);
+		auto rvit = rv.index.find(var);
+		return lvit != lv.index.end() and rvit != lv.index.end()
+			and lvit->second == rvit->second;
+	}
+	return false;
+}
+
+HandleSeqUCounter::const_iterator Surprisingness::find_equivalent(
+	const HandleSeqUCounter& partition_c,
+	const HandleSeq& block,
+	const Handle& var)
+{
+	auto it = partition_c.begin();
+	for (; it != partition_c.end(); it++)
+		if (is_equivalent(it->first, block, var))
+			return it;
+	return it;
+}
+
+HandleSeqUCounter::iterator Surprisingness::find_equivalent(
+	HandleSeqUCounter& partition_c,
+	const HandleSeq& block,
+	const Handle& var)
+{
+	auto it = partition_c.begin();
+	for (; it != partition_c.end(); it++)
+		if (is_equivalent(it->first, block, var))
+			return it;
+	return it;
+}
+
+HandleSeqUCounter Surprisingness::group_eq(const HandleSeqSeq& partition,
+                                           const Handle& var)
+{
+	HandleSeqUCounter partition_c;
+	for (const HandleSeq& blk : partition) {
+		if (is_free_in_any_tree(blk, var)) {
+			auto it = find_equivalent(partition_c, blk, var);
+			if (it == partition_c.end()) {
+				partition_c[blk] = 1;
+			} else {
+				it->second++;
+			}
+		}
+	}
+	return partition_c;
+}
+
+double Surprisingness::eq_prob(const HandleSeqSeq& partition,
+                               const Handle& pattern,
+                               const HandleSet& texts)
+{
+	double p = 1.0;
 	// Calculate the probability of a variable taking the same value
 	// across all blocks/subpatterns where that variable appears.
-	for (const Handle& var : joint_variables(pattern)) {
-		logger().debug() << "var = " << oc_to_string(var);
+	for (const Handle& var : joint_variables(pattern, partition)) {
+		// logger().debug() << "var = " << oc_to_string(var);
 
-		// Value probability distributions of var for each block
-		// where it appears.
-		std::vector<HandleCounter> dists;
-		for (const HandleSeq& blk : partition)
-			if (is_free_in_any_tree(blk, var))
-				dists.push_back(value_distribution(blk, var, texts));
+		// Group subpatterns in equivalence blocks/subpatterns
+		// w.r.t. var. For each subpattern divide p by the number of
+		// values var can take (i.e. |texts| since each subpattern is
+		// independent), then within each subpattern, divide as many
+		// times as they are equivalent subpatterns by the number of
+		// values var actually takes, since all subpatterns are
+		// equivalent this restrict the universes where these
+		// subpatterns are only over these existing values.
+		double uc = texts.size();
+		for (const auto& blk_c : group_eq(partition, var)) {
+			// Take care of the independent part
+			p /= uc;
+			// logger().debug() << "divide p by " << uc
+			//                  << " for block:" << std::endl
+			//                  << oc_to_string(blk_c.first);
+			// Take care of the dependent (equivalent for now) part
+			if (1 < blk_c.second) {
+				double c = value_count(blk_c.first, var, texts);
+				p /= std::pow(c, blk_c.second - 1.0);
+				// logger().debug() << "divide p by " << std::pow(c, blk_c.second - 1.0)
+				//                  << " for " << blk_c.second - 1.0
+				//                  << " equivalent block(s)";
+			}
+		}
 
-		// Calculate the probability that any value of var is the
-		// same for all blocks where var appears.
-		double pe = inner_product(dists);
-
-		logger().debug() << "P(Equal) = " << pe;
-
-		p *= pe;
+		// Finally multiple by the maximum number of values to normalize
+		// p, because P(equal) happens for each value.
+		p *= uc;
 	}
-
-	logger().debug() << "iprob(" << oc_to_string(partition) << ") = " << p;
-
 	return p;
 }
 

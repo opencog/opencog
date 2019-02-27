@@ -23,9 +23,10 @@
 #ifndef OPENCOG_SURPRISINGNESS_H_
 #define OPENCOG_SURPRISINGNESS_H_
 
-#include <opencog/atoms/base/Handle.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/empty_string.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -35,6 +36,7 @@ namespace opencog
  */
 
 typedef std::vector<HandleSeqSeq> HandleSeqSeqSeq;
+typedef Counter<HandleSeq, unsigned> HandleSeqUCounter;
 
 class Surprisingness {
 public:
@@ -254,7 +256,22 @@ public:
 	static Handle add_pattern(const HandleSeq& block, AtomSpace& as);
 
 	/**
-	 * Return the set of variables that appear in more than one clause.
+	 * Like add_pattern but doesn't add the pattern in any atomspace,
+	 * only remains in RAM.
+	 */
+	static LambdaLinkPtr mk_lambda(const HandleSeq& block);
+	static Handle mk_pattern(const HandleSeq& block);
+
+	/**
+	 * Turn a partition into a sequence of subpatterns. Add then in the
+	 * provided atomspace to enable memoization of their supports.
+	 */
+	static HandleSeq add_subpatterns(const HandleSeqSeq& partition,
+	                                 const Handle& pattern,
+	                                 AtomSpace& as);
+
+	/**
+	 * Return the set of variables that appear in more than one block
 	 *
 	 * For instance
 	 *
@@ -265,11 +282,27 @@ public:
 	 *   Inheritance X Y
 	 *   Inheritance Y Z
 	 *
+	 * partition
+	 * =
+	 * { {Inheritance X Y},
+	 *   {Inheritance Y Z} }
+	 *
 	 * returns
 	 *
 	 * [Y]
+	 *
+	 * because it appears in two blocks.
+ 	 */
+	static HandleSeq joint_variables(const Handle& pattern,
+	                                 const HandleSeqSeq& partition);
+
+	/**
+	 * Return the the number values associated to a given variable in a
+	 * block (subpatterns) w.r.t. to texts database.
 	 */
-	static HandleSeq joint_variables(const Handle& pattern);
+	static unsigned value_count(const HandleSeq& block,
+	                            const Handle& var,
+	                            const HandleSet& texts);
 
 	/**
 	 * Return the probability distribution over value of var in the
@@ -312,9 +345,71 @@ public:
 	 *
 	 * An atomspace is provided to memoize the support of subpatterns.
 	 */
-	static double jiprob(const HandleSeqSeq& partition,
-	                     const Handle& pattern,
-	                     const HandleSet& texts);
+	static double ji_prob(const HandleSeqSeq& partition,
+	                      const Handle& pattern,
+	                      const HandleSet& texts);
+
+	/**
+	 * Tell whether 2 blocks/subpatterns are equivalent with respect to
+	 * a given variable. Basically, whether both block are semantically
+	 * equivalent and var is in the same position in both of them.
+	 *
+	 * For instance
+	 *
+	 * l_blk = { Inh X Y }
+	 * r_blk = { Inh Z Y }
+	 *
+	 * are equivalent w.r.t Y because are both are semantically
+	 * equivalent (up to an alpha-conversion) and Y is used in the same
+	 * place in both blocks.
+	 */
+	static bool is_equivalent(const HandleSeq& l_blk,
+	                          const HandleSeq& r_blk,
+	                          const Handle& var);
+
+	static HandleSeqUCounter::const_iterator find_equivalent(
+		const HandleSeqUCounter& partition_c,
+		const HandleSeq& block,
+		const Handle& var);
+	static HandleSeqUCounter::iterator find_equivalent(
+		HandleSeqUCounter& partition_c,
+		const HandleSeq& block,
+		const Handle& var);
+
+	/**
+	 * Given subpatterns linked by a variable, count how many
+	 * subpatterns are equivalent with respect to this variable.
+	 *
+	 * For instance given patterns
+	 *
+	 * A = Inh X Y
+	 * B = Inh Y Z
+	 * C = Inh W Y
+	 *
+	 * A and C are equivalent with respect to Y, because all values
+	 * associated to Y in A and the same associated to Y in C, however
+	 * B is independent (occupies another block) because values
+	 * associated to Y in B are different than the values associated to
+	 * Y in A or C.
+	 *
+	 * Thus for this example it would return
+	 *
+	 * {A:2, C:1}
+	 *
+	 * TODO: this should be replaced by a structure considering not
+	 * only equivalence but also implication as well.
+	 */
+	static HandleSeqUCounter group_eq(const HandleSeqSeq& partition,
+	                                  const Handle& var);
+
+	/**
+	 * For each joint variable of pattern (variable that appears in
+	 * more than one partition block) calculate the probability
+	 * estimate of being assigned the same value across all block.
+	 */
+	static double eq_prob(const HandleSeqSeq& partition,
+	                      const Handle& pattern,
+	                      const HandleSet& texts);
 };
 
 /**
