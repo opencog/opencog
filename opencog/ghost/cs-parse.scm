@@ -94,28 +94,28 @@
     ; Reactive rules (aka Responders)
     ; Starts with "r:"; "s:", "?:" and "u:" are for backward compatibility
     ((has-match? "[rs?u]:" str)
-      (result:suffix 'REACTIVE-RULES location
+      (result:suffix 'REACTIVE-RULE location
         (string-trim-both
           (match:substring current-match)
             (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ; Rejoinders
     ; Starts with "j" follow by a number to denote the level
     ((has-match? "j[0-9]+:" str)
-      (result:suffix 'REJOINDERS location
+      (result:suffix 'REJOINDER location
         (string-trim-both
           (match:substring current-match)
             (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ; Rejoinders again, for backward compatibility, but limit the support
     ; up to the letter "e" instead of "q" as in ChatScript
     ((has-match? "[a-e]:" str)
-      (result:suffix 'REJOINDERS location
+      (result:suffix 'REJOINDER location
         (string-trim-both
           (match:substring current-match)
             (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
     ; Proactive rules (aka Gambits)
     ; Starts with "p:"; "t:" is for backward compatibility
     ((has-match? "[pt]:" str)
-      (result:suffix 'PROACTIVE-RULES location
+      (result:suffix 'PROACTIVE-RULE location
         (string-trim-both
           (match:substring current-match)
             (lambda (c) (or (eqv? c #\tab) (eqv? c #\space) (eqv? c #\:))))))
@@ -265,7 +265,7 @@
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
-    (CONCEPT REACTIVE-RULES REJOINDERS PROACTIVE-RULES URGE ORD-GOAL GOAL RGOAL COMMENT
+    (CONCEPT REACTIVE-RULE REJOINDER PROACTIVE-RULE URGE ORD-GOAL GOAL RGOAL COMMENT
      SAMPLE_INPUT PARALLEL-RULES LINK-CONCEPT RLINK-CONCEPT GLOBAL-DEFAULT-RULE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA
@@ -286,9 +286,13 @@
       (urge) : (set-initial-urge $1)
       (goal) : (create-top-lv-goal $1)
       (ordered-goal) : (create-top-lv-goal $1 #t)
+      (rule-goal) : (create-rule-lv-goal $1)
+      (link-concept) : (create-top-lv-link-concepts $1)
+      (rule-link-concept) : (create-rule-lv-link-concepts $1)
       (PARALLEL-RULES) : (create-top-lv-goal (list (cons "Parallel-Rules" 1)))
-      (link-concept) : (link-rule-to-concepts $1)
-      (rule) : $1
+      (reactive-rule) : $1
+      (proactive-rule) : $1
+      (rejoinder) : $1
       (enter) : $1
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
@@ -334,235 +338,35 @@
     )
 
     (global-default-rule
-      (GLOBAL-DEFAULT-RULE REACTIVE-RULES context action) :
-        (create-default-rule $2
-          $3
-          $4)
-      (GLOBAL-DEFAULT-RULE REACTIVE-RULES context) :
-        (create-default-rule $2
-          $3 (list))
-      (GLOBAL-DEFAULT-RULE REACTIVE-RULES action) :
-        (create-default-rule $2 (list)
-          $3)
-      (GLOBAL-DEFAULT-RULE PROACTIVE-RULES context action) :
-        (create-default-rule $2
-          $3
-          $4)
-      (GLOBAL-DEFAULT-RULE PROACTIVE-RULES context) :
-        (create-default-rule $2
-          $3 (list))
-      (GLOBAL-DEFAULT-RULE PROACTIVE-RULES action) :
-        (create-default-rule $2 (list)
-          $3)
+      (GLOBAL-DEFAULT-RULE GDR-TYPE context action) : (create-default-rule $2 $3 $4)
+      (GLOBAL-DEFAULT-RULE GDR-TYPE context) : (create-default-rule $2 $3 (list))
+      (GLOBAL-DEFAULT-RULE GDR-TYPE action) : (create-default-rule $2 (list) $3)
     )
 
-    ; Rule grammar
-    (rule
-      ; ----- Reactive Rules ----- ;
-      (rule-goal rule-lconcept REACTIVE-RULES str context action) :
-        (create-rule
-          $5
-          $6
-          $1
-          $4 $3 $2)
-      (rule-lconcept rule-goal REACTIVE-RULES str context action) :
-        (create-rule
-          $5
-          $6
-          $2
-          $4 $3 $1)
-      (rule-goal REACTIVE-RULES str context action) :
-        (create-rule
-          $4
-          $5
-          $1
-          $3 $2 (list))
-      (rule-lconcept REACTIVE-RULES str context action) :
-        (create-rule
-          $4
-          $5
-          (list) $3 $2 $1)
-      (rule-goal rule-lconcept REACTIVE-RULES context action) :
-        (create-rule
-          $4
-          $5
-          $1
-          "" $3 $2)
-      (rule-lconcept rule-goal REACTIVE-RULES context action) :
-        (create-rule
-          $4
-          $5
-          $2
-          "" $3 $1)
-      (rule-goal REACTIVE-RULES context action) :
-        (create-rule
-          $3
-          $4
-          $1
-          "" $2 (list))
-      (rule-lconcept REACTIVE-RULES context action) :
-        (create-rule
-          $3
-          $4
-          (list) "" $2 $1)
-      (REACTIVE-RULES str context action) :
-        (create-rule
-          $3
-          $4
-          (list) $2 $1 (list))
-      (REACTIVE-RULES context action) :
-        (create-rule
-          $2
-          $3
-          (list) "" $1 (list))
-      ; ----- Rejoinders ----- ;
-      (rule-goal rule-lconcept REJOINDERS str context action) :
-        (create-rule
-          $5
-          $6
-          $1
-          $4 $3 $2)
-      (rule-lconcept rule-goal REJOINDERS str context action) :
-        (create-rule
-          $5
-          $6
-          $2
-          $4 $3 $1)
-      (rule-goal REJOINDERS str context action) :
-        (create-rule
-          $4
-          $5
-          $1
-          $3 $2 (list))
-      (rule-lconcept REJOINDERS str context action) :
-        (create-rule
-          $4
-          $5
-          (list) $3 $2 $1)
-      (rule-goal rule-lconcept REJOINDERS context action) :
-        (create-rule
-          $4
-          $5
-          $1
-          "" $3 $2)
-      (rule-lconcept rule-goal REJOINDERS context action) :
-        (create-rule
-          $4
-          $5
-          $2
-          "" $3 $1)
-      (rule-goal REJOINDERS context action) :
-        (create-rule
-          $3
-          $4
-          $1
-          "" $2 (list))
-      (rule-lconcept REJOINDERS context action) :
-        (create-rule
-          $3
-          $4
-          (list) "" $2 $1)
-      (REJOINDERS str context action) :
-        (create-rule
-          $3
-          $4
-          (list) $2 $1 (list))
-      (REJOINDERS context action) :
-        (create-rule
-          $2
-          $3
-          (list) "" $1 (list))
-      ; ----- Proactive Rules ----- ;
+    ; For global default rule
+    (GDR-TYPE
+      (REACTIVE-RULE) : $1
+      (PROACTIVE-RULE) : $1
+    )
+
+    (reactive-rule
+      (REACTIVE-RULE str context action) : (create-rule $3 $4 $2 $1)
+      (REACTIVE-RULE context action) : (create-rule $2 $3 "" $1)
+    )
+
+    (proactive-rule
       ; Note, do not support a proactive rule that has a
       ; label but no context -- it's ambiguous to determine
       ; whether it's really a label or just the first
       ; word of the "action"
-      (rule-goal rule-lconcept PROACTIVE-RULES str context action) :
-        (create-rule
-          $5
-          $6
-          $1
-          $4 $3 $2)
-      (rule-lconcept rule-goal PROACTIVE-RULES str context action) :
-        (create-rule
-          $5
-          $6
-          $2
-          $4 $3 $1)
-      (rule-goal PROACTIVE-RULES str context action) :
-        (create-rule
-          $4
-          $5
-          $1
-          $3 $2 (list))
-      (rule-lconcept PROACTIVE-RULES str context action) :
-        (create-rule
-          $4
-          $5
-          (list) $3 $2 $1)
-      (rule-goal rule-lconcept PROACTIVE-RULES context action) :
-        (create-rule
-          $4
-          $5
-          $1
-          "" $3 $2)
-      (rule-lconcept rule-goal PROACTIVE-RULES context action) :
-        (create-rule
-          $4
-          $5
-          $2
-          "" $3 $1)
-      (rule-goal PROACTIVE-RULES context action) :
-        (create-rule
-          $3
-          $4
-          $1
-          "" $2 (list))
-      (rule-lconcept PROACTIVE-RULES context action) :
-        (create-rule
-          $3
-          $4
-          (list) "" $2 $1)
-      (rule-goal rule-lconcept PROACTIVE-RULES action) :
-        (create-rule
-          (list)
-          $4
-          $1
-          "" $3 $2)
-      (rule-lconcept rule-goal PROACTIVE-RULES action) :
-        (create-rule
-          (list)
-          $4
-          $2
-          "" $3 $1)
-      (rule-goal PROACTIVE-RULES action) :
-        (create-rule
-          (list)
-          $3
-          $1
-          "" $2 (list))
-      (rule-lconcept PROACTIVE-RULES action) :
-        (create-rule
-          (list)
-          $3
-          (list) "" $2 $1)
-      ; Same as the above, context is needed for a
-      ; labeled proactive rule
-      (PROACTIVE-RULES str context action) :
-        (create-rule
-          $3
-          $4
-          (list) $2 $1 (list))
-      (PROACTIVE-RULES context action) :
-        (create-rule
-          $2
-          $3
-          (list) "" $1 (list))
-      (PROACTIVE-RULES action) :
-        (create-rule
-          (list)
-          $2
-          (list) "" $1 (list))
+      (PROACTIVE-RULE str context action) : (create-rule $3 $4 $2 $1)
+      (PROACTIVE-RULE context action) : (create-rule $2 $3 "" $1)
+      (PROACTIVE-RULE action) : (create-rule (list) $2 "" $1)
+    )
+
+    (rejoinder
+      (REJOINDER str context action) : (create-rule $3 $4 $2 $1)
+      (REJOINDER context action) : (create-rule $2 $3 "" $1)
     )
 
     (urge
@@ -602,15 +406,15 @@
     )
 
     (link-concept
-      (LINK-CONCEPT LPAREN lconcept-members RPAREN) : (string-split $3 #\,)
+      (LINK-CONCEPT LPAREN link-concept-members RPAREN) : (string-split $3 #\,)
     )
 
-    (rule-lconcept
-      (RLINK-CONCEPT LPAREN lconcept-members RPAREN) : (string-split $3 #\,)
+    (rule-link-concept
+      (RLINK-CONCEPT LPAREN link-concept-members RPAREN) : (string-split $3 #\,)
     )
 
     ; Can only use comma as the delimiter for link-concept
-    (lconcept-members
+    (link-concept-members
       (strs) : $1
       (strs COMMA strs) : (format #f "~a,~a" $1 $3)
     )

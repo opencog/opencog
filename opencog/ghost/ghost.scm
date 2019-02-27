@@ -89,10 +89,6 @@
 ;; --------------------
 ;; For rule parsing
 
-; When set, all the rules created under it will be linked to this concept,
-; until a new top level goal is defined
-(define rule-concept '())
-
 ; The initial urge of goals
 (define initial-urges '())
 
@@ -102,6 +98,17 @@
 ; A list of top level goals that will be shared with all the rules
 ; defined under it
 (define top-lv-goals '())
+
+; A list of rule level goals that will only be associated with the
+; rule following it
+(define rule-lv-goals '())
+
+; When set, all the rules created under it will be linked to these concepts,
+; until a new top level goal is defined
+(define top-lv-link-concepts '())
+
+; When set, the rule created under it will be linked to these concepts
+(define rule-lv-link-concepts '())
 
 ; Whether the rules defined under a top level goal is ordered
 (define is-rule-seq? #f)
@@ -141,10 +148,12 @@
 
 ; To clear the above states
 (define (clear-parsing-states)
-  (set! rule-concept '())
   (set! initial-urges '())
   (set! default-urge 0)
   (set! top-lv-goals '())
+  (set! rule-lv-goals '())
+  (set! top-lv-link-concepts '())
+  (set! rule-lv-link-concepts '())
   (set! is-rule-seq? #f)
   (set! goal-rule-cnt 0)
   (set! pat-vars '())
