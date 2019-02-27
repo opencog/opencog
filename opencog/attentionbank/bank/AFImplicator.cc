@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include "AFImplicator.h"
 
@@ -46,7 +47,7 @@ Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
 	// The result_list contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
 	// Put the set into a SetLink, cache it, and return that.
-	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+	Handle rewr(createUnorderedLink(impl.get_result_set(), SET_LINK));
 	return as->add_atom(rewr);
 }
 
