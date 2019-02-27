@@ -89,10 +89,6 @@
 ;; --------------------
 ;; For rule parsing
 
-; When set, all the rules created under it will be linked to this concept,
-; until a new top level goal is defined
-(define rule-concept '())
-
 ; The initial urge of goals
 (define initial-urges '())
 
@@ -102,6 +98,17 @@
 ; A list of top level goals that will be shared with all the rules
 ; defined under it
 (define top-lv-goals '())
+
+; A list of rule level goals that will only be associated with the
+; rule following it
+(define rule-lv-goals '())
+
+; When set, all the rules created under it will be linked to these concepts,
+; until a new top level goal is defined
+(define top-lv-link-concepts '())
+
+; When set, the rule created under it will be linked to these concepts
+(define rule-lv-link-concepts '())
 
 ; Whether the rules defined under a top level goal is ordered
 (define is-rule-seq? #f)
@@ -123,6 +130,9 @@
 ; of the rules
 (define rule-type-alist '())
 
+; An association list for storing the default rule contexts and actions
+(define global-default-rule-alist '())
+
 ; An association list that contains all the terms needed to create
 ; the actual rules
 ; The key of this list is the labels of the rules
@@ -138,16 +148,19 @@
 
 ; To clear the above states
 (define (clear-parsing-states)
-  (set! rule-concept '())
   (set! initial-urges '())
   (set! default-urge 0)
   (set! top-lv-goals '())
+  (set! rule-lv-goals '())
+  (set! top-lv-link-concepts '())
+  (set! rule-lv-link-concepts '())
   (set! is-rule-seq? #f)
   (set! goal-rule-cnt 0)
   (set! pat-vars '())
   (set! rule-features '())
   (set! rule-label-list '())
   (set! rule-type-alist '())
+  (set! global-default-rule-alist '())
   (set! rule-alist '())
   (set! rule-hierarchy '())
   (set! goals-of-prev-rule '())
