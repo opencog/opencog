@@ -417,7 +417,7 @@
     ; Can only use comma as the delimiter for link-concept
     (link-concept-members
       (strs) : $1
-      (strs COMMA strs) : (format #f "~a,~a" $1 $3)
+      (link-concept-members COMMA strs) : (format #f "~a,~a" $1 $3)
     )
 
     (context
