@@ -240,7 +240,7 @@ double MinerSCM::do_isurp_old(Handle pattern, Handle texts)
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness_old(pattern, texts_set, false);
+	return Surprisingness::isurp_old(pattern, texts_set, false);
 }
 
 double MinerSCM::do_nisurp_old(Handle pattern, Handle texts)
@@ -248,7 +248,7 @@ double MinerSCM::do_nisurp_old(Handle pattern, Handle texts)
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness_old(pattern, texts_set, true);
+	return Surprisingness::isurp_old(pattern, texts_set, true);
 }
 
 double MinerSCM::do_isurp(Handle pattern, Handle texts)
@@ -256,7 +256,7 @@ double MinerSCM::do_isurp(Handle pattern, Handle texts)
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness(pattern, texts_set, false);
+	return Surprisingness::isurp(pattern, texts_set, false);
 }
 
 double MinerSCM::do_nisurp(Handle pattern, Handle texts)
@@ -264,7 +264,7 @@ double MinerSCM::do_nisurp(Handle pattern, Handle texts)
 	// Fetch all texts
 	HandleSet texts_set = MinerUtils::get_texts(texts);
 
-	return Surprisingness::ISurprisingness(pattern, texts_set, true);
+	return Surprisingness::isurp(pattern, texts_set, true);
 }
 
 extern "C" {

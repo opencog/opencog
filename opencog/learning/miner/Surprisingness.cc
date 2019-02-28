@@ -45,9 +45,9 @@
 
 namespace opencog {
 
-double Surprisingness::ISurprisingness_old(const Handle& pattern,
-                                           const HandleSet& texts,
-                                           bool normalize)
+double Surprisingness::isurp_old(const Handle& pattern,
+                                 const HandleSet& texts,
+                                 bool normalize)
 {
 	// Strictly speaking it should be the power but we use binomial for
 	// backward compatibility.
@@ -83,9 +83,9 @@ double Surprisingness::ISurprisingness_old(const Handle& pattern,
 	return normalize ? dst / pattern_prob : dst;
 }
 
-double Surprisingness::ISurprisingness(const Handle& pattern,
-                                       const HandleSet& texts,
-                                       bool normalize)
+double Surprisingness::isurp(const Handle& pattern,
+                             const HandleSet& texts,
+                             bool normalize)
 {
 	// Calculate the empiric probability of pattern
 	double emp = emp_prob(pattern, texts);
@@ -114,15 +114,15 @@ double Surprisingness::ISurprisingness(const Handle& pattern,
 	return normalize ? dst / emp : dst;
 }
 
-Handle Surprisingness::ISurprisingness_key()
+Handle Surprisingness::isurp_key()
 {
 	static Handle isurp_key = createNode(NODE, "*-I-SurprisingnessValueKey-*");
 	return isurp_key;
 }
 
-double Surprisingness::get_ISurprisingness(const Handle& pattern)
+double Surprisingness::get_isurp_value(const Handle& pattern)
 {
-	return FloatValueCast(pattern->getValue(ISurprisingness_key()))->value().front();
+	return FloatValueCast(pattern->getValue(isurp_key()))->value().front();
 }
 
 double Surprisingness::dst_from_interval(double l, double u, double v)

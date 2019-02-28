@@ -71,13 +71,12 @@ public:
 	 * Although mathmetically speaking partitions are sets of sets,
 	 * they are encoded as lists of lists for performance reasons.
 	 */
-	static double ISurprisingness_old(const Handle& pattern,
-	                                  const HandleSet& texts,
-	                                  bool normalize=true);
+	static double isurp_old(const Handle& pattern,
+	                        const HandleSet& texts,
+	                        bool normalize=true);
 
 	/**
-	 * Similar to ISurprisingness_old but takes into account variable
-	 * linkage.
+	 * Similar to isurp_old but takes into account joint variables.
 	 *
 	 * For instance the probability estimate of
 	 *
@@ -161,20 +160,20 @@ public:
 	 * we know all values in Vi, with i=1 to n, have at least one value
 	 * in common.
 	 */
-	static double ISurprisingness(const Handle& pattern,
-	                              const HandleSet& texts,
-	                              bool normalize=true);
+	static double isurp(const Handle& pattern,
+	                    const HandleSet& texts,
+	                    bool normalize=true);
 
 	/**
 	 * Return (Node "*-I-SurprisingnessValueKey-*")
 	 */
-	static Handle ISurprisingness_key();
+	static Handle isurp_key();
 
 	/**
 	 * Retrieve the I-Surprisingness value of the given pattern
 	 * associated to (Node "*-I-SurprisingnessValueKey-*").
 	 */
-	static double get_ISurprisingness(const Handle& pattern);
+	static double get_isurp_value(const Handle& pattern);
 
 	/**
 	 * Return the distance between a value and an interval
