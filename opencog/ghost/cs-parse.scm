@@ -375,7 +375,8 @@
     )
 
     (ordered-goal
-      (ORD-GOAL LPAREN goal-members RPAREN) : $3
+      (ORD-GOAL LPAREN goal-members RPAREN) :
+        (eval-string (format #f "(list ~a)" $3))
     )
 
     (rule-goal
@@ -416,7 +417,7 @@
     ; Can only use comma as the delimiter for link-concept
     (link-concept-members
       (strs) : $1
-      (strs COMMA strs) : (format #f "~a,~a" $1 $3)
+      (link-concept-members COMMA strs) : (format #f "~a,~a" $1 $3)
     )
 
     (context
@@ -434,6 +435,9 @@
       (context-term) : $1
       (context-terms context-term) : (format #f "~a\n~a" $1 $2)
       (context-terms enter) : $1
+      (NEWLINE context-terms) : $2
+      (context-terms COMMENT) : $1
+      (COMMENT context-terms) : $2
     )
 
     (context-term
@@ -466,6 +470,7 @@
       (action-term) : $1
       (action-terms action-term) : (format #f "~a ~a" $1 $2)
       (action-terms enter) : $1
+      (NEWLINE action-terms) : $2
       (action-terms COMMENT) : $1
       (COMMENT action-terms) : $2
     )
