@@ -84,7 +84,7 @@ public:
 	 *   X Y Z
 	 *   And
 	 *     Inheritance X Y
-	 *     Inheritance Z C)
+	 *     Inheritance Z C
 	 *
 	 * is the product of probability p1 of
 	 *
@@ -131,34 +131,161 @@ public:
 	 * distribution of over all values that Z can take, then calculate
 	 * the inner product of the 2 distributions.
 	 *
-	 * That is probability too expensive to begin with so instead we
-	 * assume all values are distributed evenly. Let's assume the same
-	 * variable X appears in n difference clauses, and each clause has
-	 * support S1 to Sn. Let us first estimate the number of values
-	 * that X can take in the ith clause. Assume the ith clause has Ci
-	 * variables, if these variables are completely independent then
-	 * the number of values of each of them is the Ci-th root of its
-	 * support Si
+	 * The problem is that, first, calculating such probability
+	 * distribution is expensive, and second, the resulting estimate is
+	 * too accurate and thus most pattern are measured as unsurprising
+	 * due to the inner product capturing the interactions, at the
+	 * point of contact of the variable, between the components.
+	 * Instead an estimate relying on the counts alone of values
+	 * associated to given variables in given components is derived.
 	 *
-	 * Vi=root(Si, Ci)
+	 * Let's assume the same variable X appears in n difference
+	 * components. Let's call these variable appearences X1 to Xn. So
+	 * the goal is to estimate P(X1=...=Xi= ...=Xn).  Let's denote
+	 * V(Xi) the set of values that Xi can take when its corresponding
+	 * component is matched against the database/texts alone, without
+	 * any interaction of the other components. Thus |V(Xi)| is the
+	 * number values that Xi takes in that standalone component.
+	 *
+	 * Let's now take into account the syntactic specialization
+	 * relationships between each component relative to a given
+	 * variable. Formally component A is syntactic specialization of
+	 * component B relative to variable X, if B is a subtree of A where
+	 * all variables but X have been stripped out. Conversely we say
+	 * that B is a syntactic abstraction of A relative to variable
+	 * X. Obviously here the variables of interest will be joint
+	 * variables between A and B. The idea of establishing a
+	 * variable-relative-specialization between components is to
+	 * guaranty that the number of possible values that can be chosen
+	 * so that the two variable occurences equate is bounded by the
+	 * number of values of the variable occurence of the more abstract
+	 * component. If no such relationship exists, then the number of
+	 * possible values is bounded by the size of the database/texts,
+	 * which is usually higher than the actually value, and thus often
+	 * a poor basis for an estimate. By performing a purely syntactic
+	 * analysis the estimate can be greatly enhenced. Since the
+	 * analysis is purely syntactic it does not diminish the measure of
+	 * surprisingness of the pattern relative to the database. I.e. it
+	 * adequatly discounts in the surprisingness measure the
+	 * surprisingness of the pattern alone.
+	 *
+	 * Example:
+	 *
+	 * pattern
+	 * =
+	 * Lambda
+	 *   X Y
+	 *   And
+	 *     Inheritance X Y
+	 *     Inheritance H Y
+	 *     Inheritance F X
+	 *
+	 * Let's consider a partition of 3 components/blocks, each clause
+	 * is a block.
+	 *
+	 * A = Inheritance X Y
+	 * B = Inheritance F Y
+	 * C = Inheritance G X
+	 *
+	 * All variables of this partition are joint (F and G are
+	 * constants). However relative to X components A and C are
+	 * independent, while relative to Y comomponent B is a
+	 * specialization of component A.
+	 *
+	 * Let's rewrite the component variables by explicitly showing
+	 * variable occurences in components
+	 *
+	 * A = Inheritance X1 Y1
+	 * B = Inheritance F Y2
+	 * C = Inheritance G X2
+	 *
+	 * The specialization relationship between A and B relative of Y
+	 * allows us to infer that V(Y2) is a subset of V(Y1). Thus the
+	 * number of possible values that Y2 can take is bounded by S1.
+	 *
+	 * Let's calculate the P(X1=X2) and P(Y1=Y2) for this pattern.
+	 *
+	 * P(X1=X2) = 1/|U| * 1/|U| * |U|
+	 *          = 1/|U|
+	 *
+	 * the first 1/|U| is because each value of X1 can be any value of
+	 * the universe U. The second 1/|U| is because, and since A and C
+	 * are independent relative to X, each value of X2 can also be any
+	 * value of U. Then we multiple by |U| because the equality may
+	 * occur for each possible value of X1 or X2, so the probabilities
+	 * add up.
+	 *
+	 * P(Y1=Y2) = 1/|U| * 1/|V(Y1)| * |U|
+	 *          = 1/|V(Y1)|
+	 *
+	 * 1/|U| is because Y1 in the more abstract component A can take
+	 * any value of U. For any value of Y1 however, Y2 can only take a
+	 * value of V(Y1) since B is a specialization of A relative to
+	 * Y. Then we multiple by |U| to add up all probabilities for each
+	 * values of the more abstract component A.
+	 *
+	 * Another example:
+	 *
+	 * pattern
+	 * =
+	 * Lambda
+	 *   X Y Z
+	 *   And
+	 *     Inheritance X Y
+	 *     Inheritance Z Y
+	 *
+	 * Assuming a partition of the 2 components
+	 *
+	 * A = Inheritance X Y
+	 * B = Inheritance Z Y
+	 *
+	 * Thus after explicitly showing variable occurences
+	 *
+	 * A = Inheritance X Y1
+	 * B = Inheritance Z Y2
+	 *
+	 * P(Y1=Y2) = 1/|U| * 1/|V(Y1)| * |U|
+	 *          = 1/|V(Y1)|
+	 *
+	 * Here A and B are actually equivalent relative to Y, meaning the
+	 * specialization relationship must not be strict.
+	 *
+	 * Without loss of generality let's assume that the variable
+	 * occurrences X1, ..., Xn are ordered such that for any i<j, Xi
+	 * occurs in a component that is either more abstract or equivalent
+	 * to the component where Xj occurs. Then the general formula is
+	 *
+	 * P(X1=...=Xi=...=Xn) = Prod_{j=2}^n 1/|V(M(Xj))|
+	 *
+	 * where M(Xj) is the variable occurrence Xi of the most
+	 * specialized component with the component where Xj occurs
+	 * relative to X, such such that i<j.
+	 *
+	 * A proof sketch of why it is a good estimate of P(X1=...=Xn)
+	 * (under independence assumption of the data) is that the
+	 * syntactic specialization relationship provides a prior to
+	 * discard distributions of values of variable occurences Xi using
+	 * subset relationships between V(Xi) and V(Xj).
+	 *
+	 * One last remark: The count |V(Xi)| can be exact or approximated.
+	 * Of course the estimate will be better if the count is exact.
+	 * Since such count is only consider component by component, and
+	 * interactions are never used to obtain that count, having an
+	 * exact count does not invalidate the surprisingness measure.
+	 * However it can be computationally costly, so an option is to
+	 * approximate it.  One possible approximation under independence
+	 * assumptions is as follows.  Assume the component has N
+	 * variables, if these variables are completely independent then
+	 * the number of values of each of them is the N-th root of the
+	 * component support S
+	 *
+	 * |V(Xi)| ~= Nth-root(S)
 	 *
 	 * such that the final support can be obtained by multiplying the
-	 * number of values of all variables.
+	 * number of values of all variables of that component.
 	 *
-	 * Then, without loss of generality, let's assume that V1 is the
-	 * lowest number of values that X can take (thus in the first
-	 * clause), then the probability that X takes the same values in
-	 * all clauses is
-	 *
-	 * Prod_{i=2}^n 1/Vi
-	 *
-	 * because for each value of the first clause, the probability that
-	 * the other values are equal to it is Prod_{i=2}^n 1/Vi, assuming
-	 * that all values V2 to Vn contain the values in V1. In practice I
-	 * have no idea how true that is, though since the pattern where
-	 * surprisingness is being measured has a minimum positive support,
-	 * we know all values in Vi, with i=1 to n, have at least one value
-	 * in common.
+	 * As of today the code calculates the exact count (thus is rather
+	 * slow). We have not experimented with approximated counts yet.
 	 */
 	static double isurp(const Handle& pattern,
 	                    const HandleSet& texts,
