@@ -435,6 +435,9 @@
       (context-term) : $1
       (context-terms context-term) : (format #f "~a\n~a" $1 $2)
       (context-terms enter) : $1
+      (NEWLINE context-terms) : $2
+      (context-terms COMMENT) : $1
+      (COMMENT context-terms) : $2
     )
 
     (context-term
@@ -467,6 +470,7 @@
       (action-term) : $1
       (action-terms action-term) : (format #f "~a ~a" $1 $2)
       (action-terms enter) : $1
+      (NEWLINE action-terms) : $2
       (action-terms COMMENT) : $1
       (COMMENT action-terms) : $2
     )
