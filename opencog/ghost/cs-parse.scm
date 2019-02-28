@@ -375,7 +375,8 @@
     )
 
     (ordered-goal
-      (ORD-GOAL LPAREN goal-members RPAREN) : $3
+      (ORD-GOAL LPAREN goal-members RPAREN) :
+        (eval-string (format #f "(list ~a)" $3))
     )
 
     (rule-goal
