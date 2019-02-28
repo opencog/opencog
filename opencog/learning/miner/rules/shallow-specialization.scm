@@ -31,7 +31,11 @@
 
 (load "miner-rule-utils.scm")
 
-(define shallow-specialization-rule
+;; Generate a shallow specialization rule. If unary is #t then it adds
+;; the constraint that the pattern must be unary. This is to avoid
+;; specializing conjunctions of abstract patterns that may result in
+;; circumventing the the conjunction expansion rule heuristic.
+(define (gen-shallow-specialization-rule unary)
   (let* (;; Variables
          (pattern (Variable "$pattern"))
          (texts (Variable "$texts"))
@@ -53,7 +57,8 @@
       ms-decl)
     (And
       minsup-pattern
-      (absolutely-true-eval minsup-pattern))
+      (absolutely-true-eval minsup-pattern)
+      (if unary (unary-conjunction-pattern-eval pattern) '()))
     (ExecutionOutput
       (GroundedSchema "scm: shallow-specialization-formula")
       (List
@@ -84,4 +89,10 @@
 (define shallow-specialization-rule-name
   (DefinedSchemaNode "shallow-specialization-rule"))
 (DefineLink shallow-specialization-rule-name
-  shallow-specialization-rule)
+  (gen-shallow-specialization-rule #f))
+
+;; Define shallow specialization for unary patterns
+(define shallow-specialization-unary-rule-name
+  (DefinedSchemaNode "shallow-specialization-unary-rule"))
+(DefineLink shallow-specialization-unary-rule-name
+  (gen-shallow-specialization-rule #t))

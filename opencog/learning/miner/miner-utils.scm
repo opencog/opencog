@@ -20,6 +20,26 @@
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
+(define (iota-plus-one x)
+"
+  Like iota but goes from 1 to x included instead of going
+  from 0 to x excluded.
+"
+  (map (lambda (x) (+ x 1)) (iota x)))
+
+(define (greater-tv-strength x y)
+"
+  Return #t if the tv strength of x is greater than that of y
+"
+  (> (cog-mean x) (cog-mean y)))
+
+(define (desc-sort-by-tv-strength l)
+"
+  Given a link of atoms, sort these atom in descending order according
+  to their tv strengths.
+"
+  (List (sort (cog-outgoing-set l) greater-tv-strength)))
+
 (define (top)
 "
   Insert the top abstraction in the current atomspace
@@ -40,6 +60,12 @@
   Create a random Concept node for defining a pattern miner rule base
 "
   (random-node 'ConceptNode 16 "pattern-miner-rbs-"))
+
+(define (random-surprisingness-rbs-cpt)
+"
+  Create a random Concept node for defining a rule base for surprisingness
+"
+  (random-node 'ConceptNode 16 "surprisingness-rbs-"))
 
 (define (fill-texts-cpt texts-cpt texts)
 "
@@ -73,21 +99,22 @@
   texts-cpt)
 
 (define (mk-full-rule-path brf)
-  (let ((rule-path "opencog/miner/rules/"))
+  (let ((rule-path "opencog/learning/miner/rules/"))
     (string-append rule-path brf)))
 
 (define (configure-mandatory-rules pm-rbs)
+  ;; Maybe remove, nothing is mandatory anymore
+  *unspecified*)
+
+(define (configure-shallow-specialization-rule pm-rbs unary)
   ;; Load and associate mandatory rules to pm-rbs
-  (let* ((base-rule-files (list "shallow-specialization.scm"))
-         (rule-files (map mk-full-rule-path base-rule-files))
-         (rules (list ;; TODO somehow shallow-specialization-rule-name
-                      ;; are not accessible thom here after loading
-                      ;; shallow-specialization.scm. For that reason
-                      ;; we use its Atomese definition instead. This
-                      ;; might be a guile bug.
-                      (DefinedSchemaNode "shallow-specialization-rule"))))
-    (for-each load-from-path rule-files)
-    (ure-add-rules pm-rbs rules)))
+  (let* ((base-rule-file "shallow-specialization.scm")
+         (rule-file (mk-full-rule-path base-rule-file))
+         (rule (if unary
+                   (DefinedSchema "shallow-specialization-unary-rule")
+                   (DefinedSchema "shallow-specialization-rule"))))
+    (load-from-path rule-file)
+    (ure-add-rule pm-rbs rule)))
 
 (define (false-tv? tv)
   (equal? tv (stv 0 1)))
@@ -96,8 +123,15 @@
                                    #:key
                                    (incremental-expansion (stv 0 1))
                                    (max-conjuncts -1))
+  (define enable-incremental-expansion (not (or (false-tv? incremental-expansion)
+                                                (= max-conjuncts 1))))
+
+  ;; Load shallow specialization, either unary, if
+  ;; incremental-expansion is enabled, or not
+  (configure-shallow-specialization-rule pm-rbs enable-incremental-expansion)
+
   ;; Load conjunction-expansion and associate to pm-rbs
-  (if (not (or (false-tv? incremental-expansion) (= max-conjuncts 1)))
+  (if enable-incremental-expansion
       (let* ((ie-tv (if (equal? #t) (stv 0.01 0.5) incremental-expansion))
              (rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
              (namify (lambda (i)
@@ -108,14 +142,11 @@
                                   (list (number->string i) "ary-rule"))))))
              (rulify (lambda (i)
                        (list (DefinedSchemaNode (namify i)) ie-tv)))
-             (max-conjuncts? (lambda (x) (<= max-conjuncts x)))
-             (add1 (lambda (x) (+ x 1)))
-             (1-to-max-conjuncts (unfold max-conjuncts? identity add1 1))
              (rules (if (<= max-conjuncts 0)
                         ;; No maximum conjuncts
                         (list (rulify 0))
                         ;; At most max-conjuncts conjuncts
-                        (map rulify 1-to-max-conjuncts))))
+                        (map rulify (iota-plus-one (- max-conjuncts 1))))))
         (load-from-path rule-pathfile)
         (ure-add-rules pm-rbs rules))))
 
@@ -127,6 +158,28 @@
   (configure-optional-rules pm-rbs
                             #:incremental-expansion incremental-expansion
                             #:max-conjuncts max-conjuncts))
+
+(define* (configure-isurp isurp-rbs mode max-conjuncts)
+  ;; Load I-Surprisingess rules
+  (let* ((base-rule-file "i-surprisingness.scm")
+         (rule-pathfile (mk-full-rule-path base-rule-file))
+         (rule-fule (mk-full-rule-path base-rule-file))
+         (mk-rule-name (lambda (i) (string-append (symbol->string mode) "-"
+                                                  (number->string i)
+                                                  "ary-rule")))
+         (mk-rule-alias (lambda (i) (DefinedSchema (mk-rule-name i))))
+         (rules (map mk-rule-alias (cdr (iota-plus-one max-conjuncts)))))
+    (load-from-path rule-pathfile)
+    (ure-add-rules isurp-rbs rules)))
+
+(define pattern-var
+  (Variable "$pattern"))
+
+(define (isurp-target texts-cpt)
+  (isurp-eval pattern-var texts-cpt))
+
+(define (isurp-vardecl)
+  (TypedVariable pattern-var (Type "LambdaLink")))
 
 (define* (configure-miner pm-rbs
                           #:key
@@ -208,6 +261,21 @@
 "
   (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
 
+(define (isurp-eval pattern texts)
+"
+  Construct
+
+  Evaluation
+    Predicate \"isurp\"
+    List
+      pattern
+      texts
+"
+  (Evaluation
+    (Predicate "isurp")
+    (List
+      pattern
+      texts)))
 
 (define (get-members C)
 "
@@ -301,7 +369,8 @@
                    (maximum-iterations 1000)
                    (complexity-penalty 1)
                    (incremental-expansion (stv 0 1))
-                   (max-conjuncts 3))
+                   (max-conjuncts 3)
+                   (surprisingness 'isurp))
 "
   Mine patterns in texts (text trees, a.k.a. grounded hypergraphs) with minimum
   support ms, optionally using mi iterations and starting from the initial
@@ -313,7 +382,8 @@
                    #:maximum-iterations mi
                    #:complexity-penalty cp
                    #:incremental-expansion tv
-                   #:max-conjuncts mc)
+                   #:max-conjuncts mc
+                   #:surprisingness su)
 
   texts: Collection of texts to mine. It can be given in 3 forms
 
@@ -369,14 +439,28 @@
       know what you're doing). As of now mc can not be set above 9 (which
       should be more than enough).
 
+  su: [optional, default='isurp] After running the pattern miner,
+      patterns can be ranked according to some surprisingness measure.
+      The following surported modes are:
+
+      'isurp-old:  Verbatim port of Shujing I-Surprisingness.
+
+      'nisurp-old: Verbatim port of Shujing nornalized I-Surprisingness.
+
+      'isurp:      New implementation of I-Surprisingness that takes
+                   linkage into account.
+
+      'nisurp:     New implementation of normalized I-Surprisingness
+                   that takeslinkage into account.
+
   Under the hood it will create a rule base and a query for the rule
   engine, configure it according to the user's options and run it.
   Everything takes place in a child atomspace. After the job is done
-  it will remove the child atomspace after having copied the solution
-  set in the parent atomspace.
+  it will remove the child atomspace after copying the solution set
+  in the parent atomspace.
 
-  Pattern mining is a computationally demanding. There are three
-  ways to improve performances at this time.
+  Pattern mining is computationally demanding. There are three ways
+  to improve performances at this time.
 
   1. Set ms as high as possible. The higher the minium support the
      more pruning will take place in search tree. That is because
@@ -384,15 +468,18 @@
      abstraction.
 
   2. If it takes too long to complete, it means the search tree is
-     too large to explorer entirely. Set mi to a positive value to
-     halt the exploration after a certain number of iterations of
-     the rule engine.
+     too large to explore entirely. Lower the number of iterations
+     of the rule engine, mi, to halt the exploration earlier.
 
   3. If you have any idea of the kind of patterns you are looking
      for, you can provide an initial pattern, ip. All mined patterns
      will be specialized from that pattern. This can considerably
      reduce the search space as only a subtree of the whole search
      tree is considered.
+
+  4. If your pattern is a conjunction of multiple clauses, you can
+     enable incremental conjunction expansion, see the
+     #:incremental-expansion option.
 "
   (let* (;; Create a temporary child atomspace for the URE         
          (parent-as (cog-push-atomspace))
@@ -414,24 +501,38 @@
 
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
-        (let* ((source (minsup-eval-true initpat texts-cpt minsup))
-               (miner-rbs (random-miner-rbs-cpt)))
-          (configure-miner miner-rbs
-                           #:maximum-iterations maximum-iterations
-                           #:complexity-penalty complexity-penalty
-                           #:incremental-expansion incremental-expansion
-                           #:max-conjuncts max-conjuncts)
-          (let* (;; Run the pattern miner in a forward way
-                 (results (cog-fc miner-rbs source))
-                 ;; Fetch all relevant results
-                 (patterns (fetch-patterns texts-cpt minsup))
-                 (patterns-lst (cog-outgoing-set patterns)))
-            (cog-pop-atomspace)
-            ;; TODO: copy atoms from temp atomspace to main atomspace.
-            (Set patterns-lst))))))
+        (let* (;; Configure pattern miner forward chainer
+               (source (minsup-eval-true initpat texts-cpt minsup))
+               (miner-rbs (random-miner-rbs-cpt))
+               (cfg-m (configure-miner miner-rbs
+                                       #:maximum-iterations maximum-iterations
+                                       #:complexity-penalty complexity-penalty
+                                       #:incremental-expansion incremental-expansion
+                                       #:max-conjuncts max-conjuncts))
+
+               ;; Run pattern miner in a forward way
+               (results (cog-fc miner-rbs source))
+               ;; Fetch all relevant results
+               (patterns (fetch-patterns texts-cpt minsup))
+               (patterns-lst (cog-outgoing-set patterns))
+
+               ;; Configure surprisingness backward chainer
+               ;; (I-Surprisingness for now)
+               (isurp-rbs (random-surprisingness-rbs-cpt))
+               (target (isurp-target texts-cpt))
+               (vardecl (isurp-vardecl))
+               (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
+
+               ;; Run surprisingness in backward way
+               (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
+
+          (cog-pop-atomspace)
+
+          (desc-sort-by-tv-strength isurp-results)))))
 
 (define (export-miner-utils)
   (export
+    iota-plus-one
     top
     random-texts-cpt
     random-miner-rbs-cpt
@@ -439,9 +540,11 @@
     configure-mandatory-rules
     configure-optional-rules
     configure-rules
+    configure-isurp
     configure-miner
     minsup-eval
     minsup-eval-true
+    isurp-eval
     get-members
     get-cardinality
     fetch-patterns

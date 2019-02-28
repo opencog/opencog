@@ -34,12 +34,16 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/GetLink.h>
+#include <opencog/query/Satisfier.h>
 
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace opencog
 {
@@ -108,9 +112,12 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 
 	// Only consider shallow abstractions that reach the minimum
 	// support
-	for (const auto& shapat : shapats)
-		if (ms <= shapat.second)
+	for (const auto& shapat : shapats) {
+		if (ms <= shapat.second) {
+			set_support(shapat.first, shapat.second);
 			shabs.insert(shapat.first);
+		}
+	}
 
 	////////////////////////////////
 	// Variable factorizations    //
@@ -174,8 +181,10 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 	// Only consider variable factorizations reaching the minimum
 	// support
 	for (const auto& fvar : facvars)
-		if (ms <= fvar.second)
+		if (ms <= fvar.second) {
+			set_support(fvar.first, fvar.second);
 			shabs.insert(fvar.first);
+		}
 
 	return shabs;
 }
@@ -402,6 +411,8 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 	for (const HandleSet& shabs : shabs_per_var) {
 		for (const Handle& sa : shabs) {
 			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
+			// Set the count of npat, stored in its shallow abstraction
+			set_support(npat, get_support(sa));
 			// Shallow_abstract should already have eliminated shallow
 			// abstraction that do not have enough support.
 			results.insert(npat);
@@ -465,17 +476,22 @@ Handle MinerUtils::restricted_satisfying_set(const Handle& pattern,
 		tmp_texts.push_back(tmp_texts_as.add_atom(text));
 
 	// Avoid pattern matcher warning
-	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
+	if (totally_abstract(pattern) and n_conjuncts(pattern) == 1)
 		return tmp_texts_as.add_link(SET_LINK, tmp_texts);
 
-	// Run the pattern matcher
+	// Define pattern to run
 	AtomSpace tmp_query_as(&tmp_texts_as);
 	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
-		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = HandleCast(gl->execute(&tmp_texts_as));
-	return results;
+		gl = tmp_query_as.add_link(GET_LINK, vardecl, body);
+
+	// Run pattern matcher
+	SatisfyingSet sater(&tmp_texts_as);
+	sater.max_results = ms;
+	GetLinkCast(gl)->satisfy(sater);
+
+	return Handle(createUnorderedLink(sater._satisfying_set, SET_LINK));
 }
 
 bool MinerUtils::totally_abstract(const Handle& pattern)
@@ -541,7 +557,12 @@ const Handle& MinerUtils::get_body(const Handle& pattern)
 	return pattern;
 }
 
-unsigned MinerUtils::conjuncts(const Handle& pattern)
+const HandleSeq& MinerUtils::get_clauses(const Handle& pattern)
+{
+	return get_body(pattern)->getOutgoingSet();
+}
+
+unsigned MinerUtils::n_conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {
 		if (get_body(pattern)->get_type() == AND_LINK)
@@ -736,6 +757,38 @@ HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
 	}
 
 	return patterns;
+}
+
+const Handle& MinerUtils::support_key()
+{
+	static Handle ck(createNode(NODE, "*-SupportValueKey-*"));
+	return ck;
+}
+
+void MinerUtils::set_support(const Handle& pattern, double support)
+{
+	FloatValuePtr support_fv = createFloatValue(boost::numeric_cast<double>(support));
+	pattern->setValue(support_key(), ValueCast(support_fv));
+}
+
+double MinerUtils::get_support(const Handle& pattern)
+{
+	FloatValuePtr support_fv = FloatValueCast(pattern->getValue(support_key()));
+	if (support_fv)
+		return support_fv->value().front();
+	return -1.0;
+}
+
+double MinerUtils::calc_support(const Handle& pattern,
+                                const HandleSet& texts,
+                                unsigned ms)
+{
+	double sup = get_support(pattern);
+	if (sup < 0) {
+		sup = support(pattern, texts, ms);
+		set_support(pattern, sup);
+	}
+	return sup;
 }
 
 } // namespace opencog

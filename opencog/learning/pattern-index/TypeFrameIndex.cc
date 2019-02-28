@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include <boost/range/algorithm/set_algorithm.hpp>
+#include <boost/math/special_functions/binomial.hpp>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/algorithm.h>
@@ -620,12 +621,8 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     // Comb(n, p) 
     // n: number of possible components used to assemble a compoundFrame
     // p: compoundFrame gram
-    floatUniverseCount = 1;
-    unsigned int n = baseSet.size();
-    for (unsigned int i = 0; i < PATTERNS_GRAM; i++) {
-        floatUniverseCount = floatUniverseCount * ((float) (n - i));
-        floatUniverseCount = floatUniverseCount / ((float) (i + 1));
-    }
+    unsigned int n = baseSet.size(), p = PATTERNS_GRAM;
+    floatUniverseCount = boost::math::binomial_coefficient<float>(n, p);
 
     // Copy the baseSet to a vector to ease further manipulation
     // (memory waste is irrelevant)
