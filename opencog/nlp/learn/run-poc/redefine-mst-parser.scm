@@ -230,11 +230,12 @@
 		(lambda (l) ; links
 			(if (> (get-mi l) -1.0e10) ; bad-MI
 				(display
-					(format #f "~a ~a ~a ~a\n"
+					(format #f "~a ~a ~a ~a ~a\n"
 						(get-lindex l)
 						(get-lword l)
 						(get-rindex l)
-						(get-rword l))
+						(get-rword l)
+						(get-mi l))
 				file-port)))
 		(sort mstparse link-comparator)
 	)
