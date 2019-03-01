@@ -72,6 +72,13 @@ Thus, operating the system requires three basic steps:
 
 Each of these is described in greater detail in separate sections below.
 
+Alternatively to word-pair counting and MI calculations, we have also
+set up the system to be able to generate MST parses for sentences by
+providing the weights of their instance-pairs in a file (instead of MI).
+This allows for the use of different algorithms that estimate the
+relationship between words, e.g. neural networks.
+See the MST section below for more details.
+
 
 Setting up the AtomSpace
 ------------------------
@@ -495,13 +502,20 @@ Minimum Spanning Tree Parsing
 -----------------------------
 
 The MST parser discovers the minimum spanning tree that connects the
-words together in a sentence.  The link-cost used is (minus) the mutual
-information between word-pairs (so we are maximizing MI). Thus, MST
-parsing cannot be started before the above steps to compute word-pair
+words together in a sentence, using the provided link weights. 
+The link-cost used can be (minus) the mutual
+information between word-pairs (so we are maximizing MI). In this case, 
+MST parsing cannot be started before the above steps to compute word-pair
 MI have been accomplished.
+Alternatively, one can obtain the weights between word-instance-pairs
+from a different source (e.g. a neural-network-generated language model)
+and feed them to the MST algorithm.
 
-The minimum spanning tree code is in `scm/mst-parser.scm`. The current
-version works well. To run it follow the next steps:
+The minimum spanning tree code is called from `scm/mst-parser.scm` and
+`run-poc/redefine-mst-parser.scm`. The current
+version works well. To run it using MI calculated as explained in the previous
+sections, follow the next steps (see after step 7 below for using other type 
+of weights):
 
 1) Setup the working directory by running the following commands from the
    root of your opencog clone, if you haven't already.
@@ -582,9 +596,38 @@ version works well. To run it follow the next steps:
    scripts; they will pick up where they left off. When finished,
    remember to stop the cogserver.
 
-Once this is done, you can move to the next step, which is explained in
+
+To use link weights calculated in some other way (instead of MI), you
+need to provide them in files with the following format:
+
+```
+First Sentence (prefixed with ###LEFT-WALL###)
+0 ###LEFT-WALL### 1 First-word-in-sentence link-weight
+0 ###LEFT-WALL### 2 Second-word-in-sentence link-weight
+...
+1 First-word-in-sentence 2 Second-word-in-sentence link-weight
+1 First-word-in-sentence 3 Third-word-in-sentence link-weight
+...
+
+Second Sentence (prefixed with ###LEFT-WALL###)
+0 ###LEFT-WALL### 1 First-word-in-sentence link-weight
+0 ###LEFT-WALL### 2 Second-word-in-sentence link-weight
+...
+```
+where each block of a sentence and all its word-instance-pair lines are
+separated from the next sentence by an empty line.
+The 7 steps above still apply, with the following modifications:
+In step 2), place the special-format files in `gamma-pages`, instead
+of the plain text files.
+In step 4), you need to set `cnt_mode="file"`, to indicate you're using
+file-based weights, and make sure `split_sents="#f"`. 
+All other parameters still apply.
+Step 6) is not needed.
+
+Once this is done (either using MI or file-based weights), you can move 
+to the next step, which is explained in
 the next section. If you activated the option, you can check out the
-sentence parses in `mst-parses.txt`.
+sentence parses generated in the folder `mst-parses/`.
 
 
 Exploring Connector-Sets

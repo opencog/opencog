@@ -36,11 +36,11 @@ case $1 in
 esac
 
 # Punt if the cogserver has crashed: use netcat to ping it.
-haveping=`echo foo | nc -N localhost $PORT`
+haveping=`echo foo | nc localhost $PORT`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
 
 # Submit instruction to the cogserver
-echo -e "(load \"$module\")" | nc -N localhost $PORT
-echo -e "($func \"$cnt_mode\")" | nc -N localhost $PORT
+echo -e "(load \"$module\")" | nc localhost $PORT
+echo -e "($func \"$cnt_mode\")" | nc localhost $PORT
