@@ -1,0 +1,3 @@
+[submodule "opencog/nlp/learn"]
+	path = opencog/nlp/learn
+	url = https://github.com/opencog/learn
