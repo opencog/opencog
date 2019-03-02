@@ -47,7 +47,10 @@ Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
 	// The result_list contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
 	// Put the set into a SetLink, cache it, and return that.
-	Handle rewr(createUnorderedLink(impl.get_result_set(), SET_LINK));
+	HandleSeq hs;
+	for (const auto& v: impl.get_result_set())
+		hs.push_back(HandleCast(v));
+	Handle rewr(createUnorderedLink(hs, SET_LINK));
 	return as->add_atom(rewr);
 }
 
