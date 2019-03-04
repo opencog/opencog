@@ -21,6 +21,7 @@ ENDIF()
 
 IF("${RELEX_REACHABLE}" STREQUAL "#t")
   ADD_GUILE_TEST(GhostProcedureTest test-ghost-procedures.scm)
+  ADD_GUILE_TEST(GhostUTest test-ghost.scm)
 ELSEIF("${RELEX_REACHABLE}" STREQUAL "config-error")
   message(FATAL_ERROR "Issue with relex utilities or the file ${RELEX_UTILS}")
 ENDIF()
