@@ -39,11 +39,20 @@
 (ghost-parse "r: (oranges) test literal")
 (ghost-parse "r: (let's) test literal - apostrophe")
 (ghost-parse "r: (I'm Good) test literal - capital letter")
+(ghost-parse "r: (mr. and MRS. Smith) test literal - personal title")
+(ghost-parse "r: (9 a.m.) test literal - time 1")
+(ghost-parse "r: (5pm) test literal - time 2")
+(ghost-parse "r: (\"wanna eat\") test literal - phrase")
 
 (test-equal "GHOST literal" "" (get-result "orange"))
 (test-equal "GHOST literal" "test literal" (get-result "oranges"))
 (test-equal "GHOST literal" "test literal - apostrophe" (get-result "let's"))
 (test-equal "GHOST literal" "test literal - capital letter" (get-result "I'm good"))
+(test-equal "GHOST literal" "test literal - personal title" (get-result "Mr. and Mrs. Smith"))
+(test-equal "GHOST literal" "test literal - time 1" (get-result "9 a.m."))
+(test-equal "GHOST literal" "test literal - time 2" (get-result "5pm"))
+(test-equal "GHOST literal" "test literal - time 2" (get-result "5 pm"))
+(test-equal "GHOST literal" "test literal - phrase" (get-result "wanna eat"))
 
 ; End of the test
 (test-end ghost-utest)
