@@ -100,5 +100,52 @@
 (test-equal ghost-optional "test optional" (get-result "it's really amazing"))
 (test-equal ghost-optional (string) (get-result "it's not amazing"))
 
+; --- Wildcard --- ;
+(define ghost-wildcard "GHOST wildcard")
+
+(ghost-parse "r: (it's * there) test wildcard")
+(ghost-parse "r: (it's *1 great) test wildcard - exact")
+(ghost-parse "r: (it's *~3 bad) test wildcard - range")
+
+(test-equal ghost-wildcard "test wildcard" (get-result "it's there"))
+(test-equal ghost-wildcard "test wildcard" (get-result "it's not there"))
+(test-equal ghost-wildcard "test wildcard - exact" (get-result "it's so great"))
+(test-equal ghost-wildcard (string) (get-result "it's not so great"))
+(test-equal ghost-wildcard (string) (get-result "it's great"))
+(test-equal ghost-wildcard "test wildcard - range" (get-result "it's bad"))
+(test-equal ghost-wildcard "test wildcard - range" (get-result "it's not bad"))
+(test-equal ghost-wildcard "test wildcard - range" (get-result "it's in my opinion bad"))
+(test-equal ghost-wildcard (string) (get-result "it's in my opinion not bad"))
+
+; --- Variable --- ;
+(define ghost-variable "GHOST variale")
+
+(ghost-parse "r: (go _*) test variable - '_0")
+(ghost-parse "r: (ride _*1) test variable - _0")
+(ghost-parse "r: (finish _watch people) test variable - '_0")
+
+(test-equal ghost-variable "test variable - to those stores" (get-result "go to those stores"))
+(test-equal ghost-variable "test variable - bike" (get-result "ride bikes"))
+(test-equal ghost-variable "test variable - watching" (get-result "finished watching people"))
+(test-equal ghost-variable (string) (get-result "finished firing people"))
+
+; --- User Variable --- ;
+(define ghost-user-variable "GHOST user variable")
+(define-public (findkiller) (List (Word "Bob")))
+
+(ghost-parse "$who = Jay")
+(ghost-parse "$age = 2")
+(ghost-parse "r: (me name be _*) $name='_0 test user variable - '_0")
+(ghost-parse "r: (I know you $name==John) test user variable 1")
+(ghost-parse "r: (I know $name) test user variable 2")
+(ghost-parse "r: (user variable test) test user variable - $who $age")
+(ghost-parse "r: (who be the killer) $killer=^findkiller() test user variable - $killer")
+
+(test-equal ghost-user-variable "test user variable - john" (get-result "my name is john"))
+(test-equal ghost-user-variable "test user variable 1" (get-result "I know you"))
+(test-equal ghost-user-variable "test user variable 2" (get-result "I know John"))
+(test-equal ghost-user-variable "test user variable - Jay 2" (get-result "user variable test"))
+(test-equal ghost-user-variable "test user variable - Bob" (get-result "who is the killer"))
+
 ; End of the test
 (test-end ghost-utest)
