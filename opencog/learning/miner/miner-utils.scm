@@ -481,8 +481,9 @@
      enable incremental conjunction expansion, see the
      #:incremental-expansion option.
 "
-  (let* (;; Create a temporary child atomspace for the URE         
-         (parent-as (cog-push-atomspace))
+  (let* (;; Create a temporary child atomspace for the URE
+         (tmp-as (cog-new-atomspace (cog-atomspace)))
+         (parent-as (cog-set-atomspace! tmp-as))
          (texts-concept? (and (cog-atom? texts)
                               (eq? (cog-type texts) 'ConceptNode)))
          (texts-cpt (if (not texts-concept?)
@@ -497,7 +498,9 @@
     (if (not es)
         ;; The initial pattern doesn't have enough support, thus the
         ;; solution set is empty.
-        (begin (cog-pop-atomspace) (Set))
+        (begin (cog-set-atomspace! parent-as)
+               ;; TODO: delete tmp-as
+               (Set))
 
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
@@ -514,21 +517,29 @@
                (results (cog-fc miner-rbs source))
                ;; Fetch all relevant results
                (patterns (fetch-patterns texts-cpt minsup))
-               (patterns-lst (cog-outgoing-set patterns))
+               (patterns-lst (cog-outgoing-set patterns)))
 
-               ;; Configure surprisingness backward chainer
-               ;; (I-Surprisingness for now)
-               (isurp-rbs (random-surprisingness-rbs-cpt))
-               (target (isurp-target texts-cpt))
-               (vardecl (isurp-vardecl))
-               (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
+          (if (equal? surprisingness 'none)
 
-               ;; Run surprisingness in backward way
-               (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
+              ;; No surprisingness, simple return the pattern list
+              (begin
+                (cog-set-atomspace! parent-as)
+                ;; TODO: delete tmp-as but without deleting its atoms
+                patterns-lst)
 
-          (cog-pop-atomspace)
+              ;; Run surprisingness
+              (let*
+                  ;; Configure surprisingness backward chainer
+                  ((isurp-rbs (random-surprisingness-rbs-cpt))
+                   (target (isurp-target texts-cpt))
+                   (vardecl (isurp-vardecl))
+                   (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
 
-          (desc-sort-by-tv-strength isurp-results)))))
+                   ;; Run surprisingness in a backward way
+                   (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
+                (cog-set-atomspace! parent-as)
+                ;; TODO: delete tmp-as but without deleting its atoms
+                (desc-sort-by-tv-strength isurp-results)))))))
 
 (define (export-miner-utils)
   (export
