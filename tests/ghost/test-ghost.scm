@@ -147,5 +147,51 @@
 (test-equal ghost-user-variable "test user variable - Jay 2" (get-result "user variable test"))
 (test-equal ghost-user-variable "test user variable - Bob" (get-result "who is the killer"))
 
+; --- Nagation --- ;
+(define ghost-negation "GHOST negation")
+
+(ghost-parse "r: (!close the shop stays) test negation - lemma")
+(ghost-parse "r: (!'driving you are) test negation - literal")
+(ghost-parse "r: (!~re the coffee) test negation - concept")
+(ghost-parse "r: (![not don't] tennis) test negation - choice")
+
+(test-equal ghost-negation "test negation - lemma" (get-result "the shop stays open"))
+(test-equal ghost-negation (string) (get-result "the shop stays close"))
+(test-equal ghost-negation "test negation - literal" (get-result "you are diving"))
+(test-equal ghost-negation (string) (get-result "you are driving"))
+(test-equal ghost-negation "test negation - concept" (get-result "the coffee is hot"))
+(test-equal ghost-negation (string) (get-result "the coffee is really hot"))
+(test-equal ghost-negation "test negation - choice" (get-result "play tennis"))
+(test-equal ghost-negation (string) (get-result "don't play tennis"))
+(test-equal ghost-negation (string) (get-result "do not play tennis"))
+
+; --- Sentence Boundary --- ;
+(define ghost-sentence-boundary "GHOST sentence boundary")
+
+(ghost-parse "r: (< tea) test sentence boundary - start")
+(ghost-parse "r: (tree >) test sentence boundary - end")
+(ghost-parse "r: (< green wood >) test sentence boundary - both")
+
+(test-equal ghost-sentence-boundary "test sentence boundary - start" (get-result "tea is an aromatic beverage"))
+(test-equal ghost-sentence-boundary (string) (get-result "that cup of tea"))
+(test-equal ghost-sentence-boundary "test sentence boundary - end" (get-result "visit the tree"))
+(test-equal ghost-sentence-boundary (string) (get-result "visit the tree down the street"))
+(test-equal ghost-sentence-boundary "test sentence boundary - both" (get-result "green wood"))
+(test-equal ghost-sentence-boundary (string) (get-result "magical green wood"))
+(test-equal ghost-sentence-boundary (string) (get-result "green wood paper"))
+(test-equal ghost-sentence-boundary (string) (get-result "organic green wood table"))
+
+; --- Function --- ;
+(define ghost-function "GHOST function")
+
+(define-public (get-weather-info) (List (Word "sunny")))
+(define-public (check-name name) (if (string=? "Bob" (cog-name name)) (stv 1 1) (stv 0 1)))
+(ghost-parse "r: (tell me the weather) test function - ^get-weather-info")
+(ghost-parse "r: (who am I ^check-name(Bob)) test function - predicate")
+(ghost-parse "r: (^face-seen()) test function - predicate only")
+
+(test-equal ghost-function "test function - sunny" (get-result "tell me the weather"))
+(test-equal ghost-function "test function - predicate" (get-result "who am I"))
+
 ; End of the test
 (test-end ghost-utest)
