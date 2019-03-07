@@ -5,7 +5,7 @@ from flask_restful import Resource, reqparse, marshal
 import opencog.cogserver
 from opencog.atomspace import Atom
 from mappers import *
-from flask.ext.restful.utils import cors
+from flask_restful_utils import cors
 from flask_restful_swagger import swagger
 
 # Temporary hack
