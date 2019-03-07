@@ -188,10 +188,119 @@
 (define-public (check-name name) (if (string=? "Bob" (cog-name name)) (stv 1 1) (stv 0 1)))
 (ghost-parse "r: (tell me the weather) test function - ^get-weather-info")
 (ghost-parse "r: (who am I ^check-name(Bob)) test function - predicate")
-(ghost-parse "r: (^face-seen()) test function - predicate only")
 
 (test-equal ghost-function "test function - sunny" (get-result "tell me the weather"))
 (test-equal ghost-function "test function - predicate" (get-result "who am I"))
+
+; --- Comparison --- ;
+(define ghost-comparison "GHOST comparison")
+
+(ghost-parse "$name=Bob")
+(ghost-parse "$num=3")
+(define who "Jay")
+(define-public (tell-who) (List (Word who)))
+(ghost-parse "r: (_* is standing there '_0==$name) test comparison 1")
+(ghost-parse "r: (since _* years ago '_0>$num) test comparison 2")
+(ghost-parse "r: (_* is a lucky number '_0<=$num) test comparison 3")
+(ghost-parse "r: (tell me who ^tell-who()==\"Jay\") test comparison 4")
+
+(test-equal ghost-comparison "test comparison 1" (get-result "Bob is standing there"))
+(test-equal ghost-comparison (string) (get-result "Alice is standing there"))
+(test-equal ghost-comparison "test comparison 2" (get-result "since 10 years ago"))
+(test-equal ghost-comparison (string) (get-result "since 3 years ago"))
+(test-equal ghost-comparison "test comparison 3" (get-result "2 is a lucky number"))
+(test-equal ghost-comparison "test comparison 3" (get-result "3 is a lucky number"))
+(test-equal ghost-comparison (string) (get-result "4 is a lucky number"))
+(test-equal ghost-comparison "test comparison 4" (get-result "tell me who"))
+(set! who "Bob")
+(test-equal ghost-comparison (string) (get-result "tell me who"))
+
+; --- Unordered Match --- ;
+(define ghost-unordered "GHOST unordered")
+
+(ghost-parse "r: (<< banana cherry kiwi >>) test unordered")
+
+(test-equal ghost-unordered "test unordered" (get-result "banana cherry kiwi"))
+(test-equal ghost-unordered "test unordered" (get-result "banana kiwi cherry"))
+(test-equal ghost-unordered "test unordered" (get-result "cherry banana kiwi"))
+(test-equal ghost-unordered "test unordered" (get-result "kiwi banana cherry"))
+(test-equal ghost-unordered "test unordered" (get-result "cherry kiwi banana"))
+(test-equal ghost-unordered "test unordered" (get-result "kiwi cherry banana"))
+
+; --- Action Choice --- ;
+(define ghost-action-choice "GHOST action choice")
+
+(ghost-parse "r: (action one) [AC1][AC2][AC3]")
+(ghost-parse "r: (action two) [W1][W2] and [W3][W4]")
+
+(define result1 (get-result "action one"))
+(define result2 (get-result "action two"))
+(test-assert ghost-action-choice
+  (or (string=? "AC1" result1)
+      (string=? "AC2" result1)
+      (string=? "AC3" result1)))
+(test-assert ghost-action-choice
+  (or (string=? "W1 and W3" result2)
+      (string=? "W1 and W4" result2)
+      (string=? "W2 and W3" result2)
+      (string=? "W2 and W4" result2)))
+
+; --- Question --- ;
+(define ghost-question "GHOST question")
+
+(ghost-parse "?: (done) test question")
+
+(test-equal ghost-question "test question" (get-result "is it done yet?"))
+(test-equal ghost-question (string) (get-result "it's done"))
+
+; --- Rejoinder --- ;
+(define ghost-rejoinder "GHOST rejoinder")
+
+(ghost-parse "
+  r: (parent) test rejoinder
+    j1: (level one a) test rejoinder j1a
+      j2: (level two) test rejoinder j2
+    j1: (level one b) test rejoinder j1b
+")
+
+(test-equal ghost-rejoinder "test rejoinder" (get-result "parent"))
+(test-equal ghost-rejoinder "test rejoinder j1a" (get-result "level one a"))
+(test-equal ghost-rejoinder (string) (get-result "level one b"))
+(test-equal ghost-rejoinder "test rejoinder j2" (get-result "level two"))
+(test-equal ghost-rejoinder "test rejoinder" (get-result "parent"))
+(test-equal ghost-rejoinder "test rejoinder j1b" (get-result "level one b"))
+(test-equal ghost-rejoinder (string) (get-result "level two"))
+
+; --- Label & Reuse --- ;
+(define ghost-label-reuse "GHOST label-reuse")
+
+(ghost-parse "r: R0 (-) test reuse 1")
+(ghost-parse "r: (reuse zero) ^reuse(R0)")
+(ghost-parse "r: R1 (reuse one) test reuse 2
+                 j1: RJ1 (reuse rejoinder) test reuse rej")
+(ghost-parse "r: R2 (reuse two) ^reuse(RJ1)")
+(ghost-parse "r: (reuse three) ^reuse(R0) ^reuse(R1)")
+
+(test-equal ghost-label-reuse "test reuse 1" (get-result "reuse zero"))
+(test-equal ghost-label-reuse "test reuse rej" (get-result "reuse two"))
+(test-equal ghost-label-reuse "test reuse 1 test reuse 2" (get-result "reuse three"))
+(test-equal ghost-label-reuse "test reuse rej" (get-result "reuse rejoinder"))
+
+; --- System Function --- ;
+(define ghost-sys-func "GHOST system functions")
+
+(ghost-parse "r: NR (normal rule) test system functions")
+(ghost-parse "r: KR (keep rule) test system functions - keep ^keep()
+                j1: (rej rule) test system functions - set-used rej")
+(ghost-parse "r: (set used rule) test system functions - set-used ^set_used(KR)")
+
+(test-equal ghost-sys-func "test system functions" (get-result "normal rule"))
+(test-assert ghost-sys-func (= 0 (cog-stv-strength (car (ghost-get-rule "NR")))))
+(test-equal ghost-sys-func "test system functions - keep" (get-result "keep rule"))
+(test-assert ghost-sys-func (< 0 (cog-stv-strength (car (ghost-get-rule "KR")))))
+(test-equal ghost-sys-func "test system functions - set-used" (get-result "set used rule"))
+(test-assert ghost-sys-func (= 0 (cog-stv-strength (car (ghost-get-rule "KR")))))
+(test-equal ghost-sys-func "test system functions - set-used rej" (get-result "rej rule"))
 
 ; End of the test
 (test-end ghost-utest)
