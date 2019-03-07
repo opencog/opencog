@@ -4,7 +4,7 @@
 
 (opencog-test-runner)
 
-(define ghost-utest "GhostUTest")
+(define ghost-syntax-utest "GhostSyntaxUTest")
 
 ; --------------------------------------------------
 ; Setup for GHOST
@@ -27,7 +27,7 @@
 
 ; --------------------------------------------------
 ; Test
-(test-begin ghost-utest)
+(test-begin ghost-syntax-utest)
 
 ; --- Lemma --- ;
 (define ghost-lemma "GHOST lemma")
@@ -303,4 +303,4 @@
 (test-equal ghost-sys-func "test system functions - set-used rej" (get-result "rej rule"))
 
 ; End of the test
-(test-end ghost-utest)
+(test-end ghost-syntax-utest)
