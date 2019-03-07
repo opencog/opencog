@@ -54,8 +54,8 @@ struct MinerParameters {
 	                int maxdepth=-1,
 	                double info=1.0);
 
-	// Minimum support. Mined patterns must have a frequency equal or
-	// above this value.
+	// Minimum support. Mined patterns must have a count equal or above
+	// this value.
 	unsigned minsup;
 
 	// Initial number of conjuncts. This value is overwritten by the
@@ -78,34 +78,33 @@ struct MinerParameters {
 	// initial pattern and the produced patterns.
 	int maxdepth;
 
-	// Modify how the frequency of strongly connected components is
-	// calculated from the frequencies of its components. Specifically
-	// it will go from f1*...*fn to min(f1,...,fn), where f1 to fn are
-	// the frequencies of each component. This allows to dismiss
-	// abstractions that are likely not to lead to specializations
-	// with enough support.
+	// Experimental: modify how the count (a.k.a. support) of strongly
+	// connected components is calculated from the counts of its
+	// components. Specifically it will go from c1*...*cn to
+	// min(c1,...,cn), where c1 to cn are the counts of each
+	// component. This allows to dismiss abstractions that are likely
+	// not to lead to specializations with enough support.
 	//
-	// If the parameter equals to 0 the frequency of the whole pattern
-	// is calculated as the product of f1 to fn, if it equals to 1 the
-	// frequency of the whole pattern is calculated as the min of f1
-	// to fn. And if the value is between, it is calculated as a
-	// linear combination of both.
+	// If the parameter equals to 0 the count of the whole pattern is
+	// calculated as the product of c1 to cn, if it equals to 1 the
+	// count of the whole pattern is calculated as the min of c1 to
+	// cn. And if the value is between, it is calculated as a linear
+	// combination of both.
 	//
 	// It is called info for mutual information or its n-ary
-	// generalizations (like interaction information). What it means
-	// is that when info is low subsequent specializations are likely
+	// generalizations (like interaction information). What it means is
+	// that when info is low subsequent specializations are likely
 	// independant, while when info is high subsequent specializations
 	// are likely dependant and thus we can afford to estimate the
-	// frequency of the specializations by the lowest frequency of its
+	// count of the specializations by the lowest count of its
 	// component.
 	double info;
 };
 
 /**
- * Experimental pattern miner. Mined patterns should be compatible
- * with the pattern matcher, that is if feed to the pattern matcher,
- * the latter should return as many candidates as the pattern's
- * frequency.
+ * Pattern miner. Mined patterns should be compatible with the pattern
+ * matcher, that is if feed to the pattern matcher, the latter should
+ * return as many candidates as the pattern's count.
  */
 class Miner
 {
@@ -120,8 +119,8 @@ public:
 	/**
 	 * Mine the given AtomSpace and return a tree of patterns linked by
 	 * specialization relationship (children are specializations of
-	 * parent) with frequency equal to or above minsup, starting from
-	 * the initial pattern, excluded.
+	 * parent) with count (a.k.a. support) equal to or above minsup,
+	 * starting from the initial pattern, excluded.
 	 */
 	HandleTree operator()(const AtomSpace& texts_as);
 
@@ -196,34 +195,33 @@ private:
 
 	/**
 	 * Calculate if the pattern has enough support w.r.t. to the given
-	 * texts, that is whether its frequency is greater than or equal
-	 * to minsup.
+	 * texts, that is whether its count is greater than or equal to
+	 * minsup.
 	 */
 	bool enough_support(const Handle& pattern,
 	                    const HandleSet& texts) const;
 
 	/**
-	 * Given a pattern and a text corpus, calculate the pattern
-	 * frequency, that is the number of matches if pattern is strongly
-	 * connected.
+	 * Given a pattern and a text corpus, calculate the pattern count,
+	 * that is the number of matches if pattern is strongly connected.
 	 *
-	 * If pattern is not strongly connected AND some heuristic is in
-	 * place TODO, then the definition of frequency deviates from the
-	 * usual one and corresponds to the minimum frequency over all
-	 * strongly connected components of that pattern.
+	 * If pattern is not strongly connected and some heuristic is in
+	 * place, then the definition of count deviates from the usual one
+	 * and corresponds to the minimum count over all strongly connected
+	 * components of that pattern.
 	 *
-	 * ms is used to halt the frequency calculation if it reaches a
-	 * certain maximum, for saving resources.
+	 * ms is used to halt the count calculation if it reaches a certain
+	 * maximum, for saving resources.
 	 */
-	unsigned freq(const Handle& pattern,
-	              const HandleSet& texts,
-	              unsigned ms) const;
+	unsigned support(const Handle& pattern,
+	                 const HandleSet& texts,
+	                 unsigned ms) const;
 
 	/**
-	 * Calculate the frequency of the whole pattern, given the
-	 * frequency of it's components.
+	 * Calculate the count of the whole pattern, given the count of
+	 * it's components.
 	 */
-	unsigned freq(const std::vector<unsigned>& freqs) const;
+	unsigned support(const std::vector<unsigned>& supports) const;
 
 	/**
 	 * Filter in only texts matching the pattern

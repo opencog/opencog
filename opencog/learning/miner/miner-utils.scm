@@ -410,7 +410,7 @@
               tn
               (Concept texts-name))
 
-  ms: [optional, default=10] Minimum support. All patterns with frequency below
+  ms: [optional, default=10] Minimum support. All patterns with support below
       ms are discarded. Can be a Scheme number or an Atomese number node.
 
   ip: [optional, default=(top)] Initial pattern to start the search from.

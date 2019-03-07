@@ -362,14 +362,14 @@ unsigned MinerUtils::support(const Handle& pattern,
 	if (cps.empty())
 	    return 1;
 
-	// Otherwise calculate the frequency of each component
-	std::vector<unsigned> freqs;
-	boost::transform(cps, std::back_inserter(freqs),
+	// Otherwise calculate the support of each component
+	std::vector<unsigned> supports;
+	boost::transform(cps, std::back_inserter(supports),
 	                 [&](const Handle& cp)
 	                 { return component_support(cp, texts, ms); });
 
-	// Return the product of all frequencies
-	return boost::accumulate(freqs, 1, std::multiplies<unsigned>());
+	// Return the product of all supports
+	return boost::accumulate(supports, 1, std::multiplies<unsigned>());
 }
 
 unsigned MinerUtils::component_support(const Handle& component,
