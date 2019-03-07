@@ -1,7 +1,7 @@
 __author__ = 'Cosmo Harrigan'
 
 from flask import abort, json, current_app, jsonify
-from flask.ext.restful import Resource, reqparse, marshal
+from flask_restful import Resource, reqparse, marshal
 import opencog.cogserver
 from opencog.atomspace import Atom
 from mappers import *
