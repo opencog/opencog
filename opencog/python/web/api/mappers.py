@@ -9,7 +9,7 @@ Used by the classes in: apiatomcollection.py
 __author__ = 'Cosmo Harrigan'
 
 from flask import abort
-from flask.ext.restful import fields, marshal
+from flask_restful import fields, marshal
 from opencog.atomspace import *
 
 # Temporary hack
