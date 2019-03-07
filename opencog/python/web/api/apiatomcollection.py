@@ -271,7 +271,7 @@ class AtomCollectionAPI(Resource):
         retval = jsonify({'error':'Internal error'})
         try:
            retval = self._get(id=id)
-        except Exception,e:
+        except Exception as e:
            retval = jsonify({'error':str(e)})
         return retval
 
@@ -533,7 +533,7 @@ the atom. Example:
 
         # Outgoing set
         if 'outgoing' in data:
-            print data
+            print (data)
             if len(data['outgoing']) > 0:
                 outgoing = [self.atom_map.get_atom(uid)
                                 for uid in data['outgoing']]
