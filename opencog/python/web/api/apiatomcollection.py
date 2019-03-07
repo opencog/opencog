@@ -1,11 +1,11 @@
 __author__ = 'Cosmo Harrigan'
 
 from flask import abort, json, current_app, jsonify
-from flask.ext.restful import Resource, reqparse, marshal
+from flask_restful import Resource, reqparse, marshal
 import opencog.cogserver
 from opencog.atomspace import Atom
 from mappers import *
-from flask.ext.restful.utils import cors
+from flask_restful.utils import cors
 from flask_restful_swagger import swagger
 
 # Temporary hack
@@ -16,9 +16,9 @@ from web.api.utilities import get_atoms_by_name
 try:
     from graph_description import dot
 except ImportError:
-    print "DOT graph description format option not enabled in REST API. To " \
+    print ("DOT graph description format option not enabled in REST API. To " \
           "enable, install the dependencies listed here:\n" \
-          "https://github.com/opencog/opencog/tree/master/opencog/python/graph_description#prerequisites"
+          "https://github.com/opencog/opencog/tree/master/opencog/python/graph_description#prerequisites")
 
 "AtomSpace management functionality"
 class AtomCollectionAPI(Resource):
@@ -271,7 +271,7 @@ class AtomCollectionAPI(Resource):
         retval = jsonify({'error':'Internal error'})
         try:
            retval = self._get(id=id)
-        except Exception,e:
+        except Exception as e:
            retval = jsonify({'error':str(e)})
         return retval
 
@@ -533,7 +533,7 @@ the atom. Example:
 
         # Outgoing set
         if 'outgoing' in data:
-            print data
+            print (data)
             if len(data['outgoing']) > 0:
                 outgoing = [self.atom_map.get_atom(uid)
                                 for uid in data['outgoing']]
