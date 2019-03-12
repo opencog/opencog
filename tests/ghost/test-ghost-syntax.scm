@@ -13,17 +13,26 @@
   (opencog nlp)
   (opencog nlp relex2logic)
   (opencog nlp chatbot)
+  (opencog openpsi)
   (opencog ghost)
   (opencog ghost procedures))
 
 ; Set the address for relex server
 (set-relex-server-host)
 
-; Helper for this test
+; Helpers for this test
 (define (get-result input)
   (if (null? input)
     (string)
     (string-join (map cog-name (test-ghost input)))))
+
+(define (get-rules-from-label label)
+  (map gar (filter
+    (lambda (x)
+      (and (psi-rule? (gar x))
+           (any (lambda (p) (string=? "alias" (cog-name p)))
+             (cog-chase-link 'EvaluationLink 'PredicateNode x))))
+    (cog-incoming-by-type (Concept label) 'ListLink))))
 
 ; --------------------------------------------------
 ; Test
@@ -301,6 +310,72 @@
 (test-equal ghost-sys-func "test system functions - set-used" (get-result "set used rule"))
 (test-assert ghost-sys-func (= 0 (cog-stv-strength (car (ghost-get-rule "KR")))))
 (test-equal ghost-sys-func "test system functions - set-used rej" (get-result "rej rule"))
+
+; --- Goal --- ;
+(use-modules (srfi srfi-1))
+(define ghost-goals "GHOST goal assignment")
+
+(ghost-parse "
+  goal: (stay_alive=1)
+    r: G1 (-) goal one
+
+    #goal: (novelty=0.6 please_user=0.4)
+    r: G2 (-) goal two
+
+    #goal: (stay_alive=0.5)
+    r: G3 (-) goal three
+")
+
+(define rules-g1 (get-rules-from-label "G1"))
+(define rules-g2 (get-rules-from-label "G2"))
+(define rules-g3 (get-rules-from-label "G3"))
+
+; Check if the goals have been assigned corrected
+(test-assert ghost-goals
+  (lset= equal?
+    (list (Concept "stay_alive"))
+    (map psi-get-goal rules-g1)))
+(test-assert ghost-goals
+  (lset= equal?
+    (list (Concept "stay_alive") (Concept "please_user") (Concept "novelty"))
+    (map psi-get-goal rules-g2)))
+(test-assert ghost-goals
+  (lset= equal?
+    (list (Concept "stay_alive"))
+    (map psi-get-goal (get-rules-from-label "G3"))))
+
+; Check the strengths of the rules as well
+(test-assert ghost-goals
+  (lset= equal? (list 1.0) (map cog-stv-strength rules-g1)))
+(test-assert ghost-goals
+  (lset= equal? (list 1.0 0.6 0.4) (map cog-stv-strength rules-g2)))
+(test-assert ghost-goals
+  (lset= equal? (list 0.5) (map cog-stv-strength rules-g3)))
+
+; --- Link Concept --- ;
+(define ghost-link-concept "GHOST link concept")
+
+(ghost-parse "
+  link-concept: (madagascar, golden bean, cocoa)
+
+    #link-concept: (single origin)
+    r: LC (-) link concept
+")
+
+(define concepts
+  (list
+    ; The "GHOST" concept will be linked to all of the
+    ; GHOST rules by default
+    (Concept "GHOST")
+    ; These are manually linked from above
+    (Concept "madagascar")
+    (Concept "golden bean")
+    (Concept "cocoa")
+    (Concept "single origin")))
+
+(test-assert ghost-link-concept
+  (lset= equal? concepts
+    (cog-chase-link 'MemberLink 'ConceptNode (car (ghost-get-rule "LC")))))
 
 ; End of the test
 (test-end ghost-syntax-utest)
