@@ -56,7 +56,14 @@
   r: RR (^some_pred()) done predicate ^some_schema()
 ")
 
+; The loop count should be zero before starting the loop
+(test-assert ghost-run-test (= 0 (psi-loop-count (ghost-get-component))))
+
 (ghost-run)
+(sleep 1)
+
+; The loop count should be greater than zero after starting the loop
+(test-assert ghost-run-test (< 0 (psi-loop-count (ghost-get-component))))
 
 (test-equal ghost-run-test "done reactive" (get-result "test reactive rule"))
 (test-equal ghost-run-test "done rejoinder" (get-result "test rejoinder"))
@@ -65,6 +72,11 @@
 (test-equal ghost-run-test "done predicate and schema" (get-result))
 
 (ghost-halt)
+
+; The loop count should remains unchanged after halting the loop
+(define final-cnt (psi-loop-count (ghost-get-component)))
+(sleep 1)
+(test-assert ghost-run-test (= final-cnt (psi-loop-count (ghost-get-component))))
 
 ; End of the test
 (test-end ghost-utest)
