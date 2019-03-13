@@ -29,7 +29,7 @@
 
 #include <opencog/util/RandGen.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 
 #include "AttentionParamQuery.h"
 

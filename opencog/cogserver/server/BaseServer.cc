@@ -72,6 +72,7 @@ BaseServer::~BaseServer()
 {
     // We are no longer the current server.
     set_current_server(nullptr);
+    _attentionBank = nullptr;
     _atomSpace = nullptr;
 }
 

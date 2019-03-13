@@ -624,14 +624,17 @@
   Figure out what the type of the rule is, generate the needed atomese, and
   return the type as a StringValue.
 "
-  (cond ((or (equal? #\u TYPE)
-             (equal? #\s TYPE))
+  (cond ((or (string=? "r" TYPE)
+             ; For backward compatibility
+             (string=? "u" TYPE)
+             (string=? "s" TYPE))
          (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-responder))
+           (assoc-set! rule-type-alist NAME strval-reactive-rule))
          (list '() '()))
-        ((equal? #\? TYPE)
+        ; For backward compatibility
+        ((equal? "?" TYPE)
          (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-responder))
+           (assoc-set! rule-type-alist NAME strval-reactive-rule))
          (let ((var (Variable (gen-var "Interpretation" #f))))
            (list
              (list (TypedVariable var (Type "InterpretationNode")))
@@ -642,21 +645,19 @@
                    (DefinedLinguisticConcept "InterrogativeSpeechAct"))
                  (InheritanceLink var
                    (DefinedLinguisticConcept "TruthQuerySpeechAct")))))))
-        ((equal? #\r TYPE)
+        ((or (string=? "p" TYPE)
+             ; For backward compatibility
+             (string=? "t" TYPE))
          (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-random-gambit))
-         (list '() '()))
-        ((equal? #\t TYPE)
-         (set! rule-type-alist
-           (assoc-set! rule-type-alist NAME strval-gambit))
+           (assoc-set! rule-type-alist NAME strval-proactive-rule))
          (list '() '()))
         ((null? rule-hierarchy)
          (clear-parsing-states)
          ; If we are here, it has to be a rejoinder, so make sure
-         ; rule-hierarchy is not empty, i.e. a responder should
+         ; rule-hierarchy is not empty, i.e. a reactive rule should
          ; be defined in advance
          (throw (ghost-prefix
-           "Please define a responder first before defining a rejoinder.")))
+           "Please define a reactive rule first before defining a rejoinder.")))
         ((equal? "Parallel-Rules"
            (cog-name (psi-get-goal (car (get-rules-from-label
              (last (list-ref rule-hierarchy (- (get-rejoinder-level TYPE) 1))))))))
@@ -717,21 +718,33 @@
 )
 
 ; ----------
-(define (create-rule PATTERN ACTION GOAL NAME TYPE RCNPTS)
+(define (create-default-rule RULE-TYPE CONTEXT ACTION)
+"
+  Record the context and/or action that will be shared among all
+  the rules with the same rule type.
+"
+  (cog-logger-debug ghost-logger
+    "Global default rule:\nType: ~a\nContext: ~a\nAction: ~a"
+      RULE-TYPE CONTEXT ACTION)
+
+  (set! global-default-rule-alist
+    (assoc-set! global-default-rule-alist RULE-TYPE (cons CONTEXT ACTION)))
+)
+
+; ----------
+(define (create-rule PATTERN ACTION NAME TYPE)
 "
   Top level translation function.
 
-  PATTERN, ACTION, and GOAL are the basic components of a psi-rule,
-  correspond to context, procedure, and goal respectively.
-
-  RCNPTS is the optional rule-level concepts that will be linked to
-  the rule being defined.
+  PATTERN and ACTION, aka context and procedure, are the basic
+  components of a psi-rule.
 
   NAME is like a label of a rule, so that one can reference this rule
   by using it.
 
-  TYPE is a grouping idea from ChatScript, e.g. responders, rejoinders,
-  gambits etc.
+  TYPE is a grouping idea from ChatScript, i.e. responders, rejoinders,
+  and gambits. Note, here in GHOST, responders are called reactive rules
+  and gambits are called proactive rules.
 "
   ; Label the rule with NAME, if given, generate one otherwise
   (define rule-name
@@ -743,8 +756,13 @@
 
   (set! rule-alist
     (assq-set! rule-alist rule-name
-      (list PATTERN ACTION (process-goal GOAL) GOAL
-        rule-name TYPE is-rule-seq? (append rule-concept RCNPTS))))
+      (list PATTERN ACTION (process-goal rule-lv-goals) rule-lv-goals
+        rule-name TYPE is-rule-seq?
+          (append top-lv-link-concepts rule-lv-link-concepts))))
+
+  ; Reset any rule level stuff
+  (set! rule-lv-goals '())
+  (set! rule-lv-link-concepts '())
 )
 
 ; ----------
@@ -782,8 +800,17 @@
       (set! goals-of-prev-rule (cons ALL-GOALS ORDERED?))
       (set! rule-hierarchy '())))
 
-  (let* ((proc-type (process-type TYPE NAME))
-         (ordered-terms (order-terms PATTERN))
+  (let* ((default-rule (assoc-ref global-default-rule-alist TYPE))
+         (rule-pattern
+           (if (or (not default-rule) (null? (car default-rule)))
+              PATTERN
+              (append (car default-rule) PATTERN)))
+         (rule-action
+           (if (or (not default-rule) (null? (cdr default-rule)))
+              ACTION
+              (list (cons 'action (append (cdadr default-rule) (cdar ACTION))))))
+         (proc-type (process-type TYPE NAME))
+         (ordered-terms (order-terms rule-pattern))
          (proc-terms (process-pattern-terms ordered-terms))
          (vars (append (list-ref proc-terms 0)
                        (list-ref proc-type 0)))
@@ -791,7 +818,7 @@
                         (list-ref proc-type 1)))
          (specificity (list-ref proc-terms 3))
          (type (assoc-ref rule-type-alist NAME))
-         (action (process-action ACTION NAME
+         (action (process-action rule-action NAME
                    (find
                      (lambda (g) (string=? "Parallel-Rules" (car g)))
                      ALL-GOALS)))
@@ -799,7 +826,7 @@
          (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
     (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
-    (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+    (cog-logger-debug ghost-logger "Procedure: ~a" rule-action)
     (cog-logger-debug ghost-logger "Goal: ~a" ALL-GOALS)
 
     ; Update the count -- how many rules we've seen under this top level goal
@@ -896,8 +923,8 @@
         (if is-rejoinder?
           ; If it's a rejoinder, its parent rule should be the
           ; last rule one level up in rule-hierarchy
-          ; 'process-type' will make sure there is a responder
-          ; defined beforehand so rule-hierarchy is not empty
+          ; 'process-type' will make sure there is a reactive
+          ; rule defined beforehand so rule-hierarchy is not empty
           (begin
             (set-next-rule
               (car (get-rules-from-label
@@ -923,7 +950,7 @@
                     (lambda (r)
                       (set-next-rule
                         (car (get-rules-from-label r))
-                          a-rule ghost-next-responder))
+                          a-rule ghost-next-reactive-rule))
                     lv))
                 rule-hierarchy))
             (add-to-rule-hierarchy 0 NAME)))
@@ -975,7 +1002,7 @@
 
 (define* (create-top-lv-goal GOALS #:optional (ORDERED #f))
 "
-  Create a top level goal that will be shared among the rules under it.
+  Create top level goals that will be shared among the rules under it.
 "
   ; Actually create the goals in the AtomSpace
   (for-each
@@ -989,11 +1016,29 @@
   (set! top-lv-goals GOALS)
   (set! is-rule-seq? ORDERED)
 
-  ; Reset the rule-concept when a new goal is defined
-  (set! rule-concept '())
+  ; Reset the top-lv-link-concepts when a new goal is defined
+  (set! top-lv-link-concepts '())
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
+
+(define (create-rule-lv-goal GOALS)
+"
+  Create rule level goals, assuming they have all been defined before.
+"
+  ; Check if any of them is undefined
+  (for-each
+    (lambda (goal)
+      (if (not (psi-goal? (Concept (car goal))))
+        (begin
+          (cog-logger-warn ghost-logger
+            "Goal \"~a\" has not been defined! Default urge ~d will be used"
+              (car goal) default-urge)
+          (psi-goal (car goal) default-urge))))
+    GOALS)
+
+  (set! rule-lv-goals GOALS)
+)
 
 (define (create-user-variable UVAR VAL)
 "
@@ -1002,11 +1047,20 @@
   (ghost-set-user-variable (ghost-uvar UVAR) (List (Word VAL)))
 )
 
-(define (link-rule-to-concepts CONCEPTS)
+(define (create-top-lv-link-concepts CONCEPTS)
 "
-  Link CONCEPTS to a rule by a MemberLink.
+  Link CONCEPTS to rules under it via a MemberLink.
+
+  The actual linkages will be created when the rules are instantiated.
+"
+  (set! top-lv-link-concepts CONCEPTS)
+)
+
+(define (create-rule-lv-link-concepts CONCEPTS)
+"
+  Link CONCEPTS only to the rule following it.
 
   The actual linkages will be created when the rule is instantiated.
 "
-  (set! rule-concept CONCEPTS)
+  (set! rule-lv-link-concepts CONCEPTS)
 )

@@ -52,9 +52,9 @@ Here is a list of features that are fully supported in GHOST:
     - `set_used`, to set another rule as triggered, so that it will not be triggered again.
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
-There are different types of rules in ChatScript -- responders (`u:` `s:` `?:`) and gambits (`r:` `t:`). Currently they are handled without distinction, except for questions (`?:`) which will only be triggered if the input is a question.
-
-[Rejoinder](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#fast-overview-of-topic-files-top) (`a:` to `q:`) is also supported. Rejoinders have a higher priority than responders and gambits so it will always be selected if it satisfies the context. If more than one rejoinders satisfy the current context, the one that's defined first will always be selected.
+There are different types of rules in ChatScript -- responders, rejoinders, and gambits. Note, here in GHOST, responders are called reactive rules and gambits are called proactive rules.
+Use `r:` to define a reactive rule, `j1:` `j2:` `j3:`... etc to define a rejoinder (on different levels), and `p:` to define a gambit. Currently `s:`, `?:`, and `u:` can still be used to define a reactive rule, `a:` up to `e:` can still be used to define a rejoinder, and `t:` can still be used to define a gambit, but these are for backward compability ONLY.
+Rejoinders have a higher priority than reactive rules and proactive rules so it will always be selected if it satisfies the context. If more than one rejoinders satisfy the current context, the one that's defined first will always be selected.
 
 Simple comparisons (`=` `!=` `<` `<=` `>` `>=`) can be done in the context of a rule, for variables, user variables, and functions, e.g.
 ```

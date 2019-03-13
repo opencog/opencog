@@ -71,14 +71,13 @@
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
-(define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
+(define ghost-next-reactive-rule (Predicate (ghost-prefix "Next Reactive Rule")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
 (define ghost-rej-seq-num (Predicate (ghost-prefix "Rejoinder Sequence Number")))
 (define ghost-context-specificity (Predicate (ghost-prefix "Context Specificity")))
 (define strval-rejoinder (StringValue "rejoinder"))
-(define strval-responder (StringValue "responder"))
-(define strval-random-gambit (StringValue "random gambit"))
-(define strval-gambit (StringValue "gambit"))
+(define strval-reactive-rule (StringValue "reactive-rule"))
+(define strval-proactive-rule (StringValue "proactive-rule"))
 
 ;; --------------------
 (define-public (ghost-word-seq-pred)
@@ -90,10 +89,6 @@
 ;; --------------------
 ;; For rule parsing
 
-; When set, all the rules created under it will be linked to this concept,
-; until a new top level goal is defined
-(define rule-concept '())
-
 ; The initial urge of goals
 (define initial-urges '())
 
@@ -103,6 +98,17 @@
 ; A list of top level goals that will be shared with all the rules
 ; defined under it
 (define top-lv-goals '())
+
+; A list of rule level goals that will only be associated with the
+; rule following it
+(define rule-lv-goals '())
+
+; When set, all the rules created under it will be linked to these concepts,
+; until a new top level goal is defined
+(define top-lv-link-concepts '())
+
+; When set, the rule created under it will be linked to these concepts
+(define rule-lv-link-concepts '())
 
 ; Whether the rules defined under a top level goal is ordered
 (define is-rule-seq? #f)
@@ -120,9 +126,12 @@
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
-; An association list of the types (responders, rejoinders etc)
+; An association list of the types (reactive rules, rejoinders etc)
 ; of the rules
 (define rule-type-alist '())
+
+; An association list for storing the default rule contexts and actions
+(define global-default-rule-alist '())
 
 ; An association list that contains all the terms needed to create
 ; the actual rules
@@ -139,16 +148,19 @@
 
 ; To clear the above states
 (define (clear-parsing-states)
-  (set! rule-concept '())
   (set! initial-urges '())
   (set! default-urge 0)
   (set! top-lv-goals '())
+  (set! rule-lv-goals '())
+  (set! top-lv-link-concepts '())
+  (set! rule-lv-link-concepts '())
   (set! is-rule-seq? #f)
   (set! goal-rule-cnt 0)
   (set! pat-vars '())
   (set! rule-features '())
   (set! rule-label-list '())
   (set! rule-type-alist '())
+  (set! global-default-rule-alist '())
   (set! rule-alist '())
   (set! rule-hierarchy '())
   (set! goals-of-prev-rule '())
@@ -179,7 +191,7 @@
 (define context-weight 1)
 (define sti-weight 1)
 (define urge-weight 1)
-(define responder-sti-boost 1)
+(define reactive-rule-sti-boost 1)
 (define rejoinder-sti-boost 10)
 (define refractory-period 1)
 (define specificity-based-action-selection #t)

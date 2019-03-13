@@ -26,7 +26,7 @@
 #define FUZZY_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/nlp/fuzzy/FuzzyMatchBasic.h>
 
 namespace opencog

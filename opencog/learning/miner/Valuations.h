@@ -158,6 +158,7 @@ public:
 	 * Get the SCValuations containing the given variable.
 	 */
 	const SCValuations& get_scvaluations(const Handle& var) const;
+	const SCValuations& get_scvaluations(unsigned var_idx) const;
 
 	/**
 	 * Get the SCValuations containing the variable under focus
@@ -171,6 +172,12 @@ public:
 	 */
 	void inc_focus_variable() const;
 	void dec_focus_variable() const;
+
+	/**
+	 * Return all counted values corresponding to var.
+	 */
+	HandleUCounter values(const Handle& var) const;
+	HandleUCounter values(unsigned var_idx) const;
 
 	/**
 	 * Return the size of the Valuations, that is its totally number

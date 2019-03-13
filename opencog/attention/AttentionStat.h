@@ -1,4 +1,4 @@
-#include <opencog/atoms/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #ifndef ATTENTION_STAT_H

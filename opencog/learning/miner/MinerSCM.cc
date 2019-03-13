@@ -29,6 +29,7 @@
 #include <opencog/atoms/core/NumberNode.h>
 
 #include "MinerUtils.h"
+#include "Surprisingness.h"
 
 namespace opencog {
 
@@ -94,6 +95,20 @@ protected:
 	Handle do_expand_conjunction(Handle cnjtion, Handle pattern,
 	                             Handle texts, Handle ms);
 
+	/**
+	 * Calculate the I-Surprisingness of the pattern (and its
+	 * partitions) with respect to texts.
+	 *
+	 * do_isurp_old: Shujing I-Surprisingness
+	 * do_nisurp_old: Shujing normalized I-Surprisingness
+	 * do_isurp: I-Surprisingness
+	 * do_nisurp: normalized I-Surprisingness
+	 */
+	double do_isurp_old(Handle pattern, Handle texts);
+	double do_nisurp_old(Handle pattern, Handle texts);
+	double do_isurp(Handle pattern, Handle texts);
+	double do_nisurp(Handle pattern, Handle texts);
+
 public:
 	MinerSCM();
 };
@@ -124,6 +139,18 @@ void MinerSCM::init(void)
 
 	define_scheme_primitive("cog-expand-conjunction",
 		&MinerSCM::do_expand_conjunction, this, "miner");
+
+	define_scheme_primitive("cog-isurp-old",
+		&MinerSCM::do_isurp_old, this, "miner");
+
+	define_scheme_primitive("cog-nisurp-old",
+		&MinerSCM::do_nisurp_old, this, "miner");
+
+	define_scheme_primitive("cog-isurp",
+		&MinerSCM::do_isurp, this, "miner");
+
+	define_scheme_primitive("cog-nisurp",
+		&MinerSCM::do_nisurp, this, "miner");
 }
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
@@ -203,8 +230,41 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	HandleSet results = MinerUtils::expand_conjunction(cnjtion, pattern,
-	                                                   texts_set, ms_uint);
+	                                                   texts_set,
+	                                                   ms_uint);
 	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
+}
+
+double MinerSCM::do_isurp_old(Handle pattern, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::isurp_old(pattern, texts_set, false);
+}
+
+double MinerSCM::do_nisurp_old(Handle pattern, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::isurp_old(pattern, texts_set, true);
+}
+
+double MinerSCM::do_isurp(Handle pattern, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::isurp(pattern, texts_set, false);
+}
+
+double MinerSCM::do_nisurp(Handle pattern, Handle texts)
+{
+	// Fetch all texts
+	HandleSet texts_set = MinerUtils::get_texts(texts);
+
+	return Surprisingness::isurp(pattern, texts_set, true);
 }
 
 extern "C" {

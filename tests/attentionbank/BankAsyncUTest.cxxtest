@@ -1,0 +1,128 @@
+/*
+ * tests/attentionbank/BankAsyncUTest.cxxtest
+ *
+ * Copyright (C) 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * Written by Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <algorithm>
+#include <atomic>
+#include <functional>
+#include <thread>
+
+#include <math.h>
+#include <string.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+using namespace std;
+using namespace std::placeholders;
+
+class BankAsyncUTest :  public CxxTest::TestSuite
+{
+private:
+
+    AtomSpace* atomSpace;
+    AttentionBank* ab;
+
+    // Counters must be atomic; we are incrementing them inside threads
+    std::atomic_size_t __testAFSignalsCounter;
+
+    int n_threads;
+    int num_atoms;
+    bool spinwait;
+
+public:
+    BankAsyncUTest()
+    {
+        // Current atomspace can to 50K or 100K atoms/sec, so the
+        // below should run for at least 2 to 5 seconds each time.
+        n_threads = 10;
+        num_atoms = 5000;
+        logger().set_level(Logger::INFO);
+        logger().set_print_to_stdout_flag(true);
+    }
+
+    void setUp()
+    {
+        atomSpace = new AtomSpace();
+        ab = &attentionbank(atomSpace);
+    }
+
+    void tearDown()
+    {
+        attentionbank(nullptr);
+        delete atomSpace;
+    }
+
+    // =================================================================
+    // Test the AttentionalFocus signals, AddAFSignal and RemoveAFSignal
+
+    void addAFSignal(const Handle& h,
+                     const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new)
+    {
+        logger().debug("addAFSignal: %s", h->to_string().c_str());
+        __testAFSignalsCounter += 1;
+    }
+
+    void removeAFSignal(const Handle& h,
+                        const AttentionValuePtr& av_old,
+                        const AttentionValuePtr& av_new)
+    {
+        logger().debug("removeAFSignal: %s", h->to_string().c_str());
+        __testAFSignalsCounter += 1;
+    }
+
+    void testAFSignals()
+    {
+        int addAFConnection =
+            ab->AddAFSignal().connect(
+                    std::bind(&BankAsyncUTest::addAFSignal,
+                                this, _1, _2, _3));
+        int removeAFConnection =
+            ab->RemoveAFSignal().connect(
+                    std::bind(&BankAsyncUTest::removeAFSignal,
+                                this, _1, _2, _3));
+
+        __testAFSignalsCounter = 0;
+        
+        auto af_sti = ab->get_af_max_sti();
+        ab->set_af_size(1);
+        // Add a node to the AttentionalFocus
+        Handle h = atomSpace->add_node(CONCEPT_NODE,
+                                       "test");
+        h->setTruthValue(SimpleTruthValue::createTV(0.01, 1));
+        ab->set_sti(h, af_sti + 200); //set it high enough to so that it will be in the AF.
+        TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 1);
+
+        // Remove the node from the AttentionalFocus
+        Handle h2 = atomSpace->add_node(CONCEPT_NODE, "TakeOverAF"); 
+        ab->set_sti(h2, af_sti + 300); // AFadded and AFRemoved signal emitted here.
+        TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 3);
+
+        ab->AddAFSignal().disconnect(addAFConnection);
+        ab->RemoveAFSignal().disconnect(removeAFConnection);
+    }
+};

@@ -16,10 +16,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define conjunction-rule-base (ConceptNode "conjunction-rule-base"))
-(InheritanceLink
-   conjunction-rule-base
-   (ConceptNode "URE")
-)
 
 ;; Define conj-bc for convenience
 (define (conj-bc target) (cog-bc conjunction-rule-base target))

@@ -29,7 +29,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 
 #include "AFRentCollectionAgent.h"
 #include "AttentionParamQuery.h"

@@ -4,8 +4,13 @@
 
 ;; ;; For debugging
 ;; (use-modules (opencog logger))
+;; (cog-logger-set-level! "debug")
+;; (cog-logger-set-sync! #t)
+;; (cog-logger-set-timestamp! #f)
 ;; (use-modules (opencog rule-engine))
 ;; (ure-logger-set-level! "debug")
+;; (ure-logger-set-sync! #t)
+;; (ure-logger-set-timestamp! #f)
 
 ;; Load KB
 (load "kb.scm")
@@ -33,4 +38,5 @@
                           #:minsup 5
                           #:maximum-iterations 100
                           #:incremental-expansion #t
-                          #:max-conjuncts 3))
+                          #:max-conjuncts 3
+                          #:surprisingness 'nisurp-old))

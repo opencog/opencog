@@ -1,0 +1,341 @@
+/*
+ * tests/atomspace/AttentionValueUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Tony Lofthouse <tony_lofthouse@btinternet.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
+#include <opencog/attentionbank/avalue/AttentionValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+
+#include "sorting.h"
+
+using namespace opencog;
+using namespace std;
+
+#define NUM_AVS 4
+#define AV1_STI 0
+#define AV2_STI 500
+#define AV3_STI 20000
+#define AV1_LTI 0
+#define AV2_LTI 700
+#define AV3_LTI 30000
+#define AV1_VLTI 0
+#define AV2_VLTI 0
+#define AV3_VLTI 1
+#define AV_LBOUND -32768
+#define AV_UBOUND 32767
+
+#define DEFAULTATOMSTI AttentionValue::DEFAULTATOMSTI;
+#define DEFAULTATOMLTI AttentionValue::DEFAULTATOMLTI;
+#define DEFAULTATOMVLTI AttentionValue::DEFAULTATOMVLTI;
+
+class AttentionValueUTest :  public CxxTest::TestSuite
+{
+private:
+    AtomSpace* atomSpace;
+    AttentionBank* bank;
+
+    AttentionValue::sti_t sti[NUM_AVS];
+    AttentionValue::lti_t lti[NUM_AVS];
+    AttentionValue::vlti_t vlti[NUM_AVS];
+
+    AttentionValuePtr avs[NUM_AVS];
+
+    AttentionValue::vlti_t getVLTI(Handle h) {
+        return get_vlti(h);
+    }
+
+    void chgVLTI(Handle h, int unit) {
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() + unit);
+        bank->change_av(h, new_av);
+    }
+
+    void incVLTI(Handle h) { chgVLTI(h, +1); }
+    void decVLTI(Handle h) { chgVLTI(h, -1); }
+
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
+        /* Make a copy */
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        bank->change_av(h, new_av);
+    }
+
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        bank->change_av(h, new_av);
+    }
+
+public:
+    AttentionValueUTest() {
+        logger().set_level(Logger::DEBUG);
+        // logger().set_print_to_stdout_flag(true);
+
+        sti[0] = DEFAULTATOMSTI;
+        sti[1] = AV1_STI;
+        sti[2] = AV2_STI;
+        sti[3] = AV3_STI;
+
+        lti[0] = DEFAULTATOMLTI;
+        lti[1] = DEFAULTATOMLTI;
+        lti[2] = AV2_LTI;
+        lti[3] = AV3_LTI;
+
+        vlti[0] = DEFAULTATOMVLTI;
+        vlti[1] = DEFAULTATOMVLTI;
+        vlti[2] = DEFAULTATOMVLTI
+        vlti[3] = AV3_VLTI;
+    }
+
+    void setUp() {
+        atomSpace = new AtomSpace();
+        bank = &attentionbank(atomSpace);
+
+        avs[0] = AttentionValue::createAV();
+        avs[1] = AttentionValue::createAV(sti[1]);
+        avs[2] = AttentionValue::createAV(sti[2], lti[2]);
+        avs[3] = AttentionValue::createAV(sti[3], lti[3], vlti[3]);
+    }
+
+    void tearDown() {
+        attentionbank(nullptr);
+        delete atomSpace;
+    }
+
+    void testConstructors() {
+
+        AttentionValuePtr av;
+
+        for (int i = 0; i < NUM_AVS; i++) {
+            av = avs[i];
+            //logger().debug("getSTI()=%d, sti[i]=%d", av->getSTI(), sti[i]);
+            //logger().debug("getLTI()=%d, lti[i]=%d", av->getLTI(), lti[i]);
+            //logger().debug("getVLTI()=%d, vlti[i]=%d", av->getVLTI(), vlti[i]);
+            TS_ASSERT(av != NULL);
+            TS_ASSERT(av->getSTI() == sti[i]);
+            TS_ASSERT(av->getLTI() == lti[i]);
+            TS_ASSERT(av->getVLTI() == vlti[i]);
+        }
+    }
+
+    void testGets() {
+
+        AttentionValuePtr av;
+
+        for (int i = 0; i < NUM_AVS; i++) {
+            av = avs[i];
+
+            TS_ASSERT(av->getSTI() == sti[i]);
+            TS_ASSERT(av->getLTI() == lti[i]);
+            TS_ASSERT(av->getVLTI() == vlti[i]);
+        }
+    }
+
+    void testclone() {
+        AttentionValuePtr clonedAV, av;
+
+        for (int i = 0; i < NUM_AVS; i++) {
+            av = avs[i];
+            clonedAV = av->clone();
+            TS_ASSERT(av->getSTI() == clonedAV->getSTI());
+            TS_ASSERT(av->getLTI() == clonedAV->getLTI());
+            TS_ASSERT(av->getVLTI() == clonedAV->getVLTI());
+        }
+    }
+
+    void testOperatorEquals() {
+
+
+        for (int i = 0; i < NUM_AVS; i++) {
+            const AttentionValue& av1 = *avs[i];
+            const AttentionValue av2(*av1.clone());
+            logger().debug("getSTI()=%f, cloned=%f", av1.getSTI(), av2.getSTI());
+            logger().debug("getLTI()=%f, cloned=%f", av1.getLTI(), av2.getLTI());
+            logger().debug("getVLTI()=%f, cloned=%f", av1.getVLTI(), av2.getVLTI());
+            TS_ASSERT(av1 == av2);
+        }
+    }
+
+    void testVLTI() {
+        HandleSeq atoms = createSimpleGraph(atomSpace, "vlti");
+
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        incVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        incVLTI(atoms[0]);//VLTI=2
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        incVLTI(atoms[0]);//VLTI=2
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+    }
+
+    void testComparisons() {
+        logger().debug("BEGIN TEST:");
+
+        HandleSeq atoms = createSimpleGraph(atomSpace, "comparisons");
+
+        logger().debug("STISort");
+
+        STISort sSort;
+
+        // an atom which has higher sti is strictly before one with lower sti
+        TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
+        // an atom which has lower sti is not strictly before one with higher sti
+        TS_ASSERT_EQUALS(sSort(atoms[0], atoms[1]), false);
+        // two atoms with the same sti are not strictly before each other
+        TS_ASSERT_EQUALS(sSort(atoms[2], atoms[1]), false);
+        TS_ASSERT_EQUALS(sSort(atoms[1], atoms[2]), false);
+
+        logger().debug("LTIAndTVAscendingSort");
+
+        LTIAndTVAscendingSort latvSort;
+
+        // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
+        TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
+        // an atom which has lower LTI*TV is strictly before one with higher LTI*TV
+        TS_ASSERT_EQUALS(latvSort(atoms[0], atoms[1]), true);
+        // two atoms with the same LTI*TV are not strictly before each other
+        TS_ASSERT_EQUALS(latvSort(atoms[2], atoms[1]), false);
+        TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[2]), false);
+
+        logger().debug("LTIThenTVAscendingSort");
+
+        LTIThenTVAscendingSort lttvSort;
+
+        // An atom which has higher LTI is not strictly before one
+        // with lower LTI.
+        TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[0]), false);
+        // an atom which has lower LTI is strictly before one with higher LTI
+        TS_ASSERT_EQUALS(lttvSort(atoms[0], atoms[1]), true);
+        // Two atoms with the same LTI and the same TV are not
+        // strictly before each other.
+        TS_ASSERT_EQUALS(lttvSort(atoms[2], atoms[1]), false);
+        TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[2]), false);
+        // Two atoms with the same LTI: the one with lower TV is
+        // strictly before the one with higher TV.
+        TS_ASSERT_EQUALS(lttvSort(atoms[2], atoms[3]), true);
+        // Two atoms with the same LTI: the one with higher TV is not
+        // strictly before the one with lower TV.
+        TS_ASSERT_EQUALS(lttvSort(atoms[3], atoms[2]), false);
+
+        logger().debug("END TEST:");
+    }
+
+    // Copied from AtomSpaceUTest.cxxtest, but modified for the test
+    // testComparisons
+    HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+    {
+        char buf[256];
+        HandleSeq testAtoms;
+        int baseNameLength;
+
+        memset(buf, 0, 256);
+        baseNameLength = strlen(baseName);
+        strcpy(buf, baseName);
+
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.05f, 0.005f);
+        TruthValuePtr tv3 = SimpleTruthValue::createTV(0.05f, 0.005f);
+        TruthValuePtr tv4 = SimpleTruthValue::createTV(0.5f, 0.05f);
+        buf[baseNameLength] = '1';
+        Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
+        h1->setTruthValue(tv1);
+        setSTI(h1, 0);
+        setLTI(h1, 300);
+        buf[baseNameLength] = '2';
+        Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
+        h2->setTruthValue(tv2);
+        setSTI(h2, 500);
+        setLTI(h2, 7000);
+        buf[baseNameLength] = '3';
+        Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
+        h3->setTruthValue(tv3);
+        setSTI(h3, 500);
+        setLTI(h3, 7000);
+        buf[baseNameLength] = '4';
+        Handle h4 = atomSpace->add_node(CONCEPT_NODE, buf);
+        h4->setTruthValue(tv4);
+        setSTI(h4, 500);
+        setLTI(h4, 20000);
+
+        testAtoms.push_back(h1);
+        testAtoms.push_back(h2);
+        testAtoms.push_back(h3);
+        testAtoms.push_back(h4);
+
+        return testAtoms;
+    }
+
+    void testgetDefault()
+    {
+        AttentionValuePtr av = AttentionValue::DEFAULT_AV();
+
+        TS_ASSERT(av->getSTI() == sti[0]);
+        TS_ASSERT(av->getLTI() == lti[0]);
+        TS_ASSERT(av->getVLTI() == vlti[0]);
+    }
+
+    void testfactory() {
+        AttentionValuePtr av;
+
+        av = AttentionValue::createAV();
+        TS_ASSERT(av->getSTI() == sti[0]);
+        TS_ASSERT(av->getLTI() == lti[0]);
+        TS_ASSERT(av->getVLTI() == vlti[0]);
+
+        av = AttentionValue::createAV(sti[1]);
+        TS_ASSERT(av->getSTI() == sti[1]);
+        TS_ASSERT(av->getLTI() == lti[1]);
+        TS_ASSERT(av->getVLTI() == vlti[1]);
+
+        av = AttentionValue::createAV(sti[2], lti[2]);
+        TS_ASSERT(av->getSTI() == sti[2]);
+        TS_ASSERT(av->getLTI() == lti[2]);
+        TS_ASSERT(av->getVLTI() == vlti[2]);
+
+        av = AttentionValue::createAV(sti[3], lti[3], vlti[3]);
+        TS_ASSERT(av->getSTI() == sti[3]);
+        TS_ASSERT(av->getLTI() == lti[3]);
+        TS_ASSERT(av->getVLTI() == vlti[3]);
+    }
+};

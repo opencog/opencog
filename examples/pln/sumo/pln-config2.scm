@@ -30,10 +30,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define pln-rbs (ConceptNode "PLN"))
-(InheritanceLink
-   pln-rbs
-   (ConceptNode "URE")
-)
 
 ;; Define pln-fc and pln-bc for convenience
 (define (pln-fc source) (cog-fc pln-rbs source))

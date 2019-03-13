@@ -318,14 +318,30 @@ public:
 	static Handle gen_rand_variable();
 
 	/**
-	 * Given a pattern, return its vardecl and body. If the pattern is
-	 * not a scope link (i.e. a constant/text), then get_variables and
-	 * get_vardecl return the empty Variables and vardecl
-	 * respectively, and get_body returns the pattern itself.
+	 * Given a pattern return its variables. If the pattern is not a
+	 * scope link (i.e. a constant/text), then return the empty
+	 * Variables.
 	 */
 	static const Variables& get_variables(const Handle& pattern);
+
+	/**
+	 * Given a pattern, return its vardecl. If the pattern is not a
+	 * scope link (i.e. a constant/text), then return the empty
+	 * vardecl.
+	 */
 	static Handle get_vardecl(const Handle& pattern);
+
+	/**
+	 * Given a pattern, return its body. If the pattern is not a scope
+	 * link (i.e. a constant/text), then return pattern itself.
+	 */
 	static const Handle& get_body(const Handle& pattern);
+
+	/**
+	 * Given a pattern, return its clause. If the pattern is not a
+	 * scope link (i.e. a constant/text), then behavior is undefined.
+	 */
+	static const HandleSeq& get_clauses(const Handle& pattern);
 
 	/**
 	 * Return the number of conjuncts in a pattern. That is, if the
@@ -333,7 +349,7 @@ public:
 	 * if the body is not an AndLink, then return 1, and if it's not a
 	 * pattern at all (i.e. not a LambdaLink), then return 0.
 	 */
-	static unsigned conjuncts(const Handle& pattern);
+	static unsigned n_conjuncts(const Handle& pattern);
 
 	/**
 	 * Remove useless clauses from a body pattern. Useless clauses are
@@ -399,8 +415,8 @@ public:
 	                                         const Handle& pattern_var);
 
 	/**
-	 * Given cnjtion and pattern, consider all possible connections and
-	 * expand cnjtion accordingly. For instance if
+	 * Given cnjtion and pattern, consider all possible connections
+	 * (a.k.a linkages) and expand cnjtion accordingly. For instance if
 	 *
 	 * cnjtion = (Inheritance X Y)
 	 * pattern = (Inheritance Z W)
@@ -421,6 +437,32 @@ public:
 	                                    const HandleSet& texts,
 	                                    unsigned ms);
 
+	/**
+	 * Return an atom to serve as key to store the support value.
+	 */
+	static const Handle& support_key();
+
+	/**
+	 * Attach the support of a pattern to support_key(). The support is
+	 * encoded as double because it is stored as a FloatValue, and its
+	 * subsequent processing (probability estimate, etc) requires a
+	 * double anyway.
+	 */
+	static void set_support(const Handle& pattern, double support);
+
+	/**
+	 * Get the support of a pattern stored as associated value to
+	 * support_key(). If no such value exist then return -1.0.
+	 */
+	static double get_support(const Handle& pattern);
+
+	/**
+	 * Like get_support, but if there is no value associated to
+	 * support_key() then calculate and set the support.
+	 */
+	static double calc_support(const Handle& pattern,
+	                           const HandleSet& texts,
+	                           unsigned ms);
 };
 
 } // ~namespace opencog

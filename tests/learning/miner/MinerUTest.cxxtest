@@ -24,6 +24,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MinerUTestUtils.h"
+
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/random.h>
@@ -32,11 +34,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/miner/HandleTree.h>
 #include <opencog/learning/miner/Miner.h>
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+#include <opencog/learning/miner/Surprisingness.h>
 #include <opencog/rule-engine/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 
 #include <vector>
 
@@ -65,11 +65,17 @@ private:
 	// Pattern miner rule base
 	Handle pm_rb;
 
+	// I-Surprisingness rule base
+	Handle isurp_rb;
+
 	// Concept holding the texts
 	Handle texts_cpt;
 
 	// minsup predicate
 	Handle minsup_prd;
+
+	// I-Surprisingness predicate
+	Handle isurp_prd;
 
 	// Top abstraction (Lambda X X)
 	Handle top;
@@ -91,37 +97,11 @@ private:
 	/**
 	 * Make
 	 *
-	 * (Evaluation
-	 *   (GroundedPredicate "scm: absolutely-true")
-	 *   h)
-	 */
-	Handle mk_abs_true_eval(const Handle& h);
-
-	/**
-	 * Make
-	 *
 	 * (Lambda
 	 *   (VariableList X1 ... Xn)
 	 *   (And X1 ... Xn))
 	 */
 	Handle mk_nconjunct(unsigned n);
-
-	/**
-	 * Make a URE query to mine patterns over texts with a given
-	 * minsup and a maximum of URE iterations.
-	 */
-	Handle mk_query(const HandleSeq& texts, int minsup,
-	                int depth, Handle initpat=Handle::UNDEFINED);
-
-	/**
-	 * Generate a variable (VariableNode <prefix-i>)
-	 */
-	Handle gen_variable(const std::string& prefix, int i);
-
-	/**
-	 * Generate variables (VariableNode <prefix-0>) ... (VariableNode <prefix-n-1>)
-	 */
-	HandleSeq gen_variables(const std::string& prefix, int n);
 
 	/**
 	 * Generate a query, run the URE forward to generate patterns,
@@ -149,28 +129,6 @@ private:
 	                  int conjuncts=1,
 	                  const Handle& initpat=Handle::UNDEFINED,
 	                  int maxdepth=-1, double info=1.0);
-
-	/**
-	 * Build the following pattern
-	 *
-	 * Lambda
-	 *   X
-	 *   And
-	 *     Inheritance
-	 *       X
-	 *       Concept "man"
-	 *     Inheritance
-	 *       X
-	 *       Concept "soda drinker"
-	 *     Inheritance
-	 *       X
-	 *       Concept "ugly"
-	 */
-	Handle mk_ugly_soda_drinker();
-
-	void configure_mandatory_rules();
-	void configure_optional_rules(TruthValuePtr incremental_expansion,
-	                              int max_conjuncts=-1);
 
 public:
 	MinerUTest();
@@ -216,50 +174,19 @@ Handle MinerUTest::mk_minsup_eval(int minsup,
                                   const Handle& pattern,
                                   TruthValuePtr tv)
 {
-	Handle minsup_eval_h = al(EVALUATION_LINK,
-	                          minsup_prd,
-	                          al(LIST_LINK,
-	                             pattern,
-	                             texts_cpt,
-	                             an(NUMBER_NODE, to_string(minsup))));
-	// Warning: if minsup_eval_h existed, this may erase its TV
-	minsup_eval_h->setTruthValue(tv);
-	return minsup_eval_h;
+	return MinerUTestUtils::add_minsup_eval(_as, pattern, minsup, tv);
 }
 
 Handle MinerUTest::mk_minsup_evals(int minsup,
                                    const HandleSeq& patterns,
                                    TruthValuePtr tv)
 {
-	HandleSeq minsup_evals;
-	for (const Handle& pat : patterns)
-		minsup_evals.push_back(mk_minsup_eval(2, pat, tv));
-	return al(SET_LINK, minsup_evals);
-}
-
-Handle MinerUTest::mk_abs_true_eval(const Handle& h)
-{
-	return al(EVALUATION_LINK,
-	          an(GROUNDED_PREDICATE_NODE, "scm: absolutely-true"),
-	          h);
+	return MinerUTestUtils::add_minsup_evals(_as, patterns, minsup, tv);
 }
 
 Handle MinerUTest::mk_nconjunct(unsigned n)
 {
-	return al(LAMBDA_LINK, al(AND_LINK, gen_variables("$X-", n)));
-}
-
-Handle MinerUTest::gen_variable(const std::string& prefix, int i)
-{
-	return an(VARIABLE_NODE, prefix + std::to_string(i));
-}
-
-HandleSeq MinerUTest::gen_variables(const std::string& prefix, int n)
-{
-	HandleSeq vars;
-	for (int i = 0; i < n; i++)
-		vars.push_back(gen_variable(prefix, i));
-	return vars;
+	return MinerUTestUtils::add_nconjunct(_as, n);
 }
 
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
@@ -268,11 +195,10 @@ Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
                           int max_conjuncts,
                           double complexity_penalty)
 {
-	HandleSet texts;
-	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
-	                             opencog::ATOM, true);
-	return ure_pm(texts, minsup, maximum_iterations, initpat,
-	              incremental_expansion, max_conjuncts, complexity_penalty);
+	return MinerUTestUtils::ure_pm(_as, _scm, pm_rb, texts_as, minsup,
+	                               maximum_iterations, initpat,
+	                               incremental_expansion, max_conjuncts,
+	                               complexity_penalty);
 }
 
 Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
@@ -281,49 +207,10 @@ Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
                           int max_conjuncts,
                           double complexity_penalty)
 {
-	// Make (Member text (Concept "texts)) links
-	for (const Handle& text : texts)
-		al(MEMBER_LINK, text, texts_cpt);
-
-	// If init is not defined then use top
-	if (not initpat)
-		initpat = top;
-
-	// Add the axiom that initpat has enough support, and use it as
-	// source for the forward chainer
-	bool es = MinerUtils::enough_support(initpat, texts, minsup);
-
-	// If it doesn't have enough support return the empty solution
-	if (not es)
-		return al(SET_LINK);
-
-	// Add incremental conjunction expansion if necessary
-	bool inc_exp_enabled = incremental_expansion != TruthValue::FALSE_TV();
-	if (inc_exp_enabled)
-		configure_optional_rules(incremental_expansion, max_conjuncts);
-
-	// Otherwise prepare the source
-	TruthValuePtr tv = TruthValue::TRUE_TV();
-	Handle source = mk_minsup_eval(minsup, initpat, tv);
-
-	// Run the forward chainer from the initial pattern
-	ForwardChainer fc(_as, pm_rb, source);
-	fc.get_config().set_maximum_iterations(maximum_iterations);
-	fc.get_config().set_retry_exhausted_sources(inc_exp_enabled);
-	fc.get_config().set_complexity_penalty(complexity_penalty);
-	fc.do_chain();
-
-	// Run the pattern matcher query to gather the knowledge of
-	// interest, i.e. patterns reaching the minimum support, and
-	// return the results.
-	Handle patvar = an(VARIABLE_NODE, "$patvar"),
-		target = mk_minsup_eval(minsup, patvar),
-		vardecl = al(TYPED_VARIABLE_LINK, patvar, an(TYPE_NODE, "LambdaLink")),
-		abs_true = mk_abs_true_eval(target),
-		bl = al(BIND_LINK, vardecl, al(AND_LINK, target, abs_true), target),
-		results = HandleCast(bl->execute(&_as));
-
-	return results;
+	return MinerUTestUtils::ure_pm(_as, _scm, pm_rb, texts, minsup,
+	                               maximum_iterations, initpat,
+	                               incremental_expansion, max_conjuncts,
+	                               complexity_penalty);
 }
 
 HandleTree MinerUTest::cpp_pm(const AtomSpace& texts_as,
@@ -332,9 +219,7 @@ HandleTree MinerUTest::cpp_pm(const AtomSpace& texts_as,
                               const Handle& initpat,
                               int maxdepth, double info)
 {
-	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
-	Miner pm(param);
-	return pm(texts_as);
+	return MinerUTestUtils::cpp_pm(texts_as, minsup, conjuncts, initpat, maxdepth, info);
 }
 
 HandleTree MinerUTest::cpp_pm(const HandleSet& texts,
@@ -343,45 +228,7 @@ HandleTree MinerUTest::cpp_pm(const HandleSet& texts,
                               const Handle& initpat,
                               int maxdepth, double info)
 {
-	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
-	Miner pm(param);
-	return pm(texts);
-}
-
-Handle MinerUTest::mk_ugly_soda_drinker()
-{
-	Handle man = an(CONCEPT_NODE, "man"),
-		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
-		ugly = an(CONCEPT_NODE, "ugly"),
-		is_man = al(INHERITANCE_LINK, X, man),
-		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
-		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		ugly_soda_drinker = al(LAMBDA_LINK,
-		                       X,
-		                       al(AND_LINK,
-		                          is_man,
-		                          is_soda_drinker,
-		                          is_ugly));
-	return ugly_soda_drinker;
-}
-
-void MinerUTest::configure_mandatory_rules()
-{
-	std::string rs = _scm.eval("(configure-mandatory-rules (Concept \"pm-rbs\"))");
-	logger().debug() << "MinerUTest::configure_mandatory_rules() rs = " << rs;
-}
-
-void MinerUTest::configure_optional_rules(TruthValuePtr incremental_expansion,
-                                          int max_conjuncts)
-{
-	string call = "(configure-optional-rules (Concept \"pm-rbs\")";
-	call += " #:incremental-expansion ";
-	call += SchemeSmob::tv_to_string(incremental_expansion);
-	call += " #:max-conjuncts ";
-	call += std::to_string(max_conjuncts);
-	call += ")";
-	std::string rs = _scm.eval(call);
-	logger().debug() << "MinerUTest::configure_optional_rules() rs = " << rs;
+	return MinerUTestUtils::cpp_pm(texts, minsup, conjuncts, initpat, maxdepth, info);
 }
 
 MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
@@ -392,13 +239,13 @@ MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
 	// logger().set_sync_flag(true);
-	// logger().set_print_to_stdout_flag(true);
+	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
 	ure_logger().set_level(Logger::INFO);
 	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
-	// ure_logger().set_print_to_stdout_flag(true);
+	ure_logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
@@ -435,12 +282,14 @@ void MinerUTest::setUp()
 	G = an(CONCEPT_NODE, "G");
 	H = an(CONCEPT_NODE, "H");
 	pm_rb = an(CONCEPT_NODE, "pm-rbs");
+	isurp_rb = an(CONCEPT_NODE, "isurp-rbs");
 	texts_cpt = an(CONCEPT_NODE, "texts");
 	minsup_prd = an(PREDICATE_NODE, "minsup");
+	isurp_prd = an(PREDICATE_NODE, "isurp");
 	top = al(LAMBDA_LINK, X, X);
 
 	// Load URE-based pattern miner
-	configure_mandatory_rules();
+	MinerUTestUtils::configure_mandatory_rules(_scm);
 }
 
 void MinerUTest::tearDown()
@@ -773,7 +622,8 @@ void MinerUTest::test_AB_AC()
 	// Run URE pattern miner (using _as for testing more diverse
 	// content)
 	Handle ure_results = ure_pm(_as, 2, 10),
-		ure_expected = mk_minsup_eval(2, al(LAMBDA_LINK, Y, InhAY));
+		expected_pattern = al(LAMBDA_LINK, Y, InhAY),
+		ure_expected = mk_minsup_eval(2, expected_pattern);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -1417,7 +1267,7 @@ void MinerUTest::test_SodaDrinker()
 	//     Inheritance
 	//       X
 	//       Concept "ugly"
-	Handle expected = mk_ugly_soda_drinker();
+	Handle expected = MinerUTestUtils::add_ugly_man_soda_drinker_pattern(_as);
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
@@ -1455,6 +1305,21 @@ void MinerUTest::test_SodaDrinker_incremental()
 	// Start from top, conjunctions will be grown incrementally
 	Handle initpat = top;
 
+	// Note: move the definition of 'expected' here to reproduce weird
+	// bug (the pattern is ignored by surprisingness).
+
+	// Run URE pattern miner
+	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	int max_conjuncts = 3;
+	double complexity_penalty = 1;
+	int minsup = 5;
+	int max_iteration = 200;
+	Handle ure_results = ure_pm(_tmp_as, minsup, max_iteration,
+	                            initpat,
+	                            incremental_expansion,
+	                            max_conjuncts,
+	                            complexity_penalty);
+
 	// The pattern of interest looks like
 	//
 	// Lambda
@@ -1469,25 +1334,30 @@ void MinerUTest::test_SodaDrinker_incremental()
 	//     Inheritance
 	//       X
 	//       Concept "ugly"
-	Handle expected = mk_ugly_soda_drinker();
+	Handle expected = MinerUTestUtils::add_ugly_man_soda_drinker_pattern(_as);
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
-	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
-	int max_conjuncts = 3;
-	double complexity_penalty = 1;
-	Handle ure_results = ure_pm(_tmp_as, 5, 2000,
-	                            initpat,
-	                            incremental_expansion,
-	                            max_conjuncts,
-	                            complexity_penalty),
-		ure_expected = mk_minsup_eval(5, expected);
+	Handle ure_expected = mk_minsup_eval(minsup, expected);
 
-	logger().debug() << "ure_results = " << oc_to_string(ure_results);
+	logger().debug() << "ure_results = " << oc_to_string(ure_results->getOutgoingSet());
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
 
 	TS_ASSERT(is_in(ure_expected, ure_results->getOutgoingSet()));
+
+	// Test I-Surprisingness
+	std::string mode("nisurp-old");
+	HandleSeq isurp_results = MinerUTestUtils::ure_isurp(_as, _scm, isurp_rb,
+	                                                     mode, max_conjuncts);
+
+	// We get the second, because due to the old I-Surprisingness not
+	// accounting for linkage, the ugly male soda drinker comes second
+	// not first.
+	Handle isurp_result = isurp_results[1];
+
+	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
+
+	TS_ASSERT(content_eq(expected, MinerUTestUtils::get_pattern(isurp_result)));
 }
 
 void MinerUTest::xtest_lojban()

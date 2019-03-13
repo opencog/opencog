@@ -16,10 +16,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define propositional-rule-base (ConceptNode "propositional-rule-base"))
-(InheritanceLink
-   propositional-rule-base
-   (ConceptNode "URE")
-)
 
 ;; Define conj-bc for convenience
 (define (prop-bc target) (cog-bc propositional-rule-base target))

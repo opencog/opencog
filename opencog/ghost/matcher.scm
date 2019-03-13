@@ -17,16 +17,16 @@
   if applicable, and de-stimulate the selected rule.
 "
   ; Keep a record of which rule got executed, just for rejoinders
-  (let ((next-responder (cog-value RULE ghost-next-responder))
+  (let ((next-reactive-rule (cog-value RULE ghost-next-reactive-rule))
         (next-rejoinder (cog-value RULE ghost-next-rejoinder))
         (av-alist (cog-av->alist (cog-av RULE))))
     ; Stimulate the next rules in the sequence and lower the STI of
     ; the current one
-    ; Rejoinders will have a bigger boost than responders by default
-    (if (not (null? next-responder))
+    ; Rejoinders will have a bigger boost than reactive rules by default
+    (if (not (null? next-reactive-rule))
       (for-each
-        (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
-        (cog-value->list next-responder)))
+        (lambda (r) (cog-stimulate r (* default-stimulus reactive-rule-sti-boost)))
+        (cog-value->list next-reactive-rule)))
     (if (not (null? next-rejoinder))
       (for-each
         (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
@@ -243,7 +243,7 @@
               (list)
               (map (lambda (a) (assoc-ref action-rule-alist (car a))) action-weight-alist))))
       (if (null? rejoinder)
-        ; If there is no rejoinder that safisfy the current context, try the responders
+        ; If there is no rejoinder that safisfy the current context, try the reactive rules
         (begin
           (if specificity-based-action-selection
             ; Specificity-based action selection (experimental)

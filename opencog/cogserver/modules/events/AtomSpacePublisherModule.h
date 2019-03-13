@@ -33,7 +33,7 @@
 #include <tbb/task.h>
 #include <tbb/concurrent_queue.h>
 
-#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/bank/AttentionBank.h>
 #include <opencog/util/sigslot.h>
 #include <opencog/util/tbb.h>
 

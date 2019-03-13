@@ -133,7 +133,8 @@ public:
 	 * Specialization. Given a pattern and a collection to text atoms,
 	 * generate all specialized patterns of the given pattern.
 	 */
-	HandleTree specialize(const Handle& pattern, const HandleSet& texts,
+	HandleTree specialize(const Handle& pattern,
+	                      const HandleSet& texts,
 	                      int maxdepth=-1);
 
 	/**
@@ -187,7 +188,7 @@ private:
 	 * obtained specialization.
 	 */
 	HandleTree specialize_shapat(const Handle& pattern,
-	                             const HandleSet texts,
+	                             const HandleSet& texts,
 	                             const Handle& var,
 	                             const Handle& shapat,
 	                             int maxdepth);
