@@ -50,6 +50,8 @@ public:
 
     bool operator==(const Value& other) const;
 
+    void update(const std::vector<double>& loc) const;
+
     std::string to_string(const std::string& indent = "") const;
 };
 

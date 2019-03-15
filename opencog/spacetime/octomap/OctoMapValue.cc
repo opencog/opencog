@@ -14,6 +14,11 @@ void OctoValue::update() const
     _value = {it->x(), it->y(), it->z()};
 }
 
+void OctoValue::update(const std::vector<double>& loc) const
+{
+  _value = {loc[0], loc[1], loc[2]};
+}
+
 OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
 {
 
@@ -25,6 +30,7 @@ OctoValue::OctoValue(const HandleSeq& hseq) : FloatValue(OCTO_VALUE)
     _item = hseq[0];
     _octo_node = hseq[1];
     _om = OctoMapNodeCast(_octo_node)->get_map();
+    update();
 }
 
 bool OctoValue::operator==(const Value& other) const
