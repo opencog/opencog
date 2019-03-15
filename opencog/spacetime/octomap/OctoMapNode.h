@@ -63,6 +63,12 @@ public:
     {
         return octomapPtr;
     }
+
+    void set_map(TimeOctomapPtr& map)
+    {
+      octomapPtr = map;
+    }
+
     static Handle factory(const Handle&);
 };
 
