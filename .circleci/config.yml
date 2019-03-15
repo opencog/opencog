@@ -26,14 +26,14 @@ jobs:
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
-            cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
+            cd /ws/cogutil/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - run:
           name: Install AtomSpace
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace /ws/atomspace
             mkdir -p /ws/atomspace/build
-            cd /ws/atomspace/build && cmake .. && make -j4 && make -j4 install
+            cd /ws/atomspace/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - checkout
       - run:
@@ -41,16 +41,16 @@ jobs:
           command: mkdir build && cd build && cmake ..
       - run:
           name: Build
-          command: cd build && make -j4
+          command: cd build && make -j2
       - run:
           name: Install OpenCog
-          command: cd build && make -j4 install && ldconfig
+          command: cd build && make -j2 install && ldconfig
       - run:
           name: Build tests
-          command: cd build && make -j4 tests
+          command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make -j4 test
+          command: cd build && make -j2 test ARGS=-j2
       - run:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
