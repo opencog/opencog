@@ -616,7 +616,7 @@ public:
 private:
     // Each different map may have translation and rotation (orientation)
     // co-ordinates managed by user
-    double map_res; // spetial resolution of the map
+    double map_res; // spatial resolution of the map
     duration_c time_res;
     boost::circular_buffer<TimeSlice<T> > time_circle;
     time_pt curr_time;
