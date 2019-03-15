@@ -31,9 +31,13 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/spacetime/atom-types/atom_types.h>
+
 #include <opencog/spacetime/octomap/TimeOctomap.h>
+#include <opencog/spacetime/octomap/OctoMapNode.h>
+#include <opencog/spacetime/octomap/OctoMapValue.h>
 
 namespace opencog
 {
@@ -47,12 +51,15 @@ private:
 	// Check if the named map exists.
 	void have_map(const Handle&);
 
-	std::map<Handle, TimeOctomap<Handle>*> tsa;
+	std::map<Handle, std::shared_ptr<TimeOctomap<Handle>>> tsa;
 	time_pt get_map_time(const Handle& map_name, const Handle& elapse);
 
 public:
+    static std::map<Handle,Handle> handle_octomap_map;
 	// Create a map
 	Handle create_map(Handle map_name, Handle resolution);
+
+    Handle create_map_ov(Handle map_name, Handle resolution);
 
 	// Get time resolution milli-sec
 	Handle get_time_res(Handle);
@@ -68,6 +75,7 @@ public:
 	TruthValuePtr is_auto_step_on(Handle);
 	// Add an atom at location on current time step
 	Handle map_ato(Handle map, Handle ato, Handle loc);
+	Handle map_ato_ov(Handle map, Handle ato, ValuePtr loc);
 	// Add an atom without location on current time step
 	Handle time_index_ato(Handle map, Handle ato);
 
@@ -77,37 +85,46 @@ public:
 	Handle get_last_time(Handle, Handle ato, Handle elapse);
 
 	// Get atom at location
-	Handle get_at_loc_ato(Handle, Handle);
+	Handle get_at_loc_ato(Handle map_name, Handle loc);
+	Handle get_at_loc_ato_ov(Handle map_name, const ValuePtr& loc);
 	// Get atom at location in elapsed past
-	Handle get_past_loc_ato(Handle, Handle, Handle);
+	Handle get_past_loc_ato(Handle map_name, Handle loc, Handle elapse);
+	Handle get_past_loc_ato_ov(Handle map_name, ValuePtr loc, Handle elapse);
 
 	// Get location of atom at current time
-	Handle get_locs_ato(Handle, Handle);//listlink atLocationLink
+	Handle get_locs_ato(Handle map_name, Handle ato);//listlink atLocationLink
+	LinkValuePtr get_locs_ato_ov(Handle map_name, Handle ato);//listlink atLocationLink
 	//AtLocationLink
 	//   Atom
 	//   ListLink
 	//	 ConceptNode "map name"
 	//	 ListLink
-	//	   NumberNode x
+ //	   NumberNode x
 	//	   NumberNode y
 	//	   NumberNode z
 
 	// Get locations of atom in elapsed past
 	Handle get_past_locs_ato(Handle, Handle ato, Handle elapse);
+	ValuePtr get_past_locs_ato_ov(Handle, Handle ato, Handle elapse);
 	Handle get_first_location(Handle, Handle ato, Handle elapse);
+	ValuePtr get_first_location_ov(Handle, Handle ato, Handle elapse);
 	Handle get_last_location(Handle, Handle ato, Handle elapse);
+	ValuePtr get_last_location_ov(Handle, Handle ato, Handle elapse);
 	//AtTimeLink
 	//  Atom
 	//  TimeNode "Date Time millisec"
 	// Get time points of atom occuring at a location
 	Handle get_elapse_list_at_loc_ato(Handle, Handle ato,
 	                                  Handle loc);//listlink atTimeLink
+	Handle get_elapse_list_at_loc_ato_ov(Handle, Handle ato,
+	                                  ValuePtr loc);//listlink atTimeLink
 	// Get time points of atom occuring in map
 	Handle get_timeline(Handle, Handle ato);//listlink atTimeLink
 	// Remove atom from location at currrent time
 	Handle remove_location_ato(Handle, Handle loc);
 	// Remove atom from location at elapsed past time
 	Handle remove_past_location_ato(Handle, Handle, Handle);
+	ValuePtr remove_past_location_ato_ov(Handle, ValuePtr, Handle);
 	// Remove all specific atoms from map at current time
 	Handle remove_curr_ato(Handle, Handle ato);
 	// Remove all specific atoms from map in elapsed past
@@ -130,6 +147,8 @@ public:
 	PointMemorySCM();
 	~PointMemorySCM();
 };
+
+std::map<Handle,Handle> PointMemorySCM::handle_octomap_map;
 }
 
 extern "C" {
@@ -152,7 +171,7 @@ PointMemorySCM::PointMemorySCM()
 
 PointMemorySCM::~PointMemorySCM()
 {
-	for (auto& x: tsa) delete x.second;
+//	for (auto& x: tsa) delete x.second;
 }
 /**
  * Init function for using with scm_with_guile.
@@ -187,6 +206,7 @@ void PointMemorySCM::init()
 {
 #ifdef HAVE_GUILE
 	define_scheme_primitive("cog-pointmem-create-map", &PointMemorySCM::create_map, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-create-map-ov", &PointMemorySCM::create_map_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-time-res", &PointMemorySCM::get_time_res, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-space-res", &PointMemorySCM::get_space_res, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-time-units", &PointMemorySCM::get_time_units, this, "pointmem");
@@ -195,21 +215,30 @@ void PointMemorySCM::init()
 	define_scheme_primitive("cog-pointmem-auto-step-time-off", &PointMemorySCM::auto_step_time_off, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-is-auto-step-on", &PointMemorySCM::is_auto_step_on, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-map-atom", &PointMemorySCM::map_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-map-atom-ov", &PointMemorySCM::map_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-time-index-atom", &PointMemorySCM::time_index_ato, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-first-atom", &PointMemorySCM::get_first_time, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-last-atom", &PointMemorySCM::get_last_time, this, "pointmem");
 
 	// -----------------------------------------
 	define_scheme_primitive("cog-pointmem-get-first-locs-of-atom", &PointMemorySCM::get_first_location, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-first-locs-of-atom-ov", &PointMemorySCM::get_first_location_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-last-locs-of-atom", &PointMemorySCM::get_last_location, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-last-locs-of-atom-ov", &PointMemorySCM::get_last_location_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-at-loc-atom", &PointMemorySCM::get_at_loc_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-at-loc-atom-ov", &PointMemorySCM::get_at_loc_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-past-loc-of-atom", &PointMemorySCM::get_past_loc_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-past-loc-of-atom-ov", &PointMemorySCM::get_past_loc_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-locs-of-atom", &PointMemorySCM::get_locs_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-locs-of-atom-ov", &PointMemorySCM::get_locs_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-past-locs-of-atom", &PointMemorySCM::get_past_locs_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-past-locs-of-atom-ov", &PointMemorySCM::get_past_locs_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-elapsed-list-at-loc", &PointMemorySCM::get_elapse_list_at_loc_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-elapsed-list-at-loc-ov", &PointMemorySCM::get_elapse_list_at_loc_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-get-elapsed-list", &PointMemorySCM::get_timeline, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-remove-location-of-atom", &PointMemorySCM::remove_location_ato, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-remove-past-location-of-atom", &PointMemorySCM::remove_past_location_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-remove-past-location-of-atom-ov", &PointMemorySCM::remove_past_location_ato_ov, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-remove-curr-atom", &PointMemorySCM::remove_curr_ato, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-remove-past-atom", &PointMemorySCM::remove_past_ato, this, "pointmem");
 	define_scheme_primitive("cog-pointmem-remove-all-atoms", &PointMemorySCM::remove_all_ato, this, "pointmem");
@@ -264,10 +293,62 @@ Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 	if (tsa.find(map_name) != tsa.end())
 		throw InvalidParamException(TRACE_INFO, "Map already exists");
 
-	tsa[map_name] = new TimeOctomap<Handle>(time_units, space_res_mtr,
+	auto time_ocmap_ptr = std::make_shared<TimeOctomap<Handle>>(time_units, space_res_mtr,
 	                  std::chrono::milliseconds(time_res_milli_sec));
-	return map_name;
+    tsa[map_name] = time_ocmap_ptr;
+
+    // OctoValue stuff
+    string map_id = map_name->get_name();
+    Handle octonode = map_name->getAtomSpace()->add_atom(
+            Handle(createOctoMapNode(map_id, time_ocmap_ptr)));
+    handle_octomap_map[map_name] = octonode;
+
+    return map_name;
 }
+
+Handle PointMemorySCM::create_map_ov(Handle map_name, Handle resolution)
+{
+	const HandleSeq& hs = resolution->getOutgoingSet();
+
+	double space_res_mtr = get_float(hs[0], "space resolution");
+	int time_res_milli_sec = get_int(hs[1], "time resolution (millisecs)");
+	int time_units = get_int(hs[2], "time units");
+
+	// Reject if time units < 1
+	if (time_units < 1)
+		throw InvalidParamException(TRACE_INFO,
+			 "Expecting positive time unit");
+
+	// Reject if time res, space_res <= 0
+	if (time_res_milli_sec <= 0 || space_res_mtr <= 0.0)
+		throw InvalidParamException(TRACE_INFO,
+			 "Expecting positive spatial resolution");
+
+	// The map MUST be disambiguated, else lookups will fail.
+	if (nullptr == map_name->getAtomSpace())
+		throw InvalidParamException(TRACE_INFO,
+			 "Invalid map");
+
+	// Reject if name already exists
+	if (tsa.find(map_name) != tsa.end())
+		throw InvalidParamException(TRACE_INFO, "Map already exists");
+
+	auto time_ocmap_ptr = std::make_shared<TimeOctomap<Handle>>(time_units, space_res_mtr,
+	                  std::chrono::milliseconds(time_res_milli_sec));
+    // Set the map
+    OctoMapNodeCast(map_name)->set_map(time_ocmap_ptr);
+    
+    tsa[map_name] = time_ocmap_ptr;
+
+    // OctoValue stuff
+    string map_id = map_name->get_name();
+    Handle octonode = map_name->getAtomSpace()->add_atom(
+            Handle(createOctoMapNode(map_id, time_ocmap_ptr)));
+    handle_octomap_map[map_name] = octonode;
+
+    return map_name;
+}
+
 // add point clouds later
 
 void PointMemorySCM::have_map(const Handle& map_name)
@@ -336,6 +417,15 @@ Handle PointMemorySCM::map_ato(Handle map_name, Handle ato, Handle loc)
 	return ato;
 }
 
+Handle PointMemorySCM::map_ato_ov(Handle map_name, Handle ato, ValuePtr loc)
+{
+    have_map(map_name);
+    std::vector<double> xyz = FloatValueCast(loc)->value();
+    tsa[map_name]->insert_atom(point3d(xyz[0], xyz[1], xyz[2]), ato);
+
+    return ato;
+}
+
 Handle PointMemorySCM::time_index_ato(Handle map_name, Handle ato)
 {
 	tsa[map_name]->insert_atom(ato);
@@ -402,6 +492,14 @@ Handle PointMemorySCM::get_at_loc_ato(Handle map_name,
 	return tsa[map_name]->get_atom_at_location(point3d(x, y, z));
 }
 
+Handle PointMemorySCM::get_at_loc_ato_ov(Handle map_name, const ValuePtr& loc)
+{
+    have_map(map_name);
+    std::vector<double> xyz = FloatValueCast(loc)->value();
+    return tsa[map_name]->get_atom_at_location(
+            point3d(xyz[0], xyz[1], xyz[2]));
+}
+
 Handle PointMemorySCM::get_past_loc_ato(Handle map_name,
                                         Handle loc,
                                         Handle elapse)
@@ -414,6 +512,33 @@ Handle PointMemorySCM::get_past_loc_ato(Handle map_name,
 
 	time_pt tpt = get_map_time(map_name, elapse);
 	return tsa[map_name]->get_atom_at_time_by_location(tpt, point3d(x, y, z));
+}
+
+Handle PointMemorySCM::get_past_loc_ato_ov(Handle map_name, ValuePtr loc, Handle elapse)
+{
+    have_map(map_name);
+    std::vector<double> xyz = FloatValueCast(loc)->value();
+    time_pt tpt = get_map_time(map_name, elapse);
+    return tsa[map_name]->get_atom_at_time_by_location(
+            tpt, point3d(xyz[0], xyz[1], xyz[2]));
+}
+// Returns an empty LinkValue if the pointlist is empty.
+static LinkValuePtr tag_atom_with_locs_ov(const Handle& map_name,
+                                 const Handle& ato,
+                                 const point3d_list& pl)
+{
+    Handle octomap_node = PointMemorySCM::handle_octomap_map[map_name];
+    HandleSeq hseq {ato, octomap_node};
+    ValueSet octovalues;
+    
+    for (const point3d& pt : pl){
+        OctoValuePtr ov = createOctoValue(hseq);
+        std::vector<double> xyz{pt.x(), pt.y(), pt.z()};
+        ov->update(xyz);
+        octovalues.insert(CastToValue(ov));
+    }
+    
+    return createLinkValue(octovalues);
 }
 
 // Tag an atom with SetLink of locations (AtLocationLink)
@@ -436,7 +561,8 @@ static Handle tag_atom_with_locs(const Handle& map_name,
 			))
 		)));
 	}
-	return Handle(createLink(loc_links, SET_LINK));
+	return map_name->getAtomSpace()->add_atom(
+               Handle(createLink(loc_links, SET_LINK)));
 }
 
 Handle PointMemorySCM::get_first_location(Handle map_name,
@@ -444,7 +570,15 @@ Handle PointMemorySCM::get_first_location(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_oldest_locations(ato, tpt);
-	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
+	return tag_atom_with_locs(map_name, ato, pl);
+}
+
+ValuePtr PointMemorySCM::get_first_location_ov(Handle map_name,
+                                          Handle ato, Handle elapse)
+{
+	time_pt tpt = get_map_time(map_name, elapse);
+	point3d_list pl = tsa[map_name]->get_oldest_locations(ato, tpt);
+	return tag_atom_with_locs_ov(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_last_location(Handle map_name,
@@ -452,14 +586,30 @@ Handle PointMemorySCM::get_last_location(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_newest_locations(ato, tpt);
-	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
+	return tag_atom_with_locs(map_name, ato, pl);
+}
+
+ValuePtr PointMemorySCM::get_last_location_ov(Handle map_name,
+                                         Handle ato, Handle elapse)
+{
+	time_pt tpt = get_map_time(map_name, elapse);
+	point3d_list pl = tsa[map_name]->get_newest_locations(ato, tpt);
+	return tag_atom_with_locs_ov(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_locs_ato(Handle map_name, Handle ato)
 {
 	have_map(map_name);
 	point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
-	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
+	return tag_atom_with_locs(map_name, ato, pl);
+}
+
+LinkValuePtr PointMemorySCM::get_locs_ato_ov(Handle map_name, Handle ato)
+{
+	have_map(map_name);
+	point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
+	return tag_atom_with_locs_ov(map_name, ato, pl);
+
 }
 
 Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
@@ -467,7 +617,15 @@ Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_locations_of_atom_at_time(tpt, ato);
-	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
+	return tag_atom_with_locs(map_name, ato, pl);
+}
+
+ValuePtr PointMemorySCM::get_past_locs_ato_ov(Handle map_name,
+                                         Handle ato, Handle elapse)
+{
+	time_pt tpt = get_map_time(map_name, elapse);
+	point3d_list pl = tsa[map_name]->get_locations_of_atom_at_time(tpt, ato);
+	return tag_atom_with_locs_ov(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
@@ -488,6 +646,23 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
 		LL.push_back(timestamp_tag_atom(tp, ato));
 
 	return map_name->getAtomSpace()->add_atom(opencog::Handle(createLink(LL, SET_LINK)));
+}
+
+Handle PointMemorySCM::get_elapse_list_at_loc_ato_ov(Handle map_name,
+                                        Handle ato,
+                                        ValuePtr loc)
+{
+    have_map(map_name);
+    // loc should be a ListLink of three NumberNodes.
+    std::vector<double> xyz = FloatValueCast(loc)->value();
+
+    time_list tl = tsa[map_name]->get_times_of_atom_occurence_at_location(point3d(xyz[0], xyz[1], xyz[2]), ato);
+
+    HandleSeq LL;
+    for (const time_pt& tp: tl)
+        LL.push_back(timestamp_tag_atom(tp, ato));
+
+    return map_name->getAtomSpace()->add_atom(opencog::Handle(createLink(LL, SET_LINK)));
 }
 
 // Get the timeline of the atom.  That is, get a sequence of
@@ -529,6 +704,14 @@ Handle PointMemorySCM::remove_past_location_ato(Handle map_name,
 	time_pt tpt = get_map_time(map_name, elapse);
 	tsa[map_name]->remove_atom_at_time_by_location(tpt, point3d(x, y, z));
 	return loc;
+}
+
+ValuePtr PointMemorySCM::remove_past_location_ato_ov(Handle map_name, ValuePtr loc, Handle elapse)
+{
+    vector<double> xyz = FloatValueCast(loc)->value();
+    time_pt tpt = get_map_time(map_name, elapse);
+    tsa[map_name]->remove_atom_at_time_by_location(tpt, point3d(xyz[0], xyz[1], xyz[1]));
+    return loc;
 }
 
 Handle PointMemorySCM::remove_curr_ato(Handle map_name, Handle ato)
