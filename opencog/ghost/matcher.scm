@@ -305,7 +305,9 @@
       (if (and (not-within-refractory? p-rule)
                (> (cog-tv-mean (psi-satisfiable? p-rule)) 0)
                (> (cog-stv-strength p-rule) 0))
-        (psi-imply p-rule)))
+        (begin
+          (psi-imply p-rule)
+          (handle-rule-features p-rule))))
     (filter psi-rule? (cog-incoming-set (ConceptNode "Parallel-Rules"))))
 
   (let* ((candidate-rules
