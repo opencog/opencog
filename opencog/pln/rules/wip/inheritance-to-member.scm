@@ -40,7 +40,7 @@
 (define (inheritance-to-member-formula MBC IBC)
 	(cog-set-tv!
 		MBC
-		(member-to-inheritance-side-effect-free-formula
+		(inheritance-to-member-side-effect-free-formula
 			MBC
 			IBC)))
 
