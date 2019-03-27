@@ -277,8 +277,9 @@ double Surprisingness::inner_product(const std::vector<HandleCounter>& dists)
 double Surprisingness::emp_prob(const Handle& pattern, const HandleSet& texts)
 {
 	double ucount = pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
-	double sup = MinerUtils::calc_support(pattern, texts, (unsigned)ucount);
-	// logger().debug() << "prob(" << oc_to_string(pattern) << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount;
+	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
+	double sup = MinerUtils::calc_support(pattern, texts, ms);
+	// logger().debug() << "emp_prob(" << oc_to_string(pattern) << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount;
 	return sup / ucount;
 }
 
