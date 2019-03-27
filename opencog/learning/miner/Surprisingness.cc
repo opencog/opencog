@@ -186,7 +186,7 @@ HandleSeqSeqSeq Surprisingness::partitions(const Handle& pattern)
 	HandleSeqSeqSeq prtns = partitions(MinerUtils::get_clauses(pattern));
 	prtns.resize(prtns.size() - 1);
 	// prtns.resize(1); // comment this output to only consider
-	                    // singleton blocks (convenient for debugging)
+   //                  // singleton blocks (convenient for debugging)
 	return prtns;
 }
 
@@ -519,7 +519,7 @@ double Surprisingness::eq_prob(const HandleSeqSeq& partition,
 			double c = texts.size();
 			if (0 <= i)
 				c = value_count(var_partition[i], var, texts);
-			logger().debug() << "c = " << c;
+			// logger().debug() << "c = " << c;
 			p /= c;
 		}
 	}
