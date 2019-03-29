@@ -410,7 +410,7 @@ public:
 	 *  [[C],[B,A]],
 	 *  [[A],[C,B]]]
 	 */
-	static HandleSeqSeqSeq partitions(const Handle& pattern);
+	static HandleSeqSeqSeq partitions_without_pattern(const Handle& pattern);
 
 	/**
 	 * Convert a partition block [A,B] into a pattern like
@@ -423,13 +423,6 @@ public:
 	 * and insert it in as.
 	 */
 	static Handle add_pattern(const HandleSeq& block, AtomSpace& as);
-
-	/**
-	 * Like add_pattern but doesn't add the pattern in any atomspace,
-	 * only remains in RAM.
-	 */
-	static LambdaLinkPtr mk_lambda(const HandleSeq& block);
-	static Handle mk_pattern(const HandleSeq& block);
 
 	/**
 	 * Turn a partition into a sequence of subpatterns. Add then in the
@@ -575,9 +568,9 @@ public:
 	 * matching values of Z in l_blk is a subset of the matching values
 	 * of Z in l_blk.
 	 */
-	static bool is_more_abstract(const HandleSeq& l_blk,
-	                             const HandleSeq& r_blk,
-	                             const Handle& var);
+	static bool is_syntax_more_abstract(const HandleSeq& l_blk,
+	                                    const HandleSeq& r_blk,
+	                                    const Handle& var);
 
 	/**
 	 * List above but takes scope links instead of blocks (whether each
@@ -588,9 +581,61 @@ public:
 	 * re-implemented instead, and perhaps it could then be merged to
 	 * the unification code.
 	 */
+	static bool is_syntax_more_abstract(const Handle& l_pat,
+	                                    const Handle& r_pat,
+	                                    const Handle& var);
+
+	/**
+	 * Like is_syntax_more_abstract but takes into account a bit of
+	 * semantics as well (though none that requires data), in
+	 * particular it handles conjunctions of clauses such that l_pat is
+	 * more abstract if there exists a partition lp of l_pat (meaning a
+	 * partition of conjunctions of clauses in l_pat) such that there
+	 * exists a subset rs of r_pat (meaning a subset of clauses of
+	 * r_pat) such that rs is a syntactic specialization, relative to
+	 * var, of each block lb of lp.
+	 *
+	 * For instance
+	 *
+	 * l_pat = Lambda
+	 *           X Y Z
+	 *           And
+	 *             Inheritance
+	 *               X
+	 *               Z
+	 *             Inheritance
+	 *               Y
+	 *               Z
+	 *
+	 * r_pat = Lambda
+	 *           Z
+	 *           Inheritance
+	 *             A
+	 *             Z
+	 *
+	 * var = Z
+	 *
+	 * l_pat is indeed an abstraction of r_pat because there exists a
+	 * partition lp = { {Inheritance X Z}, {Inheritance Y Z} } such
+	 * that the subset { Inheritance A Z} is a syntactic specialization
+	 * of each block of lp.
+	 */
 	static bool is_more_abstract(const Handle& l_pat,
 	                             const Handle& r_pat,
 	                             const Handle& var);
+
+	/**
+	 * Like above but consider list of clauses instead of patterns.
+	 */
+	static bool is_more_abstract(const HandleSeq& l_blk,
+	                             const HandleSeq& r_blk,
+	                             const Handle& var);
+
+	/**
+	 * Like powerset but return a sequence of sequences instead of set
+	 * of sets. Discard the empty sequence.
+	 */
+	static HandleSeqSeq powerseq_without_empty(const HandleSeq& blk);
 
 	/**
 	 * Return true iff l_blk is strictly more abstract than r_blk
@@ -614,10 +659,39 @@ public:
 	static void rank_by_abstraction(HandleSeqSeq& partition, const Handle& var);
 
 	/**
-	 * Copy all blocks where var appears
+	 * Copy all subpatterns/blocks where var appears. Also remove all
+	 * parts of the subpatterns that are not strongly connected with to
+	 * it relative to var.
+	 *
+	 * So for instance
+	 *
+	 * partition = { { Inheritance X Y, Inheritance Z A},
+	 *               { Inheritance X B, Inheritance Z Y} }
+	 *
+	 * var = Y
+	 *
+	 * returns
+	 *
+	 * { {Inheritance Z Y } }
+	 *
+	 * because
+	 *
+	 * 1. Y only appears in the second block
+	 *
+	 * 2. within that block
+	 *
+	 *    Inheritance X B
+	 *
+	 *    is not strongly connected to the component where Y appears.
+	 *
+	 * Ignoring non-strongly connected components allows to speed up
+	 * Surprisingness::value_count as well as covering more cases in
+	 * is_more_abstract.
 	 */
-	static HandleSeqSeq copy_var_blocks(const HandleSeqSeq& partition,
-	                                    const Handle& var);
+	static HandleSeqSeq connected_subpatterns_with_var(const HandleSeqSeq& partition,
+	                                                   const Handle& var);
+	static HandleSeq connected_subpattern_with_var(const HandleSeq& blk,
+	                                               const Handle& var);
 
 	/**
 	 * Given subpatterns linked by a variable, count how many

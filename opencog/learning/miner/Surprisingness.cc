@@ -37,6 +37,8 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/min_element.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/algorithm/cxx11/all_of.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/math/special_functions/binomial.hpp>
 
@@ -73,7 +75,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 		return boost::accumulate(partition | boost::adaptors::transformed(blk_prob),
 		                         1.0, std::multiplies<double>());
 	};
-	HandleSeqSeqSeq prtns = partitions(pattern);
+	HandleSeqSeqSeq prtns = partitions_without_pattern(pattern);
 	std::vector<double> estimates(prtns.size());
 	boost::transform(prtns, estimates.begin(), iprob);
 	auto p = std::minmax_element(estimates.begin(), estimates.end());
@@ -95,9 +97,10 @@ double Surprisingness::isurp(const Handle& pattern,
 	// independent assumption of between each partition block, taking
 	// into account the linkage probability.
 	std::vector<double> estimates;
-	for (const HandleSeqSeq& partition : partitions(pattern)) {
+	for (const HandleSeqSeq& partition : partitions_without_pattern(pattern)) {
 		double jip = ji_prob(partition, pattern, texts);
 		estimates.push_back(jip);
+		// logger().debug() << "jip = " << jip;
 		// double ratio = jip / emp;
 		// logger().debug() << "ratio = " << ratio;
 	}
@@ -181,7 +184,7 @@ HandleSeqSeqSeq Surprisingness::partitions(HandleSeq::const_iterator from,
 	return res;
 }
 
-HandleSeqSeqSeq Surprisingness::partitions(const Handle& pattern)
+HandleSeqSeqSeq Surprisingness::partitions_without_pattern(const Handle& pattern)
 {
 	HandleSeqSeqSeq prtns = partitions(MinerUtils::get_clauses(pattern));
 	prtns.resize(prtns.size() - 1);
@@ -192,17 +195,9 @@ HandleSeqSeqSeq Surprisingness::partitions(const Handle& pattern)
 
 Handle Surprisingness::add_pattern(const HandleSeq& block, AtomSpace& as)
 {
-	return as.add_link(LAMBDA_LINK, as.add_link(AND_LINK, block));
-}
-
-LambdaLinkPtr Surprisingness::mk_lambda(const HandleSeq& block)
-{
-	return createLambdaLink(HandleSeq{createLink(block, AND_LINK)});
-}
-
-Handle Surprisingness::mk_pattern(const HandleSeq& block)
-{
-	return Handle(mk_lambda(block));
+	return as.add_link(LAMBDA_LINK,
+	                   block.size() == 1 ? block.front()
+	                   : as.add_link(AND_LINK, block));
 }
 
 HandleSeq Surprisingness::add_subpatterns(const HandleSeqSeq& partition,
@@ -237,7 +232,7 @@ unsigned Surprisingness::value_count(const HandleSeq& block,
                                      const Handle& var,
                                      const HandleSet& texts)
 {
-	Valuations vs(mk_pattern(block), texts);
+	Valuations vs(MinerUtils::mk_pattern_without_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
 	return values.keys().size();
 }
@@ -246,7 +241,7 @@ HandleCounter Surprisingness::value_distribution(const HandleSeq& block,
                                                  const Handle& var,
                                                  const HandleSet& texts)
 {
-	Valuations vs(mk_pattern(block), texts);
+	Valuations vs(MinerUtils::mk_pattern_without_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
 	HandleCounter dist;
 	double total = values.total_count();
@@ -324,8 +319,8 @@ bool Surprisingness::is_equivalent(const HandleSeq& l_blk,
                                    const HandleSeq& r_blk,
                                    const Handle& var)
 {
-	Handle l_pat = mk_pattern(l_blk);
-	Handle r_pat = mk_pattern(r_blk);
+	Handle l_pat = MinerUtils::mk_pattern_without_vardecl(l_blk);
+	Handle r_pat = MinerUtils::mk_pattern_without_vardecl(r_blk);
 	return is_equivalent(l_pat, r_pat, var);
 }
 
@@ -360,18 +355,18 @@ HandleSeqUCounter::iterator Surprisingness::find_equivalent(
 	return it;
 }
 
-bool Surprisingness::is_more_abstract(const HandleSeq& l_blk,
-                                      const HandleSeq& r_blk,
-                                      const Handle& var)
+bool Surprisingness::is_syntax_more_abstract(const HandleSeq& l_blk,
+                                             const HandleSeq& r_blk,
+                                             const Handle& var)
 {
-	Handle l_pat = mk_pattern(l_blk);
-	Handle r_pat = mk_pattern(r_blk);
-	return is_more_abstract(l_pat, r_pat, var);
+	Handle l_pat = MinerUtils::mk_pattern_without_vardecl(l_blk);
+	Handle r_pat = MinerUtils::mk_pattern_without_vardecl(r_blk);
+	return is_syntax_more_abstract(l_pat, r_pat, var);
 }
 
-bool Surprisingness::is_more_abstract(const Handle& l_pat,
-                                      const Handle& r_pat,
-                                      const Handle& var)
+bool Surprisingness::is_syntax_more_abstract(const Handle& l_pat,
+                                             const Handle& r_pat,
+                                             const Handle& var)
 {
 	Variables l_vars = MinerUtils::get_variables(l_pat);
 	Variables r_vars = MinerUtils::get_variables(r_pat);
@@ -413,6 +408,42 @@ bool Surprisingness::is_more_abstract(const Handle& l_pat,
 	return true;
 }
 
+bool Surprisingness::is_more_abstract(const Handle& l_pat,
+                                      const Handle& r_pat,
+                                      const Handle& var)
+{
+	HandleSeq l_clauses = MinerUtils::get_clauses(l_pat);
+	HandleSeq r_clauses = MinerUtils::get_clauses(r_pat);
+	HandleSeq l_scs = connected_subpattern_with_var(l_clauses, var);
+	HandleSeq r_scs = connected_subpattern_with_var(r_clauses, var);
+	return is_more_abstract(l_scs, r_scs, var);
+}
+
+bool Surprisingness::is_more_abstract(const HandleSeq& l_blk,
+                                      const HandleSeq& r_blk,
+                                      const Handle& var)
+{
+	using namespace boost::algorithm;
+	HandleSeqSeq rps = powerseq_without_empty(r_blk);
+	return any_of(partitions(l_blk), [&](const HandleSeqSeq& lp) {
+			return any_of(rps, [&](const HandleSeq& rs) {
+					return all_of(lp, [&](const HandleSeq& lb) {
+							return is_syntax_more_abstract(lb, rs, var);
+						});
+				});
+		});
+}
+
+HandleSeqSeq Surprisingness::powerseq_without_empty(const HandleSeq& blk)
+{
+	HandleSetSet pset = powerset(HandleSet(blk.begin(), blk.end()));
+	HandleSeqSeq pseq;
+	for (const HandleSet& set : pset)
+		if (not set.empty())
+			pseq.push_back(HandleSeq(set.begin(), set.end()));
+	return pseq;
+}
+
 bool Surprisingness::is_strictly_more_abstract(const HandleSeq& l_blk,
                                                const HandleSeq& r_blk,
                                                const Handle& var)
@@ -438,14 +469,31 @@ void Surprisingness::rank_by_abstraction(HandleSeqSeq& partition, const Handle& 
 	            });
 }
 
-HandleSeqSeq Surprisingness::copy_var_blocks(const HandleSeqSeq& partition,
-                                             const Handle& var)
+HandleSeqSeq Surprisingness::connected_subpatterns_with_var(
+	const HandleSeqSeq& partition,
+	const Handle& var)
 {
 	HandleSeqSeq var_partition;
-	for (const HandleSeq& blk : partition)
-		if (is_free_in_any_tree(blk, var))
-			var_partition.push_back(blk);
+	for (const HandleSeq& blk : partition) {
+		HandleSeq sc_blk = connected_subpattern_with_var(blk, var);
+		if (not sc_blk.empty()) {
+			var_partition.push_back(sc_blk);
+		}
+	}
 	return var_partition;
+}
+
+HandleSeq Surprisingness::connected_subpattern_with_var(const HandleSeq& blk,
+                                                        const Handle& var)
+{
+	if (not is_free_in_any_tree(blk, var))
+		return {};
+
+	HandleSeqSeq sccs = MinerUtils::get_components(blk);
+	for (const HandleSeq& scc : sccs)
+		if (is_free_in_any_tree(scc, var))
+			return scc;
+	return {};
 }
 
 HandleSeqUCounter Surprisingness::group_eq(const HandleSeqSeq& partition,
@@ -480,8 +528,8 @@ double Surprisingness::eq_prob(const HandleSeqSeq& partition,
 	for (const Handle& var : joint_variables(pattern, partition)) {
 		// logger().debug() << "var = " << oc_to_string(var);
 
-		// Select all blocks containing var
-		HandleSeqSeq var_partition = copy_var_blocks(partition, var);
+		// Select all strongly connected subpatterns containing var
+		HandleSeqSeq var_partition = connected_subpatterns_with_var(partition, var);
 		// logger().debug() << "var_partition = " << oc_to_string(var_partition);
 
 		// For each variable, sort the partition so that abstract
