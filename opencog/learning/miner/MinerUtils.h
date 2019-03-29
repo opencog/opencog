@@ -246,6 +246,18 @@ public:
 	                                    unsigned ms);
 
 	/**
+	 * Create a pattern body from clauses, introducing an AndLink if
+	 * necessary.
+	 */
+	static Handle mk_body(const HandleSeq& clauses);
+
+	/**
+	 * Given a sequence of clause create a LambdaLink of it without
+	 * variable declaration, introducing an AndLink if necessary.
+	 */
+	static Handle mk_pattern_without_vardecl(const HandleSeq& clauses);
+
+	/**
 	 * Given a vardecl and a body, filter the vardecl to contain only
 	 * variable of the body, and create a Lambda with them.
 	 */
@@ -256,6 +268,12 @@ public:
 	 * connected components.
 	 */
 	static HandleSeq get_component_patterns(const Handle& pattern);
+
+	/**
+	 * Like above but consider a sequence of clauses instead of a
+	 * pattern, and return a sequence of sequences of clauses.
+	 */
+	static HandleSeqSeq get_components(const HandleSeq& clauses);
 
 	/**
 	 * Given a pattern, split it into its disjuncts.
@@ -341,7 +359,7 @@ public:
 	 * Given a pattern, return its clause. If the pattern is not a
 	 * scope link (i.e. a constant/text), then behavior is undefined.
 	 */
-	static const HandleSeq& get_clauses(const Handle& pattern);
+	static HandleSeq get_clauses(const Handle& pattern);
 
 	/**
 	 * Return the number of conjuncts in a pattern. That is, if the

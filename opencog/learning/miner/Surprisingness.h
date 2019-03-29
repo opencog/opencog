@@ -27,6 +27,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/unify/Unify.h>
 
 namespace opencog
 {
@@ -134,10 +135,10 @@ public:
 	 * The problem is that, first, calculating such probability
 	 * distribution is expensive, and second, the resulting estimate is
 	 * too accurate and thus most pattern are measured as unsurprising
-	 * due to the inner product capturing the interactions, at the
-	 * point of contact of the variable, between the components.
-	 * Instead an estimate relying on the counts alone of values
-	 * associated to given variables in given components is derived.
+	 * due to the inner product capturing the interactions at the point
+	 * of contact of the variable, between the components.  Instead an
+	 * estimate relying on the counts alone of values associated to
+	 * given variables in given components is derived.
 	 *
 	 * Let's assume the same variable X appears in n difference
 	 * components. Let's call these variable appearences X1 to Xn. So
@@ -169,7 +170,9 @@ public:
 	 * adequatly discounts in the surprisingness measure the
 	 * surprisingness of the pattern alone.
 	 *
-	 * Example:
+	 * ## Examples
+	 *
+	 * ### First Example
 	 *
 	 * pattern
 	 * =
@@ -177,8 +180,8 @@ public:
 	 *   X Y
 	 *   And
 	 *     Inheritance X Y
-	 *     Inheritance H Y
-	 *     Inheritance F X
+	 *     Inheritance F Y
+	 *     Inheritance G X
 	 *
 	 * Let's consider a partition of 3 components/blocks, each clause
 	 * is a block.
@@ -189,8 +192,8 @@ public:
 	 *
 	 * All variables of this partition are joint (F and G are
 	 * constants). However relative to X components A and C are
-	 * independent, while relative to Y comomponent B is a
-	 * specialization of component A.
+	 * independent, while relative to Y component B is a specialization
+	 * of component A.
 	 *
 	 * Let's rewrite the component variables by explicitly showing
 	 * variable occurences in components
@@ -199,11 +202,12 @@ public:
 	 * B = Inheritance F Y2
 	 * C = Inheritance G X2
 	 *
-	 * The specialization relationship between A and B relative of Y
+	 * The specialization relationship between A and B relative to Y
 	 * allows us to infer that V(Y2) is a subset of V(Y1). Thus the
-	 * number of possible values that Y2 can take is bounded by S1.
+	 * number of possible values that Y2 can take is bounded by
+	 * |V(Y1)|.
 	 *
-	 * Let's calculate the P(X1=X2) and P(Y1=Y2) for this pattern.
+	 * Let's calculate P(X1=X2) and P(Y1=Y2) for this pattern.
 	 *
 	 * P(X1=X2) = 1/|U| * 1/|U| * |U|
 	 *          = 1/|U|
@@ -213,7 +217,7 @@ public:
 	 * are independent relative to X, each value of X2 can also be any
 	 * value of U. Then we multiple by |U| because the equality may
 	 * occur for each possible value of X1 or X2, so the probabilities
-	 * add up.
+	 * add up. Now for P(Y1=Y2)
 	 *
 	 * P(Y1=Y2) = 1/|U| * 1/|V(Y1)| * |U|
 	 *          = 1/|V(Y1)|
@@ -224,7 +228,7 @@ public:
 	 * Y. Then we multiple by |U| to add up all probabilities for each
 	 * values of the more abstract component A.
 	 *
-	 * Another example:
+	 * ### Second Example
 	 *
 	 * pattern
 	 * =
@@ -250,22 +254,61 @@ public:
 	 * Here A and B are actually equivalent relative to Y, meaning the
 	 * specialization relationship must not be strict.
 	 *
-	 * Without loss of generality let's assume that the variable
-	 * occurrences X1, ..., Xn are ordered such that for any i<j, Xi
-	 * occurs in a component that is either more abstract or equivalent
-	 * to the component where Xj occurs. Then the general formula is
+	 * ### Third Example
 	 *
-	 * P(X1=...=Xi=...=Xn) = Prod_{j=2}^n 1/|V(M(Xj))|
+	 * pattern
+	 * =
+	 * Lambda
+	 *   X Y Z W
+	 *   And
+	 *     List X Y X
+	 *     List Z W X
 	 *
-	 * where M(Xj) is the variable occurrence Xi of the most
-	 * specialized component with the component where Xj occurs
-	 * relative to X, such such that i<j.
+	 * Assuming a partition of the 2 components
+	 *
+	 * A = List X Y X
+	 * B = List Z W X
+	 *
+	 * Thus after explicitly showing variable occurences
+	 *
+	 * A = List X1 Y X1
+	 * B = List Z W X2
+	 *
+	 * P(X1=X2) = 1/|U| * 1/|V(X2)| * |U| = 1/|V(X2)|
+	 *
+	 * It doesn't matter that X1 appears twice in A, the number values
+	 * it can take is still bounded by its most specialized abstraction
+	 * relative to X, that is B.
+	 *
+	 * ## General formula
+	 *
+	 * Let X be a variable, with n variable occurences X1, ..., Xn in
+	 * the respective components C1, ..., Cn. Without loss of
+	 * generality let's assume that C1, ..., Cn are ordered such that
+	 * if Ci is strictly more abstract than Cj relative to X, then
+	 * i<j. This admits many orders as it doesn't impose restrictions
+	 * on components that are equivalent or independent.  But it
+	 * doesn't matter as it is only used to avoid cycles in the
+	 * calculation of the probability estimate. Then the general
+	 * formula is
+	 *
+	 * P(X1=...=Xn) = Prod_{j=2}^n 1/M(Xj)
+	 *
+	 * where M(Xj) is either
+	 *
+	 * 1. |V(Xi)|, the count of Xi in the most specialized component Ci
+	 * that is either more abstract than or equivalent to Cj relative
+	 * to X and such that i<j.
+	 *
+	 * 2. |U|, if no such more abstract or equivalent component exists
+	 * for Xj.
 	 *
 	 * A proof sketch of why it is a good estimate of P(X1=...=Xn)
 	 * (under independence assumption of the data) is that the
 	 * syntactic specialization relationship provides a prior to
-	 * discard distributions of values of variable occurences Xi using
-	 * subset relationships between V(Xi) and V(Xj).
+	 * discard distributions (i.e. set their prior probabilities to 0)
+	 * of values of variable occurences Xi using subset relationships
+	 * between V(Xi) and V(Xj).
 	 *
 	 * One last remark: The count |V(Xi)| can be exact or approximated.
 	 * Of course the estimate will be better if the count is exact.
@@ -367,7 +410,7 @@ public:
 	 *  [[C],[B,A]],
 	 *  [[A],[C,B]]]
 	 */
-	static HandleSeqSeqSeq partitions(const Handle& pattern);
+	static HandleSeqSeqSeq partitions_without_pattern(const Handle& pattern);
 
 	/**
 	 * Convert a partition block [A,B] into a pattern like
@@ -380,13 +423,6 @@ public:
 	 * and insert it in as.
 	 */
 	static Handle add_pattern(const HandleSeq& block, AtomSpace& as);
-
-	/**
-	 * Like add_pattern but doesn't add the pattern in any atomspace,
-	 * only remains in RAM.
-	 */
-	static LambdaLinkPtr mk_lambda(const HandleSeq& block);
-	static Handle mk_pattern(const HandleSeq& block);
 
 	/**
 	 * Turn a partition into a sequence of subpatterns. Add then in the
@@ -467,7 +503,7 @@ public:
 	/**
 	 * Calculate probability estimate of a pattern given a partition,
 	 * assuming all blocks are independent, but takes into account the
-	 * joint variables.
+	 * joint variables (ji in ji_prob stands for joint-independent).
 	 *
 	 * An atomspace is provided to memoize the support of subpatterns.
 	 */
@@ -476,8 +512,16 @@ public:
 	                      const HandleSet& texts);
 
 	/**
-	 * Tell whether 2 blocks/subpatterns are equivalent with respect to
-	 * a given variable. Basically, whether both block are semantically
+	 * Return true iff the given variable has the same position (same
+	 * index) in the variable declarations of both patterns.
+	 */
+	static bool has_same_index(const Handle& l_pat,
+	                           const Handle& r_pat,
+	                           const Handle& var);
+
+	/**
+	 * Tell whether 2 blocks/subpatterns are equivalent relatie to a
+	 * given variable. Basically, whether both block are semantically
 	 * equivalent and var is in the same position in both of them.
 	 *
 	 * For instance
@@ -485,12 +529,20 @@ public:
 	 * l_blk = { Inh X Y }
 	 * r_blk = { Inh Z Y }
 	 *
-	 * are equivalent w.r.t Y because are both are semantically
+	 * are equivalent relative to Y because are both are semantically
 	 * equivalent (up to an alpha-conversion) and Y is used in the same
 	 * place in both blocks.
 	 */
 	static bool is_equivalent(const HandleSeq& l_blk,
 	                          const HandleSeq& r_blk,
+	                          const Handle& var);
+
+	/**
+	 * List above but takes scope links instead of blocks (whether each
+	 * scope link has the conjunction of clauses of its block as body).
+	 */
+	static bool is_equivalent(const Handle& l_pat,
+	                          const Handle& r_pat,
 	                          const Handle& var);
 
 	static HandleSeqUCounter::const_iterator find_equivalent(
@@ -501,6 +553,145 @@ public:
 		HandleSeqUCounter& partition_c,
 		const HandleSeq& block,
 		const Handle& var);
+
+	/**
+	 * Tell whether the left block/subpattern is is syntactically more
+	 * abstract than the right block/subpattern relative to a given
+	 * variable.
+	 *
+	 * For instance
+	 *
+	 * l_blk = { List X Y Z }
+	 * r_blk = { List W A Z }
+	 *
+	 * l_blk is more abstract than r_blk relative to Z because the
+	 * matching values of Z in l_blk is a subset of the matching values
+	 * of Z in l_blk.
+	 */
+	static bool is_syntax_more_abstract(const HandleSeq& l_blk,
+	                                    const HandleSeq& r_blk,
+	                                    const Handle& var);
+
+	/**
+	 * List above but takes scope links instead of blocks (whether each
+	 * scope link has the conjunction of clauses of its block as body).
+	 *
+	 * TODO: for now, this code relies on unification. However it can
+	 * certainly be optimized by not relying on unification and being
+	 * re-implemented instead, and perhaps it could then be merged to
+	 * the unification code.
+	 */
+	static bool is_syntax_more_abstract(const Handle& l_pat,
+	                                    const Handle& r_pat,
+	                                    const Handle& var);
+
+	/**
+	 * Like is_syntax_more_abstract but takes into account a bit of
+	 * semantics as well (though none that requires data), in
+	 * particular it handles conjunctions of clauses such that l_pat is
+	 * more abstract if there exists a partition lp of l_pat (meaning a
+	 * partition of conjunctions of clauses in l_pat) such that there
+	 * exists a subset rs of r_pat (meaning a subset of clauses of
+	 * r_pat) such that rs is a syntactic specialization, relative to
+	 * var, of each block lb of lp.
+	 *
+	 * For instance
+	 *
+	 * l_pat = Lambda
+	 *           X Y Z
+	 *           And
+	 *             Inheritance
+	 *               X
+	 *               Z
+	 *             Inheritance
+	 *               Y
+	 *               Z
+	 *
+	 * r_pat = Lambda
+	 *           Z
+	 *           Inheritance
+	 *             A
+	 *             Z
+	 *
+	 * var = Z
+	 *
+	 * l_pat is indeed an abstraction of r_pat because there exists a
+	 * partition lp = { {Inheritance X Z}, {Inheritance Y Z} } such
+	 * that the subset { Inheritance A Z} is a syntactic specialization
+	 * of each block of lp.
+	 */
+	static bool is_more_abstract(const Handle& l_pat,
+	                             const Handle& r_pat,
+	                             const Handle& var);
+
+	/**
+	 * Like above but consider list of clauses instead of patterns.
+	 */
+	static bool is_more_abstract(const HandleSeq& l_blk,
+	                             const HandleSeq& r_blk,
+	                             const Handle& var);
+
+	/**
+	 * Like powerset but return a sequence of sequences instead of set
+	 * of sets. Discard the empty sequence.
+	 */
+	static HandleSeqSeq powerseq_without_empty(const HandleSeq& blk);
+
+	/**
+	 * Return true iff l_blk is strictly more abstract than r_blk
+	 * relative to var. That is more abstract and not equivalent.
+	 */
+	static bool is_strictly_more_abstract(const HandleSeq& l_blk,
+	                                      const HandleSeq& r_blk,
+	                                      const Handle& var);
+
+	/**
+	 * Return true iff var_val is a pair with the first element a
+	 * variable in vars, and the second element a value (non-variable).
+	 */
+	static bool is_value(const Unify::HandleCHandleMap::value_type& var_val,
+	                     const Variables& vars);
+
+	/**
+	 * Sort the partition such that if block A is strictly more
+	 * abstract than block B relative var, then A occurs before B.
+	 */
+	static void rank_by_abstraction(HandleSeqSeq& partition, const Handle& var);
+
+	/**
+	 * Copy all subpatterns/blocks where var appears. Also remove all
+	 * parts of the subpatterns that are not strongly connected with to
+	 * it relative to var.
+	 *
+	 * So for instance
+	 *
+	 * partition = { { Inheritance X Y, Inheritance Z A},
+	 *               { Inheritance X B, Inheritance Z Y} }
+	 *
+	 * var = Y
+	 *
+	 * returns
+	 *
+	 * { {Inheritance Z Y } }
+	 *
+	 * because
+	 *
+	 * 1. Y only appears in the second block
+	 *
+	 * 2. within that block
+	 *
+	 *    Inheritance X B
+	 *
+	 *    is not strongly connected to the component where Y appears.
+	 *
+	 * Ignoring non-strongly connected components allows to speed up
+	 * Surprisingness::value_count as well as covering more cases in
+	 * is_more_abstract.
+	 */
+	static HandleSeqSeq connected_subpatterns_with_var(const HandleSeqSeq& partition,
+	                                                   const Handle& var);
+	static HandleSeq connected_subpattern_with_var(const HandleSeq& blk,
+	                                               const Handle& var);
 
 	/**
 	 * Given subpatterns linked by a variable, count how many
@@ -531,11 +722,20 @@ public:
 	/**
 	 * For each joint variable of pattern (variable that appears in
 	 * more than one partition block) calculate the probability
-	 * estimate of being assigned the same value across all block.
+	 * estimate of being assigned the same value across all blocks.
 	 */
 	static double eq_prob(const HandleSeqSeq& partition,
 	                      const Handle& pattern,
 	                      const HandleSet& texts);
+
+	/**
+	 * Alternate implementation of eq_prob. Takes into syntactical
+	 * abstraction between blocks in order to better estimate variable
+	 * occurance equality (see the comment above isurp).
+	 */
+	static double eq_prob_alt(const HandleSeqSeq& partition,
+	                          const Handle& pattern,
+	                          const HandleSet& texts);
 };
 
 /**

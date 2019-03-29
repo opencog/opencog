@@ -422,10 +422,24 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 	return results;
 }
 
+Handle MinerUtils::mk_body(const HandleSeq& clauses)
+{
+	if (clauses.size() == 0)
+		return Handle::UNDEFINED;
+	if (clauses.size() == 1)
+		return clauses.front();
+	return Handle(createLink(clauses, AND_LINK));
+}
+
+Handle MinerUtils::mk_pattern_without_vardecl(const HandleSeq& clauses)
+{
+	return Handle(createLambdaLink(HandleSeq{mk_body(clauses)}));
+}
+
 Handle MinerUtils::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
 {
 	Handle fvd = filter_vardecl(vardecl, clauses);
-	Handle body = 1 < clauses.size() ? createLink(clauses, AND_LINK) : clauses[0];
+	Handle body = mk_body(clauses);
 	if (fvd != nullptr and body != nullptr)
 		return Handle(createLambdaLink(fvd, body));
 	return Handle::UNDEFINED;
@@ -444,6 +458,11 @@ HandleSeq MinerUtils::get_component_patterns(const Handle& pattern)
 			compats.push_back(comp);
 	}
 	return compats;
+}
+
+HandleSeqSeq MinerUtils::get_components(const HandleSeq& clauses)
+{
+	return PatternLink(mk_body(clauses)).get_components();
 }
 
 HandleSeq MinerUtils::get_conjuncts(const Handle& pattern)
@@ -557,9 +576,12 @@ const Handle& MinerUtils::get_body(const Handle& pattern)
 	return pattern;
 }
 
-const HandleSeq& MinerUtils::get_clauses(const Handle& pattern)
+HandleSeq MinerUtils::get_clauses(const Handle& pattern)
 {
-	return get_body(pattern)->getOutgoingSet();
+	Handle body = get_body(pattern);
+	if (body->get_type() == AND_LINK)
+		return get_body(pattern)->getOutgoingSet();
+	return {body};
 }
 
 unsigned MinerUtils::n_conjuncts(const Handle& pattern)
@@ -589,7 +611,7 @@ Handle MinerUtils::remove_useless_clauses(const Handle& vardecl,
 	// Remove useless ones
 	remove_useless_clauses(vardecl, clauses);
 	// Reconstruct AndLink if necessary
-	return clauses.size() == 1 ? clauses[0] : Handle(createLink(clauses, AND_LINK));
+	return mk_body(clauses);
 }
 
 void MinerUtils::remove_useless_clauses(const Handle& vardecl, HandleSeq& clauses)
@@ -728,7 +750,7 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
-		nbody = nclauses.size() == 1 ? nclauses[0] : createLink(nclauses, AND_LINK),
+		nbody = mk_body(nclauses),
 		npattern = Handle(createLambdaLink(nvardecl, nbody));
 
 	return npattern;
