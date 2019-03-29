@@ -88,7 +88,12 @@ public:
 
 	// Test auxilary methods
 	void test_partitions();
-	void test_is_more_abstract();
+	void test_is_syntax_more_abstract();
+	void test_is_more_abstract_1();
+	void test_is_more_abstract_2();
+	void test_is_more_abstract_3();
+	// TODO: fix is_more_abstract to support that case
+	void xtest_is_more_abstract_4();
 	void test_is_strictly_more_abstract();
 
 	// Test surprisingness measures
@@ -248,14 +253,82 @@ void SurprisingnessUTest::test_partitions()
 	TS_ASSERT_EQUALS(result, expect);
 }
 
-void SurprisingnessUTest::test_is_more_abstract()
+void SurprisingnessUTest::test_is_syntax_more_abstract()
 {
 	HandleSeq l_blk{al(LIST_LINK, Z, W, X)};
 	HandleSeq r_blk{al(LIST_LINK, X, Y, X)};
 
-	// Left block/subpattern is more abstract than right
-	// block/subpattern, relative to Z.
-	TS_ASSERT(Surprisingness::is_more_abstract(l_blk, r_blk, X));
+	// Left block/subpattern is syntactically more abstract than
+	// right block/subpattern, relative to X.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_blk, r_blk, X)); }
+
+void SurprisingnessUTest::test_is_more_abstract_1()
+{
+	Handle l_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Y, Z),
+	                  al(AND_LINK,
+	                     al(INHERITANCE_LINK, X, Z),
+	                     al(INHERITANCE_LINK, Y, Z)));
+	Handle r_pat = al(LAMBDA_LINK,
+	                  Z,
+	                  al(INHERITANCE_LINK, C0, Z));
+
+	// Left pattern is more abstract than right pattern, relative to Z.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_pat, r_pat, Z));
+}
+
+void SurprisingnessUTest::test_is_more_abstract_2()
+{
+	Handle l_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Y),
+	                  al(INHERITANCE_LINK, X, Z));
+	Handle r_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Y, Z),
+	                  al(AND_LINK,
+	                     al(INHERITANCE_LINK, X, C0),
+	                     al(INHERITANCE_LINK, Z, Y),
+	                     al(INHERITANCE_LINK, Z, C1)));
+
+	// Left pattern is more abstract than right pattern, relative to X.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_pat, r_pat, X));
+}
+
+void SurprisingnessUTest::test_is_more_abstract_3()
+{
+	Handle l_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Y, Z),
+	                  al(AND_LINK,
+	                     al(INHERITANCE_LINK, X, Y),
+	                     al(INHERITANCE_LINK, Z, C1)));
+	Handle r_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Z),
+	                  al(AND_LINK,
+	                     al(INHERITANCE_LINK, X, C0),
+	                     al(INHERITANCE_LINK, Z, Y)));
+
+	// Left pattern is more abstract than right pattern, relative to X.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_pat, r_pat, X));
+
+	// Left pattern is more abstract than right pattern, relative to Y.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_pat, r_pat, Y));
+}
+
+void SurprisingnessUTest::xtest_is_more_abstract_4()
+{
+	Handle l_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Y, Z),
+	                  al(AND_LINK,
+	                     al(INHERITANCE_LINK, X, Y),
+	                     al(INHERITANCE_LINK, Z, Y)));
+	Handle r_pat = al(LAMBDA_LINK,
+	                  al(VARIABLE_LIST, X, Z),
+	                  al(INHERITANCE_LINK, Z, C0));
+
+	// Left pattern is more abstract than right pattern, relative to X.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_pat, r_pat, X));
+
+	// Left pattern is more abstract than right pattern, relative to Y.
+	TS_ASSERT(Surprisingness::is_more_abstract(l_pat, r_pat, Y));
 }
 
 void SurprisingnessUTest::test_is_strictly_more_abstract()
