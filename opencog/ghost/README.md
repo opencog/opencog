@@ -134,7 +134,7 @@ link-concept: (pets, animals)
 
   ; rule-level
   #link-concept: (fish)
-    ; ... the rule that will link to the concept "fist", as well as the top-level "pets" and "animals" concepts ...
+    ; ... the rule that will link to the concept "fish", as well as the top-level "pets" and "animals" concepts ...
 ```
 
 Note, `link-concept` will be reset when another top-level goal is seen.
