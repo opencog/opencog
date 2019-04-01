@@ -26,6 +26,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/algorithm.h>
 #include <cxxtest/TestSuite.h>
@@ -48,6 +49,10 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
+
+		ure_logger().set_level(Logger::DEBUG);
+		ure_logger().set_timestamp_flag(false);
+		ure_logger().set_print_to_stdout_flag(true);
 
 		string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
 			cur_dir = cur_ppp_dir + "/tests/pln/rules",
@@ -102,6 +107,7 @@ public:
 	void test_implication_direct_evaluation();
 	void test_conditional_full_instantiation_meta_rule();
 	void test_consequent_disjunction_elimination();
+	void test_contraposition();
 };
 
 void PLNRulesUTest::tearDown()
@@ -874,4 +880,24 @@ void PLNRulesUTest::test_consequent_disjunction_elimination()
 	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
+}
+
+void PLNRulesUTest::test_contraposition()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	load_scm_files({"opencog/pln/rules/propositional/contraposition.scm",
+				       "tests/pln/rules/simple-contraposition.scm"});
+
+	// Apply the rule
+	Handle rbs = eval.eval_h("rbs");
+	Handle target = eval.eval_h("target");
+	BackwardChainer bc(as, rbs, target);
+	bc.do_chain();
+
+	// Check the result
+	Handle result = bc.get_results()->getOutgoingAtom(0);
+	TS_ASSERT_EQUALS(result, target);
+	TS_ASSERT_LESS_THAN(0.9, result->getTruthValue()->get_mean());
+	TS_ASSERT_LESS_THAN(0.9, result->getTruthValue()->get_confidence());
 }

@@ -40,7 +40,7 @@
          (vardecl (VariableList A B))
          (clause AB)
          (precondition (Evaluation
-                         (GroundedSchema "scm: gt-zero-confidence")
+                         (GroundedPredicate "scm: gt-zero-confidence")
                          AB))
          (rewrite (ExecutionOutput
                     (GroundedSchema "scm: contraposition-formula")
