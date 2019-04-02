@@ -2,7 +2,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog exec))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ; ----------------------------------------------------------------------------
 (define-public (pln-load-rules RULE-TYPE)

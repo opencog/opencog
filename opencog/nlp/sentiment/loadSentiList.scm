@@ -6,7 +6,7 @@
              (opencog python)
              (opencog exec)
              (opencog atom-types)
-             (opencog rule-engine)
+             (opencog ure)
              (opencog nlp)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)

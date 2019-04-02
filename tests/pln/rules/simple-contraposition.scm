@@ -1,5 +1,5 @@
 (use-modules (opencog) (opencog query) (opencog exec))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; Knowledge base
 

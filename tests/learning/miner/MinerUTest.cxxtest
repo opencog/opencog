@@ -35,7 +35,7 @@
 #include <opencog/learning/miner/HandleTree.h>
 #include <opencog/learning/miner/Miner.h>
 #include <opencog/learning/miner/Surprisingness.h>
-#include <opencog/rule-engine/URELogger.h>
+#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <vector>

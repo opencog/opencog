@@ -27,8 +27,8 @@
 #include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+#include <opencog/ure/forwardchainer/ForwardChainer.h>
+#include <opencog/ure/backwardchainer/BackwardChainer.h>
 
 using namespace opencog;
 

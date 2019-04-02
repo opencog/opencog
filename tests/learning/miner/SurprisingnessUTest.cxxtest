@@ -31,8 +31,8 @@
 #include <opencog/learning/miner/Surprisingness.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-#include <opencog/rule-engine/URELogger.h>
+#include <opencog/ure/backwardchainer/BackwardChainer.h>
+#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include "MinerUTestUtils.h"

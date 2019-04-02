@@ -17,7 +17,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog exec))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 (use-modules (srfi srfi-1))
 
 (define (iota-plus-one x)

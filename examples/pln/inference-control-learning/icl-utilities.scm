@@ -6,7 +6,7 @@
 (use-modules (opencog randgen))
 (use-modules (opencog exec))
 (use-modules (opencog query))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 (use-modules (opencog miner))
 
 ;; Set a logger for the experiment

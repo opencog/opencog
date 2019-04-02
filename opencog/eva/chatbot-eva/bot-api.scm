@@ -42,7 +42,7 @@
     ; speech-act type to the processing that would be performed.  This
     ; would allow a single sentence to be interpreted as possibly several
     ; different speech-act types.  It would fit better into the long-term
-    ; plan to do all recogniztion with ImplicationLinks+rule-engine.
+    ; plan to do all recognition with ImplicationLinks+ure.
     (let* ((gutr (sentence-get-utterance-type sent-node))
            (utr (if (equal? '() gutr) '() (car gutr)))
         )

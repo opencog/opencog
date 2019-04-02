@@ -14,7 +14,7 @@
 ;; -----------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; Generate a fuzzy disjunction introduction rule for an n-ary
 ;; disjunction
