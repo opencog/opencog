@@ -7,7 +7,7 @@
 ;; (cog-logger-set-level! "debug")
 ;; (cog-logger-set-sync! #t)
 ;; (cog-logger-set-timestamp! #f)
-;; (use-modules (opencog rule-engine))
+;; (use-modules (opencog ure))
 ;; (ure-logger-set-level! "debug")
 ;; (ure-logger-set-sync! #t)
 ;; (ure-logger-set-timestamp! #f)

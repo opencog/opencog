@@ -9,7 +9,7 @@ but not only. Here is a brief description of each folder
   Optimal Preconditioned Eigenvalue Xolvers.
 * `dimensionalembedding` implements a method of dimensional embedding
   of the atomspace using the Harel-Koren algorithm.
-* `miner` implements a rule-engine based pattern miner algorithm for
+* `miner` implements a URE based pattern miner algorithm for
   the AtomSpace. Comprehensive but slow.
 * `pattern-index` implements Andre Senna prototype pattern indexing
   for the AtomSpace, used for fast pattern matching and mining.

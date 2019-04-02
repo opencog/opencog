@@ -35,7 +35,7 @@
 ; Since this file isn't loaded when ghost-procedures is loaded, import required
 ; modules. It is not loaded with the module it is an experimental feature.
 (use-modules (opencog nlp sureal))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ; ----------------------------------------------------------------------------
 (define-public (filter-for-pln a-list)

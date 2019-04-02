@@ -7,7 +7,7 @@
 (use-modules (opencog))
 (use-modules (opencog spacetime))
 (use-modules (opencog nlp))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 (load "relex2logic/rule-utils.scm")
 (load "relex2logic/r2l-utilities.scm")

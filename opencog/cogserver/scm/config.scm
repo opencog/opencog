@@ -59,7 +59,7 @@
 
 ; Load core-types and other utility functions.
 ; NOTE: Must be loaded first to avoid error likes
-; ERROR: In procedure dynamic-link: file: "libruleengine", message: "file not found"
+; ERROR: In procedure dynamic-link: file: "libure", message: "file not found"
 ; TODO: It seems weird that one-module has to be imported to use another one.
 ;(use-modules (opencog))
 

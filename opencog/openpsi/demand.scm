@@ -17,7 +17,7 @@
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
 (use-modules (srfi srfi-1)) ; for `lset-difference`
 
-(use-modules (opencog) (opencog exec) (opencog rule-engine))
+(use-modules (opencog) (opencog exec) (opencog ure))
 
 (load "utilities.scm")
 

@@ -1,7 +1,7 @@
 (use-modules (opencog))
 (use-modules (opencog atom-types))
 (use-modules (opencog pln))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;-------------------------------------------------------------------------------
 ; Define a rule-base for a particular infernece-trail.

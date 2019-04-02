@@ -760,7 +760,7 @@ Fuzzy:
 
 
 WARNING: (opencog nlp chatbot-eva): `r2l-rules' imported from both
-(opencog rule-engine) and (opencog nlp relex2logic)
+(opencog ure) and (opencog nlp relex2logic)
 opencog/nlp/chatbot/chat-utils.scm:61:39: In procedure
 (InterpretationNode
 "sentence@987adef9-1782-4ab7-b422-703a214ee0d5_parse_0_interpretation_$X")

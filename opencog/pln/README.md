@@ -16,13 +16,13 @@ Further details can be found [here](http://wiki.opencog.org/wikihome/index.php/P
 ## Implementation
 
 The current implementation uses the
-[URE](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
+[URE](https://github.com/opencog/atomspace/tree/master/opencog/ure)
 where PLN is one or a few specific rule bases, configured with scheme
 function and scheme rules.
 
 That folder contains
 
-1. A set of scripts to easily configure the rule-engine to utilize PLN
+1. A set of scripts to easily configure the rule engine to utilize PLN
    rule bases.
 2. A set of PLN rules, under the subfolder `rules`.
 3. A set of PLN meta-rules, rules producing rules, under the subfolder

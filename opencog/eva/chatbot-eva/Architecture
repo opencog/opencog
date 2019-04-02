@@ -419,7 +419,7 @@ to combine them.  Should strict/loose be treated as a probability? A
 log-probability? Via some PLN-like formulas? Something else?
 
 For the above reasons, I have been shying away from using either
-OpenPsi, or the rule-engine, or anything else besides ad-hoc coding:
+OpenPsi, or the ure, or anything else besides ad-hoc coding:
 its not yet clear how to best create rules, and how to best combine
 them.
 

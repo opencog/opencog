@@ -15,7 +15,7 @@
 ;; -----------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; Generate a crisp true conjunction introduction rule for an n-ary
 ;; conjunction

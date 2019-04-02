@@ -10,7 +10,7 @@ output = Lizards can breathe
 ; Since this file isn't loaded when ghost-procedures is loaded, import required
 ; modules. It is not loaded with the module it is an experimental feature.
 (use-modules (opencog pln)
-             (opencog rule-engine))
+             (opencog ure))
 
 ; NOTE: get-abstract-version could be used for this example but this workflow
 ; is closer to the generic approach in the long term.
