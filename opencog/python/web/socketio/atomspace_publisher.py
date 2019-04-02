@@ -60,7 +60,7 @@ subscriber.setsockopt(zmq.SUBSCRIBE, "avchanged")
 
 class AtomSpaceNamespace(BaseNamespace, BroadcastMixin):
     def recv_connect(self):
-        print 'ZeroMQ listener initialized'
+        print ('ZeroMQ listener initialized')
         while True:
             [address, contents] = subscriber.recv_multipart()
             print("[%s] %s" % (address, contents))
