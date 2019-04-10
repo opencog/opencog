@@ -6,7 +6,8 @@
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
-             (opencog nlp ghost))
+             (opencog ghost)
+             (opencog ghost procedures))
 
 ; -----
 ; A simple rule with only words/lemmas
