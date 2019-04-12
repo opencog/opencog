@@ -211,7 +211,7 @@ atomspace = scheme_eval_as('(cog-atomspace)')
 set_type_ctor_atomspace(atomspace)
 
 def get_weather_info():
-    return ListLink(WordLink('cloudy'))
+    return ListLink(WordNode('cloudy'))
 
 def check_name(word):
     return TruthValue(1, 1) if word.name == 'Bob' else TruthValue(0, 0)
