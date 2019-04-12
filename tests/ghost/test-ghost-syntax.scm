@@ -15,7 +15,8 @@
   (opencog nlp chatbot)
   (opencog openpsi)
   (opencog ghost)
-  (opencog ghost procedures))
+  (opencog ghost procedures)
+  (opencog python))
 
 ; Set the address for relex server
 (set-relex-server-host)
