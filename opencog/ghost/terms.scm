@@ -254,13 +254,29 @@
 )
 
 ; ----------
+(define (parse-method-name method-name)
+"
+  Checks if the method-name has a prefix 'scm_' or 'py_'
+  and converts it to the corresponding name 'scm:name' or 'py:name'
+  to be used as GroundedPredicate name.
+  By default scm is used if the method-name does not have the prefix.
+"
+ (cond
+  ((string-prefix? "scm_" method-name)
+   (string-append "scm:" (substring method-name 4)))
+  ((string-prefix? "py_" method-name)
+   (string-append "py:" (substring method-name 3)))
+  (else (string-append "scm:" method-name))))
+
+; ----------
 (define (context-function NAME ARGS)
 "
   Occurrence of a function in the context of a rule.
-  The Scheme function named NAME should have already been defined.
+  The Scheme or Python function named NAME should have already been defined.
+  The Python name has 'py_' prefix and Scheme name has 'scm_' or no prefix.
 "
   ; TODO: Check to make sure the function has been defined
-  (Evaluation (GroundedPredicate (string-append "scm: " NAME))
+  (Evaluation (GroundedPredicate (parse-method-name NAME))
               (List (map (lambda (a) (if (equal? 'GlobNode (cog-type a))
                                          (List a) a))
                          ARGS))))
@@ -269,10 +285,11 @@
 (define (action-function NAME ARGS)
 "
   Occurrence of a function in the action of a rule.
-  The Scheme function named NAME should have already been defined.
+  The Scheme or Python function named NAME should have already been defined.
+  The Python name has 'py_' prefix and Scheme name has 'scm_' or no prefix.
 "
   ; TODO: Check to make sure the function has been defined
-  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
+  (ExecutionOutput (GroundedSchema (parse-method-name NAME))
                    (List (map (lambda (a) (if (equal? 'GlobNode (cog-type a))
                                               (List a) a))
                               ARGS))))
