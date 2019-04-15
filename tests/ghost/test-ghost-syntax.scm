@@ -15,7 +15,8 @@
   (opencog nlp chatbot)
   (opencog openpsi)
   (opencog ghost)
-  (opencog ghost procedures))
+  (opencog ghost procedures)
+  (opencog python))
 
 ; Set the address for relex server
 (set-relex-server-host)
@@ -196,10 +197,35 @@
 (define-public (get-weather-info) (List (Word "sunny")))
 (define-public (check-name name) (if (string=? "Bob" (cog-name name)) (stv 1 1) (stv 0 1)))
 (ghost-parse "r: (tell me the weather) test function - ^get-weather-info")
+(ghost-parse "r: (what is the weather) test function - ^scm_get-weather-info")
 (ghost-parse "r: (who am I ^check-name(Bob)) test function - predicate")
+(ghost-parse "r: (who are you ^scm_check-name(Bob)) test function - scm predicate")
+
+
+(python-eval "
+from opencog.type_constructors import *
+from opencog.scheme_wrapper import scheme_eval_as
+from opencog.cogserver_type_constructors import *
+
+atomspace = scheme_eval_as('(cog-atomspace)')
+set_type_ctor_atomspace(atomspace)
+
+def get_weather_info():
+    return ListLink(WordNode('cloudy'))
+
+def check_name(word):
+    return TruthValue(1, 1) if word.name == 'Bob' else TruthValue(0, 0)
+")
+
+(ghost-parse "r: (what was the weather yesterday) test function - ^py_get_weather_info")
+(ghost-parse "r: (who were you ^py_check_name(Bob)) test function - py predicate")
 
 (test-equal ghost-function "test function - sunny" (get-result "tell me the weather"))
+(test-equal ghost-function "test function - sunny" (get-result "what is the weather"))
+(test-equal ghost-function "test function - cloudy" (get-result "what was the weather yesterday"))
 (test-equal ghost-function "test function - predicate" (get-result "who am I"))
+(test-equal ghost-function "test function - scm predicate" (get-result "who are you"))
+(test-equal ghost-function "test function - py predicate" (get-result "who were you"))
 
 ; --- Comparison --- ;
 (define ghost-comparison "GHOST comparison")
