@@ -451,7 +451,9 @@
                    linkage into account.
 
       'nisurp:     New implementation of normalized I-Surprisingness
-                   that takeslinkage into account.
+                   that takes linkage into account.
+
+      'none:       No surprisingness measure is applied.
 
   Under the hood it will create a rule base and a query for the rule
   engine, configure it according to the user's options and run it.
