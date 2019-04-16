@@ -5,7 +5,7 @@
 ;; (load "scm/Merge.scm")
 ;; (load "scm/Music.scm")
 ;; (load "scm/Geography.scm")
-(load "scm/WorldAirports.scm")
+(load "scm/Cars.scm")
 
 ;; Set ure logger to debug
 (use-modules (opencog ure))
@@ -13,9 +13,10 @@
 
 ;; Run pattern miner
 (use-modules (opencog miner))
-(define results (cog-mine (cog-atomspace)
-                          #:minsup 100
-                          #:maximum-iterations 100
+(define texts (get-all-roots))
+(define results (cog-mine texts
+                          #:minsup 5
+                          #:maximum-iterations 1000
                           #:incremental-expansion #t
                           #:max-conjuncts 2
                           #:surprisingness 'nisurp))
