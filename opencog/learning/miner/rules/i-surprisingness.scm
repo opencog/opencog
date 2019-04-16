@@ -68,7 +68,7 @@
                     (And
                       (map Unquote cnj-bodies)))))
              (f-minsup (minsup-eval f texts ms))
-             (f-isurp (isurp-eval f texts)))
+             (f-isurp (isurp-eval mode f texts)))
         (Bind
           (VariableList
             typed-f-vardecl

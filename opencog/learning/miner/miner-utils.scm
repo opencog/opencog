@@ -175,8 +175,8 @@
 (define pattern-var
   (Variable "$pattern"))
 
-(define (isurp-target texts-cpt)
-  (isurp-eval pattern-var texts-cpt))
+(define (isurp-target mode texts-cpt)
+  (isurp-eval mode pattern-var texts-cpt))
 
 (define (isurp-vardecl)
   (TypedVariable pattern-var (Type "LambdaLink")))
@@ -261,18 +261,20 @@
 "
   (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
 
-(define (isurp-eval pattern texts)
+(define (isurp-eval mode pattern texts)
 "
   Construct
 
   Evaluation
-    Predicate \"isurp\"
+    Predicate \"mode\"
     List
       pattern
       texts
+
+  where mode can be 'isurp-old, 'nisurp-old, 'isurp, 'nisurp.
 "
   (Evaluation
-    (Predicate "isurp")
+    (Predicate (symbol->string mode))
     (List
       pattern
       texts)))
@@ -533,7 +535,7 @@
               (let*
                   ;; Configure surprisingness backward chainer
                   ((isurp-rbs (random-surprisingness-rbs-cpt))
-                   (target (isurp-target texts-cpt))
+                   (target (isurp-target surprisingness texts-cpt))
                    (vardecl (isurp-vardecl))
                    (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
 
