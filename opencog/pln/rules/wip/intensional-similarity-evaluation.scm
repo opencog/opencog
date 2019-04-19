@@ -47,10 +47,10 @@
 
 (define (intensional-similarity-evaluation-side-effect-free-formula AB CA CB)
     (let 
-        ((sCA (cog-stv-strength CA))
-         (cCA (cog-stv-confidence CA))
-         (sCB (cog-stv-strength CB))
-         (cCB (cog-stv-confidence CB)))
+        ((sCA (cog-mean CA))
+         (cCA (cog-confidence CA))
+         (sCB (cog-mean CB))
+         (cCB (cog-confidence CB)))
         (if 
             (and (< sCA 0.5) (< sCB 0.5))
             (stv 0 0)

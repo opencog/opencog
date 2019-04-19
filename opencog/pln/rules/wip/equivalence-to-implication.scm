@@ -65,10 +65,10 @@
 (define (equivalence-to-implication-formula AB EQ)
   (let* ((A (gar AB))
          (B (gdr AB))
-         (sA (cog-stv-strength A))
-         (sB (cog-stv-strength B))
-         (sEQ (cog-stv-strength EQ))
-         (cEQ (cog-stv-confidence EQ))
+         (sA (cog-mean A))
+         (sB (cog-mean B))
+         (sEQ (cog-mean EQ))
+         (cEQ (cog-confidence EQ))
          (sAB (if (< 0.99 (* sEQ cEQ)) ; Hack to work around the
                                        ; lack of distributional
                                        ; TV. If sEQ is high enough,

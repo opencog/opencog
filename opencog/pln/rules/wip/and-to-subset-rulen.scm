@@ -97,6 +97,6 @@
     (cog-set-tv!
         sABCD
         (stv 
-            (/ (cog-stv-strength ABCD) (cog-stv-strength ABC)) 
-            (min (cog-stv-confidence ABCD) (cog-stv-confidence ABC)))))
+            (/ (cog-mean ABCD) (cog-mean ABC)) 
+            (min (cog-confidence ABCD) (cog-confidence ABC)))))
 

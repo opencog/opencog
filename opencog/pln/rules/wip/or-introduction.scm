@@ -52,10 +52,10 @@
 
 (define (or-introduction-side-effect-free-formula A B)
   (let 
-      ((sA (cog-stv-strength A))
-       (sB (cog-stv-strength B))
-       (cA (cog-stv-confidence A))
-       (cB (cog-stv-confidence B)))
+      ((sA (cog-mean A))
+       (sB (cog-mean B))
+       (cA (cog-confidence A))
+       (cB (cog-confidence B)))
     (stv (- (+ sA sB) (* sA sB)) (min cA cB))))
 
 ; Name the rule

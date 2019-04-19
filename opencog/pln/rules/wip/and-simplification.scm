@@ -45,8 +45,8 @@
 
 (define (and-simplification-side-effect-free-formula AABC ABC)
   (let 
-      ((sAABC (cog-stv-strength AABC))
-       (cAABC (cog-stv-confidence AABC)))
+      ((sAABC (cog-mean AABC))
+       (cAABC (cog-confidence AABC)))
     (stv sAABC cAABC)))
 
 ; Name the rule

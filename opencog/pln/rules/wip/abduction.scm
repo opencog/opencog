@@ -64,16 +64,16 @@
 
 (define (abduction-formula AB CB AC)
     (let
-        ((sA (cog-stv-strength (gar AB)))
-         (cA (cog-stv-confidence (gar AB)))
-         (sB (cog-stv-strength (gdr AB)))
-         (cB (cog-stv-confidence (gdr AB)))
-         (sC (cog-stv-strength (gar CB)))
-         (cC (cog-stv-confidence (gar CB)))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sCB (cog-stv-strength CB))
-         (cCB (cog-stv-confidence CB)))
+        ((sA (cog-mean (gar AB)))
+         (cA (cog-confidence (gar AB)))
+         (sB (cog-mean (gdr AB)))
+         (cB (cog-confidence (gdr AB)))
+         (sC (cog-mean (gar CB)))
+         (cC (cog-confidence (gar CB)))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (sCB (cog-mean CB))
+         (cCB (cog-confidence CB)))
         (cog-merge-hi-conf-tv!
             AC
             (stv

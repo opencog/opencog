@@ -56,12 +56,12 @@
 
 (define (term-probability-formula A AB BA B)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sBA (cog-stv-strength BA))
-         (cBA (cog-stv-confidence BA)))
+        ((sA (cog-mean A))
+         (cA (cog-confidence A))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (sBA (cog-mean BA))
+         (cBA (cog-confidence BA)))
         (cog-set-tv! 
             B 
             (stv 

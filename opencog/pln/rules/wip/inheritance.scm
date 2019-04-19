@@ -45,7 +45,7 @@
         IAB
         (stv 
             (/ 
-                (+ (cog-stv-strength SAB) (cog-stv-strength IIAB)) 
+                (+ (cog-mean SAB) (cog-mean IIAB)) 
                 2.0) 
-            (min (cog-stv-confidence SAB) (cog-stv-confidence IIAB)))))
+            (min (cog-confidence SAB) (cog-confidence IIAB)))))
  

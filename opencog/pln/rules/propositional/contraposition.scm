@@ -98,7 +98,7 @@
       rewrite)))
 
 (define (crisp-contraposition-scope-precondition PQ)
-  (bool->tv (and (< 0.999 (cog-stv-strength PQ)) (< 0.999 (cog-stv-confidence PQ)))))
+  (bool->tv (and (< 0.999 (cog-mean PQ)) (< 0.999 (cog-confidence PQ)))))
 
 ;; Given sAB = P(B|A), sA = P(A), sB = P(B), let's calculate
 ;; sNBNA = P(Not A | Not B)
@@ -121,12 +121,12 @@
          (AB (list-ref premises 0))
          (A (list-ref premises 1))
          (B (list-ref premises 2))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sB (cog-stv-strength B))
-         (cB (cog-stv-confidence B)))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (sA (cog-mean A))
+         (cA (cog-confidence A))
+         (sB (cog-mean B))
+         (cB (cog-confidence B)))
       (if (and (< 0.999 sAB) (< 0.999 cAB))
           (cog-merge-hi-conf-tv! NBNA (stv sAB cAB))
           (if (> 1 sB)
@@ -139,8 +139,8 @@
     (let*
         ((NQNP conclusion)
          (PQ (list-ref premises 0))
-         (sPQ (cog-stv-strength PQ))
-         (cPQ (cog-stv-confidence PQ)))
+         (sPQ (cog-mean PQ))
+         (cPQ (cog-confidence PQ)))
       (if (and (< 0.999 sPQ) (< 0.999 cPQ))
           (cog-merge-hi-conf-tv! NQNP (stv sPQ cPQ))))))
 

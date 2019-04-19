@@ -174,8 +174,8 @@
 
 (define (evaluation-to-member-side-effect-free-formula MD ED)
 	(stv
-		(cog-stv-strength ED)
-		(cog-stv-confidence ED)))
+		(cog-mean ED)
+		(cog-confidence ED)))
 
 ;(define evaluation-to-member-rule
 ;	(BindLink
@@ -204,7 +204,7 @@
 
 ;(define (evaluation-to-member-formula DA)
 ;	(if (= (cog-arity (gdr DA)) 0)
-;		(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
+;		(MemberLink (stv (cog-mean DA) (cog-confidence DA))
 ;			(gdr DA)
 ;			(SatisfyingSetScopeLink
 ;				(VariableNode "$X")
@@ -217,7 +217,7 @@
 ;(define (create-multiple-links DA preceding-nodes trailing-nodes)
 ;	(if (not (null? trailing-nodes))
 ;		(cons
-;			(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
+;			(MemberLink (stv (cog-mean DA) (cog-confidence DA))
 ;				(car trailing-nodes)
 ;				(SatisfyingSetScopeLink
 ;					(VariableNode "$X")

@@ -41,10 +41,10 @@
 
 (define (fuzzy-disjunction-introduction-formula A S)
   (let* ((orees (cog-outgoing-set S))
-         (max-s-atom (max-element-by-key orees cog-stv-strength))
-         (min-c-atom (min-element-by-key orees cog-stv-confidence))
-         (max-s (cog-stv-strength max-s-atom))
-         (min-c (cog-stv-confidence min-c-atom)))
+         (max-s-atom (max-element-by-key orees cog-mean))
+         (min-c-atom (min-element-by-key orees cog-confidence))
+         (max-s (cog-mean max-s-atom))
+         (min-c (cog-confidence min-c-atom)))
     (cog-merge-hi-conf-tv! A (stv max-s min-c))))
 
 ;; Name the rules

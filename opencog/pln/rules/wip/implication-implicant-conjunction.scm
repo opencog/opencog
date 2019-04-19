@@ -105,16 +105,16 @@
 ;; BC).
 (define (implication-implicant-conjunction-formula ABC A B C AC BC)
   (let* 
-      ((sA (cog-stv-strength A))
-       (sB (cog-stv-strength B))
-       (sC (cog-stv-strength C))
-       (sAC (cog-stv-strength AC))
-       (sBC (cog-stv-strength BC))
-       (cA (cog-stv-confidence A))
-       (cB (cog-stv-confidence B))
-       (cC (cog-stv-confidence C))
-       (cAC (cog-stv-confidence AC))
-       (cBC (cog-stv-confidence BC)))
+      ((sA (cog-mean A))
+       (sB (cog-mean B))
+       (sC (cog-mean C))
+       (sAC (cog-mean AC))
+       (sBC (cog-mean BC))
+       (cA (cog-confidence A))
+       (cB (cog-confidence B))
+       (cC (cog-confidence C))
+       (cAC (cog-confidence AC))
+       (cBC (cog-confidence BC)))
     (if
        (and
            (conditional-probability-consistency sA sC sAC)

@@ -49,10 +49,10 @@
 
 (define (subset-negated-evaluation-side-effect-free-formula nAB CA CB)
     (let 
-        ((snCA (- 1 (cog-stv-strength CA)))
-         (cnCA (cog-stv-confidence CA))
-         (sCB (cog-stv-strength CB))
-         (cCB (cog-stv-confidence CB)))
+        ((snCA (- 1 (cog-mean CA)))
+         (cnCA (cog-confidence CA))
+         (sCB (cog-mean CB))
+         (cCB (cog-confidence CB)))
         (if 
             (< snCA 0.5)
             (stv 0 0)

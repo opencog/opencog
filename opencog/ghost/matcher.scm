@@ -51,7 +51,7 @@
          ; 'val' here should be a LinkValue of rule labels
          (for-each
            (lambda (r)
-             (cog-set-tv! r (cog-new-stv 0 (cog-stv-confidence r))))
+             (cog-set-tv! r (cog-new-stv 0 (cog-confidence r))))
            (append-map (lambda (x) (get-rules-from-label (cog-name x)))
              (cog-value->list val))))
         ((string=? "mark-executed" key-str)
@@ -130,7 +130,7 @@
   (define (calculate-rweight R)
     (define strength
       (if (> strength-weight 0)
-        (* strength-weight (cog-stv-strength R)) 1))
+        (* strength-weight (cog-mean R)) 1))
     (define context
       (if (> context-weight 0)
         (* context-weight
@@ -155,7 +155,7 @@
   ; its current STI, strength, and the last executed time
   (define (accept-rule? r)
     (and (or (= sti-weight 0) (> (cog-av-sti r) 0))
-         (or (= strength-weight 0) (> (cog-stv-strength r) 0))
+         (or (= strength-weight 0) (> (cog-mean r) 0))
          (not-within-refractory? r)))
 
   ; ----------
@@ -304,7 +304,7 @@
     (lambda (p-rule)
       (if (and (not-within-refractory? p-rule)
                (> (cog-tv-mean (psi-satisfiable? p-rule)) 0)
-               (> (cog-stv-strength p-rule) 0))
+               (> (cog-mean p-rule) 0))
         (begin
           (psi-imply p-rule)
           (handle-rule-features p-rule))))

@@ -60,20 +60,20 @@
         (cog-set-tv! 
             BC
             (stv 
-                (* (cog-stv-strength B) (cog-stv-strength C))
-                (min (cog-stv-confidence B) (cog-stv-confidence C))))
+                (* (cog-mean B) (cog-mean C))
+                (min (cog-confidence B) (cog-confidence C))))
         (cog-set-tv!
             ABC
             (stv
                 (/
                     (* 
-                        (* (cog-stv-strength AB) (cog-stv-strength BC))
-                        (* (cog-stv-strength A) (cog-stv-strength AC)))
-                    (* (cog-stv-strength C) (cog-stv-strength B)))
+                        (* (cog-mean AB) (cog-mean BC))
+                        (* (cog-mean A) (cog-mean AC)))
+                    (* (cog-mean C) (cog-mean B)))
                 (min
-                    (cog-stv-confidence A)
-                    (cog-stv-confidence B)
-                    (cog-stv-confidence C)
-                    (cog-stv-confidence AB)
-                    (cog-stv-confidence AC))))))
+                    (cog-confidence A)
+                    (cog-confidence B)
+                    (cog-confidence C)
+                    (cog-confidence AB)
+                    (cog-confidence AC))))))
 
