@@ -330,11 +330,11 @@ def check_name(word):
 (ghost-parse "r: (set used rule) test system functions - set-used ^set_used(KR)")
 
 (test-equal ghost-sys-func "test system functions" (get-result "normal rule"))
-(test-assert ghost-sys-func (= 0 (cog-stv-strength (car (ghost-get-rule "NR")))))
+(test-assert ghost-sys-func (= 0 (cog-mean (car (ghost-get-rule "NR")))))
 (test-equal ghost-sys-func "test system functions - keep" (get-result "keep rule"))
-(test-assert ghost-sys-func (< 0 (cog-stv-strength (car (ghost-get-rule "KR")))))
+(test-assert ghost-sys-func (< 0 (cog-mean (car (ghost-get-rule "KR")))))
 (test-equal ghost-sys-func "test system functions - set-used" (get-result "set used rule"))
-(test-assert ghost-sys-func (= 0 (cog-stv-strength (car (ghost-get-rule "KR")))))
+(test-assert ghost-sys-func (= 0 (cog-mean (car (ghost-get-rule "KR")))))
 (test-equal ghost-sys-func "test system functions - set-used rej" (get-result "rej rule"))
 
 ; --- Goal --- ;
@@ -372,11 +372,11 @@ def check_name(word):
 
 ; Check the strengths of the rules as well
 (test-assert ghost-goals
-  (lset= equal? (list 1.0) (map cog-stv-strength rules-g1)))
+  (lset= equal? (list 1.0) (map cog-mean rules-g1)))
 (test-assert ghost-goals
-  (lset= equal? (list 1.0 0.6 0.4) (map cog-stv-strength rules-g2)))
+  (lset= equal? (list 1.0 0.6 0.4) (map cog-mean rules-g2)))
 (test-assert ghost-goals
-  (lset= equal? (list 0.5) (map cog-stv-strength rules-g3)))
+  (lset= equal? (list 0.5) (map cog-mean rules-g3)))
 
 ; --- Link Concept --- ;
 (define ghost-link-concept "GHOST link concept")

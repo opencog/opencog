@@ -165,12 +165,12 @@
 ;;
 (define (implication-full-instantiation-formula Impl)
   (let* ((Impl-outgoings (cog-outgoing-set Impl))
-         (Impl-s (cog-stv-strength Impl))
-         (Impl-c (cog-stv-confidence Impl))
+         (Impl-s (cog-mean Impl))
+         (Impl-c (cog-confidence Impl))
          (TyVs (car Impl-outgoings))
          (P (cadr Impl-outgoings))
-         (P-s (cog-stv-strength P))
-         (P-c (cog-stv-confidence P))
+         (P-s (cog-mean P))
+         (P-c (cog-confidence P))
          ;; Hacks to overcome the lack of distributional TV. If s=1
          ;; and c=0, then assign s to the mode value satisfying the
          ;; deduction consistency constraint (what a pain, let's use
@@ -187,8 +187,8 @@
         (let* (
                (Pput (PutLink (LambdaLink TyVs P) terms))
                (Pinst (cog-execute! Pput))
-               (Pinst-s (cog-stv-strength Pinst))
-               (Pinst-c (cog-stv-confidence Pinst))
+               (Pinst-s (cog-mean Pinst))
+               (Pinst-c (cog-confidence Pinst))
                (Qput (PutLink (LambdaLink TyVs Q) terms))
                (Qinst (cog-execute! Qput))
                (Qinst-s (* Impl-s Pinst-s))

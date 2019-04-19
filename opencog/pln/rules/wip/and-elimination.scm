@@ -41,8 +41,8 @@
 
 (define (and-elimination-side-effect-free-formula AB)
   (let 
-      ((sAB (cog-stv-strength AB))
-       (cAB (cog-stv-confidence AB)))
+      ((sAB (cog-mean AB))
+       (cAB (cog-confidence AB)))
     (stv (expt sAB 0.5) (/ cAB 1.42))))
 
 ; Name the rule

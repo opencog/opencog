@@ -37,8 +37,8 @@
 
 (define (or-transformation-side-effect-free-formula OAB IAB)
   (let 
-      ((sOAB (cog-stv-strength OAB))
-       (cOAB (cog-stv-confidence OAB)))
+      ((sOAB (cog-mean OAB))
+       (cOAB (cog-confidence OAB)))
     (stv sOAB cOAB)))
 
 ; Name the rule

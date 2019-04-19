@@ -140,10 +140,10 @@
                     (cond
                         ((equal? (cog-name (gdr i)) "Positive")
                             (set! utterance (string-append utterance
-                                "<Positive, " (number->string (cog-stv-strength i)) ">")))
+                                "<Positive, " (number->string (cog-mean i)) ">")))
                         ((equal? (cog-name (gdr i)) "Negative")
                             (set! utterance (string-append utterance
-                                "<Negative, " (number->string (cog-stv-strength i)) ">")))
+                                "<Negative, " (number->string (cog-mean i)) ">")))
                     )))
             (cog-incoming-set (Concept (cog-name w))))))
         words)

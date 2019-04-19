@@ -42,10 +42,10 @@
 
 (define (fuzzy-conjunction-introduction-formula A S)
   (let* ((andees (cog-outgoing-set S))
-         (min-s-atom (min-element-by-key andees cog-stv-strength))
-         (min-c-atom (min-element-by-key andees cog-stv-confidence))
-         (min-s (cog-stv-strength min-s-atom))
-         (min-c (cog-stv-confidence min-c-atom)))
+         (min-s-atom (min-element-by-key andees cog-mean))
+         (min-c-atom (min-element-by-key andees cog-confidence))
+         (min-s (cog-mean min-s-atom))
+         (min-c (cog-confidence min-c-atom)))
     (cog-merge-hi-conf-tv! A (stv min-s min-c))))
 
 ;; Name the rules

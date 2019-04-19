@@ -57,19 +57,19 @@
         CB
         (stv
             (simple-deduction-strength-formula 
-                (cog-stv-strength B)
-                (cog-stv-strength A)
-                (cog-stv-strength C)
-                (cog-stv-strength AB)
-                (cog-stv-strength AC))
+                (cog-mean B)
+                (cog-mean A)
+                (cog-mean C)
+                (cog-mean AB)
+                (cog-mean AC))
             (*
                 (* 0.9 0.9)
                 (min
-                    (cog-stv-confidence B)
-                    (cog-stv-confidence A)
-                    (cog-stv-confidence C)
-                    (cog-stv-confidence AC)
-                    (* 0.9 (cog-stv-confidence AB)))))))
+                    (cog-confidence B)
+                    (cog-confidence A)
+                    (cog-confidence C)
+                    (cog-confidence AC)
+                    (* 0.9 (cog-confidence AB)))))))
 
 ; Name the rule
 (define evaluation-implication-rule-name (DefinedSchemaNode "evaluation-implication-rule"))

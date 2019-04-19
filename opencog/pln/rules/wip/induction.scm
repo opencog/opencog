@@ -117,16 +117,16 @@
     (define B (gdr AB))
     (define C (gdr AC))
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sB (cog-stv-strength B))
-         (cB (cog-stv-confidence B))
-         (sC (cog-stv-strength C))
-         (cC (cog-stv-confidence C))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sAC (cog-stv-strength AC))
-         (cAC (cog-stv-confidence AC)))
+        ((sA (cog-mean A))
+         (cA (cog-confidence A))
+         (sB (cog-mean B))
+         (cB (cog-confidence B))
+         (sC (cog-mean C))
+         (cC (cog-confidence C))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (sAC (cog-mean AC))
+         (cAC (cog-confidence AC)))
         (cog-set-tv!
             BC
             (stv 

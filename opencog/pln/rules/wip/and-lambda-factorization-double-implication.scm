@@ -100,8 +100,8 @@
 
 (define (and-lambda-factorization-double-implication-formula var a1 a2)
   (let* ((and-lamb (AndLink (LambdaLink var a1) (LambdaLink var a2)))
-        (and-lamb-s (cog-stv-strength and-lamb))
-        (and-lamb-c (cog-stv-confidence and-lamb))
+        (and-lamb-s (cog-mean and-lamb))
+        (and-lamb-c (cog-confidence and-lamb))
         (lamb (LambdaLink var (cog-new-flattened-link 'AndLink a1 a2))))
     (if (and (< 1e-8 and-lamb-s) (< 1e-8 and-lamb-c))
         (let ((lamb-s and-lamb-s)

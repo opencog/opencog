@@ -1058,7 +1058,7 @@ proper atomese.
 		(for-each (lambda (x) (set! result
 			(assoc-set! result
 				(psi-suffix-str (cog-name (car (psi-rule-alias x))))
-				(cog-stv-strength x))))
+				(cog-mean x))))
 			rules
 		)
 		result

@@ -65,10 +65,10 @@
 
 (define (implication-introduction-stv-formula P Q)
   (let* (
-         (P-s (cog-stv-strength P))
-         (P-c (cog-stv-confidence P))
-         (Q-s (cog-stv-strength Q))
-         (Q-c (cog-stv-confidence Q))
+         (P-s (cog-mean P))
+         (P-c (cog-confidence P))
+         (Q-s (cog-mean Q))
+         (Q-c (cog-confidence Q))
          ; Compute the implication TV
          (Impl-s Q-s)
          (Impl-c (if (< 0.9 (* Q-s Q-c)) ; Hack to overcome the lack
