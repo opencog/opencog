@@ -205,7 +205,7 @@
       (map cog-av rule)
       (map cog-tv rule)
       (every
-        (lambda (x) (> (cog-tv-mean (cog-evaluate! x))) 0))
+        (lambda (x) (> (cog-tv-mean (cog-evaluate! x)) 0))
         (psi-get-context (car rule)))
       (if (null? (cog-value (car rule) ghost-time-last-executed))
         "N.A."
