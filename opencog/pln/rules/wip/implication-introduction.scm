@@ -61,7 +61,7 @@
      implication-introduction-rewrite))
 
 (define (implication-introduction-precondition P Q)
-  (bool->tv (tv-non-null-conf? (implication-introduction-stv-formula P Q))))
+  (bool->tv (< 0 (cog-tv-confidence (implication-introduction-stv-formula P Q)))))
 
 (define (implication-introduction-stv-formula P Q)
   (let* (
@@ -80,7 +80,7 @@
 
 (define (implication-introduction-formula Impl P Q)
   (let ((Impl-tv (implication-introduction-stv-formula P Q)))
-    (if (tv-non-null-conf? Impl-tv) ; Try to avoid constructing informationless
+    (if (< 0 (cog-tv-confidence Impl-tv)) ; Try to avoid constructing informationless
                                     ; knowledge
         (cog-merge-hi-conf-tv! Impl Impl-tv))))
 

@@ -73,7 +73,7 @@
          ;; (dummy-11 (cog-logger-debug "conditional-direct-evaluation-implication-scope-formula tv = ~a" tv))
          )
 
-    (if (tv-non-null-conf? tv)
+    (if (< 0 (cog-tv-confidence tv))
         (cog-merge-hi-conf-tv! I tv))))
 
 ;; Given List of values, wrap a Quote link around each element of that list
