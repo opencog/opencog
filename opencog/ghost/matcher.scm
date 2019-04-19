@@ -177,7 +177,7 @@
           (if (equal? (assoc-ref context-alist rc) #f)
             (set! context-alist
               (assoc-set! context-alist rc
-                (cdadr (cog-tv->alist (psi-satisfiable? r))))))
+                (cog-tv-mean (psi-satisfiable? r)))))
 
           ; Count the no. of rules that contain this action, and
           ; save it in action-cnt-alist
