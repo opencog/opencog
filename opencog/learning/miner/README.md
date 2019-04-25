@@ -609,7 +609,7 @@ the `miner` module
 Then, simply call `cog-mine` on your text set with a given minimum
 support
 ```scheme
-(cog-mine texts ms)
+(cog-mine texts #:minsup ms)
 ```
 where `texts` is either
 1. a Scheme list of atoms
