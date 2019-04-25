@@ -1,12 +1,8 @@
 ;; guile --no-auto-compile -l mine-sumo.scm
 
 ;; Load SUMO
-;; (load "scm/all-sumo-labeled-kb.scm")
-;; (load "scm/Merge.scm")
-;; (load "scm/Music.scm")
-;; (load "scm/Geography.scm")
-;; (load "scm/Cars.scm")
-(load "scm/Hotel.scm")
+;; (load "all-sumo-labeled-kb.scm")
+(load "Geography.scm")
 
 ;; Set ure logger to debug
 (use-modules (opencog ure))
@@ -27,7 +23,33 @@
 (use-modules (opencog miner))
 (define results (cog-mine texts
                           #:minsup 5
-                          #:maximum-iterations 10000
+                          #:maximum-iterations 500
                           #:incremental-expansion #t
                           #:max-conjuncts 2
                           #:surprisingness 'nisurp))
+
+;; The top results are very abstract, but some are interesting, such as
+;;
+;; (EvaluationLink (stv 0.98404255 1)
+;;    (PredicateNode "isurp")
+;;    (ListLink
+;;       (LambdaLink
+;;          (VariableNode "$PM-229da880")
+;;          (AndLink
+;;             (InheritanceLink
+;;                (VariableNode "$PM-229da880")
+;;                (ConceptNode "SaltWaterArea" (stv 0.01 1))
+;;             )
+;;             (InheritanceLink
+;;                (VariableNode "$PM-229da880")
+;;                (ConceptNode "MaritimeClaimArea" (stv 0.01 1))
+;;             )
+;;          )
+;;       )
+;;       (ConceptNode "texts-438037533-1Ip13XKsMBkEBFng")
+;;    )
+;; )
+;;
+;; Which is rather obvious to a human who has the appropriate
+;; background knowledge, but it highly surprising to the pattern
+;; miner.
