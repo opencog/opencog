@@ -345,3 +345,12 @@
       (and (string-suffix? "." WORD)
            (member (string-downcase (car (string-split WORD #\.))) lst)))
 )
+
+; ----------
+(define (current-time-us)
+"
+  Returns the current-time in microseconds.
+"
+  (define t (gettimeofday))
+  (+ (car t) (/ (cdr t) 1000000))
+)
