@@ -6,7 +6,7 @@
   Check if a rule is still within its refractory period or not.
 "
   (or (null? (cog-value RULE ghost-time-last-executed))
-      (> (- (current-time)
+      (> (- (current-time-us)
             (car (cog-value->list
               (cog-value RULE ghost-time-last-executed))))
          refractory-period)))
@@ -63,7 +63,7 @@
                (lambda (r)
                  (cog-set-value! r
                    ghost-time-last-executed
-                     (FloatValue (current-time))))
+                     (FloatValue (current-time-us))))
                (get-rules-from-label (cog-name lb))))
             (cog-value->list val)))
         ((string=? "last-executed" key-str)
@@ -162,7 +162,7 @@
   (for-each
     (lambda (r)
       ; Skip the rule if its STI or strength is zero,
-      ; or if it's still with the refractory period,
+      ; or if it's still within the refractory period,
       ; unless we choose to ignore their weights
       (if (accept-rule? r)
         (let ((rc (psi-get-context r))
@@ -252,12 +252,12 @@
             ; the same specificity
             (fold
               (lambda (a rtn)
+                (define a-rule (assoc-ref action-rule-alist (car a)))
+                (define a-specificity (cog-value-ref (cog-value a-rule ghost-context-specificity) 0))
                 (cond
-                  ((null? rtn) (assoc-ref action-rule-alist (car a)))
-                  ((> (cog-value-ref (cog-value
-                        (assoc-ref action-rule-alist (car a)) ghost-context-specificity) 0)
-                      (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
-                   (assoc-ref action-rule-alist (car a)))
+                  ((null? rtn) a-rule)
+                  ((> a-specificity (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
+                   a-rule)
                   (else rtn)))
               (list)
               action-weight-alist
