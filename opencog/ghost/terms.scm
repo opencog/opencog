@@ -324,24 +324,30 @@
   (list-ref os (random (length os) (random-state-from-platform))))
 
 ; ----------
-(define-public (ghost-get-original-word WORD)
-"
-  Given a word, return the original word stored as a Value.
-"
-  (define ori-word (cog-value WORD ghost-word-original))
-  (if (null? ori-word)
-    (begin
-      (cog-logger-warn ghost-logger "No original word is found for ~a" WORD)
-      WORD)
-    ori-word))
-
-; ----------
 (define (get-var-literals VAR)
 "
   Return the value grounded in original words.
 "
   (ExecutionOutput (GroundedSchema "scm: ghost-get-original-word")
                    (List VAR)))
+
+(define-public (ghost-get-original-word . WORDS)
+"
+  Given a list of words, return their original words stored as Values.
+"
+  (if (any (lambda (w) (or (equal? 'GlobNode (cog-type w))
+                           (equal? 'VariableNode (cog-type w))))
+           WORDS)
+      '()
+      (List (map
+        (lambda (w)
+          (define ori-word (cog-value w ghost-word-original))
+          (if (null? ori-word)
+            (begin
+              (cog-logger-warn ghost-logger "No original word is found for ~a" w)
+              w)
+            ori-word))
+        WORDS))))
 
 ; ----------
 (define (get-var-lemmas VAR)
@@ -360,9 +366,8 @@
            GRD)
       '()
       (List (map
-        (lambda (w)
-          (Word (get-lemma (cog-name (ghost-get-original-word w)))))
-        GRD))))
+        (lambda (w) (Word (get-lemma (cog-name w))))
+        (map (lambda (g) (cog-value g ghost-word-original)) GRD)))))
 
 ; ----------
 (define (get-user-variable UVAR)
