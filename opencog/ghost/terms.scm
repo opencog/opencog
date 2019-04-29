@@ -56,16 +56,17 @@
                   ; "(LemmaLink v2 l)" in the context
                   (Evaluation (GroundedPredicate "scm: ghost-lemma?")
                               (List var l)))))
-    ; Special handling for the word "does"
+    ; Special handling for the word "do"
     ; Given just one word, without any other clues, it seems impossible to
-    ; determine whether the word "does" means "perform" (do) or "a female
-    ; deer" (doe), so make sure, in this case, that the RelEx outputs will
-    ; be considered
+    ; determine whether the word "does" from the input means "perform" (do)
+    ; or "a female deer" (doe), so make sure, in this case, that the RelEx
+    ; outputs will be considered when "do" is in the pattern of a rule
     (if (string-ci=? STR "do")
       (let ((wi-var (Variable (gen-var str-dc #f))))
         (set! v (append v (list
           (TypedVariable wi-var (Type "WordInstanceNode")))))
         (set! c (list
+          (ReferenceLink wi-var var)
           (WordInstanceLink wi-var (Variable "$P"))
           (LemmaLink wi-var (Word "do"))))))
     (list v c (list var))))
