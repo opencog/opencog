@@ -431,7 +431,7 @@
                     (append (list ac) (to-atomese (list n)))))
               ; The grounding of a variable in original words, e.g. '_0
               ((equal? 'get_wvar (car n))
-               (list-ref pat-vars (cdr n)))
+               (get-var-literals (list-ref pat-vars (cdr n))))
               ; The grounding of a variable in lemmas, e.g. _0
               ((equal? 'get_lvar (car n))
                (get-var-lemmas (list-ref pat-vars (cdr n))))

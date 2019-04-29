@@ -141,7 +141,13 @@
     (List SENT
       (List (map
         (lambda (w)
-          (WordNode (string-downcase (cog-name w))))
+          (define word-str (cog-name w))
+          (define wordnode-dc (WordNode (string-downcase word-str)))
+          (cog-set-value!
+            wordnode-dc
+            ghost-word-original
+            (WordNode word-str))
+          wordnode-dc)
         final-word-seq)))))
 
 ; ----------

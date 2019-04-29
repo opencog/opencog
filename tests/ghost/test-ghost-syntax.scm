@@ -136,11 +136,13 @@
 (ghost-parse "r: (go _*) test variable - '_0")
 (ghost-parse "r: (ride _*1) test variable - _0")
 (ghost-parse "r: (finish _watch people) test variable - '_0")
+(ghost-parse "r: (I saw _*) test variable - _0 '_0")
 
 (test-equal ghost-variable "test variable - to those stores" (get-result "go to those stores"))
 (test-equal ghost-variable "test variable - bike" (get-result "ride bikes"))
 (test-equal ghost-variable "test variable - watching" (get-result "finished watching people"))
 (test-equal ghost-variable (string) (get-result "finished firing people"))
+(test-equal ghost-variable "test variable - Alice Alice" (get-result "I saw Alice"))
 
 ; --- User Variable --- ;
 (define ghost-user-variable "GHOST user variable")
@@ -154,7 +156,7 @@
 (ghost-parse "r: (user variable test) test user variable - $who $age")
 (ghost-parse "r: (who be the killer) $killer=^findkiller() test user variable - $killer")
 
-(test-equal ghost-user-variable "test user variable - john" (get-result "my name is john"))
+(test-equal ghost-user-variable "test user variable - John" (get-result "my name is John"))
 (test-equal ghost-user-variable "test user variable 1" (get-result "I know you"))
 (test-equal ghost-user-variable "test user variable 2" (get-result "I know John"))
 (test-equal ghost-user-variable "test user variable - Jay 2" (get-result "user variable test"))
