@@ -328,7 +328,12 @@
 "
   Given a word, return the original word stored as a Value.
 "
-  (cog-value WORD ghost-word-original))
+  (define ori-word (cog-value WORD ghost-word-original))
+  (if (null? ori-word)
+    (begin
+      (cog-logger-warn ghost-logger "No original word is found for ~a" WORD)
+      WORD)
+    ori-word))
 
 ; ----------
 (define (get-var-literals VAR)
