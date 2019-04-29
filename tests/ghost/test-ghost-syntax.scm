@@ -43,9 +43,12 @@
 (define ghost-lemma "GHOST lemma")
 
 (ghost-parse "r: (apple) test lemma")
+(ghost-parse "r: (where do) test lemma - do")
 
 (test-equal ghost-lemma "test lemma" (get-result "apple"))
 (test-equal ghost-lemma "test lemma" (get-result "apples"))
+(test-equal ghost-lemma "test lemma - do" (get-result "where does Alice work"))
+(test-equal ghost-lemma "test lemma - do" (get-result "where did you go"))
 
 ; --- Literal --- ;
 (define ghost-literal "GHOST literal")
