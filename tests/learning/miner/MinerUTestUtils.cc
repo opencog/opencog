@@ -45,9 +45,9 @@ Handle MinerUTestUtils::add_minsup_prd(AtomSpace& as)
 	return an(PREDICATE_NODE, "minsup");
 }
 
-Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as)
+Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as, const std::string& mode)
 {
-	return an(PREDICATE_NODE, "isurp");
+	return an(PREDICATE_NODE, mode);
 }
 
 Handle MinerUTestUtils::add_top(AtomSpace& as)
@@ -84,10 +84,11 @@ Handle MinerUTestUtils::add_minsup_evals(AtomSpace& as,
 }
 
 Handle MinerUTestUtils::add_isurp_eval(AtomSpace& as,
+                                       const std::string& mode,
                                        const Handle& pattern)
 {
 	Handle isurp_eval_h = al(EVALUATION_LINK,
-	                         add_isurp_prd(as),
+	                         add_isurp_prd(as, mode),
 	                         al(LIST_LINK,
 	                            pattern,
 	                            add_texts_cpt(as)));
@@ -326,7 +327,7 @@ HandleSeq MinerUTestUtils::ure_isurp(AtomSpace& as,
 {
 	configure_ISurprisingness(scm, isurp_rb, mode, max_conjuncts);
 	Handle X = an(VARIABLE_NODE, "$X"),
-		target = add_isurp_eval(as, X),
+		target = add_isurp_eval(as, mode, X),
 		vardecl = al(TYPED_VARIABLE_LINK, X, an(TYPE_NODE, "LambdaLink"));
 	BackwardChainer bc(as, isurp_rb, target, vardecl);
 	bc.do_chain();

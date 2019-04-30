@@ -205,7 +205,9 @@ Handle MinerUtils::val_shallow_abstract(const Handle& value)
 	Handle vardecl = variable_list(rnd_vars);
 
 	// Links wrapped with LocalQuoteLink
-	if (tt == AND_LINK) {
+	if (tt == AND_LINK or
+	    tt == OR_LINK or
+	    tt == NOT_LINK) {
 		return lambda(vardecl, local_quote(createLink(rnd_vars, tt)));
 	}
 
