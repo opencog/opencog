@@ -1,32 +1,48 @@
+;; Make sure you disable compiling
+;;
 ;; guile --no-auto-compile -l mine-sumo.scm
+
+;; Load modules
+(use-modules (opencog miner))
+(use-modules (opencog ure))
+(use-modules (opencog logger))
 
 ;; Load SUMO
 ;; (load "all-sumo-labeled-kb.scm")
 (load "Geography.scm")
 
-;; Set ure logger to debug
-(use-modules (opencog ure))
+;; Set loggers
 (ure-logger-set-level! "debug")
-
-;; Set regular logger to debug
-(use-modules (opencog logger))
+(ure-logger-set-timestamp! #f)
+;; (ure-logger-set-sync! #t)
+(cog-logger-set-timestamp! #f)
 (cog-logger-set-level! "debug")
+;; (cog-logger-set-sync! #t)
+
+;; Set random seed
+(use-modules (opencog randgen))
+(cog-randgen-set-seed! 0)
 
 ;; Construct corpus to mine. We select all root atoms except quanfiers
 ;; (ForAll, Exists, ImplicationScope, etc) statements, as they usually
 ;; represent rules rather than data.
 (define (scope? x) (cog-subtype? 'ScopeLink (cog-type x)))
 (define texts
-  (filter (lambda (x) (not (scope? x))) (cog-get-all-roots)))
+  ;; (filter (lambda (x) (not (scope? x))) (cog-get-all-roots)))
+  ;; (filter scope? (cog-get-all-roots)))
+  (cog-get-all-roots))
+
+;; Build texts concept
+(define texts-cpt (fill-texts-cpt (Concept "sumo-texts") texts))
 
 ;; Run pattern miner
-(use-modules (opencog miner))
-(define results (cog-mine texts
+(define results (cog-mine texts-cpt
                           #:minsup 5
-                          #:maximum-iterations 500
+                          #:maximum-iterations 30
                           #:incremental-expansion #t
                           #:max-conjuncts 2
-                          #:surprisingness 'nisurp))
+                          ;; #:surprisingness 'nisurp))
+                          #:surprisingness 'none))
 
 ;; The top results are very abstract, but some are interesting, such as
 ;;
