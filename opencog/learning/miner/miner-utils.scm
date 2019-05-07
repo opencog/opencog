@@ -70,6 +70,8 @@
 
 (define (fill-texts-cpt texts-cpt texts)
 "
+  Usage: (fill-texts-cpt texts-cpt texts)
+
   For each element text of texts create
 
   MemberLink
