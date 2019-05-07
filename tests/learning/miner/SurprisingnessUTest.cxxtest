@@ -387,7 +387,7 @@ void SurprisingnessUTest::test_nisurp_old_ugly_man()
 	std::string mode = "nisurp-old";
 	unsigned max_conjuncts = 2;
 	HandleSeq isurp_results = ure_isurp(mode, max_conjuncts);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, ugly_man_pattern);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, ugly_man_pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -441,7 +441,7 @@ void SurprisingnessUTest::test_nisurp_old_ugly_man_soda_drinker()
 	std::string mode = "nisurp-old";
 	unsigned max_conjuncts = 3;
 	HandleSeq isurp_results = ure_isurp(mode, max_conjuncts);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, umsd_pattern);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, umsd_pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -499,8 +499,9 @@ void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_1()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -550,8 +551,9 @@ void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_2()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -605,8 +607,9 @@ void SurprisingnessUTest::xtest_nisurp_linkage_synthetic_1()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -656,8 +659,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_2()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -707,8 +711,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_3()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -771,8 +776,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_4()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -833,8 +839,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_5()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -898,8 +905,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_6()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 3);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 3);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -973,8 +981,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_7()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 4);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 4);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -1036,8 +1045,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_8()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -1099,8 +1109,9 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_9()
 	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
 
 	// Test normalized I-Surprisingness
-	HandleSeq isurp_results = ure_isurp("nisurp", 2);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, pattern);
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 
@@ -1178,7 +1189,7 @@ void SurprisingnessUTest::test_nisurp_ugly_man_soda_drinker()
 	std::string mode("nisurp");
 	unsigned max_conjuncts = 3;
 	HandleSeq isurp_results = ure_isurp(mode, max_conjuncts);
-	Handle expected = MinerUTestUtils::add_isurp_eval(_as, umsd_pattern);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, umsd_pattern);
 
 	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
 

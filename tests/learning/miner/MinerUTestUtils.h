@@ -54,11 +54,11 @@ public:
 	/**
 	 * Add
 	 *
-	 * (Predicate "isurp")
+	 * (Predicate <mode>)
 	 *
 	 * to as.
 	 */
-	static Handle add_isurp_prd(AtomSpace& as);
+	static Handle add_isurp_prd(AtomSpace& as, const std::string& mode);
 
 	/**
 	 * Add
@@ -98,12 +98,14 @@ public:
 	 * Insert
 	 *
 	 * (Evaluation
-	 *   (Predicate "isurp")
+	 *   (Predicate <mode>)
 	 *   (List pattern (Concept "texts")))
 	 *
 	 * to as.
 	 */
-	static Handle add_isurp_eval(AtomSpace& as, const Handle& pattern);
+	static Handle add_isurp_eval(AtomSpace& as,
+	                             const std::string& mode,
+	                             const Handle& pattern);
 
 	/**
 	 * Given
