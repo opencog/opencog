@@ -1,213 +1,75 @@
-
+;
+; ECAN paramters.
+;
 (use-modules (opencog))
 
-(define AF_RENT_FREQUENCY  (ConceptNode "AF_RENT_FREQUENCY"))
-(define MAX_AF_SIZE (ConceptNode "MAX_AF_SIZE"))
-(define MIN_AF_SIZE (ConceptNode "MIN_AF_SIZE"))
-(define AF_SIZE (ConceptNode "AF_SIZE"))
-(define AFB_BOTTOM  (ConceptNode "AFB_BOTTOM"))
-(define AFB_DECAY (ConceptNode "AFB_DECAY"))
-(define ECAN_PARAM (ConceptNode "ECAN_PARAMS"))
-(define FORGET_THRESHOLD (ConceptNode "FORGET_THRESHOLD") ) 
-(define MAX_LINKS (ConceptNode "MAX_LINKS")   ) 
-(define HEBBIAN_MAX_ALLOCATION_PERCENTAGE (ConceptNode "HEBBIAN_MAX_ALLOCATION_PERCENTAGE") )  
-(define LOCAL_FAR_LINK_RATIO (ConceptNode "LOCAL_FAR_LINK_RATIO") )
-(define MAX_SPREAD_PERCENTAGE  (ConceptNode "MAX_SPREAD_PERCENTAGE"))
-(define SPREAD_HEBBIAN_ONLY (ConceptNode "SPREAD_HEBBIAN_ONLY"))
-(define DIFFUSION_TOURNAMENT_SIZE(ConceptNode "DIFFUSION_TOURNAMENT_SIZE"))
-(define STARTING_ATOM_STI_RENT (ConceptNode "STARTING_ATOM_STI_RENT"))
-(define STARTING_ATOM_LTI_RENT (ConceptNode "STARTING_ATOM_LTI_RENT"))
-(define TARGET_STI_FUNDS (ConceptNode "TARGET_STI_FUNDS"))
-(define TARGET_LTI_FUNDS (ConceptNode "TARGET_LTI_FUNDS"))
-(define STI_FUNDS_BUFFER (ConceptNode "STI_FUNDS_BUFFER"))
-(define LTI_FUNDS_BUFFER (ConceptNode "LTI_FUNDS_BUFFER"))
-(define TARGET_LTI_FUNDS_BUFFER (ConceptNode "TARGET_LTI_FUNDS_BUFFER"))
-(define RENT_TOURNAMENT_SIZE (ConceptNode "RENT_TOURNAMENT_SIZE"))
-(define SPREADING_FILTER (ConceptNode "SPREADING_FILTER"))
+(define AF_RENT_FREQUENCY         (Concept "AF_RENT_FREQUENCY"))
+(define MAX_AF_SIZE               (Concept "MAX_AF_SIZE"))
+(define MIN_AF_SIZE               (Concept "MIN_AF_SIZE"))
+(define AF_SIZE                   (Concept "AF_SIZE"))
+(define AFB_BOTTOM                (Concept "AFB_BOTTOM"))
+(define AFB_DECAY                 (Concept "AFB_DECAY"))
+(define ECAN_PARAM                (Concept "ECAN_PARAMS"))
+(define FORGET_THRESHOLD          (Concept "FORGET_THRESHOLD"))
+(define MAX_LINKS                 (Concept "MAX_LINKS"))
+(define HEBBIAN_MAX_ALLOCATION_PERCENTAGE (Concept "HEBBIAN_MAX_ALLOCATION_PERCENTAGE"))
+(define LOCAL_FAR_LINK_RATIO      (Concept "LOCAL_FAR_LINK_RATIO") )
+(define MAX_SPREAD_PERCENTAGE     (Concept "MAX_SPREAD_PERCENTAGE"))
+(define SPREAD_HEBBIAN_ONLY       (Concept "SPREAD_HEBBIAN_ONLY"))
+(define DIFFUSION_TOURNAMENT_SIZE (Concept "DIFFUSION_TOURNAMENT_SIZE"))
+(define STARTING_ATOM_STI_RENT    (Concept "STARTING_ATOM_STI_RENT"))
+(define STARTING_ATOM_LTI_RENT    (Concept "STARTING_ATOM_LTI_RENT"))
+(define TARGET_STI_FUNDS          (Concept "TARGET_STI_FUNDS"))
+(define TARGET_LTI_FUNDS          (Concept "TARGET_LTI_FUNDS"))
+(define STI_FUNDS_BUFFER          (Concept "STI_FUNDS_BUFFER"))
+(define LTI_FUNDS_BUFFER          (Concept "LTI_FUNDS_BUFFER"))
+(define TARGET_LTI_FUNDS_BUFFER   (Concept "TARGET_LTI_FUNDS_BUFFER"))
+(define RENT_TOURNAMENT_SIZE      (Concept "RENT_TOURNAMENT_SIZE"))
+(define SPREADING_FILTER          (Concept "SPREADING_FILTER"))
 
-(MemberLink 
-  AF_SIZE
-  ECAN_PARAM  
-)
-(MemberLink
-  MAX_AF_SIZE
-  ECAN_PARAM
-)
-(MemberLink 
-  MIN_AF_SIZE
-  ECAN_PARAM  
-)
-(MemberLink 
-  AFB_DECAY
-  ECAN_PARAM
-)
-(MemberLink
-  AFB_BOTTOM
-  ECAN_PARAM
-)
-(MemberLink
-  MAX_AF_SIZE
-  ECAN_PARAM
-)
-(MemberLink 
-  AF_RENT_FREQUENCY 
-  ECAN_PARAM  
-)
-(MemberLink 
-  FORGET_THRESHOLD
-  ECAN_PARAM  
-)
-(MemberLink 
-  MAX_LINKS
-  ECAN_PARAM  
-)
-(MemberLink 
-  HEBBIAN_MAX_ALLOCATION_PERCENTAGE
-  ECAN_PARAM  
-)
-(MemberLink 
-  LOCAL_FAR_LINK_RATIO
-  ECAN_PARAM  
-)
-(MemberLink 
-  MAX_SPREAD_PERCENTAGE
-  ECAN_PARAM  
-)
-(MemberLink
-  SPREADING_FILTER
-  ECAN_PARAM
-)
-(MemberLink 
-  SPREAD_HEBBIAN_ONLY
-  ECAN_PARAM  
-)
-(MemberLink 
-  DIFFUSION_TOURNAMENT_SIZE
-  ECAN_PARAM  
-)
-(MemberLink 
-  STARTING_ATOM_STI_RENT
-  ECAN_PARAM  
-)
-(MemberLink 
-  STARTING_ATOM_LTI_RENT
-  ECAN_PARAM  
-)
-(MemberLink 
-  TARGET_STI_FUNDS
-  ECAN_PARAM  
-)
-(MemberLink
-  TARGET_LTI_FUNDS
-  ECAN_PARAM
-)
-(MemberLink 
-  STI_FUNDS_BUFFER
-  ECAN_PARAM
-)
-(MemberLink 
-  LTI_FUNDS_BUFFER
-  ECAN_PARAM
-)
-(MemberLink 
-  TARGET_LTI_FUNDS_BUFFER
-  ECAN_PARAM
-)
-(MemberLink 
-  RENT_TOURNAMENT_SIZE
-  ECAN_PARAM
-)
-(StateLink
-  AF_SIZE
-  (NumberNode "0.2")  
-)
-(StateLink
-  MIN_AF_SIZE
-  (NumberNode "500")
-)
-(StateLink 
-  AFB_DECAY
-  (NumberNode "0.05")
-)
-(StateLink 
-  AFB_BOTTOM
-  (NumberNode "50")
-)
-(StateLink 
-  MAX_AF_SIZE
-  (NumberNode "1000")
-)
-(StateLink 
-  AF_RENT_FREQUENCY 
-  (NumberNode "5")
-)
-(StateLink 
-  FORGET_THRESHOLD
-  (NumberNode "0.05")
-)
-(StateLink 
-  MAX_LINKS
-  (NumberNode "300")
-)
-(StateLink 
-  HEBBIAN_MAX_ALLOCATION_PERCENTAGE
-  (NumberNode "0.05")
-)
-(StateLink 
-  LOCAL_FAR_LINK_RATIO
-  (NumberNode "10")
-)
-(StateLink 
-  MAX_SPREAD_PERCENTAGE
-  (NumberNode "0.4")
-)
-(StateLink
-  SPREADING_FILTER
-  (MemberLink
-    (TypeNode "MemberLink")
-  )
-)
-(StateLink 
-  SPREAD_HEBBIAN_ONLY
-  (NumberNode "0")
-)
-(StateLink 
-  DIFFUSION_TOURNAMENT_SIZE
-  (NumberNode "5")
-)
-(StateLink 
-  STARTING_ATOM_STI_RENT
-  (NumberNode "1")
-)
-(StateLink 
-  STARTING_ATOM_LTI_RENT
-  (NumberNode "1")
-)
-(StateLink 
-  TARGET_STI_FUNDS
-  (NumberNode "10000")
-)
+(Member AF_SIZE                   ECAN_PARAM)
+(Member MAX_AF_SIZE               ECAN_PARAM)
+(Member MIN_AF_SIZE               ECAN_PARAM)
+(Member AFB_DECAY                 ECAN_PARAM)
+(Member AFB_BOTTOM                ECAN_PARAM)
+(Member MAX_AF_SIZE               ECAN_PARAM)
+(Member AF_RENT_FREQUENCY         ECAN_PARAM)
+(Member FORGET_THRESHOLD          ECAN_PARAM)
+(Member MAX_LINKS                 ECAN_PARAM)
+(Member HEBBIAN_MAX_ALLOCATION_PERCENTAGE ECAN_PARAM)
+(Member LOCAL_FAR_LINK_RATIO      ECAN_PARAM)
+(Member MAX_SPREAD_PERCENTAGE     ECAN_PARAM)
+(Member SPREADING_FILTER          ECAN_PARAM)
+(Member SPREAD_HEBBIAN_ONLY       ECAN_PARAM)
+(Member DIFFUSION_TOURNAMENT_SIZE ECAN_PARAM)
+(Member STARTING_ATOM_STI_RENT    ECAN_PARAM)
+(Member STARTING_ATOM_LTI_RENT    ECAN_PARAM)
+(Member TARGET_STI_FUNDS          ECAN_PARAM)
+(Member TARGET_LTI_FUNDS          ECAN_PARAM)
+(Member STI_FUNDS_BUFFER          ECAN_PARAM)
+(Member LTI_FUNDS_BUFFER          ECAN_PARAM)
+(Member TARGET_LTI_FUNDS_BUFFER   ECAN_PARAM)
+(Member RENT_TOURNAMENT_SIZE      ECAN_PARAM)
 
-(StateLink 
-  TARGET_LTI_FUNDS
-  (NumberNode "10000")
-)
-
-(StateLink
-  STI_FUNDS_BUFFER
-  (NumberNode "10000")
-)
-
-(StateLink 
-  LTI_FUNDS_BUFFER
-  (NumberNode "10000")
-)
-(StateLink 
-  TARGET_LTI_FUNDS_BUFFER
-  (NumberNode "10000")
-)
-(StateLink
-  RENT_TOURNAMENT_SIZE
-  (NumberNode "5")
-)
-
+(State AF_SIZE                   (Number 0.2))
+(State MIN_AF_SIZE               (Number 500))
+(State AFB_DECAY                 (Number 0.05))
+(State AFB_BOTTOM                (Number 50))
+(State MAX_AF_SIZE               (Number 1000))
+(State AF_RENT_FREQUENCY         (Number 5))
+(State FORGET_THRESHOLD          (Number 0.05))
+(State MAX_LINKS                 (Number 300))
+(State HEBBIAN_MAX_ALLOCATION_PERCENTAGE (Number 0.05))
+(State LOCAL_FAR_LINK_RATIO      (Number 10))
+(State MAX_SPREAD_PERCENTAGE     (Number 0.4))
+(State SPREADING_FILTER          (MemberLink (Type "MemberLink")))
+(State SPREAD_HEBBIAN_ONLY       (Number 0))
+(State DIFFUSION_TOURNAMENT_SIZE (Number 5))
+(State STARTING_ATOM_STI_RENT    (Number 1))
+(State STARTING_ATOM_LTI_RENT    (Number 1))
+(State TARGET_STI_FUNDS          (Number 10000))
+(State TARGET_LTI_FUNDS          (Number 10000))
+(State STI_FUNDS_BUFFER          (Number 10000))
+(State LTI_FUNDS_BUFFER          (Number 10000))
+(State TARGET_LTI_FUNDS_BUFFER   (Number 10000))
+(State RENT_TOURNAMENT_SIZE      (Number 5))
