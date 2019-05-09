@@ -488,10 +488,9 @@
      enable incremental conjunction expansion, see the
      #:incremental-expansion option.
 "
-  (let* (;; Create a temporary child atomspace for the URE
-         (tmp-as (cog-new-atomspace (cog-atomspace)))
-         (parent-as (cog-set-atomspace! tmp-as))
-         (texts-concept? (and (cog-atom? texts)
+  ;; Create a temporary child atomspace for the URE
+  (cog-push-atomspace)
+  (let* ((texts-concept? (and (cog-atom? texts)
                               (eq? (cog-type texts) 'ConceptNode)))
          (texts-cpt (if (not texts-concept?)
                         ;; Construct a temporary concept containing
@@ -505,9 +504,7 @@
     (if (not es)
         ;; The initial pattern doesn't have enough support, thus the
         ;; solution set is empty.
-        (begin (cog-set-atomspace! parent-as)
-               ;; TODO: delete tmp-as
-               (Set))
+        (Set)
 
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
@@ -529,10 +526,7 @@
           (if (equal? surprisingness 'none)
 
               ;; No surprisingness, simple return the pattern list
-              (begin
-                (cog-set-atomspace! parent-as)
-                ;; TODO: delete tmp-as but without deleting its atoms
-                patterns-lst)
+              patterns-lst
 
               ;; Run surprisingness
               (let*
@@ -544,9 +538,9 @@
 
                    ;; Run surprisingness in a backward way
                    (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
-                (cog-set-atomspace! parent-as)
-                ;; TODO: delete tmp-as but without deleting its atoms
-                (desc-sort-by-tv-strength isurp-results)))))))
+                (desc-sort-by-tv-strength isurp-results))))))
+  (cog-pop-atomspace)
+)
 
 (define (export-miner-utils)
   (export
