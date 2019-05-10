@@ -305,7 +305,7 @@ public:
 	 * { (And (Concept "A") (And (Concept "B") (Concept "C"))) }
 	 *
 	 * Also, the pattern may match any subhypergraph of texts, not just
-	 * the root atoms.
+	 * the root atoms (TODO: we probably don't want that!!!).
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
 	                                        const HandleSet& texts,
