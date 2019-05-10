@@ -807,12 +807,14 @@ double MinerUtils::calc_support(const Handle& pattern,
                                 const HandleSet& texts,
                                 unsigned ms)
 {
-	double sup = get_support(pattern);
-	if (sup < 0) {
-		sup = support(pattern, texts, ms);
-		set_support(pattern, sup);
-	}
-	return sup;
+	// TODO: re-enable memoizing support when ready
+	// double sup = get_support(pattern);
+	// if (sup < 0) {
+		// sup = support(pattern, texts, ms);
+		// set_support(pattern, sup);
+	// }
+	// return sup;
+	return support(pattern, texts, ms);
 }
 
 } // namespace opencog
