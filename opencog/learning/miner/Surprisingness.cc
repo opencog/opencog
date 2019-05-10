@@ -52,7 +52,7 @@
 namespace opencog {
 
 double Surprisingness::isurp_old(const Handle& pattern,
-                                 const HandleSet& texts,
+                                 const HandleSeq& texts,
                                  bool normalize)
 {
 	// Strictly speaking it should be the power but we use binomial for
@@ -90,7 +90,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 }
 
 double Surprisingness::isurp(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              bool normalize)
 {
 	// Calculate the empiric probability of pattern
@@ -235,7 +235,7 @@ HandleSeq Surprisingness::joint_variables(const Handle& pattern,
 
 unsigned Surprisingness::value_count(const HandleSeq& block,
                                      const Handle& var,
-                                     const HandleSet& texts)
+                                     const HandleSeq& texts)
 {
 	Valuations vs(MinerUtils::mk_pattern_without_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
@@ -244,7 +244,7 @@ unsigned Surprisingness::value_count(const HandleSeq& block,
 
 HandleCounter Surprisingness::value_distribution(const HandleSeq& block,
                                                  const Handle& var,
-                                                 const HandleSet& texts)
+                                                 const HandleSeq& texts)
 {
 	Valuations vs(MinerUtils::mk_pattern_without_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
@@ -275,12 +275,12 @@ double Surprisingness::inner_product(const std::vector<HandleCounter>& dists)
 }
 
 double Surprisingness::universe_count(const Handle& pattern,
-                                      const HandleSet& texts)
+                                      const HandleSeq& texts)
 {
 	return pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
 }
 
-double Surprisingness::emp_prob(const Handle& pattern, const HandleSet& texts)
+double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
 {
 	double ucount = universe_count(pattern, texts);
 	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
@@ -290,7 +290,7 @@ double Surprisingness::emp_prob(const Handle& pattern, const HandleSet& texts)
 }
 
 double Surprisingness::emp_prob_subsmp(const Handle& pattern,
-                                       const HandleSet& texts,
+                                       const HandleSeq& texts,
                                        unsigned subsize)
 {
 	return emp_prob(pattern,
@@ -298,23 +298,23 @@ double Surprisingness::emp_prob_subsmp(const Handle& pattern,
 	                subsmp(texts, subsize) : texts);
 }
 
-HandleSet Surprisingness::subsmp(const HandleSet& texts, unsigned subsize)
+HandleSeq Surprisingness::subsmp(const HandleSeq& texts, unsigned subsize)
 {
 	logger().debug() << "Surprisingness::subsmp begin";
 	unsigned ts = texts.size();
 	if (ts/2 <= subsize and subsize < ts) {
 		// Subsample by randomly removing
-		HandleSet smp_texts(texts);
+		HandleSeq smp_texts(texts);
 		dorepeat(texts.size() - subsize)
 			rand_element_erase(smp_texts);
 		logger().debug() << "Surprisingness::subsmp end 1";
 		return smp_texts;
 	} else if (0 <= subsize and subsize < ts/2) {
 		// Subsample by randomly adding
-		HandleSet smp_texts;
+		HandleSeq smp_texts;
 		lazy_random_selector select(ts);
 		dorepeat(subsize)
-			smp_texts.insert(*std::next(texts.begin(), select()));
+			smp_texts.push_back(*std::next(texts.begin(), select()));
 		logger().debug() << "Surprisingness::subsmp end 2";
 		return smp_texts;
 	} else {
@@ -324,7 +324,7 @@ HandleSet Surprisingness::subsmp(const HandleSet& texts, unsigned subsize)
 }
 
 double Surprisingness::emp_prob_bs(const Handle& pattern,
-                                   const HandleSet& texts,
+                                   const HandleSeq& texts,
                                    unsigned nss,
                                    unsigned subsize)
 {
@@ -338,7 +338,7 @@ double Surprisingness::emp_prob_bs(const Handle& pattern,
 	}
 }
 
-std::pair<unsigned, unsigned> Surprisingness::get_nns_subsize(const HandleSet& texts)
+std::pair<unsigned, unsigned> Surprisingness::get_nns_subsize(const HandleSeq& texts)
 {
 	unsigned subsize = 5000;
 	unsigned nns = std::ceil(sqrt(texts.size() / subsize) + 0.5);
@@ -349,7 +349,7 @@ std::pair<unsigned, unsigned> Surprisingness::get_nns_subsize(const HandleSet& t
 
 double Surprisingness::ji_prob(const HandleSeqSeq& partition,
                                const Handle& pattern,
-                               const HandleSet& texts)
+                               const HandleSeq& texts)
 {
 	// Generate subpatterns from blocks (add them in the atomspace to
 	// memoize support calculation)
@@ -592,7 +592,7 @@ HandleSeqUCounter Surprisingness::group_eq(const HandleSeqSeq& partition,
 
 double Surprisingness::eq_prob(const HandleSeqSeq& partition,
                                const Handle& pattern,
-                               const HandleSet& texts)
+                               const HandleSeq& texts)
 {
 	// logger().debug() << "Surprisingness::eq_prob_alt partition:"
 	//                  << std::endl << oc_to_string(partition)

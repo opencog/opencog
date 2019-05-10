@@ -184,7 +184,7 @@ public:
 	static Handle ure_pm(AtomSpace& as,
 	                     SchemeEval& scm,
 	                     const Handle& pm_rb,
-	                     const HandleSet& texts, int minsup,
+	                     const HandleSeq& texts, int minsup,
 	                     int max_iter=-1,
 	                     Handle initpat=Handle::UNDEFINED,
 	                     TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
@@ -200,7 +200,7 @@ public:
 	                         const Handle& initpat=Handle::UNDEFINED,
 	                         int maxdepth=-1,
 	                         double info=1.0);
-	static HandleTree cpp_pm(const HandleSet& texts,
+	static HandleTree cpp_pm(const HandleSeq& texts,
 	                         int minsup=1,
 	                         int conjuncts=1,
 	                         const Handle& initpat=Handle::UNDEFINED,

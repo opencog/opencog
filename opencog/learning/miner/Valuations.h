@@ -150,7 +150,7 @@ public:
 	 * Given a pattern and texts (ground terms), calculate its
 	 * valuations.
 	 */
-	Valuations(const Handle& pattern, const HandleSet& texts);
+	Valuations(const Handle& pattern, const HandleSeq& texts);
 	Valuations(const Variables& variables, const SCValuationsSet& scvs);
 	Valuations(const Variables& variables);
 

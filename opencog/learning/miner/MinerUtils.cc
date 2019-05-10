@@ -334,15 +334,15 @@ Handle MinerUtils::remove_unary_and(const Handle& h)
 	return h;
 }
 
-HandleSet MinerUtils::get_texts(const Handle& texts_cpt)
+HandleSeq MinerUtils::get_texts(const Handle& texts_cpt)
 {
 	// Retrieve all members of texts_cpt
-	HandleSet texts;
+	HandleSeq texts;
 	IncomingSet member_links = texts_cpt->getIncomingSetByType(MEMBER_LINK);
 	for (const LinkPtr l : member_links) {
 		Handle member = l->getOutgoingAtom(0);
 		if (member != texts_cpt)
-			texts.insert(member);
+			texts.push_back(member);
 	}
 	return texts;
 }
@@ -354,7 +354,7 @@ unsigned MinerUtils::get_ms(const Handle& ms)
 }
 
 unsigned MinerUtils::support(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              unsigned ms)
 {
 	// Partition the pattern into strongly connected components
@@ -375,7 +375,7 @@ unsigned MinerUtils::support(const Handle& pattern,
 }
 
 unsigned MinerUtils::component_support(const Handle& component,
-                                       const HandleSet& texts,
+                                       const HandleSeq& texts,
                                        unsigned ms)
 {
 	if (totally_abstract(component))
@@ -384,14 +384,14 @@ unsigned MinerUtils::component_support(const Handle& component,
 }
 
 bool MinerUtils::enough_support(const Handle& pattern,
-                                const HandleSet& texts,
+                                const HandleSeq& texts,
                                 unsigned ms)
 {
 	return ms <= support(pattern, texts, ms);
 }
 
 HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
-                                          const HandleSet& texts,
+                                          const HandleSeq& texts,
                                           unsigned ms)
 {
 	Valuations valuations(pattern, texts);
@@ -399,7 +399,7 @@ HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
 }
 
 HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
-                                         const HandleSet& texts,
+                                         const HandleSeq& texts,
                                          unsigned ms)
 {
 	// Calculate all shallow abstractions of pattern
@@ -487,7 +487,7 @@ HandleSeq MinerUtils::get_conjuncts(const Handle& pattern)
 }
 
 Handle MinerUtils::restricted_satisfying_set(const Handle& pattern,
-                                             const HandleSet& texts,
+                                             const HandleSeq& texts,
                                              unsigned ms)
 {
 	static AtomSpace tmp_texts_as; // TODO: fix to be thread safe
@@ -760,7 +760,7 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
 
 HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
                                          const Handle& pattern,
-                                         const HandleSet& texts,
+                                         const HandleSeq& texts,
                                          unsigned ms)
 {
 	// Alpha convert pattern, if necessary, to avoid collisions between
@@ -804,7 +804,7 @@ double MinerUtils::get_support(const Handle& pattern)
 }
 
 double MinerUtils::calc_support(const Handle& pattern,
-                                const HandleSet& texts,
+                                const HandleSeq& texts,
                                 unsigned ms)
 {
 	// TODO: re-enable memoizing support when ready

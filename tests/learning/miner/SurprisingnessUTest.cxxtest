@@ -393,7 +393,7 @@ void SurprisingnessUTest::test_emp_prob_bs_1()
 	                    al(VARIABLE_LIST, X, Y),
 	                    al(INHERITANCE_LINK, X, Y));
 
-	HandleSet texts = MinerUtils::get_texts(_texts_cpt);
+	HandleSeq texts = MinerUtils::get_texts(_texts_cpt);
 	double epr = Surprisingness::emp_prob(pattern, texts);
 	double epr_bs = Surprisingness::emp_prob_bs(pattern, texts, 10, 1000);
 	logger().debug() << "texts.size() = " << texts.size()
@@ -427,7 +427,7 @@ void SurprisingnessUTest::test_emp_prob_bs_2()
 	                       al(INHERITANCE_LINK, X, Y),
 	                       al(INHERITANCE_LINK, Y, Z)));
 
-	HandleSet texts = MinerUtils::get_texts(_texts_cpt);
+	HandleSeq texts = MinerUtils::get_texts(_texts_cpt);
 	double epr = Surprisingness::emp_prob(pattern, texts);
 	double epr_bs = Surprisingness::emp_prob_bs(pattern, texts, 100, 1500);
 	logger().info() << "texts.size() = " << texts.size()

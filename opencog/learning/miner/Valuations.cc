@@ -155,7 +155,7 @@ std::string SCValuations::to_string(const std::string& indent) const
 // Valuations //
 ////////////////
 
-Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
+Valuations::Valuations(const Handle& pattern, const HandleSeq& texts)
 	: ValuationsBase(MinerUtils::get_variables(pattern))
 {
 	// Useless clauses (like redundant, constants, and more) are

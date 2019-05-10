@@ -112,7 +112,7 @@ private:
 	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
-	Handle ure_pm(const HandleSet& texts, int minsup,
+	Handle ure_pm(const HandleSeq& texts, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
 	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
 	              int max_conjuncts=-1,
@@ -125,7 +125,7 @@ private:
 	                  int conjuncts=1,
 	                  const Handle& initpat=Handle::UNDEFINED,
 	                  int maxdepth=-1, double info=1.0);
-	HandleTree cpp_pm(const HandleSet& texts, int minsup=1,
+	HandleTree cpp_pm(const HandleSeq& texts, int minsup=1,
 	                  int conjuncts=1,
 	                  const Handle& initpat=Handle::UNDEFINED,
 	                  int maxdepth=-1, double info=1.0);
@@ -202,7 +202,7 @@ Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
 	                               complexity_penalty);
 }
 
-Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
+Handle MinerUTest::ure_pm(const HandleSeq& texts, int minsup,
                           int maximum_iterations, Handle initpat,
                           TruthValuePtr incremental_expansion,
                           int max_conjuncts,
@@ -223,7 +223,7 @@ HandleTree MinerUTest::cpp_pm(const AtomSpace& texts_as,
 	return MinerUTestUtils::cpp_pm(texts_as, minsup, conjuncts, initpat, maxdepth, info);
 }
 
-HandleTree MinerUTest::cpp_pm(const HandleSet& texts,
+HandleTree MinerUTest::cpp_pm(const HandleSeq& texts,
                               int minsup,
                               int conjuncts,
                               const Handle& initpat,
@@ -424,7 +424,7 @@ void MinerUTest::test_expand_conjunction_1()
 	Handle
 		InhAB = al(INHERITANCE_LINK, A, B),
 		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSet texts{InhAB, InhBC};
+	HandleSeq texts{InhAB, InhBC};
 
 	Handle InhXY = al(INHERITANCE_LINK, X, Y),
 		VarXY = al(VARIABLE_LIST, X, Y),
@@ -471,7 +471,7 @@ void MinerUTest::test_expand_conjunction_2()
 	Handle
 		InhAC = al(INHERITANCE_LINK, A, C),
 		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSet texts{InhAC, InhBC};
+	HandleSeq texts{InhAC, InhBC};
 
 	Handle InhXC = al(INHERITANCE_LINK, X, C),
 		pat = al(LAMBDA_LINK,
@@ -508,7 +508,7 @@ void MinerUTest::test_shallow_abstract()
 		pattern = al(LAMBDA_LINK, VarXZW, clauses);
 
 	// Define texts
-	HandleSet texts;
+	HandleSeq texts;
 	_tmp_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                            opencog::ATOM, true);
 
@@ -603,7 +603,7 @@ void MinerUTest::test_AB_AC()
 	// Define texts
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhAC = al(INHERITANCE_LINK, A, C);
-	HandleSet texts{InhAB, InhAC};
+	HandleSeq texts{InhAB, InhAC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -640,7 +640,7 @@ void MinerUTest::test_AB_AC_BC()
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhAC = al(INHERITANCE_LINK, A, C),
 		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSet texts{A, B, C, InhAB, InhAC, InhBC};
+	HandleSeq texts{A, B, C, InhAB, InhAC, InhBC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -680,7 +680,7 @@ void MinerUTest::test_AB_ABC()
 	// Define texts
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
-	HandleSet texts{A, B, C, InhAB, InhABC};
+	HandleSeq texts{A, B, C, InhAB, InhABC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -723,7 +723,7 @@ void MinerUTest::test_ABCD()
 		InhGH = al(INHERITANCE_LINK, G, H),
 		ImpABCD = al(IMPLICATION_LINK, InhAB, InhCD),
 		ImpEFGH = al(IMPLICATION_LINK, InhEF, InhGH);
-	HandleSet texts{InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH};
+	HandleSeq texts{InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH};
 
 	// Define pattern parts
 	Handle InhXY = al(INHERITANCE_LINK, X, Y),
@@ -776,7 +776,7 @@ void MinerUTest::test_ABAB()
 		InhBC = al(INHERITANCE_LINK, B, C),
 		ImpABAB = al(IMPLICATION_LINK, InhAB, InhAB),
 		ImpBCBC = al(IMPLICATION_LINK, InhBC, InhBC);
-	HandleSet texts{ImpABAB, ImpBCBC};
+	HandleSeq texts{ImpABAB, ImpBCBC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -817,7 +817,7 @@ void MinerUTest::test_AAAA()
 		BB = al(INHERITANCE_LINK, B, B),
 		AAAA = al(IMPLICATION_LINK, AA, AA),
 		BBBB = al(IMPLICATION_LINK, BB, BB);
-	HandleSet texts{AAAA, BBBB};
+	HandleSeq texts{AAAA, BBBB};
 
 	// Define pattern parts
 	Handle InhXX = al(INHERITANCE_LINK, X, X);
@@ -860,7 +860,7 @@ void MinerUTest::test_evaluation()
 	Handle P = an(PREDICATE_NODE, "P"),
 		PA = al(EVALUATION_LINK, P, A),
 		PB = al(EVALUATION_LINK, P, B);
-	HandleSet texts{PA, PB};
+	HandleSeq texts{PA, PB};
 
 	// Define expected pattern
 	Handle PX = al(EVALUATION_LINK, P, X),
@@ -892,7 +892,7 @@ void MinerUTest::test_2conjuncts_1()
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{InhAB, InhBC1, InhBC2};
+	HandleSeq texts{InhAB, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -927,7 +927,7 @@ void MinerUTest::test_2conjuncts_2()
 	Handle AB = al(INHERITANCE_LINK, A, B),
 		BC1 = al(INHERITANCE_LINK, B, C1),
 		BC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{AB, BC1, BC2};
+	HandleSeq texts{AB, BC1, BC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -979,7 +979,7 @@ void MinerUTest::test_2conjuncts_3()
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{InhAB, InhBC1, InhBC2};
+	HandleSeq texts{InhAB, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -1023,7 +1023,7 @@ void MinerUTest::test_2conjuncts_4()
 		InhA2B = al(INHERITANCE_LINK, A2, B),
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{InhA1B, InhA2B, InhBC1, InhBC2};
+	HandleSeq texts{InhA1B, InhA2B, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -1070,7 +1070,7 @@ void MinerUTest::test_2conjuncts_5()
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2),
 		InhBC3 = al(INHERITANCE_LINK, B, C3);
-	HandleSet texts{InhA1B, InhA2B, InhBC1, InhBC2};
+	HandleSeq texts{InhA1B, InhA2B, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),

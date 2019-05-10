@@ -73,7 +73,7 @@ public:
 	 * they are encoded as lists of lists for performance reasons.
 	 */
 	static double isurp_old(const Handle& pattern,
-	                        const HandleSet& texts,
+	                        const HandleSeq& texts,
 	                        bool normalize=true);
 
 	/**
@@ -331,7 +331,7 @@ public:
 	 * slow). We have not experimented with approximated counts yet.
 	 */
 	static double isurp(const Handle& pattern,
-	                    const HandleSet& texts,
+	                    const HandleSeq& texts,
 	                    bool normalize=true);
 
 	/**
@@ -464,7 +464,7 @@ public:
 	 */
 	static unsigned value_count(const HandleSeq& block,
 	                            const Handle& var,
-	                            const HandleSet& texts);
+	                            const HandleSeq& texts);
 
 	/**
 	 * Return the probability distribution over value of var in the
@@ -472,7 +472,7 @@ public:
 	 */
 	static HandleCounter value_distribution(const HandleSeq& block,
 	                                        const Handle& var,
-	                                        const HandleSet& texts);
+	                                        const HandleSeq& texts);
 
 	/**
 	 * Perform the inner product of a collection of distributions.
@@ -497,13 +497,13 @@ public:
 	/**
 	 * Calculate the universe count of the pattern over the given texts
 	 */
-	static double universe_count(const Handle& pattern, const HandleSet& texts);
+	static double universe_count(const Handle& pattern, const HandleSeq& texts);
 
 	/**
 	 * Calculate the empiric probability of a pattern according to a
 	 * database texts.
 	 */
-	static double emp_prob(const Handle& pattern, const HandleSet& texts);
+	static double emp_prob(const Handle& pattern, const HandleSeq& texts);
 
 	/**
 	 * Like emp_prob but subsample the texts to have subsize (if texts
@@ -512,7 +512,7 @@ public:
 	 * TODO: memoizing support is current disabled.
 	 */
 	static double emp_prob_subsmp(const Handle& pattern,
-	                              const HandleSet& texts,
+	                              const HandleSeq& texts,
 	                              unsigned subsize=UINT_MAX);
 
 	/**
@@ -521,7 +521,7 @@ public:
 	 *
 	 * An assert is raised if subsize is not smaller than texts.size().
 	 */
-	static HandleSet subsmp(const HandleSet& texts, unsigned subsize);
+	static HandleSeq subsmp(const HandleSeq& texts, unsigned subsize);
 
 	/**
 	 * Like emp_prob but uses bootstrapping for more efficiency. nbs is
@@ -531,7 +531,7 @@ public:
 	 * TODO: memoizing support is current disabled.
 	 */
 	static double emp_prob_bs(const Handle& pattern,
-	                          const HandleSet& texts,
+	                          const HandleSeq& texts,
 	                          unsigned nss=1,
 	                          unsigned subsize=UINT_MAX);
 
@@ -543,7 +543,7 @@ public:
 	 *
 	 * nns = ceiling(sqrt(ts / subsize) + 0.5)
 	 */
-	static std::pair<unsigned, unsigned> get_nns_subsize(const HandleSet& texts);
+	static std::pair<unsigned, unsigned> get_nns_subsize(const HandleSeq& texts);
 
 	/**
 	 * Calculate probability estimate of a pattern given a partition,
@@ -554,7 +554,7 @@ public:
 	 */
 	static double ji_prob(const HandleSeqSeq& partition,
 	                      const Handle& pattern,
-	                      const HandleSet& texts);
+	                      const HandleSeq& texts);
 
 	/**
 	 * Return true iff the given variable has the same position (same
@@ -771,7 +771,7 @@ public:
 	 */
 	static double eq_prob(const HandleSeqSeq& partition,
 	                      const Handle& pattern,
-	                      const HandleSet& texts);
+	                      const HandleSeq& texts);
 
 	/**
 	 * Alternate implementation of eq_prob. Takes into syntactical
@@ -780,7 +780,7 @@ public:
 	 */
 	static double eq_prob_alt(const HandleSeqSeq& partition,
 	                          const Handle& pattern,
-	                          const HandleSet& texts);
+	                          const HandleSeq& texts);
 };
 
 /**
