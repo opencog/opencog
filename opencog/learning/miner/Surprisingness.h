@@ -495,10 +495,55 @@ public:
 	static double inner_product(const std::vector<HandleCounter>& dists);
 
 	/**
+	 * Calculate the universe count of the pattern over the given texts
+	 */
+	static double universe_count(const Handle& pattern, const HandleSet& texts);
+
+	/**
 	 * Calculate the empiric probability of a pattern according to a
 	 * database texts.
 	 */
 	static double emp_prob(const Handle& pattern, const HandleSet& texts);
+
+	/**
+	 * Like emp_prob but subsample the texts to have subsize (if texts
+	 * size is greater than subsize).
+	 *
+	 * TODO: memoizing support is current disabled.
+	 */
+	static double emp_prob_subsmp(const Handle& pattern,
+	                              const HandleSet& texts,
+	                              unsigned subsize=UINT_MAX);
+
+	/**
+	 * Randomly subsample texts so that the resulting texts has size
+	 * subsize.
+	 *
+	 * An assert is raised if subsize is not smaller than texts.size().
+	 */
+	static HandleSet subsmp(const HandleSet& texts, unsigned subsize);
+
+	/**
+	 * Like emp_prob but uses bootstrapping for more efficiency. nbs is
+	 * the number of subsamplings taking place, and subsize is the size
+	 * of each subsample.
+	 *
+	 * TODO: memoizing support is current disabled.
+	 */
+	static double emp_prob_bs(const Handle& pattern,
+	                          const HandleSet& texts,
+	                          unsigned nss=1,
+	                          unsigned subsize=UINT_MAX);
+
+	/**
+	 * Determine the number of samples and the subsample size given a
+	 * text corpus. The formula is as follows:
+	 *
+	 * subsize = 5000
+	 *
+	 * nns = ceiling(sqrt(ts / subsize) + 0.5)
+	 */
+	static std::pair<unsigned, unsigned> get_nns_subsize(const HandleSet& texts);
 
 	/**
 	 * Calculate probability estimate of a pattern given a partition,

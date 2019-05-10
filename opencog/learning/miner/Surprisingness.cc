@@ -25,6 +25,9 @@
 
 #include "MinerUtils.h"
 
+#include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/random.h>
+#include <opencog/util/dorepeat.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/empty_string.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -91,7 +94,9 @@ double Surprisingness::isurp(const Handle& pattern,
                              bool normalize)
 {
 	// Calculate the empiric probability of pattern
-	double emp = emp_prob(pattern, texts);
+	unsigned nns, subsize;
+	std::tie(nns, subsize) = get_nns_subsize(texts);
+	double emp = emp_prob_bs(pattern, texts, nns, subsize);
 
 	// Calculate the probability estimate of each partition based on
 	// independent assumption of between each partition block, taking
@@ -269,13 +274,77 @@ double Surprisingness::inner_product(const std::vector<HandleCounter>& dists)
 	return p;
 }
 
+double Surprisingness::universe_count(const Handle& pattern,
+                                      const HandleSet& texts)
+{
+	return pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
+}
+
 double Surprisingness::emp_prob(const Handle& pattern, const HandleSet& texts)
 {
-	double ucount = pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
+	double ucount = universe_count(pattern, texts);
 	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
 	double sup = MinerUtils::calc_support(pattern, texts, ms);
-	// logger().debug() << "emp_prob(" << oc_to_string(pattern) << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount;
+	logger().debug() << "emp_prob(" << oc_to_string(pattern) << ",texts.size()=" << texts.size() << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount << ", texts.size() < sup = " << (texts.size() < sup);
 	return sup / ucount;
+}
+
+double Surprisingness::emp_prob_subsmp(const Handle& pattern,
+                                       const HandleSet& texts,
+                                       unsigned subsize)
+{
+	return emp_prob(pattern,
+	                subsize < texts.size() ?
+	                subsmp(texts, subsize) : texts);
+}
+
+HandleSet Surprisingness::subsmp(const HandleSet& texts, unsigned subsize)
+{
+	logger().debug() << "Surprisingness::subsmp begin";
+	unsigned ts = texts.size();
+	if (ts/2 <= subsize and subsize < ts) {
+		// Subsample by randomly removing
+		HandleSet smp_texts(texts);
+		dorepeat(texts.size() - subsize)
+			rand_element_erase(smp_texts);
+		logger().debug() << "Surprisingness::subsmp end 1";
+		return smp_texts;
+	} else if (0 <= subsize and subsize < ts/2) {
+		// Subsample by randomly adding
+		HandleSet smp_texts;
+		lazy_random_selector select(ts);
+		dorepeat(subsize)
+			smp_texts.insert(*std::next(texts.begin(), select()));
+		logger().debug() << "Surprisingness::subsmp end 2";
+		return smp_texts;
+	} else {
+		OC_ASSERT(false);
+		return {};
+	}
+}
+
+double Surprisingness::emp_prob_bs(const Handle& pattern,
+                                   const HandleSet& texts,
+                                   unsigned nss,
+                                   unsigned subsize)
+{
+	if (subsize < texts.size()) {
+		std::vector<double> essprobs;
+		dorepeat(nss)
+			essprobs.push_back(emp_prob_subsmp(pattern, texts, subsize));
+		return boost::accumulate(essprobs, 0.0) / essprobs.size();
+	} else {
+		return emp_prob(pattern, texts);
+	}
+}
+
+std::pair<unsigned, unsigned> Surprisingness::get_nns_subsize(const HandleSet& texts)
+{
+	unsigned subsize = 5000;
+	unsigned nns = std::ceil(sqrt(texts.size() / subsize) + 0.5);
+	// return {nns, subsize};
+	return {1, 50000/*UINT_MAX*/};
+	// return {1, UINT_MAX};
 }
 
 double Surprisingness::ji_prob(const HandleSeqSeq& partition,
@@ -290,8 +359,16 @@ double Surprisingness::ji_prob(const HandleSeqSeq& partition,
 	// Calculate the product of the probability over subpatterns
 	// without considering joint variables
 	double p = 1.0;
-	for (const Handle& subpattern : subpatterns)
-		p *= emp_prob(subpattern, texts);
+	for (const Handle& subpattern : subpatterns) {
+		unsigned nns, subsize;
+		std::tie(nns, subsize) = get_nns_subsize(texts);
+		double empr_bs = emp_prob_bs(subpattern, texts, nns, subsize);
+		// double empr = emp_prob(subpattern, texts);
+		// logger().debug() << "ji_prob texts.size() = " << texts.size()
+		//                  << ", empr_bs = " << empr_bs
+		//                  << ", empr = " << empr;
+		p *= empr_bs;
+	}
 	// logger().debug() << "ji_prob subpattern emp product = " << p;
 
 	// Calculate the probability that all joint variables take the same
