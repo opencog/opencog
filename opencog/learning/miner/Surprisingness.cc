@@ -300,26 +300,28 @@ double Surprisingness::emp_prob_subsmp(const Handle& pattern,
 
 HandleSeq Surprisingness::subsmp(const HandleSeq& texts, unsigned subsize)
 {
-	logger().debug() << "Surprisingness::subsmp begin";
 	unsigned ts = texts.size();
 	if (ts/2 <= subsize and subsize < ts) {
-		// Subsample by randomly removing
+		// Subsample by randomly removing (swapping all elements to
+		// remove with the tail, then removing the tail, which is
+		// considerably faster than removing element by element).
 		HandleSeq smp_texts(texts);
-		dorepeat(texts.size() - subsize)
-			rand_element_erase(smp_texts);
-		logger().debug() << "Surprisingness::subsmp end 1";
+		unsigned i = ts;
+		while (subsize < i) {
+			unsigned rnd_idx = randGen().randint(i);
+			std::swap(smp_texts[rnd_idx], smp_texts[--i]);
+		}
+		smp_texts.resize(i);
 		return smp_texts;
-	} else if (0 <= subsize and subsize < ts/2) {
+	} else if (0 <= subsize and subsize < ts/*/2*/) {
 		// Subsample by randomly adding
-		HandleSeq smp_texts;
+		HandleSeq smp_texts(subsize);
 		lazy_random_selector select(ts);
-		dorepeat(subsize)
-			smp_texts.push_back(*std::next(texts.begin(), select()));
-		logger().debug() << "Surprisingness::subsmp end 2";
+		for (size_t i = 0; i < subsize; i++)
+			smp_texts[i] = texts[select()];
 		return smp_texts;
 	} else {
-		OC_ASSERT(false);
-		return {};
+		return texts;
 	}
 }
 

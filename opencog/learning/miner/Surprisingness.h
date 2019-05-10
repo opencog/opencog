@@ -518,8 +518,6 @@ public:
 	/**
 	 * Randomly subsample texts so that the resulting texts has size
 	 * subsize.
-	 *
-	 * An assert is raised if subsize is not smaller than texts.size().
 	 */
 	static HandleSeq subsmp(const HandleSeq& texts, unsigned subsize);
 

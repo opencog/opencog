@@ -95,6 +95,7 @@ public:
 	// TODO: fix is_more_abstract to support that case
 	void xtest_is_more_abstract_4();
 	void test_is_strictly_more_abstract();
+	void test_subsmp();
 	void test_emp_prob_bs_1();
 	void test_emp_prob_bs_2();
 
@@ -372,6 +373,37 @@ void SurprisingnessUTest::test_is_strictly_more_abstract()
 	// Left block/subpattern is not more abstract than itself relative
 	// to Z, since it is equivalent.
 	TS_ASSERT(not Surprisingness::is_strictly_more_abstract(l_blk, l_blk, Z));
+}
+
+void SurprisingnessUTest::test_subsmp()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create data base
+	populate_uniform_inheritance_links(4000, 0.1);
+	HandleSeq texts = MinerUtils::get_texts(_texts_cpt);
+	logger().debug() << "texts.size() = " << texts.size();
+
+	// Subsample texts
+	HandleSeq texts_smp_1 = Surprisingness::subsmp(texts, 1000);
+	logger().debug() << "texts_smp_1.size() = " << texts_smp_1.size();
+	TS_ASSERT_EQUALS(texts_smp_1.size(), 1000);
+
+	HandleSeq texts_smp_2 = Surprisingness::subsmp(texts, 10000);
+	logger().debug() << "texts_smp_2.size() = " << texts_smp_2.size();
+	TS_ASSERT_EQUALS(texts_smp_2.size(), 10000);
+
+	HandleSeq texts_smp_3 = Surprisingness::subsmp(texts, 100000);
+	logger().debug() << "texts_smp_3.size() = " << texts_smp_3.size();
+	TS_ASSERT_EQUALS(texts_smp_3.size(), 100000);
+
+	HandleSeq texts_smp_4 = Surprisingness::subsmp(texts, 1000000);
+	logger().debug() << "texts_smp_4.size() = " << texts_smp_4.size();
+	TS_ASSERT_EQUALS(texts_smp_4.size(), 1000000);
+
+	HandleSeq texts_smp_5 = Surprisingness::subsmp(texts, 10000000);
+	logger().debug() << "texts_smp_5.size() = " << texts_smp_5.size();
+	TS_ASSERT_EQUALS(texts_smp_5.size(), texts.size());
 }
 
 void SurprisingnessUTest::test_emp_prob_bs_1()
