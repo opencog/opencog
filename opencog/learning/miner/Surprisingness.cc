@@ -35,6 +35,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/transform.hpp>
@@ -108,8 +109,7 @@ double Surprisingness::isurp(const Handle& pattern,
 
 	// Calculate the empirical probability of pattern, using
 	// boostrapping if necessary
-	// double emp = emp_prob_pbs(pattern, texts, emax);
-	double emp = emp_prob(pattern, texts);
+	double emp = emp_prob_pbs_mem(pattern, texts, emax);
 	// logger().debug() <<  "emp = " << emp;
 
 	// Calculate the I-Surprisingness, normalized if requested.
@@ -293,6 +293,23 @@ double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
 	return sup / ucount;
 }
 
+double Surprisingness::emp_prob_mem(const Handle& pattern, const HandleSeq& texts)
+{
+	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
+	if (emp_prob_tv) {
+		// static unsigned hit;
+		// hit++;
+		// logger().debug() << "emp_prob_mem hit = " << hit;
+		return emp_prob_tv->get_mean();
+	}
+	// static unsigned miss;
+	// miss++;
+	// logger().debug() << "emp_prob_mem miss = " << miss;
+	double ep = emp_prob(pattern, texts);
+	set_emp_prob(pattern, ep);
+	return ep;
+}
+
 double Surprisingness::emp_prob_subsmp(const Handle& pattern,
                                        const HandleSeq& texts,
                                        unsigned subsize)
@@ -366,6 +383,25 @@ double Surprisingness::emp_prob_pbs(const Handle& pattern,
 	}
 }
 
+double Surprisingness::emp_prob_pbs_mem(const Handle& pattern,
+                                        const HandleSeq& texts,
+                                        double prob_estimate)
+{
+	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
+	if (emp_prob_tv) {
+		// static unsigned hit;
+		// hit++;
+		// logger().debug() << "emp_prob_pbs_mem hit = " << hit;
+		return emp_prob_tv->get_mean();
+	}
+	// static unsigned miss;
+	// miss++;
+	// logger().debug() << "emp_prob_pbs_mem miss = " << miss;
+	double ep = emp_prob_pbs(pattern, texts, prob_estimate);
+	set_emp_prob(pattern, ep);
+	return ep;
+}
+
 unsigned Surprisingness::subsmp_size(const Handle& pattern,
                                      const HandleSeq& texts,
                                      double support_estimate)
@@ -395,8 +431,7 @@ double Surprisingness::ji_prob(const HandleSeqSeq& partition,
 	// without considering joint variables
 	double p = 1.0;
 	for (const Handle& subpattern : subpatterns) {
-		// TODO: reuse existing empirical probability when possible
-		double empr = emp_prob(subpattern, texts);
+		double empr = emp_prob_mem(subpattern, texts);
 		// logger().debug() << "ji_prob texts.size() = " << texts.size()
 		//                  << ", empr = " << empr;
 		p *= empr;
@@ -694,6 +729,27 @@ std::string oc_to_string(const HandleSeqSeqSeq& hsss, const std::string& indent)
 		i++;
 	}
 	return ss.str();
+}
+
+const Handle& Surprisingness::emp_prob_key()
+{
+	static Handle epk(createNode(NODE, "*-EmpiricalProbabilityKey-*"));
+	return epk;
+}
+
+TruthValuePtr Surprisingness::get_emp_prob(const Handle& pattern)
+{
+	ValuePtr val = pattern->getValue(emp_prob_key());
+	if (val)
+		return TruthValueCast(val);
+	return nullptr;
+}
+
+void Surprisingness::set_emp_prob(const Handle& pattern,
+                                  double emp_prob)
+{
+	TruthValuePtr emp_prob_tv = createSimpleTruthValue(emp_prob, 1.0);
+	pattern->setValue(emp_prob_key(), ValueCast(emp_prob_tv));
 }
 
 } // namespace opencog

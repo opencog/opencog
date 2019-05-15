@@ -514,6 +514,12 @@ public:
 	static double emp_prob(const Handle& pattern, const HandleSeq& texts);
 
 	/**
+	 * Like emp_prob with memoization.
+	 */
+	static double emp_prob_mem(const Handle& pattern,
+	                           const HandleSeq& texts);
+
+	/**
 	 * Like emp_prob but subsample the texts to have subsize (if texts
 	 * size is greater than subsize).
 	 *
@@ -553,6 +559,13 @@ public:
 	static double emp_prob_pbs(const Handle& pattern,
 	                           const HandleSeq& texts,
 	                           double prob_estimate);
+
+	/**
+	 * Like emp_prob_pbs with memoization.
+	 */
+	static double emp_prob_pbs_mem(const Handle& pattern,
+	                               const HandleSeq& texts,
+	                               double prob_estimate);
 
 	/**
 	 * Determine the number of samples and the subsample size given a
@@ -829,6 +842,17 @@ public:
 	static double eq_prob_alt(const HandleSeqSeq& partition,
 	                          const Handle& pattern,
 	                          const HandleSeq& texts);
+
+	/**
+	 * Key of the empirical probability value
+	 */
+	static const Handle& emp_prob_key();
+
+	/**
+	 * Get/set the empirical probability of the given pattern.
+	 */
+	static TruthValuePtr get_emp_prob(const Handle& pattern);
+	static void set_emp_prob(const Handle& pattern, double emp_prob);
 };
 
 /**
