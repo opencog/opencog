@@ -9,13 +9,14 @@
 
 ;; Load SUMO
 ;; (load "all-sumo-labeled-kb.scm")
-(load "Geography.scm")
+;; (load "Geography.scm")
+(load "scm/mondial.scm")
 
 ;; Set loggers
 (ure-logger-set-level! "debug")
-(ure-logger-set-timestamp! #f)
+;; (ure-logger-set-timestamp! #f)
 ;; (ure-logger-set-sync! #t)
-(cog-logger-set-timestamp! #f)
+;; (cog-logger-set-timestamp! #f)
 (cog-logger-set-level! "debug")
 ;; (cog-logger-set-sync! #t)
 
@@ -38,7 +39,7 @@
 ;; Run pattern miner
 (define results (cog-mine texts-cpt
                           #:minsup 5
-                          #:maximum-iterations 30
+                          #:maximum-iterations 10
                           #:incremental-expansion #t
                           #:max-conjuncts 2
                           ;; #:surprisingness 'nisurp))
