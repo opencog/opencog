@@ -500,6 +500,14 @@ public:
 	static double universe_count(const Handle& pattern, const HandleSeq& texts);
 
 	/**
+	 * Given a pattern, a corpus and a probability, calculate the
+	 * support of that pattern.
+	 */
+	static double prob_to_support(const Handle& pattern,
+	                              const HandleSeq& texts,
+	                              double prob);
+
+	/**
 	 * Calculate the empiric probability of a pattern according to a
 	 * database texts.
 	 */
@@ -530,18 +538,60 @@ public:
 	 */
 	static double emp_prob_bs(const Handle& pattern,
 	                          const HandleSeq& texts,
-	                          unsigned nss=1,
-	                          unsigned subsize=UINT_MAX);
+	                          unsigned n_resample,
+	                          unsigned subsize);
+
+	/**
+	 * Calculate the empirical probability of the given pattern,
+	 * possibly boostrapping if necessary. The heuristic to determine
+	 * whether the booststrapping should take place, and how, is
+	 * calculated based on the pattern, the texts size and the
+	 * probability estimate of the pattern.
+	 *
+	 * pbs stands for possibly boostrapping.
+	 */
+	static double emp_prob_pbs(const Handle& pattern,
+	                           const HandleSeq& texts,
+	                           double prob_estimate);
 
 	/**
 	 * Determine the number of samples and the subsample size given a
-	 * text corpus. The formula is as follows:
+	 * text corpus. The goal here to subsample so that the support does
+	 * not exceed the corpus size. The upper bound of the support grows
+	 * exponentially with the number conjuncts and polynomially (with
+	 * maximum degree the number of conjuncts) with the size of the
+	 * corpus. We try first to estimate how fast the support grows
+	 * using the support estimate obtained by ji_prob to find what
+	 * corpus size should be so that the support is roughly equal to
+	 * the corpus size (because we can assume that the user at least
+	 * tolerates an amount of resources in space and time that is
+	 * already allocated for the corpus itself).
 	 *
-	 * subsize = 5000
+	 * The heuristic estimating the support from the corpus size, ts,
+	 * and the number of conjuncts, nc, is
 	 *
-	 * nns = ceiling(sqrt(ts / subsize) + 0.5)
+	 * f(ts, nc) = alpha * ts^nc
+	 *
+	 * This is an incredibly bad estimate, but it is the one we're
+	 * using for now.
+	 *
+	 * We want to find the new corpus size nts that verifies the
+	 * following equation
+	 *
+	 * f(nts, nc) = ts
+	 *
+	 * Thus
+	 *
+	 * alpha * nts^nc = ts
+	 * nts = (ts/alpha)^{1/nc}
+	 *
+	 * where alpha is calculated as follows
+	 *
+	 * alpha = support_estimate / ts^nc
 	 */
-	static std::pair<unsigned, unsigned> get_nns_subsize(const HandleSeq& texts);
+	static unsigned subsmp_size(const Handle& pattern,
+	                            const HandleSeq& texts,
+	                            double support_estimate);
 
 	/**
 	 * Calculate probability estimate of a pattern given a partition,
@@ -787,7 +837,7 @@ public:
  */
 std::string oc_to_string(const HandleSeqSeqSeq& hsss,
                          const std::string& indent=empty_string);
-	
+
 } // ~namespace opencog
 
 #endif /* OPENCOG_SURPRISINGNESS_H_ */

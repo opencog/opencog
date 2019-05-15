@@ -93,11 +93,6 @@ double Surprisingness::isurp(const Handle& pattern,
                              const HandleSeq& texts,
                              bool normalize)
 {
-	// Calculate the empiric probability of pattern
-	unsigned nns, subsize;
-	std::tie(nns, subsize) = get_nns_subsize(texts);
-	double emp = emp_prob_bs(pattern, texts, nns, subsize);
-
 	// Calculate the probability estimate of each partition based on
 	// independent assumption of between each partition block, taking
 	// into account the linkage probability.
@@ -106,20 +101,22 @@ double Surprisingness::isurp(const Handle& pattern,
 		double jip = ji_prob(partition, pattern, texts);
 		estimates.push_back(jip);
 		// logger().debug() << "jip = " << jip;
-		// double ratio = jip / emp;
-		// logger().debug() << "ratio = " << ratio;
 	}
 	auto mmp = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *mmp.first, emax = *mmp.second;
-	// logger().debug() << "emin = " << emin << ", emax = " << emax
-	//                  << ", emp = " << emp;
+	// logger().debug() << "emin = " << emin << ", emax = " << emax;
+
+	// Calculate the empirical probability of pattern, using
+	// boostrapping if necessary
+	// double emp = emp_prob_pbs(pattern, texts, emax);
+	double emp = emp_prob(pattern, texts);
+	// logger().debug() <<  "emp = " << emp;
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, emp);
 	// logger().debug() << "dst = " << dst
 	//                  << ", normalize = " << normalize
 	//                  << ", ndst = " << dst / emp;
-
 	return normalize ? dst / emp : dst;
 }
 
@@ -277,7 +274,14 @@ double Surprisingness::inner_product(const std::vector<HandleCounter>& dists)
 double Surprisingness::universe_count(const Handle& pattern,
                                       const HandleSeq& texts)
 {
-	return pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
+	return std::pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
+}
+
+double Surprisingness::prob_to_support(const Handle& pattern,
+                                       const HandleSeq& texts,
+                                       double prob)
+{
+	return prob * universe_count(pattern, texts);
 }
 
 double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
@@ -327,12 +331,12 @@ HandleSeq Surprisingness::subsmp(const HandleSeq& texts, unsigned subsize)
 
 double Surprisingness::emp_prob_bs(const Handle& pattern,
                                    const HandleSeq& texts,
-                                   unsigned nss,
+                                   unsigned n_resample,
                                    unsigned subsize)
 {
 	if (subsize < texts.size()) {
 		std::vector<double> essprobs;
-		dorepeat(nss)
+		dorepeat(n_resample)
 			essprobs.push_back(emp_prob_subsmp(pattern, texts, subsize));
 		return boost::accumulate(essprobs, 0.0) / essprobs.size();
 	} else {
@@ -340,13 +344,42 @@ double Surprisingness::emp_prob_bs(const Handle& pattern,
 	}
 }
 
-std::pair<unsigned, unsigned> Surprisingness::get_nns_subsize(const HandleSeq& texts)
+double Surprisingness::emp_prob_pbs(const Handle& pattern,
+                                    const HandleSeq& texts,
+                                    double prob_estimate)
 {
-	unsigned subsize = 5000;
-	unsigned nns = std::ceil(sqrt(texts.size() / subsize) + 0.5);
-	// return {nns, subsize};
-	return {1, 50000/*UINT_MAX*/};
-	// return {1, UINT_MAX};
+	// Calculate an estimate of the support of the pattern to decide
+	// whether we should subsample the texts corpus. Indeed some
+	// pattern have intractably large support.
+	double support_estimate = prob_to_support(pattern, texts, prob_estimate);
+
+	// If the support estimate is above the texts size then we
+	// subsample
+	if (texts.size() < support_estimate) {
+		// Calculate the empiric probability of pattern
+		unsigned subsize = subsmp_size(pattern, texts, support_estimate);
+		unsigned n_resampling = 10;  // TODO: move this hardwired contant
+		                             // to a user parameter
+		return emp_prob_bs(pattern, texts, n_resampling, subsize);
+	} else {
+		return emp_prob(pattern, texts);
+	}
+}
+
+unsigned Surprisingness::subsmp_size(const Handle& pattern,
+                                     const HandleSeq& texts,
+                                     double support_estimate)
+{
+	double ts = texts.size();
+	double nc = MinerUtils::n_conjuncts(pattern);
+	double alpha = (double)support_estimate / std::pow(ts, nc);
+	double res = std::pow(ts / (10*alpha), 1.0/nc);
+	logger().debug() << "Surprisingness::subsmp_size ts = " << ts
+	                 << ", nc = " << nc
+	                 << ", support_estimate = " << support_estimate
+	                 << ", alpha = " << alpha
+	                 << ", res = " << res;
+	return std::ceil(res);
 }
 
 double Surprisingness::ji_prob(const HandleSeqSeq& partition,
@@ -362,14 +395,11 @@ double Surprisingness::ji_prob(const HandleSeqSeq& partition,
 	// without considering joint variables
 	double p = 1.0;
 	for (const Handle& subpattern : subpatterns) {
-		unsigned nns, subsize;
-		std::tie(nns, subsize) = get_nns_subsize(texts);
-		double empr_bs = emp_prob_bs(subpattern, texts, nns, subsize);
-		// double empr = emp_prob(subpattern, texts);
+		// TODO: reuse existing empirical probability when possible
+		double empr = emp_prob(subpattern, texts);
 		// logger().debug() << "ji_prob texts.size() = " << texts.size()
-		//                  << ", empr_bs = " << empr_bs
 		//                  << ", empr = " << empr;
-		p *= empr_bs;
+		p *= empr;
 	}
 	// logger().debug() << "ji_prob subpattern emp product = " << p;
 
