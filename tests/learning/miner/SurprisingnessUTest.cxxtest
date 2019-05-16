@@ -638,7 +638,7 @@ void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_1()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 1e-9);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.1);
 }
 
 // Similar to above for pattern
@@ -856,7 +856,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_3()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 1e-3);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.1);
 }
 
 // Similar to above for pattern
@@ -923,7 +923,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_4()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.1);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.2);
 }
 
 // Similar to above for pattern
@@ -1056,7 +1056,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_6()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.3);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.4);
 }
 
 // Similar to above for pattern
@@ -1200,7 +1200,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_8()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.3);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.4);
 }
 
 // Similar to above for pattern
@@ -1315,7 +1315,7 @@ void SurprisingnessUTest::test_nisurp_emp_prob_bs_1()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.1);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.2);
 }
 
 // Test normalized I-Surprisingess for the ugly male soda drinker
