@@ -289,7 +289,6 @@ double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
 	double ucount = universe_count(pattern, texts);
 	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
 	double sup = MinerUtils::calc_support(pattern, texts, ms);
-	logger().debug() << "emp_prob(" << oc_to_string(pattern) << ",texts.size()=" << texts.size() << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount << ", texts.size() < sup = " << (texts.size() < sup);
 	return sup / ucount;
 }
 
@@ -365,6 +364,10 @@ double Surprisingness::emp_prob_pbs(const Handle& pattern,
                                     const HandleSeq& texts,
                                     double prob_estimate)
 {
+	// logger().debug() << "emp_prob_pbs(" << oc_to_string(pattern)
+	//                  << ",texts.size()=" << texts.size()
+	//                  << ",prob_estimate=" << prob_estimate << ")";
+
 	// Calculate an estimate of the support of the pattern to decide
 	// whether we should subsample the texts corpus. Indeed some
 	// pattern have intractably large support.
@@ -410,11 +413,11 @@ unsigned Surprisingness::subsmp_size(const Handle& pattern,
 	double nc = MinerUtils::n_conjuncts(pattern);
 	double alpha = (double)support_estimate / std::pow(ts, nc);
 	double res = std::pow(ts / (10*alpha), 1.0/nc);
-	logger().debug() << "Surprisingness::subsmp_size ts = " << ts
-	                 << ", nc = " << nc
-	                 << ", support_estimate = " << support_estimate
-	                 << ", alpha = " << alpha
-	                 << ", res = " << res;
+	// logger().debug() << "Surprisingness::subsmp_size ts = " << ts
+	//                  << ", nc = " << nc
+	//                  << ", support_estimate = " << support_estimate
+	//                  << ", alpha = " << alpha
+	//                  << ", res = " << res;
 	return std::ceil(res);
 }
 
