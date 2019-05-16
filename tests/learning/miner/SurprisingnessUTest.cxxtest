@@ -95,12 +95,19 @@ public:
 	// TODO: fix is_more_abstract to support that case
 	void xtest_is_more_abstract_4();
 	void test_is_strictly_more_abstract();
+	void test_subsmp();
+	void test_emp_prob_bs_1();
+	void test_emp_prob_bs_2();
 
-	// Test surprisingness measures
+	// Test old surprisingness measures
 	void test_nisurp_old_ugly_man();
 	void test_nisurp_old_ugly_man_soda_drinker();
+
+	// Test surprisingness without joint variables on synthetic data
 	void test_nisurp_no_linkage_synthetic_1();
 	void test_nisurp_no_linkage_synthetic_2();
+
+	// Test surprisingness with joint variables on synthetic data
 	// TODO: that one is really difficult to get because it ultimately
 	// depends on data generator to determine the universe of possible
 	// values of each variable, which is hard to guess.
@@ -113,6 +120,12 @@ public:
 	void test_nisurp_linkage_synthetic_7();
 	void test_nisurp_linkage_synthetic_8();
 	void test_nisurp_linkage_synthetic_9();
+
+	// Test surprisingness using bootstrapping to calculate
+	// probabilities
+	void test_nisurp_emp_prob_bs_1();
+
+	// Test surprisingness on toy datasets
 	void test_nisurp_ugly_man_soda_drinker();
 };
 
@@ -237,6 +250,8 @@ void SurprisingnessUTest::tearDown()
 // Test partition({A,B,C})
 void SurprisingnessUTest::test_partitions()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle A = an(CONCEPT_NODE, "A"),
 		B = an(CONCEPT_NODE, "B"),
 		C = an(CONCEPT_NODE, "C");
@@ -255,15 +270,20 @@ void SurprisingnessUTest::test_partitions()
 
 void SurprisingnessUTest::test_is_syntax_more_abstract()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	HandleSeq l_blk{al(LIST_LINK, Z, W, X)};
 	HandleSeq r_blk{al(LIST_LINK, X, Y, X)};
 
 	// Left block/subpattern is syntactically more abstract than
 	// right block/subpattern, relative to X.
-	TS_ASSERT(Surprisingness::is_more_abstract(l_blk, r_blk, X)); }
+	TS_ASSERT(Surprisingness::is_more_abstract(l_blk, r_blk, X));
+}
 
 void SurprisingnessUTest::test_is_more_abstract_1()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle l_pat = al(LAMBDA_LINK,
 	                  al(VARIABLE_LIST, X, Y, Z),
 	                  al(AND_LINK,
@@ -279,6 +299,8 @@ void SurprisingnessUTest::test_is_more_abstract_1()
 
 void SurprisingnessUTest::test_is_more_abstract_2()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle l_pat = al(LAMBDA_LINK,
 	                  al(VARIABLE_LIST, X, Y),
 	                  al(INHERITANCE_LINK, X, Z));
@@ -295,6 +317,8 @@ void SurprisingnessUTest::test_is_more_abstract_2()
 
 void SurprisingnessUTest::test_is_more_abstract_3()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle l_pat = al(LAMBDA_LINK,
 	                  al(VARIABLE_LIST, X, Y, Z),
 	                  al(AND_LINK,
@@ -333,6 +357,8 @@ void SurprisingnessUTest::xtest_is_more_abstract_4()
 
 void SurprisingnessUTest::test_is_strictly_more_abstract()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	HandleSeq l_blk{al(LIST_LINK, X, Y, Z)};
 	HandleSeq r_blk{al(LIST_LINK, W, C0, Z)};
 
@@ -347,6 +373,99 @@ void SurprisingnessUTest::test_is_strictly_more_abstract()
 	// Left block/subpattern is not more abstract than itself relative
 	// to Z, since it is equivalent.
 	TS_ASSERT(not Surprisingness::is_strictly_more_abstract(l_blk, l_blk, Z));
+}
+
+void SurprisingnessUTest::test_subsmp()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create data base
+	populate_uniform_inheritance_links(4000, 0.1);
+	HandleSeq texts = MinerUtils::get_texts(_texts_cpt);
+	logger().debug() << "texts.size() = " << texts.size();
+
+	// Subsample texts
+	HandleSeq texts_smp_1 = Surprisingness::subsmp(texts, 1000);
+	logger().debug() << "texts_smp_1.size() = " << texts_smp_1.size();
+	TS_ASSERT_EQUALS(texts_smp_1.size(), 1000);
+
+	HandleSeq texts_smp_2 = Surprisingness::subsmp(texts, 10000);
+	logger().debug() << "texts_smp_2.size() = " << texts_smp_2.size();
+	TS_ASSERT_EQUALS(texts_smp_2.size(), 10000);
+
+	HandleSeq texts_smp_3 = Surprisingness::subsmp(texts, 100000);
+	logger().debug() << "texts_smp_3.size() = " << texts_smp_3.size();
+	TS_ASSERT_EQUALS(texts_smp_3.size(), 100000);
+
+	HandleSeq texts_smp_4 = Surprisingness::subsmp(texts, 1000000);
+	logger().debug() << "texts_smp_4.size() = " << texts_smp_4.size();
+	TS_ASSERT_EQUALS(texts_smp_4.size(), 1000000);
+
+	HandleSeq texts_smp_5 = Surprisingness::subsmp(texts, 10000000);
+	logger().debug() << "texts_smp_5.size() = " << texts_smp_5.size();
+	TS_ASSERT_EQUALS(texts_smp_5.size(), texts.size());
+}
+
+void SurprisingnessUTest::test_emp_prob_bs_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create data base
+	populate_uniform_inheritance_links(1000, 0.01);
+
+	// Create pattern to measure empiric probability with and without
+	// boostrapping
+	//
+	// LambdaLink
+	//   X Y
+	//   InheritanceLink
+	//     X
+	//     Y
+	Handle pattern = al(LAMBDA_LINK,
+	                    al(VARIABLE_LIST, X, Y),
+	                    al(INHERITANCE_LINK, X, Y));
+
+	HandleSeq texts = MinerUtils::get_texts(_texts_cpt);
+	double epr = Surprisingness::emp_prob(pattern, texts);
+	double epr_bs = Surprisingness::emp_prob_bs(pattern, texts, 10, 1000);
+	logger().debug() << "texts.size() = " << texts.size()
+	                << ", epr = " << epr
+	                << ", epr_bs = " << epr_bs;
+	TS_ASSERT_DELTA(epr, epr_bs, 0.1);
+}
+
+void SurprisingnessUTest::test_emp_prob_bs_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create data base
+	populate_uniform_inheritance_links(1000, 0.001068);
+
+	// Create pattern to measure empiric probability with and without
+	// boostrapping
+	//
+	// LambdaLink
+	//   X Y Z
+	//   AndLink
+	//     InheritanceLink
+	//       X
+	//       Y
+	//     InheritanceLink
+	//       Z
+	//       Y
+	Handle pattern = al(LAMBDA_LINK,
+	                    al(VARIABLE_LIST, X, Y, Z),
+	                    al(AND_LINK,
+	                       al(INHERITANCE_LINK, X, Y),
+	                       al(INHERITANCE_LINK, Y, Z)));
+
+	HandleSeq texts = MinerUtils::get_texts(_texts_cpt);
+	double epr = Surprisingness::emp_prob(pattern, texts);
+	double epr_bs = Surprisingness::emp_prob_bs(pattern, texts, 100, 1500);
+	logger().info() << "texts.size() = " << texts.size()
+	                << ", epr = " << epr
+	                << ", epr_bs = " << epr_bs;
+	TS_ASSERT_DELTA(epr, epr_bs, 0.001);
 }
 
 // Test old normalized I-Surprisingess for the ugly male
@@ -481,6 +600,8 @@ void SurprisingnessUTest::test_nisurp_old_ugly_man_soda_drinker()
 //       W
 void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_1()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.01);
 
@@ -517,7 +638,7 @@ void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_1()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 1e-9);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.1);
 }
 
 // Similar to above for pattern
@@ -533,6 +654,8 @@ void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_1()
 //       C1
 void SurprisingnessUTest::test_nisurp_no_linkage_synthetic_2()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.5);
 
@@ -641,6 +764,8 @@ void SurprisingnessUTest::xtest_nisurp_linkage_synthetic_1()
 //       C0
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_2()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.1);
 
@@ -693,6 +818,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_2()
 //       Z
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_3()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(10000, 0.001);
 
@@ -729,7 +856,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_3()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 1e-3);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.2);
 }
 
 // Similar to above for pattern
@@ -754,6 +881,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_3()
 // clauses.
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_4()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.01);
 
@@ -794,7 +923,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_4()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.1);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.3);
 }
 
 // Similar to above for pattern
@@ -817,6 +946,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_4()
 // independent like in test_nisurp_linkage_synthetic_3
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_5()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.1);
 
@@ -857,7 +988,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_5()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 1e-2);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 1e-1);
 }
 
 // Similar to above for pattern
@@ -879,6 +1010,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_5()
 //       Y
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_6()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.01);
 
@@ -923,7 +1056,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_6()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.3);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.4);
 }
 
 // Similar to above for pattern
@@ -948,6 +1081,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_6()
 //       C1
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_7()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_inheritance_links(1000, 0.01);
 
@@ -1021,6 +1156,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_7()
 //       Z
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_8()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_list_links(50, 3, 0.1);
 
@@ -1063,7 +1200,7 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_8()
 	// Since the pattern is composed of 2 independent patterns, it
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
-	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.3);
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.4);
 }
 
 // Similar to above for pattern
@@ -1085,6 +1222,8 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_8()
 //       X
 void SurprisingnessUTest::test_nisurp_linkage_synthetic_9()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	// Create data base
 	populate_uniform_list_links(50, 3, 0.1);
 
@@ -1128,6 +1267,55 @@ void SurprisingnessUTest::test_nisurp_linkage_synthetic_9()
 	// should be completely unsurprising, thus have a nearly null
 	// nisurp measure.
 	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.3);
+}
+
+// Like test_nisurp_linkage_synthetic_4 but using bootstrapping to
+// calculate empirical probability and estimates.
+void SurprisingnessUTest::test_nisurp_emp_prob_bs_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create data base
+	populate_uniform_inheritance_links(1000, 0.01);
+
+	// Create pattern to measure surprisingness of
+	//
+	// LambdaLink
+	//   X Y Z
+	//   AndLink
+	//     InheritanceLink
+	//       X
+	//       Y
+	//     InheritanceLink
+	//       Z
+	//       Y
+	Handle pattern = al(LAMBDA_LINK,
+	                    al(VARIABLE_LIST, X, Y, Z),
+	                    al(AND_LINK,
+	                       al(INHERITANCE_LINK, X, Y),
+	                       al(INHERITANCE_LINK, Z, Y)));
+	MinerUTestUtils::add_minsup_eval(_as, pattern, 5, TruthValue::TRUE_TV());
+
+	// Test normalized I-Surprisingness
+	std::string mode = "nisurp";
+	HandleSeq isurp_results = ure_isurp(mode, 2);
+	Handle expected = MinerUTestUtils::add_isurp_eval(_as, mode, pattern);
+
+	logger().debug() << "isurp_results = " << oc_to_string(isurp_results);
+
+	TS_ASSERT(not isurp_results.empty());
+
+	Handle isurp_front = isurp_results.front();
+
+	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "isurp_front = " << oc_to_string(isurp_front);
+
+	TS_ASSERT(content_eq(expected, isurp_front));
+
+	// Since the pattern is composed of 2 independent patterns, it
+	// should be completely unsurprising, thus have a nearly null
+	// nisurp measure.
+	TS_ASSERT_DELTA(0.0, expected->getTruthValue()->get_mean(), 0.2);
 }
 
 // Test normalized I-Surprisingess for the ugly male soda drinker

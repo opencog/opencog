@@ -34,12 +34,12 @@
 "
   (> (cog-mean x) (cog-mean y)))
 
-(define (desc-sort-by-tv-strength l)
+(define (desc-sort-by-tv-strength lst)
 "
-  Given a link of atoms, sort these atom in descending order according
+  Given a list of atoms, sort these atom in descending order according
   to their tv strengths.
 "
-  (List (sort (cog-outgoing-set l) greater-tv-strength)))
+  (sort lst greater-tv-strength))
 
 (define (top)
 "
@@ -529,10 +529,9 @@
           (if (equal? surprisingness 'none)
 
               ;; No surprisingness, simple return the pattern list
-              (begin
+              (let* ((parent-patterns-lst (cog-cp parent-as patterns-lst)))
                 (cog-set-atomspace! parent-as)
-                ;; TODO: delete tmp-as but without deleting its atoms
-                patterns-lst)
+                parent-patterns-lst)
 
               ;; Run surprisingness
               (let*
@@ -543,10 +542,14 @@
                    (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
 
                    ;; Run surprisingness in a backward way
-                   (isurp-results (cog-bc isurp-rbs target #:vardecl vardecl)))
+                   (isurp-res (cog-bc isurp-rbs target #:vardecl vardecl))
+                   (isurp-res-lst (cog-outgoing-set isurp-res))
+                   (isurp-res-sort-lst (desc-sort-by-tv-strength isurp-res-lst))
+
+                   ;; Copy the results to the parent atomspace
+                   (parent-isurp-res (cog-cp parent-as isurp-res-sort-lst)))
                 (cog-set-atomspace! parent-as)
-                ;; TODO: delete tmp-as but without deleting its atoms
-                (desc-sort-by-tv-strength isurp-results)))))))
+                parent-isurp-res))))))
 
 (define (export-miner-utils)
   (export

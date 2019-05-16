@@ -192,7 +192,7 @@ public:
 	/**
 	 * Given a texts concept node, retrieve all its members
 	 */
-	static HandleSet get_texts(const Handle& texts_cpt);
+	static HandleSeq get_texts(const Handle& texts_cpt);
 
 	/**
 	 * Given a number node holding the minimum support return the
@@ -205,7 +205,7 @@ public:
 	 * frequency up to ms (to avoid unnecessary calculations).
 	 */
 	static unsigned support(const Handle& pattern,
-	                        const HandleSet& texts,
+	                        const HandleSeq& texts,
 	                        unsigned ms);
 
 	/**
@@ -213,7 +213,7 @@ public:
 	 * its variables depends on other clauses).
 	 */
 	static unsigned component_support(const Handle& pattern,
-	                                  const HandleSet& texts,
+	                                  const HandleSeq& texts,
 	                                  unsigned ms);
 
 	/**
@@ -222,7 +222,7 @@ public:
 	 * to ms.
 	 */
 	static bool enough_support(const Handle& pattern,
-	                           const HandleSet& texts,
+	                           const HandleSeq& texts,
 	                           unsigned ms);
 
 	/**
@@ -234,7 +234,7 @@ public:
 	 * details.
 	 */
 	static HandleSetSeq shallow_abstract(const Handle& pattern,
-	                                     const HandleSet& texts,
+	                                     const HandleSeq& texts,
 	                                     unsigned ms);
 
 	/**
@@ -242,7 +242,7 @@ public:
 	 * according to texts.
 	 */
 	static HandleSet shallow_specialize(const Handle& pattern,
-	                                    const HandleSet& texts,
+	                                    const HandleSeq& texts,
 	                                    unsigned ms);
 
 	/**
@@ -305,10 +305,10 @@ public:
 	 * { (And (Concept "A") (And (Concept "B") (Concept "C"))) }
 	 *
 	 * Also, the pattern may match any subhypergraph of texts, not just
-	 * the root atoms.
+	 * the root atoms (TODO: we probably don't want that!!!).
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
-	                                        const HandleSet& texts,
+	                                        const HandleSeq& texts,
 	                                        unsigned ms=UINT_MAX);
 
 	/**
@@ -455,7 +455,7 @@ public:
 	 */
 	static HandleSet expand_conjunction(const Handle& cnjtion,
 	                                    const Handle& pattern,
-	                                    const HandleSet& texts,
+	                                    const HandleSeq& texts,
 	                                    unsigned ms);
 
 	/**
@@ -482,7 +482,7 @@ public:
 	 * support_key() then calculate and set the support.
 	 */
 	static double calc_support(const Handle& pattern,
-	                           const HandleSet& texts,
+	                           const HandleSeq& texts,
 	                           unsigned ms);
 };
 

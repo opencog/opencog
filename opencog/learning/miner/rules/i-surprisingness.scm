@@ -91,8 +91,8 @@
 (define (gen-i-surprisingness-formula mode)
   (lambda (conclusion . premises)
 
-    (cog-logger-debug "(i-surprisingness-formula mode = ~a, conclusion = ~a, premises = ~a"
-                      mode conclusion premises)
+    ;; (cog-logger-debug "(i-surprisingness-formula mode = ~a, conclusion = ~a, premises = ~a"
+    ;;                   mode conclusion premises)
 
     (if (= 1 (length premises))
         (let* ((pat-isurp conclusion)

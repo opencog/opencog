@@ -78,22 +78,22 @@ Miner::Miner(const MinerParameters& prm)
 
 HandleTree Miner::operator()(const AtomSpace& texts_as)
 {
-	HandleSet texts;
+	HandleSeq texts;
 	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                             opencog::ATOM, true);
 	return operator()(texts);
 }
 
-HandleTree Miner::operator()(const HandleSet& texts)
+HandleTree Miner::operator()(const HandleSeq& texts)
 {
 	// If the initial pattern is specialized, this initial filtering
 	// may save some computation
-	HandleSet fltexts = filter_texts(param.initpat, texts);
+	HandleSeq fltexts = filter_texts(param.initpat, texts);
 	return specialize(param.initpat, fltexts, param.maxdepth);
 }
 
 HandleTree Miner::specialize(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              int maxdepth)
 {
 	// TODO: decide what to choose and remove or comment
@@ -102,7 +102,7 @@ HandleTree Miner::specialize(const Handle& pattern,
 }
 
 HandleTree Miner::specialize(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              const Valuations& valuations,
                              int maxdepth)
 {
@@ -128,7 +128,7 @@ HandleTree Miner::specialize(const Handle& pattern,
 }
 
 HandleTree Miner::specialize_alt(const Handle& pattern,
-                                 const HandleSet& texts,
+                                 const HandleSeq& texts,
                                  const Valuations& valuations,
                                  int maxdepth)
 {
@@ -159,7 +159,7 @@ HandleTree Miner::specialize_alt(const Handle& pattern,
 }
 
 bool Miner::terminate(const Handle& pattern,
-                      const HandleSet& texts,
+                      const HandleSeq& texts,
                       const Valuations& valuations,
                       int maxdepth) const
 {
@@ -176,7 +176,7 @@ bool Miner::terminate(const Handle& pattern,
 }
 
 HandleTree Miner::specialize_shabs(const Handle& pattern,
-                                   const HandleSet& texts,
+                                   const HandleSeq& texts,
                                    const Valuations& valuations,
                                    int maxdepth)
 {
@@ -208,7 +208,7 @@ HandleTree Miner::specialize_shabs(const Handle& pattern,
 }
 
 HandleTree Miner::specialize_shapat(const Handle& pattern,
-                                    const HandleSet& texts,
+                                    const HandleSeq& texts,
                                     const Handle& var,
                                     const Handle& shapat,
                                     int maxdepth)
@@ -221,7 +221,7 @@ HandleTree Miner::specialize_shapat(const Handle& pattern,
 		return HandleTree();
 
 	// Generate the corresponding text
-	HandleSet fltexts = filter_texts(npat, texts);
+	HandleSeq fltexts = filter_texts(npat, texts);
 
 	// That specialization doesn't have enough support, skip it
 	// and its specializations.
@@ -236,13 +236,13 @@ HandleTree Miner::specialize_shapat(const Handle& pattern,
 }
 
 bool Miner::enough_support(const Handle& pattern,
-                           const HandleSet& texts) const
+                           const HandleSeq& texts) const
 {
 	return param.minsup <= freq(pattern, texts, param.minsup);
 }
 
 unsigned Miner::freq(const Handle& pattern,
-                     const HandleSet& texts,
+                     const HandleSeq& texts,
                      unsigned ms) const
 {
 	HandleSeq cps(MinerUtils::get_component_patterns(pattern));
@@ -267,8 +267,8 @@ unsigned Miner::freq(const std::vector<unsigned>& freqs) const
 	return std::floor(f);
 }
 
-HandleSet Miner::filter_texts(const Handle& pattern,
-                              const HandleSet& texts) const
+HandleSeq Miner::filter_texts(const Handle& pattern,
+                              const HandleSeq& texts) const
 {
 	// No need to filter if most abstract
 	if (MinerUtils::totally_abstract(pattern))
@@ -280,10 +280,11 @@ HandleSet Miner::filter_texts(const Handle& pattern,
 		return texts;
 
 	// Otherwise it is a single conjunct pattern
-	HandleSet filtrd;
+	// TODO: use comprehension
+	HandleSeq filtrd;
 	for (const auto& text : texts)
 		if (match(pattern, text))
-			filtrd.insert(text);
+			filtrd.push_back(text);
 	return filtrd;
 }
 

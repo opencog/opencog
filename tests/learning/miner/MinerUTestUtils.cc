@@ -148,7 +148,7 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
                                int max_conjuncts,
                                double complexity_penalty)
 {
-	HandleSet texts;
+	HandleSeq texts;
 	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                             opencog::ATOM, true);
 	return ure_pm(as, scm, pm_rb, texts, minsup, maximum_iterations, initpat,
@@ -158,7 +158,7 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 Handle MinerUTestUtils::ure_pm(AtomSpace& as,
                                SchemeEval& scm,
                                const Handle& pm_rb,
-                               const HandleSet& texts,
+                               const HandleSeq& texts,
                                int minsup,
                                int maximum_iterations,
                                Handle initpat,
@@ -222,7 +222,7 @@ HandleTree MinerUTestUtils::cpp_pm(const AtomSpace& texts_as,
 	return pm(texts_as);
 }
 
-HandleTree MinerUTestUtils::cpp_pm(const HandleSet& texts,
+HandleTree MinerUTestUtils::cpp_pm(const HandleSeq& texts,
                                    int minsup,
                                    int conjuncts,
                                    const Handle& initpat,

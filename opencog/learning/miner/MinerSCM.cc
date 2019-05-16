@@ -161,14 +161,14 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
-		MinerUtils::shallow_abstract(pattern, texts_set, ms_uint);
+		MinerUtils::shallow_abstract(pattern, texts_seq, ms_uint);
 
 	// Turn that sequence of handle sets into a set of ready to be
 	// applied shallow abstractions
@@ -197,13 +197,13 @@ Handle MinerSCM::do_shallow_specialize(Handle pattern,
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-specialize");
 
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	// Generate all shallow specializations
-	HandleSet shaspes = MinerUtils::shallow_specialize(pattern, texts_set, ms_uint);
+	HandleSet shaspes = MinerUtils::shallow_specialize(pattern, texts_seq, ms_uint);
 
 	return as->add_link(SET_LINK, HandleSeq(shaspes.begin(), shaspes.end()));
 }
@@ -211,12 +211,12 @@ Handle MinerSCM::do_shallow_specialize(Handle pattern,
 bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
 {
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	unsigned ms_uint = MinerUtils::get_ms(ms);
 
-	return MinerUtils::enough_support(pattern, texts_set, ms_uint);
+	return MinerUtils::enough_support(pattern, texts_seq, ms_uint);
 }
 
 Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
@@ -225,13 +225,13 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-expand-conjunction");
 
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
 	unsigned ms_uint = MinerUtils::get_ms(ms);
 
 	HandleSet results = MinerUtils::expand_conjunction(cnjtion, pattern,
-	                                                   texts_set,
+	                                                   texts_seq,
 	                                                   ms_uint);
 	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
 }
@@ -239,33 +239,33 @@ Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
 double MinerSCM::do_isurp_old(Handle pattern, Handle texts)
 {
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
-	return Surprisingness::isurp_old(pattern, texts_set, false);
+	return Surprisingness::isurp_old(pattern, texts_seq, false);
 }
 
 double MinerSCM::do_nisurp_old(Handle pattern, Handle texts)
 {
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
-	return Surprisingness::isurp_old(pattern, texts_set, true);
+	return Surprisingness::isurp_old(pattern, texts_seq, true);
 }
 
 double MinerSCM::do_isurp(Handle pattern, Handle texts)
 {
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
-	return Surprisingness::isurp(pattern, texts_set, false);
+	return Surprisingness::isurp(pattern, texts_seq, false);
 }
 
 double MinerSCM::do_nisurp(Handle pattern, Handle texts)
 {
 	// Fetch all texts
-	HandleSet texts_set = MinerUtils::get_texts(texts);
+	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
-	return Surprisingness::isurp(pattern, texts_set, true);
+	return Surprisingness::isurp(pattern, texts_seq, true);
 }
 
 extern "C" {

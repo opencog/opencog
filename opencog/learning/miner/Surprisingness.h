@@ -73,7 +73,7 @@ public:
 	 * they are encoded as lists of lists for performance reasons.
 	 */
 	static double isurp_old(const Handle& pattern,
-	                        const HandleSet& texts,
+	                        const HandleSeq& texts,
 	                        bool normalize=true);
 
 	/**
@@ -331,7 +331,7 @@ public:
 	 * slow). We have not experimented with approximated counts yet.
 	 */
 	static double isurp(const Handle& pattern,
-	                    const HandleSet& texts,
+	                    const HandleSeq& texts,
 	                    bool normalize=true);
 
 	/**
@@ -464,7 +464,7 @@ public:
 	 */
 	static unsigned value_count(const HandleSeq& block,
 	                            const Handle& var,
-	                            const HandleSet& texts);
+	                            const HandleSeq& texts);
 
 	/**
 	 * Return the probability distribution over value of var in the
@@ -472,7 +472,7 @@ public:
 	 */
 	static HandleCounter value_distribution(const HandleSeq& block,
 	                                        const Handle& var,
-	                                        const HandleSet& texts);
+	                                        const HandleSeq& texts);
 
 	/**
 	 * Perform the inner product of a collection of distributions.
@@ -495,10 +495,116 @@ public:
 	static double inner_product(const std::vector<HandleCounter>& dists);
 
 	/**
+	 * Calculate the universe count of the pattern over the given texts
+	 */
+	static double universe_count(const Handle& pattern, const HandleSeq& texts);
+
+	/**
+	 * Given a pattern, a corpus and a probability, calculate the
+	 * support of that pattern.
+	 */
+	static double prob_to_support(const Handle& pattern,
+	                              const HandleSeq& texts,
+	                              double prob);
+
+	/**
 	 * Calculate the empiric probability of a pattern according to a
 	 * database texts.
 	 */
-	static double emp_prob(const Handle& pattern, const HandleSet& texts);
+	static double emp_prob(const Handle& pattern, const HandleSeq& texts);
+
+	/**
+	 * Like emp_prob with memoization.
+	 */
+	static double emp_prob_mem(const Handle& pattern,
+	                           const HandleSeq& texts);
+
+	/**
+	 * Like emp_prob but subsample the texts to have subsize (if texts
+	 * size is greater than subsize).
+	 *
+	 * TODO: memoizing support is current disabled.
+	 */
+	static double emp_prob_subsmp(const Handle& pattern,
+	                              const HandleSeq& texts,
+	                              unsigned subsize=UINT_MAX);
+
+	/**
+	 * Randomly subsample texts so that the resulting texts has size
+	 * subsize.
+	 */
+	static HandleSeq subsmp(const HandleSeq& texts, unsigned subsize);
+
+	/**
+	 * Like emp_prob but uses bootstrapping for more efficiency. nbs is
+	 * the number of subsamplings taking place, and subsize is the size
+	 * of each subsample.
+	 *
+	 * TODO: memoizing support is current disabled.
+	 */
+	static double emp_prob_bs(const Handle& pattern,
+	                          const HandleSeq& texts,
+	                          unsigned n_resample,
+	                          unsigned subsize);
+
+	/**
+	 * Calculate the empirical probability of the given pattern,
+	 * possibly boostrapping if necessary. The heuristic to determine
+	 * whether the booststrapping should take place, and how, is
+	 * calculated based on the pattern, the texts size and the
+	 * probability estimate of the pattern.
+	 *
+	 * pbs stands for possibly boostrapping.
+	 */
+	static double emp_prob_pbs(const Handle& pattern,
+	                           const HandleSeq& texts,
+	                           double prob_estimate);
+
+	/**
+	 * Like emp_prob_pbs with memoization.
+	 */
+	static double emp_prob_pbs_mem(const Handle& pattern,
+	                               const HandleSeq& texts,
+	                               double prob_estimate);
+
+	/**
+	 * Determine the number of samples and the subsample size given a
+	 * text corpus. The goal here to subsample so that the support does
+	 * not exceed the corpus size. The upper bound of the support grows
+	 * exponentially with the number conjuncts and polynomially (with
+	 * maximum degree the number of conjuncts) with the size of the
+	 * corpus. We try first to estimate how fast the support grows
+	 * using the support estimate obtained by ji_prob to find what
+	 * corpus size should be so that the support is roughly equal to
+	 * the corpus size (because we can assume that the user at least
+	 * tolerates an amount of resources in space and time that is
+	 * already allocated for the corpus itself).
+	 *
+	 * The heuristic estimating the support from the corpus size, ts,
+	 * and the number of conjuncts, nc, is
+	 *
+	 * f(ts, nc) = alpha * ts^nc
+	 *
+	 * This is an incredibly bad estimate, but it is the one we're
+	 * using for now.
+	 *
+	 * We want to find the new corpus size nts that verifies the
+	 * following equation
+	 *
+	 * f(nts, nc) = ts
+	 *
+	 * Thus
+	 *
+	 * alpha * nts^nc = ts
+	 * nts = (ts/alpha)^{1/nc}
+	 *
+	 * where alpha is calculated as follows
+	 *
+	 * alpha = support_estimate / ts^nc
+	 */
+	static unsigned subsmp_size(const Handle& pattern,
+	                            const HandleSeq& texts,
+	                            double support_estimate);
 
 	/**
 	 * Calculate probability estimate of a pattern given a partition,
@@ -509,7 +615,7 @@ public:
 	 */
 	static double ji_prob(const HandleSeqSeq& partition,
 	                      const Handle& pattern,
-	                      const HandleSet& texts);
+	                      const HandleSeq& texts);
 
 	/**
 	 * Return true iff the given variable has the same position (same
@@ -726,7 +832,7 @@ public:
 	 */
 	static double eq_prob(const HandleSeqSeq& partition,
 	                      const Handle& pattern,
-	                      const HandleSet& texts);
+	                      const HandleSeq& texts);
 
 	/**
 	 * Alternate implementation of eq_prob. Takes into syntactical
@@ -735,7 +841,18 @@ public:
 	 */
 	static double eq_prob_alt(const HandleSeqSeq& partition,
 	                          const Handle& pattern,
-	                          const HandleSet& texts);
+	                          const HandleSeq& texts);
+
+	/**
+	 * Key of the empirical probability value
+	 */
+	static const Handle& emp_prob_key();
+
+	/**
+	 * Get/set the empirical probability of the given pattern.
+	 */
+	static TruthValuePtr get_emp_prob(const Handle& pattern);
+	static void set_emp_prob(const Handle& pattern, double emp_prob);
 };
 
 /**
@@ -744,7 +861,7 @@ public:
  */
 std::string oc_to_string(const HandleSeqSeqSeq& hsss,
                          const std::string& indent=empty_string);
-	
+
 } // ~namespace opencog
 
 #endif /* OPENCOG_SURPRISINGNESS_H_ */

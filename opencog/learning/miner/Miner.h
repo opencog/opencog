@@ -54,6 +54,7 @@ struct MinerParameters {
 	                int maxdepth=-1,
 	                double info=1.0);
 
+	// TODO: change frequency by support!!!
 	// Minimum support. Mined patterns must have a frequency equal or
 	// above this value.
 	unsigned minsup;
@@ -128,14 +129,14 @@ public:
 	/**
 	 * Like above but only mine amongst the provided text collection.
 	 */
-	HandleTree operator()(const HandleSet& texts);
+	HandleTree operator()(const HandleSeq& texts);
 
 	/**
 	 * Specialization. Given a pattern and a collection to text atoms,
 	 * generate all specialized patterns of the given pattern.
 	 */
 	HandleTree specialize(const Handle& pattern,
-	                      const HandleSet& texts,
+	                      const HandleSeq& texts,
 	                      int maxdepth=-1);
 
 	/**
@@ -143,7 +144,7 @@ public:
 	 * valuations.
 	 */
 	HandleTree specialize(const Handle& pattern,
-	                      const HandleSet& texts,
+	                      const HandleSeq& texts,
 	                      const Valuations& valuations,
 	                      int maxdepth);
 
@@ -151,7 +152,7 @@ public:
 	 * Alternate specialization that reflects how the URE would work.
 	 */
 	HandleTree specialize_alt(const Handle& pattern,
-	                          const HandleSet& texts,
+	                          const HandleSeq& texts,
 	                          const Valuations& valuations,
 	                          int maxdepth);
 
@@ -168,7 +169,7 @@ private:
 	 * whether the valuation has any variable left to specialize from.
 	 */
 	bool terminate(const Handle& pattern,
-	               const HandleSet& texts,
+	               const HandleSeq& texts,
 	               const Valuations& valuations,
 	               int maxdepth) const;
 
@@ -179,7 +180,7 @@ private:
 	 * obtained specializations.
 	 */
 	HandleTree specialize_shabs(const Handle& pattern,
-	                            const HandleSet& texts,
+	                            const HandleSeq& texts,
 	                            const Valuations& valuations,
 	                            int maxdepth);
 
@@ -189,7 +190,7 @@ private:
 	 * obtained specialization.
 	 */
 	HandleTree specialize_shapat(const Handle& pattern,
-	                             const HandleSet& texts,
+	                             const HandleSeq& texts,
 	                             const Handle& var,
 	                             const Handle& shapat,
 	                             int maxdepth);
@@ -200,7 +201,7 @@ private:
 	 * to minsup.
 	 */
 	bool enough_support(const Handle& pattern,
-	                    const HandleSet& texts) const;
+	                    const HandleSeq& texts) const;
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
@@ -216,7 +217,7 @@ private:
 	 * certain maximum, for saving resources.
 	 */
 	unsigned freq(const Handle& pattern,
-	              const HandleSet& texts,
+	              const HandleSeq& texts,
 	              unsigned ms) const;
 
 	/**
@@ -228,8 +229,8 @@ private:
 	/**
 	 * Filter in only texts matching the pattern
 	 */
-	HandleSet filter_texts(const Handle& pattern,
-	                       const HandleSet& texts) const;
+	HandleSeq filter_texts(const Handle& pattern,
+	                       const HandleSeq& texts) const;
 
 	/**
 	 * Check whether a pattern matches a text.
