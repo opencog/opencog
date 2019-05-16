@@ -418,7 +418,7 @@ unsigned Surprisingness::subsmp_size(const Handle& pattern,
 	//                  << ", support_estimate = " << support_estimate
 	//                  << ", alpha = " << alpha
 	//                  << ", res = " << res;
-	return std::ceil(res);
+	return std::max((unsigned)res, std::min(5000U, (unsigned)ts));
 }
 
 double Surprisingness::ji_prob(const HandleSeqSeq& partition,
