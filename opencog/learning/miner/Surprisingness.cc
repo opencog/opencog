@@ -87,7 +87,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, pattern_prob);
-	return normalize ? dst / pattern_prob : dst;
+	return std::min(normalize? dst / pattern_prob : dst, 1.0);
 }
 
 double Surprisingness::isurp(const Handle& pattern,
@@ -117,7 +117,7 @@ double Surprisingness::isurp(const Handle& pattern,
 	// logger().debug() << "dst = " << dst
 	//                  << ", normalize = " << normalize
 	//                  << ", ndst = " << dst / emp;
-	return normalize ? dst / emp : dst;
+	return std::min(normalize ? dst / emp : dst, 1.0);
 }
 
 Handle Surprisingness::isurp_key()
