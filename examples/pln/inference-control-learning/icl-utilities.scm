@@ -193,6 +193,8 @@
 ;; Redefine cog-cp and cog-cp-all to return a list of copied atoms
 ;; (indeed these are not the same the ones in the source). Take care
 ;; of not overwriting TVs with higher confidences by lower ones.
+;;
+;; TODO: replace by cog-cp now that it has been updated.
 (define (icl-cp AS LST)
 "
   icl-cp AS LST - Copy the atoms in LST to the given atomspace AS and
