@@ -38,12 +38,12 @@
 
 ;; Run pattern miner
 (define results (cog-mine texts-cpt
-                          #:minsup 5
+                          #:minsup 100
                           #:maximum-iterations 10
                           #:incremental-expansion #t
                           #:max-conjuncts 2
-                          ;; #:surprisingness 'nisurp))
-                          #:surprisingness 'none))
+                          #:surprisingness 'nisurp))
+                          ;; #:surprisingness 'none))
 
 ;; The top results are very abstract, but some are interesting, such as
 ;;
