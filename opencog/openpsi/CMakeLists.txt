@@ -10,6 +10,7 @@ ADD_GUILE_MODULE (FILES
 ADD_SUBDIRECTORY (dynamics)
 
 ADD_LIBRARY (openpsi SHARED
+	OpenPsiSatisfier.cc
 	OpenPsiImplicator.cc
 	OpenPsiRules.cc
 	OpenPsiSCM.cc
@@ -21,6 +22,8 @@ TARGET_LINK_LIBRARIES (openpsi
 
 INSTALL (TARGETS openpsi DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-INSTALL (FILES OpenPsiImplicator.h
+INSTALL (FILES
+	OpenPsiImplicator.h
+	OpenPsiSatisfier.h
 	DESTINATION "include/opencog/openpsi/"
 )
