@@ -33,7 +33,6 @@ class OpenPsiSCM
 public:
   OpenPsiSCM();
 
-private:
   Handle add_category(const Handle& new_category);
 
   /**
