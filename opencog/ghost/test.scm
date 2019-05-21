@@ -209,8 +209,8 @@
         (psi-get-context (car rule)))
       (if (null? (cog-value (car rule) ghost-time-last-executed))
         "N.A."
-        (strftime "%D %T" (localtime (inexact->exact
-          (car (cog-value->list (cog-value (car rule) ghost-time-last-executed)))))))
+        (strftime "%D %T" (localtime (inexact->exact (round
+          (car (cog-value->list (cog-value (car rule) ghost-time-last-executed))))))))
       (if (null? (cog-value (car rule) ghost-next-reactive-rule))
         (list)
         (append-map psi-rule-alias
