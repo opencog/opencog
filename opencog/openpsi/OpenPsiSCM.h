@@ -131,6 +131,8 @@ public:
   void init(void);
 };
 
+OpenPsiSCM& get_openpsi_scm();
+
 } // namespace opencog
 
 extern "C" {

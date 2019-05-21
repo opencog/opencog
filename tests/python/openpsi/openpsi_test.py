@@ -29,8 +29,6 @@ class OpenPsiTest(TestCase):
     def testopenpsi(self):
         scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec) (opencog openpsi))")
 
-        APPLE = ConceptNode("apple")
-
         openpsi = OpenPsi(self.atomspace)
 
         goal = ConceptNode("goal")
@@ -38,7 +36,7 @@ class OpenPsiTest(TestCase):
         context = [
             InheritanceLink(
                 VariableNode("$APPLE"),
-                APPLE),
+                ConceptNode("apple")),
             AbsentLink(
                 InheritanceLink(
                     VariableNode("$APPLE"),
@@ -55,13 +53,30 @@ class OpenPsiTest(TestCase):
 
         component = ConceptNode("test-component")
 
-        openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
+        rule = openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
+
+        self.assertFalse(openpsi.is_rule(goal))
+        self.assertTrue(openpsi.is_rule(rule.get_rule_atom()))
+        self.assertEqual(ConceptNode("goal"), rule.get_goal())
+
+        categories = openpsi.get_categories()
+        self.assertEqual(2, len(categories))
+        self.assertTrue(component in categories)
+        self.assertFalse(ConceptNode("new-category") in categories)
+
+        new_category = openpsi.add_category(ConceptNode("new-category"))
+        self.assertEqual(ConceptNode("new-category"), new_category)
+        categories = openpsi.get_categories()
+        self.assertEqual(3, len(categories))
+        self.assertTrue(new_category in categories)
+
+        self.assertEqual(context, rule.get_context())
 
         scheme_eval(self.atomspace, "(psi-run component)")
 
         # Apples are handled by OpenPsi loop
-        InheritanceLink(ConceptNode("apple-1"), APPLE)
-        InheritanceLink(ConceptNode("apple-2"), APPLE)
+        InheritanceLink(ConceptNode("apple-1"), ConceptNode("apple"))
+        InheritanceLink(ConceptNode("apple-2"), ConceptNode("apple"))
 
         delay = 0.02
         time.sleep(delay)
