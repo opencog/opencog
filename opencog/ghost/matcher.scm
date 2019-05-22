@@ -163,7 +163,7 @@
             (set! rules-eval-cnt (1+ rules-eval-cnt))
             (if (> w 0)
               (begin
-                (set! ruled-satisfied (cons r rules-satisfied))
+                (set! rules-satisfied (cons r rules-satisfied))
                 (set! rule-weight-alist (assoc-set! rule-weight-alist r w)))
               (cog-logger-debug ghost-logger
                 "Skipping action with zero weight: ~a" ra))
