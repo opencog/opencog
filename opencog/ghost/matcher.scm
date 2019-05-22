@@ -104,7 +104,7 @@
   (define context-alist '())
 
   ; Store the sum of action-weights [sum(Wcagi)]
-  (define sum-weight-alist '())
+  (define rule-weight-alist '())
 
   ; For random number generation
   (define total-weight 0)
@@ -118,7 +118,7 @@
 
   ; ----------
   ; Calculate the weight of the rule R [Wcagi]
-  (define (calculate-rweight R)
+  (define (calculate-rule-weight R)
     (define strength
       (if (> strength-weight 0)
         (* strength-weight (cog-mean R)) 1))
@@ -160,13 +160,13 @@
                 (cog-tv-mean (psi-satisfiable? r)))))
 
           ; Calculate the weight of this rule
-          (let ((w (calculate-rweight r)))
+          (let ((w (calculate-rule-weight r)))
             (set! rules-eval-cnt (1+ rules-eval-cnt))
             (if (> w 0)
               (begin
                 (set! rules-sat-cnt (1+ rules-sat-cnt))
                 (set! ruled-satisfied (cons r rules-satisfied))
-                (set! sum-weight-alist (assoc-set! sum-weight-alist r w)))
+                (set! rule-weight-alist (assoc-set! rule-weight-alist r w)))
               (cog-logger-debug ghost-logger
                 "Skipping action with zero weight: ~a" ra))
           ))
@@ -227,7 +227,7 @@
                        (lambda (a)
                          (set! accum-weight (+ accum-weight (cdr a)))
                          (<= cutoff accum-weight))
-                       sum-weight-alist)))
+                       rule-weight-alist)))
               (if rule-rtn
                 (car rule-rtn)
                 (list)
