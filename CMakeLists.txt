@@ -372,7 +372,7 @@ IF(HAVE_PY_INTERP)
 
 	# Nosetests will find and automatically run python tests.
 	IF (PYTHON3INTERP_FOUND)
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-3.4)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
 	ELSE ()
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
