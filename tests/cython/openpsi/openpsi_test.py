@@ -48,10 +48,8 @@ class OpenPsiTest(TestCase):
             ListLink(
                 VariableNode("$APPLE")))
 
-        # Call 'psi-component' from scheme to create the psi component loop
-        scheme_eval(self.atomspace, '(define component (psi-component "test-component"))')
-
         component = ConceptNode("test-component")
+        openpsi.init_component(component)
 
         rule = openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
 
@@ -72,7 +70,7 @@ class OpenPsiTest(TestCase):
 
         self.assertEqual(context, rule.get_context())
 
-        scheme_eval(self.atomspace, "(psi-run component)")
+        openpsi.run(component)
 
         # Apples are handled by OpenPsi loop
         InheritanceLink(ConceptNode("apple-1"), ConceptNode("apple"))
@@ -80,7 +78,7 @@ class OpenPsiTest(TestCase):
 
         delay = 0.02
         time.sleep(delay)
-        scheme_eval(self.atomspace, "(psi-halt component)")
+        openpsi.halt(component)
 
         handled_apples = GetLink(
             InheritanceLink(
