@@ -87,11 +87,8 @@
   Evaluate the candidates and see which of them, if any, satisfy the
   current context, and then select one of them based on their weights.
 
-  The weight of an action will be calculated in this way:
-  Wa = 1/Na * sum(Wcagi)
-
-  Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Icag * Ug
+  The weight of a rule will be calculated in this way:
+  Wr = Scag * Sc * Icag * Ug
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
@@ -103,31 +100,21 @@
   ; won't be evaluated again, in the same psi-step
   (define context-alist '())
 
-  ; Store the no. of rules that contain this action [Na]
-  (define action-cnt-alist '())
-
-  ; Store the sum of action-weights [sum(Wcagi)]
-  (define sum-weight-alist '())
-
-  ; Store the final weight of an action [Wa]
-  (define action-weight-alist '())
+  ; Store the weight of each evaluated rule
+  (define rule-weight-alist '())
 
   ; For random number generation
   (define total-weight 0)
 
-  ; For quickly find out which rule an given
-  ; action belongs to
-  ; TODO: Remove it once action selector actually
-  ; returns an action instead of a rule (?)
-  (define action-rule-alist '())
+  ; Store which rules satisfied the current context
+  (define rules-satisfied '())
 
   ; For monitoring the status
   (define rules-eval-cnt 0)
-  (define rules-sat-cnt 0)
 
   ; ----------
-  ; Calculate the weight of the rule R [Wcagi]
-  (define (calculate-rweight R)
+  ; Calculate the weight of the rule R [Wr]
+  (define (calculate-rule-weight R)
     (define strength
       (if (> strength-weight 0)
         (* strength-weight (cog-mean R)) 1))
@@ -146,11 +133,6 @@
       (psi-rule-alias R) weight)
     weight)
 
-  ; Calculate the weight of the action A [Wa]
-  (define (calculate-aweight A)
-    (* (/ 1 (assoc-ref action-cnt-alist A))
-       (assoc-ref sum-weight-alist A)))
-
   ; Check if a rule should be skipped or not, based on
   ; its current STI, strength, and the last executed time
   (define (accept-rule? r)
@@ -167,38 +149,19 @@
       (if (accept-rule? r)
         (let ((rc (psi-get-context r))
               (ra (psi-get-action r)))
-          ; Though an action may be in multiple psi-rule, but it doesn't
-          ; really matter here, just record one of them
-          ; TODO: Remove it once action selector actually returns an
-          ; action instead of a rule (?)
-          (set! action-rule-alist (assoc-set! action-rule-alist ra r))
-
           ; Evaluate the context, and save the result in context-alist
           (if (equal? (assoc-ref context-alist rc) #f)
             (set! context-alist
               (assoc-set! context-alist rc
                 (cog-tv-mean (psi-satisfiable? r)))))
 
-          ; Count the no. of rules that contain this action, and
-          ; save it in action-cnt-alist
-          (if (equal? (assoc-ref action-cnt-alist ra) #f)
-            (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
-            (set! action-cnt-alist (assoc-set! action-cnt-alist ra
-              (+ (assoc-ref action-cnt-alist ra) 1))))
-
           ; Calculate the weight of this rule
-          ; Save and accumulate the weight of an action in sum-weight-alist
-          ; Skip the action if its weight is zero, so that sum-weight-alist
-          ; and action-weight-alist do not contain actions that have a zero weight
-          (let ((w (calculate-rweight r)))
+          (let ((w (calculate-rule-weight r)))
             (set! rules-eval-cnt (1+ rules-eval-cnt))
             (if (> w 0)
               (begin
-                (set! rules-sat-cnt (1+ rules-sat-cnt))
-                (if (equal? (assoc-ref sum-weight-alist ra) #f)
-                  (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
-                  (set! sum-weight-alist (assoc-set! sum-weight-alist ra
-                    (+ (assoc-ref sum-weight-alist ra) w)))))
+                (set! rules-satisfied (cons r rules-satisfied))
+                (set! rule-weight-alist (assoc-set! rule-weight-alist r w)))
               (cog-logger-debug ghost-logger
                 "Skipping action with zero weight: ~a" ra))
           ))
@@ -209,22 +172,13 @@
   ; Update the status
   (set! num-rules-found (length RULES))
   (set! num-rules-evaluated rules-eval-cnt)
-  (set! num-rules-satisfied rules-sat-cnt)
-
-  ; Finally calculate the weight of an action
-  (for-each
-    (lambda (a)
-      (set! action-weight-alist
-        (assoc-set! action-weight-alist (car a) (calculate-aweight (car a))))
-      (set! total-weight (+ total-weight
-        (assoc-ref action-weight-alist (car a)))))
-    sum-weight-alist)
+  (set! num-rules-satisfied (length rules-satisfied))
 
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
   ; TODO: Return the actual action instead of a rule
-  (if (= (length action-weight-alist) 1)
-    (assoc-ref action-rule-alist (caar action-weight-alist))
+  (if (= (length rules-satisfied) 1)
+    (car rules-satisfied)
     ; Here there are special handling for rejoinders:
     ; 1) If there is a rejoinder that satisfy the current context, always trigger it
     ; 2) If there are more than one rejoinders that satisfy the current context,
@@ -241,7 +195,7 @@
                   rej
                   top-rej))
               (list)
-              (map (lambda (a) (assoc-ref action-rule-alist (car a))) action-weight-alist))))
+              rules-satisfied)))
       (if (null? rejoinder)
         ; If there is no rejoinder that safisfy the current context, try the reactive rules
         (begin
@@ -251,28 +205,27 @@
             ; and randomly pick one if there are more than one rules with
             ; the same specificity
             (fold
-              (lambda (a rtn)
-                (define a-rule (assoc-ref action-rule-alist (car a)))
-                (define a-specificity (cog-value-ref (cog-value a-rule ghost-context-specificity) 0))
+              (lambda (rule rtn)
+                (define specificity (cog-value-ref (cog-value rule ghost-context-specificity) 0))
                 (cond
-                  ((null? rtn) a-rule)
-                  ((> a-specificity (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
-                   a-rule)
+                  ((null? rtn) rule)
+                  ((> specificity (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
+                   rule)
                   (else rtn)))
               (list)
-              action-weight-alist
+              rules-satisfied
             )
             (let* ((accum-weight 0)
                    (cutoff (* total-weight (random:uniform (random-state-from-platform))))
-                   (action-rtn
+                   (rule-rtn
                      (find
                        (lambda (a)
                          (set! accum-weight (+ accum-weight (cdr a)))
                          (<= cutoff accum-weight))
-                       action-weight-alist)))
-              (if (equal? #f action-rtn)
+                       rule-weight-alist)))
+              (if rule-rtn
+                (car rule-rtn)
                 (list)
-                (assoc-ref action-rule-alist (car action-rtn))
               )
             )
           )
