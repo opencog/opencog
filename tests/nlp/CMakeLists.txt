@@ -18,7 +18,7 @@ IF (HAVE_NOSETESTS)
 	ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
 		${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
 	SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
-		"PYTHONPATH=${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython:/usr/local/share/opencog/python;GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog:${PROJECT_BINARY_DIR}/opencog/scm:/usr/local/share/opencog/scm"
+		"PYTHONPATH=${PYTHON_ROOT}:${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython;GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog/scm"
 	)
 
 ENDIF (HAVE_NOSETESTS)
