@@ -114,7 +114,6 @@
 
   ; For monitoring the status
   (define rules-eval-cnt 0)
-  (define rules-sat-cnt 0)
 
   ; ----------
   ; Calculate the weight of the rule R [Wcagi]
@@ -164,7 +163,6 @@
             (set! rules-eval-cnt (1+ rules-eval-cnt))
             (if (> w 0)
               (begin
-                (set! rules-sat-cnt (1+ rules-sat-cnt))
                 (set! ruled-satisfied (cons r rules-satisfied))
                 (set! rule-weight-alist (assoc-set! rule-weight-alist r w)))
               (cog-logger-debug ghost-logger
@@ -177,7 +175,7 @@
   ; Update the status
   (set! num-rules-found (length RULES))
   (set! num-rules-evaluated rules-eval-cnt)
-  (set! num-rules-satisfied rules-sat-cnt)
+  (set! num-rules-satisfied (length rules-satisfied))
 
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
