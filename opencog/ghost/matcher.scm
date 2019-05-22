@@ -87,11 +87,8 @@
   Evaluate the candidates and see which of them, if any, satisfy the
   current context, and then select one of them based on their weights.
 
-  The weight of an action will be calculated in this way:
-  Wa = 1/Na * sum(Wcagi)
-
-  Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Icag * Ug
+  The weight of a rule will be calculated in this way:
+  Wr = Scag * Sc * Icag * Ug
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
@@ -103,20 +100,20 @@
   ; won't be evaluated again, in the same psi-step
   (define context-alist '())
 
-  ; Store the sum of action-weights [sum(Wcagi)]
+  ; Store the weight of each evaluated rule
   (define rule-weight-alist '())
 
   ; For random number generation
   (define total-weight 0)
 
-  ; Store which rules satisfy the current context
+  ; Store which rules satisfied the current context
   (define rules-satisfied '())
 
   ; For monitoring the status
   (define rules-eval-cnt 0)
 
   ; ----------
-  ; Calculate the weight of the rule R [Wcagi]
+  ; Calculate the weight of the rule R [Wr]
   (define (calculate-rule-weight R)
     (define strength
       (if (> strength-weight 0)
