@@ -189,7 +189,7 @@ void AtomSpacePublisherModule::proxy()
 	zmq::socket_t pub(*context, ZMQ_PUB);
 	pub.setsockopt(ZMQ_SNDHWM, &HWM, sizeof(HWM));
 
-	std::string zmq_event_port = config().get("ZMQ_EVENT_PORT", 5563);
+	std::string zmq_event_port = config().get("ZMQ_EVENT_PORT", "5563");
 	bool zmq_use_public_ip = config().get_bool("ZMQ_EVENT_USE_PUBLIC_IP", true);
 	std::string zmq_ip;
 	if (zmq_use_public_ip)
