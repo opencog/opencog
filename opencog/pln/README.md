@@ -103,16 +103,16 @@ sets the weight of the deduction implication rule to `(stv 0.7 0.2)`.
 
 ### Call Chainers
 
-To call the forward chainer on a given target, simply type
+To call the forward chainer on a given source, simply type
 
 ```scheme
-(pln-fc target)
+(pln-fc source)
 ```
 
-Likewise to call the backward chainer on a given source, type
+Likewise to call the backward chainer on a given target, type
 
 ```scheme
-(pln-bc source)
+(pln-bc target)
 ```
 
 Numerous options can be used, for more information see
