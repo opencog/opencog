@@ -69,7 +69,7 @@ public:
 #endif
         std::string env;
         if (pypath) {
-            env = getenv("PYTHONPATH");
+            env = pypath;
             env += ":";
         }
         env += "./tests/cython/agents:../tests/cython/agents:./agents";
