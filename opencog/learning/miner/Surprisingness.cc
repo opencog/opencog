@@ -63,7 +63,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 
 	// Function calculating the probability of a pattern
 	auto prob = [&](const Handle& pattern) {
-		double sup = MinerUtils::calc_support(pattern, texts, (unsigned)total_count);
+		double sup = MinerUtils::support(pattern, texts, (unsigned)total_count);
 		return sup / total_count;
 	};
 	auto blk_prob = [&](const HandleSeq& block) {
@@ -288,7 +288,7 @@ double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
 {
 	double ucount = universe_count(pattern, texts);
 	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
-	double sup = MinerUtils::calc_support(pattern, texts, ms);
+	double sup = MinerUtils::support(pattern, texts, ms);
 	return sup / ucount;
 }
 
