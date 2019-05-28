@@ -387,7 +387,7 @@ bool MinerUtils::enough_support(const Handle& pattern,
                                 const HandleSeq& texts,
                                 unsigned ms)
 {
-	return ms <= support(pattern, texts, ms);
+	return ms <= support_mem(pattern, texts, ms);
 }
 
 HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
@@ -803,18 +803,22 @@ double MinerUtils::get_support(const Handle& pattern)
 	return -1.0;
 }
 
-double MinerUtils::calc_support(const Handle& pattern,
-                                const HandleSeq& texts,
-                                unsigned ms)
+double MinerUtils::support_mem(const Handle& pattern,
+                               const HandleSeq& texts,
+                               unsigned ms)
 {
-	// TODO: re-enable memoizing support when ready
-	// double sup = get_support(pattern);
-	// if (sup < 0) {
-		// sup = support(pattern, texts, ms);
-		// set_support(pattern, sup);
-	// }
-	// return sup;
-	return support(pattern, texts, ms);
+	logger().debug() << "MinerUtils::support_mem "
+	                 << "pattern = " << oc_to_string(pattern)
+	                 << ", ms = " << ms;
+	double sup = get_support(pattern);
+	if (sup < 0) {
+		logger().debug() << "MinerUtils::support_mem miss!";
+		sup = support(pattern, texts, ms);
+		set_support(pattern, sup);
+	} else {
+		logger().debug() << "MinerUtils::support_mem hit!";
+	}
+	return sup;
 }
 
 } // namespace opencog

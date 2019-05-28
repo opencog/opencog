@@ -480,10 +480,13 @@ public:
 	/**
 	 * Like get_support, but if there is no value associated to
 	 * support_key() then calculate and set the support.
+	 *
+	 * Warning: note that the support is gonna be up to ms, so such
+	 * memoization should not be used if ms is to be changed.
 	 */
-	static double calc_support(const Handle& pattern,
-	                           const HandleSeq& texts,
-	                           unsigned ms);
+	static double support_mem(const Handle& pattern,
+	                          const HandleSeq& texts,
+	                          unsigned ms);
 };
 
 } // ~namespace opencog
