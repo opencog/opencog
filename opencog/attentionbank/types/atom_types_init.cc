@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "opencog/attention/atom_types.definitions"
+#include "opencog/attentionbank/types/atom_types.definitions"
 
-#define INHERITANCE_FILE "opencog/attention/atom_types.inheritance"
+#define INHERITANCE_FILE "opencog/attentionbank/types/atom_types.inheritance"
 #define INITNAME attention_types_init
 
 #include <opencog/atoms/atom_types/atom_types.cc>

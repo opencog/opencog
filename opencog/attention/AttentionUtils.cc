@@ -1,6 +1,6 @@
 #include "AttentionUtils.h"
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/attention/atom_types.h>
+#include <opencog/attentionbank/types/atom_types.h>
 
 namespace opencog
 {
