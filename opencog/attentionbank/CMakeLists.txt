@@ -1,10 +1,13 @@
 ADD_SUBDIRECTORY (avalue)
 ADD_SUBDIRECTORY (bank)
+ADD_SUBDIRECTORY (types)
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
 ADD_GUILE_MODULE (FILES
 	scm/attention-bank.scm
+	# ${CMAKE_CURRENT_BINARY_DIR}/types/attention_types.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+	DEPENDS attention_atom_types
 )
