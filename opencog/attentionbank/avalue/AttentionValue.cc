@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/attention/atom_types.h>
+#include <opencog/attentionbank/types/atom_types.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/util/exceptions.h>
 #include "AttentionValue.h"

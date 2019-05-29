@@ -26,9 +26,9 @@
 #include "AttentionParamQuery.h"
 
 #include <opencog/attentionbank/bank/AttentionBank.h>
+#include <opencog/attentionbank/types/atom_types.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
-#include <opencog/attention/atom_types.h>
 
 using namespace opencog;
 using namespace std::placeholders;

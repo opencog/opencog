@@ -26,7 +26,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/util/mt19937ar.h>
-#include <opencog/attention/atom_types.h>
+#include <opencog/attentionbank/types/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
