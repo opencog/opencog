@@ -8,6 +8,9 @@
 // for the CamelCase names, to see if they show up elsewhere!
 
 // ====================================================================
+// The AttentionValue
+ATTENTION_VALUE <- FLOAT_VALUE
+
 // Attention allocation atoms:
 //
 HEBBIAN_LINK <- LINK
