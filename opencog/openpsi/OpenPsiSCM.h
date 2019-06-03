@@ -33,7 +33,6 @@ class OpenPsiSCM
 public:
   OpenPsiSCM();
 
-private:
   Handle add_category(const Handle& new_category);
 
   /**
@@ -131,6 +130,8 @@ private:
    */
   void init(void);
 };
+
+OpenPsiSCM& get_openpsi_scm();
 
 } // namespace opencog
 
