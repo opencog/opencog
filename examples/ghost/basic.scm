@@ -18,7 +18,7 @@
 
 ; -----
 ; A simple rule with only words/lemmas
-(ghost-parse "u: (she ate apple) me too")
+(ghost-parse "r: (she ate apple) me too")
 
 ; To trigger the rule
 ; (ghost "she ate apples")
@@ -26,7 +26,7 @@
 ; -----
 ; Create a concept and a rule that contains it
 (ghost-parse "concept: ~eat (eat ingest \"binge and purge\")")
-(ghost-parse "u: (~eat chocolate) I like chocolates a lot! ^keep()")
+(ghost-parse "r: (~eat chocolate) I like chocolates a lot! ^keep()")
 
 ; To trigger the rule
 ; (ghost "he eats chocolates")
@@ -35,7 +35,7 @@
 
 ; -----
 ; Use of choice
-(ghost-parse "u: (I can [read jump dance]) good to know ^keep()")
+(ghost-parse "r: (I can [read jump dance]) good to know ^keep()")
 
 ; To trigger the rule, do either one of the below
 ; (ghost "I can read")
@@ -44,8 +44,8 @@
 
 ; -----
 ; Use of wildcard
-(ghost-parse "u: (how * it) awesome")
-(ghost-parse "u: (there *~2 cakes) I want them ^keep()")
+(ghost-parse "r: (how * it) awesome")
+(ghost-parse "r: (there *~2 cakes) I want them ^keep()")
 
 ; To trigger the rules
 ; (ghost "how was it")
@@ -55,8 +55,8 @@
 
 ; -----
 ; Use of variables and user variables
-(ghost-parse "u: (me name be _*) $name='_0 Hi '_0 ^keep()")
-(ghost-parse "u: (what be me name) Your name is $name ^keep()")
+(ghost-parse "r: (me name be _*) $name='_0 Hi '_0 ^keep()")
+(ghost-parse "r: (what be me name) Your name is $name ^keep()")
 
 ; To trigger the rule
 ; (ghost "my name is John")
@@ -64,7 +64,7 @@
 
 ; -----
 ; Use of negation
-(ghost-parse "u: (!hate I * the pen) sure ^keep()")
+(ghost-parse "r: (!hate I * the pen) sure ^keep()")
 
 ; To trigger the rule
 ; (ghost "I really like the pen")
@@ -73,7 +73,7 @@
 
 ; -----
 ; Use of sentence anchor
-(ghost-parse "u: (< there be a cat) really ^keep()")
+(ghost-parse "r: (< there be a cat) really ^keep()")
 
 ; To trigger the rule
 ; (ghost "there is a cat in the park")
@@ -92,7 +92,7 @@
   (DefinedSchema "findkiller")
   (Lambda (ExecutionOutput (GroundedSchema "scm: findkiller") (List))))
 
-(ghost-parse "u: (who killed the _*) I think ^findkiller killed the '_0 ^keep()")
+(ghost-parse "r: (who killed the _*) I think ^findkiller killed the '_0 ^keep()")
 
 ; To trigger the rule
 ; (ghost "who killed the dinosaurs")
