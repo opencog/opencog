@@ -9,6 +9,13 @@
              (opencog ghost)
              (opencog ghost procedures))
 
+; Disable the ECAN related config for this simple demo
+(ghost-set-sti-weight 0)
+(ghost-af-only #f)
+
+; Start GHOST
+(ghost-run)
+
 ; -----
 ; A simple rule with only words/lemmas
 (ghost-parse "u: (she ate apple) me too")
@@ -87,3 +94,7 @@
 
 ; To trigger the rule
 ; (ghost "who killed the dinosaurs")
+
+; -----
+; To exit GHOST
+; (ghost-halt)
