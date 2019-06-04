@@ -26,7 +26,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/attention/atom_types.h>
+#include <opencog/attentionbank/types/atom_types.h>
 #include <opencog/neighbors/Neighbors.h>
 
 #include <opencog/atomspace/AtomSpace.h>

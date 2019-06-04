@@ -56,14 +56,23 @@ class PythonModuleUTest :  public CxxTest::TestSuite
 public:
 
     PythonModuleUTest()
-   {
+    {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
 
         // Tell python where the test code is. Make sure that it is found,
         // no matter what directory we execute from.
-        std::string env = getenv("PYTHONPATH");
-        env += ":./tests/cython/agents:../tests/cython/agents:./agents";
+#if HAVE_SECURE_GETENV
+        char *pypath = secure_getenv("PYTHONPATH");
+#else
+        char *pypath = getenv("PYTHONPATH");
+#endif
+        std::string env;
+        if (pypath) {
+            env = pypath;
+            env += ":";
+        }
+        env += "./tests/cython/agents:../tests/cython/agents:./agents";
         setenv("PYTHONPATH", env.c_str(), 1);
 
         // set cycle duration to a smaller value so that this test do not take too long.

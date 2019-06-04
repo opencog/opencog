@@ -145,6 +145,11 @@ TruthValuePtr OpenPsiSCM::is_satisfiable(const Handle& rule)
   return openpsi_implicator(as).check_satisfiability(rule, openpsi_cache(as));
 }
 
+OpenPsiSCM& opencog::get_openpsi_scm() {
+  static OpenPsiSCM openpsi;
+  return openpsi;
+}
+
 // ========================================================
 // Boilerplate code.
 // ========================================================
@@ -163,5 +168,5 @@ void OpenPsiSCM::init_in_module(void* data)
 
 void opencog_openpsi_init(void)
 {
-  static OpenPsiSCM openpsi;
+  opencog::get_openpsi_scm();
 }

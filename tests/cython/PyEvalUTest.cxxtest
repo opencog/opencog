@@ -28,7 +28,7 @@ class TestCogServer : public CogServer
     int tickCount;
     bool tickBased;
     int maxCount;
-    public: 
+    public:
 
         static BaseServer* createInstance(AtomSpace* as) {
             return new TestCogServer();
@@ -45,7 +45,7 @@ class TestCogServer : public CogServer
         }
 
         bool customLoopRun() {
-            bool runCycle  = tickBased?(tickCount % 100 == 0):true; 
+            bool runCycle  = tickBased?(tickCount % 100 == 0):true;
             if (++tickCount > maxCount) stop();
             return runCycle;
         }
@@ -66,7 +66,7 @@ public:
 
         // Set cycle duration to a smaller value so that this test does not take too long.
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
 
         // This path is relative to the build diretory, not the install dir...
         config().set("MODULES", "opencog/cogserver/shell/libpy-shell.so");
@@ -93,7 +93,7 @@ public:
         //  Create the py-eval request.
         Request* pythonEvalRequest = cogserver.createRequest("py-eval");
         TS_ASSERT_DIFFERS(pythonEvalRequest, (Request*) NULL);
-        pythonEvalRequest->addParameter("print 'Hello'");
+        pythonEvalRequest->addParameter("print('Hello')");
         // StringRequestResult *pythonEvalRequestResult = new StringRequestResult();
 
         // Add request to queue.

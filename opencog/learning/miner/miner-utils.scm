@@ -307,7 +307,7 @@
 "
   (let* ((members (get-members texts))
          (texts-as (cog-new-atomspace)))
-    (cog-cp members texts-as)
+    (cog-cp texts-as members)
     texts-as))
 
 (define (pattern->bindlink pattern)

@@ -549,9 +549,10 @@
     (append-map
       (lambda (x)
         (cond
-           ; "x" could just be a list if ^keep() is used
-           ; in the same rule, skip it if that's the case
-           ((and keep (list? x) (null? x)) (list))
+           ; "x" could just be an empty list if ^keep() or any
+           ; other system function is used in the same rule,
+           ; and nothing needs to be done if that's the case
+           ((and (list? x) (null? x)) (list))
            ((equal? 'TrueLink (cog-type x))
             (get-reused-action (cog-outgoing-set x)))
            ((and (equal? 'ExecutionOutputLink (cog-type x))
