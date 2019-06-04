@@ -61,7 +61,7 @@ bool OpenPsiSatisfier::grounding(const HandleMap &var_soln,
     // such cases be handled?
 
     // Store the result in cache.
-    _implicator -> _satisfiability_cache[_pattern_body] = var_soln;
+    _satisfiability_cache[_pattern_body] = var_soln;
 
     // NOTE: If a single grounding is found then why search for more? If there
     // is an issue with instantiating the implicand then there is an issue with
@@ -72,7 +72,7 @@ bool OpenPsiSatisfier::grounding(const HandleMap &var_soln,
     // This happens when InitiateSearchCB::no_search has groundings -- when
     // there is only constant (probably evaluatable) but no variable in the
     // pattern
-    _implicator -> _satisfiability_cache[_pattern_body] = var_soln;
+    _satisfiability_cache[_pattern_body] = var_soln;
     return true;
   } else {
     // TODO: This happens when InitiateSearchCB::no_search has groundings.
@@ -99,14 +99,14 @@ TruthValuePtr OpenPsiSatisfier::check_satisfiability(const Handle& rule,
 
   // Always update cache to clear any previous result.
   // TODO: Add cache per atomspace.
-  _implicator -> _satisfiability_cache.erase(query_body);
-  _implicator -> _pattern_seen.insert(query_body);
+  _satisfiability_cache.erase(query_body);
+  _pattern_seen.insert(query_body);
 
   query->satisfy(*this);
 
   // The boolean returned by query->satisfy isn't used because all
   // type of contexts haven't been handled by this callback yet.
-  if (_implicator -> _satisfiability_cache.find(query_body) != _implicator ->_satisfiability_cache.end()) {
+  if (_satisfiability_cache.find(query_body) != _satisfiability_cache.end()) {
     return TruthValue::TRUE_TV();
   } else {
     return TruthValue::FALSE_TV();
@@ -118,14 +118,14 @@ Handle OpenPsiSatisfier::imply(const Handle& rule, OpenPsiRules& opr)
   PatternLinkPtr query = opr.get_query(rule);
   Handle query_body = query->get_pattern().body;
 
-  if (_implicator -> _pattern_seen.find(query_body) == _implicator ->_pattern_seen.end())
+  if (_pattern_seen.find(query_body) == _pattern_seen.end())
   {
     throw RuntimeException(TRACE_INFO, "The openpsi rule should be checked "
       "for satisfiablity first." );
   }
 
-  auto it = _implicator ->_satisfiability_cache.find(query_body);
-  if (it != _implicator ->_satisfiability_cache.end())
+  auto it = _satisfiability_cache.find(query_body);
+  if (it != _satisfiability_cache.end())
   {
     Instantiator inst(_as);
 
