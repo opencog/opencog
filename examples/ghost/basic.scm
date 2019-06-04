@@ -98,6 +98,20 @@
 ; (ghost "who killed the dinosaurs")
 
 ; -----
+; Use of rejoinder
+(ghost-parse "
+  r: (upgrade * phone) is it better now? ^keep()
+    j1: (yes) that's great!
+    j1: (no) that's awful!
+")
+
+; To trigger the rule
+; (ghost "I've upgraded my phone")
+; ... then either one of the below
+; (ghost "yes")
+; (ghost "no")
+
+; -----
 ; Urge & Goal
 ; There are two goals and two sets of rules defined below, one of the rules in each set
 ; shares the same "context", i.e. can be triggered by the same textual input. The urges
