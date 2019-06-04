@@ -26,14 +26,16 @@
 ; -----
 ; Create a concept and a rule that contains it
 (ghost-parse "concept: ~eat (eat ingest \"binge and purge\")")
-(ghost-parse "u: (he eats chocolate) I like chocolates a lot!")
+(ghost-parse "u: (~eat chocolate) I like chocolates a lot! ^keep()")
 
 ; To trigger the rule
 ; (ghost "he eats chocolates")
+; (ghost "she ingests chocolates")
+; (ghost "they binge and purge chocolates")
 
 ; -----
 ; Use of choice
-(ghost-parse "u: (I can [read jump dance]) good to know")
+(ghost-parse "u: (I can [read jump dance]) good to know ^keep()")
 
 ; To trigger the rule, do either one of the below
 ; (ghost "I can read")
@@ -43,7 +45,7 @@
 ; -----
 ; Use of wildcard
 (ghost-parse "u: (how * it) awesome")
-(ghost-parse "u: (there *~2 cakes) I want them")
+(ghost-parse "u: (there *~2 cakes) I want them ^keep()")
 
 ; To trigger the rules
 ; (ghost "how was it")
@@ -53,8 +55,8 @@
 
 ; -----
 ; Use of variables and user variables
-(ghost-parse "u: (me name be _*) $name='_0 Hi '_0")
-(ghost-parse "u: (what be me name) Your name is $name")
+(ghost-parse "u: (me name be _*) $name='_0 Hi '_0 ^keep()")
+(ghost-parse "u: (what be me name) Your name is $name ^keep()")
 
 ; To trigger the rule
 ; (ghost "my name is John")
@@ -62,7 +64,7 @@
 
 ; -----
 ; Use of negation
-(ghost-parse "u: (!hate I * the pen) sure")
+(ghost-parse "u: (!hate I * the pen) sure ^keep()")
 
 ; To trigger the rule
 ; (ghost "I really like the pen")
@@ -71,7 +73,7 @@
 
 ; -----
 ; Use of sentence anchor
-(ghost-parse "u: (< there be a cat) really")
+(ghost-parse "u: (< there be a cat) really ^keep()")
 
 ; To trigger the rule
 ; (ghost "there is a cat in the park")
@@ -90,7 +92,7 @@
   (DefinedSchema "findkiller")
   (Lambda (ExecutionOutput (GroundedSchema "scm: findkiller") (List))))
 
-(ghost-parse "u: (who killed the _*) I think ^findkiller killed the '_0")
+(ghost-parse "u: (who killed the _*) I think ^findkiller killed the '_0 ^keep()")
 
 ; To trigger the rule
 ; (ghost "who killed the dinosaurs")
