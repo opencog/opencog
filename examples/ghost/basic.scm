@@ -16,6 +16,9 @@
 ; Start GHOST
 (ghost-run)
 
+; You can have a look at the GHOST status by doing
+; (ghost-show-status)
+
 ; -----
 ; A simple rule with only words/lemmas
 (ghost-parse "r: (she ate apple) me too")
@@ -121,12 +124,12 @@
   urge: (please_human=1 novelty=0)
 
   goal: (please_human=1)
-    r: (orange) Squeezy! ^keep()
-    r: (man in the dark) Was it last night? ^increase_urge(novelty, 1) ^decrease_urge(please_human, 1) ^keep()
+    r: ORANGE_1 (orange) Squeezy! ^keep()
+    r: MAN_DARK (man in the dark) Was it last night? ^increase_urge(novelty, 1) ^decrease_urge(please_human, 1) ^keep()
 
   goal: (novelty=1)
-    r: (orange) A man with an orange? ^keep()
-    r: (nothing else) OK switching back ^increase_urge(please_human, 1) ^decrease_urge(novelty, 1) ^keep()
+    r: ORANGE_2 (orange) A man with an orange? ^keep()
+    r: NOTHING (nothing else) OK switching back ^increase_urge(please_human, 1) ^decrease_urge(novelty, 1) ^keep()
 ")
 
 ; To trigger the above rules, you may try this sequence:
