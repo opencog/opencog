@@ -3,9 +3,9 @@
 ; NOTE: Make sure you have RelEx server started
 
 (use-modules (opencog)
+             (opencog nlp)
              (opencog nlp relex2logic)
              (opencog openpsi)
-             (opencog eva-behavior)
              (opencog ghost)
              (opencog ghost procedures))
 
