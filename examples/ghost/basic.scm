@@ -98,5 +98,29 @@
 ; (ghost "who killed the dinosaurs")
 
 ; -----
+; Urge & Goal
+; There are two goals and two sets of rules defined below, one of the rules in each set
+; shares the same "context", i.e. can be triggered by the same textual input. The urges
+; of the goals will influence which one get triggered
+
+(ghost-parse "
+  urge: (please_human=1 novelty=0)
+
+  goal: (please_human=1)
+    r: (orange) Squeezy! ^keep()
+    r: (man in the dark) Was it last night? ^increase_urge(novelty, 1) ^decrease_urge(please_human, 1) ^keep()
+
+  goal: (novelty=1)
+    r: (orange) A man with an orange? ^keep()
+    r: (nothing else) OK switching back ^increase_urge(please_human, 1) ^decrease_urge(novelty, 1) ^keep()
+")
+
+; To trigger the above rules, you may try this sequence:
+; (ghost "he was holding an orange")
+; (ghost "I saw a man in the dark")
+; (ghost "he was holding an orange")
+; (ghost "there was nothing else")
+
+; -----
 ; To exit GHOST
 ; (ghost-halt)
