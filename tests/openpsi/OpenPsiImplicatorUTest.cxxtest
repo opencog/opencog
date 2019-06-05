@@ -217,12 +217,14 @@ public:
     Handle rule_4 = _opr->add_rule(context_4, action_2, goal_1,
       SimpleTruthValue::createTV(1.0, 1.0));
 
+    // Disable the satisfiablity check because it is now always checked
+    // by OpenPsiImplicator::imply(...) method
     // Test 1:
     // Test when satisfiablity hasn't been checked.
-    TS_ASSERT_THROWS(_opi->imply(rule_1, *_opr), RuntimeException);
-    TS_ASSERT_THROWS(_opi->imply(rule_2, *_opr), RuntimeException);
-    TS_ASSERT_THROWS(_opi->imply(rule_3, *_opr), RuntimeException);
-    TS_ASSERT_THROWS(_opi->imply(rule_4, *_opr), RuntimeException);
+    // TS_ASSERT_THROWS(_opi->imply(rule_1, *_opr), RuntimeException);
+    // TS_ASSERT_THROWS(_opi->imply(rule_2, *_opr), RuntimeException);
+    // TS_ASSERT_THROWS(_opi->imply(rule_3, *_opr), RuntimeException);
+    // TS_ASSERT_THROWS(_opi->imply(rule_4, *_opr), RuntimeException);
 
     // Test 2:
     // Test when satisfiablity has been checked.

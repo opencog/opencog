@@ -40,34 +40,15 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule,
     OpenPsiRules& opr)
 {
 
-  if (!_sater)
-  {
-    _sater = new OpenPsiSatisfier(_as, this);
-  }
-
-  TruthValuePtr res = _sater->check_satisfiability(rule, opr);
-
-  if (res == TruthValue::FALSE_TV())
-  {
-    delete _sater;
-    _sater = NULL;
-  }
-
-  return res;
+  OpenPsiSatisfier sater(_as, this);
+  return sater.check_satisfiability(rule, opr);
 }
 
 Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
 {
-
-  if (_sater)
-  {
-    Handle res = _sater->imply(rule, opr);
-    delete _sater;
-    _sater = NULL;
-    return res;
-  }
-
-  return Handle::UNDEFINED;
+  OpenPsiSatisfier sater(_as, this);
+  sater.check_satisfiability(rule, opr);
+  return sater.imply(rule, opr);
 }
 
 TruthValuePtr OpenPsiImplicator::was_action_executed(const Handle rule)
