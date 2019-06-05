@@ -4,6 +4,7 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 from atomspace cimport *
 from opencog.scheme_wrapper import scheme_eval
+from opencog.type_constructors import ConceptNode
 
 cdef class OpenPsi:
 
@@ -48,14 +49,42 @@ cdef class OpenPsi:
         cdef cHandle handle = openPsi.c_add_category(deref(new_category.handle))
         return Atom.createAtom(handle, self._as)
 
+    def increase_urge(self, Atom goal, value):
+        self.init_scm()
+        scheme_eval(self._as, '(psi-increase-urge ConceptNode("%s") %d)' % (goal.name, value))
+
+    def decrease_urge(self, Atom goal, value):
+        self.init_scm()
+        command = '(psi-decrease-urge (ConceptNode "%s") %f)' % (goal.name, value)
+        scheme_eval(self._as, command)
+
+    def set_action_selector(self, Atom component, selector_name):
+        self.init_scm()
+        name = component.name
+        scheme_eval(self._as, '''
+            (psi-set-action-selector!
+                (ConceptNode "%s")
+                (ExecutionOutput
+                    (GroundedSchema "py: %s")
+                    (List (ConceptNode "%s")))
+            )
+        '''.strip() % (name, selector_name, name))
+
+    def create_goal(self, goal_name, value = 1.0, desired_value = 1.0):
+        self.init_scm()
+        command = '(psi-goal "%s" %f %f)' % (goal_name,  value, desired_value)
+        scheme_eval(self._as, command)
+        return ConceptNode(goal_name)
+
+    def create_component(self, component_name):
+        self.init_scm()
+        scheme_eval(self._as, '(psi-component "%s")' % component_name)
+        return ConceptNode(component_name)
+
     def init_scm(self):
         if not self.is_scm_initialized:
             scheme_eval(self._as, '(use-modules (opencog openpsi))')
             self.is_scm_initialized = True
-
-    def init_component(self, component):
-        self.init_scm()
-        scheme_eval(self._as, '(psi-component "%s")' % component.name)
 
     def run(self, component):
         self.init_scm()
@@ -95,8 +124,22 @@ cdef class OpenPsiRule:
         cdef cHandle handle = openPsi.c_get_goal(deref(self.rule.handle))
         return Atom.createAtom(handle, self._as)
 
+    def get_action(self):
+        openPsi = get_openpsi_scm()
+        cdef cHandle handle = openPsi.c_get_action(deref(self.rule.handle))
+        return Atom.createAtom(handle, self._as)
+
     def add_to_category(self, Atom category):
         openPsi = get_openpsi_scm()
         cdef cHandle handle = openPsi.c_add_to_category(deref(self.rule.handle),
                                                         deref(category.handle))
         return Atom.createAtom(handle, self._as)
+
+    def is_satisfiable(self):
+        openPsi = get_openpsi_scm()
+        cdef tv_ptr result_tv_ptr = openPsi.c_is_satisfiable(deref(self.rule.handle))
+
+        cdef cTruthValue* result_tv = result_tv_ptr.get()
+        cdef strength_t strength = deref(result_tv).get_mean()
+        cdef strength_t confidence = deref(result_tv).get_confidence()
+        return TruthValue(strength, confidence)

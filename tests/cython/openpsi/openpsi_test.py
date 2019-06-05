@@ -8,6 +8,7 @@ from opencog.scheme_wrapper import scheme_eval
 from opencog.bindlink import execute_atom
 from opencog.openpsi import *
 
+import __main__
 
 # Called by OpenPsi Action
 def eat_apple(apple):
@@ -15,6 +16,7 @@ def eat_apple(apple):
     InheritanceLink(apple, ConceptNode("handled"))
     return ConceptNode("finished")
 
+__main__.eat_apple = eat_apple
 
 class OpenPsiTest(TestCase):
 
@@ -31,7 +33,7 @@ class OpenPsiTest(TestCase):
 
         openpsi = OpenPsi(self.atomspace)
 
-        goal = ConceptNode("goal")
+        goal = openpsi.create_goal("goal")
 
         context = [
             InheritanceLink(
@@ -48,8 +50,7 @@ class OpenPsiTest(TestCase):
             ListLink(
                 VariableNode("$APPLE")))
 
-        component = ConceptNode("test-component")
-        openpsi.init_component(component)
+        component = openpsi.create_component("test-component")
 
         rule = openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
 
@@ -69,6 +70,7 @@ class OpenPsiTest(TestCase):
         self.assertTrue(new_category in categories)
 
         self.assertEqual(context, rule.get_context())
+        self.assertEqual(action, rule.get_action())
 
         openpsi.run(component)
 
@@ -76,7 +78,7 @@ class OpenPsiTest(TestCase):
         InheritanceLink(ConceptNode("apple-1"), ConceptNode("apple"))
         InheritanceLink(ConceptNode("apple-2"), ConceptNode("apple"))
 
-        delay = 0.02
+        delay = 0.2
         time.sleep(delay)
         openpsi.halt(component)
 
