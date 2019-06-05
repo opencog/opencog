@@ -347,9 +347,9 @@ HandleSeq MinerUtils::get_texts(const Handle& texts_cpt)
 	return texts;
 }
 
-unsigned MinerUtils::get_ms(const Handle& ms)
+unsigned MinerUtils::get_uint(const Handle& h)
 {
-	NumberNodePtr nn = NumberNodeCast(ms);
+	NumberNodePtr nn = NumberNodeCast(h);
 	return (unsigned)std::round(nn->get_value());
 }
 
@@ -400,7 +400,8 @@ HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
 
 HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
                                          const HandleSeq& texts,
-                                         unsigned ms)
+                                         unsigned ms,
+                                         unsigned mv)
 {
 	// Calculate all shallow abstractions of pattern
 	HandleSetSeq shabs_per_var = shallow_abstract(pattern, texts, ms);
@@ -413,6 +414,11 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 	for (const HandleSet& shabs : shabs_per_var) {
 		for (const Handle& sa : shabs) {
 			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
+
+			// Temporary hack to only have 3 variables at most
+			if (mv < get_variables(npat).size())
+				continue;
+
 			// Set the count of npat, stored in its shallow abstraction
 			set_support(npat, get_support(sa));
 			// Shallow_abstract should already have eliminated shallow
@@ -729,6 +735,12 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
                                               const Handle& cnjtion_var,
                                               const Handle& pattern_var)
 {
+	logger().debug() << "MinerUtils::expand_conjunction_connect "
+	                 << "cnjtion = " << oc_to_string(cnjtion)
+	                 << ", pattern = " << oc_to_string(pattern)
+	                 << ", cnjtion_var = " << oc_to_string(cnjtion_var)
+	                 << ", pattern_var = " << oc_to_string(pattern_var);
+
 	// Substitute pattern_var by cnjtion_var in pattern
 	Variables pattern_vars = get_variables(pattern);
 	HandleMap p2c{{pattern_var, cnjtion_var}};
@@ -761,8 +773,16 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
 HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
                                          const Handle& pattern,
                                          const HandleSeq& texts,
-                                         unsigned ms)
+                                         unsigned ms,
+                                         unsigned mv)
 {
+	logger().debug() << "MinerUtils::expand_conjunction "
+	                 << "cnjtion = " << oc_to_string(cnjtion)
+	                 << ", pattern = " << oc_to_string(pattern)
+	                 << ", texts.size() = " << texts.size()
+	                 << ", ms = " << ms
+	                 << ", mv = " << mv;
+
 	// Alpha convert pattern, if necessary, to avoid collisions between
 	// cnjtion variables and pattern variables
 	Handle apat = alpha_convert(pattern, get_variables(cnjtion));
@@ -775,6 +795,11 @@ HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
 	for (const Handle& pvar : apat_vars.varseq) {
 		for (const Handle& cvar : cnjtion_vars.varseq) {
 			Handle cpat = expand_conjunction_connect(cnjtion, apat, cvar, pvar);
+
+			// Temporary hack to only have 3 variables at most
+			if (mv < get_variables(cpat).size())
+				continue;
+
 			if (not content_eq(cpat, cnjtion) and enough_support(cpat, texts, ms))
 				patterns.insert(cpat);
 		}

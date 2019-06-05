@@ -21,6 +21,28 @@
 (use-modules (opencog logger))
 (use-modules (srfi srfi-1))
 
+;; For some crazy reason I need to repaste absolutely-true here while
+;; it is already defined in ure.
+(define-public (absolutely-true A)
+"
+  Return TrueTV iff A's TV is TrueTV
+"
+  (bool->tv (tv->bool (cog-tv A))))
+
+(define (mk-full-rule-path brf)
+  (let ((rule-path "opencog/learning/miner/rules/"))
+    (string-append rule-path brf)))
+
+;; Load here because otherwise, when loaded within
+;; configure-shallow-specialization-rule,
+;; gen-shallow-specialization-rule is inaccessible
+(load-from-path (mk-full-rule-path "shallow-specialization.scm"))
+
+;; Load here because otherwise, when loaded within
+;; configure-conjunction-expansion-rules,
+;; gen-shallow-specialization-rule is inaccessible
+(load-from-path (mk-full-rule-path "conjunction-expansion.scm"))
+
 (define (iota-plus-one x)
 "
   Like iota but goes from 1 to x included instead of going
@@ -101,66 +123,90 @@
     (for-each mk-member texts-lst))
   texts-cpt)
 
-(define (mk-full-rule-path brf)
-  (let ((rule-path "opencog/learning/miner/rules/"))
-    (string-append rule-path brf)))
-
 (define (configure-mandatory-rules pm-rbs)
   ;; Maybe remove, nothing is mandatory anymore
   *unspecified*)
 
-(define (configure-shallow-specialization-rule pm-rbs unary)
+(define (configure-shallow-specialization-rule pm-rbs unary max-variables)
+  (define mv (min 9 max-variables))
+
   ;; Load and associate mandatory rules to pm-rbs
-  (let* ((base-rule-file "shallow-specialization.scm")
-         (rule-file (mk-full-rule-path base-rule-file))
-         (rule (if unary
-                   (DefinedSchema "shallow-specialization-unary-rule")
-                   (DefinedSchema "shallow-specialization-rule"))))
-    (load-from-path rule-file)
-    (ure-add-rule pm-rbs rule)))
+  ;; (load-from-path (mk-full-rule-path "shallow-specialization.scm"))
+  (let* ((rule-name (string-append "shallow-specialization-"
+                                   (if unary "unary-" "")
+                                   "mv-" (number->string mv)
+                                   "-rule"))
+         (rule-alias (DefinedSchema rule-name))
+         (rule-tv (stv 1 1)))
+    ;; Add definition
+    (DefineLink rule-alias (gen-shallow-specialization-rule unary mv))
+    (ure-add-rule pm-rbs rule-alias rule-tv)))
+
+(define (configure-conjunction-expansion-rules pm-rbs
+                                               incremental-expansion
+                                               max-conjuncts
+                                               max-variables)
+  (define mv (min 9 max-variables))
+
+  (if (and incremental-expansion (< 1 max-conjuncts))
+      ;; (load-from-path (mk-full-rule-path "conjunction-expansion.scm"))
+      (let* ((namify (lambda (i)
+                       (string-append "conjunction-expansion-"
+                                      (if (< 0 i)
+                                          (string-append (number->string i) "ary-"))
+                                      "mv-" (number->string mv)
+                                      "-rule")))
+             (aliasify (lambda (i) (DefinedSchema (namify i))))
+             (definify (lambda (i)
+                         (DefineLink
+                           (aliasify i)
+                           (gen-conjunction-expansion-rule i mv))))
+             (conf 1)    ; TODO: make this use configurable
+             ;; The more arity the expansion the lower its
+             ;; priority. Makes sure it's priority is also below that
+             ;; of shallow specialization.
+             (tvfy (lambda (i) (stv (* 0.5 (- 1 (* 0.1 i))) conf)))
+             (rulify (lambda (i)
+                       (definify i)
+                       (list (DefinedSchemaNode (namify i)) (tvfy i))))
+             (rules (if (or (<= max-conjuncts 0) (< 9 max-conjuncts))
+                        ;; No maximum conjuncts
+                        (list (rulify 0))
+                        ;; At most max-conjuncts conjuncts
+                        (map rulify (iota-plus-one (- max-conjuncts 1))))))
+        (ure-add-rules pm-rbs rules))))
 
 (define (false-tv? tv)
   (equal? tv (stv 0 1)))
 
 (define* (configure-optional-rules pm-rbs
                                    #:key
-                                   (incremental-expansion (stv 0 1))
-                                   (max-conjuncts -1))
-  (define enable-incremental-expansion (not (or (false-tv? incremental-expansion)
-                                                (= max-conjuncts 1))))
+                                   (incremental-expansion #t)
+                                   (max-conjuncts 3)
+                                   (max-variables 3))
 
   ;; Load shallow specialization, either unary, if
   ;; incremental-expansion is enabled, or not
-  (configure-shallow-specialization-rule pm-rbs enable-incremental-expansion)
+  (configure-shallow-specialization-rule pm-rbs
+                                         incremental-expansion
+                                         max-variables)
 
   ;; Load conjunction-expansion and associate to pm-rbs
-  (if enable-incremental-expansion
-      (let* ((ie-tv (if (equal? #t) (stv 0.01 0.5) incremental-expansion))
-             (rule-pathfile (mk-full-rule-path "conjunction-expansion.scm"))
-             (namify (lambda (i)
-                       (string-concatenate
-                        (cons "conjunction-expansion-"
-                              (if (<= i 0)
-                                  (list "rule")
-                                  (list (number->string i) "ary-rule"))))))
-             (rulify (lambda (i)
-                       (list (DefinedSchemaNode (namify i)) ie-tv)))
-             (rules (if (<= max-conjuncts 0)
-                        ;; No maximum conjuncts
-                        (list (rulify 0))
-                        ;; At most max-conjuncts conjuncts
-                        (map rulify (iota-plus-one (- max-conjuncts 1))))))
-        (load-from-path rule-pathfile)
-        (ure-add-rules pm-rbs rules))))
+  (configure-conjunction-expansion-rules pm-rbs
+                                         incremental-expansion
+                                         max-conjuncts
+                                         max-variables))
 
 (define* (configure-rules pm-rbs
                           #:key
-                          (incremental-expansion (stv 0 1))
-                          (max-conjuncts 3))
+                          (incremental-expansion #t)
+                          (max-conjuncts 3)
+                          (max-variables 3))
   (configure-mandatory-rules pm-rbs)
   (configure-optional-rules pm-rbs
                             #:incremental-expansion incremental-expansion
-                            #:max-conjuncts max-conjuncts))
+                            #:max-conjuncts max-conjuncts
+                            #:max-variables max-variables))
 
 (define* (configure-isurp isurp-rbs mode max-conjuncts)
   ;; Load I-Surprisingess rules
@@ -188,8 +234,9 @@
                           #:key
                           (maximum-iterations 1000)
                           (complexity-penalty 1)
-                          (incremental-expansion (stv 0 1))
-                          (max-conjuncts 3))
+                          (incremental-expansion #t)
+                          (max-conjuncts 3)
+                          (max-variables 3))
 "
   Given a Concept node representing a rule based system for the
   pattern miner. Automatically configure it with the appropriate
@@ -198,8 +245,9 @@
   Usage: (configure-miner pm-rbs
                           #:maximum-iterations mi
                           #:complexity-penalty cp
-                          #:incremental-expansion tv
+                          #:incremental-expansion ie
                           #:max-conjuncts mc)
+                          #:max-variables mv)
 
   pm-rbs: Concept node of the rule-based system to configure
 
@@ -213,23 +261,25 @@
       A negative value means more depth. Possible range is (-inf, +inf)
       but it's rarely necessary in practice to go outside of [-10, 10].
 
-  tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
-      conjunctions of patterns. It will only expand conjunctions with enough
-      support with patterns with enough support. Alternatively the user can
-      provide #t instead of a truth value. In that case a default true value
-      will be selected.
+  ie: [optional, default=#t] Flag whether to use the conjunctions expansion
+      heuristic rules. It will only expand conjunctions with enough support
+      with patterns with enough support.
 
-  mc: [optional, default=3] In case tv is set to a positive strength and
-      confidence, and thus incremental conjunction expansion is enabled, that
-      option allows to limit the number of conjuncts to mc. If negative then
-      the number of conjuncts can grow unlimited (not recommended unless you
-      know what you're doing). As of now mc can not be set above 9 (which
+  mc: [optional, default=3] In case ie is set to #t, and thus incremental
+      conjunction expansion is enabled, that option allows to limit the number
+      of conjuncts to mc. If negative then the number of conjuncts can grow
+      unlimited (not recommended unless you know what you're doing). As of
+      now mc can not be set above 9 (which should be more than enough).
+
+  mv: [optional, default=3] Maximum number of variables that the resulting
+      patterns should contain. As of now mv cannot be set above 9 (which
       should be more than enough).
 "
   ;; Load and associate rules to pm-rbs
   (configure-rules pm-rbs
                    #:incremental-expansion incremental-expansion
-                   #:max-conjuncts max-conjuncts)
+                   #:max-conjuncts max-conjuncts
+                   #:max-variables max-variables)
 
   ;; Set parameters
   (ure-set-maximum-iterations pm-rbs maximum-iterations)
@@ -237,8 +287,8 @@
 
   ;; If there is no incremental expansion then each rule is
   ;; deterministic, thus no need to retry exhausted sources
-  (ure-set-fc-retry-exhausted-sources pm-rbs (not (false-tv? incremental-expansion)))
-)
+  (ure-set-fc-retry-exhausted-sources pm-rbs (and incremental-expansion
+                                                  (< 1 max-conjuncts))))
 
 (define (minsup-eval pattern texts ms)
 "
@@ -373,8 +423,9 @@
                    (initpat (top))
                    (maximum-iterations 1000)
                    (complexity-penalty 1)
-                   (incremental-expansion (stv 0 1))
+                   (incremental-expansion #t)
                    (max-conjuncts 3)
+                   (max-variables 3)
                    (surprisingness 'isurp))
 "
   Mine patterns in texts (text trees, a.k.a. grounded hypergraphs) with minimum
@@ -386,8 +437,9 @@
                    #:initpat ip
                    #:maximum-iterations mi
                    #:complexity-penalty cp
-                   #:incremental-expansion tv
+                   #:incremental-expansion ie
                    #:max-conjuncts mc
+                   #:max-variables mv
                    #:surprisingness su)
 
   texts: Collection of texts to mine. It can be given in 3 forms
@@ -431,17 +483,19 @@
       A negative value means more depth. Possible range is (-inf, +inf)
       but it's rarely necessary in practice to go outside of [-10, 10].
 
-  tv: [optional, default=(stv 0 1)] Truth value of a rule to expand existing
-      conjunctions of patterns. It will only expand conjunctions with enough
-      support with patterns with enough support. Alternatively the user can
-      provide #t instead of a truth value. In that case a default true value
-      will be selected.
+  ie: [optional, default=#t] Flag whether to use the conjunctions expansion
+      heuristic rules. It will only expand conjunctions with enough support
+      with patterns with enough support.
 
   mc: [optional, default=3] In case tv is set to a positive strength and
       confidence, and thus incremental conjunction expansion is enabled, that
       option allows to limit the number of conjuncts to mc. If negative then
       the number of conjuncts can grow unlimited (not recommended unless you
-      know what you're doing). As of now mc can not be set above 9 (which
+      know what you're doing). As of now mc cannot be set above 9 (which
+      should be more than enough).
+
+  mv: [optional, default=3] Maximum number of variables that the resulting
+      patterns can contain. As of now mv cannot be set above 9 (which
       should be more than enough).
 
   su: [optional, default='isurp] After running the pattern miner,
@@ -518,7 +572,8 @@
                                        #:maximum-iterations maximum-iterations
                                        #:complexity-penalty complexity-penalty
                                        #:incremental-expansion incremental-expansion
-                                       #:max-conjuncts max-conjuncts))
+                                       #:max-conjuncts max-conjuncts
+                                       #:max-variables max-variables))
 
                ;; Run pattern miner in a forward way
                (results (cog-fc miner-rbs source))
@@ -539,7 +594,9 @@
                   ((isurp-rbs (random-surprisingness-rbs-cpt))
                    (target (isurp-target surprisingness texts-cpt))
                    (vardecl (isurp-vardecl))
-                   (cfg-s (configure-isurp isurp-rbs surprisingness max-conjuncts))
+                   (cfg-s (configure-isurp isurp-rbs
+                                           surprisingness
+                                           max-conjuncts))
 
                    ;; Run surprisingness in a backward way
                    (isurp-res (cog-bc isurp-rbs target #:vardecl vardecl))
@@ -572,5 +629,26 @@
     conjunct-pattern
     cog-miner
     cog-mine
+    ;; Functions to allow the rules to run
+    shallow-specialization-mv-1-formula
+    shallow-specialization-mv-2-formula
+    shallow-specialization-mv-3-formula
+    shallow-specialization-mv-4-formula
+    shallow-specialization-mv-5-formula
+    shallow-specialization-mv-6-formula
+    shallow-specialization-mv-7-formula
+    shallow-specialization-mv-8-formula
+    shallow-specialization-mv-9-formula
+    conjunction-expansion-mv-1-formula
+    conjunction-expansion-mv-2-formula
+    conjunction-expansion-mv-3-formula
+    conjunction-expansion-mv-4-formula
+    conjunction-expansion-mv-5-formula
+    conjunction-expansion-mv-6-formula
+    conjunction-expansion-mv-7-formula
+    conjunction-expansion-mv-8-formula
+    conjunction-expansion-mv-9-formula
+    unary-conjunction
+    unary-conjunction-pattern
   )
 )

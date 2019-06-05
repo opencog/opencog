@@ -195,10 +195,9 @@ public:
 	static HandleSeq get_texts(const Handle& texts_cpt);
 
 	/**
-	 * Given a number node holding the minimum support return the
-	 * positive integer.
+	 * Return the non-negative integer held by a number node.
 	 */
-	static unsigned get_ms(const Handle& ms);
+	static unsigned get_uint(const Handle& h);
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
@@ -240,10 +239,14 @@ public:
 	/**
 	 * Return all shallow specializations of pattern with support ms
 	 * according to texts.
+	 *
+	 * mv is the maximum number of variables allowed in the resulting
+	 * patterns.
 	 */
 	static HandleSet shallow_specialize(const Handle& pattern,
 	                                    const HandleSeq& texts,
-	                                    unsigned ms);
+	                                    unsigned ms,
+	                                    unsigned mv=UINT_MAX);
 
 	/**
 	 * Create a pattern body from clauses, introducing an AndLink if
@@ -452,11 +455,15 @@ public:
 	 * It will also only include patterns with minimum support ms
 	 * according to texts, and perform alpha-conversion when necessary.
 	 * If an expansion is cnjtion itself it will be dismissed.
+	 *
+	 * mv is the maximum number of variables allowed in the resulting
+	 * patterns.
 	 */
 	static HandleSet expand_conjunction(const Handle& cnjtion,
 	                                    const Handle& pattern,
 	                                    const HandleSeq& texts,
-	                                    unsigned ms);
+	                                    unsigned ms,
+	                                    unsigned mv=UINT_MAX);
 
 	/**
 	 * Return an atom to serve as key to store the support value.

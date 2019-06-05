@@ -109,12 +109,12 @@ private:
 	 */
 	Handle ure_pm(const AtomSpace& texts_as, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
-	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              bool incremental_expansion=false,
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
 	Handle ure_pm(const HandleSeq& texts, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
-	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              bool incremental_expansion=false,
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
 
@@ -192,7 +192,7 @@ Handle MinerUTest::mk_nconjunct(unsigned n)
 
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
                           int maximum_iterations, Handle initpat,
-                          TruthValuePtr incremental_expansion,
+                          bool incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
 {
@@ -204,7 +204,7 @@ Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
 
 Handle MinerUTest::ure_pm(const HandleSeq& texts, int minsup,
                           int maximum_iterations, Handle initpat,
-                          TruthValuePtr incremental_expansion,
+                          bool incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
 {
@@ -1310,7 +1310,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	// bug (the pattern is ignored by surprisingness).
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	bool incremental_expansion = true;
 	int max_conjuncts = 3;
 	double complexity_penalty = 1;
 	int minsup = 5;
@@ -1466,7 +1466,7 @@ void MinerUTest::test_vqa()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	bool incremental_expansion = true;
 	int minsup = 500;
 	int max_conjuncts = 2;
 	double complexity_penalty = 1;

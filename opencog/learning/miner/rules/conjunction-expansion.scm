@@ -62,7 +62,9 @@
 ;;
 ;; * 0 < nary: generate a rule that restricts the arity of the left
 ;;             conjunction to nary.
-(define (gen-conjunction-expansion-rule nary)
+;;
+;; * mv is the maximum of variables allowed in the resulting patterns.
+(define (gen-conjunction-expansion-rule nary mv)
   ;; Shared variables
   (define f-vardecl (Variable "$f-vardecl"))
   (define g-vardecl (Variable "$g-vardecl"))
@@ -116,7 +118,9 @@
                 (unary-conjunction-eval f-body)
                 '()))
           (ExecutionOutput
-            (GroundedSchema "scm: conjunction-expansion-formula")
+            (GroundedSchema (string-append "scm: conjunction-expansion-mv-"
+                                           (number->string mv)
+                                           "-formula"))
             (List
               ;; Fake conclusion, since we can't statistically define its
               ;; pattern ATM
@@ -149,7 +153,9 @@
           (not-equal-top g)
           (unary-conjunction-eval g-body))
         (ExecutionOutput
-          (GroundedSchema "scm: conjunction-expansion-formula")
+          (GroundedSchema (string-append "scm: conjunction-expansion-mv-"
+                                         (number->string mv)
+                                         "-formula"))
           (List
             ;; Fake conclusion, since we can't statistically define its
             ;; pattern ATM
@@ -159,77 +165,36 @@
                  minsup-g)))))))
 
 ;; Conjunction expansion formula
-(define (conjunction-expansion-formula conclusion . premises)
-  ;; (cog-logger-debug "conjunction-expansion-formula conclusion = ~a, premises = ~a" conclusion premises)
-  (if (= (length premises) 1)
-      (let* ((minsup-fg (car premises))
-             (minsup-f (cog-outgoing-atom minsup-fg 0))
-             (minsup-g (cog-outgoing-atom minsup-fg 1))
-             (f (get-pattern minsup-f))
-             (g (get-pattern minsup-g))
-             (texts (get-texts minsup-f))
-             (ms (get-ms minsup-f))
-             ;; Swap f and g to make sure the second argument of
-             ;; cog-expand-conjunction is never a conjunction
-             (fgs (if (unary-conjunction? (get-body g))
-                      (cog-expand-conjunction f g texts ms)
-                      (cog-expand-conjunction g f texts ms)))
-             (mk-minsup (lambda (fg) (minsup-eval-true fg texts ms)))
-             ;; cog-expand-conjunction only return patterns with
-             ;; enough support
-             (minsup-fgs (map mk-minsup (cog-outgoing-set fgs))))
-        (Set minsup-fgs))))
+(define (gen-conjunction-expansion-formula mv)
+  (lambda (conclusion . premises)
+    (cog-logger-debug "conjunction-expansion-formula mv = ~a, conclusion = ~a, premises = ~a" mv conclusion premises)
+    (if (= (length premises) 1)
+        (let* ((minsup-fg (car premises))
+               (minsup-f (cog-outgoing-atom minsup-fg 0))
+               (minsup-g (cog-outgoing-atom minsup-fg 1))
+               (f (get-pattern minsup-f))
+               (g (get-pattern minsup-g))
+               (texts (get-texts minsup-f))
+               (ms (get-ms minsup-f))
+               ;; Swap f and g to make sure the second argument of
+               ;; cog-expand-conjunction is never a conjunction
+               (fgs (if (unary-conjunction? (get-body g))
+                        (cog-expand-conjunction f g texts ms (Number mv))
+                        (cog-expand-conjunction g f texts ms (Number mv))))
+               (mk-minsup (lambda (fg) (minsup-eval-true fg texts ms)))
+               ;; cog-expand-conjunction only return patterns with
+               ;; enough support
+               (minsup-fgs (map mk-minsup (cog-outgoing-set fgs))))
+          (Set minsup-fgs)))))
 
-;; Define arbitrary nary conjunction expansion
-(define conjunction-expansion-rule-name
-  (DefinedSchemaNode "conjunction-expansion-rule"))
-(DefineLink conjunction-expansion-rule-name
-  (gen-conjunction-expansion-rule 0))
-
-;; Define unary conjunction expansion
-(define conjunction-expansion-1ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-1ary-rule"))
-(DefineLink conjunction-expansion-1ary-rule-name
-  (gen-conjunction-expansion-rule 1))
-
-;; Define binary conjunction expansion
-(define conjunction-expansion-2ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-2ary-rule"))
-(DefineLink conjunction-expansion-2ary-rule-name
-  (gen-conjunction-expansion-rule 2))
-
-;; Define ternary conjunction expansion
-(define conjunction-expansion-3ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-3ary-rule"))
-(DefineLink conjunction-expansion-3ary-rule-name
-  (gen-conjunction-expansion-rule 3))
-
-;; Define quaternary conjunction expansion
-(define conjunction-expansion-4ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-4ary-rule"))
-(DefineLink conjunction-expansion-4ary-rule-name
-  (gen-conjunction-expansion-rule 4))
-
-;; Define quinary conjunction expansion
-(define conjunction-expansion-5ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-5ary-rule"))
-(DefineLink conjunction-expansion-5ary-rule-name
-  (gen-conjunction-expansion-rule 5))
-
-;; Define senary conjunction expansion
-(define conjunction-expansion-6ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-6ary-rule"))
-(DefineLink conjunction-expansion-6ary-rule-name
-  (gen-conjunction-expansion-rule 6))
-
-;; Define septenary conjunction expansion
-(define conjunction-expansion-7ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-7ary-rule"))
-(DefineLink conjunction-expansion-7ary-rule-name
-  (gen-conjunction-expansion-rule 7))
-
-;; Define octonary conjunction expansion
-(define conjunction-expansion-8ary-rule-name
-  (DefinedSchemaNode "conjunction-expansion-8ary-rule"))
-(DefineLink conjunction-expansion-8ary-rule-name
-  (gen-conjunction-expansion-rule 8))
+;; Instantiate conjunction expansion formulae for different maximum
+;; number of variables
+(define conjunction-expansion-mv-1-formula (gen-conjunction-expansion-formula 1))
+(define conjunction-expansion-mv-2-formula (gen-conjunction-expansion-formula 2))
+(define conjunction-expansion-mv-3-formula (gen-conjunction-expansion-formula 3))
+(define conjunction-expansion-mv-4-formula (gen-conjunction-expansion-formula 4))
+(define conjunction-expansion-mv-5-formula (gen-conjunction-expansion-formula 5))
+(define conjunction-expansion-mv-6-formula (gen-conjunction-expansion-formula 6))
+(define conjunction-expansion-mv-7-formula (gen-conjunction-expansion-formula 7))
+(define conjunction-expansion-mv-8-formula (gen-conjunction-expansion-formula 8))
+(define conjunction-expansion-mv-9-formula (gen-conjunction-expansion-formula 9))

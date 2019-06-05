@@ -80,7 +80,8 @@ protected:
 	 *   (Lambda Y (Inheritance A Y))
 	 *   (Lambda Y (Inheritance Y Y)))
 	 */
-	Handle do_shallow_specialize(Handle pattern, Handle texts, Handle ms);
+	Handle do_shallow_specialize(Handle pattern, Handle texts,
+	                             Handle ms, Handle mv);
 
 	/**
 	 * Given a pattern, a texts concept and a minimum support, return
@@ -94,7 +95,7 @@ protected:
 	 * pattern cannot be a conjunction itself.
 	 */
 	Handle do_expand_conjunction(Handle cnjtion, Handle pattern,
-	                             Handle texts, Handle ms);
+	                             Handle texts, Handle ms, Handle mv);
 
 	/**
 	 * Calculate the I-Surprisingness of the pattern (and its
@@ -156,7 +157,7 @@ void MinerSCM::init(void)
 
 Handle MinerSCM::do_shallow_abstract(Handle pattern,
                                      Handle texts,
-                                     Handle ms)
+                                     Handle ms_h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
@@ -164,11 +165,11 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
-	unsigned ms_uint = MinerUtils::get_ms(ms);
+	unsigned ms = MinerUtils::get_uint(ms_h);
 
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
-		MinerUtils::shallow_abstract(pattern, texts_seq, ms_uint);
+		MinerUtils::shallow_abstract(pattern, texts_seq, ms);
 
 	// Turn that sequence of handle sets into a set of ready to be
 	// applied shallow abstractions
@@ -192,47 +193,49 @@ Handle MinerSCM::do_shallow_abstract(Handle pattern,
 
 Handle MinerSCM::do_shallow_specialize(Handle pattern,
                                        Handle texts,
-                                       Handle ms)
+                                       Handle ms_h,
+                                       Handle mv_h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-specialize");
 
 	// Fetch all texts
 	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
-	// Fetch the minimum support
-	unsigned ms_uint = MinerUtils::get_ms(ms);
+	// Get minimum support and maximum number of variables
+	unsigned ms = MinerUtils::get_uint(ms_h);
+	unsigned mv = MinerUtils::get_uint(mv_h);
 
 	// Generate all shallow specializations
-	HandleSet shaspes = MinerUtils::shallow_specialize(pattern, texts_seq, ms_uint);
+	HandleSet shaspes = MinerUtils::shallow_specialize(pattern, texts_seq, ms, mv);
 
 	return as->add_link(SET_LINK, HandleSeq(shaspes.begin(), shaspes.end()));
 }
 
-bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms)
+bool MinerSCM::do_enough_support(Handle pattern, Handle texts, Handle ms_h)
 {
 	// Fetch all texts
 	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
 	// Fetch the minimum support
-	unsigned ms_uint = MinerUtils::get_ms(ms);
+	unsigned ms = MinerUtils::get_uint(ms_h);
 
-	return MinerUtils::enough_support(pattern, texts_seq, ms_uint);
+	return MinerUtils::enough_support(pattern, texts_seq, ms);
 }
 
 Handle MinerSCM::do_expand_conjunction(Handle cnjtion, Handle pattern,
-                                       Handle texts, Handle ms)
+                                       Handle texts, Handle ms_h, Handle mv_h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-expand-conjunction");
 
 	// Fetch all texts
 	HandleSeq texts_seq = MinerUtils::get_texts(texts);
 
-	// Fetch the minimum support
-	unsigned ms_uint = MinerUtils::get_ms(ms);
+	// Get minimum support and maximum variables
+	unsigned ms = MinerUtils::get_uint(ms_h);
+	unsigned mv = MinerUtils::get_uint(mv_h);
 
 	HandleSet results = MinerUtils::expand_conjunction(cnjtion, pattern,
-	                                                   texts_seq,
-	                                                   ms_uint);
+	                                                   texts_seq, ms, mv);
 	return as->add_link(SET_LINK, HandleSeq(results.begin(), results.end()));
 }
 
