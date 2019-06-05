@@ -69,18 +69,6 @@ OpenPsiSatisfier(AtomSpace* as,
 
   OpenPsiImplicator* _implicator;
 
-  /**
-   * Cache used to store context with the variable groundings. Values
-   * are not used to associate the variable groundings(the HandleMap) with
-   * the query PatternLink, because doing so would require extra
-   * computation that doesn't add any value.
-   */
-  std::map<Handle, HandleMap> _satisfiability_cache;
-
-  // To store what pattern we've seen so far
-  std::set<Handle> _pattern_seen;
-
-
   // Because two of the ancestor classes that this class inherites
   // from have _as variable.
   using DefaultPatternMatchCB::_as;
