@@ -796,6 +796,10 @@ HandleSet MinerUtils::expand_conjunction_connect_rec(const Handle& cnjtion,
 				if (n_conjuncts(npat) <= n_conjuncts(cnjtion))
 					continue;
 
+				// Insert npat in the atomspace where cnjtion and pattern
+				// are before memoizing its support.
+				npat = cnjtion->getAtomSpace()->add_atom(npat);
+
 				// If npat does not have enough support, any recursive
 				// call will produce specializations that do not have
 				// enough support, thus can be ignored.
@@ -854,11 +858,8 @@ double MinerUtils::support_mem(const Handle& pattern,
 {
 	double sup = get_support(pattern);
 	if (sup < 0) {
-		logger().debug() << "MinerUtils::support_mem miss!";
 		sup = support(pattern, texts, ms);
 		set_support(pattern, sup);
-	} else {
-		logger().debug() << "MinerUtils::support_mem hit!";
 	}
 	return sup;
 }

@@ -167,7 +167,7 @@
 ;; Conjunction expansion formula
 (define (gen-conjunction-expansion-formula mv)
   (lambda (conclusion . premises)
-    (cog-logger-debug "conjunction-expansion-formula mv = ~a, conclusion = ~a, premises = ~a" mv conclusion premises)
+    ;; (cog-logger-debug "conjunction-expansion-formula mv = ~a, conclusion = ~a, premises = ~a" mv conclusion premises)
     (if (= (length premises) 1)
         (let* ((minsup-fg (car premises))
                (minsup-f (cog-outgoing-atom minsup-fg 0))

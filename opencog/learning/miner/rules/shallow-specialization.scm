@@ -86,7 +86,7 @@
 ;; mv is the maximimum number of variables
 (define (gen-shallow-specialization-formula mv)
   (lambda (conclusion . premises)
-    (cog-logger-debug "gen-shallow-specialization-formula mv = ~a, conclusion = ~a, premises = ~a" mv conclusion premises)
+    ;; (cog-logger-debug "gen-shallow-specialization-formula mv = ~a, conclusion = ~a, premises = ~a" mv conclusion premises)
     (if (= (length premises) 1)
         (let* ((minsup-pattern (car premises))
                (pattern (get-pattern minsup-pattern))

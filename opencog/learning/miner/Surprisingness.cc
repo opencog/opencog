@@ -296,14 +296,8 @@ double Surprisingness::emp_prob_mem(const Handle& pattern, const HandleSeq& text
 {
 	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
 	if (emp_prob_tv) {
-		// static unsigned hit;
-		// hit++;
-		// logger().debug() << "emp_prob_mem hit = " << hit;
 		return emp_prob_tv->get_mean();
 	}
-	// static unsigned miss;
-	// miss++;
-	// logger().debug() << "emp_prob_mem miss = " << miss;
 	double ep = emp_prob(pattern, texts);
 	set_emp_prob(pattern, ep);
 	return ep;
@@ -392,14 +386,8 @@ double Surprisingness::emp_prob_pbs_mem(const Handle& pattern,
 {
 	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
 	if (emp_prob_tv) {
-		// static unsigned hit;
-		// hit++;
-		// logger().debug() << "emp_prob_pbs_mem hit = " << hit;
 		return emp_prob_tv->get_mean();
 	}
-	// static unsigned miss;
-	// miss++;
-	// logger().debug() << "emp_prob_pbs_mem miss = " << miss;
 	double ep = emp_prob_pbs(pattern, texts, prob_estimate);
 	set_emp_prob(pattern, ep);
 	return ep;
