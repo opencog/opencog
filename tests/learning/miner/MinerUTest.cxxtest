@@ -109,12 +109,12 @@ private:
 	 */
 	Handle ure_pm(const AtomSpace& texts_as, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
-	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              bool incremental_expansion=false,
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
 	Handle ure_pm(const HandleSeq& texts, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
-	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              bool incremental_expansion=false,
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
 
@@ -147,6 +147,8 @@ public:
 	void test_expand_conjunction_disconnect();
 	void test_expand_conjunction_1();
 	void test_expand_conjunction_2();
+	void test_expand_conjunction_3();
+	void test_expand_conjunction_4();
 	void test_shallow_abstract();
 
 	// Pattern miner
@@ -192,7 +194,7 @@ Handle MinerUTest::mk_nconjunct(unsigned n)
 
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
                           int maximum_iterations, Handle initpat,
-                          TruthValuePtr incremental_expansion,
+                          bool incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
 {
@@ -204,7 +206,7 @@ Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
 
 Handle MinerUTest::ure_pm(const HandleSeq& texts, int minsup,
                           int maximum_iterations, Handle initpat,
-                          TruthValuePtr incremental_expansion,
+                          bool incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
 {
@@ -436,6 +438,59 @@ void MinerUTest::test_expand_conjunction_1()
 		         InhXY);
 
 	HandleSet results = MinerUtils::expand_conjunction(p1, p2, texts, 1);
+	// Empty because all resulting expansions have a number of clauses
+	// equal to or below that of p1.
+	HandleSet expected{};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_expand_conjunction_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Texts
+	Handle
+		InhAC = al(INHERITANCE_LINK, A, C),
+		InhBC = al(INHERITANCE_LINK, B, C);
+	HandleSeq texts{InhAC, InhBC};
+
+	Handle InhXC = al(INHERITANCE_LINK, X, C),
+		pat = al(LAMBDA_LINK,
+		         X,
+		         InhXC);
+
+	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
+	// Empty because the only result is equal to pat, thus rejected as
+	// worthwhile expansion
+	HandleSet expected{};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_expand_conjunction_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Texts
+	Handle
+		InhAB = al(INHERITANCE_LINK, A, B),
+		InhBC = al(INHERITANCE_LINK, B, C);
+	HandleSeq texts{InhAB, InhBC};
+
+	Handle InhXY = al(INHERITANCE_LINK, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		pat = al(LAMBDA_LINK,
+		         VarXY,
+		         InhXY);
+
+	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
 	Handle
 		InhXW = al(INHERITANCE_LINK, X, W),
 		InhZX = al(INHERITANCE_LINK, Z, X),
@@ -463,25 +518,43 @@ void MinerUTest::test_expand_conjunction_1()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void MinerUTest::test_expand_conjunction_2()
+void MinerUTest::test_expand_conjunction_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Texts
 	Handle
-		InhAC = al(INHERITANCE_LINK, A, C),
-		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSeq texts{InhAC, InhBC};
+		InhAB = al(INHERITANCE_LINK, A, B),
+		LstAB = al(LIST_LINK, A, B);
+	HandleSeq texts{InhAB, LstAB};
 
-	Handle InhXC = al(INHERITANCE_LINK, X, C),
-		pat = al(LAMBDA_LINK,
-		         X,
-		         InhXC);
+	Handle InhXY = al(INHERITANCE_LINK, X, Y),
+		LstXY = al(LIST_LINK, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		p1 = al(LAMBDA_LINK,
+		        VarXY,
+		        InhXY),
+		p2 = al(LAMBDA_LINK,
+		        VarXY,
+		        LstXY);
 
-	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
-	// Empty because the only result is equal to pat, thus rejected as
-	// worthwhile expansion
-	HandleSet expected{};
+	HandleSet results = MinerUtils::expand_conjunction(p1, p2, texts, 1);
+	Handle
+		InhXZ = al(INHERITANCE_LINK, X, Z),
+		InhZY = al(INHERITANCE_LINK, Z, Y),
+		LstXZ = al(LIST_LINK, X, Z),
+		LstZY = al(LIST_LINK, Z, Y),
+		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
+		InhXYLstXZ = al(LAMBDA_LINK,
+		                VarXYZ,
+		                al(AND_LINK, InhXY, LstXZ)),
+		InhXYLstZY = al(LAMBDA_LINK,
+		                VarXYZ,
+		                al(AND_LINK, InhXY, LstZY)),
+		InhXYLstXY = al(LAMBDA_LINK,
+		                VarXY,
+		                al(AND_LINK, InhXY, LstXY));
+	HandleSet expected{InhXYLstXZ, InhXYLstZY, InhXYLstXY};
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -1310,7 +1383,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	// bug (the pattern is ignored by surprisingness).
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	bool incremental_expansion = true;
 	int max_conjuncts = 3;
 	double complexity_penalty = 1;
 	int minsup = 5;
@@ -1466,7 +1539,7 @@ void MinerUTest::test_vqa()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	bool incremental_expansion = true;
 	int minsup = 500;
 	int max_conjuncts = 2;
 	double complexity_penalty = 1;

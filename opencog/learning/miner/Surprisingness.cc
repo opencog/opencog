@@ -63,7 +63,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 
 	// Function calculating the probability of a pattern
 	auto prob = [&](const Handle& pattern) {
-		double sup = MinerUtils::calc_support(pattern, texts, (unsigned)total_count);
+		double sup = MinerUtils::support(pattern, texts, (unsigned)total_count);
 		return sup / total_count;
 	};
 	auto blk_prob = [&](const HandleSeq& block) {
@@ -288,7 +288,7 @@ double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
 {
 	double ucount = universe_count(pattern, texts);
 	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
-	double sup = MinerUtils::calc_support(pattern, texts, ms);
+	double sup = MinerUtils::support(pattern, texts, ms);
 	return sup / ucount;
 }
 
@@ -296,14 +296,8 @@ double Surprisingness::emp_prob_mem(const Handle& pattern, const HandleSeq& text
 {
 	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
 	if (emp_prob_tv) {
-		// static unsigned hit;
-		// hit++;
-		// logger().debug() << "emp_prob_mem hit = " << hit;
 		return emp_prob_tv->get_mean();
 	}
-	// static unsigned miss;
-	// miss++;
-	// logger().debug() << "emp_prob_mem miss = " << miss;
 	double ep = emp_prob(pattern, texts);
 	set_emp_prob(pattern, ep);
 	return ep;
@@ -392,14 +386,8 @@ double Surprisingness::emp_prob_pbs_mem(const Handle& pattern,
 {
 	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
 	if (emp_prob_tv) {
-		// static unsigned hit;
-		// hit++;
-		// logger().debug() << "emp_prob_pbs_mem hit = " << hit;
 		return emp_prob_tv->get_mean();
 	}
-	// static unsigned miss;
-	// miss++;
-	// logger().debug() << "emp_prob_pbs_mem miss = " << miss;
 	double ep = emp_prob_pbs(pattern, texts, prob_estimate);
 	set_emp_prob(pattern, ep);
 	return ep;

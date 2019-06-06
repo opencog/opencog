@@ -36,5 +36,11 @@ The results should have been stored in the `results` variable, which
 can be shown as follows:
 
 ```scheme
-results
+results-as
+```
+
+and
+
+```scheme
+results-lst
 ```

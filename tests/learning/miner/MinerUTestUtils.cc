@@ -144,8 +144,8 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
                                int minsup,
                                int maximum_iterations,
                                Handle initpat,
-                               TruthValuePtr incremental_expansion,
-                               int max_conjuncts,
+                               bool incremental_expansion,
+                               unsigned max_conjuncts,
                                double complexity_penalty)
 {
 	HandleSeq texts;
@@ -162,8 +162,8 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
                                int minsup,
                                int maximum_iterations,
                                Handle initpat,
-                               TruthValuePtr incremental_expansion,
-                               int max_conjuncts,
+                               bool incremental_expansion,
+                               unsigned max_conjuncts,
                                double complexity_penalty)
 {
 	// Make (Member text (Concept "texts)) links
@@ -183,7 +183,6 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 		return al(SET_LINK);
 
 	// Add incremental conjunction expansion if necessary
-	bool inc_exp_enabled = incremental_expansion != TruthValue::FALSE_TV();
 	configure_optional_rules(scm, incremental_expansion, max_conjuncts);
 
 	// Otherwise prepare the source
@@ -193,7 +192,7 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 	// Run the forward chainer from the initial pattern
 	ForwardChainer fc(as, pm_rb, source);
 	fc.get_config().set_maximum_iterations(maximum_iterations);
-	fc.get_config().set_retry_exhausted_sources(inc_exp_enabled);
+	fc.get_config().set_retry_exhausted_sources(incremental_expansion);
 	fc.get_config().set_complexity_penalty(complexity_penalty);
 	fc.do_chain();
 
@@ -292,14 +291,17 @@ void MinerUTestUtils::configure_mandatory_rules(SchemeEval& scm)
 }
 
 void MinerUTestUtils::configure_optional_rules(SchemeEval& scm,
-                                               TruthValuePtr incremental_expansion,
-                                               int max_conjuncts)
+                                               bool incremental_expansion,
+                                               unsigned max_conjuncts,
+                                               unsigned max_variables)
 {
 	std::string call = "(configure-optional-rules (Concept \"pm-rbs\")";
-	call += " #:incremental-expansion ";
-	call += SchemeSmob::tv_to_string(incremental_expansion);
+	call += " #:incremental-expansion #";
+	call += incremental_expansion ? "t" : "f";
 	call += " #:max-conjuncts ";
 	call += std::to_string(max_conjuncts);
+	call += " #:max-variables ";
+	call += std::to_string(max_variables);
 	call += ")";
 	std::string rs = scm.eval(call);
 	logger().debug() << "MinerUTest::configure_optional_rules() rs = " << rs;
