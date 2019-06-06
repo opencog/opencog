@@ -25,8 +25,14 @@
 ;; Since the pattern has no conjunction the surprisingness measure is
 ;; none (as the current surprisingness measures consider the
 ;; surprisingness of conjunctions of components)
-(define results (cog-mine (cog-atomspace) #:minsup 2 #:surprisingness 'none))
+(define results-as (cog-mine (cog-atomspace)
+                             #:minsup 2
+                             #:incremental-expansion #f
+                             #:surprisingness 'none))
 
 ;; Call the miner on the text set of interest instead, should yield
 ;; the same results.
-(cog-mine (list AB AC) #:minsup 2 #:surprisingness 'none)
+(define results-lst (cog-mine (list AB AC)
+                              #:minsup 2
+                              #:incremental-expansion #f
+                              #:surprisingness 'none))

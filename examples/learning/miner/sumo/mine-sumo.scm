@@ -42,6 +42,7 @@
                           #:maximum-iterations 10
                           #:incremental-expansion #t
                           #:max-conjuncts 2
+                          #:max-variables 4
                           #:surprisingness 'nisurp))
                           ;; #:surprisingness 'none))
 

@@ -24,8 +24,8 @@ cd <EXTERNAL-TOOLS>/SUMO_importer
 copy the output folder to here (where that README.md is located)
 
 ```bash
-cp <EXTERNAL-TOOLS>/SUMO_importer/all-sumo-labeled-kb.scm <HERE>
-cp <EXTERNAL-TOOLS>/SUMO_importer/sumo/output/Geography.scm <HERE>
+cp -p <EXTERNAL-TOOLS>/SUMO_importer/all-sumo-labeled-kb.scm <HERE>/scm
+cp -p <EXTERNAL-TOOLS>/SUMO_importer/sumo/output/Geography.scm <HERE>/scm
 ```
 
 ### Run Pattern Miner

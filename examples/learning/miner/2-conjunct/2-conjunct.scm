@@ -57,7 +57,13 @@
 ;;     (Variable "$X-1"))))
 ;;
 ;; TODO: the following bugs for no reason
-;; (cog-mine (cog-atomspace) #:minsup 2 #:initpat (conjunct-pattern 2))
+;; (cog-mine (cog-atomspace)
+;;           #:minsup 2
+;;           #:initpat (conjunct-pattern 2)
+;;           #:incremental-expansion #f)
 (define results (cog-mine (list AB BC DE EF)
                           #:minsup 2
-                          #:initpat (conjunct-pattern 2)))
+                          #:initpat (conjunct-pattern 2)
+                          #:incremental-expansion #f
+                          #:max-variables 4
+                          #:surprisingness 'none))
