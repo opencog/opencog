@@ -22,10 +22,9 @@ SET(CYTHON_FLAGS "-f")
 # Cythonizes one .pyx file into a .cpp file
 # Additional arguments are dependencies
 MACRO(CYTHON_ADD_MODULE_PYX name)
+	SET(DEPENDS ${name}.pyx)
 	IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx ${name}.pxd)
-	ELSE(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx)
+		SET(DEPENDS ${DEPENDS} ${name}.pxd)
 	ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
 	# Allow the user to specify dependencies as optional arguments
 	SET(DEPENDS ${DEPENDS} ${ARGN})
