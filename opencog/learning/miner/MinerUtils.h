@@ -439,6 +439,28 @@ public:
 	                                         const Handle& pattern_var);
 
 	/**
+	 * Like expand_conjunction_connect but consider a mapping from
+	 * variables of pattern to variables of cnjtion.
+	 */
+	static Handle expand_conjunction_connect(const Handle& cnjtion,
+	                                         const Handle& pattern,
+	                                         const HandleMap& pv2cv);
+
+	/**
+	 * Like expand_conjunction_connect above but recursively consider
+	 * all variable mappings from pattern to cnjtion.
+	 *
+	 * pvi is the variable index of pattern variable declaration.
+	 */
+	static HandleSet expand_conjunction_connect_rec(const Handle& cnjtion,
+	                                                const Handle& pattern,
+	                                                const HandleSeq& texts,
+	                                                unsigned ms,
+	                                                unsigned mv,
+	                                                const HandleMap& pv2cv=HandleMap(),
+	                                                unsigned pvi=0);
+
+	/**
 	 * Given cnjtion and pattern, consider all possible connections
 	 * (a.k.a linkages) and expand cnjtion accordingly. For instance if
 	 *

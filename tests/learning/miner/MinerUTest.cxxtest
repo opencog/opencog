@@ -147,6 +147,8 @@ public:
 	void test_expand_conjunction_disconnect();
 	void test_expand_conjunction_1();
 	void test_expand_conjunction_2();
+	void test_expand_conjunction_3();
+	void test_expand_conjunction_4();
 	void test_shallow_abstract();
 
 	// Pattern miner
@@ -436,6 +438,59 @@ void MinerUTest::test_expand_conjunction_1()
 		         InhXY);
 
 	HandleSet results = MinerUtils::expand_conjunction(p1, p2, texts, 1);
+	// Empty because all resulting expansions have a number of clauses
+	// equal to or below that of p1.
+	HandleSet expected{};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_expand_conjunction_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Texts
+	Handle
+		InhAC = al(INHERITANCE_LINK, A, C),
+		InhBC = al(INHERITANCE_LINK, B, C);
+	HandleSeq texts{InhAC, InhBC};
+
+	Handle InhXC = al(INHERITANCE_LINK, X, C),
+		pat = al(LAMBDA_LINK,
+		         X,
+		         InhXC);
+
+	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
+	// Empty because the only result is equal to pat, thus rejected as
+	// worthwhile expansion
+	HandleSet expected{};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_expand_conjunction_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Texts
+	Handle
+		InhAB = al(INHERITANCE_LINK, A, B),
+		InhBC = al(INHERITANCE_LINK, B, C);
+	HandleSeq texts{InhAB, InhBC};
+
+	Handle InhXY = al(INHERITANCE_LINK, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		pat = al(LAMBDA_LINK,
+		         VarXY,
+		         InhXY);
+
+	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
 	Handle
 		InhXW = al(INHERITANCE_LINK, X, W),
 		InhZX = al(INHERITANCE_LINK, Z, X),
@@ -463,25 +518,43 @@ void MinerUTest::test_expand_conjunction_1()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void MinerUTest::test_expand_conjunction_2()
+void MinerUTest::test_expand_conjunction_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Texts
 	Handle
-		InhAC = al(INHERITANCE_LINK, A, C),
-		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSeq texts{InhAC, InhBC};
+		InhAB = al(INHERITANCE_LINK, A, B),
+		LstAB = al(LIST_LINK, A, B);
+	HandleSeq texts{InhAB, LstAB};
 
-	Handle InhXC = al(INHERITANCE_LINK, X, C),
-		pat = al(LAMBDA_LINK,
-		         X,
-		         InhXC);
+	Handle InhXY = al(INHERITANCE_LINK, X, Y),
+		LstXY = al(LIST_LINK, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		p1 = al(LAMBDA_LINK,
+		        VarXY,
+		        InhXY),
+		p2 = al(LAMBDA_LINK,
+		        VarXY,
+		        LstXY);
 
-	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
-	// Empty because the only result is equal to pat, thus rejected as
-	// worthwhile expansion
-	HandleSet expected{};
+	HandleSet results = MinerUtils::expand_conjunction(p1, p2, texts, 1);
+	Handle
+		InhXZ = al(INHERITANCE_LINK, X, Z),
+		InhZY = al(INHERITANCE_LINK, Z, Y),
+		LstXZ = al(LIST_LINK, X, Z),
+		LstZY = al(LIST_LINK, Z, Y),
+		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
+		InhXYLstXZ = al(LAMBDA_LINK,
+		                VarXYZ,
+		                al(AND_LINK, InhXY, LstXZ)),
+		InhXYLstZY = al(LAMBDA_LINK,
+		                VarXYZ,
+		                al(AND_LINK, InhXY, LstZY)),
+		InhXYLstXY = al(LAMBDA_LINK,
+		                VarXY,
+		                al(AND_LINK, InhXY, LstXY));
+	HandleSet expected{InhXYLstXZ, InhXYLstZY, InhXYLstXY};
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
