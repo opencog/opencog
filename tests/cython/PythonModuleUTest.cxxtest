@@ -53,6 +53,7 @@ class TestCogServer : public CogServer
 
 class PythonModuleUTest :  public CxxTest::TestSuite
 {
+    
 public:
 
     PythonModuleUTest()
@@ -75,12 +76,8 @@ public:
         env += "./tests/cython/agents:../tests/cython/agents:./agents";
         setenv("PYTHONPATH", env.c_str(), 1);
 
-        // set cycle duration to a smaller value so that this test do not take too long.
-        config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
+        
 
-        config().set("MODULES", "opencog/cogserver/modules/python/libPythonModule.so");
-        cogserver.loadModules();
     }
 
     ~PythonModuleUTest()
@@ -91,9 +88,19 @@ public:
     }
 
     void setUp() {
+        // set cycle duration to a smaller value so that this test do not take too long.
+        config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
+        config().set("MODULES", "opencog/cogserver/modules/python/libPythonModule.so");
+
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
+        cogserver.loadModules();
     }
 
     void tearDown() {
+        config().reset();
+        
+        TestCogServer* delete_server = &(static_cast<TestCogServer&>(server(TestCogServer::createInstance)));
+        delete delete_server;
     }
 
     void testLoadExceptionAgent()
@@ -110,10 +117,9 @@ public:
         cogserver.runLoopStep();
         // ensure that the exception is reported
         printf("Got >>>%s<<<\n", srr->result.c_str());
-// The python shell is currently not returning results.
-// Stub this out until issue #2322 is fixed.
-// Re-enable this test afer #2322 is fixed.
-        // TS_ASSERT_DIFFERS(srr->result.find("TypeError"), std::string::npos);
+        // The python shell is currently not returning results.
+        // TODO: Fix #2322
+        //TS_ASSERT_DIFFERS(srr->result.find("TypeError"), std::string::npos);
     }
 
     void testAgentWithRunException()
@@ -142,8 +148,11 @@ public:
     void testPreloadAgent ()
     {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
-        // agent is actually loaded from python module in test constructor
-        // just check it actually can be created though
+        config().set("PYTHON_PRELOAD", "preload_test");
+        cogserver.loadModules();
+
+        // agent is loaded from python module in test constructor
+        // check it can actually be created
         Request* loadpyRequest = cogserver.createRequest("loadpy");
         TS_ASSERT(loadpyRequest != NULL);
         loadpyRequest->addParameter("preload_test");
