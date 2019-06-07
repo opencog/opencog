@@ -97,8 +97,7 @@ class BindLinkExecution():
         listOfLinks=self.response.out
         for link in listOfLinks:
             atom=(link.out)[1]
-            if atom.type==self.atomType:
-                rv.append(atom)
+            rv.append(atom)
         for link in listOfLinks:
             self.atomspace.remove(link)
         self.atomspace.remove(self.response)
