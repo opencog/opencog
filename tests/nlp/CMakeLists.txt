@@ -13,15 +13,15 @@ IF (HAVE_VITERBI)
 	ADD_SUBDIRECTORY (viterbi)
 ENDIF (HAVE_VITERBI)
 
-# Disable. These tests cannot possibly pass, as designed; there
-# are obvious bugs in some BindLinks (e.g. the isIt bindlink)
-#IF (HAVE_NOSETESTS)
-#	ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
-#		${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
-#	SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
-#		"PYTHONPATH=${PYTHON_ROOT}:${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython;GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog/scm"
-#	)
-#ENDIF (HAVE_NOSETESTS)
+IF (HAVE_NOSETESTS)
+
+	ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
+		${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
+	SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
+		"PYTHONPATH=${PYTHON_ROOT}:${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython;GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog/scm"
+	)
+
+ENDIF (HAVE_NOSETESTS)
 
 IF (HAVE_STACK AND BUILD_LOJBAN)
 	# Lojban is currently failing to build; see for example
