@@ -62,12 +62,14 @@ class OpenPsiTest(TestCase):
         self.assertEqual(ConceptNode("goal"), rule.get_goal())
 
         categories = openpsi.get_categories()
+        self.assertEqual(2, len(categories))
         self.assertTrue(component in categories)
         self.assertFalse(ConceptNode("new-category") in categories)
 
         new_category = openpsi.add_category(ConceptNode("new-category"))
         self.assertEqual(ConceptNode("new-category"), new_category)
         categories = openpsi.get_categories()
+        self.assertEqual(3, len(categories))
         self.assertTrue(new_category in categories)
 
         self.assertEqual(context, rule.get_context())
