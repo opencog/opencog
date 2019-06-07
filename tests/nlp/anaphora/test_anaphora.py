@@ -78,7 +78,6 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g','h','j'],self.hobbsAgent.getWords()))
         self.atomspace.clear()
 
-    # @unittest.skip("debugging skipping")
     def test_propose(self):
 
         '''
