@@ -471,7 +471,8 @@ IF (NOT DEFINED ATOMSPACE_DATA_DIR)
 ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
 
 INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogFunctions.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
 
 # -------------------------------------------------
 # Library configuration
