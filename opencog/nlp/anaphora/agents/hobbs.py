@@ -81,7 +81,7 @@ class BindLinkExecution():
             self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
         else:
             self.tmpLink=None
-        self.response = scheme_eval(self.atomspace, self.command)
+        self.response = scheme_eval_h(self.atomspace, self.command)
         d=3;
 
     def returnResult(self):
@@ -112,7 +112,14 @@ class BindLinkExecution():
 
         if self.response==None:
             return
-        rv=self.atomspace.outgoing
+        rv=[]
+        listOfLinks=self.response.out
+        for link in listOfLinks:
+            atom=(link.out)[1]
+            if atom.type==self.atomType:
+                rv.append(atom)
+        for link in listOfLinks:
+            self.atomspace.remove(link)
         self.atomspace.remove(self.response)
         self.response=None
         return rv
@@ -165,7 +172,7 @@ class HobbsAgent(MindAgent):
 
         exe=BindLinkExecution(self.atomspace,anchorNode, target, command,resultNode,atomType)
         exe.execution()
-        rv=exe.returnResult()
+        rv=exe.returnResponse()
         exe.clear()
         return rv
 

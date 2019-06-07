@@ -393,7 +393,6 @@ class AnaphoraUnitTester(TestCase):
         filter_17()
         filter_18()
 
-    @unittest.skip("debugging skipping")
     def test_pleonastic_if(self):
 
         self.assertTrue(load_scm(self.atomspace, "tests/nlp/anaphora/data/pleonastic_it/data_#1.scm"))
