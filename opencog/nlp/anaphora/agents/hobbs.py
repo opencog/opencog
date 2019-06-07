@@ -67,6 +67,7 @@ class BindLinkExecution():
         self.command=command
         self.resultNode=resultNode
         self.atomType=atomType
+        self.response=None
         scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec))")
         scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
 
@@ -80,7 +81,7 @@ class BindLinkExecution():
             self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
         else:
             self.tmpLink=None
-        response = scheme_eval(self.atomspace, self.command)
+        self.response = scheme_eval(self.atomspace, self.command)
         d=3;
 
     def returnResult(self):
@@ -101,6 +102,19 @@ class BindLinkExecution():
 
         for link in listOfLinks:
             self.atomspace.remove(link)
+        return rv
+
+    def returnResponse(self):
+
+        '''
+        Returns list of atoms resulted in previous execution of a scheme command
+        '''
+
+        if self.response==None:
+            return
+        rv=self.atomspace.outgoing
+        self.atomspace.remove(self.response)
+        self.response=None
         return rv
 
     def clear(self):
@@ -261,7 +275,7 @@ class HobbsAgent(MindAgent):
 
         for index in range(start,end):
             command='(cog-execute! filter-#'+str(index)+')'
-            rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
+            rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.WordInstanceNode)
             if len(rv)>0:
                 '''
                 Reject it
@@ -345,7 +359,7 @@ class HobbsAgent(MindAgent):
             matched=False
             for index in range(1,self.numOfPrePatterns+1):
                 command='(cog-execute! pre-process-#'+str(index)+')'
-                rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.AnchorNode)
+                rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.WordInstanceNode)
                 if len(rv)>0:
                     matched=True
                     break
@@ -489,11 +503,11 @@ class HobbsAgent(MindAgent):
         Check if the node is the word "it".
         '''
         matched=False
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! isIt)',self.currentResult,types.AnchorNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! isIt)',self.currentResult,types.WordInstanceNode)
         if len(rv)>0:
             for index in range(1,self.numOfPleonasticItPatterns+1):
                 command='(cog-execute! pleonastic-it-#'+str(index)+')'
-                rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.AnchorNode)
+                rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.WordInstanceNode)
                 if len(rv)>0:
                     matched=True
                     break
