@@ -67,7 +67,6 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g'],self.hobbsAgent.bfs(self.getWord('a'))))
         self.atomspace.clear()
 
-    #@unittest.skip("debugging skipping")
     def test_getWords(self):
 
         '''
@@ -79,7 +78,6 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g','h','j'],self.hobbsAgent.getWords()))
         self.atomspace.clear()
 
-    @unittest.skip("debugging skipping")
     def test_propose(self):
 
         '''
@@ -394,7 +392,6 @@ class AnaphoraUnitTester(TestCase):
         filter_17()
         filter_18()
 
-    @unittest.skip("debugging skipping")
     def test_pleonastic_if(self):
 
         self.assertTrue(load_scm(self.atomspace, "tests/nlp/anaphora/data/pleonastic_it/data_#1.scm"))
@@ -422,7 +419,6 @@ class AnaphoraUnitTester(TestCase):
         self.assertFalse(self.hobbsAgent.pleonastic_it(self.getWord('it')))
         self.atomspace.clear()
 
-    @unittest.skip("debugging skipping")
     def test_conjunctions(self):
         self.assertTrue(load_scm(self.atomspace, "tests/nlp/anaphora/data/conjunction.scm"))
         self.hobbsAgent.initilization(self.atomspace)

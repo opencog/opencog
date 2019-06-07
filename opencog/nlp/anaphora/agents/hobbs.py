@@ -55,7 +55,7 @@ class BindLinkExecution():
     Executes a (cog-execute! xxx) command and return the results of it
     '''
 
-    def __init__(self,atomspace,anchorNode, target, command,resultNode,atomType):
+    def __init__(self,atomspace,anchorNode, target, command):
 
         '''
         Stores necessary information
@@ -65,8 +65,7 @@ class BindLinkExecution():
         self.anchorNode=anchorNode
         self.target=target
         self.command=command
-        self.resultNode=resultNode
-        self.atomType=atomType
+        self.response=None
         scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec))")
         scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
 
@@ -80,27 +79,26 @@ class BindLinkExecution():
             self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
         else:
             self.tmpLink=None
-        response = scheme_eval(self.atomspace, self.command)
+        self.response = scheme_eval_h(self.atomspace, self.command)
         d=3;
 
-    def returnResult(self):
+    def returnResponse(self):
 
         '''
         Returns list of atoms resulted in previous execution of a scheme command
-        It only returns atoms which match the type of "self.atomType"
         '''
 
-        if self.resultNode==None:
+        if self.response==None:
             return
         rv=[]
-        listOfLinks=self.resultNode.incoming
+        listOfLinks=self.response.out
         for link in listOfLinks:
             atom=(link.out)[1]
-            if atom.type==self.atomType:
-                rv.append(atom)
-
+            rv.append(atom)
         for link in listOfLinks:
             self.atomspace.remove(link)
+        self.atomspace.remove(self.response)
+        self.response=None
         return rv
 
     def clear(self):
@@ -127,9 +125,7 @@ class HobbsAgent(MindAgent):
         self.currentPronoun = None
         self.currentPronounNode = None
         self.currentTarget = None
-        self.currentResult = None
         self.currentProposal = None
-        self.unresolvedReferences=None
         self.pronounNumber = None
 
         self.pronouns = None
@@ -143,15 +139,15 @@ class HobbsAgent(MindAgent):
 
         log.fine("\n===========================================================\n Starting hobbs agent.....\n=========================================================== ")
 
-    def bindLinkExe(self,anchorNode, target, command,resultNode,atomType):
+    def bindLinkExe(self,anchorNode, target, command):
 
         '''
         Just combines all the steps of executing a scheme command into a single function.
         '''
 
-        exe=BindLinkExecution(self.atomspace,anchorNode, target, command,resultNode,atomType)
+        exe=BindLinkExecution(self.atomspace,anchorNode, target, command)
         exe.execution()
-        rv=exe.returnResult()
+        rv=exe.returnResponse()
         exe.clear()
         return rv
 
@@ -178,7 +174,7 @@ class HobbsAgent(MindAgent):
         Given a ParseNode, returns a SentenceNumber of a SentenceNode associated with it.
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! getNumberNode_ParseNode)',self.currentResult,types.NumberNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! getNumberNode_ParseNode)')
         return int(rv[0].name)
 
     def sortNodes(self,list,keyFunc):
@@ -194,7 +190,7 @@ class HobbsAgent(MindAgent):
         Returns a sorted list of children nodes of current node.
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! getChildren)',self.currentResult,types.WordInstanceNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! getChildren)')
         return self.sortNodes(rv,self.getWordNumber)
 
     def generateReferenceLink(self,anaphora,antecedent,tv):
@@ -213,7 +209,7 @@ class HobbsAgent(MindAgent):
         Returning the other part of a conjunction if conjunction exists and anaphor is "Plural"
         '''
 
-        return self.bindLinkExe(self.currentProposal,node,'(cog-execute! getConjunction)',self.currentResult,types.WordInstanceNode)
+        return self.bindLinkExe(self.currentProposal,node,'(cog-execute! getConjunction)')
 
     def checkConjunctions(self,node):
 
@@ -261,7 +257,7 @@ class HobbsAgent(MindAgent):
 
         for index in range(start,end):
             command='(cog-execute! filter-#'+str(index)+')'
-            rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
+            rv=self.bindLinkExe(self.currentProposal,node,command)
             if len(rv)>0:
                 '''
                 Reject it
@@ -331,7 +327,7 @@ class HobbsAgent(MindAgent):
         Returns a list of words in the atomspace
         '''
 
-        rv=self.bindLinkExe(None,None,'(cog-execute! getWords)',self.currentResult,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-execute! getWords)')
         return self.sortNodes(rv,self.getWordNumber)
 
     def getTargets(self,words):
@@ -345,7 +341,7 @@ class HobbsAgent(MindAgent):
             matched=False
             for index in range(1,self.numOfPrePatterns+1):
                 command='(cog-execute! pre-process-#'+str(index)+')'
-                rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.AnchorNode)
+                rv=self.bindLinkExe(self.currentTarget,word,command)
                 if len(rv)>0:
                     matched=True
                     break
@@ -354,7 +350,7 @@ class HobbsAgent(MindAgent):
         return targets
 
     def getPronouns(self):
-        rv=self.bindLinkExe(None,None,'(cog-execute! getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-execute! getPronouns)')
         return self.sortNodes(rv,self.getWordNumber)
 
     def getRoots(self):
@@ -363,8 +359,8 @@ class HobbsAgent(MindAgent):
         Return a list of roots(incoming degree of 0)
         '''
 
-        self.bindLinkExe(None,None,'(cog-execute! connectRootsToParseNodes)',None,None)
-        rv= self.bindLinkExe(None,None,'(cog-execute! getAllParseNodes)',self.currentResult,types.ParseNode)
+        self.bindLinkExe(None,None,'(cog-execute! connectRootsToParseNodes)')
+        rv= self.bindLinkExe(None,None,'(cog-execute! getAllParseNodes)')
         return self.sortNodes(rv,self.getSentenceNumber)
 
     def getRootOfNode(self,target):
@@ -372,7 +368,7 @@ class HobbsAgent(MindAgent):
         Returns a ParseNode associated with the "target"
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,target,'(cog-execute! getParseNode)',self.currentResult,types.ParseNode)
+        rv=self.bindLinkExe(self.currentTarget,target,'(cog-execute! getParseNode)')
         return rv[0]
 
     def  previousRootExist(self,root):
@@ -400,7 +396,7 @@ class HobbsAgent(MindAgent):
         Finds word sequence number for each word
         '''
 
-        rv= self.bindLinkExe(None, None, '(cog-execute! getAllNumberNodes)', self.currentResult, types.WordSequenceLink)
+        rv= self.bindLinkExe(None, None, '(cog-execute!  getAllNumberNodes)')
         for link in rv:
             out=link.out
             if out[0].type==types.WordInstanceNode:
@@ -416,13 +412,9 @@ class HobbsAgent(MindAgent):
         self.PleonasticItNode=atomspace.add_node(types.AnchorNode, 'Pleonastic-it', TruthValue(1.0, 100))
         self.currentPronounNode = atomspace.add_node(types.AnchorNode, 'CurrentPronoun', TruthValue(1.0, 100))
         self.currentTarget = atomspace.add_node(types.AnchorNode, 'CurrentTarget', TruthValue(1.0, 100))
-        self.currentResult = atomspace.add_node(types.AnchorNode, 'CurrentResult', TruthValue(1.0, 100))
         self.currentProposal = atomspace.add_node(types.AnchorNode, 'CurrentProposal', TruthValue(1.0, 100))
-        self.unresolvedReferences=atomspace.add_node(types.AnchorNode, 'Recent Unresolved references', TruthValue(1.0, 100))
         self.resolvedReferences=atomspace.add_node(types.AnchorNode, 'Resolved references', TruthValue(1.0, 100))
         self.currentResolutionNode=atomspace.add_node(types.AnchorNode, 'CurrentResolution', TruthValue(1.0, 100))
-        self.currentResolutionLink_proposal=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentProposal], TruthValue(1.0, 100))
-        self.currentResolutionLink_pronoun=self.atomspace.add_link(types.ListLink, [self.currentResolutionNode, self.currentPronounNode], TruthValue(1.0, 100))
         self.pronounNumber = -1
 
         data=["opencog/nlp/anaphora/rules/getChildren.scm",
@@ -489,11 +481,11 @@ class HobbsAgent(MindAgent):
         Check if the node is the word "it".
         '''
         matched=False
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! isIt)',self.currentResult,types.AnchorNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! isIt)')
         if len(rv)>0:
             for index in range(1,self.numOfPleonasticItPatterns+1):
                 command='(cog-execute! pleonastic-it-#'+str(index)+')'
-                rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.AnchorNode)
+                rv=self.bindLinkExe(self.currentTarget,node,command)
                 if len(rv)>0:
                     matched=True
                     break
