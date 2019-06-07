@@ -28,7 +28,7 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
         vector[bool] req_is_shell
         string err_string 
 
-cdef api requests_and_agents_t load_req_agent_module(string& module_name) with gil:
+cdef api requests_and_agents_t load_req_agent_module(string module_name) with gil:
     """ Load module and return a vector of MindAgent names """
     cdef str mod_name = module_name.decode("UTF-8")
     # for return results
