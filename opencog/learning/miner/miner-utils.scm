@@ -137,7 +137,7 @@
                                    "mv-" (number->string mv)
                                    "-rule"))
          (rule-alias (DefinedSchema rule-name))
-         (rule-tv (stv 1 1)))
+         (rule-tv (stv 0.9 1)))
     ;; Add definition
     (DefineLink rule-alias (gen-shallow-specialization-rule unary mv))
     (ure-add-rule pm-rbs rule-alias rule-tv)))
