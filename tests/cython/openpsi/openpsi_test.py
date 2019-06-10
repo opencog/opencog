@@ -26,14 +26,13 @@ class OpenPsiTest(TestCase):
     def setUp(self):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
+        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec) (opencog openpsi))")
 
     def tearDown(self):
         finalize_opencog()
         del self.atomspace
 
-    def testopenpsi(self):
-        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec) (opencog openpsi))")
-
+    def test_create_rule(self):
         openpsi = OpenPsi(self.atomspace)
 
         goal = openpsi.create_goal("goal")
@@ -74,6 +73,31 @@ class OpenPsiTest(TestCase):
 
         self.assertEqual(context, rule.get_context())
         self.assertEqual(action, rule.get_action())
+
+    @unittest.skip("Issue https://github.com/opencog/opencog/issues/3492")
+    def test_run_openpsi(self):
+        openpsi = OpenPsi(self.atomspace)
+
+        goal = openpsi.create_goal("goal")
+
+        context = [
+            InheritanceLink(
+                VariableNode("$APPLE"),
+                ConceptNode("apple")),
+            AbsentLink(
+                InheritanceLink(
+                    VariableNode("$APPLE"),
+                    ConceptNode("handled")))
+        ]
+
+        action = ExecutionOutputLink(
+            GroundedSchemaNode("py: eat_apple"),
+            ListLink(
+                VariableNode("$APPLE")))
+
+        component = openpsi.create_component("test-component")
+
+        openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
 
         openpsi.run(component)
 
