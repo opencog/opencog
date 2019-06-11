@@ -708,7 +708,7 @@ and each function has an online help like `cog-mine`.
 TODO
 ----
 
-1. Support surprisingness.
+1. Support generic surprisingness, not just I-Surprisingness.
 2. Support links such as `DefineLink`, `DefinedSchemaNode`,
    `ExecutionOutputLink`, etc.
 3. Store more information about the pattern, such as frequency and
