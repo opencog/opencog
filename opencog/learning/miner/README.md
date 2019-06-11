@@ -637,53 +637,28 @@ In addition `cog-mine` accepts multiple options such as
 3. Whether to enable incremental conjunction expansion.
 4. Maximum number of conjuncts (in case incremental conjunction
    expansion is enabled).
-5. And more.
+5. Surprisingness measure.
 
-Providing an initial patterns can greatly speed up the search. This
-can also used to specify how many conjucts it may have. The function
-`conjunct-pattern` can help you to do that. For instance to produce
-an initial pattern with 3 conjuncts, call
-```scheme
-(conjunct-pattern 3)
-```
-
-to get
-```scheme
-(Lambda
-  (VariableList
-    (Variable "$X-1")
-    (Variable "$X-2")
-    (Variable "$X-3"))
-  (And
-    (Variable "$X-1")
-    (Variable "$X-2")
-    (Variable "$X-3")))
-```
-
-then pass this pattern to `cog-mine` as initial pattern. For instance
-calling the miner on some given texts with a minimum support of 10,
-and a desired patterns of 3 conjuncts
+Providing an initial patterns can greatly speed up the search, as well
+as limiting the number of conjuncts and variables. For instance the
+following runs the pattern miner with a minimum support of 10, a
+maximum number of 2 conjuncts and 3 variables.
 
 ```scheme
-(cog-mine (Concept "texts") 10 #:initpat (conjunct-pattern 3))
+(cog-mine (Concept "texts")
+          #:minsup 10
+          #:max-conjuncts 2
+          #:max-variables 2)
 ```
 
 where `(Concept "texts")` contains (via using `MemberLink`) the text
 corpus.
 
-Beware however that the search space will explode as a result of
-increasing the number of conjuncts because by default the search is
-open-ended. That is given enough iterations, no pattern will be
-missed!
-
-Thus in order to be more efficient it is recommanded to use instead
-the incremental conjunction expansion heuristic.
-
-```scheme
-(cog-mine (Concept "texts") 10
-          #:incremental-expansion #t
-          #:max-conjuncts 3)
-```
+Beware that the search space will explode as a result of increasing
+the number of conjuncts. To minimize the combinatorial explosion the
+pattern miner uses by default an Incremental Conjunction Expansion
+heuristic, as a result it might miss some patterns. This can be
+disabled, see below for further help.
 
 ### Help and Examples
 
@@ -712,8 +687,7 @@ TODO
 2. Support links such as `DefineLink`, `DefinedSchemaNode`,
    `ExecutionOutputLink`, etc.
 3. Store more information about the pattern, such as frequency and
-   surprisingness, and make accessible to the user. Maybe store this
-   as values attached to patterns.
+   surprisingness, and make accessible to the user.
 
 References
 ----------
