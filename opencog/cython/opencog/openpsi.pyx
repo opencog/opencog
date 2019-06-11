@@ -13,7 +13,7 @@ cdef class OpenPsi:
 
     def __cinit__(self, AtomSpace _as):
         self._as = _as
-        self.is_scm_initialized = False
+        scheme_eval(self._as, '(use-modules (opencog openpsi))')
 
     def add_rule(self, context, Atom action, Atom goal, TruthValue stv, Atom category):
         cdef vector[cHandle] handle_vector
@@ -50,16 +50,13 @@ cdef class OpenPsi:
         return Atom.createAtom(handle, self._as)
 
     def increase_urge(self, Atom goal, value):
-        self.init_scm()
         scheme_eval(self._as, '(psi-increase-urge ConceptNode("%s") %d)' % (goal.name, value))
 
     def decrease_urge(self, Atom goal, value):
-        self.init_scm()
         command = '(psi-decrease-urge (ConceptNode "%s") %f)' % (goal.name, value)
         scheme_eval(self._as, command)
 
     def set_action_selector(self, Atom component, selector_name):
-        self.init_scm()
         name = component.name
         scheme_eval(self._as, '''
             (psi-set-action-selector!
@@ -71,27 +68,18 @@ cdef class OpenPsi:
         '''.strip() % (name, selector_name, name))
 
     def create_goal(self, goal_name, value = 1.0, desired_value = 1.0):
-        self.init_scm()
         command = '(psi-goal "%s" %f %f)' % (goal_name,  value, desired_value)
         scheme_eval(self._as, command)
         return ConceptNode(goal_name)
 
     def create_component(self, component_name):
-        self.init_scm()
         scheme_eval(self._as, '(psi-component "%s")' % component_name)
         return ConceptNode(component_name)
 
-    def init_scm(self):
-        if not self.is_scm_initialized:
-            scheme_eval(self._as, '(use-modules (opencog openpsi))')
-            self.is_scm_initialized = True
-
     def run(self, component):
-        self.init_scm()
         scheme_eval(self._as, '(psi-run (ConceptNode "%s"))' % component.name)
 
     def halt(self, component):
-        self.init_scm()
         scheme_eval(self._as, '(psi-halt (ConceptNode "%s"))' % component.name)
 
 
