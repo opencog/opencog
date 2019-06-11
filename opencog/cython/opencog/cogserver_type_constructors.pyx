@@ -15,7 +15,6 @@ def set_type_ctor_atomspace(new_atomspace):
     atomspace = new_atomspace
 
 include "opencog/attentionbank/types/attention_types.pyx"
-include "opencog/learning/PatternMiner/types/patternminer_types.pyx"
 include "opencog/nlp/types/nlp_types.pyx"
 include "opencog/spacetime/atom-types/spacetime_types.pyx"
 include "opencog/spacetime/octomap/octomap_types.pyx"

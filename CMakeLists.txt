@@ -199,20 +199,6 @@ IF(Boost_FOUND_SAVE)
 ENDIF(Boost_FOUND_SAVE)
 
 # ----------------------------------------------------------
-# cpprest
-# XXX FIXME This is required only by the soon-to-be obsolete
-# PatternMiner. Remove this when the (old) PatternMiner is gone.
-FIND_PACKAGE(cpprest 2.6)
-IF (cpprest_FOUND AND cpprest_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_cpprest)
-	SET(HAVE_cpprest 1)
-	SET(cpprest_DIR_MESSAGE "cpprest was found.")
-ELSE (cpprest_FOUND AND cpprest_LIBRARY)
-        SET(cpprest_DIR_MESSAGE "cpprest was not found; Distributed version of PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
-ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
-MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
-
-# ----------------------------------------------------------
 # Needed for unit tests
 
 FIND_PACKAGE(Cxxtest)
@@ -694,7 +680,6 @@ SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("SpaceTime" "3D Space-Time object tracker" HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
-SUMMARY_ADD("PatternMiner" "Pattern Miner" HAVE_ATOMSPACE)
 SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)
 
 SUMMARY_SHOW()
