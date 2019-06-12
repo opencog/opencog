@@ -28,12 +28,8 @@ cdef extern :
 cdef extern :
     void attention_types_init()
 
-cdef extern :
-    void patternminer_types_init()
-
 nlp_types_init()
 spacetime_types_init()
 attention_types_init()
-patternminer_types_init()
 
 types = get_refreshed_types()
