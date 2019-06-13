@@ -34,5 +34,8 @@ cdef extern from "opencog/openpsi/OpenPsiSCM.h" namespace "opencog":
         #  Handle add_to_category(const Handle& rule, const Handle& category);
         cHandle c_add_to_category "add_to_category" (cHandle rule, cHandle category)
 
+        #  TruthValuePtr is_satisfiable(const Handle& rule);
+        tv_ptr c_is_satisfiable "is_satisfiable" (cHandle rule)
+
     cdef cOpenPsi& get_openpsi_scm()
 

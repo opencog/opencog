@@ -8,6 +8,8 @@ from opencog.scheme_wrapper import scheme_eval
 from opencog.bindlink import execute_atom
 from opencog.openpsi import *
 
+import __main__
+
 
 # Called by OpenPsi Action
 def eat_apple(apple):
@@ -16,22 +18,24 @@ def eat_apple(apple):
     return ConceptNode("finished")
 
 
+__main__.eat_apple = eat_apple
+
+
 class OpenPsiTest(TestCase):
 
     def setUp(self):
         self.atomspace = AtomSpace()
         initialize_opencog(self.atomspace)
+        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec) (opencog openpsi))")
 
     def tearDown(self):
         finalize_opencog()
         del self.atomspace
 
-    def testopenpsi(self):
-        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec) (opencog openpsi))")
-
+    def test_create_rule(self):
         openpsi = OpenPsi(self.atomspace)
 
-        goal = ConceptNode("goal")
+        goal = openpsi.create_goal("goal")
 
         context = [
             InheritanceLink(
@@ -48,8 +52,7 @@ class OpenPsiTest(TestCase):
             ListLink(
                 VariableNode("$APPLE")))
 
-        component = ConceptNode("test-component")
-        openpsi.init_component(component)
+        component = openpsi.create_component("test-component")
 
         rule = openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
 
@@ -69,6 +72,32 @@ class OpenPsiTest(TestCase):
         self.assertTrue(new_category in categories)
 
         self.assertEqual(context, rule.get_context())
+        self.assertEqual(action, rule.get_action())
+
+    @unittest.skip("Issue https://github.com/opencog/opencog/issues/3492")
+    def test_run_openpsi(self):
+        openpsi = OpenPsi(self.atomspace)
+
+        goal = openpsi.create_goal("goal")
+
+        context = [
+            InheritanceLink(
+                VariableNode("$APPLE"),
+                ConceptNode("apple")),
+            AbsentLink(
+                InheritanceLink(
+                    VariableNode("$APPLE"),
+                    ConceptNode("handled")))
+        ]
+
+        action = ExecutionOutputLink(
+            GroundedSchemaNode("py: eat_apple"),
+            ListLink(
+                VariableNode("$APPLE")))
+
+        component = openpsi.create_component("test-component")
+
+        openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
 
         openpsi.run(component)
 
@@ -76,7 +105,7 @@ class OpenPsiTest(TestCase):
         InheritanceLink(ConceptNode("apple-1"), ConceptNode("apple"))
         InheritanceLink(ConceptNode("apple-2"), ConceptNode("apple"))
 
-        delay = 0.02
+        delay = 0.2
         time.sleep(delay)
         openpsi.halt(component)
 

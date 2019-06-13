@@ -27,7 +27,13 @@
 ;;       <pattern-shallow-specialization-1>
 ;;       <texts>
 ;;       <ms>
-;; ...
+;;   ...
+;;   Evaluation (stv 1 1)
+;;     Predicate "minsup"
+;;     List
+;;       <pattern-shallow-specialization-n>
+;;       <texts>
+;;       <ms>
 
 (load "miner-rule-utils.scm")
 
@@ -35,7 +41,10 @@
 ;; the constraint that the pattern must be unary. This is to avoid
 ;; specializing conjunctions of abstract patterns that may result in
 ;; circumventing the the conjunction expansion rule heuristic.
-(define (gen-shallow-specialization-rule unary)
+;;
+;; mv is the maximum number of variable allowed in the resulting
+;; patterns.
+(define (gen-shallow-specialization-rule unary mv)
   (let* (;; Variables
          (pattern (Variable "$pattern"))
          (texts (Variable "$texts"))
@@ -60,7 +69,9 @@
       (absolutely-true-eval minsup-pattern)
       (if unary (unary-conjunction-pattern-eval pattern) '()))
     (ExecutionOutput
-      (GroundedSchema "scm: shallow-specialization-formula")
+      (GroundedSchema (string-append "scm: shallow-specialization-mv-"
+                                     (number->string mv)
+                                     "-formula"))
       (List
         (Set)               ; Cannot know the structure of the rule
                             ; conclusion in advance, because we don't
@@ -71,28 +82,31 @@
         minsup-pattern)))))
 
 ;; Shallow specialization formula
-(define (shallow-specialization-formula conclusion . premises)
-  ;; (cog-logger-debug "shallow-specialization-formula conclusion = ~a, premises = ~a" conclusion premises)
-  (if (= (length premises) 1)
-      (let* ((minsup-pattern (car premises))
-             (pattern (get-pattern minsup-pattern))
-             (texts (get-texts minsup-pattern))
-             (ms (get-ms minsup-pattern))
-             (shaspes (cog-shallow-specialize pattern texts ms))
-             (minsup-shaspe (lambda (x) (cog-set-tv!
-                                         (minsup-eval x texts ms)
-                                         (stv 1 1))))
-             (minsup-shaspes (map minsup-shaspe (cog-outgoing-set shaspes))))
-        (Set minsup-shaspes))))
+;;
+;; mv is the maximimum number of variables
+(define (gen-shallow-specialization-formula mv)
+  (lambda (conclusion . premises)
+    ;; (cog-logger-debug "gen-shallow-specialization-formula mv = ~a, conclusion = ~a, premises = ~a" mv conclusion premises)
+    (if (= (length premises) 1)
+        (let* ((minsup-pattern (car premises))
+               (pattern (get-pattern minsup-pattern))
+               (texts (get-texts minsup-pattern))
+               (ms (get-ms minsup-pattern))
+               (shaspes (cog-shallow-specialize pattern texts ms (Number mv)))
+               (minsup-shaspe (lambda (x) (cog-set-tv!
+                                           (minsup-eval x texts ms)
+                                           (stv 1 1))))
+               (minsup-shaspes (map minsup-shaspe (cog-outgoing-set shaspes))))
+          (Set minsup-shaspes)))))
 
-;; Define shallow specialization
-(define shallow-specialization-rule-name
-  (DefinedSchemaNode "shallow-specialization-rule"))
-(DefineLink shallow-specialization-rule-name
-  (gen-shallow-specialization-rule #f))
-
-;; Define shallow specialization for unary patterns
-(define shallow-specialization-unary-rule-name
-  (DefinedSchemaNode "shallow-specialization-unary-rule"))
-(DefineLink shallow-specialization-unary-rule-name
-  (gen-shallow-specialization-rule #t))
+;; Instantiate shallow specialization formulae for different maximum
+;; number of variables
+(define shallow-specialization-mv-1-formula (gen-shallow-specialization-formula 1))
+(define shallow-specialization-mv-2-formula (gen-shallow-specialization-formula 2))
+(define shallow-specialization-mv-3-formula (gen-shallow-specialization-formula 3))
+(define shallow-specialization-mv-4-formula (gen-shallow-specialization-formula 4))
+(define shallow-specialization-mv-5-formula (gen-shallow-specialization-formula 5))
+(define shallow-specialization-mv-6-formula (gen-shallow-specialization-formula 6))
+(define shallow-specialization-mv-7-formula (gen-shallow-specialization-formula 7))
+(define shallow-specialization-mv-8-formula (gen-shallow-specialization-formula 8))
+(define shallow-specialization-mv-9-formula (gen-shallow-specialization-formula 9))

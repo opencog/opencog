@@ -178,8 +178,8 @@ public:
 	                     int minsup,
 	                     int max_iter=-1,
 	                     Handle initpat=Handle::UNDEFINED,
-	                     TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
-	                     int max_conjuncts=-1,
+	                     bool incremental_expansion=false,
+	                     unsigned max_conjuncts=UINT_MAX,
 	                     double complexity_penalty=0.0);
 	static Handle ure_pm(AtomSpace& as,
 	                     SchemeEval& scm,
@@ -187,8 +187,8 @@ public:
 	                     const HandleSeq& texts, int minsup,
 	                     int max_iter=-1,
 	                     Handle initpat=Handle::UNDEFINED,
-	                     TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
-	                     int max_conjuncts=-1,
+	                     bool incremental_expansion=false,
+	                     unsigned max_conjuncts=UINT_MAX,
 	                     double complexity_penalty=0.0);
 
 	/**
@@ -274,8 +274,9 @@ public:
 
 	static void configure_mandatory_rules(SchemeEval& scm);
 	static void configure_optional_rules(SchemeEval& scm,
-	                                     TruthValuePtr incremental_expansion,
-	                                     int max_conjuncts=-1);
+	                                     bool incremental_expansion,
+	                                     unsigned max_conjuncts=UINT_MAX,
+	                                     unsigned max_variables=UINT_MAX);
 	static void configure_ISurprisingness(SchemeEval& scm,
 	                                      const Handle& isurp_rb,
 	                                      const std::string& mode,

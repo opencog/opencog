@@ -195,10 +195,9 @@ public:
 	static HandleSeq get_texts(const Handle& texts_cpt);
 
 	/**
-	 * Given a number node holding the minimum support return the
-	 * positive integer.
+	 * Return the non-negative integer held by a number node.
 	 */
-	static unsigned get_ms(const Handle& ms);
+	static unsigned get_uint(const Handle& h);
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
@@ -240,10 +239,14 @@ public:
 	/**
 	 * Return all shallow specializations of pattern with support ms
 	 * according to texts.
+	 *
+	 * mv is the maximum number of variables allowed in the resulting
+	 * patterns.
 	 */
 	static HandleSet shallow_specialize(const Handle& pattern,
 	                                    const HandleSeq& texts,
-	                                    unsigned ms);
+	                                    unsigned ms,
+	                                    unsigned mv=UINT_MAX);
 
 	/**
 	 * Create a pattern body from clauses, introducing an AndLink if
@@ -436,6 +439,28 @@ public:
 	                                         const Handle& pattern_var);
 
 	/**
+	 * Like expand_conjunction_connect but consider a mapping from
+	 * variables of pattern to variables of cnjtion.
+	 */
+	static Handle expand_conjunction_connect(const Handle& cnjtion,
+	                                         const Handle& pattern,
+	                                         const HandleMap& pv2cv);
+
+	/**
+	 * Like expand_conjunction_connect above but recursively consider
+	 * all variable mappings from pattern to cnjtion.
+	 *
+	 * pvi is the variable index of pattern variable declaration.
+	 */
+	static HandleSet expand_conjunction_connect_rec(const Handle& cnjtion,
+	                                                const Handle& pattern,
+	                                                const HandleSeq& texts,
+	                                                unsigned ms,
+	                                                unsigned mv,
+	                                                const HandleMap& pv2cv=HandleMap(),
+	                                                unsigned pvi=0);
+
+	/**
 	 * Given cnjtion and pattern, consider all possible connections
 	 * (a.k.a linkages) and expand cnjtion accordingly. For instance if
 	 *
@@ -452,11 +477,15 @@ public:
 	 * It will also only include patterns with minimum support ms
 	 * according to texts, and perform alpha-conversion when necessary.
 	 * If an expansion is cnjtion itself it will be dismissed.
+	 *
+	 * mv is the maximum number of variables allowed in the resulting
+	 * patterns.
 	 */
 	static HandleSet expand_conjunction(const Handle& cnjtion,
 	                                    const Handle& pattern,
 	                                    const HandleSeq& texts,
-	                                    unsigned ms);
+	                                    unsigned ms,
+	                                    unsigned mv=UINT_MAX);
 
 	/**
 	 * Return an atom to serve as key to store the support value.
@@ -480,10 +509,13 @@ public:
 	/**
 	 * Like get_support, but if there is no value associated to
 	 * support_key() then calculate and set the support.
+	 *
+	 * Warning: note that the support is gonna be up to ms, so such
+	 * memoization should not be used if ms is to be changed.
 	 */
-	static double calc_support(const Handle& pattern,
-	                           const HandleSeq& texts,
-	                           unsigned ms);
+	static double support_mem(const Handle& pattern,
+	                          const HandleSeq& texts,
+	                          unsigned ms);
 };
 
 } // ~namespace opencog

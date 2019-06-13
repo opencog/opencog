@@ -57,7 +57,7 @@
         )
         (ListLink
             (AnchorNode "CurrentResult")
-            (AnchorNode "Filtered")
+            (VariableNode "$word-inst-antecedent")
         )
     )
 )
