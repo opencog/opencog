@@ -6,6 +6,8 @@ from atomspace cimport *
 from opencog.scheme_wrapper import scheme_eval
 from opencog.type_constructors import ConceptNode
 
+is_scm_initialized = False
+
 cdef class OpenPsi:
 
     cdef AtomSpace _as
@@ -13,7 +15,10 @@ cdef class OpenPsi:
 
     def __cinit__(self, AtomSpace _as):
         self._as = _as
-        scheme_eval(self._as, '(use-modules (opencog openpsi))')
+        if not is_scm_initialized:
+            scheme_eval(self._as, '(use-modules (opencog openpsi))')
+            global is_scm_initialized
+            is_scm_initialized = True
 
     def add_rule(self, context, Atom action, Atom goal, TruthValue stv, Atom category):
         cdef vector[cHandle] handle_vector
