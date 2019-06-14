@@ -117,7 +117,8 @@ double Surprisingness::isurp(const Handle& pattern,
 	// logger().debug() << "dst = " << dst
 	//                  << ", normalize = " << normalize
 	//                  << ", ndst = " << dst / emp;
-	return std::min(normalize ? dst / emp : dst, 1.0);
+	double maxprb = std::max(emp, emax);
+	return std::min(normalize ? dst / maxprb : dst, 1.0);
 }
 
 Handle Surprisingness::isurp_key()
