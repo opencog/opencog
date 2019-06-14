@@ -47,7 +47,6 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule,
 Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
 {
   OpenPsiSatisfier sater(_as, this);
-  sater.check_satisfiability(rule, opr);
   return sater.imply(rule, opr);
 }
 
