@@ -304,27 +304,31 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 
 		// Convert the disjunct to atomese.
 		// This requires parsing a string. Fortunately, the
-		// string is a very simple format, and always ends with
-		// a blank char before the newline.
+		// string is a very simple format.
 		const char* djstr = linkage_get_disjunct_str(lkg, w);
 
 		HandleSeq conseq;
 		const char* p = djstr;
 		while (*p)
 		{
+			while (' ' == *p) p++;
+			if (0 == *p) break;
 			bool multi = false;
 			if ('@' == *p) { multi = true; p++; }
 			const char* s = strchr(p, ' ');
-			char cstr[60];
 			size_t len = s-p-1;
-			if (60<len) len = 59;
+			if (NULL == s) len = strlen(p) - 1;
+			char cstr[60];
+			if (60 <= len)
+				throw RuntimeException(TRACE_INFO,
+					"LGParseLink: Dictionary has a bug; Uuexpectedly long connector=%s", djstr);
 			strncpy(cstr, p, len);
 			cstr[len] = 0;
 			Handle con(createNode(LG_CONNECTOR_NODE, cstr));
-			cstr[0] = *(s-1);
+			cstr[0] = *(p+len);
 			cstr[1] = 0;
 			Handle dir(createNode(LG_CONN_DIR_NODE, cstr));
-			p = s+1;
+			p = p+len+1;
 
 			HandleSeq cono;
 			cono.push_back(con);
