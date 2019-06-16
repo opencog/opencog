@@ -28,6 +28,13 @@ optional NumberNode is present, then that will be the number of
 parses that are captured. If the NumberNode is not present, it
 defaults to four.
 
+LgParseMinimal
+--------------
+This performs the same parse as `LgParseLink`; however, it does not
+insert the resulting disjuncts into the AtomSpace. As the disjuncts
+are quite verbose, this significantly reduces the number of atoms
+placed in the AtomSpace.
+
 Example
 -------
 Here's a working example:
