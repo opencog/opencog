@@ -139,11 +139,16 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 {
-	// XXX FIXME -- these should throw, instead of returning null handle!
-	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
-	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
+	if (PHRASE_NODE != _outgoing[0]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LGParseLink: Invalid outgoing set at 0; expecting PhraseNode");
+	if (LG_DICT_NODE != _outgoing[1]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LGParseLink: Invalid outgoing set at 1; expecting LgDictNode");
 	if (3 == _outgoing.size() and
-	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
+	   NUMBER_NODE != _outgoing[2]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LGParseLink: Invalid outgoing set at 2; expecting NumberNode");
 
 	// Link grammar, for some reason, has a different error handler
 	// per thread. Don't know why. So we have to set it every time,
@@ -161,7 +166,9 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	// Set up the sentence
 	const char* phrstr = _outgoing[0]->get_name().c_str() ;
 	Sentence sent = sentence_create(phrstr, dict);
-	if (nullptr == sent) return Handle(); // XXX FIXME should throw, instead!
+	if (nullptr == sent)
+		throw FatalErrorException(TRACE_INFO,
+			"LGParseLink: Unexpected parser failure!");
 
 	// Work with the default parse options (mostly).
 	// Suppress printing of combinatorial-overflow warning.
@@ -181,7 +188,8 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		return Handle(); // XXX FIXMEE should throw, instead.
+		throw FatalErrorException(TRACE_INFO,
+			"LGParseLink: Unexpected parser linkage failure!");
 	}
 
 	// if num_links is zero, we should try again with null links.
@@ -196,7 +204,8 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		return Handle(); // XXX FIXME should throw, instead!
+		throw FatalErrorException(TRACE_INFO,
+			"LGParseLink: Unexpected parser null-word linkage failure!");
 	}
 
 	// The number of linkages to process.
