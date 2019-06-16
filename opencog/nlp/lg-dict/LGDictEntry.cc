@@ -60,7 +60,7 @@ void LGDictEntry::init()
 	Type dit = oset[1]->get_type();
 	if (LG_DICT_NODE != dit and VARIABLE_NODE != dit and GLOB_NODE != dit)
 		throw InvalidParamException(TRACE_INFO,
-			"LGDictEntry: Expecting LgDictNode, got %s",
+			"LgDictEntry: Expecting LgDictNode, got %s",
 			oset[1]->to_string().c_str());
 }
 
@@ -94,9 +94,21 @@ LGDictEntry::LGDictEntry(const Link& l)
 
 ValuePtr LGDictEntry::execute(AtomSpace* as, bool silent)
 {
-	// XXX FIXME - these should throw, instead of returning null ptr!
-	if (WORD_NODE != _outgoing[0]->get_type()) return Handle();
-	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
+	if (WORD_NODE != _outgoing[0]->get_type())
+	{
+		if (silent) throw SilentException();
+		throw InvalidParamException(TRACE_INFO,
+			"LgDictEntry: Expecting WordNode, got %s",
+			_outgoing[0]->to_string().c_str());
+	}
+
+	if (LG_DICT_NODE != _outgoing[1]->get_type())
+	{
+		if (silent) throw SilentException();
+		throw InvalidParamException(TRACE_INFO,
+			"LgDictEntry: Expecting WordNode, got %s",
+			_outgoing[0]->to_string().c_str());
+	}
 
 	// Get the dictionary
 	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
@@ -113,5 +125,92 @@ ValuePtr LGDictEntry::execute(AtomSpace* as, bool silent)
 }
 
 DEFINE_LINK_FACTORY(LGDictEntry, LG_DICT_ENTRY)
+
+// =================================================================
+
+// Same init sequence as above...
+void LGHaveDictEntry::init()
+{
+	const HandleSeq& oset = _outgoing;
+
+	size_t osz = oset.size();
+	if (2 != osz)
+		throw InvalidParamException(TRACE_INFO,
+			"LgHaveDictEntry: Expecting two arguments, got %lu", osz);
+
+	Type pht = oset[0]->get_type();
+	if (WORD_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)
+		throw InvalidParamException(TRACE_INFO,
+			"LgHaveDictEntry: Expecting WordNode, got %s",
+			oset[0]->to_string().c_str());
+
+	Type dit = oset[1]->get_type();
+	if (LG_DICT_NODE != dit and VARIABLE_NODE != dit and GLOB_NODE != dit)
+		throw InvalidParamException(TRACE_INFO,
+			"LgHaveDictEntry: Expecting LgDictNode, got %s",
+			oset[1]->to_string().c_str());
+}
+
+LGHaveDictEntry::LGHaveDictEntry(const HandleSeq& oset, Type t)
+	: Link(oset, t)
+{
+	// Type must be as expected
+	if (not nameserver().isA(t, LG_HAVE_DICT_ENTRY))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an LgHaveDictEntry, got %s", tname.c_str());
+	}
+	init();
+}
+
+LGHaveDictEntry::LGHaveDictEntry(const Link& l)
+	: Link(l)
+{
+	// Type must be as expected
+	Type tparse = l.get_type();
+	if (not nameserver().isA(tparse, LG_HAVE_DICT_ENTRY))
+	{
+		const std::string& tname = nameserver().getTypeName(tparse);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an LgHaveDictEntry, got %s", tname.c_str());
+	}
+}
+
+// =================================================================
+
+TruthValuePtr LGHaveDictEntry::evaluate(AtomSpace* as, bool silent)
+{
+	if (WORD_NODE != _outgoing[0]->get_type())
+	{
+		if (silent) throw SilentException();
+		throw InvalidParamException(TRACE_INFO,
+			"LgHaveDictEntry: Expecting WordNode, got %s",
+			_outgoing[0]->to_string().c_str());
+	}
+
+	if (LG_DICT_NODE != _outgoing[1]->get_type())
+	{
+		if (silent) throw SilentException();
+		throw InvalidParamException(TRACE_INFO,
+			"LgHaveDictEntry: Expecting WordNode, got %s",
+			_outgoing[0]->to_string().c_str());
+	}
+
+	// Get the dictionary
+	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
+	Dictionary dict = ldn->get_dictionary();
+	if (nullptr == dict)
+		throw InvalidParamException(TRACE_INFO,
+			"LgDictEntry requires valid dictionary! %s was given.",
+			ldn->get_name().c_str());
+
+	if (haveDictEntry(dict, _outgoing[0]->get_name()))
+		return TruthValue::TRUE_TV();
+
+	return TruthValue::FALSE_TV();
+}
+
+DEFINE_LINK_FACTORY(LGHaveDictEntry, LG_HAVE_DICT_ENTRY)
 
 /* ===================== END OF FILE ===================== */

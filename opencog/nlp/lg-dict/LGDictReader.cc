@@ -126,3 +126,11 @@ HandleSeq opencog::getDictEntry(Dictionary _dictionary,
     free_lookup_list(_dictionary, dn_head);
     return outgoing;
 }
+
+bool opencog::haveDictEntry(Dictionary _dictionary,
+                            const std::string& word)
+{
+	// See if we know about this word, or not.
+	Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());
+	return nullptr != dn_head;
+}

@@ -106,6 +106,9 @@ SPECIFIC_ENTITY_NODE <- NODE
 // Dictionary. Holds a reference to an LG Dictionary.
 LG_DICT_NODE <- NODE
 
+// Evaluates to true, if the word is in the LG dictionary
+LG_HAVE_DICT_ENTRY <- CRISP_OUTPUT_LINK
+
 // Looks up a single word in the LG dictionary
 LG_DICT_ENTRY <- FUNCTION_LINK
 

@@ -37,6 +37,13 @@ namespace opencog
  */
 HandleSeq getDictEntry(Dictionary, const std::string& word);
 
+/**
+ * Link Grammar dictionary entry reader.
+ *
+ * Return true if the dictionary has an antry for this word.
+ */
+bool haveDictEntry(Dictionary, const std::string& word);
+
 }
 
 #endif // _OPENCOG_LG_DICT_READER_H
