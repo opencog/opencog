@@ -205,9 +205,10 @@ TruthValuePtr LGHaveDictEntry::evaluate(AtomSpace* as, bool silent)
 			"LgDictEntry requires valid dictionary! %s was given.",
 			ldn->get_name().c_str());
 
-	HandleSeq djs = getDictEntry(dict, _outgoing[0]->get_name());
+	if (haveDictEntry(dict, _outgoing[0]->get_name()))
+		return TruthValue::TRUE_TV();
 
-	return TruthValue::TRUE_TV();
+	return TruthValue::FALSE_TV();
 }
 
 DEFINE_LINK_FACTORY(LGHaveDictEntry, LG_HAVE_DICT_ENTRY)
