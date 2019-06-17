@@ -112,33 +112,3 @@ TruthValuePtr OpenPsiSatisfier::check_satisfiability(const Handle& rule,
     return TruthValue::FALSE_TV();
   }
 }
-
-Handle OpenPsiSatisfier::imply(const Handle& rule, OpenPsiRules& opr)
-{
-  PatternLinkPtr query = opr.get_query(rule);
-  Handle query_body = query->get_pattern().body;
-
-  if (_implicator -> _pattern_seen.find(query_body) == _implicator ->_pattern_seen.end())
-  {
-    throw RuntimeException(TRACE_INFO, "The openpsi rule should be checked "
-      "for satisfiablity first." );
-  }
-
-  auto it = _implicator ->_satisfiability_cache.find(query_body);
-  if (it != _implicator ->_satisfiability_cache.end())
-  {
-    Instantiator inst(_as);
-
-    Handle result =
-      HandleCast(inst.instantiate(opr.get_action(rule), it->second, true));
-    rule->setValue(_implicator -> _action_executed, ValueCast(TruthValue::TRUE_TV()));
-
-    return result;
-  } else {
-    // NOTE: Trying to check for satisfiablity isn't done because it
-    // is the responsibility of the action-selector for determining
-    // what action is to be taken.
-    rule->setValue(_implicator -> _action_executed, ValueCast(TruthValue::FALSE_TV()));
-    return Handle::UNDEFINED;
-  }
-}

@@ -57,14 +57,6 @@ OpenPsiSatisfier(AtomSpace* as,
    */
   TruthValuePtr check_satisfiability(const Handle& rule, OpenPsiRules& opr);
 
-  /**
-   * Instantiate the action of the given openpsi rule.
-   *
-   * @param rule An openpsi rule.
-   * @return The handle to the grounded atom.
-   */
-  Handle imply(const Handle& rule, OpenPsiRules& opr);
-
   private:
 
   OpenPsiImplicator* _implicator;
