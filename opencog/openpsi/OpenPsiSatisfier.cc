@@ -86,29 +86,3 @@ bool OpenPsiSatisfier::grounding(const HandleMap &var_soln,
     return false;
   }
 }
-
-TruthValuePtr OpenPsiSatisfier::check_satisfiability(const Handle& rule,
-    OpenPsiRules& opr)
-{
-  // TODO:
-  // Solve for multithreaded access. Create a rule class and lock
-  // the rule when updating the cache.
-
-  PatternLinkPtr query = opr.get_query(rule);
-  Handle query_body = query->get_pattern().body;
-
-  // Always update cache to clear any previous result.
-  // TODO: Add cache per atomspace.
-  _implicator -> _satisfiability_cache.erase(query_body);
-  _implicator -> _pattern_seen.insert(query_body);
-
-  query->satisfy(*this);
-
-  // The boolean returned by query->satisfy isn't used because all
-  // type of contexts haven't been handled by this callback yet.
-  if (_implicator -> _satisfiability_cache.find(query_body) != _implicator ->_satisfiability_cache.end()) {
-    return TruthValue::TRUE_TV();
-  } else {
-    return TruthValue::FALSE_TV();
-  }
-}
