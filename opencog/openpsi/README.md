@@ -43,21 +43,6 @@ are used).
 * The demand-update code is undocumented, confusing, and does not
   belong in this directory.
 
-
-## References
-
-* OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
-* Hanson Robotics Wiki - [Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
-* [MicroPsi publications](http://micropsi.com/publications/publications.html)
-* [MicroPsi source code]()
-* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2008 ed.)
-* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://micropsi.com/publications/assets/Draft-MicroPsi-JBach-07-03-30.pdf) (2007 ed.)
-* Wikipedia - [Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some
-  similarities with respect to demand, goals and actions, that is, has
-  the cognitive schematic `Belief + Intention ==> Desire, which is
-  similar to the Context + Procedure/Actions ==> Goal`which is used
-  here.
-
 ## OpenPsi components
 
 1. Psi-rule:
@@ -244,12 +229,12 @@ are used).
 
 ## Modulators and Internal Dynamics
 
-OpenPsi includes a dynamical system of interacting modulator variables.
+OpenPsi includes a dynamic system of interacting modulator variables.
 The model contains varying parameters that regulate processes such as
 stimulus evaluation, action selection, and emotional expression.
 Modulators are based on MicroPsi, and SECs are based on Component
-Process Model theory (see references for  more info). These and other
-OpenPsi-related entities dynamically interact with each other according
+Process Model theory (see [references](#References) for more info). These and other
+OpenPsi-related entities interact with each other according
 to rules that specify how a change in a "trigger" entity cause a change
 in a "target" entity.
 
@@ -315,3 +300,17 @@ TODO: Create general callback that is called at each loop step.
 * Can a rule partially satisfy a goal?  How is the partial satisfaction
   indicated?
 * Demand update is confused/confusing
+
+## References
+
+* OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
+* Hanson Robotics Wiki - [Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
+* [MicroPsi publications](http://micropsi.com/publications/publications.html)
+* [MicroPsi source code]()
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2008 ed.)
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://micropsi.com/publications/assets/Draft-MicroPsi-JBach-07-03-30.pdf) (2007 ed.)
+* Wikipedia - [Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some
+  similarities with respect to demand, goals and actions, that is, has
+  the cognitive schematic `Belief + Intention ==> Desire, which is
+  similar to the Context + Procedure/Actions ==> Goal`which is used
+  here.
