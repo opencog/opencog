@@ -132,5 +132,7 @@ bool opencog::haveDictEntry(Dictionary _dictionary,
 {
 	// See if we know about this word, or not.
 	Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());
-	return nullptr != dn_head;
+	bool have_entry = (nullptr != dn_head);
+	free_lookup_list(_dictionary, dn_head);
+	return have_entry;
 }
