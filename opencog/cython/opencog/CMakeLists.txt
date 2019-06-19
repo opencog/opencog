@@ -166,3 +166,28 @@ SET_TARGET_PROPERTIES(openpsi_cython PROPERTIES
 
 INSTALL (TARGETS openpsi_cython
     DESTINATION "${PYTHON_DEST}")
+
+##################### Attention Bank ##################
+
+CYTHON_ADD_MODULE_PYX(atbank
+    "atbank.pyx"
+# 	atbank
+)
+
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atbank.cpp")
+
+ADD_LIBRARY(atbank_cython SHARED
+    atbank.cpp
+)
+
+TARGET_LINK_LIBRARIES(atbank_cython
+    attentionbonk
+    ${PYTHON_LIBRARIES}
+)
+
+SET_TARGET_PROPERTIES(atbank_cython PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME atbank)
+
+INSTALL (TARGETS atbank_cython
+    DESTINATION "${PYTHON_DEST}")
