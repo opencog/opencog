@@ -49,22 +49,6 @@ OpenPsiSatisfier(AtomSpace* as,
   bool grounding(const HandleMap &var_soln,
                  const HandleMap &term_soln);
 
-  /**
-   * Returns TRUE_TV if there is grounding else returns FALSE_TV. If the
-   * cache has entry for the context then TRUE_TV is returned.
-   *
-   * @param rule An openpsi rule.
-   */
-  TruthValuePtr check_satisfiability(const Handle& rule, OpenPsiRules& opr);
-
-  /**
-   * Instantiate the action of the given openpsi rule.
-   *
-   * @param rule An openpsi rule.
-   * @return The handle to the grounded atom.
-   */
-  Handle imply(const Handle& rule, OpenPsiRules& opr);
-
   private:
 
   OpenPsiImplicator* _implicator;

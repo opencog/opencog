@@ -23,17 +23,20 @@ __main__.eat_apple = eat_apple
 
 class OpenPsiTest(TestCase):
 
-    def setUp(self):
-        self.atomspace = AtomSpace()
-        initialize_opencog(self.atomspace)
-        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec) (opencog openpsi))")
+    @classmethod
+    def setUpClass(cls):
+        global atomspace
+        atomspace = AtomSpace()
+        initialize_opencog(atomspace)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         finalize_opencog()
-        del self.atomspace
+        global atomspace
+        del atomspace
 
     def test_create_rule(self):
-        openpsi = OpenPsi(self.atomspace)
+        openpsi = OpenPsi(atomspace)
 
         goal = openpsi.create_goal("goal")
 
@@ -74,11 +77,11 @@ class OpenPsiTest(TestCase):
         self.assertEqual(context, rule.get_context())
         self.assertEqual(action, rule.get_action())
 
-    @unittest.skip("Issue https://github.com/opencog/opencog/issues/3492")
+    @unittest.skip("Issue https://github.com/opencog/opencog/issues/3532")
     def test_run_openpsi(self):
-        openpsi = OpenPsi(self.atomspace)
+        openpsi = OpenPsi(atomspace)
 
-        goal = openpsi.create_goal("goal")
+        goal = openpsi.create_goal("goal-run")
 
         context = [
             InheritanceLink(
@@ -95,7 +98,7 @@ class OpenPsiTest(TestCase):
             ListLink(
                 VariableNode("$APPLE")))
 
-        component = openpsi.create_component("test-component")
+        component = openpsi.create_component("test-component-run")
 
         openpsi.add_rule(context, action, goal, TruthValue(1.0, 1.0), component)
 
@@ -114,7 +117,7 @@ class OpenPsiTest(TestCase):
                 VariableNode("$APPLE"),
                 ConceptNode("handled")))
 
-        result_set = execute_atom(self.atomspace, handled_apples)
+        result_set = execute_atom(atomspace, handled_apples)
         result1 = result_set.out[0]
         result2 = result_set.out[1]
         self.assertEqual(result1, ConceptNode("apple-1"))

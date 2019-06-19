@@ -86,12 +86,6 @@ private:
   std::set<Handle> _pattern_seen;
 
   /**
-   * OpenPsiSatisfier is created on check_satisfiability() request and
-   * removed in the imply() to release temporary AtomTable.
-   */
-  OpenPsiSatisfier* _sater;
-
-  /**
    * An empty map used for clearing cache entries, or to denote absence
    * of groundings.
    */
