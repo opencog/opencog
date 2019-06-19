@@ -15,8 +15,51 @@ class AttentionBankTest(TestCase):
     def tearDown(self):
         finalize_opencog()
         del self.atomspace
+        self.atomspace = None
 
-    def test_attention_bank(self):
+    def test_attention_value(self):
+        attention_bank = AttentionBank(self.atomspace)
+
+        node = ConceptNode("Socrates")
+
+        attention_bank.set_sti(node, 2.0)
+        self.assertEqual(2.0, attention_bank.get_sti(node))
+
+        attention_bank.set_lti(node, 3.0)
+        self.assertEqual(3.0, attention_bank.get_lti(node))
+
+        self.assertEqual(0.0, attention_bank.get_vlti(node))
+
+        attention_bank.inc_vlti(node)
+        self.assertEqual(1.0, attention_bank.get_vlti(node))
+
+        attention_bank.inc_vlti(node)
+        self.assertEqual(2.0, attention_bank.get_vlti(node))
+
+        attention_bank.dec_vlti(node)
+        self.assertEqual(1.0, attention_bank.get_vlti(node))
+
+    def test_get_handles_by_av(self):
+        attention_bank = AttentionBank(self.atomspace)
+
+        node1 = ConceptNode("Socrates")
+        node2 = ConceptNode("Einstein")
+        attention_bank.set_sti(node1, 2.0)
+        attention_bank.set_sti(node2, 3.0)
+
+        atoms = attention_bank.get_handles_by_av(1.0, 4.0)
+        self.assertEqual(2, len(atoms))
+
+        atoms = attention_bank.get_handles_by_av(1.0, 2.5)
+        self.assertEqual(1, len(atoms))
+
+        atoms = attention_bank.get_handles_by_av(2.5, 3.5)
+        self.assertEqual(1, len(atoms))
+
+        atoms = attention_bank.get_handles_by_av(4, 5)
+        self.assertEqual(0, len(atoms))
+
+    def test_attention_bind_link(self):
         attention_bank = AttentionBank(self.atomspace)
 
         socrates = ConceptNode("Socrates")
