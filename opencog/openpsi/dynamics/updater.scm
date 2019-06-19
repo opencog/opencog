@@ -1,7 +1,7 @@
 ;
 ; updater.scm
 ;
-; Copyright 2106 OpenCog Foundation`
+; Copyright 2016 OpenCog Foundation`
 ;
 ; Code responsible for updating various openpsi related entities,
 ; modulators, and parameters based on interaction rules governing the

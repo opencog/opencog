@@ -17,10 +17,11 @@ satisfy that demand, and also be applicable in the current context.
 The code currently works at a basic level, and is used to control the
 Hanson Robotics robot, coordinating both verbal and non-verbal behavior.
 Contexts can be crisp conjunctions of patterns containing variables;
-the variables can appear within the actions (where thier grounded values
+the variables can appear within the actions (where their grounded values
 are used).
 
-## TODO:
+### TODO
+
 * Some of the context-matching code in the nlp/aiml directory should
   be cleaned up, generalized, and moved here.  It attempts to handle
   crisp-valued conjunctions of context with variables.
@@ -42,21 +43,8 @@ are used).
 * The demand-update code is undocumented, confusing, and does not
   belong in this directory.
 
-
-### References
-* OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
-* Hanson Robotics Wiki - [Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
-* [MicroPsi publications](http://micropsi.com/publications/publications.html)
-* [MicroPsi source code]()
-* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2008 ed.)
-* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://micropsi.com/publications/assets/Draft-MicroPsi-JBach-07-03-30.pdf) (2007 ed.)
-* Wikipedia - [Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some
-  similarities with respect to demand, goals and actions, that is, has
-  the cognitive schematic `Belief + Intention ==> Desire, which is
-  similar to the Context + Procedure/Actions ==> Goal`which is used
-  here.
-
 ## OpenPsi components
+
 1. Psi-rule:
   * A rule is an ImplicationLink structured as
     ```scheme
@@ -77,7 +65,7 @@ are used).
     (typically a crisp TRUE_TV or FALSE_TV) to indicate if the rules
     is applicable in the current context.  In the current
     implementation, the truth values are assumed to be crisp true/false
-    values; thier boolean conjunction is taken to determine the validity
+    values; their boolean conjunction is taken to determine the validity
     of the context. The action can then be taken if the resulting truth
     value is strong enough (i.e. is TRUE_TV).
 
@@ -93,7 +81,6 @@ are used).
   * The goal indicates the degree to which the action, if taken, can
     satisfy the demand or meet the goal.  It can be any atom that,
     when evaluated, returns a truth value.
-    (Huh ?? Deamnds are not goals? How do these interact?)
 
 5. Demand:
   * A demand is collection of state that must be maximized during
@@ -105,20 +92,20 @@ are used).
     atom (currently, a ConceptNode by default).
 
 6. Modulator and Feeling representation:
-Coming soon :smile:
+  * TODO - explain these.
 
 ## Algorithmic overview:
 
 1. Main loop
   * The `psi-step` function performs a single iteration of the system.
-    It performs the steps described below. It is implemented
-    [here](main.scm). The main loop just calls the single-step
+    It performs the steps described below. It is implemented in
+    [main.scm](main.scm). The main loop just calls the single-step
     function repeatedly.
 
 2. Action selection
   * Action selection chooses one (or more) rules associated with a
     demand. It is implemented in the `psi-select-rules-per-demand`
-    function, [here](main.scm).
+    function, in [main.scm](main.scm).
 
   * The default action selector finds all satisfiable rules that are
     associated with a demand, and then randomly picks one, according
@@ -136,20 +123,20 @@ Coming soon :smile:
 
   * Each demand can have it's own custom action-selector. The
     user can set these with the `psi-add-action-selector` and
-    `psi-action-selector-set!` functions [here](action-selector.scm).
+    `psi-action-selector-set!` functions in [action-selector.scm](action-selector.scm).
 
 3. Default action selector
-  * The default action selector randomly picks one satsifiable rule
-    associated with a demand.  If there is more than one rule that
-    is satisfiable, then one is selected randomly.
+  * The default action selector randomly picks one satisfiable rule
+    associated with a demand. If there are multiple rules that
+    are satisfiable, then a rule is selected randomly.
 
   * The weight of a rule is currently defined as the product of
     the strength and confidence of the ImplicationLink of the rule.
 
-  * The satsifiability of a rule is checked by extracting the context
+  * The satisfiability of a rule is checked by extracting the context
     and wrapping it in a `SatisfactionLink`, and then evaluating it.
     A rule is satisfiable if the result of evaluation is TRUE_TV.
-    See the `psi-satisfiable?` function [here](main.scm).
+    See the `psi-satisfiable?` function in [main.scm](main.scm).
 
   * In the future, the weight of a rule will be defined as:
     XXX FIXME: the below is not currently used.
@@ -158,20 +145,20 @@ Coming soon :smile:
     Wcagi = Scga * Sc * STIcga
     ```
     where
-    Wa = weight of an action
-    Wcagi = weight of an action in a single psi-rule 'i' (An action 'a'
-            could be part of multiple psi-rules achieving multiple goals,
-            so if an action is likely to achieve multiple goals then it
-            should have a higher weight). It is implemented in
-            `psi-action-weight`.  (Present value =
-            Scga * Sc * confidence(cga) * confidence(context))
-    Na = Number of rules that have action `a` (Present value =1 )
-    Scga = Strength of psi-rule
-    Sc = Strength of context that is partially implemented in
+      * Wa = weight of an action
+      * Wcagi = weight of an action in a single psi-rule 'i' (An action 'a'
+        could be part of multiple psi-rules achieving multiple goals,
+        so if an action is likely to achieve multiple goals then it
+        should have a higher weight). It is implemented in
+        `psi-action-weight`.  (Present value =
+        Scga * Sc * confidence(cga) * confidence(context))
+      * Na = Number of rules that have action `a` (Present value =1 )
+      * Scga = Strength of psi-rule
+      * Sc = Strength of context that is partially implemented in
         `psi-context-weight`. Implementation details are being discussed
-        [here](https://github.com/opencog/atomspace/issues/823).
+        at https://github.com/opencog/atomspace/issues/823
         (Present value = 0 or 1)
-    STIcga = short-term-importance of the psi-rule (Present value = 1)
+      * STIcga = short-term-importance of the psi-rule (Present value = 1)
 
 4. Action Selection bugs. XXX FIXME -- The current implementation has
    multiple implementation issues. These include:
@@ -182,22 +169,22 @@ Coming soon :smile:
    variable $X", the current satisfiability code can determine if
    the context holds true, by grounding variable $X, but that
    grounding is not passed to the action. That is, when the action is
-   executed, teh variable $X is not known/grounded.
+   executed, the variable $X is not known/grounded.
 
  * The default action selector is extremely inefficient if there
    are more than a few hundred rules, as it attempts to find and
    work with all of them. This overhead can be avoided by using the
    DualLink for narrowing the search for applicable contexts.  There
-   is a protottype showing the DualLink in action, in the nlp/aiml
+   is a prototype showing the DualLink in action, in the nlp/aiml
    subsystem. (There are more than 100K AIML rules; the DualLink
    narrows these down to the handful of rules applicable to the
-   current context). This code needs to be prted here.
+   current context). This code needs to be ported here.
 
 5. Action execution and goal evaluation
   * After a set of rules are selected, then the actions and goals
     attached to these rules are extracted.
 
-  * Given a set of actions, all goals that associated to these
+  * Given a set of actions, all goals associated with these
     actions are located (even if those goals belong to rules that
     did not trigger in the current context).  The idea here is that
     performing the action may advance those goals, even though those
@@ -206,10 +193,10 @@ Coming soon :smile:
   * Related/associated goals are those that are the implicand of the
     psi-rules that have the given action in the implicand. That is, if
     more than one rule has the same action, helping achieve different
-    goals, then those goals are related/associated. Thus, the execution
-    of the given action should result in acheiving those goals as well,
+    goals, then these goals are related/associated. Thus, the execution
+    of the given action should result in achieving these goals as well,
     regardless of whether the rules that resulted in the association
-    are selected or not. See `psi-related-goals` [here](main.scm).
+    are selected or not. See `psi-related-goals` in [main.scm](main.scm).
 
   * The actions are executed, followed by the evaluation of the goals.
 
@@ -219,34 +206,35 @@ Coming soon :smile:
 
 
 ## File overview
-* `main.scm` -- Defines the main function for single-stepping the
+
+* `main.scm` - Defines the main function for single-stepping the
    psi rule engine, as well as the main-loop to run the stepper.
 
-* `rules.scm` -- Functions for defining openpsi-rules, and fetching
-  thier various components.
+* `rules.scm` - Functions for defining openpsi-rules, and fetching
+  their various components.
 
-* `action-selector.scm` -- Implementation of a default action-selector,
+* `action-selector.scm` - Implementation of a default action-selector,
   as well as functions that allow a user to specify a custom action
   selector.
 
-* `utilities.scm` -- Miscellaneous utilities.
+* `utilities.scm` - Miscellaneous utilities.
 
 ## OpenPsi examples
-* The examples [here](../../examples/openpsi) are currently broken.
-* The AIML interpreter [here](../nlp/aiml) uses Opensi and currently
+
+* The [examples](../../examples/openpsi) in this repo are currently broken.
+* The [AIML interpreter](../nlp/aiml) uses OpenPsi and currently
   works.
-* The ROS behavior scripts
-  [here](http://github.com/opencog/ros-behavior-scripting) use OpenPsi
-  and are currently working.
+* The [ROS behavior scripts](http://github.com/opencog/ros-behavior-scripting)
+  use OpenPsi and are currently working.
 
 ## Modulators and Internal Dynamics
 
-OpenPsi includes a dynamical system of interacting modulator variables.
+OpenPsi includes a dynamic system of interacting modulator variables.
 The model contains varying parameters that regulate processes such as
 stimulus evaluation, action selection, and emotional expression.
 Modulators are based on MicroPsi, and SECs are based on Component
-Process Model theory (see references for  more info). These and other
-OpenPsi-related entities dynamically interact with each other according
+Process Model theory (see [references](#References) for more info). These and other
+OpenPsi-related entities interact with each other according
 to rules that specify how a change in a "trigger" entity cause a change
 in a "target" entity.
 
@@ -304,12 +292,25 @@ Instructions:
 For a concrete example of using this model, see 
 https://github.com/opencog/ros-behavior-scripting/blob/master/src/psi-dynamics.scm
 
-Todo: Create general callback that is called at each loop step.
+TODO: Create general callback that is called at each loop step.
 
+## Open Issues:
 
-Open Issues:
-------------
- * Can a rule satisfy multiple goals?
- * Can a rule partially satisfy a goal?  How is the partial satisfaction
-   indicated?
- * Demand update is confused/confusing
+* Can a rule satisfy multiple goals?
+* Can a rule partially satisfy a goal?  How is the partial satisfaction
+  indicated?
+* Demand update is confused/confusing
+
+## References
+
+* OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
+* Hanson Robotics Wiki - [Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
+* [MicroPsi publications](http://micropsi.com/publications/publications.html)
+* [MicroPsi source code]()
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2008 ed.)
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://micropsi.com/publications/assets/Draft-MicroPsi-JBach-07-03-30.pdf) (2007 ed.)
+* Wikipedia - [Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some
+  similarities with respect to demand, goals and actions, that is, has
+  the cognitive schematic `Belief + Intention ==> Desire, which is
+  similar to the Context + Procedure/Actions ==> Goal`which is used
+  here.
