@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
-from opencog.atbank import AttentionBank, af_bindlink
+from opencog.bank import AttentionBank, af_bindlink
 
 
 class AttentionBankTest(TestCase):

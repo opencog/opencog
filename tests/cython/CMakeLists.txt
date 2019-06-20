@@ -61,9 +61,9 @@ IF (HAVE_NOSETESTS)
 		"LTDL_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/openpsi;PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/openpsi:${PYTHON_ROOT}")
 
 	ADD_TEST(AttentionBankCythonTest ${NOSETESTS_EXECUTABLE} -vs
-		${CMAKE_SOURCE_DIR}/tests/cython/atbank/)
+		${CMAKE_SOURCE_DIR}/tests/cython/attentionbank/)
 	SET_TESTS_PROPERTIES(AttentionBankCythonTest
 		PROPERTIES  ENVIRONMENT
-		"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/openpsi:${PYTHON_ROOT}")
+		"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/attentionbank:${PYTHON_ROOT}")
 
 ENDIF (HAVE_NOSETESTS)

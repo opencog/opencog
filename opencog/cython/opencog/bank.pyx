@@ -57,3 +57,4 @@ def af_bindlink(AtomSpace atomspace, Atom atom):
 
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace, deref(atom.handle))
     return Atom.createAtom(c_result, atomspace)
+
