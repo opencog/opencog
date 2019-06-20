@@ -15,7 +15,6 @@ class AttentionBankTest(TestCase):
     def tearDown(self):
         finalize_opencog()
         del self.atomspace
-        self.atomspace = None
 
     def test_attention_value(self):
         attention_bank = AttentionBank(self.atomspace)
@@ -47,17 +46,40 @@ class AttentionBankTest(TestCase):
         attention_bank.set_sti(node1, 2.0)
         attention_bank.set_sti(node2, 3.0)
 
-        atoms = attention_bank.get_handles_by_av(1.0, 4.0)
+        atoms = attention_bank.get_atoms_by_av(1.0, 4.0)
         self.assertEqual(2, len(atoms))
+        self.assertEqual(set([node1, node2]), atoms)
 
-        atoms = attention_bank.get_handles_by_av(1.0, 2.5)
+        atoms = attention_bank.get_atoms_by_av(1.0, 2.5)
         self.assertEqual(1, len(atoms))
+        self.assertEqual(set([node1]), atoms)
 
-        atoms = attention_bank.get_handles_by_av(2.5, 3.5)
+        atoms = attention_bank.get_atoms_by_av(2.5, 3.5)
         self.assertEqual(1, len(atoms))
+        self.assertEqual(set([node2]), atoms)
 
-        atoms = attention_bank.get_handles_by_av(4, 5)
+        atoms = attention_bank.get_atoms_by_av(4, 5)
         self.assertEqual(0, len(atoms))
+
+    def test_get_handles_by_av_different_as1(self):
+        attention_bank = AttentionBank(self.atomspace)
+
+        node1 = ConceptNode("node1")
+        attention_bank.set_sti(node1, 2.0)
+
+        atoms = attention_bank.get_atoms_by_av(1.0, 4.0)
+        self.assertEqual(1, len(atoms))
+        self.assertEqual(set([node1]), atoms)
+
+    def test_get_handles_by_av_different_as2(self):
+        attention_bank = AttentionBank(self.atomspace)
+
+        node2 = ConceptNode("node2")
+        attention_bank.set_sti(node2, 2.0)
+
+        atoms = attention_bank.get_atoms_by_av(1.0, 4.0)
+        self.assertEqual(1, len(atoms))
+        self.assertEqual(set([node2]), atoms)
 
     def test_attention_bind_link(self):
         attention_bank = AttentionBank(self.atomspace)

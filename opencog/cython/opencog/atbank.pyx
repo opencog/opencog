@@ -9,6 +9,9 @@ cdef class AttentionBank:
         self._as = _as
         attentionbank(_as.atomspace)
 
+    def __dealloc__(self):
+        attentionbank(NULL)
+
     def get_sti(self, Atom atom):
         return get_sti(deref(atom.handle))
 
@@ -34,7 +37,7 @@ cdef class AttentionBank:
         attentionbank(self._as.atomspace).set_sti(deref(atom.handle), sti)
         attentionbank(self._as.atomspace).set_lti(deref(atom.handle), lti)
 
-    def get_handles_by_av(self, sti_lower_bound, sti_upper_bound):
+    def get_atoms_by_av(self, sti_lower_bound, sti_upper_bound):
         cdef unordered_set[cHandle] handles = \
             attentionbank(self._as.atomspace).c_get_handles_by_av(sti_lower_bound, sti_upper_bound)
 
