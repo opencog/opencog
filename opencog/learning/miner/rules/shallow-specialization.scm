@@ -65,7 +65,7 @@
       texts-decl
       ms-decl)
     (And
-      minsup-pattern
+      (Present minsup-pattern)
       (absolutely-true-eval minsup-pattern)
       (if unary (unary-conjunction-pattern-eval pattern) '()))
     (ExecutionOutput

@@ -106,8 +106,9 @@
             texts-decl
             ms-decl)
           (And
-            minsup-f
-            minsup-g
+            (Present
+              minsup-f
+              minsup-g)
             (absolutely-true-eval minsup-f)
             (absolutely-true-eval minsup-g)
             (not-equal-top f)
