@@ -27,12 +27,13 @@ cdef extern from "opencog/attentionbank/bank/AttentionBank.h" namespace "opencog
         void inc_vlti(const cHandle&)
         void dec_vlti(const cHandle&)
 
-        # get by STI range
-        unordered_set[cHandle] c_get_handles_by_av "getHandlesByAV" (av_type sti_lower_bind, av_type sti_upper_bound)
-
         # template <typename OutputIterator> OutputIterator
         # get_handle_set_in_attentional_focus(OutputIterator result)
         output_iterator get_handle_set_in_attentional_focus[output_iterator](output_iterator)
+
+        # get by STI range
+        output_iterator get_handles_by_AV[output_iterator](output_iterator, av_type sti_lower_bind, av_type sti_upper_bound)
+        output_iterator get_handles_by_AV[output_iterator](output_iterator, av_type sti_lower_bind)
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
 

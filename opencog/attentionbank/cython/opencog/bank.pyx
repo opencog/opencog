@@ -3,6 +3,17 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 from atomspace cimport AtomSpace, Atom
 
+cdef vector_to_set(vector[cHandle] handle_vector, AtomSpace atomspace):
+    cdef cHandle c_handle
+    cdef vector[cHandle].iterator it = handle_vector.begin()
+    atoms = set()
+    while it != handle_vector.end():
+        c_handle = deref(it)
+        atoms.add(Atom.createAtom(c_handle, atomspace))
+        inc(it)
+    return atoms
+
+
 cdef class AttentionBank:
 
     cdef AtomSpace _as
@@ -39,34 +50,25 @@ cdef class AttentionBank:
         attentionbank(self._as.atomspace).set_sti(deref(atom.handle), sti)
         attentionbank(self._as.atomspace).set_lti(deref(atom.handle), lti)
 
-    def get_atoms_by_av(self, sti_lower_bound, sti_upper_bound):
-        cdef unordered_set[cHandle] handles = \
-            attentionbank(self._as.atomspace).c_get_handles_by_av(sti_lower_bound, sti_upper_bound)
+    def get_atoms_by_av(self, sti_lower_bound, sti_upper_bound = None):
 
-        cdef cHandle c_handle
-        cdef unordered_set[cHandle].iterator it = handles.begin()
-        atoms = set()
-        while it != handles.end():
-            c_handle = deref(it)
-            atom = Atom.createAtom(c_handle, self._as)
-            atoms.add(atom)
-            inc(it)
+        cdef av_type lower_bound = sti_lower_bound
+        cdef av_type upper_bound = -1
+        cdef vector[cHandle] handle_vector
 
-        return atoms
+        if sti_upper_bound is None:
+            attentionbank(self._as.atomspace).get_handles_by_AV(back_inserter(handle_vector), lower_bound)
+        else:
+            upper_bound = sti_upper_bound
+            attentionbank(self._as.atomspace).get_handles_by_AV(back_inserter(handle_vector), lower_bound, upper_bound)
+
+        return vector_to_set(handle_vector, self._as)
 
     def get_atoms_in_attentional_focus(self):
         cdef vector[cHandle] handle_vector
         attentionbank(self._as.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
+        return vector_to_set(handle_vector, self._as)
 
-        cdef cHandle c_handle
-        cdef vector[cHandle].iterator it = handle_vector.begin()
-        atoms = []
-        while it != handle_vector.end():
-            c_handle = deref(it)
-            atoms.append(Atom.createAtom(c_handle, self._as))
-            inc(it)
-
-        return atoms
 
 def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")
