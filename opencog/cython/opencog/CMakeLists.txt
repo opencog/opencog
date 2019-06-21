@@ -166,27 +166,3 @@ SET_TARGET_PROPERTIES(openpsi_cython PROPERTIES
 
 INSTALL (TARGETS openpsi_cython
     DESTINATION "${PYTHON_DEST}")
-
-##################### Attention Bank ##################
-
-CYTHON_ADD_MODULE_PYX(bank
-    "bank.pyx"
-)
-
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bank.cpp")
-
-ADD_LIBRARY(bank_cython SHARED
-    bank.cpp
-)
-
-TARGET_LINK_LIBRARIES(bank_cython
-    attentionbonk
-    ${PYTHON_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(bank_cython PROPERTIES
-    PREFIX ""
-    OUTPUT_NAME bank)
-
-INSTALL (TARGETS bank_cython
-    DESTINATION "${PYTHON_DEST}")
