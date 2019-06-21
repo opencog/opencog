@@ -172,8 +172,21 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 
 	// Work with the default parse options (mostly).
 	// Suppress printing of combinatorial-overflow warning.
+	// Larger linkage limit; improves sample accuracy.
+	// Set timeout to 30 seconds; the default is infinite.
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
+	parse_options_set_linkage_limit(opts, 38000);
+	parse_options_set_max_parse_time(opts, 30);
+
+	// XXX FIXME -- We should fish parse options out of the atomspace.
+	// Something like this, maybe:
+	//     EvaluationLink
+	//         PredicateNode "LG ParseTime"
+	//         ListLink
+	//             LgDictNode "En_US"
+	//             NumberNode 42
+	// ... or something like that ...
 
 	// For the ANY language, this code is being used for sampling.
 	// In this case, we are not concerned about reproducibility,
