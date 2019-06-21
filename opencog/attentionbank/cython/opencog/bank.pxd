@@ -1,52 +1,19 @@
-from libcpp.vector cimport vector
-from libcpp.list cimport list as cpplist
-from libcpp.memory cimport shared_ptr
-from libcpp.string cimport string
+from libcpp.unordered_set cimport unordered_set
 
-ctypedef public short av_type
+from opencog.atomspace cimport cAtomSpace, cHandle
 
-# This import doesn't work for some reason.
-# from opencog.atomspace cimport cHandle
+ctypedef public double av_type
 
-# --------------------------------------------------------
+### Cython version 0.23.4 does not contain libcpp.iterator package ###
+cdef extern from "<iterator>" namespace "std" nogil:
+    cdef cppclass iterator[Category,T,Distance,Pointer,Reference]:
+        pass
+    cdef cppclass output_iterator_tag:
+        pass
+    cdef cppclass back_insert_iterator[T](iterator[output_iterator_tag,void,void,void,void]):
+        pass
+    back_insert_iterator[CONTAINER] back_inserter[CONTAINER](CONTAINER &)
 
-cdef extern from "Python.h":
-    cdef void* PyLong_AsVoidPtr(object)
-    cdef object PyLong_FromVoidPtr(void *p)
-
-# Value
-cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
-    cdef cppclass cValue "opencog::Value":
-        string to_string()
-
-    ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
-
-cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
-    cdef cppclass cAtom "opencog::Atom" (cValue):
-        cAtom()
-
-cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
-    ctypedef shared_ptr[cAtom] cAtomPtr "opencog::AtomPtr"
-
-    cdef cppclass cHandle "opencog::Handle" (cAtomPtr):
-        cHandle()
-        cHandle(const cHandle&)
-        string to_string()
-        cHandle UNDEFINED
-
-cdef extern from "<vector>" namespace "std":
-    cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
-    cdef output_iterator back_inserter(vector[cHandle])
-
-cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
-    cdef cppclass cAtomSpace "opencog::AtomSpace":
-        AtomSpace()
-
-cdef class AtomSpace:
-    cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
-
-# --------------------------------------------------------
 
 cdef extern from "opencog/attentionbank/bank/AVUtils.h" namespace "opencog":
     cdef av_type get_sti(const cHandle&)
@@ -60,17 +27,18 @@ cdef extern from "opencog/attentionbank/bank/AttentionBank.h" namespace "opencog
         void inc_vlti(const cHandle&)
         void dec_vlti(const cHandle&)
 
-        # get by STI range
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
+        # template <typename OutputIterator> OutputIterator
+        # get_handle_set_in_attentional_focus(OutputIterator result)
+        output_iterator get_handle_set_in_attentional_focus[output_iterator](output_iterator)
 
-        # get from AttentionalFocus
-        output_iterator get_handle_set_in_attentional_focus(output_iterator)
+        # get by STI range
+        output_iterator get_handles_by_AV[output_iterator](output_iterator, av_type sti_lower_bind, av_type sti_upper_bound)
+        output_iterator get_handles_by_AV[output_iterator](output_iterator, av_type sti_lower_bind)
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
 
+
 cdef extern from "opencog/attentionbank/bank/AFImplicator.h" namespace "opencog":
     # C++:
-    #   Handle af_bindlink(AtomSpace*, Handle);
-    #
-    cdef cHandle c_af_bindlink "af_bindlink" (cAtomSpace*, cHandle)
+    #   Handle af_bindlink(AtomSpace*, const Handle&);
+    cHandle c_af_bindlink "af_bindlink" (cAtomSpace*, const cHandle&)

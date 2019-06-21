@@ -1,55 +1,78 @@
-from libcpp cimport bool
 from libcpp.vector cimport vector
+
 from cython.operator cimport dereference as deref, preincrement as inc
+from atomspace cimport AtomSpace, Atom
 
-# from atomspace cimport *
-# from opencog.atomspace cimport cHandle
-
-# @todo use the guide here to separate out into a hierarchy
-# http://wiki.cython.org/PackageHierarchy
-
-#cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
-#    cdef vector[cHandle].iterator handle_iter
-#    cdef cHandle handle
-#    result = []
-#    handle_iter = handles.begin()
-#    while handle_iter != handles.end():
-#        handle = deref(handle_iter)
-#        result.append(Atom.createAtom(handle, atomspace))
-#        inc(handle_iter)
-#    return result
+cdef vector_to_set(vector[cHandle] handle_vector, AtomSpace atomspace):
+    cdef cHandle c_handle
+    cdef vector[cHandle].iterator it = handle_vector.begin()
+    atoms = set()
+    while it != handle_vector.end():
+        c_handle = deref(it)
+        atoms.add(Atom.createAtom(c_handle, atomspace))
+        inc(it)
+    return atoms
 
 
 cdef class AttentionBank:
 
-    def __init__(self, AtomSpace aspace):
-        self.as = aspace
-        attentionbank(aspace.atomspace)
+    cdef AtomSpace _as
+
+    def __cinit__(self, AtomSpace _as):
+        self._as = _as
+        attentionbank(_as.atomspace)
 
     def __dealloc__(self):
-        attentionbank(<cAtomSpace*> PyLong_AsVoidPtr(0))
+        attentionbank(NULL)
 
-    def get_atoms_by_av(self, lower_bound, upper_bound=None):
+    def get_sti(self, Atom atom):
+        return get_sti(deref(atom.handle))
+
+    def set_sti(self, Atom atom, sti):
+        attentionbank(self._as.atomspace).set_sti(deref(atom.handle), sti)
+
+    def get_lti(self, Atom atom):
+        return get_lti(deref(atom.handle))
+
+    def set_lti(self, Atom atom, lti):
+        attentionbank(self._as.atomspace).set_lti(deref(atom.handle), lti)
+
+    def get_vlti(self, Atom atom):
+        return get_vlti(deref(atom.handle))
+
+    def inc_vlti(self, Atom atom):
+        attentionbank(self._as.atomspace).inc_vlti(deref(atom.handle))
+
+    def dec_vlti(self, Atom atom):
+        attentionbank(self._as.atomspace).dec_vlti(deref(atom.handle))
+
+    def set_av(self, Atom atom, sti, lti):
+        attentionbank(self._as.atomspace).set_sti(deref(atom.handle), sti)
+        attentionbank(self._as.atomspace).set_lti(deref(atom.handle), lti)
+
+    def get_atoms_by_av(self, sti_lower_bound, sti_upper_bound = None):
+
+        cdef av_type lower_bound = sti_lower_bound
+        cdef av_type upper_bound = -1
         cdef vector[cHandle] handle_vector
-        if upper_bound is not None:
-            pass
-#             attentionbank(self.as.atomspace).get_handles_by_AV(back_inserter(handle_vector),
-#                    lower_bound, upper_bound)
+
+        if sti_upper_bound is None:
+            attentionbank(self._as.atomspace).get_handles_by_AV(back_inserter(handle_vector), lower_bound)
         else:
-            pass
-#            attentionbank(self.as.atomspace).get_handles_by_AV(back_inserter(handle_vector),
-#                    lower_bound)
-#        return convert_handle_seq_to_python_list(handle_vector, self)
+            upper_bound = sti_upper_bound
+            attentionbank(self._as.atomspace).get_handles_by_AV(back_inserter(handle_vector), lower_bound, upper_bound)
+
+        return vector_to_set(handle_vector, self._as)
 
     def get_atoms_in_attentional_focus(self):
         cdef vector[cHandle] handle_vector
-        pass
-#        attentionbank(self.as.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
-#        return convert_handle_seq_to_python_list(handle_vector, self)
+        attentionbank(self._as.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
+        return vector_to_set(handle_vector, self._as)
 
-#def af_bindlink(AtomSpace atomspace, Atom atom):
-#    if atom == None: raise ValueError("af_bindlink atom is: None")
-#    cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
-#                                          deref(atom.handle))
-#    cdef Atom result = Atom.createAtom(c_result, atomspace)
-#    return result
+
+def af_bindlink(AtomSpace atomspace, Atom atom):
+    if atom == None: raise ValueError("af_bindlink atom is: None")
+
+    cdef cHandle c_result = c_af_bindlink(atomspace.atomspace, deref(atom.handle))
+    return Atom.createAtom(c_result, atomspace)
+
