@@ -1,3 +1,5 @@
+from libcpp.vector cimport vector
+
 from cython.operator cimport dereference as deref, preincrement as inc
 from atomspace cimport AtomSpace, Atom
 
@@ -48,6 +50,20 @@ cdef class AttentionBank:
             c_handle = deref(it)
             atom = Atom.createAtom(c_handle, self._as)
             atoms.add(atom)
+            inc(it)
+
+        return atoms
+
+    def get_atoms_in_attentional_focus(self):
+        cdef vector[cHandle] handle_vector
+        attentionbank(self._as.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
+
+        cdef cHandle c_handle
+        cdef vector[cHandle].iterator it = handle_vector.begin()
+        atoms = []
+        while it != handle_vector.end():
+            c_handle = deref(it)
+            atoms.append(Atom.createAtom(c_handle, self._as))
             inc(it)
 
         return atoms

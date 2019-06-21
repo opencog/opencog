@@ -81,6 +81,19 @@ class AttentionBankTest(TestCase):
         self.assertEqual(1, len(atoms))
         self.assertEqual(set([node2]), atoms)
 
+    def test_atoms_in_attentional_focus(self):
+        attention_bank = AttentionBank(self.atomspace)
+
+        node1 = ConceptNode("node1")
+        node2 = ConceptNode("node2")
+        node3 = ConceptNode("node3")
+        attention_bank.set_sti(node1, 1.0)
+        attention_bank.set_sti(node3, 3.0)
+
+        atoms = attention_bank.get_atoms_in_attentional_focus()
+        self.assertEqual(2, len(atoms))
+        self.assertEqual([node1, node3], atoms)
+
     def test_attention_bind_link(self):
         attention_bank = AttentionBank(self.atomspace)
 

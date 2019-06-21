@@ -4,6 +4,17 @@ from opencog.atomspace cimport cAtomSpace, cHandle
 
 ctypedef public double av_type
 
+### Cython version 0.23.4 does not contain libcpp.iterator package ###
+cdef extern from "<iterator>" namespace "std" nogil:
+    cdef cppclass iterator[Category,T,Distance,Pointer,Reference]:
+        pass
+    cdef cppclass output_iterator_tag:
+        pass
+    cdef cppclass back_insert_iterator[T](iterator[output_iterator_tag,void,void,void,void]):
+        pass
+    back_insert_iterator[CONTAINER] back_inserter[CONTAINER](CONTAINER &)
+
+
 cdef extern from "opencog/attentionbank/bank/AVUtils.h" namespace "opencog":
     cdef av_type get_sti(const cHandle&)
     cdef av_type get_lti(const cHandle&)
@@ -18,6 +29,10 @@ cdef extern from "opencog/attentionbank/bank/AttentionBank.h" namespace "opencog
 
         # get by STI range
         unordered_set[cHandle] c_get_handles_by_av "getHandlesByAV" (av_type sti_lower_bind, av_type sti_upper_bound)
+
+        # template <typename OutputIterator> OutputIterator
+        # get_handle_set_in_attentional_focus(OutputIterator result)
+        output_iterator get_handle_set_in_attentional_focus[output_iterator](output_iterator)
 
     cdef cAttentionBank attentionbank(cAtomSpace*)
 
