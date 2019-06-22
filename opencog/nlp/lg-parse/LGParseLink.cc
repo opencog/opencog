@@ -177,7 +177,7 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
 	parse_options_set_linkage_limit(opts, 38000);
-	parse_options_set_max_parse_time(opts, 30);
+	parse_options_set_max_parse_time(opts, 60);
 
 	// XXX FIXME -- We should fish parse options out of the atomspace.
 	// Something like this, maybe:
@@ -201,13 +201,14 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		throw FatalErrorException(TRACE_INFO,
-			"LGParseLink: Unexpected parser linkage failure!");
+		throw RuntimeException(TRACE_INFO,
+			"LGParseLink: Parser timeout.");
 	}
 
 	// if num_links is zero, we should try again with null links.
 	if (num_linkages == 0)
 	{
+		parse_options_reset_resources(opts);
 		parse_options_set_min_null_count(opts, 1);
 		parse_options_set_max_null_count(opts, sentence_length(sent));
 		num_linkages = sentence_parse(sent, opts);
@@ -217,8 +218,8 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		throw FatalErrorException(TRACE_INFO,
-			"LGParseLink: Unexpected parser null-word linkage failure!");
+		throw RuntimeException(TRACE_INFO,
+			"LGParseLink: Parser timeout.");
 	}
 
 	// The number of linkages to process.
