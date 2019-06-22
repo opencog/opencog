@@ -195,17 +195,17 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	// different parse for it, each time. Bug #3065.
 	parse_options_set_repeatable_rand(opts, 0);
 
-	// Count the number of parses
+	// Count the number of parses.
 	int num_linkages = sentence_parse(sent, opts);
 	if (num_linkages < 0)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		throw RuntimeException(TRACE_INFO,
-			"LGParseLink: Parser timeout.");
+		throw FatalErrorException(TRACE_INFO,
+			"LGParseLink: Unexpected parser error!");
 	}
 
-	// if num_links is zero, we should try again with null links.
+	// If num_links is zero, try again, allowing null linked words.
 	if (num_linkages == 0)
 	{
 		parse_options_reset_resources(opts);
@@ -222,6 +222,9 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 			"LGParseLink: Parser timeout.");
 	}
 
+	// Post-processor might not accept all of the parses.
+	num_linkages = sentence_num_valid_linkages(sent);
+
 	// The number of linkages to process.
 	int max_linkages = 0;
 	if (3 == _outgoing.size())
@@ -229,6 +232,7 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
 		max_linkages = nnp->get_value() + 0.5;
 	}
+
 	// Takes limit from parameter only if it's positive and smaller
 	if ((max_linkages > 0) && (max_linkages < num_linkages))
 	{
@@ -247,12 +251,19 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
-	// Due to the way that parsing generates big piles of atoms,
-	// they have to be placed into some atomspace.
-
+	// Avoid generating big piles of Atoms, if the user did not
+	// want them. (The extra Atoms deescribe disjuncts, etc.)
 	bool minimal = (get_type() == LG_PARSE_MINIMAL);
-	for (int i=0; i<num_linkages; i++)
+
+	// There are only so many parses available.
+	int num_available = sentence_num_linkages_post_processed(sent);
+
+	int jct = 0;
+	for (int i=0; jct<num_linkages and i<num_available; i++)
 	{
+		// Skip sentences with P.P. violations.
+		if (0 < sentence_num_violations(sent, i)) continue;
+		jct ++;
 		Linkage lkg = linkage_create(i, sent, opts);
 		Handle pnode = cvt_linkage(lkg, i, sentstr, phrstr, minimal, as);
 		as->add_link(PARSE_LINK, pnode, snode);
