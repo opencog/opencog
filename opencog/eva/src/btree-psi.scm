@@ -22,9 +22,6 @@
 ;
 ; Unit testing:  See `unit-test.scm` and also notes in `behavior.scm`.
 ;
-
-(add-to-load-path "/usr/local/share/opencog/scm")
-
 (use-modules (opencog))
 (use-modules (opencog logger))
 (use-modules (opencog eva-model))

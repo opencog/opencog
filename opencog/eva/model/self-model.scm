@@ -34,8 +34,6 @@
 ; (cog-evaluate! (DefinedPredicateNode "Someone visible?"))
 ; (cog-execute! (DefinedSchemaNode "Num visible faces"))
 ;
-(add-to-load-path "/usr/local/share/opencog/scm")
-
 (use-modules (opencog openpsi))
 
 (load "faces.scm")

@@ -10,7 +10,6 @@
 ; (load "helpers.scm")
 ; (include "helpers.scm")
 ; Aiee!  include fails, when installed, due to the relative paths!
-(add-to-load-path "/usr/local/share/opencog/scm")
 (include-from-path "opencog/nlp/microplanning/helpers.scm")
 
 ; -----------------------------------------------------------------------
