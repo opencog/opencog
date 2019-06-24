@@ -8,9 +8,9 @@
 (use-modules (opencog logger))
 
 ;; Load SUMO
-;; (load "all-sumo-labeled-kb.scm")
-;; (load "Geography.scm")
-(load "scm/mondial.scm")
+(load "scm/all-sumo-labeled-kb.scm")
+;; (load "scm/Geography.scm")
+;; (load "scm/mondial.scm")
 
 ;; Set loggers
 (ure-logger-set-level! "debug")
@@ -39,10 +39,10 @@
 ;; Run pattern miner
 (define results (cog-mine texts-cpt
                           #:minsup 100
-                          #:maximum-iterations 10
+                          #:maximum-iterations 20
                           #:incremental-expansion #t
-                          #:max-conjuncts 2
-                          #:max-variables 4
+                          #:max-conjuncts 4
+                          #:max-variables 2
                           #:surprisingness 'nisurp))
                           ;; #:surprisingness 'none))
 
