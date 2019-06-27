@@ -18,9 +18,10 @@
 ;;
 ;; (Lambda
 ;;   (Variable "$X")
-;;   (Inheritance
-;;     (Concept "A")
-;;     (Variable "$X")))
+;;   (Present
+;;     (Inheritance
+;;       (Concept "A")
+;;       (Variable "$X"))))
 ;;
 ;; Since the pattern has no conjunction the surprisingness measure is
 ;; none (as the current surprisingness measures consider the

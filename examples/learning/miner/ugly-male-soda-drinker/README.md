@@ -27,7 +27,7 @@ Mine patterns such as
 ```scheme
 (Lambda
   (Variable "$X")
-  (And
+  (Present
     (Inheritance
       (Variable "$X")
       (Concept "man"))
@@ -44,7 +44,7 @@ by starting from the top pattern
 ```scheme
 (Lambda
   (Variable "$X")
-  (Variable "$X"))
+  (Present (Variable "$X")))
 ```
 
 finding 1-conjunct (a.k.a. 1-gram) patterns first, such as
@@ -52,14 +52,16 @@ finding 1-conjunct (a.k.a. 1-gram) patterns first, such as
 ```scheme
 (Lambda
   (Variable "$X")
-  (Inheritance
-    (Variable "$X")
-    (Concept "soda drinker")))
+  (Present
+    (Inheritance
+      (Variable "$X")
+      (Concept "soda drinker"))))
 (Lambda
   (Variable "$X")
-  (Inheritance
-    (Variable "$X")
-    (Concept "ugly")))
+  (Present
+    (Inheritance
+      (Variable "$X")
+      (Concept "ugly"))))
 ```
 
 and combining them to create larger conjunctive patterns such as
@@ -67,7 +69,7 @@ and combining them to create larger conjunctive patterns such as
 ```scheme
 (Lambda
   (Variable "$X")
-  (And
+  (Present
     (Inheritance
       (Variable "$X")
       (Concept "soda drinker"))

@@ -24,7 +24,7 @@
 ;;
 ;; (Lambda
 ;;   (Variable "$X")
-;;   (And
+;;   (Present
 ;;     (Inheritance
 ;;       (Variable "$X")
 ;;       (Concept "man"))
@@ -43,7 +43,7 @@
 ;;    (ListLink
 ;;       (LambdaLink
 ;;          (VariableNode "$PM-294b9483")
-;;          (AndLink
+;;          (Present
 ;;             (InheritanceLink
 ;;                (VariableNode "$PM-294b9483")
 ;;                (ConceptNode "man")
@@ -69,4 +69,5 @@
                           #:maximum-iterations 100
                           #:incremental-expansion #t
                           #:max-conjuncts 3
+                          #:max-variables 2
                           #:surprisingness 'nisurp))

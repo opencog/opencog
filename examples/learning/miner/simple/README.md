@@ -17,9 +17,10 @@ find pattern
 ```
 (Lambda
   (Variable "$X")
-  (Inheritance
-    (Concept "A")
-    (Variable "$X")))
+  (Present
+    (Inheritance
+      (Concept "A")
+      (Variable "$X"))))
 ```
 
 ## Usage
