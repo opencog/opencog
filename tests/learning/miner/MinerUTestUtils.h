@@ -198,14 +198,12 @@ public:
 	                         int minsup=1,
 	                         int conjuncts=1,
 	                         const Handle& initpat=Handle::UNDEFINED,
-	                         int maxdepth=-1,
-	                         double info=1.0);
+	                         int maxdepth=-1);
 	static HandleTree cpp_pm(const HandleSeq& texts,
 	                         int minsup=1,
 	                         int conjuncts=1,
 	                         const Handle& initpat=Handle::UNDEFINED,
-	                         int maxdepth=-1,
-	                         double info=1.0);
+	                         int maxdepth=-1);
 
 	/**
 	 * Add

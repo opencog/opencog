@@ -52,8 +52,8 @@ Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as, const std::string& mode)
 
 Handle MinerUTestUtils::add_top(AtomSpace& as)
 {
-	Handle X = an(VARIABLE_NODE, "$X");
-	return al(LAMBDA_LINK, X, X);
+	Handle X = as.add_node(VARIABLE_NODE, "$X");
+	return as.add_link(LAMBDA_LINK, X, MinerUtils::mk_body({X}));
 }
 
 Handle MinerUTestUtils::add_minsup_eval(AtomSpace& as,
@@ -213,10 +213,9 @@ HandleTree MinerUTestUtils::cpp_pm(const AtomSpace& texts_as,
                                    int minsup,
                                    int conjuncts,
                                    const Handle& initpat,
-                                   int maxdepth,
-                                   double info)
+                                   int maxdepth)
 {
-	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
+	MinerParameters param(minsup, conjuncts, initpat, maxdepth);
 	Miner pm(param);
 	return pm(texts_as);
 }
@@ -225,10 +224,9 @@ HandleTree MinerUTestUtils::cpp_pm(const HandleSeq& texts,
                                    int minsup,
                                    int conjuncts,
                                    const Handle& initpat,
-                                   int maxdepth,
-                                   double info)
+                                   int maxdepth)
 {
-	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
+	MinerParameters param(minsup, conjuncts, initpat, maxdepth);
 	Miner pm(param);
 	return pm(texts);
 }
@@ -237,9 +235,7 @@ Handle MinerUTestUtils::add_is_cpt_pattern(AtomSpace& as, const Handle& cpt)
 {
 	Handle X = an(VARIABLE_NODE, "$X"),
 		is_cpt = al(INHERITANCE_LINK, X, cpt),
-		pattern = al(LAMBDA_LINK,
-		                 X,
-		                 is_cpt);
+		pattern = MinerUtils::mk_pattern(X, {is_cpt});
 	return pattern;
 }
 
@@ -265,8 +261,7 @@ Handle MinerUTestUtils::add_ugly_man_pattern(AtomSpace& as)
 		ugly = an(CONCEPT_NODE, "ugly"),
 		is_man = al(INHERITANCE_LINK, X, man),
 		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		is_ugly_man = al(AND_LINK, is_ugly, is_man),
-		pattern = al(LAMBDA_LINK, X, is_ugly_man);
+		pattern = MinerUtils::mk_pattern(X, {is_ugly, is_man});
 	return pattern;
 }
 
@@ -279,8 +274,7 @@ Handle MinerUTestUtils::add_ugly_man_soda_drinker_pattern(AtomSpace& as)
 		is_man = al(INHERITANCE_LINK, X, man),
 		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
 		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		is_ugly_man_soda = al(AND_LINK, is_ugly, is_man, is_soda_drinker),
-		pattern = al(LAMBDA_LINK, X, is_ugly_man_soda);
+		pattern = MinerUtils::mk_pattern(X, {is_ugly, is_man, is_soda_drinker});
 	return pattern;
 }
 

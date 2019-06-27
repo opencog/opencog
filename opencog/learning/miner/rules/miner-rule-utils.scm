@@ -27,8 +27,9 @@
 
 (define (unary-conjunction? body)
   (let ((body-type (cog-type body)))
-    (and (not (equal? body-type 'PresentLink))
-         (not (equal? body-type 'AndLink)))))
+    (or (and (not (equal? body-type 'PresentLink))
+             (not (equal? body-type 'AndLink)))
+        (= 1 (cog-arity body)))))
 
 (define (unary-conjunction body)
   (bool->tv (unary-conjunction? body)))

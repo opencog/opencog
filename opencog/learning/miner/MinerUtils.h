@@ -36,6 +36,11 @@ namespace opencog
 class MinerUtils
 {
 public:
+	/**
+	 * Wrap conjuncts (including unary) with PresentLink rather than
+	 * AndLink.
+	 */
+	static const bool use_present_link = true;
 
 	/**
 	 * Given valuations produce all shallow abstractions reaching
@@ -125,7 +130,7 @@ public:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	static Handle val_shallow_abstract(const Handle& value);
+	static Handle shallow_abstract_of_val(const Handle& value);
 
 	/**
 	 * Wrap a VariableList around a variable list, if more than one
@@ -181,13 +186,6 @@ public:
 	 */
 	static Handle vardecl_compose(const Handle& vardecl,
 	                              const HandleMap& var2subdecl);
-
-	/**
-	 * If a body is an AndLink with one argument, remove it. For instance
-	 *
-	 * remove_uniry_and(And (Concept "A")) = (Concept "A")
-	 */
-	static Handle remove_unary_and(const Handle& h);
 
 	/**
 	 * Given a texts concept node, retrieve all its members
@@ -258,11 +256,21 @@ public:
 	 * Given a sequence of clause create a LambdaLink of it without
 	 * variable declaration, introducing an AndLink if necessary.
 	 */
-	static Handle mk_pattern_without_vardecl(const HandleSeq& clauses);
+	static Handle mk_pattern_no_vardecl(const HandleSeq& clauses);
 
 	/**
-	 * Given a vardecl and a body, filter the vardecl to contain only
-	 * variable of the body, and create a Lambda with them.
+	 * Given a vardecl and a sequence of clauses, filter the vardecl to
+	 * contain only variable of the body, and create a Lambda with
+	 * them.
+	 */
+	static Handle mk_pattern_filtering_vardecl(const Handle& vardecl,
+	                                           const HandleSeq& clauses);
+
+	/**
+	 * Given a vardecl and a sequence of clauses, build a pattern. If
+	 * use_present_link is true, then the result will be
+	 *
+	 * (Lambda <vardecl> (Present <clauses-1> ... <clauses-n>))
 	 */
 	static Handle mk_pattern(const Handle& vardecl, const HandleSeq& clauses);
 
@@ -366,6 +374,7 @@ public:
 	 * scope link (i.e. a constant/text), then behavior is undefined.
 	 */
 	static HandleSeq get_clauses(const Handle& pattern);
+	static HandleSeq get_clauses_of_body(const Handle& body);
 
 	/**
 	 * Return the number of conjuncts in a pattern. That is, if the

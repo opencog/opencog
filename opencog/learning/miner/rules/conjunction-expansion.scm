@@ -136,7 +136,8 @@
              ;; Vardecls
              (f-conjuncts-decls f-conjuncts)
              ;; clauses
-             (f (Quote (Lambda (Unquote f-vardecl) (And (map Unquote f-conjuncts)))))
+             (f (Quote (Lambda (Unquote f-vardecl)
+                               (Present (map Unquote f-conjuncts)))))
              (minsup-f (minsup-eval f texts ms)))
       (Bind
         (VariableList
@@ -147,8 +148,9 @@
           texts-decl
           ms-decl)
         (And
-          minsup-f
-          minsup-g
+          (Present
+            minsup-f
+            minsup-g)
           (absolutely-true-eval minsup-f)
           (absolutely-true-eval minsup-g)
           (not-equal-top g)

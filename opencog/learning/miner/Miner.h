@@ -51,8 +51,7 @@ struct MinerParameters {
 	MinerParameters(unsigned minsup=1,
 	                unsigned conjuncts=1,
 	                const Handle& initpat=Handle::UNDEFINED,
-	                int maxdepth=-1,
-	                double info=1.0);
+	                int maxdepth=-1);
 
 	// TODO: change frequency by support!!!
 	// Minimum support. Mined patterns must have a frequency equal or
@@ -78,28 +77,6 @@ struct MinerParameters {
 	// depth limit. Depth is the number of specializations between the
 	// initial pattern and the produced patterns.
 	int maxdepth;
-
-	// Modify how the frequency of strongly connected components is
-	// calculated from the frequencies of its components. Specifically
-	// it will go from f1*...*fn to min(f1,...,fn), where f1 to fn are
-	// the frequencies of each component. This allows to dismiss
-	// abstractions that are likely not to lead to specializations
-	// with enough support.
-	//
-	// If the parameter equals to 0 the frequency of the whole pattern
-	// is calculated as the product of f1 to fn, if it equals to 1 the
-	// frequency of the whole pattern is calculated as the min of f1
-	// to fn. And if the value is between, it is calculated as a
-	// linear combination of both.
-	//
-	// It is called info for mutual information or its n-ary
-	// generalizations (like interaction information). What it means
-	// is that when info is low subsequent specializations are likely
-	// independant, while when info is high subsequent specializations
-	// are likely dependant and thus we can afford to estimate the
-	// frequency of the specializations by the lowest frequency of its
-	// component.
-	double info;
 };
 
 /**
