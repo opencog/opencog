@@ -113,7 +113,7 @@
                       shabs-eval))))
     (Bind
       vardecl
-      (And shabs-eval precond-1 precond-2)
+      (And (Present shabs-eval) precond-1 precond-2)
       rewrite)))
 
 (define (specialization-formula conclusion . premises)

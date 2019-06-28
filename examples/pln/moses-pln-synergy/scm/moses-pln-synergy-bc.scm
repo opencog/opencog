@@ -1,6 +1,8 @@
 ;; Like moses-pln-synergy-fc.scm but this version relies on the
 ;; backward chainer.
 
+(use-modules (opencog ure))
+
 ;; Set logger to DEBUG
 ;; (ure-logger-set-sync! #t)
 ;; (ure-logger-set-stdout! #t)

@@ -1,3 +1,5 @@
+Status: broken, chatbot needs to be reconfigured
+
 Abduction reasoning based on NLP knowledge. Given the sentences
 
 Ben is happy

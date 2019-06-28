@@ -185,7 +185,7 @@
                               (GroundedPredicate "scm: gt-zero-confidence")
                               implication))
          ;; Meta rule pattern
-         (meta-pattern (And implication meta-precondition))
+         (meta-pattern (And (Present implication) meta-precondition))
 
          ;; Produced rule variable declaration. P and Q will now be
          ;; content rather than variables.

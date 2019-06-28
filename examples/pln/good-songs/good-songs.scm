@@ -3,6 +3,7 @@
 (pln-load)
 
 (use-modules (opencog logger))
+(use-modules (opencog ure))
 ;; (cog-logger-set-level! "fine")
 (ure-logger-set-level! "debug")
 
@@ -46,6 +47,8 @@
                         ;; Remove conditional instantiation but implication scope one
                         "conditional-full-instantiation-implication-meta-rule"
                         "conditional-full-instantiation-inheritance-meta-rule"))
+
+(cog-logger-info "TODO: weirdly this needs to be added to unstuck guile")
 
 ;; Call forward chainer
 ;;

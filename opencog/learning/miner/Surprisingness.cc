@@ -101,22 +101,16 @@ double Surprisingness::isurp(const Handle& pattern,
 	for (const HandleSeqSeq& partition : partitions_without_pattern(pattern)) {
 		double jip = ji_prob(partition, pattern, texts);
 		estimates.push_back(jip);
-		// logger().debug() << "jip = " << jip;
 	}
 	auto mmp = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *mmp.first, emax = *mmp.second;
-	// logger().debug() << "emin = " << emin << ", emax = " << emax;
 
 	// Calculate the empirical probability of pattern, using
 	// boostrapping if necessary
 	double emp = emp_prob_pbs_mem(pattern, texts, emax);
-	// logger().debug() <<  "emp = " << emp;
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, emp);
-	// logger().debug() << "dst = " << dst
-	//                  << ", normalize = " << normalize
-	//                  << ", ndst = " << dst / emp;
 	double maxprb = std::max(emp, emax);
 	return std::min(normalize ? dst / maxprb : dst, 1.0);
 }
@@ -235,7 +229,7 @@ unsigned Surprisingness::value_count(const HandleSeq& block,
                                      const Handle& var,
                                      const HandleSeq& texts)
 {
-	Valuations vs(MinerUtils::mk_pattern_without_vardecl(block), texts);
+	Valuations vs(MinerUtils::mk_pattern_no_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
 	return values.keys().size();
 }
@@ -244,7 +238,7 @@ HandleCounter Surprisingness::value_distribution(const HandleSeq& block,
                                                  const Handle& var,
                                                  const HandleSeq& texts)
 {
-	Valuations vs(MinerUtils::mk_pattern_without_vardecl(block), texts);
+	Valuations vs(MinerUtils::mk_pattern_no_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
 	HandleCounter dist;
 	double total = values.total_count();
@@ -359,10 +353,6 @@ double Surprisingness::emp_prob_pbs(const Handle& pattern,
                                     const HandleSeq& texts,
                                     double prob_estimate)
 {
-	// logger().debug() << "emp_prob_pbs(" << oc_to_string(pattern)
-	//                  << ",texts.size()=" << texts.size()
-	//                  << ",prob_estimate=" << prob_estimate << ")";
-
 	// Calculate an estimate of the support of the pattern to decide
 	// whether we should subsample the texts corpus. Indeed some
 	// pattern have intractably large support.
@@ -402,11 +392,6 @@ unsigned Surprisingness::subsmp_size(const Handle& pattern,
 	double nc = MinerUtils::n_conjuncts(pattern);
 	double alpha = (double)support_estimate / std::pow(ts, nc);
 	double res = std::pow(ts / (10*alpha), 1.0/nc);
-	// logger().debug() << "Surprisingness::subsmp_size ts = " << ts
-	//                  << ", nc = " << nc
-	//                  << ", support_estimate = " << support_estimate
-	//                  << ", alpha = " << alpha
-	//                  << ", res = " << res;
 	return std::max((unsigned)res, std::min(5000U, (unsigned)ts));
 }
 
@@ -424,16 +409,12 @@ double Surprisingness::ji_prob(const HandleSeqSeq& partition,
 	double p = 1.0;
 	for (const Handle& subpattern : subpatterns) {
 		double empr = emp_prob_mem(subpattern, texts);
-		// logger().debug() << "ji_prob texts.size() = " << texts.size()
-		//                  << ", empr = " << empr;
 		p *= empr;
 	}
-	// logger().debug() << "ji_prob subpattern emp product = " << p;
 
 	// Calculate the probability that all joint variables take the same
 	// value
 	double eq_p = eq_prob(partition, pattern, texts);
-	// logger().debug() << "ji_prob P(equal) = " << eq_p;
 	p *= eq_p;
 
 	return p;
@@ -455,8 +436,8 @@ bool Surprisingness::is_equivalent(const HandleSeq& l_blk,
                                    const HandleSeq& r_blk,
                                    const Handle& var)
 {
-	Handle l_pat = MinerUtils::mk_pattern_without_vardecl(l_blk);
-	Handle r_pat = MinerUtils::mk_pattern_without_vardecl(r_blk);
+	Handle l_pat = MinerUtils::mk_pattern_no_vardecl(l_blk);
+	Handle r_pat = MinerUtils::mk_pattern_no_vardecl(r_blk);
 	return is_equivalent(l_pat, r_pat, var);
 }
 
@@ -495,8 +476,8 @@ bool Surprisingness::is_syntax_more_abstract(const HandleSeq& l_blk,
                                              const HandleSeq& r_blk,
                                              const Handle& var)
 {
-	Handle l_pat = MinerUtils::mk_pattern_without_vardecl(l_blk);
-	Handle r_pat = MinerUtils::mk_pattern_without_vardecl(r_blk);
+	Handle l_pat = MinerUtils::mk_pattern_no_vardecl(l_blk);
+	Handle r_pat = MinerUtils::mk_pattern_no_vardecl(r_blk);
 	return is_syntax_more_abstract(l_pat, r_pat, var);
 }
 
@@ -520,11 +501,6 @@ bool Surprisingness::is_syntax_more_abstract(const Handle& l_pat,
 
 	// Find all mappings from variables (except var) to terms
 	Unify unify(l_body, r_body, l_vars, r_vars);
-	// logger().debug() << "unify" << std::endl
-	//                  << "l_body:" << std::endl << oc_to_string(l_body)
-	//                  << "r_body:" << std::endl << oc_to_string(r_body)
-	//                  << "l_vars:" << std::endl << oc_to_string(l_vars)
-	//                  << "r_vars:" << std::endl << oc_to_string(r_vars);
 	Unify::SolutionSet sol = unify();
 
 	// If it is not satisfiable, l_pat is not an abstraction
@@ -653,26 +629,17 @@ double Surprisingness::eq_prob(const HandleSeqSeq& partition,
                                const Handle& pattern,
                                const HandleSeq& texts)
 {
-	// logger().debug() << "Surprisingness::eq_prob_alt partition:"
-	//                  << std::endl << oc_to_string(partition)
-	//                  << ", pattern:" << std::endl << oc_to_string(pattern)
-	//                  << ", texts.size() = " << texts.size();
-
 	double p = 1.0;
 	// Calculate the probability of a variable taking the same value
 	// across all blocks/subpatterns where that variable appears.
 	for (const Handle& var : joint_variables(pattern, partition)) {
-		// logger().debug() << "var = " << oc_to_string(var);
 
 		// Select all strongly connected subpatterns containing var
 		HandleSeqSeq var_partition = connected_subpatterns_with_var(partition, var);
-		// logger().debug() << "var_partition = " << oc_to_string(var_partition);
 
 		// For each variable, sort the partition so that abstract
 		// blocks, relative to var, appear first.
 		rank_by_abstraction(var_partition, var);
-		// logger().debug() << "var_partition (after ranking by abstraction) = "
-		//                  << oc_to_string(var_partition);
 
 		// For each block j_blk, but the first, look for the most
 		// specialized block that is more abstract or equivalent to that
@@ -680,9 +647,6 @@ double Surprisingness::eq_prob(const HandleSeqSeq& partition,
 		// cannot take more values than its count in i_blk. If no such
 		// i_blk block exists, then use uc=|U| as count.
 		for (int j = 1; j < (int)var_partition.size(); j++) {
-			// logger().debug() << "var_partition[" << j << "]:" << std::endl
-			//                  << oc_to_string(var_partition[j]);
-
 			// Since abstraction relation is transitive, one can just go
 			// backward from j_blk and pick up the first i_blk that is
 			// either equivalent or more abstract, it will be the most
@@ -693,17 +657,9 @@ double Surprisingness::eq_prob(const HandleSeqSeq& partition,
 					break;
 				else i--;
 
-			// if (0 <= i)
-			// 	logger().debug() << "var_partition[" << i
-			// 	                 << "] (most specialized abstraction):" << std::endl
-			// 	                 << oc_to_string(var_partition[j]);
-			// else
-			// 	logger().debug() << "no abstraction (i = " << i << ")";
-
 			double c = texts.size();
 			if (0 <= i)
 				c = value_count(var_partition[i], var, texts);
-			// logger().debug() << "c = " << c;
 			p /= c;
 		}
 	}

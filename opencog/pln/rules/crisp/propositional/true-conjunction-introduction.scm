@@ -32,7 +32,7 @@
          (vardecl (VariableList (map gen-typed-variable variables)))
          (gen-precondition (lambda (x) (absolutely-true-eval x)))
          (preconditions (map gen-precondition variables))
-         (pattern (And variables preconditions))
+         (pattern (And (Present variables) preconditions))
          (rewrite (ExecutionOutput
                     (GroundedSchema "scm: true-conjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order

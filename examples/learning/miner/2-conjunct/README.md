@@ -31,7 +31,7 @@ find pattern
     (Variable "$X")
     (Variable "$Y")
     (Variable "$Z"))
-  (And
+  (Present
     (Inheritance
       (Variable "$X")
       (Variable "$Y"))

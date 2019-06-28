@@ -21,11 +21,14 @@ cd <EXTERNAL-TOOLS>/SUMO_importer
 ./sumo-opencog.sh
 ```
 
-copy the output folder to here (where that README.md is located)
+copy the generated output (replace `<OPENCOG_REPO>` appropriately)
 
 ```bash
-cp -p <EXTERNAL-TOOLS>/SUMO_importer/all-sumo-labeled-kb.scm <HERE>/scm
-cp -p <EXTERNAL-TOOLS>/SUMO_importer/sumo/output/Geography.scm <HERE>/scm
+SCM_DIR=<OPENCOG_REPO>/examples/learning/miner/sumo/scm
+mkdir "$SCM_DIR"
+cp all-sumo-labeled-kb.scm "$SCM_DIR"
+cp sumo/output/*.scm "$SCM_DIR"
+cd "$SCM_DIR/.."
 ```
 
 ### Run Pattern Miner

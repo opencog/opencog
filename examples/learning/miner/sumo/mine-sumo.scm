@@ -8,9 +8,9 @@
 (use-modules (opencog logger))
 
 ;; Load SUMO
-;; (load "all-sumo-labeled-kb.scm")
-;; (load "Geography.scm")
-(load "scm/mondial.scm")
+;; (load "scm/all-sumo-labeled-kb.scm")
+(load "scm/Geography.scm")
+;; (load "scm/mondial.scm")
 
 ;; Set loggers
 (ure-logger-set-level! "debug")
@@ -38,22 +38,23 @@
 
 ;; Run pattern miner
 (define results (cog-mine texts-cpt
-                          #:minsup 100
-                          #:maximum-iterations 10
+                          #:minsup 5
+                          #:maximum-iterations 100
                           #:incremental-expansion #t
                           #:max-conjuncts 2
-                          #:max-variables 4
+                          #:max-variables 2
                           #:surprisingness 'nisurp))
                           ;; #:surprisingness 'none))
 
-;; The top results are very abstract, but some are interesting, such as
+;; The top results are very abstract, but some are interesting, such
+;; as from Geography.scm
 ;;
 ;; (EvaluationLink (stv 0.98404255 1)
 ;;    (PredicateNode "isurp")
 ;;    (ListLink
 ;;       (LambdaLink
 ;;          (VariableNode "$PM-229da880")
-;;          (AndLink
+;;          (PresentLink
 ;;             (InheritanceLink
 ;;                (VariableNode "$PM-229da880")
 ;;                (ConceptNode "SaltWaterArea" (stv 0.01 1))

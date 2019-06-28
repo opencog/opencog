@@ -70,7 +70,7 @@
   (Lambda (Variable \"$X\") (Variable \"$X\"))
 "
   (let ((top-arg (Variable "$top-arg")))
-    (Lambda top-arg top-arg)))
+    (Lambda top-arg (Present top-arg))))
 
 (define (random-texts-cpt)
 "
@@ -390,7 +390,7 @@
          (target (minsup-eval patvar texts ms))
          (vardecl (TypedVariable patvar (Type "LambdaLink")))
          (precond (absolutely-true-eval target))
-         (gl (Get vardecl (And target precond))))
+         (gl (Get vardecl (And (Present target) precond))))
     (cog-execute! gl)))
 
 (define* (conjunct-pattern nconj)
@@ -404,14 +404,14 @@
       (Variable \"$X-1\")
       (Variable \"$X-2\")
       (Variable \"$X-3\"))
-    (And
+    (Present
       (Variable \"$X-1\")
       (Variable \"$X-2\")
       (Variable \"$X-3\")))
 "
   (let* ((vars (gen-variables "$X" nconj))
          (var-lst (VariableList vars))
-         (var-conj (And vars)))
+         (var-conj (Present vars)))
     (Lambda var-lst var-conj)))
 
 (define* (cog-miner . args)

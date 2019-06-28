@@ -52,7 +52,7 @@
     (Bind
       vardecl
       (And
-        clause
+        (Present clause)
         precondition)
       rewrite)))
 

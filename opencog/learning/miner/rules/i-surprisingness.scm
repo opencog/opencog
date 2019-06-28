@@ -65,7 +65,7 @@
              (f (Quote
                   (Lambda
                     (Unquote f-vardecl)
-                    (And
+                    (Present
                       (map Unquote cnj-bodies)))))
              (f-minsup (minsup-eval f texts ms))
              (f-isurp (isurp-eval mode f texts)))

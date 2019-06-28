@@ -72,7 +72,7 @@
       texts-decl
       ms-decl)
     (And
-      minsup-g
+      (Present minsup-g)
       (absolutely-true-eval minsup-g))
     (ExecutionOutput
       (GroundedSchema "scm: shallow-abstraction-formula")
