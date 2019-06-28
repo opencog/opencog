@@ -78,11 +78,11 @@
                                     ; count as a connective
     (AndLink
       (QuoteLink (LambdaLink
-        (VariableNode "$TyVs")
-        (VariableNode "$A1")))
+        (Unquote (VariableNode "$TyVs"))
+        (Unquote (VariableNode "$A1"))))
       (QuoteLink (LambdaLink
-        (VariableNode "$TyVs")
-        (VariableNode "$A2"))))))
+        (Unquote (VariableNode "$TyVs"))
+        (Unquote (VariableNode "$A2")))))))
 
 (define and-lambda-factorization-double-implication-rewrite
   (ExecutionOutputLink

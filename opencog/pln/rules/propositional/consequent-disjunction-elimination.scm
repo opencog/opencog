@@ -33,11 +33,12 @@
         (TypedVariable A var-type)
         (TypedVariable B var-type)
         (TypedVariable C var-type))
-      (impl-type
-        A
-        (Or
-          B
-          C))
+      (Present
+        (impl-type
+          A
+          (Or
+            B
+            C)))
       (ExecutionOutput
         (GroundedSchema "scm: consequent-disjunction-elimination-formula")
         (List

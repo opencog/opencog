@@ -41,8 +41,9 @@
         (TypedVariable B var-type)
         (TypedVariable C var-type))
       (And
-        AB
-        BC
+        (Present
+          AB
+          BC)
         (Not (Identical A C)))
       (ExecutionOutput
         (GroundedSchema "scm: deduction-formula")

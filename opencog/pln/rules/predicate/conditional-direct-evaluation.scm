@@ -25,7 +25,7 @@
     (TypedVariable
       (Variable "$I")
       (Type "ImplicationScopeLink"))
-    (Variable "$I")
+    (Present (Variable "$I"))
     (ExecutionOutput
       (GroundedSchema "scm: conditional-direct-evaluation-implication-scope-formula")
       (Variable "$I"))))

@@ -59,8 +59,9 @@
         (GroundedPredicate "scm: gt-zero-confidence")
         AB)
       ;; Pattern clauses
-      AB
-      A)
+      (Present
+        AB
+        A))
     ;; Rewrite
     (ExecutionOutputLink
       (GroundedSchemaNode "scm: modus-ponens-formula")
