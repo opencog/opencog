@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-f" "-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython")
+SET(CYTHON_FLAGS "-2" "-f" "-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython")
 
 ##################### Attention Bank ##################
 
