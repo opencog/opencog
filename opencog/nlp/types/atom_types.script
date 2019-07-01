@@ -13,7 +13,6 @@
 WORD_NODE <- NODE
 ANY_NODE <- NODE    // Explicit wildcard node, used for counting.
 WORD_CLASS_NODE <- NODE  // A signifier of a set of words
-LINK_CLASS_NODE <- NODE  // A signifier of a set of connected words
 
 REFERENCE_LINK <- ORDERED_LINK
 
