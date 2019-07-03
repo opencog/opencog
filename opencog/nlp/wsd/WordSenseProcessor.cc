@@ -107,8 +107,10 @@ void WordSenseProcessor::work_thread(void)
 void WordSenseProcessor::run_no_delay()
 {
 	// Look for recently entered text
-	atom_space->foreach_handle_of_type(DOCUMENT_NODE,
-	               &WordSenseProcessor::do_document, this);
+	HandleSet handle_set;
+	atom_space->get_handleset_by_type(handle_set, DOCUMENT_NODE);
+	for (const Handle& h: handle_set)
+		do_document(h);
 }
 
 void WordSenseProcessor::run()

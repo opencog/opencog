@@ -71,7 +71,7 @@
                               (GroundedPredicate "scm: gt-zero-confidence")
                               forall))
          ;; Meta rule pattern
-         (meta-pattern (And forall meta-precondition))
+         (meta-pattern (And (Present forall) meta-precondition))
 
          ;; Produced rule variable declaration. P will now be content
          ;; rather than variables.

@@ -59,8 +59,9 @@
         (GroundedPredicate "scm: gt-zero-confidence")
         AB)
       ;; Pattern clauses
-      AB
-      A)
+      (Present
+        AB
+        A))
     ;; Rewrite
     (ExecutionOutputLink
       (GroundedSchemaNode "scm: modus-ponens-formula")
@@ -80,10 +81,10 @@
 
 (define (modus-ponens-formula B AB A)
   (let
-      ((sA (cog-stv-strength A))
-       (cA (cog-stv-confidence A))
-       (sAB (cog-stv-strength AB))
-       (cAB (cog-stv-confidence AB))
+      ((sA (cog-mean A))
+       (cA (cog-confidence A))
+       (sAB (cog-mean AB))
+       (cAB (cog-confidence AB))
        (snotAB 0.2)                     ; Huge hack
        (cnotAB 1))
     (cog-set-tv!

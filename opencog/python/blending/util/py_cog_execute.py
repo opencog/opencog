@@ -86,7 +86,7 @@ class PyCogExecute(Singleton):
             cls.a,
             '(use-modules (opencog))' +
             '(use-modules (opencog exec))' +
-            '(use-modules (opencog rule-engine))'
+            '(use-modules (opencog ure))'
         )
 
     def execute(cls, a, execute_link):

@@ -23,7 +23,7 @@ This converter is called [RelEx](http://wiki.opencog.org/w/RelEx).
 Step 3 extracts the predicate-argument logical structure.  This is done
 by applying a set of rules to the RelEx format.  These are applied by
 using the forward chainer provided by the
-[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine).
+[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/ure).
 
 After the quick-start, below, there is a quick sketch of how the R2L
 rules are applied to sentences in the AtomSpace. This is followed by

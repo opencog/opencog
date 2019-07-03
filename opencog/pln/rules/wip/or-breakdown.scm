@@ -38,10 +38,10 @@
 
 (define (or-breakdown-side-effect-free-formula AB A B)
   (let 
-      ((sAB (cog-stv-strength AB))
-       (cAB (cog-stv-confidence AB))
-       (sA (cog-stv-strength A))
-       (cA (cog-stv-confidence A)))
+      ((sAB (cog-mean AB))
+       (cAB (cog-confidence AB))
+       (sA (cog-mean A))
+       (cA (cog-confidence A)))
     (stv (/ sAB (- 1 sA)) (min cAB cA))))
 
 ; Name the rule

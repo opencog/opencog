@@ -10,6 +10,11 @@
 
 (load-extension "libattentionbonk" "opencog_attention_init")
 
+; Load the C library that calls the nameserver to load the types.
+(load-extension "libattention-types" "attention_types_init")
+
+(load "attentionbank/types/attention_types.scm")
+
 ; This avoids complaints, when the docs are set, below.
 (export
 	cog-av cog-set-av! cog-inc-vlti! cog-dec-vlti!

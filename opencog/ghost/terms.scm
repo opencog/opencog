@@ -56,6 +56,19 @@
                   ; "(LemmaLink v2 l)" in the context
                   (Evaluation (GroundedPredicate "scm: ghost-lemma?")
                               (List var l)))))
+    ; Special handling for the word "do"
+    ; Given just one word, without any other clues, it seems impossible to
+    ; determine whether the word "does" from the input means "perform" (do)
+    ; or "a female deer" (doe), so make sure, in this case, that the RelEx
+    ; outputs will be considered when "do" is in the pattern of a rule
+    (if (string-ci=? STR "do")
+      (let ((wi-var (Variable (gen-var str-dc #f))))
+        (set! v (append v (list
+          (TypedVariable wi-var (Type "WordInstanceNode")))))
+        (set! c (list
+          (ReferenceLink wi-var var)
+          (WordInstanceLink wi-var (Variable "$P"))
+          (LemmaLink wi-var (Word "do"))))))
     (list v c (list var))))
 
 (define-public (ghost-lemma? GRD LEMMA)
@@ -254,13 +267,29 @@
 )
 
 ; ----------
+(define (parse-method-name method-name)
+"
+  Checks if the method-name has a prefix 'scm_' or 'py_'
+  and converts it to the corresponding name 'scm:name' or 'py:name'
+  to be used as GroundedPredicate name.
+  By default scm is used if the method-name does not have the prefix.
+"
+ (cond
+  ((string-prefix? "scm_" method-name)
+   (string-append "scm:" (substring method-name 4)))
+  ((string-prefix? "py_" method-name)
+   (string-append "py:" (substring method-name 3)))
+  (else (string-append "scm:" method-name))))
+
+; ----------
 (define (context-function NAME ARGS)
 "
   Occurrence of a function in the context of a rule.
-  The Scheme function named NAME should have already been defined.
+  The Scheme or Python function named NAME should have already been defined.
+  The Python name has 'py_' prefix and Scheme name has 'scm_' or no prefix.
 "
   ; TODO: Check to make sure the function has been defined
-  (Evaluation (GroundedPredicate (string-append "scm: " NAME))
+  (Evaluation (GroundedPredicate (parse-method-name NAME))
               (List (map (lambda (a) (if (equal? 'GlobNode (cog-type a))
                                          (List a) a))
                          ARGS))))
@@ -269,10 +298,11 @@
 (define (action-function NAME ARGS)
 "
   Occurrence of a function in the action of a rule.
-  The Scheme function named NAME should have already been defined.
+  The Scheme or Python function named NAME should have already been defined.
+  The Python name has 'py_' prefix and Scheme name has 'scm_' or no prefix.
 "
   ; TODO: Check to make sure the function has been defined
-  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
+  (ExecutionOutput (GroundedSchema (parse-method-name NAME))
                    (List (map (lambda (a) (if (equal? 'GlobNode (cog-type a))
                                               (List a) a))
                               ARGS))))
@@ -294,6 +324,32 @@
   (list-ref os (random (length os) (random-state-from-platform))))
 
 ; ----------
+(define (get-var-literals VAR)
+"
+  Return the value grounded in original words.
+"
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-original-word")
+                   (List VAR)))
+
+(define-public (ghost-get-original-word . WORDS)
+"
+  Given a list of words, return their original words stored as Values.
+"
+  (if (any (lambda (w) (or (equal? 'GlobNode (cog-type w))
+                           (equal? 'VariableNode (cog-type w))))
+           WORDS)
+      '()
+      (List (map
+        (lambda (w)
+          (define ori-word (cog-value w ghost-word-original))
+          (if (null? ori-word)
+            (begin
+              (cog-logger-warn ghost-logger "No original word is found for ~a" w)
+              w)
+            ori-word))
+        WORDS))))
+
+; ----------
 (define (get-var-lemmas VAR)
 "
   Turn the value grounded for VAR into lemmas.
@@ -309,7 +365,9 @@
                            (equal? 'VariableNode (cog-type g))))
            GRD)
       '()
-      (List (map Word (map get-lemma (map cog-name GRD))))))
+      (List (map
+        (lambda (w) (Word (get-lemma (cog-name w))))
+        (map (lambda (g) (cog-value g ghost-word-original)) GRD)))))
 
 ; ----------
 (define (get-user-variable UVAR)

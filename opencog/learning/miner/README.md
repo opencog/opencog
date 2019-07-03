@@ -28,20 +28,18 @@ Let us recall the important terms
 * *Text tree*: a tree (or hypergraph) that is part of the data set to
   be mined. Can be imply called *tree*. Generally speaking any atom of
   an atomspace.
-* *Database*: a set of text tree to mine.
 * *Pattern tree*: a tree representing a pattern, that is capturing a
   collection of text trees. Can be simply called *pattern*.
-* *Support*: number of text trees and subtrees matching a given
+* *Frequency*: number of text trees and subtrees matching a given
   pattern.
-* *Count*: another word for *support*.
-* *Frequency*: Support divided by the size of the database.
+* *Support*: similar to frequency.
 * *Minimum support*: parameter of the mining algorithm to discard
-  patterns with support below that value.
+  patterns with frequency below that value.
 * *A priori property*: assumption that allows to systematically prune
   the search space. In its least abstract form, it expresses the fact
-  that if a pattern tree has a certain support `c` then a
-  specialization of it can only have a support that is equal to or
-  lower than `c`.
+  that if a pattern tree has a certain frequency `f` then a
+  specialization of it can only have a frequency that is equal to or
+  lower than `f`.
 
 Algorithm
 ---------
@@ -49,8 +47,8 @@ Algorithm
 Patterm mining operates by searching the space of pattern trees,
 typically starting from the most abstract pattern, the one that
 encompass all text trees, construct specializations of it, retain
-those that have enough support (count equal to or above the minimum
-support), then recursively specialize those, and so on.
+those that have enough support (frequency equal to or above the
+minimum support), then recursively specialize those, and so on.
 
 ### Pattern Trees in Atomese
 
@@ -326,7 +324,7 @@ See https://wiki.opencog.org/w/PutLink for more information about `PutLink`.
 #### Step 5: Add Resulting Specializations with Enough Support
 
 Given all specializations (6 in total in this iteration example), we
-now need to calculate the support of each of them against `T`, and
+now need to calculate the frequency of each of them against `T`, and
 only the one reaching the minimum support can be added back to the
 population of patterns `C`. Out of these 6 only one has enough support
 ```scheme
@@ -533,7 +531,7 @@ meaning that if `Ps` has enough support and is a specialization of
 `P`, then `P` has enough support. And a second rule to evaluate by
 direct calculation if some pattern has enough support
 ```
-ms <= support(P, T)
+ms <= freq(P, T)
 |-
 minsup(P, T, ms)
 ```
@@ -611,7 +609,7 @@ the `miner` module
 Then, simply call `cog-mine` on your text set with a given minimum
 support
 ```scheme
-(cog-mine texts ms)
+(cog-mine texts #:minsup ms)
 ```
 where `texts` is either
 1. a Scheme list of atoms
@@ -639,53 +637,28 @@ In addition `cog-mine` accepts multiple options such as
 3. Whether to enable incremental conjunction expansion.
 4. Maximum number of conjuncts (in case incremental conjunction
    expansion is enabled).
-5. And more.
+5. Surprisingness measure.
 
-Providing an initial patterns can greatly speed up the search. This
-can also used to specify how many conjucts it may have. The function
-`conjunct-pattern` can help you to do that. For instance to produce
-an initial pattern with 3 conjuncts, call
-```scheme
-(conjunct-pattern 3)
-```
-
-to get
-```scheme
-(Lambda
-  (VariableList
-    (Variable "$X-1")
-    (Variable "$X-2")
-    (Variable "$X-3"))
-  (And
-    (Variable "$X-1")
-    (Variable "$X-2")
-    (Variable "$X-3")))
-```
-
-then pass this pattern to `cog-mine` as initial pattern. For instance
-calling the miner on some given texts with a minimum support of 10,
-and a desired patterns of 3 conjuncts
+Providing an initial patterns can greatly speed up the search, as well
+as limiting the number of conjuncts and variables. For instance the
+following runs the pattern miner with a minimum support of 10, a
+maximum number of 2 conjuncts and 3 variables.
 
 ```scheme
-(cog-mine (Concept "texts") 10 #:initpat (conjunct-pattern 3))
+(cog-mine (Concept "texts")
+          #:minsup 10
+          #:max-conjuncts 2
+          #:max-variables 2)
 ```
 
 where `(Concept "texts")` contains (via using `MemberLink`) the text
 corpus.
 
-Beware however that the search space will explode as a result of
-increasing the number of conjuncts because by default the search is
-open-ended. That is given enough iterations, no pattern will be
-missed!
-
-Thus in order to be more efficient it is recommanded to use instead
-the incremental conjunction expansion heuristic.
-
-```scheme
-(cog-mine (Concept "texts") 10
-          #:incremental-expansion #t
-          #:max-conjuncts 3)
-```
+Beware that the search space will explode as a result of increasing
+the number of conjuncts. To minimize the combinatorial explosion the
+pattern miner uses by default an Incremental Conjunction Expansion
+heuristic, as a result it might miss some patterns. This can be
+disabled, see below for further help.
 
 ### Help and Examples
 
@@ -710,12 +683,11 @@ and each function has an online help like `cog-mine`.
 TODO
 ----
 
-1. Support surprisingness.
+1. Support generic surprisingness, not just I-Surprisingness.
 2. Support links such as `DefineLink`, `DefinedSchemaNode`,
    `ExecutionOutputLink`, etc.
-3. Store more information about the pattern, such as support,
-   frequency and surprisingness, and make accessible to the
-   user. Maybe store this as values attached to patterns.
+3. Store more information about the pattern, such as frequency and
+   surprisingness, and make accessible to the user.
 
 References
 ----------

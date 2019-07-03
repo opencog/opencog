@@ -14,7 +14,7 @@
 ;; -----------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; Generate a fuzzy disjunction introduction rule for an n-ary
 ;; disjunction
@@ -28,7 +28,7 @@
          (type (TypeChoice EvaluationT InheritanceT AndT NotT))
          (gen-typed-variable (lambda (x) (TypedVariable x type)))
          (vardecl (VariableList (map gen-typed-variable variables)))
-         (pattern (And variables))
+         (pattern (Present variables))
          (rewrite (ExecutionOutput
                     (GroundedSchema "scm: fuzzy-disjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order
@@ -41,10 +41,10 @@
 
 (define (fuzzy-disjunction-introduction-formula A S)
   (let* ((orees (cog-outgoing-set S))
-         (max-s-atom (max-element-by-key orees cog-stv-strength))
-         (min-c-atom (min-element-by-key orees cog-stv-confidence))
-         (max-s (cog-stv-strength max-s-atom))
-         (min-c (cog-stv-confidence min-c-atom)))
+         (max-s-atom (max-element-by-key orees cog-mean))
+         (min-c-atom (min-element-by-key orees cog-confidence))
+         (max-s (cog-mean max-s-atom))
+         (min-c (cog-confidence min-c-atom)))
     (cog-merge-hi-conf-tv! A (stv max-s min-c))))
 
 ;; Name the rules

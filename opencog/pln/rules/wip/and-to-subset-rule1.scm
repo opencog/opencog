@@ -38,9 +38,9 @@
     (cog-set-tv! 
         SAB
         (if
-            (= (cog-stv-strength A) 0)
+            (= (cog-mean A) 0)
             (stv 0 0)
             (stv 
-                (/ (cog-stv-strength AAB) (cog-stv-strength A))
-                (min (cog-stv-confidence AAB) (cog-stv-confidence A))))))
+                (/ (cog-mean AAB) (cog-mean A))
+                (min (cog-confidence AAB) (cog-confidence A))))))
  

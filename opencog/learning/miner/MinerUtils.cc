@@ -25,12 +25,15 @@
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/random.h>
+#include <opencog/util/algorithm.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/core/PresentLink.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
@@ -59,7 +62,7 @@ HandleSetSeq MinerUtils::shallow_abstract(const Valuations& valuations, unsigned
 	valuations.inc_focus_variable();
 	HandleSetSeq remaining = shallow_abstract(valuations, ms);
 	valuations.dec_focus_variable();
-	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
+	append(shabs_per_var, remaining);
 	return shabs_per_var;
 }
 
@@ -106,7 +109,7 @@ HandleSet MinerUtils::focus_shallow_abstract(const Valuations& valuations, unsig
 			continue;
 
 		// Otherwise generate its shallow abstraction
-		if (Handle shabs = val_shallow_abstract(value))
+		if (Handle shabs = shallow_abstract_of_val(value))
 			shapats[shabs] += val_count;
 	}
 
@@ -194,7 +197,7 @@ bool MinerUtils::is_nullary(const Handle& h)
 	return h->is_node() or h->get_arity() == 0;
 }
 
-Handle MinerUtils::val_shallow_abstract(const Handle& value)
+Handle MinerUtils::shallow_abstract_of_val(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
 	if (is_nullary(value))
@@ -204,19 +207,22 @@ Handle MinerUtils::val_shallow_abstract(const Handle& value)
 	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 	Handle vardecl = variable_list(rnd_vars);
 
+	// TODO: this can probably be simplified using PresentLink, would
+	// entail to have RewriteLink::beta_reduce support PresentLink.
+
 	// Links wrapped with LocalQuoteLink
-	if (tt == AND_LINK) {
+	if (tt == AND_LINK or
+	    tt == OR_LINK or
+	    tt == NOT_LINK) {
 		return lambda(vardecl, local_quote(createLink(rnd_vars, tt)));
 	}
 
-	// Links wrapped with QuoteLink and UnquoteLinks
 	if (tt == BIND_LINK or       // TODO: should probabably be replaced
-                                // by scope link and its subtypes
+	                             // by scope link and its subtypes
 	    (tt == EVALUATION_LINK and
 	     value->getOutgoingAtom(0)->get_type() == GROUNDED_PREDICATE_NODE) or
 	    nameserver().isA(tt, FUNCTION_LINK) or
-	    nameserver().isA(tt, VIRTUAL_LINK))
-	{
+	    nameserver().isA(tt, VIRTUAL_LINK)) {
 		// TODO: comment out the following lines when issue #1843 on the
 		// atomspace repository has been fixed (see more about that
 		// below).
@@ -227,7 +233,6 @@ Handle MinerUtils::val_shallow_abstract(const Handle& value)
 		// 	uq_vars.push_back(unquote(var));
 
 		// return lambda(vardecl, quote(createLink(uq_vars, tt)));
-
 		// TODO: ignore these links for now!!! In order to support them
 		// we first need to address issue #1843 on the atomspace
 		// repository. That is because otherwise the quotations inside
@@ -237,7 +242,7 @@ Handle MinerUtils::val_shallow_abstract(const Handle& value)
 		return Handle::UNDEFINED;
 	}
 
-	// Links to ignore (till supported)
+	// Links to ignore no matter what (till supported)
 	if (tt == DEFINE_LINK)
 		return Handle::UNDEFINED;
 
@@ -247,8 +252,7 @@ Handle MinerUtils::val_shallow_abstract(const Handle& value)
 
 Handle MinerUtils::variable_list(const HandleSeq& vars)
 {
-	return vars.size() == 1 ? vars[0]
-		: createLink(vars, VARIABLE_LIST);
+	return vars.size() == 1 ? vars[0] : Handle(createVariableList(vars));
 }
 
 Handle MinerUtils::lambda(const Handle& vardecl, const Handle& body)
@@ -325,34 +329,27 @@ Handle MinerUtils::vardecl_compose(const Handle& vardecl, const HandleMap& var2s
 	}
 }
 
-Handle MinerUtils::remove_unary_and(const Handle& h)
-{
-	if (h->get_type() == AND_LINK and h->get_arity() == 1)
-		return h->getOutgoingAtom(0);
-	return h;
-}
-
-HandleSet MinerUtils::get_texts(const Handle& texts_cpt)
+HandleSeq MinerUtils::get_texts(const Handle& texts_cpt)
 {
 	// Retrieve all members of texts_cpt
-	HandleSet texts;
+	HandleSeq texts;
 	IncomingSet member_links = texts_cpt->getIncomingSetByType(MEMBER_LINK);
 	for (const LinkPtr l : member_links) {
 		Handle member = l->getOutgoingAtom(0);
 		if (member != texts_cpt)
-			texts.insert(member);
+			texts.push_back(member);
 	}
 	return texts;
 }
 
-unsigned MinerUtils::get_ms(const Handle& ms)
+unsigned MinerUtils::get_uint(const Handle& h)
 {
-	NumberNodePtr nn = NumberNodeCast(ms);
+	NumberNodePtr nn = NumberNodeCast(h);
 	return (unsigned)std::round(nn->get_value());
 }
 
 unsigned MinerUtils::support(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              unsigned ms)
 {
 	// Partition the pattern into strongly connected components
@@ -373,7 +370,7 @@ unsigned MinerUtils::support(const Handle& pattern,
 }
 
 unsigned MinerUtils::component_support(const Handle& component,
-                                       const HandleSet& texts,
+                                       const HandleSeq& texts,
                                        unsigned ms)
 {
 	if (totally_abstract(component))
@@ -382,14 +379,14 @@ unsigned MinerUtils::component_support(const Handle& component,
 }
 
 bool MinerUtils::enough_support(const Handle& pattern,
-                                const HandleSet& texts,
+                                const HandleSeq& texts,
                                 unsigned ms)
 {
-	return ms <= support(pattern, texts, ms);
+	return ms <= support_mem(pattern, texts, ms);
 }
 
 HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
-                                          const HandleSet& texts,
+                                          const HandleSeq& texts,
                                           unsigned ms)
 {
 	Valuations valuations(pattern, texts);
@@ -397,8 +394,9 @@ HandleSetSeq MinerUtils::shallow_abstract(const Handle& pattern,
 }
 
 HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
-                                         const HandleSet& texts,
-                                         unsigned ms)
+                                         const HandleSeq& texts,
+                                         unsigned ms,
+                                         unsigned mv)
 {
 	// Calculate all shallow abstractions of pattern
 	HandleSetSeq shabs_per_var = shallow_abstract(pattern, texts, ms);
@@ -411,6 +409,10 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 	for (const HandleSet& shabs : shabs_per_var) {
 		for (const Handle& sa : shabs) {
 			Handle npat = compose(pattern, {{vars.varseq[vari], sa}});
+
+			if (mv < get_variables(npat).size())
+				continue;
+
 			// Set the count of npat, stored in its shallow abstraction
 			set_support(npat, get_support(sa));
 			// Shallow_abstract should already have eliminated shallow
@@ -422,13 +424,36 @@ HandleSet MinerUtils::shallow_specialize(const Handle& pattern,
 	return results;
 }
 
-Handle MinerUtils::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
+Handle MinerUtils::mk_body(const HandleSeq& clauses)
+{
+	if (clauses.size() == 0)
+		return Handle::UNDEFINED;
+	if (use_present_link)
+		return Handle(createPresentLink(clauses));
+	if (clauses.size() == 1)
+		return clauses.front();
+	return Handle(createLink(clauses, AND_LINK));
+}
+
+Handle MinerUtils::mk_pattern_no_vardecl(const HandleSeq& clauses)
+{
+	return Handle(createLambdaLink(HandleSeq{mk_body(clauses)}));
+}
+
+Handle MinerUtils::mk_pattern_filtering_vardecl(const Handle& vardecl,
+                                                const HandleSeq& clauses)
 {
 	Handle fvd = filter_vardecl(vardecl, clauses);
-	Handle body = 1 < clauses.size() ? createLink(clauses, AND_LINK) : clauses[0];
+	Handle body = mk_body(clauses);
 	if (fvd != nullptr and body != nullptr)
 		return Handle(createLambdaLink(fvd, body));
 	return Handle::UNDEFINED;
+}
+
+Handle MinerUtils::mk_pattern(const Handle& vardecl,
+                              const HandleSeq& clauses)
+{
+	return Handle(createLambdaLink(vardecl, mk_body(clauses)));
 }
 
 HandleSeq MinerUtils::get_component_patterns(const Handle& pattern)
@@ -439,18 +464,25 @@ HandleSeq MinerUtils::get_component_patterns(const Handle& pattern)
 	const HandleSeqSeq comps(pl.get_components());
 	for (unsigned i = 0; i < comps.size(); ++i)
 	{
-		Handle comp = mk_pattern(MinerUtils::get_vardecl(pattern), comps[i]);
+		Handle comp = mk_pattern_filtering_vardecl(get_vardecl(pattern),
+		                                           comps[i]);
 		if (comp)
 			compats.push_back(comp);
 	}
 	return compats;
 }
 
+HandleSeqSeq MinerUtils::get_components(const HandleSeq& clauses)
+{
+	return PatternLink(mk_body(clauses)).get_components();
+}
+
 HandleSeq MinerUtils::get_conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {
 		Handle body = get_body(pattern);
-		if (body->get_type() == AND_LINK) {
+		Type bt = body->get_type();
+		if (bt == AND_LINK or bt == PRESENT_LINK) {
 			Handle vardecl = get_vardecl(pattern);
 			HandleSeq conjs;
 			for (const Handle& clause : body->getOutgoingSet()) {
@@ -466,7 +498,7 @@ HandleSeq MinerUtils::get_conjuncts(const Handle& pattern)
 }
 
 Handle MinerUtils::restricted_satisfying_set(const Handle& pattern,
-                                             const HandleSet& texts,
+                                             const HandleSeq& texts,
                                              unsigned ms)
 {
 	static AtomSpace tmp_texts_as; // TODO: fix to be thread safe
@@ -508,9 +540,10 @@ bool MinerUtils::totally_abstract(const Handle& pattern)
 	// Make sure the body is either a variable, or a conjunction of
 	// variables
 	Handle body = get_body(pattern);
-	if (body->get_type() == VARIABLE_NODE)
+	Type bt = body->get_type();
+	if (bt == VARIABLE_NODE)
 		return true;
-	if (body->get_type() != AND_LINK)
+	if (bt != AND_LINK and bt != PRESENT_LINK)
 		return false;
 	for (const Handle& ch : body->getOutgoingSet())
 		if (ch->get_type() != VARIABLE_NODE)
@@ -557,15 +590,24 @@ const Handle& MinerUtils::get_body(const Handle& pattern)
 	return pattern;
 }
 
-const HandleSeq& MinerUtils::get_clauses(const Handle& pattern)
+HandleSeq MinerUtils::get_clauses(const Handle& pattern)
 {
-	return get_body(pattern)->getOutgoingSet();
+	return get_clauses_of_body(get_body(pattern));
+}
+
+HandleSeq MinerUtils::get_clauses_of_body(const Handle& body)
+{
+	Type bt = body->get_type();
+	if (bt == AND_LINK or bt == PRESENT_LINK)
+		return body->getOutgoingSet();
+	return {body};
 }
 
 unsigned MinerUtils::n_conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {
-		if (get_body(pattern)->get_type() == AND_LINK)
+		Type bt = get_body(pattern)->get_type();
+		if (bt == AND_LINK or bt == PRESENT_LINK)
 			return get_body(pattern)->get_arity();
 		return 1;
 	}
@@ -583,13 +625,11 @@ Handle MinerUtils::remove_useless_clauses(const Handle& pattern)
 Handle MinerUtils::remove_useless_clauses(const Handle& vardecl,
                                           const Handle& body)
 {
-	// Copy clauses
-	HandleSeq clauses = body->get_type() == AND_LINK ?
-		body->getOutgoingSet() : HandleSeq{body};
-	// Remove useless ones
+	// Remove useless clauses
+	HandleSeq clauses = get_clauses(body);
 	remove_useless_clauses(vardecl, clauses);
-	// Reconstruct AndLink if necessary
-	return clauses.size() == 1 ? clauses[0] : Handle(createLink(clauses, AND_LINK));
+	// Reconstruct body
+	return mk_body(clauses);
 }
 
 void MinerUtils::remove_useless_clauses(const Handle& vardecl, HandleSeq& clauses)
@@ -681,11 +721,9 @@ Handle MinerUtils::expand_conjunction_disconnect(const Handle& cnjtion,
 	// Extend cnjtion_vars with pattern variables
 	cnjtion_vars.extend(get_variables(acpat));
 
-	// Expand cnjtion_body with pattern, flattening cnjtion_body if necessary
-	const Handle& cnjtion_body = get_body(cnjtion);
-	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
-		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
-	nclauses.push_back(get_body(acpat));
+	// Expand cnjtion body with pattern, flattening the body if necessary
+	HandleSeq nclauses = get_clauses(cnjtion);
+	append(nclauses, get_clauses(acpat));
 
 	// Remove redundant subclauses. This can happen if there's only one
 	// variable to connect, then some subclause turn out to be
@@ -694,8 +732,7 @@ Handle MinerUtils::expand_conjunction_disconnect(const Handle& cnjtion,
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
-		nbody = createLink(nclauses, AND_LINK),
-		npattern = Handle(createLambdaLink(nvardecl, nbody));
+		npattern = mk_pattern(nvardecl, nclauses);
 
 	return npattern;
 }
@@ -705,21 +742,29 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
                                               const Handle& cnjtion_var,
                                               const Handle& pattern_var)
 {
-	// Substitute pattern_var by cnjtion_var in pattern
-	Variables pattern_vars = get_variables(pattern);
 	HandleMap p2c{{pattern_var, cnjtion_var}};
-	Handle npat_body = pattern_vars.substitute_nocheck(get_body(pattern), p2c);
-	pattern_vars.erase(pattern_var);
+	return expand_conjunction_connect(cnjtion, pattern, p2c);
+}
 
-	// Extend cnjtion variables with the pattern variables, except pattern_var
+Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
+                                              const Handle& pattern,
+                                              const HandleMap& pv2cv)
+{
+	// Substitute pattern variables by cnjtion variables in pattern
+	Variables pattern_vars = get_variables(pattern);
+	Handle npat_body = pattern_vars.substitute_nocheck(get_body(pattern), pv2cv);
+	for (const auto& el : pv2cv)
+		pattern_vars.erase(el.first);
+
+	// Extend cnjtion variables with the pattern variables, except
+	// mapped variables
 	Variables cnjtion_vars = get_variables(cnjtion);
 	cnjtion_vars.extend(pattern_vars);
 
 	// Expand cnjtion body with npat_body, flattening cnjtion_body if necessary
 	const Handle& cnjtion_body = get_body(cnjtion);
-	HandleSeq nclauses = cnjtion_body->get_type() == AND_LINK ?
-		cnjtion_body->getOutgoingSet() : HandleSeq{cnjtion_body};
-	nclauses.push_back(npat_body);
+	HandleSeq nclauses = get_clauses(cnjtion_body);
+	append(nclauses, get_clauses_of_body(npat_body));
 
 	// Remove redundant subclauses. This can happen if there's only one
 	// variable to connect, then some subclause turn out to be
@@ -728,35 +773,70 @@ Handle MinerUtils::expand_conjunction_connect(const Handle& cnjtion,
 
 	// Recreate expanded conjunction
 	Handle nvardecl = cnjtion_vars.get_vardecl(),
-		nbody = nclauses.size() == 1 ? nclauses[0] : createLink(nclauses, AND_LINK),
-		npattern = Handle(createLambdaLink(nvardecl, nbody));
+		npattern = mk_pattern(nvardecl, nclauses);
 
 	return npattern;
 }
 
+HandleSet MinerUtils::expand_conjunction_connect_rec(const Handle& cnjtion,
+                                                     const Handle& pattern,
+                                                     const HandleSeq& texts,
+                                                     unsigned ms,
+                                                     unsigned mv,
+                                                     const HandleMap& pv2cv,
+                                                     unsigned pvi)
+{
+	HandleSet patterns;
+	const Variables& cvars = get_variables(cnjtion);
+	const Variables& pvars = get_variables(pattern);
+	for (; pvi < pvars.size(); pvi++) {
+		for (const Handle& cv : cvars.varseq) {
+			HandleMap pv2cv_ext(pv2cv);
+			pv2cv_ext[pvars.varseq[pvi]] = cv;
+			Handle npat = expand_conjunction_connect(cnjtion, pattern, pv2cv_ext);
+
+			if (get_variables(npat).size() <= mv) {
+
+				// If conjuncts have been dropped then it shouldn't be
+				// considered by that rule.
+				if (n_conjuncts(npat) <= n_conjuncts(cnjtion))
+					continue;
+
+				// Insert npat in the atomspace where cnjtion and pattern
+				// are, before memoizing its support.
+				if (cnjtion->getAtomSpace())
+					npat = cnjtion->getAtomSpace()->add_atom(npat);
+
+				// If npat does not have enough support, any recursive
+				// call will produce specializations that do not have
+				// enough support, thus can be ignored.
+				if (not enough_support(npat, texts, ms))
+					continue;
+
+				patterns.insert(npat);
+			}
+
+			HandleSet rrs = expand_conjunction_connect_rec(cnjtion, pattern,
+			                                               texts, ms, mv,
+			                                               pv2cv_ext, pvi + 1);
+			patterns.insert(rrs.begin(), rrs.end());
+		}
+	}
+	return patterns;
+}
+
 HandleSet MinerUtils::expand_conjunction(const Handle& cnjtion,
                                          const Handle& pattern,
-                                         const HandleSet& texts,
-                                         unsigned ms)
+                                         const HandleSeq& texts,
+                                         unsigned ms,
+                                         unsigned mv)
 {
 	// Alpha convert pattern, if necessary, to avoid collisions between
 	// cnjtion variables and pattern variables
 	Handle apat = alpha_convert(pattern, get_variables(cnjtion));
 
-	// For each variable in apat and cnjtion, create a connected
-	// pattern, retain it if enough support.
-	const Variables& cnjtion_vars = get_variables(cnjtion);
-	const Variables& apat_vars = get_variables(apat);
-	HandleSet patterns;
-	for (const Handle& pvar : apat_vars.varseq) {
-		for (const Handle& cvar : cnjtion_vars.varseq) {
-			Handle cpat = expand_conjunction_connect(cnjtion, apat, cvar, pvar);
-			if (not content_eq(cpat, cnjtion) and enough_support(cpat, texts, ms))
-				patterns.insert(cpat);
-		}
-	}
-
-	return patterns;
+	// Consider all variable mappings from apat to cnjtion
+	return expand_conjunction_connect_rec(cnjtion, apat, texts, ms, mv);
 }
 
 const Handle& MinerUtils::support_key()
@@ -779,9 +859,9 @@ double MinerUtils::get_support(const Handle& pattern)
 	return -1.0;
 }
 
-double MinerUtils::calc_support(const Handle& pattern,
-                                const HandleSet& texts,
-                                unsigned ms)
+double MinerUtils::support_mem(const Handle& pattern,
+                               const HandleSeq& texts,
+                               unsigned ms)
 {
 	double sup = get_support(pattern);
 	if (sup < 0) {

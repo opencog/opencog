@@ -49,10 +49,10 @@
 
 (define (ontological-inheritance-side-effect-free-formula OAB AB BA)
     (let
-        ((sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sBA (cog-stv-strength BA))
-         (cBA (cog-stv-confidence BA))
+        ((sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (sBA (cog-mean BA))
+         (cBA (cog-confidence BA))
         )
         (if 
             (<= sAB sBA)

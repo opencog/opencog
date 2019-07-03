@@ -65,10 +65,10 @@
              (f (Quote
                   (Lambda
                     (Unquote f-vardecl)
-                    (And
+                    (Present
                       (map Unquote cnj-bodies)))))
              (f-minsup (minsup-eval f texts ms))
-             (f-isurp (isurp-eval f texts)))
+             (f-isurp (isurp-eval mode f texts)))
         (Bind
           (VariableList
             typed-f-vardecl
@@ -91,8 +91,8 @@
 (define (gen-i-surprisingness-formula mode)
   (lambda (conclusion . premises)
 
-    (cog-logger-debug "(i-surprisingness-formula mode = ~a, conclusion = ~a, premises = ~a"
-                      mode conclusion premises)
+    ;; (cog-logger-debug "(i-surprisingness-formula mode = ~a, conclusion = ~a, premises = ~a"
+    ;;                   mode conclusion premises)
 
     (if (= 1 (length premises))
         (let* ((pat-isurp conclusion)

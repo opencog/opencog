@@ -36,6 +36,11 @@ namespace opencog
 class MinerUtils
 {
 public:
+	/**
+	 * Wrap conjuncts (including unary) with PresentLink rather than
+	 * AndLink.
+	 */
+	static const bool use_present_link = true;
 
 	/**
 	 * Given valuations produce all shallow abstractions reaching
@@ -125,7 +130,7 @@ public:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	static Handle val_shallow_abstract(const Handle& value);
+	static Handle shallow_abstract_of_val(const Handle& value);
 
 	/**
 	 * Wrap a VariableList around a variable list, if more than one
@@ -183,29 +188,21 @@ public:
 	                              const HandleMap& var2subdecl);
 
 	/**
-	 * If a body is an AndLink with one argument, remove it. For instance
-	 *
-	 * remove_uniry_and(And (Concept "A")) = (Concept "A")
-	 */
-	static Handle remove_unary_and(const Handle& h);
-
-	/**
 	 * Given a texts concept node, retrieve all its members
 	 */
-	static HandleSet get_texts(const Handle& texts_cpt);
+	static HandleSeq get_texts(const Handle& texts_cpt);
 
 	/**
-	 * Given a number node holding the minimum support return the
-	 * positive integer.
+	 * Return the non-negative integer held by a number node.
 	 */
-	static unsigned get_ms(const Handle& ms);
+	static unsigned get_uint(const Handle& h);
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
 	 * support up to ms (to avoid unnecessary calculations).
 	 */
 	static unsigned support(const Handle& pattern,
-	                        const HandleSet& texts,
+	                        const HandleSeq& texts,
 	                        unsigned ms);
 
 	/**
@@ -213,7 +210,7 @@ public:
 	 * its variables depends on other clauses).
 	 */
 	static unsigned component_support(const Handle& pattern,
-	                                  const HandleSet& texts,
+	                                  const HandleSeq& texts,
 	                                  unsigned ms);
 
 	/**
@@ -222,7 +219,7 @@ public:
 	 * ms.
 	 */
 	static bool enough_support(const Handle& pattern,
-	                           const HandleSet& texts,
+	                           const HandleSeq& texts,
 	                           unsigned ms);
 
 	/**
@@ -234,20 +231,46 @@ public:
 	 * details.
 	 */
 	static HandleSetSeq shallow_abstract(const Handle& pattern,
-	                                     const HandleSet& texts,
+	                                     const HandleSeq& texts,
 	                                     unsigned ms);
 
 	/**
 	 * Return all shallow specializations of pattern with support ms
 	 * according to texts.
+	 *
+	 * mv is the maximum number of variables allowed in the resulting
+	 * patterns.
 	 */
 	static HandleSet shallow_specialize(const Handle& pattern,
-	                                    const HandleSet& texts,
-	                                    unsigned ms);
+	                                    const HandleSeq& texts,
+	                                    unsigned ms,
+	                                    unsigned mv=UINT_MAX);
 
 	/**
-	 * Given a vardecl and a body, filter the vardecl to contain only
-	 * variable of the body, and create a Lambda with them.
+	 * Create a pattern body from clauses, introducing an AndLink if
+	 * necessary.
+	 */
+	static Handle mk_body(const HandleSeq& clauses);
+
+	/**
+	 * Given a sequence of clause create a LambdaLink of it without
+	 * variable declaration, introducing an AndLink if necessary.
+	 */
+	static Handle mk_pattern_no_vardecl(const HandleSeq& clauses);
+
+	/**
+	 * Given a vardecl and a sequence of clauses, filter the vardecl to
+	 * contain only variable of the body, and create a Lambda with
+	 * them.
+	 */
+	static Handle mk_pattern_filtering_vardecl(const Handle& vardecl,
+	                                           const HandleSeq& clauses);
+
+	/**
+	 * Given a vardecl and a sequence of clauses, build a pattern. If
+	 * use_present_link is true, then the result will be
+	 *
+	 * (Lambda <vardecl> (Present <clauses-1> ... <clauses-n>))
 	 */
 	static Handle mk_pattern(const Handle& vardecl, const HandleSeq& clauses);
 
@@ -256,6 +279,12 @@ public:
 	 * connected components.
 	 */
 	static HandleSeq get_component_patterns(const Handle& pattern);
+
+	/**
+	 * Like above but consider a sequence of clauses instead of a
+	 * pattern, and return a sequence of sequences of clauses.
+	 */
+	static HandleSeqSeq get_components(const HandleSeq& clauses);
 
 	/**
 	 * Given a pattern, split it into its disjuncts.
@@ -285,9 +314,12 @@ public:
 	 * instead of one
 	 *
 	 * { (And (Concept "A") (And (Concept "B") (Concept "C"))) }
+	 *
+	 * Also, the pattern may match any subhypergraph of texts, not just
+	 * the root atoms (TODO: we probably don't want that!!!).
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
-	                                        const HandleSet& texts,
+	                                        const HandleSeq& texts,
 	                                        unsigned ms=UINT_MAX);
 
 	/**
@@ -341,7 +373,8 @@ public:
 	 * Given a pattern, return its clause. If the pattern is not a
 	 * scope link (i.e. a constant/text), then behavior is undefined.
 	 */
-	static const HandleSeq& get_clauses(const Handle& pattern);
+	static HandleSeq get_clauses(const Handle& pattern);
+	static HandleSeq get_clauses_of_body(const Handle& body);
 
 	/**
 	 * Return the number of conjuncts in a pattern. That is, if the
@@ -415,6 +448,28 @@ public:
 	                                         const Handle& pattern_var);
 
 	/**
+	 * Like expand_conjunction_connect but consider a mapping from
+	 * variables of pattern to variables of cnjtion.
+	 */
+	static Handle expand_conjunction_connect(const Handle& cnjtion,
+	                                         const Handle& pattern,
+	                                         const HandleMap& pv2cv);
+
+	/**
+	 * Like expand_conjunction_connect above but recursively consider
+	 * all variable mappings from pattern to cnjtion.
+	 *
+	 * pvi is the variable index of pattern variable declaration.
+	 */
+	static HandleSet expand_conjunction_connect_rec(const Handle& cnjtion,
+	                                                const Handle& pattern,
+	                                                const HandleSeq& texts,
+	                                                unsigned ms,
+	                                                unsigned mv,
+	                                                const HandleMap& pv2cv=HandleMap(),
+	                                                unsigned pvi=0);
+
+	/**
 	 * Given cnjtion and pattern, consider all possible connections
 	 * (a.k.a linkages) and expand cnjtion accordingly. For instance if
 	 *
@@ -431,11 +486,15 @@ public:
 	 * It will also only include patterns with minimum support ms
 	 * according to texts, and perform alpha-conversion when necessary.
 	 * If an expansion is cnjtion itself it will be dismissed.
+	 *
+	 * mv is the maximum number of variables allowed in the resulting
+	 * patterns.
 	 */
 	static HandleSet expand_conjunction(const Handle& cnjtion,
 	                                    const Handle& pattern,
-	                                    const HandleSet& texts,
-	                                    unsigned ms);
+	                                    const HandleSeq& texts,
+	                                    unsigned ms,
+	                                    unsigned mv=UINT_MAX);
 
 	/**
 	 * Return an atom to serve as key to store the support value.
@@ -459,10 +518,13 @@ public:
 	/**
 	 * Like get_support, but if there is no value associated to
 	 * support_key() then calculate and set the support.
+	 *
+	 * Warning: note that the support is gonna be up to ms, so such
+	 * memoization should not be used if ms is to be changed.
 	 */
-	static double calc_support(const Handle& pattern,
-	                           const HandleSet& texts,
-	                           unsigned ms);
+	static double support_mem(const Handle& pattern,
+	                          const HandleSeq& texts,
+	                          unsigned ms);
 };
 
 } // ~namespace opencog

@@ -30,18 +30,18 @@
 
 (define (context-free-to-sensitive-formula Context CA)
     (cog-set-tv! Context 
-        (cog-new-stv (cog-stv-strength CA) (cog-stv-confidence CA))))
+        (cog-new-stv (cog-mean CA) (cog-confidence CA))))
 ;            ; strength (now just computed as the mean of the strengths of C & A)
 ;           (/
 ;              (+
-;                    (cog-stv-strength C) (cog-stv-strength A))
+;                    (cog-mean C) (cog-mean A))
 ;                2)
 ;            ; confidence
 ;            (*
-;                (cog-stv-confidence C)
-;                (cog-stv-confidence A)
-;                (- 1 (entropy (cog-stv-strength C)))
-;                (- 1 (entropy (cog-stv-strength A))))
+;                (cog-confidence C)
+;                (cog-confidence A)
+;                (- 1 (entropy (cog-mean C)))
+;                (- 1 (entropy (cog-mean A))))
 
 ;(define (entropy p)
 ;    (-

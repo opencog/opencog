@@ -59,12 +59,12 @@
 
 (define (precise-modus-ponens-formula A AB notAB B)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (snotAB (cog-stv-strength notAB))
-         (cnotAB (cog-stv-confidence notAB)))
+        ((sA (cog-mean A))
+         (cA (cog-confidence A))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (snotAB (cog-mean notAB))
+         (cnotAB (cog-confidence notAB)))
         (cog-set-tv!
             B
             (stv 

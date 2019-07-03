@@ -16,7 +16,7 @@
   #:use-module (opencog nlp sureal)
   #:use-module (opencog openpsi)
   #:use-module (opencog pln)
-  #:use-module (opencog rule-engine)
+  #:use-module (opencog ure)
   #:use-module (opencog ghost)
   #:export (
     ; -------------------- Perception -------------------- ;

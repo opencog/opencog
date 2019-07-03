@@ -14,10 +14,10 @@ def set_type_ctor_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
 
+include "opencog/attentionbank/types/attention_types.pyx"
 include "opencog/nlp/types/nlp_types.pyx"
 include "opencog/spacetime/atom-types/spacetime_types.pyx"
-include "opencog/attention/attention_types.pyx"
-include "opencog/learning/PatternMiner/types/patternminer_types.pyx"
+include "opencog/spacetime/octomap/octomap_types.pyx"
 
 cdef extern :
     void nlp_types_init()
@@ -28,12 +28,8 @@ cdef extern :
 cdef extern :
     void attention_types_init()
 
-cdef extern :
-    void patternminer_types_init()
-
 nlp_types_init()
 spacetime_types_init()
 attention_types_init()
-patternminer_types_init()
 
 types = get_refreshed_types()

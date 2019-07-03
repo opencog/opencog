@@ -60,16 +60,16 @@
 
 (define (transitive-similarity-formula A B C AB BC AC)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sB (cog-stv-strength B))
-         (cB (cog-stv-confidence B))
-         (sC (cog-stv-strength C))
-         (cC (cog-stv-confidence C))
-         (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sBC (cog-stv-strength BC))
-         (cBC (cog-stv-confidence BC)))
+        ((sA (cog-mean A))
+         (cA (cog-confidence A))
+         (sB (cog-mean B))
+         (cB (cog-confidence B))
+         (sC (cog-mean C))
+         (cC (cog-confidence C))
+         (sAB (cog-mean AB))
+         (cAB (cog-confidence AB))
+         (sBC (cog-mean BC))
+         (cBC (cog-confidence BC)))
         (cog-set-tv!
             AC 
             (stv 

@@ -39,8 +39,8 @@
       rewrite)))
 
 (define (negation-introduction-formula N A)
-  (let* ((A-s (cog-stv-strength A))
-         (A-c (cog-stv-confidence A)))
+  (let* ((A-s (cog-mean A))
+         (A-c (cog-confidence A)))
     (cog-merge-hi-conf-tv! N (stv (- 1 A-s) A-c))))
 
 ;; Name the rules

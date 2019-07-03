@@ -18,11 +18,22 @@
 ;;
 ;; (Lambda
 ;;   (Variable "$X")
-;;   (Inheritance
-;;     (Concept "A")
-;;     (Variable "$X")))
-(define results (cog-mine (cog-atomspace) #:minsup 2))
+;;   (Present
+;;     (Inheritance
+;;       (Concept "A")
+;;       (Variable "$X"))))
+;;
+;; Since the pattern has no conjunction the surprisingness measure is
+;; none (as the current surprisingness measures consider the
+;; surprisingness of conjunctions of components)
+(define results-as (cog-mine (cog-atomspace)
+                             #:minsup 2
+                             #:incremental-expansion #f
+                             #:surprisingness 'none))
 
 ;; Call the miner on the text set of interest instead, should yield
 ;; the same results.
-(cog-mine (list AB AC) #:minsup 2)
+(define results-lst (cog-mine (list AB AC)
+                              #:minsup 2
+                              #:incremental-expansion #f
+                              #:surprisingness 'none))

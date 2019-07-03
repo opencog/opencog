@@ -1,6 +1,10 @@
 
 ADD_SUBDIRECTORY (atom-types)
+
 IF (HAVE_OCTOMAP)
 	ADD_SUBDIRECTORY (octomap)
 	ADD_SUBDIRECTORY (pointmemory)
+ELSE (HAVE_OCTOMAP)
+	FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/octomap/octomap_types.pyx" "\n")
 ENDIF (HAVE_OCTOMAP)
+

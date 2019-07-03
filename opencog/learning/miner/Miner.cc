@@ -42,19 +42,16 @@ namespace opencog
 // 7. make sure that filtering is still meaningfull
 
 MinerParameters::MinerParameters(unsigned ms, unsigned iconjuncts,
-                                 const Handle& ipat, int maxd,
-                                 double io)
+                                 const Handle& ipat, int maxd)
 	: minsup(ms), initconjuncts(iconjuncts), initpat(ipat),
-	  maxdepth(maxd), info(io)
+	  maxdepth(maxd)
 {
 	// Provide initial pattern if none
 	if (not initpat) {
 		HandleSeq vars = MinerUtils::gen_rand_variables(initconjuncts);
-		Handle vardecl = 1 < vars.size() ?
-		                     createLink(vars, VARIABLE_LIST) : vars[0];
-		Handle body = 1 < vars.size() ?
-		                  createLink(vars, AND_LINK) : vars[0];
-		initpat = createLambdaLink(vardecl, body);
+		Handle vardecl = MinerUtils::variable_list(vars);
+		Handle body = MinerUtils::mk_body(vars);
+		initpat = MinerUtils::lambda(vardecl, body);
 	}
 
 	// Wrap a Lambda around if none
@@ -78,22 +75,19 @@ Miner::Miner(const MinerParameters& prm)
 
 HandleTree Miner::operator()(const AtomSpace& texts_as)
 {
-	HandleSet texts;
+	HandleSeq texts;
 	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                             opencog::ATOM, true);
 	return operator()(texts);
 }
 
-HandleTree Miner::operator()(const HandleSet& texts)
+HandleTree Miner::operator()(const HandleSeq& texts)
 {
-	// If the initial pattern is specialized, this initial filtering
-	// may save some computation
-	HandleSet fltexts = filter_texts(param.initpat, texts);
-	return specialize(param.initpat, fltexts, param.maxdepth);
+	return specialize(param.initpat, texts, param.maxdepth);
 }
 
 HandleTree Miner::specialize(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              int maxdepth)
 {
 	// TODO: decide what to choose and remove or comment
@@ -102,7 +96,7 @@ HandleTree Miner::specialize(const Handle& pattern,
 }
 
 HandleTree Miner::specialize(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              const Valuations& valuations,
                              int maxdepth)
 {
@@ -128,7 +122,7 @@ HandleTree Miner::specialize(const Handle& pattern,
 }
 
 HandleTree Miner::specialize_alt(const Handle& pattern,
-                                 const HandleSet& texts,
+                                 const HandleSeq& texts,
                                  const Valuations& valuations,
                                  int maxdepth)
 {
@@ -159,7 +153,7 @@ HandleTree Miner::specialize_alt(const Handle& pattern,
 }
 
 bool Miner::terminate(const Handle& pattern,
-                      const HandleSet& texts,
+                      const HandleSeq& texts,
                       const Valuations& valuations,
                       int maxdepth) const
 {
@@ -171,12 +165,11 @@ bool Miner::terminate(const Handle& pattern,
 		// There is no more variable to specialize from
 		valuations.no_focus() or
 		// The pattern doesn't have enough support
-		// TODO: it seems the text is always filtered prior anyway
-		not enough_support(pattern, texts);
+		not MinerUtils::enough_support(pattern, texts, param.minsup);
 }
 
 HandleTree Miner::specialize_shabs(const Handle& pattern,
-                                   const HandleSet& texts,
+                                   const HandleSeq& texts,
                                    const Valuations& valuations,
                                    int maxdepth)
 {
@@ -208,7 +201,7 @@ HandleTree Miner::specialize_shabs(const Handle& pattern,
 }
 
 HandleTree Miner::specialize_shapat(const Handle& pattern,
-                                    const HandleSet& texts,
+                                    const HandleSeq& texts,
                                     const Handle& var,
                                     const Handle& shapat,
                                     int maxdepth)
@@ -220,101 +213,16 @@ HandleTree Miner::specialize_shapat(const Handle& pattern,
 	if (MinerUtils::n_conjuncts(npat) < param.initconjuncts)
 		return HandleTree();
 
-	// Generate the corresponding text
-	HandleSet fltexts = filter_texts(npat, texts);
-
 	// That specialization doesn't have enough support, skip it
 	// and its specializations.
-	if (not enough_support(npat, fltexts))
+	if (not MinerUtils::enough_support(npat, texts, param.minsup))
 		return HandleTree();
 
 	// Specialize npat from all variables (with new valuations)
-	HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
+	HandleTree nvapats = specialize(npat, texts, maxdepth - 1);
 
 	// Return npat and its children
 	return HandleTree(npat, {nvapats});
-}
-
-bool Miner::enough_support(const Handle& pattern,
-                           const HandleSet& texts) const
-{
-	return param.minsup <= support(pattern, texts, param.minsup);
-}
-
-unsigned Miner::support(const Handle& pattern,
-                        const HandleSet& texts,
-                        unsigned ms) const
-{
-	HandleSeq cps(MinerUtils::get_component_patterns(pattern));
-
-	// Likely a constant pattern
-	if (cps.empty())
-	    return 1;
-
-	// Otherwise aggregate the counts in a heuristic fashion
-	std::vector<unsigned> supports;
-	boost::transform(cps, std::back_inserter(supports),
-	                 [&](const Handle& cp)
-	                 { return MinerUtils::component_support(cp, texts, ms); });
-	return support(supports);
-}
-
-unsigned Miner::support(const std::vector<unsigned>& supports) const
-{
-	double minf = *boost::min_element(supports),
-		timesf = boost::accumulate(supports, 1, std::multiplies<unsigned>()),
-		f = param.info * minf + (1 - param.info) * timesf;
-	return std::floor(f);
-}
-
-HandleSet Miner::filter_texts(const Handle& pattern,
-                              const HandleSet& texts) const
-{
-	// No need to filter if most abstract
-	if (MinerUtils::totally_abstract(pattern))
-		return texts;
-
-	// If it has more than one conjunct, then TODO: it's probably the
-	// union of the texts of all its conjuncts.
-	if (1 < MinerUtils::n_conjuncts(pattern))
-		return texts;
-
-	// Otherwise it is a single conjunct pattern
-	HandleSet filtrd;
-	for (const auto& text : texts)
-		if (match(pattern, text))
-			filtrd.insert(text);
-	return filtrd;
-}
-
-bool Miner::match(const Handle& pattern, const Handle& text) const
-{
-	// If constant pattern, matching ammounts to equality
-	if (pattern->get_type() != LAMBDA_LINK)
-		return content_eq(pattern, text);
-
-	// Ignore text of these types
-	Type tt = text->get_type();
-	if (tt == DEFINE_LINK or
-	    tt == DEFINED_SCHEMA_NODE)
-		return false;
-
-	// Otherwise see if pattern matches text
-	return (bool)matched_results(pattern, text);
-}
-
-Handle Miner::matched_results(const Handle& pattern, const Handle& text) const
-{
-	// If I use a temporary atomspace on stack, then the atoms in it
-	// get deleted, grrrr, would need to use a smart pointer.
-	tmp_as.clear();
-	tmp_as.add_atom(text);
-	AtomSpace tmp_pattern_as(&tmp_as);
-	Handle tmp_pattern = tmp_pattern_as.add_atom(pattern),
-		tmp_text = tmp_as.add_atom(MinerUtils::quote(text)),
-		ml = tmp_as.add_link(MAP_LINK, tmp_pattern, tmp_text);
-	Instantiator inst(&tmp_as);
-	return HandleCast(inst.execute(ml));
 }
 
 } // namespace opencog

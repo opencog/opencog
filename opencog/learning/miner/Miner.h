@@ -51,11 +51,11 @@ struct MinerParameters {
 	MinerParameters(unsigned minsup=1,
 	                unsigned conjuncts=1,
 	                const Handle& initpat=Handle::UNDEFINED,
-	                int maxdepth=-1,
-	                double info=1.0);
+	                int maxdepth=-1);
 
-	// Minimum support. Mined patterns must have a count equal or above
-	// this value.
+	// TODO: change frequency by support!!!
+	// Minimum support. Mined patterns must have a frequency equal or
+	// above this value.
 	unsigned minsup;
 
 	// Initial number of conjuncts. This value is overwritten by the
@@ -77,34 +77,13 @@ struct MinerParameters {
 	// depth limit. Depth is the number of specializations between the
 	// initial pattern and the produced patterns.
 	int maxdepth;
-
-	// Experimental: modify how the count (a.k.a. support) of strongly
-	// connected components is calculated from the counts of its
-	// components. Specifically it will go from c1*...*cn to
-	// min(c1,...,cn), where c1 to cn are the counts of each
-	// component. This allows to dismiss abstractions that are likely
-	// not to lead to specializations with enough support.
-	//
-	// If the parameter equals to 0 the count of the whole pattern is
-	// calculated as the product of c1 to cn, if it equals to 1 the
-	// count of the whole pattern is calculated as the min of c1 to
-	// cn. And if the value is between, it is calculated as a linear
-	// combination of both.
-	//
-	// It is called info for mutual information or its n-ary
-	// generalizations (like interaction information). What it means is
-	// that when info is low subsequent specializations are likely
-	// independant, while when info is high subsequent specializations
-	// are likely dependant and thus we can afford to estimate the
-	// count of the specializations by the lowest count of its
-	// component.
-	double info;
 };
 
 /**
- * Pattern miner. Mined patterns should be compatible with the pattern
- * matcher, that is if feed to the pattern matcher, the latter should
- * return as many candidates as the pattern's count.
+ * Experimental pattern miner. Mined patterns should be compatible
+ * with the pattern matcher, that is if feed to the pattern matcher,
+ * the latter should return as many candidates as the pattern's
+ * frequency.
  */
 class Miner
 {
@@ -119,22 +98,22 @@ public:
 	/**
 	 * Mine the given AtomSpace and return a tree of patterns linked by
 	 * specialization relationship (children are specializations of
-	 * parent) with count (a.k.a. support) equal to or above minsup,
-	 * starting from the initial pattern, excluded.
+	 * parent) with frequency equal to or above minsup, starting from
+	 * the initial pattern, excluded.
 	 */
 	HandleTree operator()(const AtomSpace& texts_as);
 
 	/**
 	 * Like above but only mine amongst the provided text collection.
 	 */
-	HandleTree operator()(const HandleSet& texts);
+	HandleTree operator()(const HandleSeq& texts);
 
 	/**
 	 * Specialization. Given a pattern and a collection to text atoms,
 	 * generate all specialized patterns of the given pattern.
 	 */
 	HandleTree specialize(const Handle& pattern,
-	                      const HandleSet& texts,
+	                      const HandleSeq& texts,
 	                      int maxdepth=-1);
 
 	/**
@@ -142,7 +121,7 @@ public:
 	 * valuations.
 	 */
 	HandleTree specialize(const Handle& pattern,
-	                      const HandleSet& texts,
+	                      const HandleSeq& texts,
 	                      const Valuations& valuations,
 	                      int maxdepth);
 
@@ -150,7 +129,7 @@ public:
 	 * Alternate specialization that reflects how the URE would work.
 	 */
 	HandleTree specialize_alt(const Handle& pattern,
-	                          const HandleSet& texts,
+	                          const HandleSeq& texts,
 	                          const Valuations& valuations,
 	                          int maxdepth);
 
@@ -167,7 +146,7 @@ private:
 	 * whether the valuation has any variable left to specialize from.
 	 */
 	bool terminate(const Handle& pattern,
-	               const HandleSet& texts,
+	               const HandleSeq& texts,
 	               const Valuations& valuations,
 	               int maxdepth) const;
 
@@ -178,7 +157,7 @@ private:
 	 * obtained specializations.
 	 */
 	HandleTree specialize_shabs(const Handle& pattern,
-	                            const HandleSet& texts,
+	                            const HandleSeq& texts,
 	                            const Valuations& valuations,
 	                            int maxdepth);
 
@@ -188,46 +167,47 @@ private:
 	 * obtained specialization.
 	 */
 	HandleTree specialize_shapat(const Handle& pattern,
-	                             const HandleSet& texts,
+	                             const HandleSeq& texts,
 	                             const Handle& var,
 	                             const Handle& shapat,
 	                             int maxdepth);
 
 	/**
 	 * Calculate if the pattern has enough support w.r.t. to the given
-	 * texts, that is whether its count is greater than or equal to
-	 * minsup.
+	 * texts, that is whether its frequency is greater than or equal
+	 * to minsup.
 	 */
 	bool enough_support(const Handle& pattern,
-	                    const HandleSet& texts) const;
+	                    const HandleSeq& texts) const;
 
 	/**
-	 * Given a pattern and a text corpus, calculate the pattern count,
-	 * that is the number of matches if pattern is strongly connected.
+	 * Given a pattern and a text corpus, calculate the pattern
+	 * frequency, that is the number of matches if pattern is strongly
+	 * connected.
 	 *
-	 * If pattern is not strongly connected and some heuristic is in
-	 * place, then the definition of count deviates from the usual one
-	 * and corresponds to the minimum count over all strongly connected
-	 * components of that pattern.
+	 * If pattern is not strongly connected AND some heuristic is in
+	 * place TODO, then the definition of frequency deviates from the
+	 * usual one and corresponds to the minimum frequency over all
+	 * strongly connected components of that pattern.
 	 *
-	 * ms is used to halt the count calculation if it reaches a certain
-	 * maximum, for saving resources.
+	 * ms is used to halt the frequency calculation if it reaches a
+	 * certain maximum, for saving resources.
 	 */
-	unsigned support(const Handle& pattern,
-	                 const HandleSet& texts,
-	                 unsigned ms) const;
+	unsigned freq(const Handle& pattern,
+	              const HandleSeq& texts,
+	              unsigned ms) const;
 
 	/**
-	 * Calculate the count of the whole pattern, given the count of
-	 * it's components.
+	 * Calculate the frequency of the whole pattern, given the
+	 * frequency of it's components.
 	 */
-	unsigned support(const std::vector<unsigned>& supports) const;
+	unsigned freq(const std::vector<unsigned>& freqs) const;
 
 	/**
 	 * Filter in only texts matching the pattern
 	 */
-	HandleSet filter_texts(const Handle& pattern,
-	                       const HandleSet& texts) const;
+	HandleSeq filter_texts(const Handle& pattern,
+	                       const HandleSeq& texts) const;
 
 	/**
 	 * Check whether a pattern matches a text.

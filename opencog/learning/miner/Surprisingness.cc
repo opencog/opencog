@@ -25,6 +25,9 @@
 
 #include "MinerUtils.h"
 
+#include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/random.h>
+#include <opencog/util/dorepeat.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/empty_string.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -32,10 +35,14 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/min_element.hpp>
+#include <boost/range/algorithm/sort.hpp>
+#include <boost/algorithm/cxx11/all_of.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/math/special_functions/binomial.hpp>
 
@@ -46,7 +53,7 @@
 namespace opencog {
 
 double Surprisingness::isurp_old(const Handle& pattern,
-                                 const HandleSet& texts,
+                                 const HandleSeq& texts,
                                  bool normalize)
 {
 	// Strictly speaking it should be the power but we use binomial for
@@ -56,7 +63,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 
 	// Function calculating the probability of a pattern
 	auto prob = [&](const Handle& pattern) {
-		double sup = MinerUtils::calc_support(pattern, texts, (unsigned)total_count);
+		double sup = MinerUtils::support(pattern, texts, (unsigned)total_count);
 		return sup / total_count;
 	};
 	auto blk_prob = [&](const HandleSeq& block) {
@@ -72,7 +79,7 @@ double Surprisingness::isurp_old(const Handle& pattern,
 		return boost::accumulate(partition | boost::adaptors::transformed(blk_prob),
 		                         1.0, std::multiplies<double>());
 	};
-	HandleSeqSeqSeq prtns = partitions(pattern);
+	HandleSeqSeqSeq prtns = partitions_without_pattern(pattern);
 	std::vector<double> estimates(prtns.size());
 	boost::transform(prtns, estimates.begin(), iprob);
 	auto p = std::minmax_element(estimates.begin(), estimates.end());
@@ -80,38 +87,32 @@ double Surprisingness::isurp_old(const Handle& pattern,
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, pattern_prob);
-	return normalize ? dst / pattern_prob : dst;
+	return std::min(normalize? dst / pattern_prob : dst, 1.0);
 }
 
 double Surprisingness::isurp(const Handle& pattern,
-                             const HandleSet& texts,
+                             const HandleSeq& texts,
                              bool normalize)
 {
-	// Calculate the empiric probability of pattern
-	double emp = emp_prob(pattern, texts);
-
 	// Calculate the probability estimate of each partition based on
 	// independent assumption of between each partition block, taking
 	// into account the linkage probability.
 	std::vector<double> estimates;
-	for (const HandleSeqSeq& partition : partitions(pattern)) {
+	for (const HandleSeqSeq& partition : partitions_without_pattern(pattern)) {
 		double jip = ji_prob(partition, pattern, texts);
 		estimates.push_back(jip);
-		// double ratio = jip / emp;
-		// logger().debug() << "ratio = " << ratio;
 	}
 	auto mmp = std::minmax_element(estimates.begin(), estimates.end());
 	double emin = *mmp.first, emax = *mmp.second;
-	// logger().debug() << "emin = " << emin << ", emax = " << emax
-	//                  << ", emp = " << emp;
+
+	// Calculate the empirical probability of pattern, using
+	// boostrapping if necessary
+	double emp = emp_prob_pbs_mem(pattern, texts, emax);
 
 	// Calculate the I-Surprisingness, normalized if requested.
 	double dst = dst_from_interval(emin, emax, emp);
-	// logger().debug() << "dst = " << dst
-	//                  << ", normalize = " << normalize
-	//                  << ", ndst = " << dst / emp;
-
-	return normalize ? dst / emp : dst;
+	double maxprb = std::max(emp, emax);
+	return std::min(normalize ? dst / maxprb : dst, 1.0);
 }
 
 Handle Surprisingness::isurp_key()
@@ -180,28 +181,20 @@ HandleSeqSeqSeq Surprisingness::partitions(HandleSeq::const_iterator from,
 	return res;
 }
 
-HandleSeqSeqSeq Surprisingness::partitions(const Handle& pattern)
+HandleSeqSeqSeq Surprisingness::partitions_without_pattern(const Handle& pattern)
 {
 	HandleSeqSeqSeq prtns = partitions(MinerUtils::get_clauses(pattern));
 	prtns.resize(prtns.size() - 1);
 	// prtns.resize(1); // comment this output to only consider
-	                    // singleton blocks (convenient for debugging)
+   //                  // singleton blocks (convenient for debugging)
 	return prtns;
 }
 
 Handle Surprisingness::add_pattern(const HandleSeq& block, AtomSpace& as)
 {
-	return as.add_link(LAMBDA_LINK, as.add_link(AND_LINK, block));
-}
-
-LambdaLinkPtr Surprisingness::mk_lambda(const HandleSeq& block)
-{
-	return createLambdaLink(HandleSeq{createLink(block, AND_LINK)});
-}
-
-Handle Surprisingness::mk_pattern(const HandleSeq& block)
-{
-	return Handle(mk_lambda(block));
+	return as.add_link(LAMBDA_LINK,
+	                   block.size() == 1 ? block.front()
+	                   : as.add_link(AND_LINK, block));
 }
 
 HandleSeq Surprisingness::add_subpatterns(const HandleSeqSeq& partition,
@@ -234,18 +227,18 @@ HandleSeq Surprisingness::joint_variables(const Handle& pattern,
 
 unsigned Surprisingness::value_count(const HandleSeq& block,
                                      const Handle& var,
-                                     const HandleSet& texts)
+                                     const HandleSeq& texts)
 {
-	Valuations vs(mk_pattern(block), texts);
+	Valuations vs(MinerUtils::mk_pattern_no_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
 	return values.keys().size();
 }
 
 HandleCounter Surprisingness::value_distribution(const HandleSeq& block,
                                                  const Handle& var,
-                                                 const HandleSet& texts)
+                                                 const HandleSeq& texts)
 {
-	Valuations vs(mk_pattern(block), texts);
+	Valuations vs(MinerUtils::mk_pattern_no_vardecl(block), texts);
 	HandleUCounter values = vs.values(var);
 	HandleCounter dist;
 	double total = values.total_count();
@@ -273,17 +266,138 @@ double Surprisingness::inner_product(const std::vector<HandleCounter>& dists)
 	return p;
 }
 
-double Surprisingness::emp_prob(const Handle& pattern, const HandleSet& texts)
+double Surprisingness::universe_count(const Handle& pattern,
+                                      const HandleSeq& texts)
 {
-	double ucount = pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
-	double sup = MinerUtils::calc_support(pattern, texts, (unsigned)ucount);
-	// logger().debug() << "prob(" << oc_to_string(pattern) << ") = " << "sup = " << sup << ", ucount = " << ucount << ", res = " << sup/ucount;
+	return std::pow((double)texts.size(), MinerUtils::n_conjuncts(pattern));
+}
+
+double Surprisingness::prob_to_support(const Handle& pattern,
+                                       const HandleSeq& texts,
+                                       double prob)
+{
+	return prob * universe_count(pattern, texts);
+}
+
+double Surprisingness::emp_prob(const Handle& pattern, const HandleSeq& texts)
+{
+	double ucount = universe_count(pattern, texts);
+	unsigned ms = (unsigned)std::min((double)UINT_MAX, ucount);
+	double sup = MinerUtils::support(pattern, texts, ms);
 	return sup / ucount;
+}
+
+double Surprisingness::emp_prob_mem(const Handle& pattern, const HandleSeq& texts)
+{
+	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
+	if (emp_prob_tv) {
+		return emp_prob_tv->get_mean();
+	}
+	double ep = emp_prob(pattern, texts);
+	set_emp_prob(pattern, ep);
+	return ep;
+}
+
+double Surprisingness::emp_prob_subsmp(const Handle& pattern,
+                                       const HandleSeq& texts,
+                                       unsigned subsize)
+{
+	return emp_prob(pattern,
+	                subsize < texts.size() ?
+	                subsmp(texts, subsize) : texts);
+}
+
+HandleSeq Surprisingness::subsmp(const HandleSeq& texts, unsigned subsize)
+{
+	unsigned ts = texts.size();
+	if (ts/2 <= subsize and subsize < ts) {
+		// Subsample by randomly removing (swapping all elements to
+		// remove with the tail, then removing the tail, which is
+		// considerably faster than removing element by element).
+		HandleSeq smp_texts(texts);
+		unsigned i = ts;
+		while (subsize < i) {
+			unsigned rnd_idx = randGen().randint(i);
+			std::swap(smp_texts[rnd_idx], smp_texts[--i]);
+		}
+		smp_texts.resize(i);
+		return smp_texts;
+	} else if (0 <= subsize and subsize < ts/*/2*/) {
+		// Subsample by randomly adding
+		HandleSeq smp_texts(subsize);
+		lazy_random_selector select(ts);
+		for (size_t i = 0; i < subsize; i++)
+			smp_texts[i] = texts[select()];
+		return smp_texts;
+	} else {
+		return texts;
+	}
+}
+
+double Surprisingness::emp_prob_bs(const Handle& pattern,
+                                   const HandleSeq& texts,
+                                   unsigned n_resample,
+                                   unsigned subsize)
+{
+	if (subsize < texts.size()) {
+		std::vector<double> essprobs;
+		dorepeat(n_resample)
+			essprobs.push_back(emp_prob_subsmp(pattern, texts, subsize));
+		return boost::accumulate(essprobs, 0.0) / essprobs.size();
+	} else {
+		return emp_prob(pattern, texts);
+	}
+}
+
+double Surprisingness::emp_prob_pbs(const Handle& pattern,
+                                    const HandleSeq& texts,
+                                    double prob_estimate)
+{
+	// Calculate an estimate of the support of the pattern to decide
+	// whether we should subsample the texts corpus. Indeed some
+	// pattern have intractably large support.
+	double support_estimate = prob_to_support(pattern, texts, prob_estimate);
+
+	// If the support estimate is above the texts size then we
+	// subsample
+	if (texts.size() < support_estimate) {
+		// Calculate the empiric probability of pattern
+		unsigned subsize = subsmp_size(pattern, texts, support_estimate);
+		unsigned n_resampling = 10;  // TODO: move this hardwired contant
+		                             // to a user parameter
+		return emp_prob_bs(pattern, texts, n_resampling, subsize);
+	} else {
+		return emp_prob(pattern, texts);
+	}
+}
+
+double Surprisingness::emp_prob_pbs_mem(const Handle& pattern,
+                                        const HandleSeq& texts,
+                                        double prob_estimate)
+{
+	TruthValuePtr emp_prob_tv = get_emp_prob(pattern);
+	if (emp_prob_tv) {
+		return emp_prob_tv->get_mean();
+	}
+	double ep = emp_prob_pbs(pattern, texts, prob_estimate);
+	set_emp_prob(pattern, ep);
+	return ep;
+}
+
+unsigned Surprisingness::subsmp_size(const Handle& pattern,
+                                     const HandleSeq& texts,
+                                     double support_estimate)
+{
+	double ts = texts.size();
+	double nc = MinerUtils::n_conjuncts(pattern);
+	double alpha = (double)support_estimate / std::pow(ts, nc);
+	double res = std::pow(ts / (10*alpha), 1.0/nc);
+	return std::max((unsigned)res, std::min(5000U, (unsigned)ts));
 }
 
 double Surprisingness::ji_prob(const HandleSeqSeq& partition,
                                const Handle& pattern,
-                               const HandleSet& texts)
+                               const HandleSeq& texts)
 {
 	// Generate subpatterns from blocks (add them in the atomspace to
 	// memoize support calculation)
@@ -291,35 +405,47 @@ double Surprisingness::ji_prob(const HandleSeqSeq& partition,
 	                                        *pattern->getAtomSpace());
 
 	// Calculate the product of the probability over subpatterns
+	// without considering joint variables
 	double p = 1.0;
-	for (const Handle& subpattern : subpatterns)
-		p *= emp_prob(subpattern, texts);
-	// logger().debug() << "ji_prob subpattern emp product = " << p;
+	for (const Handle& subpattern : subpatterns) {
+		double empr = emp_prob_mem(subpattern, texts);
+		p *= empr;
+	}
 
 	// Calculate the probability that all joint variables take the same
 	// value
 	double eq_p = eq_prob(partition, pattern, texts);
-	// logger().debug() << "ji_prob P(equal) = " << eq_p;
 	p *= eq_p;
 
 	return p;
+}
+
+bool Surprisingness::has_same_index(const Handle& l_pat,
+                                    const Handle& r_pat,
+                                    const Handle& var)
+{
+	const Variables& lv = LambdaLinkCast(l_pat)->get_variables();
+	const Variables& rv = LambdaLinkCast(r_pat)->get_variables();
+	auto lv_it = lv.index.find(var);
+	auto rv_it = rv.index.find(var);
+	return lv_it != lv.index.end() and rv_it != lv.index.end()
+		and lv_it->second == rv_it->second;
 }
 
 bool Surprisingness::is_equivalent(const HandleSeq& l_blk,
                                    const HandleSeq& r_blk,
                                    const Handle& var)
 {
-	Handle l_pat = mk_pattern(l_blk);
-	Handle r_pat = mk_pattern(r_blk);
-	if (content_eq(l_pat, r_pat)) {
-		const Variables& lv = LambdaLinkCast(l_pat)->get_variables();
-		const Variables& rv = LambdaLinkCast(r_pat)->get_variables();
-		auto lvit = lv.index.find(var);
-		auto rvit = rv.index.find(var);
-		return lvit != lv.index.end() and rvit != lv.index.end()
-			and lvit->second == rvit->second;
-	}
-	return false;
+	Handle l_pat = MinerUtils::mk_pattern_no_vardecl(l_blk);
+	Handle r_pat = MinerUtils::mk_pattern_no_vardecl(r_blk);
+	return is_equivalent(l_pat, r_pat, var);
+}
+
+bool Surprisingness::is_equivalent(const Handle& l_pat,
+                                   const Handle& r_pat,
+                                   const Handle& var)
+{
+	return content_eq(l_pat, r_pat) and has_same_index(l_pat, r_pat, var);
 }
 
 HandleSeqUCounter::const_iterator Surprisingness::find_equivalent(
@@ -346,6 +472,142 @@ HandleSeqUCounter::iterator Surprisingness::find_equivalent(
 	return it;
 }
 
+bool Surprisingness::is_syntax_more_abstract(const HandleSeq& l_blk,
+                                             const HandleSeq& r_blk,
+                                             const Handle& var)
+{
+	Handle l_pat = MinerUtils::mk_pattern_no_vardecl(l_blk);
+	Handle r_pat = MinerUtils::mk_pattern_no_vardecl(r_blk);
+	return is_syntax_more_abstract(l_pat, r_pat, var);
+}
+
+bool Surprisingness::is_syntax_more_abstract(const Handle& l_pat,
+                                             const Handle& r_pat,
+                                             const Handle& var)
+{
+	Variables l_vars = MinerUtils::get_variables(l_pat);
+	Variables r_vars = MinerUtils::get_variables(r_pat);
+	Handle l_body = MinerUtils::get_body(l_pat);
+	Handle r_body = MinerUtils::get_body(r_pat);
+
+	// Let's first make sure that var is both in l_pat and r_pat
+	if (not l_vars.is_in_varset(var) or not r_vars.is_in_varset(var))
+		return false;
+
+	// Remove var from l_vars and r_vars to be considered as value
+	// rather than variable.
+	l_vars.erase(var);
+	r_vars.erase(var);
+
+	// Find all mappings from variables (except var) to terms
+	Unify unify(l_body, r_body, l_vars, r_vars);
+	Unify::SolutionSet sol = unify();
+
+	// If it is not satisfiable, l_pat is not an abstraction
+	//
+	// TODO: case of nary conjunctions additional care is needed
+	if (not sol.is_satisfiable())
+		return false;
+
+	Unify::TypedSubstitutions tsub = unify.typed_substitutions(sol, r_body);
+
+	// Check that for all mappings no variable in r_vars maps to a
+	// value (non-variable).
+	for (const auto& var2val_map : tsub)
+		for (const auto& var_val : var2val_map.first)
+			if (is_value(var_val, r_vars))
+				return false;
+	return true;
+}
+
+bool Surprisingness::is_more_abstract(const Handle& l_pat,
+                                      const Handle& r_pat,
+                                      const Handle& var)
+{
+	HandleSeq l_clauses = MinerUtils::get_clauses(l_pat);
+	HandleSeq r_clauses = MinerUtils::get_clauses(r_pat);
+	HandleSeq l_scs = connected_subpattern_with_var(l_clauses, var);
+	HandleSeq r_scs = connected_subpattern_with_var(r_clauses, var);
+	return is_more_abstract(l_scs, r_scs, var);
+}
+
+bool Surprisingness::is_more_abstract(const HandleSeq& l_blk,
+                                      const HandleSeq& r_blk,
+                                      const Handle& var)
+{
+	using namespace boost::algorithm;
+	HandleSeqSeq rps = powerseq_without_empty(r_blk);
+	return any_of(partitions(l_blk), [&](const HandleSeqSeq& lp) {
+			return any_of(rps, [&](const HandleSeq& rs) {
+					return all_of(lp, [&](const HandleSeq& lb) {
+							return is_syntax_more_abstract(lb, rs, var);
+						});
+				});
+		});
+}
+
+HandleSeqSeq Surprisingness::powerseq_without_empty(const HandleSeq& blk)
+{
+	HandleSetSet pset = powerset(HandleSet(blk.begin(), blk.end()));
+	HandleSeqSeq pseq;
+	for (const HandleSet& set : pset)
+		if (not set.empty())
+			pseq.push_back(HandleSeq(set.begin(), set.end()));
+	return pseq;
+}
+
+bool Surprisingness::is_strictly_more_abstract(const HandleSeq& l_blk,
+                                               const HandleSeq& r_blk,
+                                               const Handle& var)
+{
+	return not is_equivalent(l_blk, r_blk, var)
+		and is_more_abstract(l_blk, r_blk, var);
+}
+
+bool Surprisingness::is_value(const Unify::HandleCHandleMap::value_type& var_val,
+                              const Variables& vars)
+{
+	return vars.is_in_varset(var_val.first)
+		and not var_val.second.is_free_variable();
+}
+
+void Surprisingness::rank_by_abstraction(HandleSeqSeq& partition, const Handle& var)
+{
+	boost::sort(partition,
+	            [&](const HandleSeq& l_blk, const HandleSeq& r_blk) {
+		            // sort operates on strict weak order so is
+		            // compatible with is_strictly_more_abstract
+		            return is_strictly_more_abstract(l_blk, r_blk, var);
+	            });
+}
+
+HandleSeqSeq Surprisingness::connected_subpatterns_with_var(
+	const HandleSeqSeq& partition,
+	const Handle& var)
+{
+	HandleSeqSeq var_partition;
+	for (const HandleSeq& blk : partition) {
+		HandleSeq sc_blk = connected_subpattern_with_var(blk, var);
+		if (not sc_blk.empty()) {
+			var_partition.push_back(sc_blk);
+		}
+	}
+	return var_partition;
+}
+
+HandleSeq Surprisingness::connected_subpattern_with_var(const HandleSeq& blk,
+                                                        const Handle& var)
+{
+	if (not is_free_in_any_tree(blk, var))
+		return {};
+
+	HandleSeqSeq sccs = MinerUtils::get_components(blk);
+	for (const HandleSeq& scc : sccs)
+		if (is_free_in_any_tree(scc, var))
+			return scc;
+	return {};
+}
+
 HandleSeqUCounter Surprisingness::group_eq(const HandleSeqSeq& partition,
                                            const Handle& var)
 {
@@ -365,42 +627,41 @@ HandleSeqUCounter Surprisingness::group_eq(const HandleSeqSeq& partition,
 
 double Surprisingness::eq_prob(const HandleSeqSeq& partition,
                                const Handle& pattern,
-                               const HandleSet& texts)
+                               const HandleSeq& texts)
 {
 	double p = 1.0;
 	// Calculate the probability of a variable taking the same value
 	// across all blocks/subpatterns where that variable appears.
 	for (const Handle& var : joint_variables(pattern, partition)) {
-		// logger().debug() << "var = " << oc_to_string(var);
 
-		// Group subpatterns in equivalence blocks/subpatterns
-		// w.r.t. var. For each subpattern divide p by the number of
-		// values var can take (i.e. |texts| since each subpattern is
-		// independent), then within each subpattern, divide as many
-		// times as they are equivalent subpatterns by the number of
-		// values var actually takes, since all subpatterns are
-		// equivalent this restrict the universes where these
-		// subpatterns are only over these existing values.
-		double uc = texts.size();
-		for (const auto& blk_c : group_eq(partition, var)) {
-			// Take care of the independent part
-			p /= uc;
-			// logger().debug() << "divide p by " << uc
-			//                  << " for block:" << std::endl
-			//                  << oc_to_string(blk_c.first);
-			// Take care of the dependent (equivalent for now) part
-			if (1 < blk_c.second) {
-				double c = value_count(blk_c.first, var, texts);
-				p /= std::pow(c, blk_c.second - 1.0);
-				// logger().debug() << "divide p by " << std::pow(c, blk_c.second - 1.0)
-				//                  << " for " << blk_c.second - 1.0
-				//                  << " equivalent block(s)";
-			}
+		// Select all strongly connected subpatterns containing var
+		HandleSeqSeq var_partition = connected_subpatterns_with_var(partition, var);
+
+		// For each variable, sort the partition so that abstract
+		// blocks, relative to var, appear first.
+		rank_by_abstraction(var_partition, var);
+
+		// For each block j_blk, but the first, look for the most
+		// specialized block that is more abstract or equivalent to that
+		// block relative to var, i_blk, and use the fact that var
+		// cannot take more values than its count in i_blk. If no such
+		// i_blk block exists, then use uc=|U| as count.
+		for (int j = 1; j < (int)var_partition.size(); j++) {
+			// Since abstraction relation is transitive, one can just go
+			// backward from j_blk and pick up the first i_blk that is
+			// either equivalent or more abstract, it will be the most
+			// specialized abstraction.
+			int i = j-1;
+			while (0 <= i)
+				if (is_more_abstract(var_partition[i], var_partition[j], var))
+					break;
+				else i--;
+
+			double c = texts.size();
+			if (0 <= i)
+				c = value_count(var_partition[i], var, texts);
+			p /= c;
 		}
-
-		// Finally multiple by the maximum number of values to normalize
-		// p, because P(equal) happens for each value.
-		p *= uc;
 	}
 	return p;
 }
@@ -416,6 +677,27 @@ std::string oc_to_string(const HandleSeqSeqSeq& hsss, const std::string& indent)
 		i++;
 	}
 	return ss.str();
+}
+
+const Handle& Surprisingness::emp_prob_key()
+{
+	static Handle epk(createNode(NODE, "*-EmpiricalProbabilityKey-*"));
+	return epk;
+}
+
+TruthValuePtr Surprisingness::get_emp_prob(const Handle& pattern)
+{
+	ValuePtr val = pattern->getValue(emp_prob_key());
+	if (val)
+		return TruthValueCast(val);
+	return nullptr;
+}
+
+void Surprisingness::set_emp_prob(const Handle& pattern,
+                                  double emp_prob)
+{
+	TruthValuePtr emp_prob_tv = createSimpleTruthValue(emp_prob, 1.0);
+	pattern->setValue(emp_prob_key(), ValueCast(emp_prob_tv));
 }
 
 } // namespace opencog

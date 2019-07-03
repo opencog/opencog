@@ -34,7 +34,7 @@
         )
         (ListLink
             (AnchorNode "CurrentResult")
-            (AnchorNode "Matched")
+            (VariableNode "$target")
         )
     )
 )

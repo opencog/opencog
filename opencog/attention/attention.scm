@@ -2,16 +2,11 @@
 ; Opencog attention module
 ;
 
-(use-modules (opencog))  ; needed for cog-type->int and LTDL
+(use-modules (opencog))
 
 (define-module (opencog attention))
 
-; Load the C library that calls the nameserver to load the types.
-(load-extension "libattention-types" "attention_types_init")
-
-(load "attention/attention_types.scm")
 (load "attention/default-param-values.scm")
-
 
 (define-public (ecan-set-spreading-filter . type-symbols)
 "

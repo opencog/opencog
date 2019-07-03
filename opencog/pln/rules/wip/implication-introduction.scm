@@ -61,14 +61,14 @@
      implication-introduction-rewrite))
 
 (define (implication-introduction-precondition P Q)
-  (bool->tv (tv-non-null-conf? (implication-introduction-stv-formula P Q))))
+  (bool->tv (< 0 (cog-tv-confidence (implication-introduction-stv-formula P Q)))))
 
 (define (implication-introduction-stv-formula P Q)
   (let* (
-         (P-s (cog-stv-strength P))
-         (P-c (cog-stv-confidence P))
-         (Q-s (cog-stv-strength Q))
-         (Q-c (cog-stv-confidence Q))
+         (P-s (cog-mean P))
+         (P-c (cog-confidence P))
+         (Q-s (cog-mean Q))
+         (Q-c (cog-confidence Q))
          ; Compute the implication TV
          (Impl-s Q-s)
          (Impl-c (if (< 0.9 (* Q-s Q-c)) ; Hack to overcome the lack
@@ -80,7 +80,7 @@
 
 (define (implication-introduction-formula Impl P Q)
   (let ((Impl-tv (implication-introduction-stv-formula P Q)))
-    (if (tv-non-null-conf? Impl-tv) ; Try to avoid constructing informationless
+    (if (< 0 (cog-tv-confidence Impl-tv)) ; Try to avoid constructing informationless
                                     ; knowledge
         (cog-merge-hi-conf-tv! Impl Impl-tv))))
 

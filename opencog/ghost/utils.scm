@@ -141,7 +141,13 @@
     (List SENT
       (List (map
         (lambda (w)
-          (WordNode (string-downcase (cog-name w))))
+          (define word-str (cog-name w))
+          (define wordnode-dc (WordNode (string-downcase word-str)))
+          (cog-set-value!
+            wordnode-dc
+            ghost-word-original
+            (WordNode word-str))
+          wordnode-dc)
         final-word-seq)))))
 
 ; ----------
@@ -344,4 +350,13 @@
   (or (member (string-downcase WORD) lst)
       (and (string-suffix? "." WORD)
            (member (string-downcase (car (string-split WORD #\.))) lst)))
+)
+
+; ----------
+(define (current-time-us)
+"
+  Returns the current-time in microseconds.
+"
+  (define t (gettimeofday))
+  (+ (car t) (/ (cdr t) 1000000))
 )

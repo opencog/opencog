@@ -50,8 +50,8 @@
 
 (define (member-to-inheritance-side-effect-free-formula IBC MBC)
 	(stv
-		(cog-stv-strength MBC)
-		(* (cog-stv-confidence MBC) 0.9)))
+		(cog-mean MBC)
+		(* (cog-confidence MBC) 0.9)))
 
 ; =============================================================================
 

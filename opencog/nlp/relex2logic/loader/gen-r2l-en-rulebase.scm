@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog rule-engine))
+(use-modules (opencog) (opencog ure))
 
 ; Load rule files. The order of the load matters
 (load "../rule-utils.scm")

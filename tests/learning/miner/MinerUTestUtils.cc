@@ -27,8 +27,8 @@
 #include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+#include <opencog/ure/forwardchainer/ForwardChainer.h>
+#include <opencog/ure/backwardchainer/BackwardChainer.h>
 
 using namespace opencog;
 
@@ -45,15 +45,15 @@ Handle MinerUTestUtils::add_minsup_prd(AtomSpace& as)
 	return an(PREDICATE_NODE, "minsup");
 }
 
-Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as)
+Handle MinerUTestUtils::add_isurp_prd(AtomSpace& as, const std::string& mode)
 {
-	return an(PREDICATE_NODE, "isurp");
+	return an(PREDICATE_NODE, mode);
 }
 
 Handle MinerUTestUtils::add_top(AtomSpace& as)
 {
-	Handle X = an(VARIABLE_NODE, "$X");
-	return al(LAMBDA_LINK, X, X);
+	Handle X = as.add_node(VARIABLE_NODE, "$X");
+	return as.add_link(LAMBDA_LINK, X, MinerUtils::mk_body({X}));
 }
 
 Handle MinerUTestUtils::add_minsup_eval(AtomSpace& as,
@@ -84,10 +84,11 @@ Handle MinerUTestUtils::add_minsup_evals(AtomSpace& as,
 }
 
 Handle MinerUTestUtils::add_isurp_eval(AtomSpace& as,
+                                       const std::string& mode,
                                        const Handle& pattern)
 {
 	Handle isurp_eval_h = al(EVALUATION_LINK,
-	                         add_isurp_prd(as),
+	                         add_isurp_prd(as, mode),
 	                         al(LIST_LINK,
 	                            pattern,
 	                            add_texts_cpt(as)));
@@ -143,11 +144,11 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
                                int minsup,
                                int maximum_iterations,
                                Handle initpat,
-                               TruthValuePtr incremental_expansion,
-                               int max_conjuncts,
+                               bool incremental_expansion,
+                               unsigned max_conjuncts,
                                double complexity_penalty)
 {
-	HandleSet texts;
+	HandleSeq texts;
 	texts_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                             opencog::ATOM, true);
 	return ure_pm(as, scm, pm_rb, texts, minsup, maximum_iterations, initpat,
@@ -157,12 +158,12 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 Handle MinerUTestUtils::ure_pm(AtomSpace& as,
                                SchemeEval& scm,
                                const Handle& pm_rb,
-                               const HandleSet& texts,
+                               const HandleSeq& texts,
                                int minsup,
                                int maximum_iterations,
                                Handle initpat,
-                               TruthValuePtr incremental_expansion,
-                               int max_conjuncts,
+                               bool incremental_expansion,
+                               unsigned max_conjuncts,
                                double complexity_penalty)
 {
 	// Make (Member text (Concept "texts)) links
@@ -182,7 +183,6 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 		return al(SET_LINK);
 
 	// Add incremental conjunction expansion if necessary
-	bool inc_exp_enabled = incremental_expansion != TruthValue::FALSE_TV();
 	configure_optional_rules(scm, incremental_expansion, max_conjuncts);
 
 	// Otherwise prepare the source
@@ -192,7 +192,7 @@ Handle MinerUTestUtils::ure_pm(AtomSpace& as,
 	// Run the forward chainer from the initial pattern
 	ForwardChainer fc(as, pm_rb, source);
 	fc.get_config().set_maximum_iterations(maximum_iterations);
-	fc.get_config().set_retry_exhausted_sources(inc_exp_enabled);
+	fc.get_config().set_retry_exhausted_sources(incremental_expansion);
 	fc.get_config().set_complexity_penalty(complexity_penalty);
 	fc.do_chain();
 
@@ -213,22 +213,20 @@ HandleTree MinerUTestUtils::cpp_pm(const AtomSpace& texts_as,
                                    int minsup,
                                    int conjuncts,
                                    const Handle& initpat,
-                                   int maxdepth,
-                                   double info)
+                                   int maxdepth)
 {
-	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
+	MinerParameters param(minsup, conjuncts, initpat, maxdepth);
 	Miner pm(param);
 	return pm(texts_as);
 }
 
-HandleTree MinerUTestUtils::cpp_pm(const HandleSet& texts,
+HandleTree MinerUTestUtils::cpp_pm(const HandleSeq& texts,
                                    int minsup,
                                    int conjuncts,
                                    const Handle& initpat,
-                                   int maxdepth,
-                                   double info)
+                                   int maxdepth)
 {
-	MinerParameters param(minsup, conjuncts, initpat, maxdepth, info);
+	MinerParameters param(minsup, conjuncts, initpat, maxdepth);
 	Miner pm(param);
 	return pm(texts);
 }
@@ -237,9 +235,7 @@ Handle MinerUTestUtils::add_is_cpt_pattern(AtomSpace& as, const Handle& cpt)
 {
 	Handle X = an(VARIABLE_NODE, "$X"),
 		is_cpt = al(INHERITANCE_LINK, X, cpt),
-		pattern = al(LAMBDA_LINK,
-		                 X,
-		                 is_cpt);
+		pattern = MinerUtils::mk_pattern(X, {is_cpt});
 	return pattern;
 }
 
@@ -265,8 +261,7 @@ Handle MinerUTestUtils::add_ugly_man_pattern(AtomSpace& as)
 		ugly = an(CONCEPT_NODE, "ugly"),
 		is_man = al(INHERITANCE_LINK, X, man),
 		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		is_ugly_man = al(AND_LINK, is_ugly, is_man),
-		pattern = al(LAMBDA_LINK, X, is_ugly_man);
+		pattern = MinerUtils::mk_pattern(X, {is_ugly, is_man});
 	return pattern;
 }
 
@@ -279,8 +274,7 @@ Handle MinerUTestUtils::add_ugly_man_soda_drinker_pattern(AtomSpace& as)
 		is_man = al(INHERITANCE_LINK, X, man),
 		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
 		is_ugly = al(INHERITANCE_LINK, X, ugly),
-		is_ugly_man_soda = al(AND_LINK, is_ugly, is_man, is_soda_drinker),
-		pattern = al(LAMBDA_LINK, X, is_ugly_man_soda);
+		pattern = MinerUtils::mk_pattern(X, {is_ugly, is_man, is_soda_drinker});
 	return pattern;
 }
 
@@ -291,14 +285,17 @@ void MinerUTestUtils::configure_mandatory_rules(SchemeEval& scm)
 }
 
 void MinerUTestUtils::configure_optional_rules(SchemeEval& scm,
-                                               TruthValuePtr incremental_expansion,
-                                               int max_conjuncts)
+                                               bool incremental_expansion,
+                                               unsigned max_conjuncts,
+                                               unsigned max_variables)
 {
 	std::string call = "(configure-optional-rules (Concept \"pm-rbs\")";
-	call += " #:incremental-expansion ";
-	call += SchemeSmob::tv_to_string(incremental_expansion);
+	call += " #:incremental-expansion #";
+	call += incremental_expansion ? "t" : "f";
 	call += " #:max-conjuncts ";
 	call += std::to_string(max_conjuncts);
+	call += " #:max-variables ";
+	call += std::to_string(max_variables);
 	call += ")";
 	std::string rs = scm.eval(call);
 	logger().debug() << "MinerUTest::configure_optional_rules() rs = " << rs;
@@ -326,7 +323,7 @@ HandleSeq MinerUTestUtils::ure_isurp(AtomSpace& as,
 {
 	configure_ISurprisingness(scm, isurp_rb, mode, max_conjuncts);
 	Handle X = an(VARIABLE_NODE, "$X"),
-		target = add_isurp_eval(as, X),
+		target = add_isurp_eval(as, mode, X),
 		vardecl = al(TYPED_VARIABLE_LINK, X, an(TYPE_NODE, "LambdaLink"));
 	BackwardChainer bc(as, isurp_rb, target, vardecl);
 	bc.do_chain();

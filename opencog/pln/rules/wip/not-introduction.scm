@@ -33,8 +33,8 @@
   (- 1 x))
 
 (define (not-introduction-side-effect-free-formula A)
-  (let ((sA (cog-stv-strength A))
-        (cA (cog-stv-confidence A)))
+  (let ((sA (cog-mean A))
+        (cA (cog-confidence A)))
     (stv (negate sA) cA)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

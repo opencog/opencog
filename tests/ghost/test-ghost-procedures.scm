@@ -12,6 +12,7 @@
   (opencog nlp)
   (opencog nlp chatbot)
   (opencog nlp relex2logic)
+  (opencog ghost)
   (opencog ghost procedures)
   (srfi srfi-1))
 

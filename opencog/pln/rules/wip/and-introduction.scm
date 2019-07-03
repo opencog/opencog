@@ -57,10 +57,10 @@
 
 (define (and-side-effect-free-formula A B)
   (let 
-      ((sA (cog-stv-strength A))
-       (sB (cog-stv-strength B))
-       (cA (cog-stv-confidence A))
-       (cB (cog-stv-confidence B)))
+      ((sA (cog-mean A))
+       (sB (cog-mean B))
+       (cA (cog-confidence A))
+       (cB (cog-confidence B)))
     (stv (* sA sB) (min cA cB))))
 
 ; Name the rule
@@ -129,12 +129,12 @@
            (VariableNode "$C")))))
 
 (define (and-introduction-grounded-evaluation-formula A B C)
-  (let ((As (cog-stv-strength A))
-        (Bs (cog-stv-strength B))
-        (Cs (cog-stv-strength C))
-        (Ac (cog-stv-confidence A))
-        (Bc (cog-stv-confidence B))
-        (Cc (cog-stv-confidence C)))
+  (let ((As (cog-mean A))
+        (Bs (cog-mean B))
+        (Cs (cog-mean C))
+        (Ac (cog-confidence A))
+        (Bc (cog-confidence B))
+        (Cc (cog-confidence C)))
     (cog-set-tv! (And A B C) (stv (min As Bs Cs) (min Ac Bc Cc)))))
 
 ;; The following are for checking that an atom (i.e. a sub-hypergraph)

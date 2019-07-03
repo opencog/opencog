@@ -139,11 +139,16 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 {
-	// XXX FIXME -- these should throw, instead of returning null handle!
-	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
-	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
+	if (PHRASE_NODE != _outgoing[0]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LGParseLink: Invalid outgoing set at 0; expecting PhraseNode");
+	if (LG_DICT_NODE != _outgoing[1]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LGParseLink: Invalid outgoing set at 1; expecting LgDictNode");
 	if (3 == _outgoing.size() and
-	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
+	   NUMBER_NODE != _outgoing[2]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LGParseLink: Invalid outgoing set at 2; expecting NumberNode");
 
 	// Link grammar, for some reason, has a different error handler
 	// per thread. Don't know why. So we have to set it every time,
@@ -161,12 +166,27 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	// Set up the sentence
 	const char* phrstr = _outgoing[0]->get_name().c_str() ;
 	Sentence sent = sentence_create(phrstr, dict);
-	if (nullptr == sent) return Handle(); // XXX FIXME should throw, instead!
+	if (nullptr == sent)
+		throw FatalErrorException(TRACE_INFO,
+			"LGParseLink: Unexpected parser failure!");
 
 	// Work with the default parse options (mostly).
 	// Suppress printing of combinatorial-overflow warning.
+	// Larger linkage limit; improves sample accuracy.
+	// Set timeout to 30 seconds; the default is infinite.
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
+	parse_options_set_linkage_limit(opts, 38000);
+	parse_options_set_max_parse_time(opts, 60);
+
+	// XXX FIXME -- We should fish parse options out of the atomspace.
+	// Something like this, maybe:
+	//     EvaluationLink
+	//         PredicateNode "LG ParseTime"
+	//         ListLink
+	//             LgDictNode "En_US"
+	//             NumberNode 42
+	// ... or something like that ...
 
 	// For the ANY language, this code is being used for sampling.
 	// In this case, we are not concerned about reproducibility,
@@ -175,18 +195,20 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	// different parse for it, each time. Bug #3065.
 	parse_options_set_repeatable_rand(opts, 0);
 
-	// Count the number of parses
+	// Count the number of parses.
 	int num_linkages = sentence_parse(sent, opts);
 	if (num_linkages < 0)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		return Handle(); // XXX FIXMEE should throw, instead.
+		throw FatalErrorException(TRACE_INFO,
+			"LGParseLink: Unexpected parser error!");
 	}
 
-	// if num_links is zero, we should try again with null links.
+	// If num_links is zero, try again, allowing null linked words.
 	if (num_linkages == 0)
 	{
+		parse_options_reset_resources(opts);
 		parse_options_set_min_null_count(opts, 1);
 		parse_options_set_max_null_count(opts, sentence_length(sent));
 		num_linkages = sentence_parse(sent, opts);
@@ -196,8 +218,12 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
-		return Handle(); // XXX FIXME should throw, instead!
+		throw RuntimeException(TRACE_INFO,
+			"LGParseLink: Parser timeout.");
 	}
+
+	// Post-processor might not accept all of the parses.
+	num_linkages = sentence_num_valid_linkages(sent);
 
 	// The number of linkages to process.
 	int max_linkages = 0;
@@ -206,6 +232,7 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
 		max_linkages = nnp->get_value() + 0.5;
 	}
+
 	// Takes limit from parameter only if it's positive and smaller
 	if ((max_linkages > 0) && (max_linkages < num_linkages))
 	{
@@ -224,12 +251,19 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
-	// Due to the way that parsing generates big piles of atoms,
-	// they have to be placed into some atomspace.
-
+	// Avoid generating big piles of Atoms, if the user did not
+	// want them. (The extra Atoms deescribe disjuncts, etc.)
 	bool minimal = (get_type() == LG_PARSE_MINIMAL);
-	for (int i=0; i<num_linkages; i++)
+
+	// There are only so many parses available.
+	int num_available = sentence_num_linkages_post_processed(sent);
+
+	int jct = 0;
+	for (int i=0; jct<num_linkages and i<num_available; i++)
 	{
+		// Skip sentences with P.P. violations.
+		if (0 < sentence_num_violations(sent, i)) continue;
+		jct ++;
 		Linkage lkg = linkage_create(i, sent, opts);
 		Handle pnode = cvt_linkage(lkg, i, sentstr, phrstr, minimal, as);
 		as->add_link(PARSE_LINK, pnode, snode);
@@ -304,27 +338,31 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 
 		// Convert the disjunct to atomese.
 		// This requires parsing a string. Fortunately, the
-		// string is a very simple format, and always ends with
-		// a blank char before the newline.
+		// string is a very simple format.
 		const char* djstr = linkage_get_disjunct_str(lkg, w);
 
 		HandleSeq conseq;
 		const char* p = djstr;
 		while (*p)
 		{
+			while (' ' == *p) p++;
+			if (0 == *p) break;
 			bool multi = false;
 			if ('@' == *p) { multi = true; p++; }
 			const char* s = strchr(p, ' ');
-			char cstr[60];
 			size_t len = s-p-1;
-			if (60<len) len = 59;
+			if (NULL == s) len = strlen(p) - 1;
+			char cstr[60];
+			if (60 <= len)
+				throw RuntimeException(TRACE_INFO,
+					"LGParseLink: Dictionary has a bug; Uuexpectedly long connector=%s", djstr);
 			strncpy(cstr, p, len);
 			cstr[len] = 0;
 			Handle con(createNode(LG_CONNECTOR_NODE, cstr));
-			cstr[0] = *(s-1);
+			cstr[0] = *(p+len);
 			cstr[1] = 0;
 			Handle dir(createNode(LG_CONN_DIR_NODE, cstr));
-			p = s+1;
+			p = p+len+1;
 
 			HandleSeq cono;
 			cono.push_back(con);

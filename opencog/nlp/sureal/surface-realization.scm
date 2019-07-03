@@ -195,7 +195,7 @@
 ;                       0<x<1 if higher confidence is preferred
 ;                       x > 1 if higher strength is preferred
 (define (cog-stv-heuristic-value constant atom)
-    (* (expt (cog-stv-strength atom) constant) (expt (cog-stv-confidence atom) (- 2 constant)))
+    (* (expt (cog-mean atom) constant) (expt (cog-confidence atom) (- 2 constant)))
 )
 
 ; This just takes the one of the many InterpretationNode.

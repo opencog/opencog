@@ -6,7 +6,7 @@
 (use-modules (opencog randgen))
 (use-modules (opencog exec))
 (use-modules (opencog query))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 (use-modules (opencog miner))
 
 ;; Set a logger for the experiment
@@ -193,6 +193,8 @@
 ;; Redefine cog-cp and cog-cp-all to return a list of copied atoms
 ;; (indeed these are not the same the ones in the source). Take care
 ;; of not overwriting TVs with higher confidences by lower ones.
+;;
+;; TODO: replace by cog-cp now that it has been updated.
 (define (icl-cp AS LST)
 "
   icl-cp AS LST - Copy the atoms in LST to the given atomspace AS and

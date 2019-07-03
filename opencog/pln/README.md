@@ -16,13 +16,13 @@ Further details can be found [here](http://wiki.opencog.org/wikihome/index.php/P
 ## Implementation
 
 The current implementation uses the
-[URE](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
+[URE](https://github.com/opencog/atomspace/tree/master/opencog/ure)
 where PLN is one or a few specific rule bases, configured with scheme
 function and scheme rules.
 
 That folder contains
 
-1. A set of scripts to easily configure the rule-engine to utilize PLN
+1. A set of scripts to easily configure the rule engine to utilize PLN
    rule bases.
 2. A set of PLN rules, under the subfolder `rules`.
 3. A set of PLN meta-rules, rules producing rules, under the subfolder
@@ -103,16 +103,16 @@ sets the weight of the deduction implication rule to `(stv 0.7 0.2)`.
 
 ### Call Chainers
 
-To call the forward chainer on a given target, simply type
+To call the forward chainer on a given source, simply type
 
 ```scheme
-(pln-fc target)
+(pln-fc source)
 ```
 
-Likewise to call the backward chainer on a given source, type
+Likewise to call the backward chainer on a given target, type
 
 ```scheme
-(pln-bc source)
+(pln-bc target)
 ```
 
 Numerous options can be used, for more information see

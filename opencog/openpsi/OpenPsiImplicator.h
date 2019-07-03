@@ -26,6 +26,7 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/openpsi/OpenPsiRules.h>
+#include <opencog/openpsi/OpenPsiSatisfier.h>
 
 #include <opencog/query/Satisfier.h>
 
@@ -34,20 +35,17 @@ class OpenPsiImplicatorUTest;
 namespace opencog
 {
 
-class OpenPsiImplicator: public virtual Satisfier
+class OpenPsiImplicator
 {
+
+  friend class ::OpenPsiSatisfier;
+
   // Needed for resetting private cache.
   // TODO Why would one need to reset during psi-loop?
   friend class ::OpenPsiImplicatorUTest;
 
 public:
   OpenPsiImplicator(AtomSpace* as);
-
-  /**
-   * Return true if a single grounding has been found.
-   */
-  bool grounding(const HandleMap &var_soln,
-                 const HandleMap &term_soln);
 
   /**
    * Returns TRUE_TV if there is grounding else returns FALSE_TV. If the
@@ -93,9 +91,7 @@ private:
    */
   const HandleMap _EMPTY_HANDLE_MAP;
 
-  // Because two of the ancestor classes that this class inherites
-  // from have _as variable.
-  using DefaultPatternMatchCB::_as;
+  AtomSpace* _as;
 
   // Predicate used to set a value on whether an action was executed or not
   Handle _action_executed;

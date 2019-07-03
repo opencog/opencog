@@ -5,8 +5,8 @@ in the atomspace.
 
 ## Scheme module `(opencog nlp lg-dict)`
 
-Defines the LgDictNode and the LgDictEntryNode.  These can be used
-together to look up Link Grammar dictionary entries, and place them
+Defines `LgDictNode`, `LgDictEntry` and `LgHaveDictEntry`.  These can
+be used to look up Link Grammar dictionary entries, and place them
 into the atomspace.  For example:
 
 ```
@@ -44,6 +44,18 @@ The `(cog-incoming-set (WordNode "..."))` should resemble the below:
       )
    )
   ```
+
+Because the above is quite verbose, there is a fast, high-speed way
+for checking to see if a dictionary entry exists in the dictionary,
+without loading it: the is the `LgHaveDictEntry` link. It has the
+same syntax as `LgDictEntry` except that it is evaluatable, and will
+evaluate to either true of false:
+```
+	(cog-evaluate!
+		(LgHaveDictEntry
+			(WordNode "blorgel-bargel")
+			(LgDictNode "en")))
+```
 
 The disjuncts are in [Disjuntive Normal Form](http://en.wikipedia.org/wiki/Disjunctive_normal_form) (DNF)
 where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.

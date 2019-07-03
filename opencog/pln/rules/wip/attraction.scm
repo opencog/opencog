@@ -53,10 +53,10 @@
 (define (attraction-side-effect-free-formula AB SAB SnAB)
     (let
         (
-            (sSAB (cog-stv-strength SAB))
-            (cSAB (cog-stv-confidence SAB))
-            (sSnAB (cog-stv-strength SnAB))
-            (cSnAB (cog-stv-confidence SnAB))
+            (sSAB (cog-mean SAB))
+            (cSAB (cog-confidence SAB))
+            (sSnAB (cog-mean SnAB))
+            (cSnAB (cog-confidence SnAB))
     
         )
         (if 

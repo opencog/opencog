@@ -70,6 +70,7 @@
 (define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-time-last-executed (Predicate (ghost-prefix "Time Last Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
+(define ghost-word-original (Predicate (ghost-prefix "Word Original")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-reactive-rule (Predicate (ghost-prefix "Next Reactive Rule")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))

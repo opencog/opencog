@@ -39,8 +39,8 @@
 
 (define (and-transformation-side-effect-free-formula AB NIAB)
   (let 
-      ((sAB (cog-stv-strength AB))
-       (cAB (cog-stv-confidence AB)))
+      ((sAB (cog-mean AB))
+       (cAB (cog-confidence AB)))
     (stv sAB cAB)))
 
 ; Name the rule

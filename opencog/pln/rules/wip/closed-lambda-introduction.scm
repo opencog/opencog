@@ -52,7 +52,7 @@
   (cog-set-tv! lamb (cog-tv body)))
 
 (define (closed-lambda-introduction-precondition atom)
-  (bool->tv (and (cog-closed? atom) (tv-non-null-conf? (cog-tv atom)))))
+  (bool->tv (and (cog-closed? atom) (< 0 (cog-confidence atom)))))
 
 ;; Name the rule
 (define closed-lambda-introduction-rule-name

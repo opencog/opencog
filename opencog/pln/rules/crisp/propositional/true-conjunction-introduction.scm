@@ -15,7 +15,7 @@
 ;; -----------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; Generate a crisp true conjunction introduction rule for an n-ary
 ;; conjunction
@@ -32,7 +32,7 @@
          (vardecl (VariableList (map gen-typed-variable variables)))
          (gen-precondition (lambda (x) (absolutely-true-eval x)))
          (preconditions (map gen-precondition variables))
-         (pattern (And variables preconditions))
+         (pattern (And (Present variables) preconditions))
          (rewrite (ExecutionOutput
                     (GroundedSchema "scm: true-conjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order
@@ -45,10 +45,10 @@
 
 (define (true-conjunction-introduction-formula A S)
   (let* ((andees (cog-outgoing-set S))
-         (min-s-atom (min-element-by-key andees cog-stv-strength))
-         (min-c-atom (min-element-by-key andees cog-stv-confidence))
-         (min-s (cog-stv-strength min-s-atom))
-         (min-c (cog-stv-confidence min-c-atom))
+         (min-s-atom (min-element-by-key andees cog-mean))
+         (min-c-atom (min-element-by-key andees cog-confidence))
+         (min-s (cog-mean min-s-atom))
+         (min-c (cog-confidence min-c-atom))
          (min-tv (stv min-s min-c)))
     (if (tv->bool min-tv)
         (cog-merge-hi-conf-tv! A min-tv))))

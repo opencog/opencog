@@ -34,21 +34,6 @@ using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace* asp)
 {
-#if 0
-    // XXX FIXME -- should not use config() to get these values;
-    // The user of this class should call config(), instead!
-
-This generates warnings whenever the unit tests run.
-    startingFundsSTI = fundsSTI = config().get_double("STARTING_STI_FUNDS", 100000);
-    startingFundsLTI = fundsLTI = config().get_double("STARTING_LTI_FUNDS", 100000);
-    stiFundsBuffer = config().get_double("STI_FUNDS_BUFFER", 10000);
-    ltiFundsBuffer = config().get_double("LTI_FUNDS_BUFFER", 10000);
-    targetLTI = config().get_double("TARGET_LTI_FUNDS", 10000);
-    targetSTI = config().get_double("TARGET_STI_FUNDS", 10000);
-    STIAtomWage = config().get_double("ECAN_STARTING_ATOM_STI_WAGE", 10);
-    LTIAtomWage = config().get_double("ECAN_STARTING_ATOM_LTI_WAGE", 10);
-    maxAFSize = config().get_int("ECAN_MAX_AF_SIZE", 100);
-#endif
     startingFundsSTI = fundsSTI = 100000;
     startingFundsLTI = fundsLTI = 100000;
     stiFundsBuffer = 10000;

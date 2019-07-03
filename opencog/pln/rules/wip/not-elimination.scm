@@ -29,8 +29,8 @@
 
 (define (not-elimination-side-effect-free-formula NA A)
   (let 
-      ((sNA (cog-stv-strength NA))
-       (cNA (cog-stv-confidence NA)))
+      ((sNA (cog-mean NA))
+       (cNA (cog-confidence NA)))
     (stv (- 1 sNA) cAB )))
 
 ; Name the rule

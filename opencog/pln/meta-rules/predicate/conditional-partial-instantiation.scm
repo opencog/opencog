@@ -66,7 +66,7 @@
                               (GroundedPredicate "scm: gt-zero-confidence")
                               implication))
          ;; Meta rule pattern
-         (meta-pattern (And implication meta-precondition))
+         (meta-pattern (And (Present implication) meta-precondition))
          ;; Produced rule variable declaration. V2 and V3 are to be
          ;; substituted.
          (produced-vardecl (VariableList

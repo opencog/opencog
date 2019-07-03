@@ -27,9 +27,6 @@
 ;
 ; Unit testing:  See `unit-test.scm` and also notes in `behavior.scm`.
 ;
-
-(add-to-load-path "/usr/local/share/opencog/scm")
-
 (use-modules (opencog))
 (load "time-map.scm") ;;; octomap for faces
 ; Start the cogsserver.  It is used by the face-tracker to poke data

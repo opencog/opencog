@@ -7,6 +7,7 @@ ADD_LIBRARY (attentionval SHARED
 # ADD_DEPENDENCIES(attentionval opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(attentionval
+	attention-types
 	value
 	${COGUTIL_LIBRARY}
 )

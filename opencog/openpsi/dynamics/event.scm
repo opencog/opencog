@@ -1,8 +1,7 @@
 ;
 ; event.scm
-; Event Detection - ... ??
 ;
-; Copyright (c) 2106 OpenCog Foundation
+; Copyright (c) 2016 OpenCog Foundation
 ;
 ; --------------------------------------------------------------
 ; Event Detection

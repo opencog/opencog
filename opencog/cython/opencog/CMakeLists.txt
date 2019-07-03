@@ -14,28 +14,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-f")
-
-# Cythonizes one .pyx file into a .cpp file
-# Additional arguments are dependencies
-MACRO(CYTHON_ADD_MODULE_PYX name)
-	IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx ${name}.pxd)
-	ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-	# Allow the user to specify dependencies as optional arguments
-	SET(DEPENDS ${DEPENDS} ${ARGN})
-	ADD_CUSTOM_COMMAND(
-		OUTPUT ${name}.cpp
-		COMMAND ${CYTHON_EXECUTABLE}
-		ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR}
-		      -I ${ATOMSPACE_INCLUDE_DIR}/opencog/cython
-		      # -I /usr/local/include/opencog/cython
-		      -o ${name}.cpp
-		      --cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
-		DEPENDS ${DEPENDS}
-		COMMENT "Cythonizing ${name}.pyx")
-ENDMACRO(CYTHON_ADD_MODULE_PYX)
-
+SET(CYTHON_FLAGS "-2" "-f" "-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython")
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -55,13 +34,11 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(cogserver_type_constructors nlp_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors attention_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
-	ADD_DEPENDENCIES(cogserver_type_constructors patternminer_atom_types)
 
 	TARGET_LINK_LIBRARIES(cogserver_type_constructors
 		attention-types
 		nlp-types
 		spacetime-types
-		patternminer-types
 		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
@@ -163,6 +140,29 @@ IF (HAVE_STATISTICS)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_STATISTICS)
 
-INSTALL (FILES
-	__init__.py
-	DESTINATION "${PYTHON_DEST}")
+##################### OpenPsi ##################
+
+CYTHON_ADD_MODULE_PYX(openpsi
+    "openpsi.pyx"
+    "../../openpsi/OpenPsiSCM.h"
+    openpsi
+)
+
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "openpsi.cpp")
+
+# opencog.openpsi Python bindings
+ADD_LIBRARY(openpsi_cython SHARED
+    openpsi.cpp
+)
+
+TARGET_LINK_LIBRARIES(openpsi_cython
+    openpsi
+    ${PYTHON_LIBRARIES}
+)
+
+SET_TARGET_PROPERTIES(openpsi_cython PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME openpsi)
+
+INSTALL (TARGETS openpsi_cython
+    DESTINATION "${PYTHON_DEST}")

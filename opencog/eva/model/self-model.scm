@@ -34,8 +34,6 @@
 ; (cog-evaluate! (DefinedPredicateNode "Someone visible?"))
 ; (cog-execute! (DefinedSchemaNode "Num visible faces"))
 ;
-(add-to-load-path "/usr/local/share/opencog/scm")
-
 (use-modules (opencog openpsi))
 
 (load "faces.scm")
@@ -1058,7 +1056,7 @@ proper atomese.
 		(for-each (lambda (x) (set! result
 			(assoc-set! result
 				(psi-suffix-str (cog-name (car (psi-rule-alias x))))
-				(cog-stv-strength x))))
+				(cog-mean x))))
 			rules
 		)
 		result

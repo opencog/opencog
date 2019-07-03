@@ -33,11 +33,12 @@
         (TypedVariable A var-type)
         (TypedVariable B var-type)
         (TypedVariable C var-type))
-      (impl-type
-        A
-        (Or
-          B
-          C))
+      (Present
+        (impl-type
+          A
+          (Or
+            B
+            C)))
       (ExecutionOutput
         (GroundedSchema "scm: consequent-disjunction-elimination-formula")
         (List
@@ -103,10 +104,10 @@
   (if (= (length premises) 2)
       (let* ((ABC (list-ref premises 0))
              (AC (list-ref premises 1))
-             (sABC (cog-stv-strength ABC))
-             (cABC (cog-stv-confidence ABC))
-             (sAC (cog-stv-strength AC))
-             (cAC (cog-stv-confidence AC))
+             (sABC (cog-mean ABC))
+             (cABC (cog-confidence ABC))
+             (sAC (cog-mean AC))
+             (cAC (cog-confidence AC))
              (alpha 0.9)                ; Confidence-loss
                                         ; coefficient. TODO replace by
                                         ; something more meaningful

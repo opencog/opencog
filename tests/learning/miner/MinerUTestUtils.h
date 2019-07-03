@@ -54,11 +54,11 @@ public:
 	/**
 	 * Add
 	 *
-	 * (Predicate "isurp")
+	 * (Predicate <mode>)
 	 *
 	 * to as.
 	 */
-	static Handle add_isurp_prd(AtomSpace& as);
+	static Handle add_isurp_prd(AtomSpace& as, const std::string& mode);
 
 	/**
 	 * Add
@@ -98,12 +98,14 @@ public:
 	 * Insert
 	 *
 	 * (Evaluation
-	 *   (Predicate "isurp")
+	 *   (Predicate <mode>)
 	 *   (List pattern (Concept "texts")))
 	 *
 	 * to as.
 	 */
-	static Handle add_isurp_eval(AtomSpace& as, const Handle& pattern);
+	static Handle add_isurp_eval(AtomSpace& as,
+	                             const std::string& mode,
+	                             const Handle& pattern);
 
 	/**
 	 * Given
@@ -176,17 +178,17 @@ public:
 	                     int minsup,
 	                     int max_iter=-1,
 	                     Handle initpat=Handle::UNDEFINED,
-	                     TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
-	                     int max_conjuncts=-1,
+	                     bool incremental_expansion=false,
+	                     unsigned max_conjuncts=UINT_MAX,
 	                     double complexity_penalty=0.0);
 	static Handle ure_pm(AtomSpace& as,
 	                     SchemeEval& scm,
 	                     const Handle& pm_rb,
-	                     const HandleSet& texts, int minsup,
+	                     const HandleSeq& texts, int minsup,
 	                     int max_iter=-1,
 	                     Handle initpat=Handle::UNDEFINED,
-	                     TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
-	                     int max_conjuncts=-1,
+	                     bool incremental_expansion=false,
+	                     unsigned max_conjuncts=UINT_MAX,
 	                     double complexity_penalty=0.0);
 
 	/**
@@ -196,14 +198,12 @@ public:
 	                         int minsup=1,
 	                         int conjuncts=1,
 	                         const Handle& initpat=Handle::UNDEFINED,
-	                         int maxdepth=-1,
-	                         double info=1.0);
-	static HandleTree cpp_pm(const HandleSet& texts,
+	                         int maxdepth=-1);
+	static HandleTree cpp_pm(const HandleSeq& texts,
 	                         int minsup=1,
 	                         int conjuncts=1,
 	                         const Handle& initpat=Handle::UNDEFINED,
-	                         int maxdepth=-1,
-	                         double info=1.0);
+	                         int maxdepth=-1);
 
 	/**
 	 * Add
@@ -272,8 +272,9 @@ public:
 
 	static void configure_mandatory_rules(SchemeEval& scm);
 	static void configure_optional_rules(SchemeEval& scm,
-	                                     TruthValuePtr incremental_expansion,
-	                                     int max_conjuncts=-1);
+	                                     bool incremental_expansion,
+	                                     unsigned max_conjuncts=UINT_MAX,
+	                                     unsigned max_variables=UINT_MAX);
 	static void configure_ISurprisingness(SchemeEval& scm,
 	                                      const Handle& isurp_rb,
 	                                      const std::string& mode,

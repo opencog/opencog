@@ -17,14 +17,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-modules (opencog))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; TODO Maybe we can remove that definitely?
 ;; ;XXX This is bad and broken and wrong; one should not try to bypass the
 ;; ; scheme module system like this, its just asking for carpet burns.
 ;; (load-from-path "utilities.scm")
 ;; (load-from-path "av-tv.scm")
-;; (load-from-path "opencog/rule-engine/rule-engine-utils.scm")
+;; (load-from-path "opencog/ure/ure-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
@@ -58,6 +58,7 @@
         )
   )
 (define rule-files (map append-rule-dir rule-basenames))
+(use-modules (opencog logger))
 (for-each load rule-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -66,10 +67,10 @@
 
 ; List the rules
 (define rules
-  (list scope-to-implication-rule-name
-        full-instantiation-rule-name
+  (list implication-scope-to-implication-rule-name
+        implication-full-instantiation-rule-name
         equivalence-to-implication-rule-name
-        lambda-predicate-evaluation-rule-name
+        predicate-lambda-evaluation-rule-name
         inversion-implication-rule-name
         implication-implicant-conjunction-rule-name
         and-lambda-factorization-double-implication-rule-name

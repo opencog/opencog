@@ -11,10 +11,7 @@ ADD_LIBRARY (spacetime-types SHARED
 )
 
 TARGET_LINK_LIBRARIES(spacetime-types
-	${ATOMSPACE_atomcore_LIBRARY}
-	${ATOMSPACE_atombase_LIBRARY}
-	${ATOMSPACE_atomproto_LIBRARY}
-	${ATOMSPACE_atomtypes_LIBRARY}
+	${ATOMSPACE_LIBRARIES}
 )
 
 ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)

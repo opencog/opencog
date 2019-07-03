@@ -20,26 +20,26 @@ A rule that has been triggered will not be triggered again unless you `^keep()` 
 
 ## Syntax
 
-The syntax of GHOST rules is modeled heavily on [ChatScript](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules). However, GHOST uses several ChatScript features for different purposes than they are normally used in ChatScript; and also contains some additional features.
+The syntax of GHOST rules is modeled heavily on [ChatScript](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules). However, GHOST uses several ChatScript features for different purposes than they are normally used in ChatScript; and also contains some additional features.
 
 Here is a list of features that are fully supported in GHOST:
-- [Word/Lemma](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)
-- [Phrase](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#proper-names)
-- [Concept](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#concepts)
-- [Choice](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#choices--)
+- [Word/Lemma](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)
+- [Phrase](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#proper-names)
+- [Concept](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#concepts)
+- [Choice](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#choices--)
   - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
-- [Optional](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#optional-words--)
+- [Optional](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#optional-words--)
   - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
-- [Indefinite Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#simple-indefinite-wildcards-)
-- [Precise Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#precise-wildcards-n)
-- [Range-restricted Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
-- [Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#_-match-variables)
-- [User Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
+- [Indefinite Wildcard](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#simple-indefinite-wildcards-)
+- [Precise Wildcard](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#precise-wildcards-n)
+- [Range-restricted Wildcard](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
+- [Variable](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#_-match-variables)
+- [User Variable](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
   - There is one difference, in ChatScript when a user variable is placed in the context, e.g. `?: ( what is my name $firstname ) Your name is $firstname.`, it checks whether `$firstname` has been defined, and trigger the rule if it's been defined and the input is "what is my name". In GHOST, on the contrary, it also checks the value of that user variable against the input to see if they match, e.g. `u: (I'm $name) I know.` and `$name` == "Sam", then rule will only be triggered if the input is "I'm Sam".
-- [Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
-- [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
+- [Sentence Boundary](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
+- [Negation](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
   - Currently predicates (functions) are not supported, only accept word, lemma, phrase, and concepts.
-- [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
+- [Function](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
   - Currently only Scheme functions are accepted, can support other languages if needed.
   - Should be in the public interface, e.g. use `define-public` when defining the function.
   - There are several build-in functions that are available:
@@ -50,7 +50,7 @@ Here is a list of features that are fully supported in GHOST:
     - `keep`, to keep the rule in the system so that it can be selected and executed more than once.
     - `unkeep`, parallel-rules are kept by default (see below for details), call this to unkeep it.
     - `set_used`, to set another rule as triggered, so that it will not be triggered again.
-- [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
+- [Unordered Matching](https://github.com/ChatScript/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 There are different types of rules in ChatScript -- responders, rejoinders, and gambits. Note, here in GHOST, responders are called reactive rules and gambits are called proactive rules.
 Use `r:` to define a reactive rule, `j1:` `j2:` `j3:`... etc to define a rejoinder (on different levels), and `p:` to define a gambit. Currently `s:`, `?:`, and `u:` can still be used to define a reactive rule, `a:` up to `e:` can still be used to define a rejoinder, and `t:` can still be used to define a gambit, but these are for backward compability ONLY.
@@ -134,7 +134,7 @@ link-concept: (pets, animals)
 
   ; rule-level
   #link-concept: (fish)
-    ; ... the rule that will link to the concept "fist", as well as the top-level "pets" and "animals" concepts ...
+    ; ... the rule that will link to the concept "fish", as well as the top-level "pets" and "animals" concepts ...
 ```
 
 Note, `link-concept` will be reset when another top-level goal is seen.

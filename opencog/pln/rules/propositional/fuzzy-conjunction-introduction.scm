@@ -14,7 +14,7 @@
 ;; -----------------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 ;; Generate a fuzzy conjunction introduction rule for an n-ary
 ;; conjunction
@@ -29,7 +29,7 @@
          (type (TypeChoice EvaluationT InheritanceT OrT NotT ExecutionT))
          (gen-typed-variable (lambda (x) (TypedVariable x type)))
          (vardecl (VariableList (map gen-typed-variable variables)))
-         (pattern (And variables))
+         (pattern (Present variables))
          (rewrite (ExecutionOutput
                     (GroundedSchema "scm: fuzzy-conjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order
@@ -42,10 +42,10 @@
 
 (define (fuzzy-conjunction-introduction-formula A S)
   (let* ((andees (cog-outgoing-set S))
-         (min-s-atom (min-element-by-key andees cog-stv-strength))
-         (min-c-atom (min-element-by-key andees cog-stv-confidence))
-         (min-s (cog-stv-strength min-s-atom))
-         (min-c (cog-stv-confidence min-c-atom)))
+         (min-s-atom (min-element-by-key andees cog-mean))
+         (min-c-atom (min-element-by-key andees cog-confidence))
+         (min-s (cog-mean min-s-atom))
+         (min-c (cog-confidence min-c-atom)))
     (cog-merge-hi-conf-tv! A (stv min-s min-c))))
 
 ;; Name the rules

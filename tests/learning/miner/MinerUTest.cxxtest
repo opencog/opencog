@@ -35,7 +35,7 @@
 #include <opencog/learning/miner/HandleTree.h>
 #include <opencog/learning/miner/Miner.h>
 #include <opencog/learning/miner/Surprisingness.h>
-#include <opencog/rule-engine/URELogger.h>
+#include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <vector>
@@ -99,7 +99,7 @@ private:
 	 *
 	 * (Lambda
 	 *   (VariableList X1 ... Xn)
-	 *   (And X1 ... Xn))
+	 *   (Present X1 ... Xn))
 	 */
 	Handle mk_nconjunct(unsigned n);
 
@@ -109,12 +109,12 @@ private:
 	 */
 	Handle ure_pm(const AtomSpace& texts_as, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
-	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              bool incremental_expansion=false,
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
-	Handle ure_pm(const HandleSet& texts, int minsup,
+	Handle ure_pm(const HandleSeq& texts, int minsup,
 	              int max_iter=-1, Handle initpat=Handle::UNDEFINED,
-	              TruthValuePtr incremental_expansion=TruthValue::FALSE_TV(),
+	              bool incremental_expansion=false,
 	              int max_conjuncts=-1,
 	              double complexity_penalty=0.0);
 
@@ -124,11 +124,11 @@ private:
 	HandleTree cpp_pm(const AtomSpace& texts_as, int minsup=1,
 	                  int conjuncts=1,
 	                  const Handle& initpat=Handle::UNDEFINED,
-	                  int maxdepth=-1, double info=1.0);
-	HandleTree cpp_pm(const HandleSet& texts, int minsup=1,
+	                  int maxdepth=-1);
+	HandleTree cpp_pm(const HandleSeq& texts, int minsup=1,
 	                  int conjuncts=1,
 	                  const Handle& initpat=Handle::UNDEFINED,
-	                  int maxdepth=-1, double info=1.0);
+	                  int maxdepth=-1);
 
 public:
 	MinerUTest();
@@ -139,13 +139,17 @@ public:
 
 	// Auxiliary methods
 	void test_remove_useless_clauses();
-	void test_match();
 	void test_compose_1();
 	void test_compose_2();
 	void test_compose_3();
+	void test_compose_4();
+	// Re-enable when RewriteLink::beta_reduce support PresentLink
+	void xtest_compose_5();
 	void test_expand_conjunction_disconnect();
 	void test_expand_conjunction_1();
 	void test_expand_conjunction_2();
+	void test_expand_conjunction_3();
+	void test_expand_conjunction_4();
 	void test_shallow_abstract();
 
 	// Pattern miner
@@ -191,7 +195,7 @@ Handle MinerUTest::mk_nconjunct(unsigned n)
 
 Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
                           int maximum_iterations, Handle initpat,
-                          TruthValuePtr incremental_expansion,
+                          bool incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
 {
@@ -201,9 +205,9 @@ Handle MinerUTest::ure_pm(const AtomSpace& texts_as, int minsup,
 	                               complexity_penalty);
 }
 
-Handle MinerUTest::ure_pm(const HandleSet& texts, int minsup,
+Handle MinerUTest::ure_pm(const HandleSeq& texts, int minsup,
                           int maximum_iterations, Handle initpat,
-                          TruthValuePtr incremental_expansion,
+                          bool incremental_expansion,
                           int max_conjuncts,
                           double complexity_penalty)
 {
@@ -217,18 +221,18 @@ HandleTree MinerUTest::cpp_pm(const AtomSpace& texts_as,
                               int minsup,
                               int conjuncts,
                               const Handle& initpat,
-                              int maxdepth, double info)
+                              int maxdepth)
 {
-	return MinerUTestUtils::cpp_pm(texts_as, minsup, conjuncts, initpat, maxdepth, info);
+	return MinerUTestUtils::cpp_pm(texts_as, minsup, conjuncts, initpat, maxdepth);
 }
 
-HandleTree MinerUTest::cpp_pm(const HandleSet& texts,
+HandleTree MinerUTest::cpp_pm(const HandleSeq& texts,
                               int minsup,
                               int conjuncts,
                               const Handle& initpat,
-                              int maxdepth, double info)
+                              int maxdepth)
 {
-	return MinerUTestUtils::cpp_pm(texts, minsup, conjuncts, initpat, maxdepth, info);
+	return MinerUTestUtils::cpp_pm(texts, minsup, conjuncts, initpat, maxdepth);
 }
 
 MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
@@ -238,13 +242,13 @@ MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 	// Main logger
 	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
-	// logger().set_sync_flag(true);
+	logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
 	ure_logger().set_level(Logger::INFO);
 	ure_logger().set_timestamp_flag(false);
-	// ure_logger().set_sync_flag(true);
+	ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
@@ -286,7 +290,7 @@ void MinerUTest::setUp()
 	texts_cpt = an(CONCEPT_NODE, "texts");
 	minsup_prd = an(PREDICATE_NODE, "minsup");
 	isurp_prd = an(PREDICATE_NODE, "isurp");
-	top = al(LAMBDA_LINK, X, X);
+	top = MinerUtils::mk_pattern(X, {X});
 
 	// Load URE-based pattern miner
 	MinerUTestUtils::configure_mandatory_rules(_scm);
@@ -302,49 +306,26 @@ void MinerUTest::test_remove_useless_clauses()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = an(VARIABLE_NODE, "$X"),
-		pattern = al(LAMBDA_LINK,
-		             X,
-		             al(AND_LINK, X, X)),
+	Handle pattern = MinerUtils::mk_pattern(X, {X, X}),
 		result = MinerUtils::remove_useless_clauses(pattern),
-		expected = al(LAMBDA_LINK, X, X);
+		expected = top;
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT(content_eq(result, expected));
-}
-
-void MinerUTest::test_match()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle X = an(VARIABLE_NODE, "$X"),
-		Y = an(VARIABLE_NODE, "$Y"),
-		A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		C = an(CONCEPT_NODE, "C"),
-		pattern = al(LAMBDA_LINK,
-		             al(VARIABLE_LIST, X, Y),
-		             al(LOCAL_QUOTE_LINK,
-		                al(AND_LINK, X, Y))),
-		text = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
-
-	TS_ASSERT(not Miner().match(pattern, text));
 }
 
 void MinerUTest::test_compose_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = an(VARIABLE_NODE, "$X"),
-		Y = an(VARIABLE_NODE, "$Y"),
-		A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		pattern = al(LAMBDA_LINK,
-		             al(VARIABLE_LIST, X, Y),
-		             al(AND_LINK, X, al(INHERITANCE_LINK, Y, B))),
+	Handle InhYB = al(INHERITANCE_LINK, Y, B),
+		pattern = MinerUtils::mk_pattern(al(VARIABLE_LIST, X, Y), {X, InhYB}),
 		subpat = A;
 
 	Handle npat = MinerUtils::compose(pattern, {{Y, subpat}}),
-		expected = al(LAMBDA_LINK, X, X);
+		expected = top;
 
 	logger().debug() << "npat = " << oc_to_string(npat);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -356,25 +337,23 @@ void MinerUTest::test_compose_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = an(VARIABLE_NODE, "$X"),
-		Y = an(VARIABLE_NODE, "$Y"),
-		VarXY = al(VARIABLE_LIST, X, Y),
+	Handle VarXY = al(VARIABLE_LIST, X, Y),
 		pattern = al(LAMBDA_LINK,
 		             VarXY,
-		             al(QUOTE_LINK,
+		             al(PRESENT_LINK,
 		                al(EVALUATION_LINK,
-		                   al(UNQUOTE_LINK, X),
-		                   al(UNQUOTE_LINK, Y)))),
+		                   X,
+		                   Y))),
 		gpn = an(GROUNDED_PREDICATE_NODE, "scm: absolutely-true"),
 		subpat = gpn;
 
 	Handle npat = MinerUtils::compose(pattern, {{X, subpat}}),
 		expected = al(LAMBDA_LINK,
 		              X,
-		              al(QUOTE_LINK,
+		              al(PRESENT_LINK,
 		                 al(EVALUATION_LINK,
 		                    gpn,
-		                    al(UNQUOTE_LINK, X))));
+		                    X)));
 
 	logger().debug() << "npat = " << oc_to_string(npat);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -386,16 +365,40 @@ void MinerUTest::test_compose_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = an(VARIABLE_NODE, "$X"),
-		Y = an(VARIABLE_NODE, "$Y"),
-		VarXY = al(VARIABLE_LIST, X, Y),
-		pattern = al(LAMBDA_LINK,
-		             al(IMPLICATION_LINK, X, Y));
+	Handle VarXY = al(VARIABLE_LIST, X, Y);
+	Handle pattern =
+		MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, X, Y)});
 
 	Handle npat = MinerUtils::compose(pattern, {{Y, Y}}),
-		expected = al(LAMBDA_LINK,
-		              VarXY,
-		              al(IMPLICATION_LINK, X, Y));
+		expected = MinerUtils::mk_pattern(VarXY, {al(IMPLICATION_LINK, X, Y)});
+
+	logger().debug() << "npat = " << oc_to_string(npat);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(npat, expected));
+}
+
+void MinerUTest::test_compose_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sa = al(LAMBDA_LINK, X, al(LOCAL_QUOTE_LINK, al(NOT_LINK, X))),
+		npat = MinerUtils::compose(top, {{X, sa}}),
+		expected = MinerUtils::mk_pattern(X, {al(NOT_LINK, X)});
+
+	logger().debug() << "npat = " << oc_to_string(npat);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(npat, expected));
+}
+
+void MinerUTest::xtest_compose_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sa = al(LAMBDA_LINK, X, al(PRESENT_LINK, al(NOT_LINK, X))),
+		npat = MinerUtils::compose(top, {{X, sa}}),
+		expected = sa;
 
 	logger().debug() << "npat = " << oc_to_string(npat);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -408,9 +411,10 @@ void MinerUTest::test_expand_conjunction_disconnect()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle result = MinerUtils::expand_conjunction_disconnect(top, top),
-		expected = al(LAMBDA_LINK,
-		              al(VARIABLE_LIST, X, Y),
-		              al(AND_LINK, X, Y));
+		expected = MinerUtils::mk_pattern(al(VARIABLE_LIST, X, Y), {X, Y});
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT(content_eq(result, expected));
 }
@@ -423,7 +427,7 @@ void MinerUTest::test_expand_conjunction_1()
 	Handle
 		InhAB = al(INHERITANCE_LINK, A, B),
 		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSet texts{InhAB, InhBC};
+	HandleSeq texts{InhAB, InhBC};
 
 	Handle InhXY = al(INHERITANCE_LINK, X, Y),
 		VarXY = al(VARIABLE_LIST, X, Y),
@@ -435,26 +439,9 @@ void MinerUTest::test_expand_conjunction_1()
 		         InhXY);
 
 	HandleSet results = MinerUtils::expand_conjunction(p1, p2, texts, 1);
-	Handle
-		InhXW = al(INHERITANCE_LINK, X, W),
-		InhZX = al(INHERITANCE_LINK, Z, X),
-		InhYW = al(INHERITANCE_LINK, Y, W),
-		InhZY = al(INHERITANCE_LINK, Z, Y),
-		VarXYW = al(VARIABLE_LIST, X, Y, W),
-		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
-		InhXYXW = al(LAMBDA_LINK,
-		             VarXYW,
-		             al(AND_LINK, InhXY, InhXW)),
-		InhXYZX = al(LAMBDA_LINK,
-		             VarXYZ,
-		             al(AND_LINK, InhXY, InhZX)),
-		InhXYYW = al(LAMBDA_LINK,
-		             VarXYW,
-		             al(AND_LINK, InhXY, InhYW)),
-		InhXYZY = al(LAMBDA_LINK,
-		             VarXYZ,
-		             al(AND_LINK, InhXY, InhZY));
-	HandleSet expected{InhXYXW, InhXYZX, InhXYYW, InhXYZY};
+	// Empty because all resulting expansions have a number of clauses
+	// equal to or below that of p1.
+	HandleSet expected{};
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -470,7 +457,7 @@ void MinerUTest::test_expand_conjunction_2()
 	Handle
 		InhAC = al(INHERITANCE_LINK, A, C),
 		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSet texts{InhAC, InhBC};
+	HandleSeq texts{InhAC, InhBC};
 
 	Handle InhXC = al(INHERITANCE_LINK, X, C),
 		pat = al(LAMBDA_LINK,
@@ -481,6 +468,81 @@ void MinerUTest::test_expand_conjunction_2()
 	// Empty because the only result is equal to pat, thus rejected as
 	// worthwhile expansion
 	HandleSet expected{};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_expand_conjunction_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Texts
+	Handle
+		InhAB = al(INHERITANCE_LINK, A, B),
+		InhBC = al(INHERITANCE_LINK, B, C);
+	HandleSeq texts{InhAB, InhBC};
+
+	Handle InhXY = al(INHERITANCE_LINK, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		pat = MinerUtils::mk_pattern(VarXY, {InhXY});
+
+	HandleSet results = MinerUtils::expand_conjunction(pat, pat, texts, 1);
+	Handle
+		InhXW = al(INHERITANCE_LINK, X, W),
+		InhZX = al(INHERITANCE_LINK, Z, X),
+		InhYW = al(INHERITANCE_LINK, Y, W),
+		InhZY = al(INHERITANCE_LINK, Z, Y),
+		VarXYW = al(VARIABLE_LIST, X, Y, W),
+		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
+		InhXYXW = MinerUtils::mk_pattern(VarXYW, {InhXY, InhXW}),
+		InhXYZX = MinerUtils::mk_pattern(VarXYZ, {InhXY, InhZX}),
+		InhXYYW = MinerUtils::mk_pattern(VarXYW, {InhXY, InhYW}),
+		InhXYZY = MinerUtils::mk_pattern(VarXYZ, {InhXY, InhZY});
+	HandleSet expected{InhXYXW, InhXYZX, InhXYYW, InhXYZY};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void MinerUTest::test_expand_conjunction_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Texts
+	Handle
+		InhAB = al(INHERITANCE_LINK, A, B),
+		LstAB = al(LIST_LINK, A, B);
+	HandleSeq texts{InhAB, LstAB};
+
+	Handle InhXY = al(INHERITANCE_LINK, X, Y),
+		LstXY = al(LIST_LINK, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		p1 = al(LAMBDA_LINK,
+		        VarXY,
+		        InhXY),
+		p2 = al(LAMBDA_LINK,
+		        VarXY,
+		        LstXY);
+
+	HandleSet results = MinerUtils::expand_conjunction(p1, p2, texts, 1);
+	Handle
+		InhXZ = al(INHERITANCE_LINK, X, Z),
+		InhZY = al(INHERITANCE_LINK, Z, Y),
+		LstXZ = al(LIST_LINK, X, Z),
+		LstZY = al(LIST_LINK, Z, Y),
+		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
+		InhXYLstXZ = MinerUtils::mk_pattern(VarXYZ,
+		                                    {InhXY, LstXZ}),
+		InhXYLstZY = MinerUtils::mk_pattern(VarXYZ,
+		                                    {InhXY, LstZY}),
+		InhXYLstXY = MinerUtils::mk_pattern(VarXY,
+		                                    {InhXY, LstXY});
+	HandleSet expected{InhXYLstXZ, InhXYLstZY, InhXYLstXY};
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -499,15 +561,14 @@ void MinerUTest::test_shallow_abstract()
 
 	// Define pattern
 	Handle VarXZW = al(VARIABLE_LIST, X, Z, W),
-		ugly = an(CONCEPT_NODE, "ugly"),
-		clauses = al(AND_LINK,
-		             al(INHERITANCE_LINK, X, ugly),
-		             al(INHERITANCE_LINK, X, Z),
-		             al(INHERITANCE_LINK, X, W)),
-		pattern = al(LAMBDA_LINK, VarXZW, clauses);
+		ugly = an(CONCEPT_NODE, "ugly");
+	HandleSeq clauses = {al(INHERITANCE_LINK, X, ugly),
+	                     al(INHERITANCE_LINK, X, Z),
+	                     al(INHERITANCE_LINK, X, W)};
+	Handle pattern = MinerUtils::mk_pattern(VarXZW, clauses);
 
 	// Define texts
-	HandleSet texts;
+	HandleSeq texts;
 	_tmp_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                            opencog::ATOM, true);
 
@@ -602,17 +663,19 @@ void MinerUTest::test_AB_AC()
 	// Define texts
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhAC = al(INHERITANCE_LINK, A, C);
-	HandleSet texts{InhAB, InhAC};
+	HandleSeq texts{InhAB, InhAC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y);
 
+	// NEXT TODO: get rid of the C++ pattern miner, as it is not used at all
+
 	// Run C++ pattern miner (using _as for testing more diverse
 	// content)
 	HandleTree cpp_results = cpp_pm(_as, 2);
-	Handle cpp_expected = al(LAMBDA_LINK, Y, InhAY);
+	Handle cpp_expected = MinerUtils::mk_pattern(Y, {InhAY});
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -622,7 +685,7 @@ void MinerUTest::test_AB_AC()
 	// Run URE pattern miner (using _as for testing more diverse
 	// content)
 	Handle ure_results = ure_pm(_as, 2, 10),
-		expected_pattern = al(LAMBDA_LINK, Y, InhAY),
+		expected_pattern = MinerUtils::mk_pattern(Y, {InhAY}),
 		ure_expected = mk_minsup_eval(2, expected_pattern);
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
@@ -639,7 +702,7 @@ void MinerUTest::test_AB_AC_BC()
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhAC = al(INHERITANCE_LINK, A, C),
 		InhBC = al(INHERITANCE_LINK, B, C);
-	HandleSet texts{A, B, C, InhAB, InhAC, InhBC};
+	HandleSeq texts{A, B, C, InhAB, InhAC, InhBC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -649,9 +712,9 @@ void MinerUTest::test_AB_AC_BC()
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 2),
-		cpp_expected(al(LAMBDA_LINK, VarXY, InhXY),
-		             { al(LAMBDA_LINK, Y, InhAY),
-		               al(LAMBDA_LINK, X, InhXC) });
+		cpp_expected(MinerUtils::mk_pattern(VarXY, {InhXY}),
+		             { MinerUtils::mk_pattern(Y, {InhAY}),
+		               MinerUtils::mk_pattern(X, {InhXC}) });
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -662,9 +725,9 @@ void MinerUTest::test_AB_AC_BC()
 	Handle ure_results = ure_pm(texts, 2, 10),
 		ure_expected = mk_minsup_evals(2,
 		                               { top,
-		                                 al(LAMBDA_LINK, VarXY, InhXY),
-		                                 al(LAMBDA_LINK, Y, InhAY),
-		                                 al(LAMBDA_LINK, X, InhXC) });
+		                                 MinerUtils::mk_pattern(VarXY, {InhXY}),
+		                                 MinerUtils::mk_pattern(Y, {InhAY}),
+		                                 MinerUtils::mk_pattern(X, {InhXC}) });
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -679,18 +742,17 @@ void MinerUTest::test_AB_ABC()
 	// Define texts
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
-	HandleSet texts{A, B, C, InhAB, InhABC};
+	HandleSeq texts{A, B, C, InhAB, InhABC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
-		AndXY = al(AND_LINK, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y);
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 2),
-		cpp_expected({ HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
-		                          { al(LAMBDA_LINK, Y, InhAY) }) });
+		cpp_expected({ HandleTree(MinerUtils::mk_pattern(VarXY, {InhXY}),
+		                          { MinerUtils::mk_pattern(Y, {InhAY}) }) });
 
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
@@ -702,8 +764,8 @@ void MinerUTest::test_AB_ABC()
 	Handle ure_results = ure_pm(texts, 2, 10),
 		ure_expected = mk_minsup_evals(2,
 		                               { top,
-		                                 al(LAMBDA_LINK, VarXY, InhXY),
-		                                 al(LAMBDA_LINK, Y, InhAY) });
+		                                 MinerUtils::mk_pattern(VarXY, {InhXY}),
+		                                 MinerUtils::mk_pattern(Y, {InhAY}) });
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -722,7 +784,7 @@ void MinerUTest::test_ABCD()
 		InhGH = al(INHERITANCE_LINK, G, H),
 		ImpABCD = al(IMPLICATION_LINK, InhAB, InhCD),
 		ImpEFGH = al(IMPLICATION_LINK, InhEF, InhGH);
-	HandleSet texts{InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH};
+	HandleSeq texts{InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH};
 
 	// Define pattern parts
 	Handle InhXY = al(INHERITANCE_LINK, X, Y),
@@ -730,18 +792,15 @@ void MinerUTest::test_ABCD()
 		ImpXY = al(IMPLICATION_LINK, X, Y);
 
 	// Define initpat
-	Handle initpat = al(LAMBDA_LINK, ImpXY);
+	Handle initpat = MinerUtils::mk_pattern_no_vardecl({ImpXY});
 
 	// Run C++ pattern miner
+
 	HandleTree cpp_results = cpp_pm(texts, 2, 1, initpat),
-		cpp_expected{ HandleTree(al(LAMBDA_LINK,
-		                            al(IMPLICATION_LINK, Z, InhXY)),
-		                         { al(LAMBDA_LINK,
-		                              al(IMPLICATION_LINK, InhZW, InhXY)) }),
-		              HandleTree(al(LAMBDA_LINK,
-		                            al(IMPLICATION_LINK, InhXY, Z)),
-		                         { al(LAMBDA_LINK,
-		                              al(IMPLICATION_LINK, InhZW, InhXY)) })
+		cpp_expected{ HandleTree(MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, Z, InhXY)}),
+		                         { MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, InhZW, InhXY)})}),
+		              HandleTree(MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, InhXY, Z)}),
+		                         { MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, InhZW, InhXY)}) })
 		};
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
@@ -752,13 +811,10 @@ void MinerUTest::test_ABCD()
 	// Run URE pattern miner
 	Handle ure_results = ure_pm(texts, 2, 10, initpat),
 		ure_expected = mk_minsup_evals(2,
-		                               { al(LAMBDA_LINK, ImpXY),
-		                                 al(LAMBDA_LINK,
-		                                    al(IMPLICATION_LINK, Z, InhXY)),
-		                                 al(LAMBDA_LINK,
-		                                    al(IMPLICATION_LINK, InhXY, Z)),
-		                                 al(LAMBDA_LINK,
-		                                    al(IMPLICATION_LINK, InhZW, InhXY)) });
+		                               { MinerUtils::mk_pattern_no_vardecl({ImpXY}),
+		                                 MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, Z, InhXY)}),
+		                                 MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, InhXY, Z)}),
+		                                 MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, InhZW, InhXY)}) });
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -775,7 +831,7 @@ void MinerUTest::test_ABAB()
 		InhBC = al(INHERITANCE_LINK, B, C),
 		ImpABAB = al(IMPLICATION_LINK, InhAB, InhAB),
 		ImpBCBC = al(IMPLICATION_LINK, InhBC, InhBC);
-	HandleSet texts{ImpABAB, ImpBCBC};
+	HandleSeq texts{ImpABAB, ImpBCBC};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -783,11 +839,12 @@ void MinerUTest::test_ABAB()
 		ImpXY = al(IMPLICATION_LINK, X, Y);
 
 	// Define initpat
-	Handle initpat = al(LAMBDA_LINK, ImpXY);
+	Handle initpat = MinerUtils::mk_pattern_no_vardecl({ImpXY});
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 2, 1, initpat);
-	Handle cpp_expected = al(LAMBDA_LINK, al(IMPLICATION_LINK, InhXY, InhXY));
+	Handle cpp_expected =
+		MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, InhXY, InhXY)});
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -797,9 +854,10 @@ void MinerUTest::test_ABAB()
 	// Run URE pattern miner
 	Handle ure_results = ure_pm(texts, 2, 10, initpat),
 		ure_expected = mk_minsup_eval(2,
-		                              al(LAMBDA_LINK,
-		                                 VarXY,
-		                                 al(IMPLICATION_LINK, InhXY, InhXY)));
+		                              MinerUtils::mk_pattern(VarXY,
+		                                                     {al(IMPLICATION_LINK,
+		                                                         InhXY,
+		                                                         InhXY)}));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -816,21 +874,20 @@ void MinerUTest::test_AAAA()
 		BB = al(INHERITANCE_LINK, B, B),
 		AAAA = al(IMPLICATION_LINK, AA, AA),
 		BBBB = al(IMPLICATION_LINK, BB, BB);
-	HandleSet texts{AAAA, BBBB};
+	HandleSeq texts{AAAA, BBBB};
 
 	// Define pattern parts
 	Handle InhXX = al(INHERITANCE_LINK, X, X);
 
 	// Define initpat
-	Handle initpat = al(LAMBDA_LINK,
-	                    al(IMPLICATION_LINK, X, Y));
+	Handle initpat =
+		MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK, X, Y)});
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 2, 1, initpat);
-	Handle cpp_expected = al(LAMBDA_LINK,
-	                         al(IMPLICATION_LINK,
-	                            InhXX,
-	                            InhXX));
+	Handle cpp_expected = MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK,
+	                                                            InhXX,
+	                                                            InhXX)});
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -840,10 +897,9 @@ void MinerUTest::test_AAAA()
 	// Run URE pattern miner
 	Handle ure_results = ure_pm(texts, 2, 50, initpat),
 		ure_expected = mk_minsup_eval(2,
-		                              al(LAMBDA_LINK,
-		                                 al(IMPLICATION_LINK,
-		                                    InhXX,
-		                                    InhXX)));
+		                              MinerUtils::mk_pattern_no_vardecl({al(IMPLICATION_LINK,
+		                                                                    InhXX,
+		                                                                    InhXX)}));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -859,11 +915,11 @@ void MinerUTest::test_evaluation()
 	Handle P = an(PREDICATE_NODE, "P"),
 		PA = al(EVALUATION_LINK, P, A),
 		PB = al(EVALUATION_LINK, P, B);
-	HandleSet texts{PA, PB};
+	HandleSeq texts{PA, PB};
 
 	// Define expected pattern
 	Handle PX = al(EVALUATION_LINK, P, X),
-		cpp_expected = al(LAMBDA_LINK, X, PX);
+		cpp_expected = MinerUtils::mk_pattern(X, {PX});
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 2);
@@ -891,7 +947,7 @@ void MinerUTest::test_2conjuncts_1()
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{InhAB, InhBC1, InhBC2};
+	HandleSeq texts{InhAB, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXY = al(VARIABLE_LIST, X, Y),
@@ -899,9 +955,7 @@ void MinerUTest::test_2conjuncts_1()
 		InhAY = al(INHERITANCE_LINK, A, Y);
 
 	// Define initpat
-	Handle initpat = al(LAMBDA_LINK,
-	                    VarXY,
-	                    al(AND_LINK, InhXA, InhAY));
+	Handle initpat = MinerUtils::mk_pattern(VarXY, {InhXA, InhAY});
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(_as, 2, 2, initpat);
@@ -926,7 +980,7 @@ void MinerUTest::test_2conjuncts_2()
 	Handle AB = al(INHERITANCE_LINK, A, B),
 		BC1 = al(INHERITANCE_LINK, B, C1),
 		BC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{AB, BC1, BC2};
+	HandleSeq texts{AB, BC1, BC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -936,19 +990,11 @@ void MinerUTest::test_2conjuncts_2()
 		InhZW = al(INHERITANCE_LINK, Z, W);
 
 	// Define initpat
-	Handle initpat = al(LAMBDA_LINK,
-	                    VarXYZW,
-	                    al(AND_LINK,
-	                       InhXY,
-	                       InhZW));
+	Handle initpat = MinerUtils::mk_pattern(VarXYZW, {InhXY, InhZW});
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(_as, 2, 2, initpat);
-	Handle cpp_expected = al(LAMBDA_LINK,
-	                         VarXYZ,
-	                         al(AND_LINK,
-	                            InhXY,
-	                            InhYZ));
+	Handle cpp_expected = MinerUtils::mk_pattern(VarXYZ, {InhXY, InhYZ});
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -958,11 +1004,8 @@ void MinerUTest::test_2conjuncts_2()
 	// Run URE pattern miner
 	Handle ure_results = ure_pm(texts, 2, 2, initpat),
 		ure_expected = mk_minsup_eval(2,
-		                              al(LAMBDA_LINK,
-		                                 VarXYZ,
-		                                 al(AND_LINK,
-		                                    InhXY,
-		                                    InhYZ)));
+		                              MinerUtils::mk_pattern(VarXYZ,
+		                                                     {InhXY, InhYZ}));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -978,7 +1021,7 @@ void MinerUTest::test_2conjuncts_3()
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{InhAB, InhBC1, InhBC2};
+	HandleSeq texts{InhAB, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -987,11 +1030,7 @@ void MinerUTest::test_2conjuncts_3()
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 2, 2);
-	Handle cpp_expected = al(LAMBDA_LINK,
-	                         VarXYZ,
-	                         al(AND_LINK,
-	                            InhXY,
-	                            InhYZ));
+	Handle cpp_expected = MinerUtils::mk_pattern(VarXYZ, {InhXY, InhYZ});
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -1001,11 +1040,8 @@ void MinerUTest::test_2conjuncts_3()
 	// Run URE pattern miner
 	Handle ure_results = ure_pm(texts, 2, 50, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(2,
-		                              al(LAMBDA_LINK,
-		                                 VarXYZ,
-		                                 al(AND_LINK,
-		                                    InhXY,
-		                                    InhYZ)));
+		                              MinerUtils::mk_pattern(VarXYZ,
+		                                                     {InhXY, InhYZ}));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -1022,7 +1058,7 @@ void MinerUTest::test_2conjuncts_4()
 		InhA2B = al(INHERITANCE_LINK, A2, B),
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2);
-	HandleSet texts{InhA1B, InhA2B, InhBC1, InhBC2};
+	HandleSeq texts{InhA1B, InhA2B, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -1031,11 +1067,7 @@ void MinerUTest::test_2conjuncts_4()
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(texts, 4, 2);
-	Handle cpp_expected = al(LAMBDA_LINK,
-	                         VarXYZ,
-	                         al(AND_LINK,
-	                            InhXY,
-	                            InhYZ));
+	Handle cpp_expected = MinerUtils::mk_pattern(VarXYZ, {InhXY, InhYZ});
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 	logger().debug() << "cpp_expected = " << oc_to_string(cpp_expected);
@@ -1045,11 +1077,8 @@ void MinerUTest::test_2conjuncts_4()
 	// Run URE pattern miner
 	Handle ure_results = ure_pm(texts, 4, 100, mk_nconjunct(2)),
 		ure_expected = mk_minsup_eval(4,
-		                              al(LAMBDA_LINK,
-		                                 VarXYZ,
-		                                 al(AND_LINK,
-		                                    InhXY,
-		                                    InhYZ)));
+		                              MinerUtils::mk_pattern(VarXYZ,
+		                                                     {InhXY, InhYZ}));
 
 	logger().debug() << "ure_results = " << oc_to_string(ure_results);
 	logger().debug() << "ure_expected = " << oc_to_string(ure_expected);
@@ -1069,7 +1098,7 @@ void MinerUTest::test_2conjuncts_5()
 		InhBC1 = al(INHERITANCE_LINK, B, C1),
 		InhBC2 = al(INHERITANCE_LINK, B, C2),
 		InhBC3 = al(INHERITANCE_LINK, B, C3);
-	HandleSet texts{InhA1B, InhA2B, InhBC1, InhBC2};
+	HandleSeq texts{InhA1B, InhA2B, InhBC1, InhBC2};
 
 	// Define pattern parts
 	Handle VarXYZ = al(VARIABLE_LIST, X, Y, Z),
@@ -1079,11 +1108,7 @@ void MinerUTest::test_2conjuncts_5()
 		InhZW = al(INHERITANCE_LINK, Z, W);
 
 	// Define initpat
-	Handle initpat = al(LAMBDA_LINK,
-	                    VarXYZW,
-	                    tmp_al(AND_LINK,
-	                           InhXY,
-	                           InhZW));
+	Handle initpat = MinerUtils::mk_pattern(VarXYZW, {InhXY, InhZW});
 
 	// Like test_2conjuncts_2 but setting the info heuristic to 1,
 	// meaning that the frequency of a conjunction of strongly
@@ -1094,12 +1119,8 @@ void MinerUTest::test_2conjuncts_5()
 	// Only run the C++ pattern miner since the URE pattern doesn't
 	// have such heuristic (though it could in the future)
 	HandleTree results = cpp_pm(texts, 9/*minsup*/, 2/*nconjuncts*/,
-	                            initpat, -1/*maxdepth*/, 1/*info*/);
-	Handle non_expected = al(LAMBDA_LINK,
-	                         VarXYZ,
-	                         al(AND_LINK,
-	                            InhXY,
-	                            InhYZ));
+	                            initpat, -1/*maxdepth*/);
+	Handle non_expected = MinerUtils::mk_pattern(VarXYZ, {InhXY, InhYZ});
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "non_expected = " << oc_to_string(non_expected);
@@ -1153,19 +1174,18 @@ void MinerUTest::test_InferenceControl()
 		VarA = an(VARIABLE_NODE, "$A"),
 		VarL = an(VARIABLE_NODE, "$L"),
 		VarB = an(VARIABLE_NODE, "$B"),
-		vardecl = al(VARIABLE_LIST, VarT, VarA, VarL, VarB),
-		clauses = al(AND_LINK,
-		             al(EXECUTION_LINK,
-		                expand,
-		                al(LIST_LINK, VarA, VarL, de_rule),
-		                VarB),
-		             al(EVALUATION_LINK,
-		                preproof,
-		                al(LIST_LINK, VarA, VarT)),
-		             al(EVALUATION_LINK,
-		                preproof,
-		                al(LIST_LINK, VarB, VarT))),
-		initpat = al(LAMBDA_LINK, vardecl, clauses);
+		vardecl = al(VARIABLE_LIST, VarT, VarA, VarL, VarB);
+	HandleSeq clauses = {al(EXECUTION_LINK,
+	                        expand,
+	                        al(LIST_LINK, VarA, VarL, de_rule),
+	                        VarB),
+	                     al(EVALUATION_LINK,
+	                        preproof,
+	                        al(LIST_LINK, VarA, VarT)),
+	                     al(EVALUATION_LINK,
+	                        preproof,
+	                        al(LIST_LINK, VarB, VarT))};
+	Handle initpat = MinerUtils::mk_pattern(vardecl, clauses);
 
 	// The pattern of interest looks like
 	//
@@ -1197,30 +1217,29 @@ void MinerUTest::test_InferenceControl()
 	//       Variable "$B"
 	//       Variable "$T"
 	Handle a = an(CONCEPT_NODE, "a"),
-		expected_vardecl = al(VARIABLE_LIST, VarT, VarA, X, VarB),
-		expected_clauses = al(AND_LINK,
-		                      al(EXECUTION_LINK,
-		                         expand,
-		                         al(LIST_LINK,
-		                            VarA,
-		                            al(INHERITANCE_LINK, a, X),
-		                            de_rule),
-		                         VarB),
-		                      al(EVALUATION_LINK,
-		                         preproof,
-		                         al(LIST_LINK, VarA, VarT)),
-		                      al(EVALUATION_LINK,
-		                         preproof,
-		                         al(LIST_LINK, VarB, VarT))),
-		expected = al(LAMBDA_LINK,
-		              expected_vardecl,
-		              expected_clauses);
+		expected_vardecl = al(VARIABLE_LIST, VarT, VarA, X, VarB);
+	HandleSeq
+		expected_clauses = {al(EXECUTION_LINK,
+		                       expand,
+		                       al(LIST_LINK,
+		                          VarA,
+		                          al(INHERITANCE_LINK, a, X),
+		                          de_rule),
+		                       VarB),
+		                    al(EVALUATION_LINK,
+		                       preproof,
+		                       al(LIST_LINK, VarA, VarT)),
+		                    al(EVALUATION_LINK,
+		                       preproof,
+		                       al(LIST_LINK, VarB, VarT))};
+	Handle expected = MinerUtils::mk_pattern(expected_vardecl,
+	                                         expected_clauses);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(_tmp_as,
 	                                2/*minsup*/, 3/*nconjuncts*/,
-	                                initpat, 2/*maxdepth*/, 1/*info*/);
+	                                initpat, 2/*maxdepth*/);
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 
@@ -1246,18 +1265,17 @@ void MinerUTest::test_SodaDrinker()
 	logger().debug() << "rs = " << rs;
 
 	// Define initial pattern (to speed up mining)
-	Handle VarXYZW = al(VARIABLE_LIST, X, Y, Z, W),
-		clauses = al(AND_LINK,
-		             al(INHERITANCE_LINK, X, Y),
-		             al(INHERITANCE_LINK, X, Z),
-		             al(INHERITANCE_LINK, X, W)),
-		initpat = al(LAMBDA_LINK, VarXYZW, clauses);
+	Handle VarXYZW = al(VARIABLE_LIST, X, Y, Z, W);
+	HandleSeq clauses = {al(INHERITANCE_LINK, X, Y),
+	                     al(INHERITANCE_LINK, X, Z),
+	                     al(INHERITANCE_LINK, X, W)};
+	Handle initpat = MinerUtils::mk_pattern(VarXYZW, clauses);
 
 	// The pattern of interest looks like
 	//
 	// Lambda
 	//   X
-	//   And
+	//   Present
 	//     Inheritance
 	//       X
 	//       Concept "man"
@@ -1274,7 +1292,7 @@ void MinerUTest::test_SodaDrinker()
 	// Run C++ pattern miner
 	HandleTree cpp_results = cpp_pm(_tmp_as,
 	                                5/*minsup*/, 3/*nconjuncts*/,
-	                                initpat, 3/*maxdepth*/, 1/*info*/);
+	                                initpat, 3/*maxdepth*/);
 
 	logger().debug() << "cpp_results = " << oc_to_string(cpp_results);
 
@@ -1309,11 +1327,11 @@ void MinerUTest::test_SodaDrinker_incremental()
 	// bug (the pattern is ignored by surprisingness).
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	bool incremental_expansion = true;
 	int max_conjuncts = 3;
 	double complexity_penalty = 1;
 	int minsup = 5;
-	int max_iteration = 200;
+	int max_iteration = 100;
 	Handle ure_results = ure_pm(_tmp_as, minsup, max_iteration,
 	                            initpat,
 	                            incremental_expansion,
@@ -1324,7 +1342,7 @@ void MinerUTest::test_SodaDrinker_incremental()
 	//
 	// Lambda
 	//   X
-	//   And
+	//   Present
 	//     Inheritance
 	//       X
 	//       Concept "man"
@@ -1374,30 +1392,29 @@ void MinerUTest::xtest_lojban()
 		X1 = tmp_an(VARIABLE_NODE, "$X1"),
 		X2 = tmp_an(VARIABLE_NODE, "$X2"),
 		Z2 = tmp_an(VARIABLE_NODE, "$Z2"),
-		VARS = tmp_al(VARIABLE_LIST, X1, X2, Z2, P1, P3),
-		clauses = tmp_al(AND_LINK,
-		                 tmp_al(EVALUATION_LINK, P1, tmp_al(LIST_LINK, X1, X2)),
-		                 tmp_al(EVALUATION_LINK, P3, tmp_al(LIST_LINK, X1, Z2))),
-		initpat = tmp_al(LAMBDA_LINK, VARS, clauses);
+		VARS = tmp_al(VARIABLE_LIST, X1, X2, Z2, P1, P3);
+	HandleSeq clauses = { tmp_al(EVALUATION_LINK, P1, tmp_al(LIST_LINK, X1, X2)),
+	                      tmp_al(EVALUATION_LINK, P3, tmp_al(LIST_LINK, X1, Z2)) };
+	Handle initpat = MinerUtils::mk_pattern(VARS, clauses);
 
 	// Run the pattern miner
-	HandleTree results = cpp_pm(_as, 5/*minsup*/, 2/*nconjuncts*/, initpat, 3/*maxdepth*/, 1/*info*/);
+	HandleTree results = cpp_pm(_as, 5/*minsup*/, 2/*nconjuncts*/, initpat, 3/*maxdepth*/);
 
 	// The pattern of interest looks like
 	//
 	// Lambda
 	//   X
-	// And
-	//   EvaluationLink
-	//     PredicateNode "sumti1"
-	//     ListLink
-	//       X
-	//       Concept "jitfa"
-	//   EvaluationLink
-	//     PredicateNode "sumti2"
-	//     ListLink
-	//       X
-	//       Concept "ko'a"
+	//   Present
+	//     EvaluationLink
+	//       PredicateNode "sumti1"
+	//       ListLink
+	//         X
+	//         Concept "jitfa"
+	//     EvaluationLink
+	//       PredicateNode "sumti2"
+	//       ListLink
+	//         X
+	//         Concept "ko'a"
 	Handle jitfa = tmp_an(CONCEPT_NODE, "jitfa"),
 		koa = tmp_an(CONCEPT_NODE, "ko'a"),
 		sumti1 = tmp_an(PREDICATE_NODE, "sumti1"),
@@ -1439,7 +1456,7 @@ void MinerUTest::test_vqa()
 	//     (VariableNode "$PM-1b1cc2ca")
 	//     (VariableNode "$PM-24b2cd09-1de71072")
 	//   )
-	//   (AndLink
+	//   (PresentLink
 	//     (MemberLink
 	//       (VariableNode "$PM-24b2cd09")
 	//       (VariableNode "$PM-1b1cc2ca")
@@ -1456,20 +1473,17 @@ void MinerUTest::test_vqa()
 		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
 		MemXY = al(MEMBER_LINK, X, Y),
 		MemZY = al(MEMBER_LINK, Z, Y),
-		expected = al(LAMBDA_LINK,
-		              VarXYZ,
-		              al(AND_LINK,
-		                 MemXY,
-		                 MemZY));
+		expected = MinerUtils::mk_pattern(VarXYZ, {MemXY, MemZY});
 
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Run URE pattern miner
-	TruthValuePtr incremental_expansion = SimpleTruthValue::createSTV(0.0001, 1.0);
+	bool incremental_expansion = true;
 	int minsup = 500;
+	int max_iteration = 20;
 	int max_conjuncts = 2;
 	double complexity_penalty = 1;
-	Handle ure_results = ure_pm(_tmp_as, minsup, 100,
+	Handle ure_results = ure_pm(_tmp_as, minsup, max_iteration,
 	                            initpat,
 	                            incremental_expansion,
 	                            max_conjuncts,

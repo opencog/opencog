@@ -23,6 +23,10 @@
   opl
 )
 
+; list of pairs (psi-thread component)
+; to close psi threads before exiting
+(define psi-threads '())
+
 ; --------------------------------------------------------------
 ; Define the component category. Components are like mind-agents
 ; but there activities are defined using openpsi-rules and action-selectors
@@ -102,8 +106,10 @@
   (if (not (psi-running? component))
     (begin
       (cog-set-value! component (Predicate "run-loop") (StringValue "#t"))
-      (call-with-new-thread
-        (lambda () (cog-evaluate! (cog-value component (Predicate "loop"))))))
+      (save-thread
+        (call-with-new-thread
+          (lambda () (cog-evaluate! (cog-value component (Predicate "loop")))))
+        component))
   )
 )
 
@@ -134,15 +140,36 @@
 )
 
 ; -------------------------------------------------------------
-(define (psi-halt component)
+(define (save-thread thread component)
+ "
+  save-thread THREAD COMPONENT
+
+  Save thread in the psi-threads list to properly terminate it
+  before exit.
+ "
+ (set! psi-threads (cons (cons thread component) psi-threads))
+)
+
+; -------------------------------------------------------------
+(define* (psi-halt component #:optional (timeout 3))
 "
   psi-halt COMPONENT
 
   Halts COMPONENT's previously-started psi loop thread. The thread is
   started by calling `(psi-run COMPONENT)`.
 "
+  (define (psi-join lst)
+    (if (not (null? lst))
+      (let
+        ((thread (car (car lst)))
+         (comp (cdr (car lst))))
+        (if (equal? component comp)
+          (if (not (thread-exited? thread))
+            (join-thread thread (+ (current-time) timeout)))
+          (psi-join (cdr lst))))))
+
   (cog-set-value! component (Predicate "run-loop") (StringValue "#f"))
-)
+  (psi-join psi-threads))
 
 ; --------------------------------------------------------------
 (define (psi-loop-count component)

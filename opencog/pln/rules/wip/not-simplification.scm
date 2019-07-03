@@ -32,8 +32,8 @@
 
 (define (not-simplification-side-effect-free-formula NNA A)
   (let 
-      ((sNNA (cog-stv-strength NNA))
-       (cNNA (cog-stv-confidence NNA)))
+      ((sNNA (cog-mean NNA))
+       (cNNA (cog-confidence NNA)))
     (stv (- 1 sNNA) cNNA)))
 
 ; Name the rule

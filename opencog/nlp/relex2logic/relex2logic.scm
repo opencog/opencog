@@ -1,13 +1,11 @@
 
 (define-module (opencog nlp relex2logic))
 
-; (add-to-load-path "/usr/local/share/opencog/scm")
-
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog spacetime))
 (use-modules (opencog nlp))
-(use-modules (opencog rule-engine))
+(use-modules (opencog ure))
 
 (load "relex2logic/rule-utils.scm")
 (load "relex2logic/r2l-utilities.scm")

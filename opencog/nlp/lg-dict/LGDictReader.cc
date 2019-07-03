@@ -41,33 +41,13 @@ static LGDictExpContainer lg_exp_to_container(Exp* exp)
     if (CONNECTOR_type == exp->type)
         return LGDictExpContainer(CONNECTOR_type, exp);
 
-    // Whenever a null appears in an OR-list, it means the
-    // entire OR-list is optional.  A null can never appear
-    // in an AND-list.
     E_list* el = exp->u.l;
-
-    if (NULL == el)
-        return LGDictExpContainer(CONNECTOR_type, NULL);
-
-    // The C data structure that link-grammar uses for connector
-    // expressions is totally insane, as witnessed by the loop below.
-    // Anyway: operators are infixed, i.e. are always binary,
-    // with exp->u.l->e being the left hand side, and
-    //      exp->u.l->next->e being the right hand side.
-    // This means that exp->u.l->next->next is always null.
     std::vector<LGDictExpContainer> subcontainers;
-    subcontainers.push_back(lg_exp_to_container(el->e));
-    el = el->next;
-
-    while (el && exp->type == el->e->type)
+    while (el)
     {
-        el = el->e->u.l;
         subcontainers.push_back(lg_exp_to_container(el->e));
         el = el->next;
     }
-
-    if (el)
-        subcontainers.push_back(lg_exp_to_container(el->e));
 
     return LGDictExpContainer(exp->type, subcontainers);
 }
@@ -125,4 +105,12 @@ HandleSeq opencog::getDictEntry(Dictionary _dictionary,
 
     free_lookup_list(_dictionary, dn_head);
     return outgoing;
+}
+
+bool opencog::haveDictEntry(Dictionary _dictionary,
+                            const std::string& word)
+{
+	// See if we know about this word, or not.
+// XXX As above, this should make use of the regexes!
+	return boolean_dictionary_lookup(_dictionary, word.c_str());
 }

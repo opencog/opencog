@@ -404,6 +404,7 @@
   (define keep #f)
   (define unkeep #f)
   (define set_used #f)
+  (define set-used-rule-label "")
 
   ; The GroundedSchemaNode that will be used
   (define gsn-action
@@ -430,7 +431,7 @@
                     (append (list ac) (to-atomese (list n)))))
               ; The grounding of a variable in original words, e.g. '_0
               ((equal? 'get_wvar (car n))
-               (list-ref pat-vars (cdr n)))
+               (get-var-literals (list-ref pat-vars (cdr n))))
               ; The grounding of a variable in lemmas, e.g. _0
               ((equal? 'get_lvar (car n))
                (get-var-lemmas (list-ref pat-vars (cdr n))))
@@ -494,6 +495,7 @@
                          (cog-logger-debug ghost-logger
                            "Found the rule \"~a\" in the rule-alist" label)
                          (set! set_used #t)
+                         (set! set-used-rule-label label)
                          ; Calling process-action just to get all the rule-features
                          ; of the rule that will set used
                          (process-action
@@ -503,6 +505,7 @@
                            IS-PARALLEL-RULE?))))
                    (begin
                      (set! set_used #t)
+                     (set! set-used-rule-label label)
                      ; Get all the rule features and append them to the
                      ; current rule-features list
                      (set! rule-features (append rule-features
@@ -546,9 +549,10 @@
     (append-map
       (lambda (x)
         (cond
-           ; "x" could just be a list if ^keep() is used
-           ; in the same rule, skip it if that's the case
-           ((and keep (list? x) (null? x)) (list))
+           ; "x" could just be an empty list if ^keep() or any
+           ; other system function is used in the same rule,
+           ; and nothing needs to be done if that's the case
+           ((and (list? x) (null? x)) (list))
            ((equal? 'TrueLink (cog-type x))
             (get-reused-action (cog-outgoing-set x)))
            ((and (equal? 'ExecutionOutputLink (cog-type x))
@@ -577,6 +581,11 @@
     (set! rule-features
       (append rule-features (list
         (cons (Predicate "unkeep") (Concept RULENAME))))))
+  ; To set another rule as "used"
+  (if set_used
+    (set! rule-features
+      (append rule-features (list
+        (cons (Predicate "unkeep") (Concept set-used-rule-label))))))
   ; Keep a record of which rule is the last executed one, just for rejoinders
   ; And when a "reuse" is used, it becomes slightly more complicated
   ; The expected behavior is that, when (the action of) a rule is reused,

@@ -7,7 +7,6 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 	# microplanning depends on sureal, so should test after it
 	ADD_SUBDIRECTORY (microplanning)
-	ADD_SUBDIRECTORY (chatlang)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 IF (HAVE_VITERBI)
@@ -16,11 +15,17 @@ ENDIF (HAVE_VITERBI)
 
 IF (HAVE_NOSETESTS)
 
-	ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
-		${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
-	SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
-		"PYTHONPATH=${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython:/usr/local/share/opencog/python;GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog:${PROJECT_BINARY_DIR}/opencog/scm:/usr/local/share/opencog/scm"
-	)
+	# AnaphoraUTest fails on guile-2.2 with a bdw-gc error:
+	# "Too many root sets".  It appears to work for guile-3.0
+	IF (GUILE_FOUND AND (GUILE_VERSION_MAJOR EQUAL 3)
+			OR ((GUILE_VERSION_MAJOR EQUAL 2) AND
+				(GUILE_VERSION_MINOR GREATER 4)))
+		ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
+		SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
+			"PYTHONPATH=${PYTHON_ROOT}:${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython;GUILE_LOAD_PATH=${PROJECT_BINARY_DIR}/opencog/scm"
+		)
+	ENDIF ()
 
 ENDIF (HAVE_NOSETESTS)
 
