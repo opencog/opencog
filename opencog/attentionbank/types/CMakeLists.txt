@@ -40,3 +40,4 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/attentionbank/types"
 	DEPENDS attention_atom_types
 )
+ADD_GUILE_EXTENSION(SCM_CONFIG attention-types "opencog-ext-path-attention-types")

@@ -20,6 +20,8 @@ INSTALL (TARGETS spacetime-types
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
+ADD_GUILE_EXTENSION(SCM_CONFIG spacetime-types "opencog-ext-path-spacetime-types")
+
 ADD_GUILE_MODULE (FILES
 	spacetime.scm
 	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm

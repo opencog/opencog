@@ -39,6 +39,7 @@ IF (HAVE_GUILE)
     miner-utils.scm
     MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/miner"
   )
+  ADD_GUILE_EXTENSION(SCM_CONFIG guile-miner "opencog-ext-path-miner")
 
   ADD_SUBDIRECTORY (rules)
 ENDIF (HAVE_GUILE)

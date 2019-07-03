@@ -53,3 +53,5 @@ ADD_GUILE_MODULE (FILES
 	pattern-index.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/learning/pattern-index"
 )
+
+ADD_GUILE_EXTENSION(SCM_CONFIG patternindex "opencog-ext-path-pattern-index")

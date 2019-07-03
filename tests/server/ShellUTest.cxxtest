@@ -192,7 +192,14 @@ public:
 	ShellUTest()
 	{
 		logger().set_level(Logger::DEBUG);
-		//logger().set_print_to_stdout_flag(true);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_print_level_flag(true);
+        
+        // We can't directly manipulate the SchemeEval environment, because it's created by CogServer
+		auto test = std::string("GUILE_LOAD_PATH=" PROJECT_BINARY_DIR "/opencog/scm");
+		char ctest[test.size() + 1];
+		strcpy(ctest, test.c_str());
+		putenv(ctest);
 	}
 
 	~ShellUTest()
@@ -206,7 +213,6 @@ public:
 	{
 		csrv = new CogServer();
 		csrv->loadModules();
-		csrv->loadModule("libscheme-shell.so");
 		csrv->enableNetworkServer(17333);
 		main_loop = new std::thread(&CogServer::serverLoop, csrv);
 

@@ -18,3 +18,5 @@ ADD_GUILE_MODULE (FILES
 	fuzzy.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/fuzzy"
 )
+
+ADD_GUILE_EXTENSION(SCM_CONFIG nlpfz "opencog-ext-path-nlp-fuzzy")

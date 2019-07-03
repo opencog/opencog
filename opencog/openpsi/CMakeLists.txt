@@ -20,6 +20,8 @@ TARGET_LINK_LIBRARIES (openpsi
 	${ATOMSPACE_LIBRARIES}
 )
 
+ADD_GUILE_EXTENSION(SCM_CONFIG openpsi "opencog-ext-path-openpsi")
+
 INSTALL (TARGETS openpsi DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES

@@ -28,6 +28,8 @@ INSTALL (FILES
 	DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
+ADD_GUILE_EXTENSION(SCM_CONFIG octomap-types "opencog-ext-path-octomap-types")
+
 ADD_GUILE_MODULE (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/octomap_types.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/spacetime/octomap"

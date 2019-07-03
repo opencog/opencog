@@ -5,13 +5,11 @@
 
 (define-module (opencog attention-bank))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
+(use-modules (opencog) (opencog oc-config))
 
-(load-extension "libattentionbonk" "opencog_attention_init")
-
+(load-extension (string-append opencog-ext-path-attentionbonk "libattentionbonk") "opencog_attention_init")
 ; Load the C library that calls the nameserver to load the types.
-(load-extension "libattention-types" "attention_types_init")
+(load-extension (string-append opencog-ext-path-attention-types "libattention-types") "attention_types_init")
 
 (load "attentionbank/types/attention_types.scm")
 

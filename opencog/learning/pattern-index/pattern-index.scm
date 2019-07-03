@@ -1,7 +1,7 @@
 (define-module (opencog learning pattern-index))
-(load-extension "libpatternindex" "opencog_patternindex_init")
 
-(use-modules (opencog))
+(use-modules (opencog oc-config))
+(load-extension (string-append opencog-ext-path-pattern-index "libpatternindex") "opencog_patternindex_init")
 
 (define-public (pi-create-index path)
     (scm-api-create-index path) ; Defined in PatternIndexSCM.cc
