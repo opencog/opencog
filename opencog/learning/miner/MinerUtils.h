@@ -199,7 +199,7 @@ public:
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
-	 * support up to ms (to avoid unnecessary calculations).
+	 * frequency up to ms (to avoid unnecessary calculations).
 	 */
 	static unsigned support(const Handle& pattern,
 	                        const HandleSeq& texts,
@@ -215,8 +215,8 @@ public:
 
 	/**
 	 * Calculate if the pattern has enough support w.r.t. to the given
-	 * texts, that is whether its support is greater than or equal to
-	 * ms.
+	 * texts, that is whether its frequency is greater than or equal
+	 * to ms.
 	 */
 	static bool enough_support(const Handle& pattern,
 	                           const HandleSeq& texts,
