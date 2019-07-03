@@ -57,12 +57,7 @@ public:
 
     void InitCogServer()
     {
-        auto test = std::string("GUILE_LOAD_PATH=" PROJECT_BINARY_DIR "/opencog/scm");
-        char ctest[test.size() + 1];
-        strcpy(ctest, test.c_str());
-        putenv(ctest);
-
-       config().set("MODULES", "opencog/attention/libattention.so"); 
+        config().set("MODULES", "opencog/attention/libattention.so"); 
         
         AttentionParamQuery _atq(&cogserver().getAtomSpace());
         _atq.load_default_values(); // Load default ECAN param values into AS

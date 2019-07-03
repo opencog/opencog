@@ -254,9 +254,7 @@ MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/tests/learning/miner/scm\")");
-	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/opencog/learning/miner\")");
-
+	
 	// Load modules
 	_scm.eval("(use-modules (opencog))");
 	std::string rs = _scm.eval("(use-modules (opencog miner))");

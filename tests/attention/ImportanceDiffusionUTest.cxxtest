@@ -98,10 +98,6 @@ ImportanceDiffusionUTest::ImportanceDiffusionUTest() {
     _as = &(_cogserver->getAtomSpace());
     
     _eval = make_shared<SchemeEval>(_as);
-    auto load_path_result = _eval->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
-    if (_eval->eval_error())
-        logger().error(load_path_result);
-
     _atq = make_shared<AttentionParamQuery>(_as);
 
     _cogserver->registerAgent(DummyImportanceDiffusionAgent::info().id,&DIdCreationFactory);
