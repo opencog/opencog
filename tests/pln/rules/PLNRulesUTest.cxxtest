@@ -179,7 +179,7 @@ void PLNRulesUTest::test_and_introduction()
 	                "opencog/pln/rules/wip/and-introduction.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af and-introduction-rule)");
+	Handle results = eval.eval_h("(cog-execute! and-introduction-rule)");
 
 	// It should contain 1 groundings, and(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
@@ -197,7 +197,7 @@ void PLNRulesUTest::test_or_introduction()
 	                "opencog/pln/rules/wip/or-introduction.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af or-introduction-rule)");
+	Handle results = eval.eval_h("(cog-execute! or-introduction-rule)");
 
 	// It should contain 1 groundings, or(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
@@ -215,7 +215,7 @@ void PLNRulesUTest::test_not_introduction()
 	               "opencog/pln/rules/wip/not-introduction.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af not-introduction-rule)");
+	Handle results = eval.eval_h("(cog-execute! not-introduction-rule)");
 
 	// It should contain 2 groundings, not(A), not(B)
 	TS_ASSERT_EQUALS(2, getarity(results));
