@@ -36,6 +36,7 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/ure/BetaDistribution.h>
 
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/algorithm/transform.hpp>
@@ -666,19 +667,6 @@ double Surprisingness::eq_prob(const HandleSeqSeq& partition,
 	return p;
 }
 
-std::string oc_to_string(const HandleSeqSeqSeq& hsss, const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << hsss.size() << std::endl;
-	size_t i = 0;
-	for (const HandleSeqSeq& hss : hsss) {
-		ss << indent << "atoms sets[" << i << "]:" << std::endl
-		   << oc_to_string(hss, indent + oc_to_string_indent);
-		i++;
-	}
-	return ss.str();
-}
-
 const Handle& Surprisingness::emp_prob_key()
 {
 	static Handle epk(createNode(NODE, "*-EmpiricalProbabilityKey-*"));
@@ -698,6 +686,73 @@ void Surprisingness::set_emp_prob(const Handle& pattern,
 {
 	TruthValuePtr emp_prob_tv = createSimpleTruthValue(emp_prob, 1.0);
 	pattern->setValue(emp_prob_key(), ValueCast(emp_prob_tv));
+}
+
+double avrg(double l, double r)
+{
+	return (l + r) / 2.0;
+}
+
+double Surprisingness::jsd(const TruthValuePtr l_tv, const TruthValuePtr r_tv)
+{
+	static int bins = 100;
+	std::vector<double>
+		l_cdf = BetaDistribution(l_tv).cdf(bins),
+		r_cdf = BetaDistribution(r_tv).cdf(bins),
+		m_cdf = avrg_cdf(l_cdf, r_cdf);
+	double
+		ld = kld(l_cdf, m_cdf),
+		rd = kld(r_cdf, m_cdf);
+	return sqrt(avrg(ld, rd));
+}
+
+double Surprisingness::kld(const std::vector<double>& l_cdf,
+                           const std::vector<double>& r_cdf)
+{
+	static double epsilon = 1e-32;
+	OC_ASSERT(l_cdf.size() == r_cdf.size());
+
+	// Value of the previous data point in the left and right cdf
+	// respectively
+	double last_lv = 0.0;
+	double last_rv = 0.0;
+
+	// Integrate the relative entropy between the 2 cdfs for each data
+	// point
+	double kldi = 0.0;
+	for (size_t i = 0; i < l_cdf.size(); i++) {
+		// Probabilities of the right and left points
+		double lp = l_cdf[i] - last_lv;
+		double rp = r_cdf[i] - last_rv;
+		// Their relative entropy
+		kldi += epsilon < rp ? lp * std::log2(lp/rp) : 0.0;
+		// Remember last cummulated probabilities
+		last_lv = l_cdf[i];
+		last_rv = r_cdf[i];
+	}
+	return kldi;
+}
+
+std::vector<double> Surprisingness::avrg_cdf(const std::vector<double>& l_cdf,
+                                             const std::vector<double>& r_cdf)
+{
+	OC_ASSERT(l_cdf.size() == r_cdf.size());
+	std::vector<double> m_cdf(l_cdf.size());
+	boost::transform(l_cdf, r_cdf, m_cdf.begin(), avrg);
+	return m_cdf;
+}
+
+std::string oc_to_string(const HandleSeqSeqSeq& hsss, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hsss.size() << std::endl;
+	size_t i = 0;
+	for (const HandleSeqSeq& hss : hsss) {
+		ss << indent << "atoms sets[" << i << "]:" << std::endl
+		   << oc_to_string(hss, indent + oc_to_string_indent);
+		i++;
+	}
+	return ss.str();
 }
 
 } // namespace opencog
