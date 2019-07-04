@@ -25,3 +25,5 @@ ADD_GUILE_MODULE (FILES
 	lg-parse.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/"
 )
+
+ADD_GUILE_EXTENSION(SCM_CONFIG lg-parse "opencog-ext-path-lg-parse")

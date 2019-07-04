@@ -21,8 +21,13 @@ ENDIF()
 
 IF("${RELEX_REACHABLE}" STREQUAL "#t")
   ADD_GUILE_TEST(GhostSyntaxUTest test-ghost-syntax.scm)
+  SET_PROPERTY(TEST GhostSyntaxUTest
+        APPEND PROPERTY ENVIRONMENT
+        "PYTHONPATH=${PYTHON_ROOT}:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents:${PYTHON_ROOT}"
+  )
   ADD_GUILE_TEST(GhostProcedureUTest test-ghost-procedures.scm)
   ADD_GUILE_TEST(GhostUTest test-ghost.scm)
+  
 ELSEIF("${RELEX_REACHABLE}" STREQUAL "config-error")
   message(FATAL_ERROR "Issue with relex utilities or the file ${RELEX_UTILS}")
 ENDIF()

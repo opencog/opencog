@@ -1,7 +1,7 @@
 (define-module (opencog nlp fuzzy))
 
-(use-modules (opencog))
-(load-extension "libnlpfz" "opencog_nlp_fuzzy_init")
+(use-modules (opencog oc-config))
+(load-extension (string-append opencog-ext-path-nlp-fuzzy "libnlpfz") "opencog_nlp_fuzzy_init")
 
 (use-modules (srfi srfi-1)
              (ice-9 optargs)      ; for doing define*-public

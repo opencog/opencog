@@ -37,7 +37,11 @@ TARGET_LINK_LIBRARIES(bank_cython
 
 SET_TARGET_PROPERTIES(bank_cython PROPERTIES
     PREFIX ""
-    OUTPUT_NAME bank)
+	OUTPUT_NAME bank)
+	
+add_custom_command(TARGET bank_cython POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:bank_cython> "${PROJECT_BINARY_DIR}/opencog/cython/opencog/bank.so"
+)
 
 INSTALL (TARGETS bank_cython
     DESTINATION "${PYTHON_DEST}")

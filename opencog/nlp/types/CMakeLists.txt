@@ -42,3 +42,5 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/types"
 	DEPENDS nlp_atom_types
 )
+
+ADD_GUILE_EXTENSION(SCM_CONFIG nlp-types "opencog-ext-path-nlp-types")

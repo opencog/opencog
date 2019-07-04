@@ -192,7 +192,8 @@ public:
 	ShellUTest()
 	{
 		logger().set_level(Logger::DEBUG);
-		//logger().set_print_to_stdout_flag(true);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_print_level_flag(true);
 	}
 
 	~ShellUTest()
@@ -206,7 +207,6 @@ public:
 	{
 		csrv = new CogServer();
 		csrv->loadModules();
-		csrv->loadModule("libscheme-shell.so");
 		csrv->enableNetworkServer(17333);
 		main_loop = new std::thread(&CogServer::serverLoop, csrv);
 

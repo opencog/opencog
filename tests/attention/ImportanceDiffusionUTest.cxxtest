@@ -96,6 +96,7 @@ class DummyImportanceDiffusionAgent : public virtual ImportanceDiffusionBase{
 ImportanceDiffusionUTest::ImportanceDiffusionUTest() {
     _cogserver = &cogserver();
     _as = &(_cogserver->getAtomSpace());
+    
     _eval = make_shared<SchemeEval>(_as);
     _atq = make_shared<AttentionParamQuery>(_as);
 

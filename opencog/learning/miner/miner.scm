@@ -3,11 +3,9 @@
 ;;
 (define-module (opencog miner))
 
-;; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
-
+(use-modules (opencog oc-config))
 ;; This loads the miner atom types.
-(load-extension "libguile-miner" "opencog_miner_init")
+(load-extension (string-append opencog-ext-path-miner "libguile-miner") "opencog_miner_init")
 
 ;; Load miner utils
 

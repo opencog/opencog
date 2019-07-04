@@ -42,7 +42,13 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		auto load_path_result = eval->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
+        if (eval->eval_error())
+            logger().error(load_path_result);
+		load_path_result = eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/attentionbank\")");
+        if (eval->eval_error())
+            logger().error(load_path_result);
+		
 
 	}
 
@@ -72,7 +78,9 @@ void AttentionalFocusCBUTest::setUp(void)
 void AttentionalFocusCBUTest::test_af_bindlink(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval->eval("(load-from-path \"tests/attentionbank/af-filtering-test.scm\")");
+	auto load_path_result = eval->eval("(load-from-path \"af-filtering-test.scm\")");
+	if (eval->eval_error())
+            logger().error(load_path_result);
 
 	Handle findMan = eval->eval_h("find-man");
 	// Test PatternMatch::af_bindlink, which should only return the

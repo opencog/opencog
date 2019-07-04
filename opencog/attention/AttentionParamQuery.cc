@@ -118,5 +118,5 @@ HandleSeq AttentionParamQuery::get_params(void)
 void AttentionParamQuery::load_default_values(void)
 {
      SchemeEval scm(_as);
-     scm.eval("(load \"" GUILE_SITE_DIR "/opencog/attention/default-param-values.scm\")");
+     scm.eval("(load-from-path \"opencog/attention/default-param-values.scm\")");
 }

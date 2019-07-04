@@ -46,20 +46,20 @@ public:
         _as = new AtomSpace();
         _scm = new SchemeEval(_as);
 
-        // The scheme environment is reset between each test.
-        // Configure scheme load-paths that are common for all tests.
-        _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        CHKERR
-
-        // Load required modules for testing and populate the atomspace
-        _scm->eval("(use-modules (opencog) (opencog openpsi))");
-        CHKERR
-        _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
-        CHKERR
-
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
         logger().set_print_to_stdout_flag(true);
+        
+        // Load required modules for testing and populate the atomspace
+        auto use_result = _scm->eval("(use-modules (opencog) (opencog openpsi))");
+        if (_scm->eval_error())
+            logger().error(use_result);
+
+        auto load_result = _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
+        if (_scm->eval_error())
+            logger().error(load_result);
+
+        
     }
 
     ~OpenPsiSCMUTest()

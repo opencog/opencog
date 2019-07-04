@@ -10,9 +10,8 @@
 
 (define-module (opencog nlp sureal))
 
-; We need this to set the LTDL_LIBRARY_PATH
-(use-modules (opencog))
+(use-modules (opencog oc-config))
 
-(load-extension "libsureal" "opencog_nlp_sureal_init")
+(load-extension (string-append opencog-ext-path-sureal "libsureal") "opencog_nlp_sureal_init")
 
 (load "sureal/surface-realization.scm")

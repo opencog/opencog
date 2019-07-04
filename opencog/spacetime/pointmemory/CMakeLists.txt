@@ -14,6 +14,8 @@ INSTALL (TARGETS point_memory
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
+ADD_GUILE_EXTENSION(SCM_CONFIG point_memory "opencog-ext-path-point-memory")
+
 ADD_GUILE_MODULE (FILES
 	pointmem.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/pointmem"

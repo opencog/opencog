@@ -57,7 +57,7 @@ public:
 
     void InitCogServer()
     {
-       config().set("MODULES", "opencog/attention/libattention.so"); 
+        config().set("MODULES", "opencog/attention/libattention.so"); 
         
         AttentionParamQuery _atq(&cogserver().getAtomSpace());
         _atq.load_default_values(); // Load default ECAN param values into AS
