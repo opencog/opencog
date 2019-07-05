@@ -40,8 +40,12 @@
 
 ;; Load here because otherwise, when loaded within
 ;; configure-conjunction-expansion-rules,
-;; gen-shallow-specialization-rule is inaccessible
+;; gen-conjunction-expansion-rule is inaccessible
 (load-from-path (mk-full-rule-path "conjunction-expansion.scm"))
+
+;; Load here because otherwise, when loaded within configure-isurp,
+;; gen-i-surprisingness-rule is inaccessible
+(load-from-path (mk-full-rule-path "i-surprisingness.scm"))
 
 (define (iota-plus-one x)
 "
@@ -166,9 +170,7 @@
              ;; priority. Makes sure it's priority is also below that
              ;; of shallow specialization.
              (tvfy (lambda (i) (stv (* 0.5 (- 1 (* 0.1 i))) conf)))
-             (rulify (lambda (i)
-                       (definify i)
-                       (list (DefinedSchemaNode (namify i)) (tvfy i))))
+             (rulify (lambda (i) (definify i) (list (aliasify i) (tvfy i))))
              (rules (if (or (<= max-conjuncts 0) (< 9 max-conjuncts))
                         ;; No maximum conjuncts
                         (list (rulify 0))
@@ -210,25 +212,27 @@
 
 (define* (configure-isurp isurp-rbs mode max-conjuncts)
   ;; Load I-Surprisingess rules
+  ;; (load-from-path (mk-full-rule-path "is-surprisingness.scm"))
   (let* ((base-rule-file "i-surprisingness.scm")
-         (rule-pathfile (mk-full-rule-path base-rule-file))
-         (rule-fule (mk-full-rule-path base-rule-file))
-         (mk-rule-name (lambda (i) (string-append (symbol->string mode) "-"
-                                                  (number->string i)
-                                                  "ary-rule")))
-         (mk-rule-alias (lambda (i) (DefinedSchema (mk-rule-name i))))
-         (rules (map mk-rule-alias (cdr (iota-plus-one max-conjuncts)))))
-    (load-from-path rule-pathfile)
+         (namify (lambda (i) (string-append (symbol->string mode) "-"
+                                            (number->string i)
+                                            "ary-rule")))
+         (aliasify (lambda (i) (DefinedSchema (namify i))))
+         (definify (lambda (i) (DefineLink
+                                 (aliasify i)
+                                 (gen-i-surprisingness-rule mode i))))
+         (rulify (lambda (i) (definify i) (aliasify i)))
+         (rules (map rulify (cdr (iota-plus-one max-conjuncts)))))
     (ure-add-rules isurp-rbs rules)))
 
-(define pattern-var
+(define (pattern-var)
   (Variable "$pattern"))
 
 (define (isurp-target mode texts-cpt)
-  (isurp-eval mode pattern-var texts-cpt))
+  (isurp-eval mode (pattern-var) texts-cpt))
 
 (define (isurp-vardecl)
-  (TypedVariable pattern-var (Type "LambdaLink")))
+  (TypedVariable (pattern-var) (Type "LambdaLink")))
 
 (define* (configure-miner pm-rbs
                           #:key
@@ -648,6 +652,10 @@
     conjunction-expansion-mv-7-formula
     conjunction-expansion-mv-8-formula
     conjunction-expansion-mv-9-formula
+    isurp-old-formula
+    nisurp-old-formula
+    isurp-formula
+    nisurp-formula
     unary-conjunction
     unary-conjunction-pattern
   )
