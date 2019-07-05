@@ -96,7 +96,8 @@ evaluation of pattern
 
 means that such pattern has an I-Surprisingness of 0.98404255 (the 1,
 representing the confidence of that value, is irrelevant in that
-context). Interesting such a pattern is rather obvious to a human who
-has the appropriate background knowledge, but surprising to the
-pattern miner which doesn't have, and wouldn't at the present time
-take advantage of it during its surprisingness calculation.
+context). Interestingly such a pattern is rather obvious to a human
+who has the appropriate background knowledge, but surprising to the
+pattern miner which has not, and would not at the present time take
+advantage of it during its surprisingness calculation. Subsequent
+versions of the pattern miner will address this problem.
