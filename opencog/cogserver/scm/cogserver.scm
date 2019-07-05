@@ -4,10 +4,13 @@
 
 (define-module (opencog cogserver))
 
+(use-modules (opencog))
 (use-modules (opencog oc-config))
 
-; Path to libguile-cogserver.so is set up in the opencog module.
-(load-extension (string-append opencog-ext-path-cogserver "libguile-cogserver") "opencog_cogserver_init")
+; Path to libguile-cogserver.so is set up in the oc-config module.
+(load-extension
+	(string-append opencog-ext-path-cogserver "libguile-cogserver")
+	"opencog_cogserver_init")
 
 ; config path name is optional.
 (define* (start-cogserver #:optional (config-path ""))
