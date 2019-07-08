@@ -85,7 +85,7 @@ plausible candidates that these might refer to.
 
 chatbot
 -------
-Scripts for running the current IRC-based chatbot.
+Scripts for running the current IRC or Telegram-based chatbot.
 
 chatbot-eva
 -----------
@@ -125,12 +125,6 @@ A dialog authoring system. Resembles ChatScript.
 irc
 ---
 Interfaces to IRC; provide an easy way to connect opencog to IRC.
-
-learn
------
-Language learning code. Goal is to learn any language at all, given
-some sufficiently large corpus.  Experiment is in progress, results
-are promising.
 
 lg-dict
 -------
