@@ -2,7 +2,6 @@
 # Build C++ code in assorted NLP subdirectories
 
 ADD_SUBDIRECTORY (irc)
-# ADD_SUBDIRECTORY (learn)
 ADD_SUBDIRECTORY (scm)
 ADD_SUBDIRECTORY (sentiment)
 ADD_SUBDIRECTORY (types)
