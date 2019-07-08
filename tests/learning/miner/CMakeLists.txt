@@ -5,6 +5,7 @@ ADD_LIBRARY(minerutestutils SHARED
 TARGET_LINK_LIBRARIES(minerutestutils
   miner
   guile-miner
+  ${URE_LIBRARIES}
 )
 
 ADD_CXXTEST(MinerUTest)
