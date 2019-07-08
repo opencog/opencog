@@ -2,7 +2,8 @@
                        OpenCog Chatbot
                        ---------------
 
-A (partial) demo the OpenCog NLP pipeline, connected to IRC chat.
+A (partial) demo the OpenCog NLP pipeline, connected to IRC or Telegram
+chat.
 
 At this time, the bot is a demo of a portion of the OpenCog
 natural-language processing (NLP) pipeline; missing feautres include
