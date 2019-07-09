@@ -192,8 +192,7 @@ public:
 	ShellUTest()
 	{
 		logger().set_level(Logger::DEBUG);
-		logger().set_print_to_stdout_flag(true);
-		logger().set_print_level_flag(true);
+		//logger().set_print_to_stdout_flag(true);
 	}
 
 	~ShellUTest()
