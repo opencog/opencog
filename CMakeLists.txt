@@ -168,13 +168,13 @@ ELSE (ATOMSPACE_FOUND)
 ENDIF (ATOMSPACE_FOUND)
 
 # URE
-FIND_PACKAGE(URE 1.0.0 CONFIG REQUIRED)
+FIND_PACKAGE(URE 1.0.0 CONFIG)
 IF (URE_FOUND)
 	MESSAGE(STATUS "URE found.")
 	ADD_DEFINITIONS(-DHAVE_URE)
 	SET(HAVE_URE 1)
 ELSE (URE_FOUND)
-	MESSAGE(FATAL_ERROR "URE missing: it is needed!")
+	MESSAGE(STATUS "URE was not found. PLN and Miner will not be built.")
 ENDIF (URE_FOUND)
 
 # ----------------------------------------------------------
