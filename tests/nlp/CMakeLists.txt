@@ -1,13 +1,9 @@
 IF (HAVE_NLP)
 	ADD_SUBDIRECTORY (fuzzy)
-ENDIF (HAVE_NLP)
-
-IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	ADD_SUBDIRECTORY (sureal)
-
 	# microplanning depends on sureal, so should test after it
 	ADD_SUBDIRECTORY (microplanning)
-ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+ENDIF (HAVE_NLP)
 
 IF (HAVE_VITERBI)
 	ADD_SUBDIRECTORY (viterbi)
