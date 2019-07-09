@@ -142,27 +142,29 @@ ENDIF (HAVE_STATISTICS)
 
 ##################### OpenPsi ##################
 
-CYTHON_ADD_MODULE_PYX(openpsi
-    "openpsi.pyx"
-    "../../openpsi/OpenPsiSCM.h"
-    openpsi
-)
+IF (HAVE_OPENPSI)
+	CYTHON_ADD_MODULE_PYX(openpsi
+	    "openpsi.pyx"
+	    "../../openpsi/OpenPsiSCM.h"
+	    openpsi
+	)
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "openpsi.cpp")
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "openpsi.cpp")
 
-# opencog.openpsi Python bindings
-ADD_LIBRARY(openpsi_cython SHARED
-    openpsi.cpp
-)
+	# opencog.openpsi Python bindings
+	ADD_LIBRARY(openpsi_cython SHARED
+	    openpsi.cpp
+	)
 
-TARGET_LINK_LIBRARIES(openpsi_cython
-    openpsi
-    ${PYTHON_LIBRARIES}
-)
+	TARGET_LINK_LIBRARIES(openpsi_cython
+	    openpsi
+	    ${PYTHON_LIBRARIES}
+	)
 
-SET_TARGET_PROPERTIES(openpsi_cython PROPERTIES
-    PREFIX ""
-    OUTPUT_NAME openpsi)
+	SET_TARGET_PROPERTIES(openpsi_cython PROPERTIES
+	    PREFIX ""
+	    OUTPUT_NAME openpsi)
 
-INSTALL (TARGETS openpsi_cython
-    DESTINATION "${PYTHON_DEST}")
+	INSTALL (TARGETS openpsi_cython
+	    DESTINATION "${PYTHON_DEST}")
+ENDIF (HAVE_OPENPSI)
