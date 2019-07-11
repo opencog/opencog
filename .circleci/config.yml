@@ -55,6 +55,13 @@ jobs:
           key: haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
           paths:
             - /ws/atomspace/opencog/haskell/.stack-work
+      - run:
+          name: Checkout URE
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure /ws/ure
+            mkdir -p /ws/ure/build
+            cd /ws/ure/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
       - checkout
       - run:
           name: CMake Configure
