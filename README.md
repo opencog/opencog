@@ -134,6 +134,13 @@ the build, will be more precise as to which parts will not be built.
 > Required for the robot perception subsystem.
 > `sudo apt-get install liboctomap-dev`
 
+###### URE
+> Unified Rule Engine
+> http://github.com/opencog/ure
+> Required for NLP, PLN and pattern miner
+> It uses exactly the same build proceedure as this package. Be sure
+  to `sudo make install` at the end.
+
 Obsolete Prerequisites
 ----------------------
 The following packages are needed to build some of the old, obsolete
