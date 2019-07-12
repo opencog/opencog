@@ -22,7 +22,7 @@ jobs:
             - ccache-{{ checksum "/tmp/date" }}
             - ccache-
       - run:
-          name: Install cogutil
+          name: Install CogUtil
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
