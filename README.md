@@ -32,9 +32,9 @@ This git repository contains assorted projects that are central to the
 OpenCog project, but are not yet mature or stable, and are subject to
 active development and experimentation. These include:
 * An assortment of natural language processing subsystems, including:
--- Natural language generation (for expressiong thoughts as sentences).
--- Natural language input (for reading and hearing).
--- Assorted chatbots, some of which are embodied.
+  * Natural language generation (for expressiong thoughts as sentences).
+  * Natural language input (for reading and hearing).
+  * Assorted chatbots, some of which are embodied.
 * PLN, a probabilistic reasoning and inference system.
 * Attention Allocation, for managing combinatoric explosion during
   reasoning and language generation.
