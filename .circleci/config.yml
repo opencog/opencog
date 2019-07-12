@@ -64,6 +64,9 @@ jobs:
             ldconfig
       - checkout
       - run:
+          name: Checkout OpenCog
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog /ws/opencog
+      - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
       - run:
