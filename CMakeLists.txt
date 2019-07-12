@@ -174,7 +174,7 @@ IF (URE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_URE)
 	SET(HAVE_URE 1)
 ELSE (URE_FOUND)
-	MESSAGE(STATUS "URE was not found. PLN, Miner and NLP will not be built.")
+	MESSAGE(STATUS "URE was not found. PLN and Miner will not be built.")
 ENDIF (URE_FOUND)
 
 # ----------------------------------------------------------
