@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/miner/Miner.cxxtest
+ * opencog/tests/miner/Miner.cxxtest
  *
  * Copyright (C) 2017-2018 by OpenCog Foundation
  * All Rights Reserved
@@ -32,9 +32,9 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/learning/miner/HandleTree.h>
-#include <opencog/learning/miner/Miner.h>
-#include <opencog/learning/miner/Surprisingness.h>
+#include <opencog/miner/HandleTree.h>
+#include <opencog/miner/Miner.h>
+#include <opencog/miner/Surprisingness.h>
 #include <opencog/ure/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -253,7 +253,7 @@ MinerUTest::MinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/miner/scm\")");
+	          "/tests/miner/scm\")");
 	
 	// Load modules
 	_scm.eval("(use-modules (opencog))");

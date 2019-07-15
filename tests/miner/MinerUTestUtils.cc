@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/miner/MinerUTestUtils.h
+ * opencog/tests/miner/MinerUTestUtils.h
  *
  * Copyright (C) 2018 SingularityNET Foundation
  * All Rights Reserved

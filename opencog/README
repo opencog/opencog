@@ -8,6 +8,7 @@ are located one directory up from this.
 Source code overview:
 
 scm             -- Scheme language bindings.
+
 python,cython   -- Python language bindings.
 
 nlp             -- English language processing tools.
@@ -16,6 +17,7 @@ nlp             -- English language processing tools.
 ghost           -- A behavior-scripting system.
 
 pln             -- Probabilistic logic reasoner.
+
 attention       -- ECAN Attention allocation.
 
 cogserver       -- Multi-user network server.
@@ -29,5 +31,8 @@ eva             -- Code to control the Hanson Robotics Eva robot.
 
 learning        -- Misc supervised learning algorithms.
                    Most importantly, the pattern miner.
+
+miner           -- Implements a URE based pattern miner algorithm for
+                   the AtomSpace.
 
 visualization   -- Visualization, graphics.

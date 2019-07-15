@@ -1,15 +1,7 @@
 Pattern Miner
 =============
 
-New pattern miner implementation which should eventually replace
-Shujing Ke pattern miner (see [learning/README.md](../README.md)).
-
-It is more open-ended than the old pattern miner, that is, at least in
-in principle, can reach any pattern expressible as conjunction of
-clauses (with some minor limitations, no support for virtual clause or
-typed variables) by the pattern matcher. Due to that, it can also be
-slower than the previous pattern miner but is easy to configure to
-overcome that.
+URE based pattern miner.
 
 If you just want to use the pattern miner, jump straight ahead to the
 [Usage](#usage) Section, otherwise read on.
@@ -667,7 +659,7 @@ All available options are documented in
 (help cog-mine)
 ```
 
-Examples can be found in [examples/learning/miner](../../../examples/learning/miner).
+Examples can be found in [examples/miner](../../../examples/miner).
 
 Finally, if you wish to carry out manually the various steps
 automatically handled by `cog-mine`, configuring the URE and such, the

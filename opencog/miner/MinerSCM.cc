@@ -120,7 +120,7 @@ public:
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include <opencog/learning/miner/Miner.h>
+#include <opencog/miner/Miner.h>
 
 using namespace opencog;
 

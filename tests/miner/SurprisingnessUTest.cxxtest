@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/miner/SurprisingnessUTest.cxxtest
+ * opencog/tests/miner/SurprisingnessUTest.cxxtest
  *
  * Copyright (C) 2019 by SingularityNET Foundation
  * All Rights Reserved
@@ -28,7 +28,7 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/learning/miner/Surprisingness.h>
+#include <opencog/miner/Surprisingness.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/ure/backwardchainer/BackwardChainer.h>
@@ -217,7 +217,7 @@ SurprisingnessUTest::SurprisingnessUTest() : _scm(&_as)
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/miner/scm\")");
+	          "/tests/miner/scm\")");
 
 	// Load modules
 	_scm.eval("(use-modules (opencog))");
