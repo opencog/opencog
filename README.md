@@ -49,8 +49,6 @@ active development and experimentation. These include:
   two unrelated ideas: a generic rule-class selection and plannning
   system, and a model of human psychological states. An open to-do item
   is to untangle these two.
-* An unsupervised learning system or "pattern miner", for extracting
-  "surprising" patterns.
 * A supervised learning system, MOSES, for extracting patterns from
   tabular data. This is located in a seprate repository,
   [MOSES](https://github.com/opencog/moses).
@@ -137,7 +135,7 @@ the build, will be more precise as to which parts will not be built.
 ###### URE
 > Unified Rule Engine
 > http://github.com/opencog/ure
-> Required for NLP, PLN and pattern miner
+> Required for PLN
 > It uses exactly the same build proceedure as this package. Be sure
   to `sudo make install` at the end.
 

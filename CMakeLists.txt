@@ -174,7 +174,7 @@ IF (URE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_URE)
 	SET(HAVE_URE 1)
 ELSE (URE_FOUND)
-	MESSAGE(STATUS "URE was not found. PLN and Miner will not be built.")
+	MESSAGE(STATUS "URE was not found. PLN will not be built.")
 ENDIF (URE_FOUND)
 
 # ----------------------------------------------------------
@@ -528,7 +528,6 @@ ENDIF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 
 IF(HAVE_URE)
 	SET(HAVE_PLN 1)
-	SET(HAVE_MINER 1)
 ENDIF(HAVE_URE)
 
 IF(HAVE_ATOMSPACE AND HAVE_GUILE)
@@ -701,7 +700,6 @@ SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
 SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)
 SUMMARY_ADD("PLN" "Probabilistic Logic Network" HAVE_PLN)
-SUMMARY_ADD("Miner" "URE based hypergraph pattern miner" HAVE_MINER)
 SUMMARY_ADD("OpenPsi" "MicroPsi OpenCog implementation" HAVE_OPENPSI)
 
 SUMMARY_SHOW()

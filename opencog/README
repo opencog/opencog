@@ -30,9 +30,5 @@ eva             -- Code to control the Hanson Robotics Eva robot.
                    behavior subsystems.
 
 learning        -- Misc supervised learning algorithms.
-                   Most importantly, the pattern miner.
-
-miner           -- Implements a URE based pattern miner algorithm for
-                   the AtomSpace.
 
 visualization   -- Visualization, graphics.
