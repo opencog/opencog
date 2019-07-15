@@ -30,7 +30,7 @@
   (bool->tv (tv->bool (cog-tv A))))
 
 (define (mk-full-rule-path brf)
-  (let ((rule-path "opencog/learning/miner/rules/"))
+  (let ((rule-path "opencog/miner/rules/"))
     (string-append rule-path brf)))
 
 ;; Load here because otherwise, when loaded within

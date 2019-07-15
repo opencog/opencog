@@ -3,7 +3,7 @@ ADD_LIBRARY(miner SHARED
 	MinerUtils
 	HandleTree
 	Valuations
-   Surprisingness
+	Surprisingness
 )
 
 TARGET_LINK_LIBRARIES(miner
@@ -19,7 +19,7 @@ INSTALL (FILES
 	HandleTree.h
 	Valuations.h
 	Surprisingness.h
-	DESTINATION "include/opencog/learning/miner"
+	DESTINATION "include/opencog/miner"
 )
 
 IF (HAVE_GUILE)

@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/miner/MinerUTestUtils.h
+ * opencog/tests/miner/MinerUTestUtils.h
  *
  * Copyright (C) 2018 SingularityNET Foundation
  * All Rights Reserved
@@ -25,8 +25,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include <opencog/learning/miner/HandleTree.h>
-#include <opencog/learning/miner/Miner.h>
+#include <opencog/miner/HandleTree.h>
+#include <opencog/miner/Miner.h>
 
 namespace opencog {
 
