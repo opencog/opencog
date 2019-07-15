@@ -44,7 +44,11 @@ std::string ConsoleSocket::_prompt;
 // connection. With the default `ulimit -a` of 1024 open files,
 // this should work OK (including open files for the logger, the
 // databases, etc.).
-unsigned int ConsoleSocket::_max_open_sockets = 60;
+//
+// July 2019 - change to 10. When it is 60, it just thrashes like
+// crazy, mostly because there are 60 threads thrashing in guile
+// on some lock. And that's pretty pointless...
+unsigned int ConsoleSocket::_max_open_sockets = 10;
 volatile unsigned int ConsoleSocket::_num_open_sockets = 0;
 std::mutex ConsoleSocket::_max_mtx;
 std::condition_variable ConsoleSocket::_max_cv;
