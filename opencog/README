@@ -22,9 +22,6 @@ attention       -- ECAN Attention allocation.
 
 cogserver       -- Multi-user network server.
 
-spacetime       -- Tag atoms with 3D spatial and time coordinates.
-                   DEPRECATED. Do not use in new code!
-
 eva             -- Code to control the Hanson Robotics Eva robot.
                    Includes perception (vision, sound), chat and
                    behavior subsystems.
