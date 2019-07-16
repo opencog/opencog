@@ -296,18 +296,6 @@ ELSE (UUID_FOUND)
 ENDIF (UUID_FOUND)
 
 # ----------------------------------------------------------
-# Octomap
-FIND_PACKAGE(Octomap)
-IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
-  SET(HAVE_OCTOMAP 1)
-  INCLUDE_DIRECTORIES(${OCTOMAP_INCLUDE_DIR})
-  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
-ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap missing: needed for the SpaceTime map.")
-ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-
-# ----------------------------------------------------------
 # Python and Cython
 #
 # NOTE: Python interpreter is needed for runing python unit tests,
@@ -694,7 +682,6 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("REST Events" "REST Atomspace Event Publisher module"
 	HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
-SUMMARY_ADD("SpaceTime" "3D Space-Time object tracker" HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
 SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)
