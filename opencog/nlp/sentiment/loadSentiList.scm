@@ -5,7 +5,6 @@
              (opencog)
              (opencog python)
              (opencog exec)
-             (opencog atom-types)
              (opencog ure)
              (opencog nlp)
              (opencog nlp fuzzy)

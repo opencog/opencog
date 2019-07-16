@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog) (opencog nlp))
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states

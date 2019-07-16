@@ -10,7 +10,7 @@
 ; --------------------------------------------------------
 
 (use-modules (opencog) (opencog exec))
-(use-modules (opencog atom-types))
+(use-modules (opencog nlp))
 (use-modules (opencog logger))
 (use-modules (opencog eva-model))
 

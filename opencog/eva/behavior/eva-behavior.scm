@@ -5,7 +5,7 @@
 
 (define-module (opencog eva-behavior))
 
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog) (opencog nlp))
 (use-modules (opencog eva-model))
 
 ; Load various parts....
