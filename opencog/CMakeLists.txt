@@ -48,10 +48,6 @@ ENDIF (HAVE_CYTHON)
 # Graphics and visualization subsystems
 ADD_SUBDIRECTORY (visualization)
 
-IF (HAVE_MINER)
-    ADD_SUBDIRECTORY (miner)
-ENDIF (HAVE_MINER)
-
 WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/oc-config.scm SCM_CONFIG TRUE)
 
 WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/oc-config-installable.scm SCM_CONFIG FALSE)
