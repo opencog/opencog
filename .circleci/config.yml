@@ -87,6 +87,7 @@ jobs:
       - persist_to_workspace:
           root: /ws/
           paths:
+            - opencog
             - ccache
 
   package: #Place holder
