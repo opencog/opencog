@@ -853,6 +853,32 @@ public:
 	 */
 	static TruthValuePtr get_emp_prob(const Handle& pattern);
 	static void set_emp_prob(const Handle& pattern, double emp_prob);
+
+	/**
+	 * Given 2 TVs, typically representing the empirical probability
+	 * and the probability estimate of a pattern, calculate the
+	 * Jensen-Shannon distance between them.
+	 */
+	static double jsd(const TruthValuePtr l_tv, const TruthValuePtr r_tv);
+
+	/**
+	 * Given 2 cdfs (cummulative distribution functions) return their
+	 * Kullback-Leibler divergence.
+	 *
+	 * The cdfs are described as vectors of regularly spaced right-end
+	 * points. The point at the origin is ignored because it is always
+	 * 0, but the last one, which is always 1, is present for
+	 * completeness.
+	 */
+	static double kld(const std::vector<double>& l_cdf,
+	                  const std::vector<double>& r_cdf);
+
+	/**
+	 * Given 2 cdfs, return their average, that is (cdf1 + cdf2)/2.
+	 */
+	static std::vector<double> avrg_cdf(const std::vector<double>& l_cdf,
+	                                    const std::vector<double>& r_cdf);
+
 };
 
 /**
