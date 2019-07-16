@@ -65,9 +65,6 @@ public:
         _evaluator->eval("(use-modules (opencog))");
         _evaluator->eval("(use-modules (opencog nlp))");
         _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-        // MUST load spacetime types, before loading relex2logic,
-        // else the libspacetime-types.so won't be found.
-        // _evaluator->eval("(use-modules (opencog spacetime))");
 
         _evaluator->eval("(use-modules (opencog nlp relex2logic))");
         _evaluator->eval("(use-modules (opencog nlp sureal))");
