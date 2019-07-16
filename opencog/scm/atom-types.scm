@@ -2,7 +2,7 @@
 ; Opencog atom-types module
 ;
 
-(use-modules (opencog) (opencog nlp) (opencog attention) (opencog spacetime))
+(use-modules (opencog) (opencog nlp) (opencog attention))
 
 (define-module (opencog atom-types))
 ; NOTHING is done here.
