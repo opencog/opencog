@@ -6,7 +6,6 @@
 (use-modules (srfi srfi-1))
 
 (use-modules (opencog))
-; (use-modules (opencog spacetime))
 (use-modules (opencog exec))
 
 ; -----------------------------------------------------------------------
