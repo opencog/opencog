@@ -112,34 +112,6 @@ IF (HAVE_SERVER)
 		DESTINATION "${PYTHON_DEST}")
 ENDIF(HAVE_SERVER)
 
-IF (HAVE_STATISTICS)
-	CYTHON_ADD_MODULE_PYX(statistics
-		"../../learning/statistics/DataProvider.h"
-		"../../learning/statistics/Probability.h"
-		"../../learning/statistics/Entropy.h"
-		"../../learning/statistics/InteractionInformation.h"
-	)
-
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "statistics.cpp")
-
-	# opencog.statistics Python bindings
-	ADD_LIBRARY(statistics_cython SHARED
-		statistics.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(statistics_cython
-		statistics
-		${PYTHON_LIBRARIES}
-	)
-
-	SET_TARGET_PROPERTIES(statistics_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME statistics)
-
-	INSTALL (TARGETS statistics_cython
-		DESTINATION "${PYTHON_DEST}")
-ENDIF (HAVE_STATISTICS)
-
 ##################### OpenPsi ##################
 
 IF (HAVE_OPENPSI)
