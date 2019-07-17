@@ -411,11 +411,11 @@
    (SetLink
       (InheritanceLink
          (ConceptNode "quickly@6d5b0484-eb56-4a4e-887a-108fb300e391")
-         (ConceptNode "quickly" (ptv 1 0 1))
+         (ConceptNode "quickly" (stv 1 0))
       )
       (ImplicationLink
          (PredicateNode "eats@b2862737-d65b-4c81-a1db-7ef65f5bf0c8")
-         (PredicateNode "eat" (ptv 1 0 1))
+         (PredicateNode "eat" (stv 1 0))
       )
       (InheritanceLink
          (SatisfyingSetLink
@@ -425,7 +425,7 @@
       )
       (InheritanceLink
          (ConceptNode "she@cc9806ed-8bbc-4ec2-9c4d-a97ba41f700f")
-         (ConceptNode "she" (ptv 1 0 1))
+         (ConceptNode "she" (stv 1 0))
       )
       (EvaluationLink
          (DefinedLinguisticPredicateNode "definite")

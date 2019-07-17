@@ -426,7 +426,7 @@
    (AtTimeLink
       (SentenceNode "sentence@c4d06d71-4b2b-476b-8442-aece0563ce3b")
       (TimeNode "1480056292")
-      (TimeDomainNode "Dialogue-System")
+      (DialogNode "Dialogue-System")
    )
    (EvaluationLink (stv 1 1)
       (LinkGrammarRelationshipNode "Xx")
@@ -1024,7 +1024,7 @@
    (AtTimeLink
       (SentenceNode "sentence@33d31c08-7578-4047-9f65-3a35ad3c4bf0")
       (TimeNode "1480056343")
-      (TimeDomainNode "Dialogue-System")
+      (DialogNode "Dialogue-System")
    )
    (EvaluationLink (stv 1 1)
       (LinkGrammarRelationshipNode "Dmc")

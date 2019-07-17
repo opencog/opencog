@@ -33,7 +33,7 @@
     (cog-name (gar (cog-execute! (Get
         (TypedVariable (Variable "$t") (Type "TimeNode"))
             (AtTime (Variable "$t") (get-input-sent-node)
-                (TimeDomain "Dialogue-System"))))))
+                (Dialog "Dialogue-System"))))))
 )
 
 ;-------------------------------------------------------------------------------

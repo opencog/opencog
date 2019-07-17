@@ -38,6 +38,10 @@ DIALOG_NODE <- CONCEPT_NODE
 // Ghost (was chatlang) needs a PHRASE_NODE
 PHRASE_NODE <- NODE
 
+// Chatbot needs AtTimeLink
+AT_TIME_LINK <- LINK
+TIME_NODE <- NODE
+
 // These are used to number the sequence in which words,
 // sentences and documents are observed.  Use these with
 // GreaterThanLink to find out what order things came in.

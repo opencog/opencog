@@ -1,5 +1,5 @@
 (use-modules (opencog))
-(use-modules (opencog atom-types))
+(use-modules (opencog nlp))
 (use-modules (opencog pln))
 (use-modules (opencog ure))
 

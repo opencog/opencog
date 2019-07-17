@@ -27,7 +27,7 @@
 ; -----------------------------------------------------------------------
 ; TODO: Replace these time related utilities with one from TimeMap, when it is
 ; ready.
-(define time-domain (TimeDomainNode "Dialogue-System"))
+(define time-domain (DialogNode "Dialogue-System"))
 
 (define (sent-set-time sent)
 "

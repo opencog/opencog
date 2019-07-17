@@ -1,3 +1,6 @@
+
+(use-modules (opencog) (opencog nlp) (opencog nlp chatbot))
+
 ; ----------
 ; ECAN related configuration
 

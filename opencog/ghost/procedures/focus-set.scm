@@ -1,7 +1,6 @@
 ; This file is used for specifying functions used for choosing a focus-set.
 
 (use-modules (opencog))
-(use-modules (opencog atom-types))
 (use-modules (opencog nlp))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp relex2logic))

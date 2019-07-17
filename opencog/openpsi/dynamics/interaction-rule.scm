@@ -38,7 +38,7 @@
 ; e.g., (psi-create-interaction-rule positive-sentiment-dialog
 ;        		increased pos-valence .3))
 
-(use-modules (opencog atom-types)) ; needed for PredictiveImplication definition
+(use-modules (opencog attention)) ; needed for PredictiveImplication definition
 
 ; Define the change-predicate types that can be used in the interaction rules.
 (define changed "changed")
