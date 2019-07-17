@@ -1,7 +1,0 @@
-
-IF (HAVE_LAPACK)
-	ADD_SUBDIRECTORY (blopex)
-	ADD_SUBDIRECTORY (blopex-demo)
-ENDIF (HAVE_LAPACK)
-
-
