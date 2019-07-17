@@ -9,5 +9,3 @@ but not only. Here is a brief description of each folder
   Locally Optimal Preconditioned Eigenvalue Xolvers.
 * `dimensionalembedding` implements a method of dimensional embedding
   of the atomspace using the Harel-Koren algorithm.
-* `pattern-index` implements Andre Senna prototype pattern indexing
-  for the AtomSpace.
