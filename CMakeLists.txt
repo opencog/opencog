@@ -242,16 +242,6 @@ MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
 
-# Gtk-3 required for visualization
-FIND_PACKAGE(GTK3)
-IF (GTK3_FOUND)
-	# MESSAGE(STATUS "GTK3 found.")
-	ADD_DEFINITIONS(-DHAVE_GTK)
-	SET(HAVE_GTK 1)
-ELSE (GTK3_FOUND)
-	MESSAGE(STATUS "GTK missing: needed for the the gtk-visualizer.")
-ENDIF (GTK3_FOUND)
-
 # Gnu Guile scheme interpreter
 # Version 2.2.2 is needed for mrs io ports, compilation, atomics, nlp
 FIND_PACKAGE(Guile 2.2.2)
@@ -663,7 +653,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("REST Events" "REST Atomspace Event Publisher module"
 	HAVE_EVENT_PUBLISHING_DEPENDENCIES)
