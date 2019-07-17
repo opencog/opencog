@@ -3,6 +3,8 @@
 ;
 (define-module (opencog nlp chatbot))
 
+(use-modules (opencog))
+
 (load "chatbot/chat-utils.scm")
 (load "chatbot/bot-api.scm")
 
