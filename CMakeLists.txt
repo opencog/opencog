@@ -499,7 +499,6 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 IF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 	SET(HAVE_ATTENTION 1)
-	SET(HAVE_DIMEMBED 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 
 IF(HAVE_URE)
@@ -663,7 +662,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
-SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
