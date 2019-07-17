@@ -265,17 +265,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
 # ----------------------------------------------------------
-# Lapack is needed for BLOPEX
-FIND_PACKAGE(LAPACK)
-IF (LAPACK_FOUND)
-	# MESSAGE(STATUS "LAPACK found.")
-	ADD_DEFINITIONS(-DHAVE_LAPACK)
-	SET(HAVE_LAPACK 1)
-ELSE (LAPACK_FOUND)
-	MESSAGE(STATUS "LAPACK missing: needed for blopex-based clustering.")
-ENDIF (LAPACK_FOUND)
-
-# ----------------------------------------------------------
 # Link-Grammar is needed for several NLP subsystems
 # Only 5.4.0 or newer has the required API in it.
 FIND_PACKAGE(LinkGrammar 5.4.0)
@@ -673,7 +662,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
-SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
