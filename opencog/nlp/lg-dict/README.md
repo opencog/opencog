@@ -111,6 +111,8 @@ In addition, the following scheme utilities are provided:
 The core design of this module has a number of issues, some minor, and
 some pretty important.
 
+* Handling of optional links is currently broken.
+
 * The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
   the `lg-dict-entry` method instead. Alternately, perhaps the
   `lg-get-dict-entry` could be redesigned to return a LinkValue,
@@ -140,6 +142,6 @@ some pretty important.
   system, and those are also ignorant of morphology.
 
 * The format of the word-disjunct association in the atomspace does not
-  indicatte which dictionary the disjuncts came from. This prevents
+  indicate which dictionary the disjuncts came from. This prevents
   multi-dictionary use, because its not clear which disjuncts came from
-  which dictionary. This might make translation difficult.
+  which dictionary. This makes multi-language operation impossible.

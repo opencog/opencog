@@ -41,13 +41,26 @@ static LGDictExpContainer lg_exp_to_container(Exp* exp)
     if (CONNECTOR_type == exp->type)
         return LGDictExpContainer(CONNECTOR_type, exp);
 
-    E_list* el = exp->u.l;
     std::vector<LGDictExpContainer> subcontainers;
+
+    // FIXME XXX -- Optionals are handled incorrectly here;
+    // they are denoted by a null Exp pointer in an OR_list!
+    // Ignoring all the nulls is just ... wrong.
+#if (LINK_MAJOR_VERSION == 5) &&  (LINK_MINOR_VERSION < 7)
+    E_list* el = exp->u.l;
     while (el)
     {
         subcontainers.push_back(lg_exp_to_container(el->e));
         el = el->next;
     }
+#else
+    Exp* subexp = lg_exp_operand_first(exp);
+    while (subexp)
+    {
+        subcontainers.push_back(lg_exp_to_container(subexp));
+        subexp = lg_exp_operand_next(subexp);
+    }
+#endif
 
     return LGDictExpContainer(exp->type, subcontainers);
 }
