@@ -167,7 +167,7 @@ static GenericShell* _redirector = nullptr;
 // threads for each evaluation: one thread for the evaluation, and
 // another thread to listen for results, and pass them on.
 //
-// Side-note: the constructor for this class runs in a different thead
+// Side-note: the constructor for this class runs in a different thread
 // than the caller for this method. That's because the socket listen
 // and socket accept runs in a different thread, than the socket
 // receive.  The receiver thread calls us.
@@ -689,10 +689,15 @@ std::string GenericShell::poll_output()
 			return "";
 	}
 
-	if (show_output or _evaluator->eval_error())
-	{
-		if (show_prompt) return normal_prompt;
-	}
+	// Record evaluator errors. Automated scripts pumping the cogserver
+	// with data might not always notice these, so at least record them
+	// in the log file, where they might get noticed by some human.
+	if (_evaluator->eval_error())
+		logger().info("[GenericShell] evaluator error:\n%s",
+			_evaluator->get_error_string().c_str());
+
+	if (show_prompt and (show_output or _evaluator->eval_error()))
+		return normal_prompt;
 	return "";
 }
 
