@@ -205,6 +205,9 @@ void GenericShell::eval(const std::string &expr)
 	// then attach stdout to a pipe, perform the evaluation, then
 	// restore stdout from the backup. Finally, drain the pipe,
 	// printing both to stdout and to the shell socket.
+	//
+	// It's currently disabled, because guile can aleady do this
+	// correctly, on it's own, and its been copied over to cython.
 // #define PERFORM_STDOUT_DUPLICATION 1
 #ifdef PERFORM_STDOUT_DUPLICATION
 	// What used to be stdout will now go to the pipe.
@@ -250,7 +253,6 @@ void GenericShell::eval(const std::string &expr)
 			{
 				char buf[4097];
 				int nr = read(pipefd[0], buf, sizeof(buf)-1);
-				OC_ASSERT(0 < rc, "GenericShell pipe read failure");
 				while (0 < nr)
 				{
 					buf[nr] = 0;
@@ -260,7 +262,6 @@ void GenericShell::eval(const std::string &expr)
 						socket->Send(buf);
 					}
 					nr = read(pipefd[0], buf, sizeof(buf)-1);
-					OC_ASSERT(0 < rc, "GenericShell pipe read failure");
 				}
 
 				// Cleanup.
