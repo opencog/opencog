@@ -178,7 +178,7 @@ void GenericShell::eval(const std::string &expr)
 	// First time through, initialize the evaluator.  We can't do this
 	// in the ctor, since we can't get the evaluator until after the
 	// derived-class ctor has run, and thus informed us as to whether
-	// the evaluator will be guile (scheme) or python.
+	// the evaluator will be guile (scheme) or cython (python).
 	if (nullptr == _evaluator)
 	{
 		_init_done = false;
@@ -188,92 +188,8 @@ void GenericShell::eval(const std::string &expr)
 		while (not _init_done) { sched_yield(); }
 	}
 
-	// Work-around some printing madness. See issue
-	// https://github.com/opencog/atomspace/issues/629
-	// This is kind of complicated to explain, so pay attention:
-	// When runnning scheme, or python code, from the cogserver
-	// shell, that code might cause all sorts of things to happen,
-	// including possibly printing to the stdout file descriptor.
-	// The stdout descriptor goes to the terminal in which the
-	// cogserver was started. Which is nice, and all that, but
-	// is usually not quite what the user expected --- and so we
-	// actually want to redirect stdout to the shell, where the user
-	// can see it.
-	//
-	// The code below, ifdefed PERFORM_STDOUT_DUPLICATION, does this.
-	// It's a bit of a trick: make a backup copy of stdout,
-	// then attach stdout to a pipe, perform the evaluation, then
-	// restore stdout from the backup. Finally, drain the pipe,
-	// printing both to stdout and to the shell socket.
-	//
-	// It's currently disabled, because guile can aleady do this
-	// correctly, on it's own, and its been copied over to cython.
-// #define PERFORM_STDOUT_DUPLICATION 1
-#ifdef PERFORM_STDOUT_DUPLICATION
-	// What used to be stdout will now go to the pipe.
-	int pipefd[2];
-	int stdout_backup = -1;
-	if (show_output and show_prompt)
-	{
-		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
-		if (nullptr == _redirector)
-		{
-			_redirector = this;
-			int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
-			OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
-			stdout_backup = dup(fileno(stdout));
-			OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
-			rc = dup2(pipefd[1], fileno(stdout));
-			OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
-		}
-	}
-#endif // PERFORM_STDOUT_DUPLICATION
-
 	// Queue up the expr, where it will be evaluated in another thread.
 	line_discipline(expr);
-
-#ifdef PERFORM_STDOUT_DUPLICATION
-	if (show_output and show_prompt)
-	{
-		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
-		if (this == _redirector)
-		{
-			_redirector = nullptr;
-			// Restore stdout
-			fflush(stdout);
-			int rc = write(pipefd[1], "", 1); // null-terminated string!
-			OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
-			rc = close(pipefd[1]);
-			OC_ASSERT(0 == rc, "GenericShell pipe close failure");
-			rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
-			OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
-
-			// Drain the pipe
-			auto drain_wrapper = [&](void)
-			{
-				char buf[4097];
-				int nr = read(pipefd[0], buf, sizeof(buf)-1);
-				while (0 < nr)
-				{
-					buf[nr] = 0;
-					if (1 < nr or 0 != buf[0])
-					{
-						printf("hey hye hey %s", buf); // print to the cogservers stdout.
-						socket->Send(buf);
-					}
-					nr = read(pipefd[0], buf, sizeof(buf)-1);
-				}
-
-				// Cleanup.
-				close(pipefd[0]);
-				close(stdout_backup);
-			};
-
-			drain_wrapper();
-			// stdout_thr = new std::thread(drain_wrapper);
-		}
-	}
-#endif // PERFORM_STDOUT_DUPLICATION
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
