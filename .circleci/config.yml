@@ -62,9 +62,7 @@ jobs:
             mkdir -p /ws/ure/build
             cd /ws/ure/build && cmake .. && make -j2 && make -j2 install
             ldconfig
-      - run:
-          name: Checkout OpenCog
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog /ws/opencog
+      - checkout
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
