@@ -9,7 +9,7 @@ cdef vector_to_set(vector[cHandle] handle_vector, AtomSpace atomspace):
     atoms = set()
     while it != handle_vector.end():
         c_handle = deref(it)
-        atoms.add(Atom.createAtom(c_handle, atomspace))
+        atoms.add(Atom.createAtom(c_handle))
         inc(it)
     return atoms
 
@@ -74,5 +74,5 @@ def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")
 
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace, deref(atom.handle))
-    return Atom.createAtom(c_result, atomspace)
+    return Atom.createAtom(c_result)
 
