@@ -71,7 +71,7 @@ cdef class AttentionBank:
 
 
 def af_bindlink(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("af_bindlink atom is: None")
+    if atom is None: raise ValueError("af_bindlink atom is: None")
 
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace, deref(atom.handle))
     return Atom.createAtom(c_result)
