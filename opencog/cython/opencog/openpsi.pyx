@@ -33,7 +33,7 @@ cdef class OpenPsi:
                                                  deref(stv._tvptr()),
                                                  deref(category.handle))
 
-        return OpenPsiRule(self._as, Atom.createAtom(handle, self._as))
+        return OpenPsiRule(self._as, Atom.createAtom(handle))
 
     def is_rule(self, Atom atom):
         return get_openpsi_scm().c_is_rule(deref(atom.handle))
@@ -45,14 +45,14 @@ cdef class OpenPsi:
         cdef vector[cHandle].iterator it = res_handles.begin()
         while it != res_handles.end():
             handle = deref(it)
-            list.append(Atom.createAtom(handle, self._as))
+            list.append(Atom.createAtom(handle))
             inc(it)
         return list
 
     def add_category(self, Atom new_category):
         openPsi = get_openpsi_scm()
         cdef cHandle handle = openPsi.c_add_category(deref(new_category.handle))
-        return Atom.createAtom(handle, self._as)
+        return Atom.createAtom(handle)
 
     def increase_urge(self, Atom goal, value):
         scheme_eval(self._as, '(psi-increase-urge ConceptNode("%s") %d)' % (goal.name, value))
@@ -108,25 +108,25 @@ cdef class OpenPsiRule:
         cdef vector[cHandle].iterator it = res_handles.begin()
         while it != res_handles.end():
             handle = deref(it)
-            list.append(Atom.createAtom(handle, self._as))
+            list.append(Atom.createAtom(handle))
             inc(it)
         return list
 
     def get_goal(self):
         openPsi = get_openpsi_scm()
         cdef cHandle handle = openPsi.c_get_goal(deref(self.rule.handle))
-        return Atom.createAtom(handle, self._as)
+        return Atom.createAtom(handle)
 
     def get_action(self):
         openPsi = get_openpsi_scm()
         cdef cHandle handle = openPsi.c_get_action(deref(self.rule.handle))
-        return Atom.createAtom(handle, self._as)
+        return Atom.createAtom(handle)
 
     def add_to_category(self, Atom category):
         openPsi = get_openpsi_scm()
         cdef cHandle handle = openPsi.c_add_to_category(deref(self.rule.handle),
                                                         deref(category.handle))
-        return Atom.createAtom(handle, self._as)
+        return Atom.createAtom(handle)
 
     def is_satisfiable(self):
         openPsi = get_openpsi_scm()

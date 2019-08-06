@@ -3,13 +3,14 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 from atomspace cimport AtomSpace, Atom
 
-cdef vector_to_set(vector[cHandle] handle_vector, AtomSpace atomspace):
+
+cdef vector_to_set(vector[cHandle] handle_vector):
     cdef cHandle c_handle
     cdef vector[cHandle].iterator it = handle_vector.begin()
     atoms = set()
     while it != handle_vector.end():
         c_handle = deref(it)
-        atoms.add(Atom.createAtom(c_handle, atomspace))
+        atoms.add(Atom.createAtom(c_handle))
         inc(it)
     return atoms
 
@@ -62,17 +63,17 @@ cdef class AttentionBank:
             upper_bound = sti_upper_bound
             attentionbank(self._as.atomspace).get_handles_by_AV(back_inserter(handle_vector), lower_bound, upper_bound)
 
-        return vector_to_set(handle_vector, self._as)
+        return vector_to_set(handle_vector)
 
     def get_atoms_in_attentional_focus(self):
         cdef vector[cHandle] handle_vector
         attentionbank(self._as.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
-        return vector_to_set(handle_vector, self._as)
+        return vector_to_set(handle_vector)
 
 
 def af_bindlink(AtomSpace atomspace, Atom atom):
-    if atom == None: raise ValueError("af_bindlink atom is: None")
+    if atom is None: raise ValueError("af_bindlink atom is: None")
 
     cdef cHandle c_result = c_af_bindlink(atomspace.atomspace, deref(atom.handle))
-    return Atom.createAtom(c_result, atomspace)
+    return Atom.createAtom(c_result)
 
