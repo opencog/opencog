@@ -20,7 +20,7 @@ used for representing knowledge and algorithms, providing a surface on
 which learning and reasoning algorithms are implemented. The AtomSpace
 consists of an in-RAM database, a "query language" aka "pattern matcher",
 a (ProLog-like) rule system, including forward and backward chainers,
-and an evaluator for the internal "programming langauge", Atomese. This
+and an evaluator for the internal "programming language", Atomese. This
 language is not really meant to be used by humans (although, defacto,
 it is) but rather, it is a language for representing knowledge and
 algorithms, on which (automated) reasoning and learning can be performed.
