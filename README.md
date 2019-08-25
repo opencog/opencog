@@ -32,6 +32,7 @@ This git repository contains assorted projects that are central to the
 OpenCog project, but are not yet mature or stable, and are subject to
 active development and experimentation. These include:
 * An assortment of natural language processing subsystems, including:
+  * Unsupervised natural langauge learning.
   * Natural language generation (for expressiong thoughts as sentences).
   * Natural language input (for reading and hearing).
   * Assorted chatbots, some of which are embodied.
@@ -88,8 +89,8 @@ Prerequisites
 -------------
 To build and run OpenCog, the packages listed below are required.
 With a few exceptions, most Linux distributions will provide these
-packages. Users of Ubuntu 14.04 "Trusty Tahr" may use the dependency
-installer at `/scripts/octool`.  Users of any version of Linux may
+packages. Users of Ubuntu may use the dependency installer from the
+`/opencog/octool` repoitory.  Users of any version of Linux may
 use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
@@ -105,10 +106,18 @@ be built and run.
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
-###### libuuid
-> Library for generating UUID's
-> Used by various internal subsystems.
-> `sudo apt-get install uuid-dev`
+###### cogserver
+> OpenCog CogServer Network Server.
+> http://github.com/opencog/cogserver
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
+
+###### attention
+> OpenCog Attention Allocation subsystem.
+> http://github.com/opencog/attention
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
+
 
 Optional Prerequisites
 ----------------------
@@ -127,13 +136,14 @@ the build, will be more precise as to which parts will not be built.
 > It uses exactly the same build proceedure as this package. Be sure
   to `sudo make install` at the end.
 
-###### OctoMap
-> 3D occupancy grid mapping library
-> Required for the robot perception subsystem.
-> `sudo apt-get install liboctomap-dev`
+###### SpaceTime Server
+> OpenCog SpaceTime server.
+> http://github.com/opencog/spacetime
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
 
 ###### URE
-> Unified Rule Engine
+> OpenCog Unified Rule Engine
 > http://github.com/opencog/ure
 > Required for PLN
 > It uses exactly the same build proceedure as this package. Be sure
@@ -188,16 +198,6 @@ Some useful CMake's web sites/pages:
  - http://www.cmake.org/Wiki/CMakeMacroAddCxxTest
  - http://www.cmake.org/Wiki/CMake_HowToFindInstalledSoftware
 
-
-The main CMakeLists.txt currently sets -DNDEBUG. This disables Boost
-matrix/vector debugging code and safety checks, with the benefit of
-making it much faster. Boost sparse matrixes and (dense) vectors are
-currently used by ECAN's ImportanceDiffusionAgent. If you use Boost
-ublas in other code, it may be a good idea to at least temporarily
-unset NDEBUG. Also if the Boost assert.h is used it will be necessary
-to unset NDEBUG. Boost ublas is intended to respond to a specific
-BOOST_UBLAS_NDEBUG, however this is not available as of the current
-Ubuntu standard version (1.34).
 
 -Wno-deprecated is currently enabled by default to avoid a number of
 warnings regarding hash_map being deprecated (because the alternative
