@@ -16,7 +16,6 @@ IF (HAVE_ATOMSPACE)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
-	ADD_SUBDIRECTORY (cogserver)
 	# attention builds *after* cogserver.
 	ADD_SUBDIRECTORY (attention)
 ENDIF(HAVE_SERVER)
