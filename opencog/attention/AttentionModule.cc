@@ -63,7 +63,7 @@ AttentionModule::~AttentionModule()
     do_list_ecan_param_unregister();
     do_set_ecan_param_unregister();
 
-    _cogserver.getAttentionBank().AddAFSignal().disconnect(addAFConnection);
+    // _cogserver.getAttentionBank().AddAFSignal().disconnect(addAFConnection);
 
     logger().debug("[AttentionModule] exit destructor");
 }
@@ -101,9 +101,9 @@ void AttentionModule::init()
     _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
 
 
-    addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
-            std::bind(&AttentionModule::addAFSignalHandler,
-                this, _1, _2, _3));
+//    addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
+//            std::bind(&AttentionModule::addAFSignalHandler,
+//                this, _1, _2, _3));
 }
 
 std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> args)

@@ -26,7 +26,7 @@ ADD_LIBRARY(attention SHARED
 TARGET_LINK_LIBRARIES(attention
 	attention-types
 	neighbors
-	server
+	${COGSERVER_LIBRARIES}
 	${ATOMSPACE_LIBRARIES})
 
 INSTALL (TARGETS attention
