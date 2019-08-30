@@ -238,6 +238,7 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
     static AttentionBank* _instance = nullptr;
     static AtomSpace* _as = nullptr;
+    _as->get_uuid();
 
     // Protect setting and getting against thread races.
     // This is probably not needed.
