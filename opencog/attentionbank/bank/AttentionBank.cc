@@ -237,7 +237,7 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
     static AttentionBank* _instance = nullptr;
-    static AtomSpace* _as = nullptr;
+    static AtomSpace* _as;
     _as->get_uuid();
 
     // Protect setting and getting against thread races.
