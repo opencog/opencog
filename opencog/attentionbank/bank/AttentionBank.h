@@ -308,7 +308,7 @@ public:
 };
 
 /* Singleton instance (for now) */
-AttentionBank& attentionbank(AtomSpace* = nullptr);
+AttentionBank& attentionbank(AtomSpace*);
 
 /** @}*/
 } //namespace opencog

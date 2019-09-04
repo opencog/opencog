@@ -246,9 +246,6 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
     static std::mutex art;
     std::unique_lock<std::mutex> graffiti(art);
 
-    if (nullptr == asp)
-        return *_instance;
-
     if (_as != asp and _instance) {
         delete _instance;
         _instance = nullptr;
