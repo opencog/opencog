@@ -55,6 +55,10 @@
     )
 )
 
+; This isn't right, but something isn't working, and
+;  I can't figure out how to debug it.
+(define opencog-ext-path-openpsi "/usr/local/lib/opencog/")
+
 (load-extension (string-append opencog-ext-path-openpsi "libopenpsi") "opencog_openpsi_init")
 
 ; NOTE: The order of loading helps avoid warnings
