@@ -315,8 +315,18 @@
 
   Run (ghost-get-result) to get the output generated for the input, if any.
 "
+  (ghost-take-sentence-node (car (nlp-parse (string-trim TXT))))
+)
+
+; ----------
+(define-public (ghost-take-sentence-node SENTENCE-NODE)
+"
+  ghost-take-sentence-node SENTENCE-NODE
+
+  Take the SENTENCE-NODE as input and link it to the GHOST anchor.
+"
   (set! ghost-result '())
-  (set! ghost-buffer (car (nlp-parse (string-trim TXT))))
+  (set! ghost-buffer SENTENCE-NODE)
   ghost-buffer
 )
 
