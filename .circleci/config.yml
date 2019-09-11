@@ -69,6 +69,13 @@ jobs:
             mkdir -p /ws/cogserver/build
             cd /ws/cogserver/build && cmake .. && make -j2 && make -j2 install
             ldconfig
+      - run:
+          name: Checkout AttentionBank
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/attention /ws/attention
+            mkdir -p /ws/attention/build
+            cd /ws/attention/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
       - checkout
       - run:
           name: CMake Configure
