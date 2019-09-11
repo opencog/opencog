@@ -64,6 +64,7 @@ class OpenPsiTest(TestCase):
         self.assertEqual(ConceptNode("goal"), rule.get_goal())
 
         categories = openpsi.get_categories()
+        print("duuuude its cat=", categories)
         self.assertEqual(2, len(categories))
         self.assertTrue(component in categories)
         self.assertFalse(ConceptNode("new-category") in categories)
