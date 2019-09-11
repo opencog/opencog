@@ -36,7 +36,6 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-using namespace opencog::ecan;
 
 /** Diffuses short term importance between atoms in the attentional focus.
  *

@@ -211,9 +211,13 @@
 from opencog.type_constructors import *
 from opencog.scheme_wrapper import scheme_eval_as
 from opencog.cogserver_type_constructors import *
+# from opencog.nlp_types import *
 
 atomspace = scheme_eval_as('(cog-atomspace)')
 set_type_ctor_atomspace(atomspace)
+
+def WordNode(node_name, tv=None):
+    return atomspace.add_node(types.WordNode, node_name, tv)
 
 def get_weather_info():
     return ListLink(WordNode('cloudy'))

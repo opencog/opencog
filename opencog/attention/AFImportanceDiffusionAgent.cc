@@ -27,6 +27,7 @@
 #include <thread>
 
 #include <opencog/cogserver/server/CogServer.h>
+#include <opencog/attentionbank/bank/AVUtils.h>
 
 #include "AFImportanceDiffusionAgent.h"
 #include "AttentionParamQuery.h"

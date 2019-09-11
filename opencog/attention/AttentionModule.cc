@@ -63,7 +63,7 @@ AttentionModule::~AttentionModule()
     do_list_ecan_param_unregister();
     do_set_ecan_param_unregister();
 
-    _cogserver.getAttentionBank().AddAFSignal().disconnect(addAFConnection);
+    attentionbank(&_cogserver.getAtomSpace()).AddAFSignal().disconnect(addAFConnection);
 
     logger().debug("[AttentionModule] exit destructor");
 }
@@ -101,7 +101,7 @@ void AttentionModule::init()
     _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
 
 
-    addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
+    addAFConnection = attentionbank(&_cogserver.getAtomSpace()).AddAFSignal().connect(
             std::bind(&AttentionModule::addAFSignalHandler,
                 this, _1, _2, _3));
 }

@@ -5,7 +5,8 @@ import unittest
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
-from opencog.cogserver_type_constructors import types
+from opencog.type_constructors import *
+from opencog.cogserver_type_constructors import *
 
 # The path is commented out b/c there is no __init__.py in
 # https://github.com/opencog/opencog/tree/master/opencog/nlp don't think it
@@ -30,9 +31,7 @@ class AnaphoraUnitTester(TestCase):
 
         self.atomspace= AtomSpace()
 
-        scheme_eval(self.atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
         scheme_eval(self.atomspace, "(use-modules (opencog))")
-        scheme_eval(self.atomspace, "(use-modules (opencog query))")
         scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
 
         self.hobbsAgent=HobbsAgent()

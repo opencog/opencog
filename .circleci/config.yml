@@ -32,7 +32,7 @@ jobs:
           name: Checkout AtomSpace
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace /ws/atomspace
       - restore_cache:
-          name: Restore GCH Cache
+          name: Restore GHC Cache
           keys:
             - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
@@ -61,6 +61,13 @@ jobs:
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure /ws/ure
             mkdir -p /ws/ure/build
             cd /ws/ure/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
+      - run:
+          name: Checkout CogServer
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver /ws/cogserver
+            mkdir -p /ws/cogserver/build
+            cd /ws/cogserver/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - checkout
       - run:
