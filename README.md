@@ -20,7 +20,7 @@ used for representing knowledge and algorithms, providing a surface on
 which learning and reasoning algorithms are implemented. The AtomSpace
 consists of an in-RAM database, a "query language" aka "pattern matcher",
 a (ProLog-like) rule system, including forward and backward chainers,
-and an evaluator for the internal "programming langauge", Atomese. This
+and an evaluator for the internal "programming language", Atomese. This
 language is not really meant to be used by humans (although, defacto,
 it is) but rather, it is a language for representing knowledge and
 algorithms, on which (automated) reasoning and learning can be performed.
@@ -47,18 +47,18 @@ active development and experimentation. These include:
   [ROS Behavior Scripting](https://github.com/opencog/ros-behavior-scripting)
   repository.
 * OpenPsi, a model of psychological states. Its currently a mashup of
-  two unrelated ideas: a generic rule-class selection and plannning
+  two unrelated ideas: a generic rule-class selection and planning
   system, and a model of human psychological states. An open to-do item
   is to untangle these two.
 * A supervised learning system, MOSES, for extracting patterns from
-  tabular data. This is located in a seprate repository,
+  tabular data. This is located in a seperate repository,
   [MOSES](https://github.com/opencog/moses).
 * The CogServer, a network server providing shell access and a REST API.
 * Several (obsolete!?) data visualization subsystems.
 
 With the exception of MOSES and the CogServer, all of the above are in
 active development, are half-baked, poorly documented, mis-designed,
-subject to experimentation, and generally in need of love an attention.
+subject to experimentation, and generally in need of love and attention.
 This is where experimentation and integration are taking place, and,
 like any laboratory, things are a bit fluid and chaotic.
 
