@@ -21,7 +21,9 @@ IF (CXXTEST_FOUND)
 
 	IF (HAVE_ATOMSPACE)
 		ADD_SUBDIRECTORY (attentionbank)
-		ADD_SUBDIRECTORY (attention)
+		IF (HAVE_SERVER)
+			ADD_SUBDIRECTORY (attention)
+		ENDIF (HAVE_SERVER)
 		ADD_SUBDIRECTORY (neighbors)
 
 		# Persistence is for saving/restoring atomspace to disk.
