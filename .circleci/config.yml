@@ -69,6 +69,13 @@ jobs:
             mkdir -p /ws/cogserver/build
             cd /ws/cogserver/build && cmake .. && make -j2 && make -j2 install
             ldconfig
+      - run:
+          name: Checkout AttentionBank
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/attention /ws/attention
+            mkdir -p /ws/attention/build
+            cd /ws/attention/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
       - checkout
       - run:
           name: CMake Configure
@@ -83,12 +90,12 @@ jobs:
           name: Run tests
           command: cd build && make -j2 test ARGS=-j2
       - run:
-          name: Install OpenCog
-          command: cd build && make -j2 install && ldconfig
-      - run:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
           when: always
+      - run:
+          name: Install OpenCog
+          command: cd build && make -j2 install && ldconfig
       - persist_to_workspace:
           root: /ws/
           paths:

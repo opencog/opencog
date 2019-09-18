@@ -177,6 +177,16 @@ ELSE (COGSERVER_FOUND)
 	MESSAGE(STATUS "CogServer was not found.")
 ENDIF (COGSERVER_FOUND)
 
+# AttentionBank
+FIND_PACKAGE(AttentionBank 1.0.0 CONFIG)
+IF (ATTENTIONBANK_FOUND)
+	MESSAGE(STATUS "AttentionBank found.")
+	ADD_DEFINITIONS(-DHAVE_BANK)
+	SET(HAVE_BANK 1)
+ELSE (ATTENTIONBANK_FOUND)
+	MESSAGE(STATUS "AttentionBank was not found.")
+ENDIF (ATTENTIONBANK_FOUND)
+
 # URE
 FIND_PACKAGE(URE 1.0.0 CONFIG)
 IF (URE_FOUND)
@@ -611,7 +621,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)

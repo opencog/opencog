@@ -65,11 +65,14 @@ public:
     // The scheme environment is reset between each test.
     _as = new AtomSpace();
     _scm = new SchemeEval(_as);
-    _opr = new OpenPsiRules(_as);
 
     // Configure scheme load-paths that are common for all tests.
     _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
     CHKERR
+    _scm->eval("(add-to-load-path \"" OPENPSI_TEST_PATH "/../../opencog/openpsi\")");
+    CHKERR
+
+    _opr = new OpenPsiRules(_as);
 
     logger().info("##### Finished setting up to run a test #####");
   }

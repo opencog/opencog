@@ -8,17 +8,11 @@ DECLARE_GUILE_CONFIG_TARGET(SCM_CONFIG "opencog oc-config" "OPENCOG_TEST")
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
-ADD_SUBDIRECTORY (attentionbank)
 ADD_SUBDIRECTORY (neighbors)
 
 IF (HAVE_ATOMSPACE)
 	ADD_SUBDIRECTORY (nlp)
 ENDIF (HAVE_ATOMSPACE)
-
-IF (HAVE_SERVER)
-	# attention builds *after* cogserver.
-	ADD_SUBDIRECTORY (attention)
-ENDIF(HAVE_SERVER)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (eva)
