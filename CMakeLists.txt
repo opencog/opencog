@@ -276,8 +276,8 @@ ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
 # ----------------------------------------------------------
 # Link-Grammar is needed for several NLP subsystems
-# Only 5.4.0 or newer has the required API in it.
-FIND_PACKAGE(LinkGrammar 5.4.0)
+# Only 5.6.2 or newer has the required API in it.
+FIND_PACKAGE(LinkGrammar 5.6.2)
 IF (LINK_GRAMMAR_FOUND)
 	SET(HAVE_LINK_GRAMMAR 1)
 	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
