@@ -70,20 +70,6 @@ code, as well as other options for setting up development environments,
 more details are found on the [Building Opencog
 wiki](http://wiki.opencog.org/wikihome/index.php/Building_OpenCog).
 
-There is no single "demo" or system that can be "run"; rather, the
-various subsystems can be run individually, or together. The single
-most-fully-integrated, complete demo would be the embodied [Hanson
-Robotics](http://github.com/hansonrobotics) chat subsystem.  This
-can be run *without* having an actual robot; a virtual Blender
-animation may be used instead; a webcam and microphones are required
-for sensory input. Portions of this system can be found in the `nlp`
-directory, in this repo, as well as the
-[ROS Behavior Scripting](https://github.com/opencog/ros-behavior-scripting)
-repo. The full setup is located in the Hanson Robotics
-[HEAD](https://github.com/hansonrobotics/HEAD) repo, and ready-to-run
-Docker images can be found in the [OpenCog Docker
-repo](https://github.com/opencog/docker).
-
 
 Prerequisites
 -------------
