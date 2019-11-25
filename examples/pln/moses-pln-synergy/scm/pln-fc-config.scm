@@ -21,7 +21,7 @@
 
 ;XXX This is bad and broken and wrong; one should not try to bypass the
 ; scheme module system like this, its just asking for carpet burns.
-(load-from-path "opencog/pln/utilities.scm")
+(load-from-path "opencog/pln/pln-utils.scm")
 (load-from-path "opencog/ure/ure-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
