@@ -2,4 +2,4 @@
 
 (use-modules (opencog))
 
-(load "pln/utilities.scm")
+(load "pln/pln-utils.scm")

@@ -1,6 +1,6 @@
 ADD_GUILE_MODULE(FILES
 	pln.scm
-	utilities.scm
+	pln-utils.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/pln"
 )
 
