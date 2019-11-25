@@ -48,8 +48,6 @@
                         "conditional-full-instantiation-implication-meta-rule"
                         "conditional-full-instantiation-inheritance-meta-rule"))
 
-(cog-logger-info "TODO: weirdly this needs to be added to unstuck guile")
-
 ;; Call forward chainer
 ;;
 ;; fc-results includes, among others,
