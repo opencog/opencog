@@ -14,8 +14,6 @@ nlp             -- English language processing tools.
 
 ghost           -- A chatbot and behavior-scripting system.
 
-pln             -- Probabilistic logic reasoner.
-
 attention       -- ECAN Attention allocation server and tools.
 
 cogserver       -- Multi-user network server.
