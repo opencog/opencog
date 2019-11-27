@@ -76,6 +76,13 @@ jobs:
             mkdir -p /ws/attention/build
             cd /ws/attention/build && cmake .. && make -j2 && make -j2 install
             ldconfig
+      - run:
+          name: Checkout PLN
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/pln /ws/pln
+            mkdir -p /ws/pln/build
+            cd /ws/pln/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
       - checkout
       - run:
           name: CMake Configure
