@@ -38,7 +38,7 @@ namespace opencog
 class OpenPsiImplicator
 {
 
-  friend class ::OpenPsiSatisfier;
+  friend class OpenPsiSatisfier;
 
   // Needed for resetting private cache.
   // TODO Why would one need to reset during psi-loop?
