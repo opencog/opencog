@@ -23,8 +23,6 @@
 
 #include "LojbanModule.h"
 
-#include <boost/algorithm/string/join.hpp>
-
 #include <fstream>
 #include <sys/stat.h>
 
@@ -67,7 +65,8 @@ void LojbanModule::init(void)
 
 std::string LojbanModule::do_parse_lojban(Request *req, std::list<std::string> args)
 {
-    std::string sentence = boost::algorithm::join(args," ");
+    std::string sentence;
+    for (const auto& a: args) sentence += a + " ";
 
     Handle * hptr = lojban_parse(_as,_wordlist,sentence.c_str());
 
