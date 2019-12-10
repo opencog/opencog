@@ -208,37 +208,6 @@ ELSE (PLN_FOUND)
 ENDIF (PLN_FOUND)
 
 # ----------------------------------------------------------
-# Check for boost. We need dynamic-linked, threaded libs by default.
-SET(Boost_USE_STATIC_LIBS OFF)
-SET(Boost_USE_MULTITHREADED ON)
-SET(MIN_BOOST 1.46)
-
-# Required boost packages
-FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
-
-IF(Boost_FOUND)
-	SET(Boost_FOUND_SAVE 1)
-ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build OpenCog!")
-ENDIF(Boost_FOUND)
-
-# Opencog won't compile with Boost 1.51, some kind of conflict with
-# hash functions, see github bugs 1 and 36
-IF(105100 EQUAL ${Boost_VERSION})
-	MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with OpenCog.  Please use a different version.")
-ENDIF(105100 EQUAL ${Boost_VERSION})
-MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
-
-# Optional boost packages; can build without these.
-FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS math_c99 QUIET)
-
-# Arghhh. Except cmake is treating above as required, not optional. #$%**&
-IF(Boost_FOUND_SAVE)
-	SET(Boost_FOUND 1)
-ENDIF(Boost_FOUND_SAVE)
-
-# ----------------------------------------------------------
 # Needed for unit tests
 
 FIND_PACKAGE(Cxxtest)
@@ -414,7 +383,7 @@ ENDIF (VALGRIND_FOUND)
 # Include configuration.
 
 # Set default include paths.
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}
 	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
 
 # Macros that define how atom types get declared.
