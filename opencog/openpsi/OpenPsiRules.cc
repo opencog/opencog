@@ -85,7 +85,8 @@ bool OpenPsiRules::is_rule(const Handle& rule)
 
 Handle OpenPsiRules::add_category(const Handle& new_category)
 {
-  _as->add_link(INHERITANCE_LINK, new_category, _psi_category);
+  // _psi_category is a null pointer; its never set.
+  // _as->add_link(INHERITANCE_LINK, new_category, _psi_category);
   if(not(_category_index.count(new_category))) {
     _category_index[new_category] = {};
   }
