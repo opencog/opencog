@@ -11,18 +11,13 @@
 (use-modules (ice-9 threads)  ; needed for par-map
              (srfi srfi-1)
              (opencog)
+             (opencog exec)
              (opencog ure)
+             (opencog attention-bank)
              (opencog nlp)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)
-             (opencog nlp relex2logic)
-             (opencog exec))
-
-; Temporarily used during transitioning. The aim is to make life easier for
-; developers who work with atomspace before opencog/atomspace/pull/1664 while
-; waiting for opencog/opencog/issues/3107 to resolve.
-(if (resolve-module '(opencog attention-bank) #:ensure #f)
-  (use-modules (opencog attention-bank)))
+             (opencog nlp relex2logic))
 
 ; -----------------------------------------------------------------------
 ; TODO: Replace these time related utilities with one from TimeMap, when it is
