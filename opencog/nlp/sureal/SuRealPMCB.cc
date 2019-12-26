@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/query/PatternMatchEngine.h>
 #include <opencog/neighbors/GetPredicates.h>
 #include <opencog/neighbors/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
@@ -909,7 +910,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
  *
  * @param pPME       pointer to the PatternMatchEngine
  */
-bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
+bool SuRealPMCB::initiate_search(PatternMatchCallback& pmc)
 {
     // set targets, m_targets should always be a subset of m_interp
     if (m_interp.size() > 0)
@@ -918,11 +919,10 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         m_interp.clear();
     }
 
-    _search_fail = false;
     if (not _variables->varset.empty())
     {
-        bool found = neighbor_search(pPME);
-        if (not _search_fail) return found;
+        if (setup_neighbor_search())
+            return choice_loop(pmc, "sssssss neighbor_search uuuuuuuu");
     }
 
     // Not sure quite what triggers this, but there are patterns
@@ -936,7 +936,8 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
     logger().debug("[SuReal] Start pred is: %s",
                    bestClause->to_short_string().c_str());
 
-    // keep only links of the same type as bestClause and have linkage to InterpretationNode
+    // keep only links of the same type as bestClause and
+    // have linkage to InterpretationNode
     HandleSeq qCandidate;
     m_as->get_handles_by_type(std::back_inserter(qCandidate), bestClause->get_type());
 
@@ -985,11 +986,13 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
     std::sort(sCandidate.begin(), sCandidate.end(), sortBySize);
 
+    PatternMatchEngine pme(pmc);
+    pme.set_pattern(*_variables, *_pattern);
     for (auto& c : sCandidate)
     {
         logger().debug("[SuReal] Loop candidate: %s", c.handle->to_short_string().c_str());
 
-        if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
+        if (pme.explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
     }
     return false;
