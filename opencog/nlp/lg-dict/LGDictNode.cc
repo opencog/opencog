@@ -46,8 +46,8 @@ void error_handler(lg_errinfo *ei, void *data)
 
 // ------------------------------------------------------
 
-LgDictNode::LgDictNode(const std::string& name)
-	: Node(LG_DICT_NODE, name), _dict(nullptr)
+LgDictNode::LgDictNode(const std::string&& name)
+	: Node(LG_DICT_NODE, std::move(name)), _dict(nullptr)
 {
 }
 
@@ -87,7 +87,7 @@ Dictionary LgDictNode::get_dictionary()
 Handle LgDictNode::factory(const Handle& base)
 {
 	if (LgDictNodeCast(base)) return base;
-	Handle h(createLgDictNode(base->get_name()));
+	Handle h(createLgDictNode(std::move(base->get_name())));
 	return h;
 }
 

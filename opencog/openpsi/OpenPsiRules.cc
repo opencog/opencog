@@ -71,7 +71,7 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
 
     // Add to the index of rules.
     PatternLinkPtr query_body = \
-      createPatternLink(Handle(createLink(context, AND_LINK)));
+      createPatternLink(std::move(Handle(createLink(std::move(context), AND_LINK))));
     _psi_rules[rule] = std::make_tuple(context, action, goal, query_body);
   }
 

@@ -106,7 +106,7 @@ HandleSeq opencog::getDictEntry(Dictionary _dictionary,
 // automatically.
     if (!dn_head) return outgoing;
 
-    Handle hWord(createNode(WORD_NODE, word));
+    Handle hWord(createNode(WORD_NODE, std::move(std::string(word))));
 
     for (Dict_node* dn = dn_head; dn; dn = dn->right)
     {

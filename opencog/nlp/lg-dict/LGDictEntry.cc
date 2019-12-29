@@ -64,8 +64,8 @@ void LGDictEntry::init()
 			oset[1]->to_string().c_str());
 }
 
-LGDictEntry::LGDictEntry(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+LGDictEntry::LGDictEntry(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, LG_DICT_ENTRY))
@@ -138,8 +138,8 @@ void LGHaveDictEntry::init()
 			oset[1]->to_string().c_str());
 }
 
-LGHaveDictEntry::LGHaveDictEntry(const HandleSeq& oset, Type t)
-	: Link(oset, t)
+LGHaveDictEntry::LGHaveDictEntry(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, LG_HAVE_DICT_ENTRY))

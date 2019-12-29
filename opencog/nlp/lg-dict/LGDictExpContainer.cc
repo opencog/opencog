@@ -238,9 +238,10 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
         // blown up into pairs of disjuncts, one with and one without.
         if (m_string == "OPTIONAL") return { optnl };
 
-        Handle connector(createNode(LG_CONNECTOR_NODE, m_string));
+        Handle connector(createNode(LG_CONNECTOR_NODE,
+                                    std::move(std::string(m_string))));
         Handle direction(createNode(LG_CONN_DIR_NODE,
-                          std::string(1, m_direction)));
+                          std::move(std::string(1, m_direction))));
 
         if (m_multi)
             return { Handle(createLink(LG_CONNECTOR, connector, direction, multi)) };
@@ -257,7 +258,7 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
     }
 
     if (m_type == AND_type)
-        return { Handle(createLink(outgoing, LG_AND)) };
+        return { Handle(createLink(std::move(outgoing), LG_AND)) };
 
     // remove repeated atoms from OR
     if (m_type == OR_type)

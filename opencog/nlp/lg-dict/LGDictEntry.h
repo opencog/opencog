@@ -55,7 +55,7 @@ protected:
 	void init();
 
 public:
-	LGDictEntry(const HandleSeq&, Type=LG_DICT_ENTRY);
+	LGDictEntry(const HandleSeq&&, Type=LG_DICT_ENTRY);
 	LGDictEntry(const LGDictEntry&) = delete;
 	LGDictEntry& operator=(const LGDictEntry&) = delete;
 
@@ -79,7 +79,7 @@ protected:
 	void init();
 
 public:
-	LGHaveDictEntry(const HandleSeq&, Type=LG_HAVE_DICT_ENTRY);
+	LGHaveDictEntry(const HandleSeq&&, Type=LG_HAVE_DICT_ENTRY);
 	LGHaveDictEntry(const LGHaveDictEntry&) = delete;
 	LGHaveDictEntry& operator=(const LGHaveDictEntry&) = delete;
 
