@@ -51,19 +51,6 @@ LgDictNode::LgDictNode(const std::string& name)
 {
 }
 
-LgDictNode::LgDictNode(const Node& n)
-	: Node(n), _dict(nullptr)
-{
-	// Type must be as expected
-	Type tdict = n.get_type();
-	if (not nameserver().isA(tdict, LG_DICT_NODE))
-	{
-		const std::string& tname = nameserver().getTypeName(tdict);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LgDictNode, got %s", tname.c_str());
-	}
-}
-
 LgDictNode::~LgDictNode()
 {
 	if (_dict)

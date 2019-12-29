@@ -96,19 +96,6 @@ LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-LGParseLink::LGParseLink(const Link& l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tparse = l.get_type();
-	if (not nameserver().isA(tparse, LG_PARSE_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(tparse);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LgParseLink, got %s", tname.c_str());
-	}
-}
-
 LGParseMinimal::LGParseMinimal(const HandleSeq& oset, Type t)
 	: LGParseLink(oset, t)
 {
@@ -120,19 +107,6 @@ LGParseMinimal::LGParseMinimal(const HandleSeq& oset, Type t)
 			"Expecting an LgParseMinimal, got %s", tname.c_str());
 	}
 	init();
-}
-
-LGParseMinimal::LGParseMinimal(const Link& l)
-	: LGParseLink(l)
-{
-	// Type must be as expected
-	Type tparse = l.get_type();
-	if (not nameserver().isA(tparse, LG_PARSE_MINIMAL))
-	{
-		const std::string& tname = nameserver().getTypeName(tparse);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LgParseMinimal, got %s", tname.c_str());
-	}
 }
 
 // =================================================================

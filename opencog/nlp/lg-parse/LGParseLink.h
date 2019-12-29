@@ -53,7 +53,8 @@ protected:
 
 public:
 	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
-	LGParseLink(const Link&);
+	LGParseLink(const LGParseLink&) = delete;
+	LGParseLink& operator=(const LGParseLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -65,7 +66,8 @@ class LGParseMinimal : public LGParseLink
 {
 public:
 	LGParseMinimal(const HandleSeq&, Type=LG_PARSE_MINIMAL);
-	LGParseMinimal(const Link&);
+	LGParseMinimal(const LGParseMinimal&) = delete;
+	LGParseMinimal& operator=(const LGParseMinimal&) = delete;
 };
 
 typedef std::shared_ptr<LGParseLink> LGParseLinkPtr;
