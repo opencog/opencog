@@ -171,19 +171,18 @@ public:
       expected_goal_1, SimpleTruthValue::createSTV(1,1));
 
     Handle result_2_1 = _opr->get_action(rule_1);
-    TS_ASSERT_EQUALS(expected_action_1, result_2_1);
+    TS_ASSERT(*expected_action_1 == *result_2_1);
 
-    HandleSeq& result_2_2 = _opr->get_context(rule_1);
+    HandleSeq result_2_2 = _opr->get_context(rule_1);
     // A Link is created so as to use operator==.
-    TS_ASSERT_EQUALS(*LinkCast(createLink(expected_context_1)),
-      *LinkCast(createLink(result_2_2)));
+    TS_ASSERT(*createLink(std::move(expected_context_1)) ==
+              *createLink(std::move(result_2_2)));
 
     Handle result_2_3 = _opr->get_goal(rule_1);
-    TS_ASSERT_EQUALS(expected_goal_1, result_2_3);
+    TS_ASSERT(*expected_goal_1 == *result_2_3);
 
-    PatternLinkPtr result_2_4 = _opr->get_query(rule_1);
-    // Don't know why operator== doesn't work.
-    TS_ASSERT(opencog::content_eq(expected_query_1, result_2_4->get_handle()));
+    Handle result_2_4(_opr->get_query(rule_1));
+    TS_ASSERT(*expected_query_1 == *result_2_4);
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
