@@ -66,7 +66,8 @@ class LGParseMinimal : public LGParseLink
 {
 public:
 	LGParseMinimal(const HandleSeq&, Type=LG_PARSE_MINIMAL);
-	LGParseMinimal(const Link&);
+	LGParseMinimal(const LGParseMinimal&) = delete;
+	LGParseMinimal& operator=(const LGParseMinimal&) = delete;
 };
 
 typedef std::shared_ptr<LGParseLink> LGParseLinkPtr;

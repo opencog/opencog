@@ -109,19 +109,6 @@ LGParseMinimal::LGParseMinimal(const HandleSeq& oset, Type t)
 	init();
 }
 
-LGParseMinimal::LGParseMinimal(const Link& l)
-	: LGParseLink(l)
-{
-	// Type must be as expected
-	Type tparse = l.get_type();
-	if (not nameserver().isA(tparse, LG_PARSE_MINIMAL))
-	{
-		const std::string& tname = nameserver().getTypeName(tparse);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LgParseMinimal, got %s", tname.c_str());
-	}
-}
-
 // =================================================================
 
 ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
