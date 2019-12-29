@@ -77,19 +77,6 @@ LGDictEntry::LGDictEntry(const HandleSeq& oset, Type t)
 	init();
 }
 
-LGDictEntry::LGDictEntry(const Link& l)
-	: FunctionLink(l)
-{
-	// Type must be as expected
-	Type tparse = l.get_type();
-	if (not nameserver().isA(tparse, LG_DICT_ENTRY))
-	{
-		const std::string& tname = nameserver().getTypeName(tparse);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LgDictEntry, got %s", tname.c_str());
-	}
-}
-
 // =================================================================
 
 ValuePtr LGDictEntry::execute(AtomSpace* as, bool silent)
@@ -162,19 +149,6 @@ LGHaveDictEntry::LGHaveDictEntry(const HandleSeq& oset, Type t)
 			"Expecting an LgHaveDictEntry, got %s", tname.c_str());
 	}
 	init();
-}
-
-LGHaveDictEntry::LGHaveDictEntry(const Link& l)
-	: Link(l)
-{
-	// Type must be as expected
-	Type tparse = l.get_type();
-	if (not nameserver().isA(tparse, LG_HAVE_DICT_ENTRY))
-	{
-		const std::string& tname = nameserver().getTypeName(tparse);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LgHaveDictEntry, got %s", tname.c_str());
-	}
 }
 
 // =================================================================

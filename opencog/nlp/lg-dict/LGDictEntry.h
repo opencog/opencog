@@ -56,7 +56,8 @@ protected:
 
 public:
 	LGDictEntry(const HandleSeq&, Type=LG_DICT_ENTRY);
-	LGDictEntry(const Link&);
+	LGDictEntry(const LGDictEntry&) = delete;
+	LGDictEntry& operator=(const LGDictEntry&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -79,7 +80,8 @@ protected:
 
 public:
 	LGHaveDictEntry(const HandleSeq&, Type=LG_HAVE_DICT_ENTRY);
-	LGHaveDictEntry(const Link&);
+	LGHaveDictEntry(const LGHaveDictEntry&) = delete;
+	LGHaveDictEntry& operator=(const LGHaveDictEntry&) = delete;
 
 	virtual bool is_evaluatable() const { return true; }
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
