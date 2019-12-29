@@ -53,7 +53,8 @@ protected:
 
 public:
 	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
-	LGParseLink(const Link&);
+	LGParseLink(const LGParseLink&) = delete;
+	LGParseLink& operator=(const LGParseLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);
