@@ -37,7 +37,7 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
         return HandleSeq();
 
     HandleSeq answer;
-    for (const LinkPtr& link : h->getIncomingSet())
+    for (const Handle& link : h->getIncomingSet())
     {
         Type t = link->get_type();
         if (not(t == desiredLinkType or
@@ -62,7 +62,7 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
 
     HandleSeq answer;
 
-    for (const LinkPtr& link : h->getIncomingSet())
+    for (const Handle& link : h->getIncomingSet())
     {
         Type t = link->get_type();
         if (not(t == desiredLinkType or
@@ -83,7 +83,7 @@ HandleSeq get_all_neighbors(const Handle& h,
 {
     HandleSeq answer;
 
-    for (const LinkPtr& link : h->getIncomingSet())
+    for (const Handle& link : h->getIncomingSet())
     {
         if (link->get_type() != desiredLinkType) continue;
         for (const Handle& handle : link->getOutgoingSet())
@@ -107,7 +107,7 @@ static void get_distant_neighbors_rec(const Handle& h,
     // Recursive calls
     if (dist != 0) {
         // 1. Fetch incomings
-        for (const LinkPtr& in_l : h->getIncomingSet()) {
+        for (const Handle& in_l : h->getIncomingSet()) {
             Handle in_h = in_l->get_handle();
             if (res.find(in_h) == res.cend()) // Do not re-explore
                 get_distant_neighbors_rec(in_h, res, dist - 1);
