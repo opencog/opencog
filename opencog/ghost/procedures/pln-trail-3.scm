@@ -111,13 +111,17 @@ output = Lizards can breathe
 
     ; The deduction rule doesn't work when the truth-value are extremely
     ; low. (load-gtwc) wasn't helpful
-    ;(pln-load-rules "term/deduction")
-    (pln-load-rules "wip/evaluation-to-member")
-    (pln-load-rules "wip/member-to-inheritance")
-    (pln-load-rules "wip/temp-deduction")
-    (pln-load-rules "wip/evaluation-to-member")
-    (pln-load-rules "wip/inheritance-to-member")
-    (pln-load-rules "wip/member-to-evaluation")
+    ;
+    ; TODO: use pln-load-rules when move to new PLN API, see
+    ; https://github.com/opencog/pln/blob/master/opencog/pln/README.md
+    ;
+    ;(load-from-path (pln-rule-type->filename "term/deduction"))
+    (load-from-path (pln-rule-type->filename "wip/evaluation-to-member"))
+    (load-from-path (pln-rule-type->filename "wip/member-to-inheritance"))
+    (load-from-path (pln-rule-type->filename "wip/temp-deduction"))
+    (load-from-path (pln-rule-type->filename "wip/evaluation-to-member"))
+    (load-from-path (pln-rule-type->filename "wip/inheritance-to-member"))
+    (load-from-path (pln-rule-type->filename "wip/member-to-evaluation"))
 
     ; NOTE: The number has no relevance in r2l-mode
     (ure-define-rbs rb 0)
