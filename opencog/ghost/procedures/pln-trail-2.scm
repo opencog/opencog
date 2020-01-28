@@ -48,8 +48,10 @@
 (define (configure-pln-rbs-2)
     (define rb (ConceptNode "r2l-pln-2"))
 
-    (pln-load-rules "term/deduction")
-    (pln-load-rules "wip/abduction")
+    ; TODO: use pln-load-rules when move to new PLN API, see
+    ; https://github.com/opencog/pln/blob/master/opencog/pln/README.md
+    (load-from-path (pln-rule-type->filename "term/deduction"))
+    (load-from-path (pln-rule-type->filename "wip/abduction"))
 
     ; NOTE: The number has no relevance in r2l-mode
     (ure-define-rbs rb 0)
