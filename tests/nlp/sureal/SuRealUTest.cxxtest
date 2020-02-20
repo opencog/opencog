@@ -41,15 +41,6 @@ public:
 
     SuRealUTest(void)
     {
-        try
-        {
-            config().load("opencog-test.conf");
-        }
-        catch (RuntimeException &e)
-        {
-            std::cerr << e.get_message() << std::endl;
-        }
-
         // XXX FIXME This unit test fails, if multiple atomspaces
         // are used, instead of re-using the same atomspace (and
         // clearing it.) Something is majorly wrong with this, but

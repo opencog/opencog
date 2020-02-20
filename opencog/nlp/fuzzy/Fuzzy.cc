@@ -71,7 +71,7 @@ Fuzzy::~Fuzzy()
  */
 static void examine(const Handle& h, HandleSeq& wi, HandleSeq& sl)
 {
-    for (const LinkPtr& lp : h->getIncomingSet())
+    for (const Handle& lp : h->getIncomingSet())
     {
         if (h->is_node())
         {

@@ -2,11 +2,20 @@ IF (HAVE_BANK)
 	ADD_SUBDIRECTORY (fuzzy)
 ENDIF (HAVE_BANK)
 
-IF (HAVE_URE AND HAVE_NLP)
-	ADD_SUBDIRECTORY (sureal)
-	# microplanning depends on sureal, so should test after it
-	ADD_SUBDIRECTORY (microplanning)
-ENDIF (HAVE_URE AND HAVE_NLP)
+# Disable sureal and microplanning - Jan 2020
+# These two modules have not been used in many years, and are unmaintained.
+# Recent changes to the pattern matcher have exposed bugs in
+# nlp/sureal/SuRealPMCB.cc that are not readily apparent.  I don't want
+# to maintain the code that no one else wants to maintain, either, so
+# I'm just going to stub this out, and let future generations find and
+# fix the bug(s). My general guess is that sureal probably should NOT
+# be using a customized pattern matcher, anyway; just use what's
+# provided, instead of inventing something oddly different.
+#IF (HAVE_URE AND HAVE_NLP)
+#	ADD_SUBDIRECTORY (sureal)
+#	# microplanning depends on sureal, so should test after it
+#	ADD_SUBDIRECTORY (microplanning)
+#ENDIF (HAVE_URE AND HAVE_NLP)
 
 IF (HAVE_NOSETESTS)
 

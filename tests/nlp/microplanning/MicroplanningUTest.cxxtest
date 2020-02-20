@@ -40,14 +40,6 @@ public:
 
     MicroplanningUTest(void)
     {
-        try
-        {
-            config().load("opencog-test.conf");
-        }
-        catch (RuntimeException &e)
-        {
-            std::cerr << e.get_message() << std::endl;
-        }
         logger().set_timestamp_flag(false);
         _as = new AtomSpace();
         _evaluator = new SchemeEval(_as);

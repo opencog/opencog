@@ -37,7 +37,7 @@ using namespace opencog;
  */
 void FuzzyMatch::explore(const Handle& h)
 {
-	for (const LinkPtr& lptr : h->getIncomingSet())
+	for (const Handle& lptr : h->getIncomingSet())
 	{
 		Handle soln(lptr->get_handle());
 		bool look_for_more = try_match(soln);
@@ -61,7 +61,7 @@ void FuzzyMatch::find_starters(const Handle& hp)
 
 	// Check if there is a similar tree, explore it if there is one
 	// and is accepted as a starting point
-	for (const LinkPtr& lptr : hp->getIncomingSet())
+	for (const Handle& lptr : hp->getIncomingSet())
 		if (lptr->get_type() == SIMILARITY_LINK)
 			for (const Handle& h : lptr->getOutgoingSet())
 				if (h != hp and accept_starter(h))

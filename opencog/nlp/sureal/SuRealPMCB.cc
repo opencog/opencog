@@ -456,7 +456,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
 
                 bool found = false;
 
-                for (LinkPtr lpll : qLemmaLinks)
+                for (const Handle& lpll : qLemmaLinks)
                 {
                     HandleSeq qOS = lpll->getOutgoingSet();
 
@@ -475,7 +475,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                     //    (DefinedLinguisticConceptNode "present"))
                     std::string sTense;
                     IncomingSet qSolnIS = kv.second->getIncomingSetByType(INHERITANCE_LINK);
-                    for (LinkPtr lpInhLk : qSolnIS)
+                    for (const Handle& lpInhLk : qSolnIS)
                     {
                         HandleSeq qInhOS = lpInhLk->getOutgoingSet();
                         if (qInhOS[0] == kv.second and
@@ -497,7 +497,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                     if (hPatPredNode != Handle::UNDEFINED)
                     {
                         IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
-                        for (LinkPtr lpInhLk : qPatIS)
+                        for (const Handle& lpInhLk : qPatIS)
                         {
                             HandleSeq qInhOS = lpInhLk->getOutgoingSet();
                             if (qInhOS[0] == hPatPredNode and

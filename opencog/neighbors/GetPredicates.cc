@@ -42,7 +42,7 @@ HandleSeq get_predicates(const Handle& target,
     HandleSeq answer;
 
     // First find any ListLinks that point to the target
-    for (const LinkPtr& link : target->getIncomingSet())
+    for (const Handle& link : target->getIncomingSet())
     {
         // Skip any links that aren't subclasses of ListLink.
         Type linkType = link->get_type();
@@ -50,7 +50,7 @@ HandleSeq get_predicates(const Handle& target,
            continue;
  
         // Look for EvaluationLink's that contain this ListLink.
-        for (const LinkPtr& evaluationLink : link->getIncomingSet())
+        for (const Handle& evaluationLink : link->getIncomingSet())
         {
             // Skip any links that aren't subclasses of EvaluationLink.
             linkType = evaluationLink->get_type();
@@ -88,7 +88,7 @@ HandleSeq get_predicates_for(const Handle& target,
     HandleSeq answer;
 
     // First find any ListLinks that point to the target
-    for (const LinkPtr& link : target->getIncomingSet())
+    for (const Handle& link : target->getIncomingSet())
     {
         // Skip any links that aren't subclasses of ListLink.
         Type linkType = link->get_type();
@@ -96,7 +96,7 @@ HandleSeq get_predicates_for(const Handle& target,
            continue;
  
         // Look for EvaluationLink's that contain this ListLink.
-        for (const LinkPtr& evaluationLink : link->getIncomingSet())
+        for (const Handle& evaluationLink : link->getIncomingSet())
         {
             // Skip any links that aren't subclasses of EvaluationLink.
             linkType = evaluationLink->get_type();
