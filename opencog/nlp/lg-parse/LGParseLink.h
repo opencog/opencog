@@ -52,7 +52,7 @@ protected:
 	                   bool, AtomSpace*) const;
 
 public:
-	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
+	LGParseLink(const HandleSeq&&, Type=LG_PARSE_LINK);
 	LGParseLink(const LGParseLink&) = delete;
 	LGParseLink& operator=(const LGParseLink&) = delete;
 
@@ -65,7 +65,7 @@ public:
 class LGParseMinimal : public LGParseLink
 {
 public:
-	LGParseMinimal(const HandleSeq&, Type=LG_PARSE_MINIMAL);
+	LGParseMinimal(const HandleSeq&&, Type=LG_PARSE_MINIMAL);
 	LGParseMinimal(const LGParseMinimal&) = delete;
 	LGParseMinimal& operator=(const LGParseMinimal&) = delete;
 };

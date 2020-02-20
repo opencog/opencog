@@ -45,7 +45,7 @@ protected:
 	Dictionary _dict;
 
 public:
-	LgDictNode(const std::string&);
+	LgDictNode(const std::string&&);
 	LgDictNode(const LgDictNode&) = delete;
 	LgDictNode& operator=(const LgDictNode&) = delete;
 	virtual ~LgDictNode();

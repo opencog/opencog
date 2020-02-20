@@ -83,8 +83,8 @@ void LGParseLink::init()
 	}
 }
 
-LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+LGParseLink::LGParseLink(const HandleSeq&& oset, Type t)
+	: FunctionLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, LG_PARSE_LINK))
@@ -96,8 +96,8 @@ LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-LGParseMinimal::LGParseMinimal(const HandleSeq& oset, Type t)
-	: LGParseLink(oset, t)
+LGParseMinimal::LGParseMinimal(const HandleSeq&& oset, Type t)
+	: LGParseLink(std::move(oset), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, LG_PARSE_MINIMAL))
@@ -346,7 +346,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 				Handle mu(createNode(LG_CONN_MULTI_NODE, "@"));
 				cono.push_back(mu);
 			}
-			Handle conl(createLink(cono, LG_CONNECTOR));
+			Handle conl(createLink(std::move(cono), LG_CONNECTOR));
 			conseq.push_back(conl);
 		}
 
