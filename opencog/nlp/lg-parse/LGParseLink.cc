@@ -353,7 +353,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		// Set up the disjuncts on each word
 		if (0 < conseq.size())
 			as->add_link(LG_WORD_CSET, winst,
-				as->add_link(LG_AND, conseq));
+				as->add_link(LG_AND, std::move(conseq)));
 	}
 
 	// Loop over all the links
