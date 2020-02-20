@@ -528,7 +528,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                         Handle hNewPred = m_as->get_handle(PREDICATE_NODE, sWord);
 
                         if (hNewPred == Handle::UNDEFINED)
-                            hNewPred = m_as->add_node(PREDICATE_NODE, sWord);
+                            hNewPred = m_as->add_node(PREDICATE_NODE, std::move(sWord));
 
                         // update the mapping by replacing the lemma
                         // by the one that passed the disjunct match

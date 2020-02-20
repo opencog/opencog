@@ -75,7 +75,7 @@ Handle find_approximate_match(AtomSpace* as, const Handle& hp)
     HandleSeq solns;
     for (auto rs: ranked_solns)
         solns.emplace_back(rs.first);
-    return as->add_link(LIST_LINK, solns);
+    return as->add_link(LIST_LINK, std::move(solns));
 }
 
 void FuzzyPatternUTest::test_basic_fuzzy_match(void)

@@ -265,11 +265,7 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
 	if (stv->get_mean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
-	HandleSeq out;
-	out.push_back(first_sense_link);
-	out.push_back(second_sense_link);
-
-	atom_space->add_link(COSENSE_LINK, out)->setTruthValue(stv);
+	atom_space->add_link(COSENSE_LINK, first_sense_link, second_sense_link)->setTruthValue(stv);
 	edge_count ++;
 
 #ifdef LINK_DEBUG

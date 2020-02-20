@@ -120,7 +120,7 @@ Handle FuzzySCM::find_approximate_match(Handle hp)
 		solns.emplace_back(rs.first);
 
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
-	return as->add_link(LIST_LINK, solns);
+	return as->add_link(LIST_LINK, std::move(solns));
 }
 
 /**
@@ -154,7 +154,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     }
 
     // Wrap everything in a ListLink and then return it
-    Handle results = as->add_link(LIST_LINK, rtn_solns);
+    Handle results = as->add_link(LIST_LINK, std::move(rtn_solns));
 
     return results;
 }

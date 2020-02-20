@@ -130,13 +130,9 @@ bool MihalceaLabel::annotate_word_sense(const Handle& word_sense)
 #endif
 
 	// Create a link connecting this word-instance to this word-sense.
-	HandleSeq out;
-	out.push_back(word_instance);
-	out.push_back(word_sense);
-
 	// Give it a true truth value; but no confidence.
 	TruthValuePtr ctv(CountTruthValue::createTV(1.0f, 0.0f, 1.0f));
-	atom_space->add_link(INHERITANCE_LINK, out)->setTruthValue(ctv);
+	atom_space->add_link(INHERITANCE_LINK, word_instance, word_sense)->setTruthValue(ctv);
 
 	return false;
 }
