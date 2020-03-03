@@ -38,18 +38,16 @@ resolver: lts-8.5
 packages:
 - '.'
 - '../HaskellLib'
-- location:
-   git: https://github.com/rTreutlein/LojbanValidator
-   commit: cb19659bca234cc60598f35557683f152637f35d
-  extra-dep: true
-- location:
-   git: https://github.com/rTreutlein/IsoSyntax
-   commit: 8d50ccba82ece75143488dba49a7ac3eba709d14
-  extra-dep: true
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: [opencog-atomspace-0.1.0.8,list-tries-0.6.3]
+extra-deps:
+- git: https://github.com/rTreutlein/LojbanValidator
+  commit: cb19659bca234cc60598f35557683f152637f35d
+- git: https://github.com/rTreutlein/IsoSyntax
+  commit: 8d50ccba82ece75143488dba49a7ac3eba709d14
+- opencog-atomspace-0.1.0.8
+- list-tries-0.6.3
 
 # Override default flag values for local packages and extra-deps
 flags: {}
