@@ -33,18 +33,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 
-typedef void *HsStablePtr;  /* C representation of a Haskell StablePtr */
-
-extern "C"
-{
-    opencog::Handle *lojban_parse(opencog::AtomSpace *, HsStablePtr,const char *);
-
-    char* lojban_print(opencog::AtomSpace *, HsStablePtr, opencog::Handle *);
-
-    HsStablePtr lojban_init();
-
-    void lojban_exit(HsStablePtr);
-}
+#include "LojbanParser.h"
 
 namespace opencog
 {

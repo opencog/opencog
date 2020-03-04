@@ -39,13 +39,13 @@ c_parse asRef swl ctext = do
     wl <- deRefStablePtr swl
     seed <- randomIO
     text <- peekCString ctext
-    print "Parsing: "
-    print text
+    -- print "Parsing: "
+    -- print text
     case lojbanToAtomese wl seed text of
         Left m  -> pure nullPtr
         Right Nothing -> pure nullPtr
         Right (Just r) -> do
-            print r
+            -- print r
             mres <- as <: insertAndGetHandle r
             case mres of
                 Nothing  -> pure nullPtr
