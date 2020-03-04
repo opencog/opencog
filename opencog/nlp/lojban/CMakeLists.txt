@@ -19,3 +19,12 @@ TARGET_LINK_LIBRARIES (LojbanModule
 INSTALL (TARGETS LojbanModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
 )
+
+ADD_EXECUTABLE(lojban-parse Parse)
+
+TARGET_LINK_LIBRARIES(lojban-parse
+    opencog-lojban-wrapper-0.1.0.0
+    nlp-types
+)
+
+INSTALL (TARGETS lojban-parse RUNTIME DESTINATION "bin")
