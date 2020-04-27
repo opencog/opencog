@@ -7,10 +7,9 @@ IF (HAVE_NOSETESTS)
 	IF (HAVE_OPENPSI)
 		ADD_TEST(OpenPsiCythonTest ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/openpsi/)
-		# Use LTDL_LIBRARY_PATH to make Guile load *.so libraries from build dir
 		SET_PROPERTY(TEST OpenPsiCythonTest
 			PROPERTY ENVIRONMENT
-				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/openpsi:${PYTHON_ROOT}"
+				"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_BINARY_DIR}/opencog/openpsi:${PYTHON_ROOT}:${PYTHON_ROOT}/opencog"
 				"GUILE_LOAD_PATH=${GUILE_LOAD_PATH}"
 				)
 	ENDIF (HAVE_OPENPSI)
