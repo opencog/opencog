@@ -239,7 +239,7 @@
   ; The assumption is that there is only one thread that is adding
   ; to the sequence.
   (let ((tail-sent (tail-input-sent)))
-    (if (null? tail-sent)
+    (if (nil? tail-sent)
       (begin
         (cog-set-value! sent-input-seq tail-sent-key sent)
         (cog-set-value! sent-input-seq next-sent-key sent))

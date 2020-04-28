@@ -169,7 +169,7 @@
 "
   (cog-logger-debug ghost-logger
     "In ghost-optionals? OPTIONALS: ~aGRD: ~a" OPTIONALS GRD)
-  (if (null? GRD)
+  (if (nil? GRD)
       (stv 1 1)
       (let* ((opts (cog-outgoing-set OPTIONALS))
              (cpts (append-map get-members (cog-filter 'ConceptNode opts))))
@@ -195,7 +195,7 @@
   (let* ; Get the raw text input
         ((sent (ghost-get-curr-sent))
          (txt-node (cog-chase-link 'ListLink 'Node sent))
-         (rtxt (if (null? txt-node) "" (cog-name (car txt-node))))
+         (rtxt (if (nil? txt-node) "" (cog-name (car txt-node))))
          (ltxt (if (string-null? rtxt) ""
                  (string-join (map get-lemma (string-split rtxt #\sp))))))
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
@@ -261,7 +261,7 @@
 "
   Check if there is any text input to GHOST that is currently being processed.
 "
-  (if (null? (ghost-get-curr-sent))
+  (if (nil? (ghost-get-curr-sent))
     (stv 0 1)
     (stv 1 1))
 )
@@ -342,7 +342,7 @@
       (List (map
         (lambda (w)
           (define ori-word (cog-value w ghost-word-original))
-          (if (null? ori-word)
+          (if (nil? ori-word)
             (begin
               (cog-logger-warn ghost-logger "No original word is found for ~a" w)
               w)
@@ -453,7 +453,7 @@
       (begin (cog-execute!
         (Put (DefinedSchema "say") (List (Node txt-str) (Concept ""))))))
   ; New atoms being created
-  (if (not (null? atoms-created))
+  (if (not (nil? atoms-created))
       (cog-logger-debug ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
   (set! ghost-result (append txt-atoms atoms-created))
@@ -510,7 +510,7 @@
 
 (define-public (ghost-compare-equal? LV RV)
   (cond
-    ((and (not (null? (gar RV)))
+    ((and (not (nil? (gar RV)))
           (equal? 'ConceptNode (cog-type (gar RV)))
           (is-member?
             (flatten-list (cog-outgoing-set LV))

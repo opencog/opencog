@@ -59,7 +59,7 @@
              (start-anchor?
                (let ((before-anchor-start
                        (take-while (lambda (t) (not (equal? as t))) TERMS)))
-                    (if (null? before-anchor-start)
+                    (if (nil? before-anchor-start)
                         (append start end)
                         ; In case there are terms before anchor-start,
                         ; get it and add an extra wildcard
@@ -69,7 +69,7 @@
              ; the end-seq
              (end-anchor?
                (let ((after-anchor-end (cdr (member ae TERMS))))
-                 (if (null? after-anchor-end)
+                 (if (nil? after-anchor-end)
                      (append start end)
                      ; In case there are still terms after anchor-end,
                      ; get it and add an extra wildcard
@@ -424,7 +424,7 @@
                '())
               ; Generate the DefinedSchema once we have finished going through
               ; all the choices
-              ((not (null? choices))
+              ((not (nil? choices))
                (let ((ac (action-choices choices)))
                     (set! choices '())
                     ; Generate the atoms for the current one
@@ -459,9 +459,9 @@
                     (equal? "reuse" (cadr n)))
                (let* ((label (cdaddr n))
                       (reused-rule (get-rules-from-label label)))
-                 (if (null? reused-rule)
+                 (if (nil? reused-rule)
                    (let ((reused-rule-from-alist (assoc-ref rule-alist label)))
-                     (if (null? reused-rule-from-alist)
+                     (if (nil? reused-rule-from-alist)
                        (cog-logger-error ghost-logger
                          "Please make sure the rule with label \"~a\" is defined!" label)
                        (begin
@@ -486,9 +486,9 @@
                     (equal? "set_used" (cadr n)))
                (let* ((label (cdaddr n))
                       (used-rule (get-rules-from-label label)))
-                 (if (null? used-rule)
+                 (if (nil? used-rule)
                    (let ((used-rule-from-alist (assoc-ref rule-alist label)))
-                     (if (null? used-rule-from-alist)
+                     (if (nil? used-rule-from-alist)
                        (cog-logger-error ghost-logger
                          "Please make sure the rule with label \"~a\" is defined!" label)
                        (begin
@@ -526,7 +526,7 @@
                  (match:substring (string-match "[0-9]+" (cdr n))))))
               (else (Word (cdr n)))))
         actions)
-      (if (null? choices)
+      (if (nil? choices)
           '()
           (list (action-choices choices)))))
 
@@ -552,7 +552,7 @@
            ; "x" could just be an empty list if ^keep() or any
            ; other system function is used in the same rule,
            ; and nothing needs to be done if that's the case
-           ((and (list? x) (null? x)) (list))
+           ((and (list? x) (nil? x)) (list))
            ((equal? 'TrueLink (cog-type x))
             (get-reused-action (cog-outgoing-set x)))
            ((and (equal? 'ExecutionOutputLink (cog-type x))
@@ -616,7 +616,7 @@
 "
   Go through each of the goals, including the shared ones.
 "
-  (if (and (null? GOAL) (null? top-lv-goals))
+  (if (and (nil? GOAL) (nil? top-lv-goals))
       (begin
         (cog-logger-warn ghost-logger
           "Did you forget to link a goal to the rule?")
@@ -660,7 +660,7 @@
          (set! rule-type-alist
            (assoc-set! rule-type-alist NAME strval-proactive-rule))
          (list '() '()))
-        ((null? rule-hierarchy)
+        ((nil? rule-hierarchy)
          (clear-parsing-states)
          ; If we are here, it has to be a rejoinder, so make sure
          ; rule-hierarchy is not empty, i.e. a reactive rule should
@@ -706,7 +706,7 @@
   it returns (stv 0 1).
 "
   (let ((result (cog-value rule handles-sent-key)))
-    (if (null? result)
+    (if (nil? result)
       (stv 0 1)
       result
     )
@@ -791,7 +791,7 @@
   (define (set-next-rule PRULE CRULE KEY)
     (define val (cog-value PRULE KEY))
     (cog-set-value! PRULE KEY
-      (if (null? val)
+      (if (nil? val)
         (LinkValue CRULE)
         (apply LinkValue (append (cog-value->list val) (list CRULE))))))
 
@@ -802,7 +802,7 @@
   ; Reset the rule hierarchy if we are looking at a rule with
   ; a different set of goals, or it has been changed from
   ; ordered to unordered (or vice versa)
-  (if (or (null? goals-of-prev-rule)
+  (if (or (nil? goals-of-prev-rule)
           (not (equal? (car goals-of-prev-rule) ALL-GOALS))
           (not (equal? (cdr goals-of-prev-rule) ORDERED?)))
     (begin
@@ -811,11 +811,11 @@
 
   (let* ((default-rule (assoc-ref global-default-rule-alist TYPE))
          (rule-pattern
-           (if (or (not default-rule) (null? (car default-rule)))
+           (if (or (not default-rule) (nil? (car default-rule)))
               PATTERN
               (append (car default-rule) PATTERN)))
          (rule-action
-           (if (or (not default-rule) (null? (cdr default-rule)))
+           (if (or (not default-rule) (nil? (cdr default-rule)))
               ACTION
               (list (cons 'action (append (cdadr default-rule) (cdar ACTION))))))
          (proc-type (process-type TYPE NAME))
@@ -894,7 +894,7 @@
                (cond
                  ; If 'val' is null, that means no such value has been
                  ; assigned to this rule yet
-                 ((null? val)
+                 ((nil? val)
                   (cog-set-value! a-rule (car f) (LinkValue (cdr f))))
                  ; If 'val' is not null and it's an atom, just append it
                  ; it to 'val'
@@ -952,7 +952,7 @@
             ; If it's not a rejoinder, its parent rules should
             ; be the rules at every level that are still in
             ; the rule-hierarchy
-            (if (and ORDERED? (not (null? rule-hierarchy)))
+            (if (and ORDERED? (not (nil? rule-hierarchy)))
               (for-each
                 (lambda (lv)
                   (for-each
