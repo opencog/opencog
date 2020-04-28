@@ -23,7 +23,7 @@
 (define (get-atoms-for-sureal trail)
   (define pln-outputs (cog-value->list
     (cog-value trail (Predicate "inference-results"))))
-  (if (null? pln-outputs)
+  (if (nil? pln-outputs)
     '()
     (cog-outgoing-set (filter-for-sureal pln-outputs))))
 
