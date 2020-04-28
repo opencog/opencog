@@ -185,6 +185,6 @@ Some useful CMake's web sites/pages:
  - http://www.cmake.org/Wiki/CMake_HowToFindInstalledSoftware
 
 
--Wno-deprecated is currently enabled by default to avoid a number of
+`-Wno-deprecated` is currently enabled by default to avoid a number of
 warnings regarding hash_map being deprecated (because the alternative
 is still experimental!)
