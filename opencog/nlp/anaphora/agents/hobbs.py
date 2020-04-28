@@ -2,8 +2,9 @@
 from __future__ import print_function
 from pprint import pprint
 from opencog.cogserver import MindAgent
-from opencog.atomspace import types, AtomSpace, TruthValue
+from opencog.atomspace import AtomSpace
 from opencog.scheme_wrapper import load_scm, scheme_eval_h, scheme_eval, __init__
+from opencog.type_constructors import TruthValue
 from opencog.cogserver_type_constructors import *
 from opencog import logger
 
