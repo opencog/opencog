@@ -150,7 +150,7 @@
   inferences are recorded as a value on TRAIL.
 "
     (let* ((inputs (pln-get-nlp-inputs (get-previous-said-sents time))))
-        (if (null? inputs)
+        (if (nil? inputs)
           (error "Inference in requested without proper configuration")
         ; Why record the inputs? -> To be able to filter outputs based on
         ; similarities to the inputs.
@@ -184,17 +184,17 @@
       (lambda (x) (equal? 'EvaluationLink (cog-type x))) pln-output)))))
   (define pln-outputs (cog-value->list (get-inferred-atoms trail)))
   (define candidates
-    (if (null? pln-outputs)
+    (if (nil? pln-outputs)
       '()
       (cog-outgoing-set (filter-for-sureal pln-outputs))))
 
   ; TODO: Add measure to choose between candidates based on query or some
   ; other method.
-  (if (null? candidates)
+  (if (nil? candidates)
     ""
     ; FIXME: This only works for trail-3
     (let ((sureal-results (get-sureal-results candidates)))
-      (if (null? sureal-results)
+      (if (nil? sureal-results)
         ""
         (string-join (car (sureal-results))))
     ))

@@ -599,7 +599,7 @@
   )
 
   (cond
-    ((null? sent) fini) ; If run before query is sent.
+    ((nil? sent) fini) ; If run before query is sent.
     (source (Concept (cog-value-ref (source-result sent src) 0)))
     (else (Concept (cog-value-ref
       (source-result sent (cog-value sent (Predicate "random-source"))) 0)))
@@ -633,14 +633,14 @@
 
     ; Send the BindLink results to SuReal for sentence generation
     (define sureal-results
-      (if (null? bind-results)
+      (if (nil? bind-results)
         (list)
         (append-map sureal bind-results)))
 
     ; Select one of the sentences generated, just in case there are
     ; more than one
     (define selected-result
-      (if (null? sureal-results)
+      (if (nil? sureal-results)
         (list)
         (car sureal-results)))
 
@@ -715,7 +715,7 @@
   (gddr
     (fold
       (lambda (x rtn)
-        (cond ((null? rtn) x)
+        (cond ((nil? rtn) x)
               ((> (time-perceived x) (time-perceived rtn)) x)
               (else rtn)))
       (list)

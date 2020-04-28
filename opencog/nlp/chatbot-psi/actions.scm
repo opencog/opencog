@@ -15,7 +15,7 @@
                (picked (list-ref list-of-results (random (length list-of-results))))
                ; TODO: Should use gen-sentences when new microplanner is ready
                (generated (sureal (gar picked))))
-            (if (null? generated)
+            (if (nil? generated)
                 ; Do it again if the chosen one can't be used to generate a sentence
                 (pick-and-generate (delete! generated list-of-results))
                 (begin
@@ -56,7 +56,7 @@
                 (State fuzzy-reply no-result)
                 (let ((rtn (pick-and-generate (cog-outgoing-set fuzzy-results))))
                     (cog-extract fuzzy-results)
-                    (if (null? rtn)
+                    (if (nil? rtn)
                         ; Could happen if none of them can be used to generate
                         ; an actual sentence
                         (State fuzzy-reply no-result)
@@ -107,7 +107,7 @@
         (State psi-current-emotion-state (Variable "$f"))))))
 
     ;(display "in emotion-state-inquiry-response \n")
-    (if (not (null? current-emotion))
+    (if (not (nil? current-emotion))
         (let ((current-emotion-word (substring (cog-name (car current-emotion))
                 (string-length psi-prefix-str))))
             (List (text2wordnodes
@@ -179,7 +179,7 @@
 
 (define (reply anchor)
     (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
-        (if (null? ans-in-words)
+        (if (nil? ans-in-words)
             ; Return for the GroundedSchemaNode
             (Set)
             (apply say (cog-outgoing-set (car ans-in-words)))

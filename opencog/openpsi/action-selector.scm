@@ -72,7 +72,7 @@
 "
   ; Function to sum up the total weights in the list.
   (define (accum-weight rule-list)
-    (if (null? rule-list) 0.0
+    (if (nil? rule-list) 0.0
       (+ (WEIGHT-FUNC (car rule-list))
         (accum-weight (cdr rule-list)))))
 
@@ -92,10 +92,10 @@
 
   (cond
     ; If the list is empty, we can't do anything.
-    ((null? ALIST) '())
+    ((nil? ALIST) '())
 
     ; If there's only one rule in the list, return it.
-    ((null? (cdr ALIST)) ALIST)
+    ((nil? (cdr ALIST)) ALIST)
 
     ; Else randomly pick among the most-weighted rules.
     (else
@@ -132,11 +132,11 @@
   )
 
   (let ((acs (psi-action-selector component)))
-    (if (null? acs)
+    (if (nil? acs)
       (error
         (format #f "Define an action-selector for component ~a" component))
       (let ((result (cog-execute! acs)))
-          (if (null? result)
+          (if (nil? result)
             '()
             ; Depending on how the action-selector is defined,
             ; the list of psi-rules returned may be nested in

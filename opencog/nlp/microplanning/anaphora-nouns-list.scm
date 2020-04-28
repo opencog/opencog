@@ -269,7 +269,7 @@
 	(define last-occurrence (get-last-time (- index 1)))
 
 	; a noun is ancient if appearing more than 3 sentences ago, or not at all
-	(or (null? last-occurrence) (< (+ 3 (get-chunk-index last-occurrence)) (get-chunk-index ni)))
+	(or (nil? last-occurrence) (< (+ 3 (get-chunk-index last-occurrence)) (get-chunk-index ni)))
 )
 
 ; -----------------------------------------------------------------------

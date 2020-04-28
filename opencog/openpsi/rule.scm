@@ -42,7 +42,7 @@
   Return the present value of GOAL.
 "
   (define gv (cog-value goal (Predicate "value")))
-  (if (null? gv)
+  (if (nil? gv)
     (error (format #f "Goal \"~a\" has not been created?" (cog-name goal)))
     (cog-value-ref gv 0))
 )
@@ -66,7 +66,7 @@
   representin the goal concerned.
 "
   (define gv (cog-value goal dgv-key))
-  (if (null? gv)
+  (if (nil? gv)
     (error (format #f "Goal \"~a\" has not been created?" (cog-name goal)))
     (cog-value-ref gv 0))
 )
@@ -113,7 +113,7 @@
   otherwise. An atom is a goal if it a member of the set
   represented by (ConceptNode \"goal\").
 "
-  (not (null?  (cog-link 'InheritanceLink ATOM psi-goal-node)))
+  (not (nil?  (cog-link 'InheritanceLink ATOM psi-goal-node)))
 )
 
 ; --------------------------------------------------------------
@@ -222,7 +222,7 @@
 
   ; TODO Uncomment after testing with ghost
   ;(let ((alias-value (cog-value rule psi-rule-name-predicate-node)))
-  ;  (if (null? alias-value)
+  ;  (if (nil? alias-value)
   ;    '()
   ;    (cog-value-ref alias-value 0)
   ;  )

@@ -30,16 +30,16 @@
 ;
 (define (word-get-r2l-node node)
 	(define name
-		(if (not (null? node))
+		(if (not (nil? node))
 			(cog-name node)
 		)
 	)
 
-	(cond ((null? node) '())
-		((not (null? (cog-node 'ConceptNode name))) (cog-node 'ConceptNode name))
-		((not (null? (cog-node 'PredicateNode name))) (cog-node 'PredicateNode name))
-		((not (null? (cog-node 'NumberNode name))) (cog-node 'NumberNode name))
-		((not (null? (cog-node 'DefinedLinguisticPredicateNode name))) (cog-node 'DefinedLinguisticPredicateNode name))
+	(cond ((nil? node) '())
+		((not (nil? (cog-node 'ConceptNode name))) (cog-node 'ConceptNode name))
+		((not (nil? (cog-node 'PredicateNode name))) (cog-node 'PredicateNode name))
+		((not (nil? (cog-node 'NumberNode name))) (cog-node 'NumberNode name))
+		((not (nil? (cog-node 'DefinedLinguisticPredicateNode name))) (cog-node 'DefinedLinguisticPredicateNode name))
 		(else '())
 	)
 )
@@ -70,7 +70,7 @@
 	(define (create-with-index index rest)
 		(map (lambda (r) (list index r)) rest))
 	(define (recursive-helper index rest)
-		(if (null? (cdr rest))
+		(if (nil? (cdr rest))
 			(create-with-index index rest)
 			(append (create-with-index index rest)
 				(recursive-helper (car rest) (cdr rest))
@@ -114,8 +114,8 @@
 	(define definite (DefinedLinguisticPredicateNode "definite"))
 	(define llink (cog-link 'ListLink word-concept-inst))
 	(and
-		(not (null? llink))
-		(not (null? (cog-link 'EvaluationLink definite llink))))
+		(not (nil? llink))
+		(not (nil? (cog-link 'EvaluationLink definite llink))))
 )
 
 ; -----------------------------------------------------------------------
@@ -194,7 +194,7 @@
 		; if 'deref-x' is #<Invalid handle>, than both cog-node?
 		; and cog-link? will return false
 		(if (and (or (cog-node? deref-x) (cog-link? deref-x))
-			 (null? (cog-incoming-set x)))
+			 (nil? (cog-incoming-set x)))
 			x
 			#f
 		)
@@ -372,7 +372,7 @@
 						old-atom
 						; fail-safe for when R2L rule is incomplete and
 						; never created the abstract node
-						(if (null? (word-get-r2l-node
+						(if (nil? (word-get-r2l-node
 								(word-inst-get-lemma (r2l-get-word-inst old-atom))))
 							(cog-new-node
 								(cog-type old-atom)
@@ -389,7 +389,7 @@
 		    ;  (a-pair
 			;(let ((abstract-node
 			;	; fail-safe for when R2L rule is incomplete and never created the abstract node
-			;	(if (null? (word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom))))
+			;	(if (nil? (word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom))))
 			;		(cog-new-node (cog-type old-atom) (cog-name (word-inst-get-lemma (r2l-get-word-inst old-atom))))
 			;		(word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom)))
 			;	)

@@ -85,7 +85,7 @@
 
 (define (check-words . target-words)
     ; target-words is a list of WordNodes
-    (if (null? (filter (lambda (w) (list? (member w target-words)))
+    (if (nil? (filter (lambda (w) (list? (member w target-words)))
             (cog-outgoing-set (get-input-word-list))))
         (stv 0 1)
         (stv 1 1)
@@ -184,7 +184,7 @@
 
 (define (check-emotion-state-inquiry)
     (define inputwords (get-input-word-list))
-    (if (not (null? inputwords))
+    (if (not (nil? inputwords))
         (if (list? (member (cog-outgoing-set inputwords) (map text2wordnodes
                     (list
                         "how are you feeling"

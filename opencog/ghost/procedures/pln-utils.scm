@@ -2,7 +2,7 @@
 
 (define (get-inferred-atoms trail)
     (define result (cog-value trail inference-results-key))
-    (if (null? result) (LinkValue) result)
+    (if (nil? result) (LinkValue) result)
 )
 
 (define (get-names atom-list)
@@ -14,7 +14,7 @@
 
 (define (search-input-utterance-words)
   (let* ((results (cog-chase-link 'StateLink 'ListLink input-utterance-words)))
-    (if (null? results) '() (cog-outgoing-set (first results)))))
+    (if (nil? results) '() (cog-outgoing-set (first results)))))
 
 (define (get-input-utterance-names)
   (get-names (search-input-utterance-words)))
@@ -29,12 +29,12 @@
                       (Parse (Variable "$parse") (Variable "$sentence")))
                  (Variable "$sentence")))
          (results (cog-outgoing-set (cog-execute! query))))
-    (if (null? results) '() (first results))))
+    (if (nil? results) '() (first results))))
 
 (define (get-last-rec-id)
   (let* ((last-recognized-face (Anchor "last-recognized-face"))
          (results (cog-chase-link 'StateLink 'ConceptNode last-recognized-face)))
-    (if (null? results) '() (first results))))
+    (if (nil? results) '() (first results))))
 
 (define (shuffle l)
   (map cdr
@@ -118,7 +118,7 @@
           (List
              (Concept rec-id-1)
              (Word name-1)))
-    (if (or (null? last-sentence-id) (null? last-rec-id))
+    (if (or (nil? last-sentence-id) (nil? last-rec-id))
         '()
         (Evaluation
            (Predicate "say")

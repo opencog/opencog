@@ -200,7 +200,7 @@
 				; sort bases on the weight
 				(sort (zip weights (map gar subsets)) (lambda (s1 s2) (> (car s1) (car s2)))))
 			       (appended-sorted-zip
-				(if (null? sorted-zip)
+				(if (nil? sorted-zip)
 					(list (list 1.0 (get-noun-node ni)))
 					; add the original noun-node to the list with same weight as the head
 					(cons (list (caar sorted-zip) (get-noun-node ni)) sorted-zip)
@@ -210,7 +210,7 @@
 				(reverse
 					(fold
 						 (lambda (s lst)
-						 	(if (null? lst)
+						 	(if (nil? lst)
 						 		(cons s '())
 						 		(cons (list (+ (car s) (caar lst)) (cadr s)) lst)
 						 	)
@@ -229,7 +229,7 @@
 	)
 
 	; get & store the lexical choice if not determined before
-	(if (null? (slot-ref ni 'lexical-node))
+	(if (nil? (slot-ref ni 'lexical-node))
 		(slot-set! ni 'lexical-node (determine-lexical))
 	)
 

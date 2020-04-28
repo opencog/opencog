@@ -340,9 +340,9 @@
 	;(format #t "~a " psi-updater-loop-count)
 
 	(if logging
-		(if (or (not (null? changed-params))
-				(not (null? detected-events))
-				(not (null? changed-pau))
+		(if (or (not (nil? changed-params))
+				(not (nil? detected-events))
+				(not (nil? changed-pau))
 				(= psi-updater-loop-count 1))
 			(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
@@ -794,7 +794,7 @@
 						(ListLink))
 					(loop-node)))))
 
-	;(if (null? (cog-node 'DefinedPredicateNode loop-name))
+	;(if (nil? (cog-node 'DefinedPredicateNode loop-name))
 		(define-psi-loop)
 	;    #f ; Nothing to do already defined
 	;)

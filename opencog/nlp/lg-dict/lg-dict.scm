@@ -46,7 +46,7 @@
      (cog-incoming-by-type WORD 'LgDisjunct)
 "
 	(define djset (cog-incoming-by-type WORD 'LgDisjunct))
-	(if (null? djset)
+	(if (nil? djset)
 		(let ((dentry (LgDictEntry WORD (LgDictNode "en"))))
 			; XXX Argh. This function gets called in par-map in sureal,
 			; and because it races, the dentry could already be deleted
@@ -93,7 +93,7 @@
 	(lg-get-dict-entry word2)
 
 	; Check if the two word has common LG dict entry
-	(not (null? (lset-intersection equal? (get-set word1) (get-set word2))))
+	(not (nil? (lset-intersection equal? (get-set word1) (get-set word2))))
 )
 
 ; ---------------------------------------------------------------------

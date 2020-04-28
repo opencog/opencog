@@ -54,7 +54,7 @@
 			 		)
 			 	)))
 			 	; if the old noun usage can be replaced
-			 	(if (not (null? new-noun-node))
+			 	(if (not (nil? new-noun-node))
 			 		(begin
 			 			; indicate the chunk is changed and need checking with SuReal
 			 			(list-set! changed-chunk-indicator (get-chunk-index ni) #t)
@@ -88,7 +88,7 @@
 				       (ut (get-utterance-type results-set index))
 				       (temp-set-link (SetLink (get-utterance-link ut chunk) chunk)))
 					; failed to SuReal? bring back the old chunk
-					(if (null? (sureal temp-set-link))
+					(if (nil? (sureal temp-set-link))
 						(mod-chunk results-set index (get-chunk inputs-set index))
 					)
 				
