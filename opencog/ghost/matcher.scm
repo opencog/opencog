@@ -5,7 +5,7 @@
 "
   Check if a rule is still within its refractory period or not.
 "
-  (or (null? (cog-value RULE ghost-time-last-executed))
+  (or (nil? (cog-value RULE ghost-time-last-executed))
       (> (- (current-time-us)
             (car (cog-value->list
               (cog-value RULE ghost-time-last-executed))))
@@ -23,11 +23,11 @@
     ; Stimulate the next rules in the sequence and lower the STI of
     ; the current one
     ; Rejoinders will have a bigger boost than reactive rules by default
-    (if (not (null? next-reactive-rule))
+    (if (not (nil? next-reactive-rule))
       (for-each
         (lambda (r) (cog-stimulate r (* default-stimulus reactive-rule-sti-boost)))
         (cog-value->list next-reactive-rule)))
-    (if (not (null? next-rejoinder))
+    (if (not (nil? next-rejoinder))
       (for-each
         (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
         (cog-value->list next-rejoinder)))
@@ -186,8 +186,8 @@
     (let ((rejoinder
             (fold
               (lambda (rej top-rej)
-                (if (and (not (null? (cog-value rej ghost-rej-seq-num)))
-                         (or (null? top-rej)
+                (if (and (not (nil? (cog-value rej ghost-rej-seq-num)))
+                         (or (nil? top-rej)
                              (< (car (cog-value->list
                                        (cog-value rej ghost-rej-seq-num)))
                                 (car (cog-value->list
@@ -196,7 +196,7 @@
                   top-rej))
               (list)
               rules-satisfied)))
-      (if (null? rejoinder)
+      (if (nil? rejoinder)
         ; If there is no rejoinder that safisfy the current context, try the reactive rules
         (begin
           (if specificity-based-action-selection
@@ -208,7 +208,7 @@
               (lambda (rule rtn)
                 (define specificity (cog-value-ref (cog-value rule ghost-context-specificity) 0))
                 (cond
-                  ((null? rtn) rule)
+                  ((nil? rtn) rule)
                   ((> specificity (cog-value-ref (cog-value rtn ghost-context-specificity) 0))
                    rule)
                   (else rtn)))
@@ -275,7 +275,7 @@
     (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
     ; Do some GHOST specific processing if a satisfiable GHOST rule is found
-    (if (not (null? rule-selected)) (process-ghost-rule rule-selected))
+    (if (not (nil? rule-selected)) (process-ghost-rule rule-selected))
 
     (List rule-selected)))
 

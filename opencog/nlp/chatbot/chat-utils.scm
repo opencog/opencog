@@ -191,7 +191,7 @@
 			(display "Error: Cannot connect to RelEx server: ")
 			(display key) (newline) (display rest) (newline)))
 
-	(if (null? (get-new-parsed-sentences))
+	(if (nil? (get-new-parsed-sentences))
 		(error "The RelEx server seems to have crashed!"))
 
 	(let* ((sent-list (get-new-parsed-sentences))

@@ -74,7 +74,7 @@
 "
   psi-get-all-enabled-demands - Return list of all demands that are enabled.
 "
-    (if (null? psi-demand-cache) (make-demand-cache))
+    (if (nil? psi-demand-cache) (make-demand-cache))
     psi-demand-cache
 )
 
@@ -109,7 +109,7 @@
 
         ; A filter is used to account for empty list as well as
         ; cog-chase-link returning multiple results, just in case.
-        (not (null?
+        (not (nil?
             (filter (lambda (x) (equal? x psi-demand-node)) candidates)))
     )
 )

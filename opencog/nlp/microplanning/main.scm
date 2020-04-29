@@ -123,7 +123,7 @@
 	(set! all-sets (make-sentence-chunks
 		(cog-outgoing-set seq-link) utterance-type option))
 
-	(if (null? all-sets) #f (map finalize all-sets))
+	(if (nil? all-sets) #f (map finalize all-sets))
 )
 
 ; -----------------------------------------------------------------------
@@ -159,7 +159,7 @@
 			(cond
 				; make-sentence made a new chunk; make more chunks
 				; with the remaining atoms.
-				((not (null? new-atomW-chunk))
+				((not (nil? new-atomW-chunk))
 					; TODO Keep some of the atoms (those that do not
 					; satisfy sentence forms) for later use?
 					(recursive-helper
@@ -170,7 +170,7 @@
 				)
 				; Unable to form more chunks, store the created chunks
 				; (if any) & their corresponding utterance-type.
-				((not (null? curr-chunks))
+				((not (nil? curr-chunks))
 					(set! all-chunks-sets
 						(cons
 							(make <chunks-set>
@@ -187,7 +187,7 @@
 
 		; If not the first sentence, and have "interrogative" utterance
 		; type, allow "declarative"
-		(if (and (not (null? curr-chunks))
+		(if (and (not (nil? curr-chunks))
 				(string=? "interrogative" utterance-type))
 			(set! ut (list "interrogative" "declarative"))
 		)
@@ -195,7 +195,7 @@
 		(cond
 			; Use the sub-helper to keep calling make-sentence until
 			; all atoms are used, branching on all allowed utterance type.
-			((not (null? atomW-unused)) (for-each sub-helper ut))
+			((not (nil? atomW-unused)) (for-each sub-helper ut))
 
 			; Finished all atoms, store the created chunks & their
 			; corresponding utterance-type.
@@ -214,7 +214,7 @@
 	(recursive-helper atomW-complete-set '() '())
 
 	(cond
-		((not (null? all-chunks-sets))
+		((not (nil? all-chunks-sets))
 			(receive (complete-sets incomplete-sets)
 				(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-chunks-sets)
 
@@ -237,7 +237,7 @@
 				; variation.
 				(letrec ((sort-by-variation
 						(lambda (sets)
-							(if (null? sets)
+							(if (nil? sets)
 								'()
 								(receive (this next)
 									; Split by finding all whose # of sentences is
@@ -304,8 +304,8 @@
 
 			; Try "saying" the previous working iteration again (if
 			; available).
-			(if (null? good-set)
-				(if (not (null? atomW-unused))
+			(if (nil? good-set)
+				(if (not (nil? atomW-unused))
 					(recursive-helper (list
 							(pick-atomW atomW-unused atomW-used
 								(get-main-weight-proc option) utterance-type)) #t)
@@ -342,7 +342,7 @@
 								(lset-difference equal? temp-var1 temp-var2)))
 
 						(cond
-							((null? temp-differences)
+							((nil? temp-differences)
 								(give-up-unadded-part))
 							(else
 								; Find the first link in atomW-not-tried that
@@ -375,7 +375,7 @@
 				(update-chunk)
 
 				; Continue only if there is more to say.
-				(if (not (null? atomW-unused))
+				(if (not (nil? atomW-unused))
 					(recursive-helper
 						(cons
 							(pick-atomW atomW-unused atomW-chunk
@@ -536,7 +536,7 @@
     ; this (split sureal requests among multiple threads), just comment the
     ; call to reset-sureal-cache above and change the line below to call 'sureal'
     ; instead of 'cached-sureal'
-	(define say-able (not (null? (cached-sureal temp-set-link))))
+	(define say-able (not (nil? (cached-sureal temp-set-link))))
 
 	; remove the temporary SetLink
 	(cog-extract temp-set-link)

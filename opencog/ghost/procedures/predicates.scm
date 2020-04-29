@@ -19,7 +19,7 @@
   ; is assumed to be as false state, as we don't yet have a don't know state.
   (let ((models (get-models sign)))
     (cond
-      ((and (not proc-type) (null? models)) (stv 1 1))
+      ((and (not proc-type) (nil? models)) (stv 1 1))
       ((any (lambda (x) (equal? (stv 1 1) (proc x))) models) (stv 1 1))
       (else (stv 0 1))
     )
@@ -229,7 +229,7 @@
   (define t (time-perceived timer-id))
 
   ; If it's null, the timer probably has not started yet
-  (if (null? t)
+  (if (nil? t)
     (stv 0 1)
     (if (>= (current-time-us)
             (+ t (* (string->number (cog-name minutes)) 60)))
@@ -254,7 +254,7 @@
 
   (define (has-result? src)
     ; Sometimes a check maybe run before any query is made to the source.
-    (if (null? sent)
+    (if (nil? sent)
       (stv 0 1)
       (source-has-result? sent src)))
 
@@ -262,7 +262,7 @@
   (define (any-result?)
     (set! srcs-with-result
       (filter (lambda (x) (equal? (stv 1 1) (has-result? x))) src-list))
-    (not (null? srcs-with-result)))
+    (not (nil? srcs-with-result)))
   (define (pick-src)
     (list-ref srcs-with-result
       (random (length srcs-with-result) (random-state-from-platform))))
@@ -284,7 +284,7 @@
   Check if there is any stochastic question generated.
   Returns (stv 1 1) if so, (stv 0 1) otherwise.
 "
-  (if (null? (cog-value (ghost-get-curr-sent) (Concept "StochasticQuestion")))
+  (if (nil? (cog-value (ghost-get-curr-sent) (Concept "StochasticQuestion")))
     (stv 0 1)
     (stv 1 1))
 )

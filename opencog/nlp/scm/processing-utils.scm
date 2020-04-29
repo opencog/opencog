@@ -23,7 +23,7 @@
 		(lambda (ANCHOR)
 			(with-mutex mtx
 				(let ((iset (cog-incoming-by-type ANCHOR 'ListLink)))
-					(if (null? iset) '()
+					(if (nil? iset) '()
 						(let* ((lnk (car iset))
 								(item (cog-get-partner lnk ANCHOR)))
 							(cog-extract-recursive lnk)

@@ -145,7 +145,7 @@
   with the ParseNode.
 "
 	(let ((inters (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node)))
-		(if (null? inters)
+		(if (nil? inters)
 			'()
 			(interp-get-r2l-outputs (car inters))
 		)
@@ -172,10 +172,10 @@
   Also works if the word-inst is actually a seme.
 "
 	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
-		(if (null? wlist)
+		(if (nil? wlist)
 			; FIXME: this is a dumb way to get other type
 			(let ((nlist (cog-chase-link 'LemmaLink 'NumberNode word-inst)))
-				(if (null? nlist)
+				(if (nil? nlist)
 					'()
 					(car nlist)
 				)
@@ -224,7 +224,7 @@
   have already meged this into an entity string (and tagged the string).
 "
 	(let ((pos-list (word-inst-get-pos word-inst)))
-		(if (null? pos-list)
+		(if (nil? pos-list)
 			#f
 			(string=? pos (cog-name (car pos-list)))
 		)
@@ -419,7 +419,7 @@
 		)
 	)
 	(let ((infl (filter! subscript? (word-inst-get-attr word-inst))))
-		(if (null? infl)
+		(if (nil? infl)
 			""
 			(cog-name (car infl))
 		)

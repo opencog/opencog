@@ -23,7 +23,7 @@
 
 ; Helpers for this test
 (define (get-result input)
-  (if (null? input)
+  (if (nil? input)
     (string)
     (string-join (map cog-name (test-ghost input)))))
 

@@ -90,7 +90,7 @@
   FUNC-NAME should be the type of function.
 "
   (let ((func (psi-func component-node function-name)))
-    (if (null? func)
+    (if (nil? func)
       (error (format #f "A function called \"~a\" hasn't been set for ~a\n"
           function-name component-node))
       (equal? "#t"
@@ -124,7 +124,7 @@
   Returns the value of the parameter represented by ATOM.
 "
   (define v (cog-value atom value-key))
-  (if (null? v)
+  (if (nil? v)
     (begin (set-value! atom 0) 0)
     (cog-value-ref v 0))
 )

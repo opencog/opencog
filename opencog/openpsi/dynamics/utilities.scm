@@ -18,7 +18,7 @@
 				(Variable "$n"))))
 	(define result (cog-execute! query))
 	;(cog-delete query) ; maybe more optimal to keep this in the atomspace
-	(if (not (null? (cog-outgoing-set result)))
+	(if (not (nil? (cog-outgoing-set result)))
 		(gar result)
 		#f))
 

@@ -159,7 +159,7 @@
   started by calling `(psi-run COMPONENT)`.
 "
   (define (psi-join lst)
-    (if (not (null? lst))
+    (if (not (nil? lst))
       (let
         ((thread (car (car lst)))
          (comp (cdr (car lst))))

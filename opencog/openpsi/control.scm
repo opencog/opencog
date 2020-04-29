@@ -188,7 +188,7 @@
 "
     (define (update-weight-from-atomese-weight rule)
         (let ((result (psi-rule-atomese-weight rule)))
-            (if (not (null? result))
+            (if (not (nil? result))
                 (cog-set-tv! rule
                     (stv (cog-number (car result))
                          (cog-confidence rule)))

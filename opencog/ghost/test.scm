@@ -57,7 +57,7 @@
 )
 
 (define-public (ghost-action-executed?)
-  (if (null? expt-var) (stv 0 1) (psi-action-executed? (car expt-var)))
+  (if (nil? expt-var) (stv 0 1) (psi-action-executed? (car expt-var)))
 )
 
 ; ----------
@@ -129,7 +129,7 @@
   Get the SentenceNode that is being processed currently.
 "
   (define sent (cog-chase-link 'StateLink 'SentenceNode ghost-curr-proc))
-  (if (null? sent) '() (car sent)))
+  (if (nil? sent) '() (car sent)))
 
 ; ----------
 (define-public (ghost-currently-processing)
@@ -137,7 +137,7 @@
   Get the sentence that is currently being processed.
 "
   (let ((sent (ghost-get-curr-sent)))
-    (if (null? sent)
+    (if (nil? sent)
         '()
         (car (filter (lambda (e) (equal? ghost-word-seq (gar e)))
                      (cog-get-pred (ghost-get-curr-sent) 'PredicateNode))))))
@@ -194,7 +194,7 @@
   with that label.
 "
   (define rule (get-rules-from-label LABEL))
-  (if (not (null? rule))
+  (if (not (nil? rule))
     (format #t (string-append
       "AV = ~a\n"
       "TV = ~a\n"
@@ -207,15 +207,15 @@
       (every
         (lambda (x) (> (cog-tv-mean (cog-evaluate! x)) 0))
         (psi-get-context (car rule)))
-      (if (null? (cog-value (car rule) ghost-time-last-executed))
+      (if (nil? (cog-value (car rule) ghost-time-last-executed))
         "N.A."
         (strftime "%D %T" (localtime (inexact->exact (round
           (car (cog-value->list (cog-value (car rule) ghost-time-last-executed))))))))
-      (if (null? (cog-value (car rule) ghost-next-reactive-rule))
+      (if (nil? (cog-value (car rule) ghost-next-reactive-rule))
         (list)
         (append-map psi-rule-alias
           (cog-value->list (cog-value (car rule) ghost-next-reactive-rule))))
-      (if (null? (cog-value (car rule) ghost-next-rejoinder))
+      (if (nil? (cog-value (car rule) ghost-next-rejoinder))
         (list)
         (append-map psi-rule-alias
           (cog-value->list (cog-value (car rule) ghost-next-rejoinder)))))))
@@ -252,7 +252,7 @@
       num-rules-found
       num-rules-evaluated
       num-rules-satisfied
-      (if (null? last-rule) "N.A." (cog-name (car last-rule))))))
+      (if (nil? last-rule) "N.A." (cog-name (car last-rule))))))
 
 ; ----------
 (define-public (ghost-show-executed-rules)

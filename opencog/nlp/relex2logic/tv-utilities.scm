@@ -109,11 +109,11 @@
   copying the stv of the ConceptNodes with the same name, else returns the r2l-node with calculated stv.
 "
     (let ((winst (cog-chase-link 'ReferenceLink 'WordInstanceNode r2l-node)))
-        (if (null? winst)
+        (if (nil? winst)
             (let* ((name (string-downcase (cog-name r2l-node)))
                 (concept (cog-node 'ConceptNode name)))
 
-                (if (null? concept)
+                (if (nil? concept)
                     (cog-set-tv! r2l-node
                         (stv (/ 1 total-count) (/ 1 (+ 1 default-k))))
                     (cog-set-tv! r2l-node (cog-tv concept))
@@ -124,7 +124,7 @@
                         (word-inst-get-lemma (car winst)))))
                 (concept (cog-node 'ConceptNode name)))
 
-                (if (null? concept)
+                (if (nil? concept)
                     (cog-set-tv! r2l-node
                         (stv (/ 1 total-count) (/ 1 (+ 1 default-k))))
                     (cog-set-tv! r2l-node (cog-tv concept))

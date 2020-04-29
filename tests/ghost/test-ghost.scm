@@ -28,7 +28,7 @@
   ; almost instantly, but let's give it 2 seconds just
   ; to be safe
   (sleep 2)
-  (if (null? (ghost-get-result))
+  (if (nil? (ghost-get-result))
     (string)
     (string-join (map cog-name (ghost-get-result)))))
 

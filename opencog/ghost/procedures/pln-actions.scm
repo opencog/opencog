@@ -68,9 +68,9 @@
 
     ; TODO: Remove the check  once other inference-trails are handled
     ; diffferently.
-    (define sureal-result (if (null? logic) '() (sureal logic)))
+    (define sureal-result (if (nil? logic) '() (sureal logic)))
 
-    (if (null? sureal-result)
+    (if (nil? sureal-result)
         ; SuReal may give nothing because sometimes R2L generates the same pattern
         ; (that PLN is looking for) for words that have very different disjuncts.
         ; This introduces 'noise' and confuses SuReal so it generates nothing if
@@ -104,7 +104,7 @@
 "
 
     (filter
-        (lambda (x) (not (null?
+        (lambda (x) (not (nil?
             (lset-intersection equal? (get-node-names x) query-words))))
         inferences)
 )
@@ -113,12 +113,12 @@
 "
   impl-links: A list of ImplicationLinks
 "
-    (if (null? impl-links)
+    (if (nil? impl-links)
         (State pln-answers no-result)
         (let* ((sureal-word-list (get-sureal-result-for-trail-1 impl-links)))
             (State
                 pln-answers
-                (if (null? sureal-word-list)
+                (if (nil? sureal-word-list)
                     no-result
                     (List (map Word sureal-word-list))
                 )
@@ -141,7 +141,7 @@
     (update-inferences rb-trail-1 3 time)
     (update-inferences rb-trail-1 3 time)
     (let ((inferences (get-inferred-atoms rb-trail-1)))
-        (if (null? inferences)
+        (if (nil? inferences)
             (State pln-answers no-result)
             (choose-response-for-trail-1
                 (filter-using-query-words

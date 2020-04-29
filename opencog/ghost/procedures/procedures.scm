@@ -490,7 +490,7 @@
   into a true state. If no time had been recorded then nil is returned.
 "
   (let ((time (cog-value model event-start)))
-    (if (null? time)
+    (if (nil? time)
       time
       (cog-value-ref time 0)
     )
@@ -505,7 +505,7 @@
   into a false state. If no time had been recorded then nil is returned.
 "
   (let ((time (cog-value model event-stop)))
-    (if (null? time)
+    (if (nil? time)
       time
       (cog-value-ref time 0)
     )
@@ -521,8 +521,8 @@
   (let ((true-t (time-true-transition model))
     (false-t (time-false-transition model)))
     (cond
-      ((null? true-t) #f)
-      ((null? false-t) #t)
+      ((nil? true-t) #f)
+      ((nil? false-t) #t)
       (else (> true-t false-t)))
   )
 )
@@ -536,8 +536,8 @@
   (let ((true-t (time-true-transition model))
     (false-t (time-false-transition model)))
     (cond
-      ((null? false-t) #f)
-      ((null? true-t) #t)
+      ((nil? false-t) #f)
+      ((nil? true-t) #t)
       (else (< true-t false-t)))
   )
 )
@@ -626,7 +626,7 @@
 
 (define (any-model-true? model-list)
   (let ((true-models (filter is-model-true? model-list)))
-    (if (null? true-models)
+    (if (nil? true-models)
       (stv 0 1)
       (stv 1 1)
     )
@@ -709,7 +709,7 @@
   ; If a perception time was not set then it is assumed to have not been
   ; perceived and nil is returned.
   (let ((time (cog-value atom time-key)))
-    (if (null? time)
+    (if (nil? time)
       time
       (cog-value-ref time 0)
     )
@@ -737,7 +737,7 @@
   returns (stv 0 1). All times passed as argument should be in seconds.
 "
   (let ((time (time-perceived atom)))
-    (if (and (not (null? time))
+    (if (and (not (nil? time))
           (time-within-interval? time end-time time-interval))
       (stv 1 1)
       (stv 0 1)
@@ -967,7 +967,7 @@
   running (cog-value SENT SOURCE).
 "
   (let ((link-value (cog-value sent source)))
-    (if (null? link-value)
+    (if (nil? link-value)
       link-value
       (cog-value-ref link-value index))
   )

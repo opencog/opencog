@@ -22,7 +22,7 @@
 ; the exception of empty-lists.
 (define (list-squash lst member-output)
     (receive (list-lst member-lst) (partition list? lst)
-        (if (null? list-lst)
+        (if (nil? list-lst)
             (lset-union equal? member-output member-lst)
             (lset-union equal? member-lst
                 (append-map
@@ -49,7 +49,7 @@
     ;; (cog-logger-info "sureal a-set-link = ~a" a-set-link)
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
-            (if (null? interpretations)
+            (if (nil? interpretations)
                 (delete-duplicates (create-sentence a-set-link #f))
                 (get-sentence interpretations)
             )
@@ -76,7 +76,7 @@
 "
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
-            (if (null? interpretations)
+            (if (nil? interpretations)
                 (create-sentence a-set-link #t)
                 (get-sentence interpretations)
             )
@@ -103,12 +103,12 @@
                           (new-word (r2l-get-word new-logic-node))
                           )
                         ; if old-logic-node is actually a word (could be not for VariableNode or InterpretationNode)
-                        (if (not (null? old-word-inst))
+                        (if (not (nil? old-word-inst))
                             ; find all locations in the w-seq this word-inst appear
                             (for-each
                                 (lambda (x idx)
                                     (if (equal? x old-word-inst)
-                                        (if (null? new-word-inst)
+                                        (if (nil? new-word-inst)
                                             (list-set! w-seq-copy idx new-word)
                                             (list-set! w-seq-copy idx new-word-inst)
                                         )
@@ -152,8 +152,8 @@
         lg-dict-entry
         (filter-map
             (lambda (n)
-                (if (null? (r2l-get-word-inst n))
-                    (if (null? (r2l-get-word n))
+                (if (nil? (r2l-get-word-inst n))
+                    (if (nil? (r2l-get-word n))
                         #f
                         (begin
                             (if (equal? (cog-type n) 'PredicateNode)
@@ -238,7 +238,7 @@
 (define (is-abstraction? link)
     (let ((out-set (cog-outgoing-set link)))
         (and
-            (null? (filter-map cog-link? out-set))
+            (nil? (filter-map cog-link? out-set))
             (equal? (cog-name-clean (car out-set)) (cog-name-clean (cadr out-set)))
         )
     )

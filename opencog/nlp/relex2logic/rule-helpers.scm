@@ -5,7 +5,7 @@
 ; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
 (define (check-lemma? word word-inst)
 	(define lemma (word-inst-get-lemma word-inst))
-	(if (null? lemma)
+	(if (nil? lemma)
 		#f
 		(string=? word (cog-name lemma))
 	)

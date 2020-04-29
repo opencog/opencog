@@ -38,7 +38,7 @@
   (define c (cog-outgoing-set (cog-execute!
               (Get (Member (Variable "$x") CONCEPT)))))
 
-  (if (null? c)
+  (if (nil? c)
       -1  ; This may happen if the concept is not yet defined in the system...
       (fold (lambda (term len)
         (let ((tl (cond ((equal? 'ListLink (cog-type term))
@@ -88,7 +88,7 @@
         ; Ignore LEFT-WALL and punctuations
         (if (or (string-prefix? "LEFT-WALL" (cog-name w))
                 (word-inst-match-pos? w "punctuation")
-                (null? (cog-chase-link TYPE 'WordNode w)))
+                (nil? (cog-chase-link TYPE 'WordNode w)))
             '()
             (cog-chase-link TYPE 'WordNode w)))
       input-word-seq))
@@ -265,7 +265,7 @@
 "
   Flatten a list of lists.
 "
-  (cond ((null? LST) '())
+  (cond ((nil? LST) '())
         ((pair? (car LST))
          (append (flatten (car LST))
                  (flatten (cdr LST))))
@@ -318,7 +318,7 @@
                (cog-chase-link 'EvaluationLink 'PredicateNode x))))
       (cog-incoming-by-type (Concept LABEL) 'ListLink))))
 
-  (if (null? rules)
+  (if (nil? rules)
       (begin
         (cog-logger-debug ghost-logger
           "Failed to find any GHOST rule with label \"~a\"" LABEL)
