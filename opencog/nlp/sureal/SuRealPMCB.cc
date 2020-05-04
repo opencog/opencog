@@ -899,9 +899,9 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
 }
 
 /**
- * Implement the initiate_search method.
+ * Implement the perform_search method.
  *
- * Similar to InitiateSearchCB::initiate_search, in which we start search
+ * Similar to InitiateSearchCB::perform_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -910,7 +910,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
  *
  * @param pPME       pointer to the PatternMatchEngine
  */
-bool SuRealPMCB::initiate_search(PatternMatchCallback& pmc)
+bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 {
     // set targets, m_targets should always be a subset of m_interp
     if (m_interp.size() > 0)
