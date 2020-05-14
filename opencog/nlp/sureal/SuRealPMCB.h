@@ -62,6 +62,11 @@ public:
         DefaultPatternMatchCB::set_pattern(vars, pat);
     }
 
+    virtual PatternMatchCallback* clone(void)
+    {
+        return new SuRealPMCB(*this);
+    }
+
     std::map<Handle, HandleMapSeq> m_results;   // store the PM results
 
 private:
