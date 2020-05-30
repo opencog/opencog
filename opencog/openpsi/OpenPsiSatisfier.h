@@ -36,7 +36,8 @@ namespace opencog
 
 class OpenPsiImplicator;
 
-class OpenPsiSatisfier : public virtual Satisfier {
+class OpenPsiSatisfier : public Satisfier
+{
 
 public:
 
@@ -55,7 +56,7 @@ OpenPsiSatisfier(AtomSpace* as,
 
   // Because two of the ancestor classes that this class inherites
   // from have _as variable.
-  using DefaultPatternMatchCB::_as;
+  using TermMatchMixin::_as;
 };
 
 }; // namespace opencog

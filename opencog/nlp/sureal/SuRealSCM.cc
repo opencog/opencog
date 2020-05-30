@@ -229,8 +229,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
     SuRealPMCB pmcb(pAS, sVars, use_cache);
     PatternLinkPtr slp(createPatternLink(sVars, qClauses));
-
-    slp->satisfy(pmcb);
+    pmcb.satisfy(slp);
 
     // The cached version of SuReal is supposed to return only true or false,
     // not the set of all acceptable answers. To keep ortogonality with the

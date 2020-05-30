@@ -51,7 +51,7 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule,
   _pattern_seen.insert(query_body);
 
   OpenPsiSatisfier sater(_as, this);
-  query->satisfy(sater);
+  sater.satisfy(query);
 
   // The boolean returned by query->satisfy isn't used because all
   // type of contexts haven't been handled by this callback yet.

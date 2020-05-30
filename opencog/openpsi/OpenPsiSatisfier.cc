@@ -31,8 +31,6 @@ using namespace opencog;
 
 OpenPsiSatisfier::OpenPsiSatisfier(AtomSpace* as,
                                    OpenPsiImplicator* implicator) :
-  InitiateSearchCB(as),
-  DefaultPatternMatchCB(as),
   Satisfier(as)
 {
   _implicator = implicator;
