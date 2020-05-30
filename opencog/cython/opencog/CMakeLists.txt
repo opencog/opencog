@@ -14,7 +14,15 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-3" "-f" "-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython" "-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog")
+IF (${PYTHONLIBS_VERSION_STRING} VERSION_LESS 3.0.0)
+	SET(CYTHON_FLAGS "-2" "-f" "-Wextra" # "-Werror"
+		"-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython"
+		"-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog")
+ELSE ()
+	SET(CYTHON_FLAGS "-3" "-f" "-Wextra" # "-Werror"
+		"-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython"
+		"-I" "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog")
+ENDIF ()
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
