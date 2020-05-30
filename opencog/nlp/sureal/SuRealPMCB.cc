@@ -44,8 +44,8 @@ using namespace std;
  * @param vars           the set of nodes that should be treated as variables
  */
 SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const HandleSet& vars, bool use_cache) :
-    InitiateSearchCB(pAS),
-    DefaultPatternMatchCB(pAS),
+    InitiateSearchMixin(pAS),
+    TermMatchMixin(pAS),
     m_as(pAS),
     m_vars(vars)
 {
@@ -901,7 +901,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
 /**
  * Implement the perform_search method.
  *
- * Similar to InitiateSearchCB::perform_search, in which we start search
+ * Similar to InitiateSearchMixin::perform_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -1014,7 +1014,7 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 Handle SuRealPMCB::find_starter_recursive(const Handle& h, size_t& depth,
                                           Handle& start, size_t& width)
 {
-    Handle rh = InitiateSearchCB::find_starter_recursive(h, depth, start, width);
+    Handle rh = InitiateSearchMixin::find_starter_recursive(h, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)
