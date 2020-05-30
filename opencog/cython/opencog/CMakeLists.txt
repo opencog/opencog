@@ -30,7 +30,7 @@ ENDIF ()
 ##################### NLP Types ##################
 
 CYTHON_ADD_MODULE_PYX(nlp_types
-	"../../nlp/types/nlp_types.pyx"
+	"nlp_types.pyx"
 )
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "nlp_types.cpp")
@@ -38,23 +38,24 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "nlp_types.cpp")
 # opencog.nlp_types Python bindings
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-# Below is commented out because for some reason it does not
-# work any more, but I can't figure out why.
-#ADD_LIBRARY(nlp_types_cython SHARED
-#	${CMAKE_BINARY_DIR}/opencog/nlp/types/nlp_types.cpp
-#)
+ADD_LIBRARY(nlp_types_cython SHARED
+	nlp_types.cpp
+)
 
-#TARGET_LINK_LIBRARIES(nlp_types_cython
-#	nlp_types
-#	${PYTHON_LIBRARIES}
-#)
+ADD_DEPENDENCIES(nlp_types_cython nlp-types)
 
-#SET_TARGET_PROPERTIES(nlp_types_cython PROPERTIES
-#	PREFIX ""
-#	OUTPUT_NAME nlp_types)
+TARGET_LINK_LIBRARIES(nlp_types_cython
+	nlp-types
+	${ATOMSPACE_LIBRARIES}
+	${PYTHON_LIBRARIES}
+)
 
-#INSTALL (TARGETS nlp_types_cython
-#	DESTINATION "${PYTHON_DEST}")
+SET_TARGET_PROPERTIES(nlp_types_cython PROPERTIES
+	PREFIX ""
+	OUTPUT_NAME nlp_types)
+
+INSTALL (TARGETS nlp_types_cython
+	DESTINATION "${PYTHON_DEST}")
 
 ##################### OpenPsi ##################
 
@@ -73,8 +74,8 @@ IF (HAVE_OPENPSI)
 	)
 
 	TARGET_LINK_LIBRARIES(openpsi_cython
-	    openpsi
-	    ${PYTHON_LIBRARIES}
+		openpsi
+		${PYTHON_LIBRARIES}
 	)
 
 	SET_TARGET_PROPERTIES(openpsi_cython PROPERTIES
