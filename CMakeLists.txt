@@ -127,6 +127,21 @@ ELSE (PLN_FOUND)
 ENDIF (PLN_FOUND)
 
 # ----------------------------------------------------------
+# Check for boost. We need dynamic-linked, threaded libs by default.
+SET(Boost_USE_STATIC_LIBS OFF)
+SET(Boost_USE_MULTITHREADED ON)
+SET(MIN_BOOST 1.46)
+
+# Required boost packages
+FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS filesystem system REQUIRED)
+
+IF(Boost_FOUND)
+	SET(Boost_FOUND_SAVE 1)
+ELSE(Boost_FOUND)
+	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build PLN!")
+ENDIF(Boost_FOUND)
+
+# ----------------------------------------------------------
 # Needed for unit tests
 
 FIND_PACKAGE(Cxxtest)
