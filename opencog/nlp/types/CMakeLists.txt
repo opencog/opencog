@@ -18,7 +18,7 @@ ADD_LIBRARY (nlp-types SHARED
 )
 
 TARGET_LINK_LIBRARIES(nlp-types
-	${ATOMSPACE_LIBRARIES}
+	${ATOMSPACE_atomtypes_LIBRARY}
 )
 
 # Without this, parallel make will race and crap up the generated files.
