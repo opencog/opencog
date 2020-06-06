@@ -932,7 +932,8 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 
     // Reaching here means no constants, so do some search space
     // reduction here
-    Handle bestClause = _pattern->mandatory[0];
+    PatternTermPtr root_clause = _pattern->pmandatory[0];
+    Handle bestClause = root_clause->getHandle();
 
     logger().debug("[SuReal] Start pred is: %s",
                    bestClause->to_short_string().c_str());
@@ -989,13 +990,11 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 
     PatternMatchEngine pme(pmc);
     pme.set_pattern(*_variables, *_pattern);
-    PatternTermPtr top_term(createPatternTerm());
-    PatternTermPtr root_term(top_term->addOutgoingTerm(bestClause));
     for (auto& c : sCandidate)
     {
         logger().debug("[SuReal] Loop candidate: %s", c.handle->to_short_string().c_str());
 
-        if (pme.explore_neighborhood(bestClause, c.handle, root_term))
+        if (pme.explore_neighborhood(bestClause, c.handle, root_clause))
             return true;
     }
     return false;
