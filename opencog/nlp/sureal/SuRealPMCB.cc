@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/pattern/PatternTerm.h>
 #include <opencog/query/PatternMatchEngine.h>
 #include <opencog/neighbors/GetPredicates.h>
 #include <opencog/neighbors/Neighbors.h>
@@ -988,11 +989,13 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 
     PatternMatchEngine pme(pmc);
     pme.set_pattern(*_variables, *_pattern);
+    PatternTermPtr top_term(createPatternTerm());
+    PatternTermPtr root_term(top_term->addOutgoingTerm(bestClause));
     for (auto& c : sCandidate)
     {
         logger().debug("[SuReal] Loop candidate: %s", c.handle->to_short_string().c_str());
 
-        if (pme.explore_neighborhood(bestClause, bestClause, c.handle))
+        if (pme.explore_neighborhood(bestClause, c.handle, root_term))
             return true;
     }
     return false;
