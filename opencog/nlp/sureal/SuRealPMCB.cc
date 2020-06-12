@@ -1013,10 +1013,10 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
  * @return        same as InitiateSearchCB::find_starter_recursive but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter_recursive(const Handle& h, size_t& depth,
+Handle SuRealPMCB::find_starter_recursive(const PatternTermPtr& ptm, size_t& depth,
                                           Handle& start, size_t& width)
 {
-    Handle rh = InitiateSearchMixin::find_starter_recursive(h, depth, start, width);
+    Handle rh = InitiateSearchMixin::find_starter_recursive(ptm, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)
