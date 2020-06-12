@@ -928,7 +928,7 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 
     // Not sure quite what triggers this, but there are patterns
     // with no mandatory clauses.
-    if (0 ==  _pattern->mandatory.size()) return false;
+    if (0 ==  _pattern->pmandatory.size()) return false;
 
     // Reaching here means no constants, so do some search space
     // reduction here
