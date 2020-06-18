@@ -404,15 +404,7 @@ SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
 ## Debian specific configurations
 SET(DEPENDENCY_LIST
 	"guile-2.2-dev (>= 2.2.2)"
-	"python-dev (>= 2.7.5)"
-	"libboost-date-time-dev (>= ${MIN_BOOST})"
-	"libboost-filesystem-dev (>= ${MIN_BOOST})"
-	"libboost-program-options-dev (>= ${MIN_BOOST})"
-	"libboost-regex-dev (>= ${MIN_BOOST})"
-	"libboost-serialization-dev (>= ${MIN_BOOST})"
-	"libboost-thread-dev (>= ${MIN_BOOST})"
-	"libboost-system-dev (>= ${MIN_BOOST})"
-	"libboost-random-dev (>= ${MIN_BOOST})"
+	"python3-dev (>= 3.6.7)"
 	"libstdc++6 (>= 4.7)"
 	"libcogutil-dev (>= 2.0.2)"
 	"atomspace-dev (>= 5.0.3)"
