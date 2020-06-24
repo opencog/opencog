@@ -1,7 +1,7 @@
 __author__ = 'Cosmo Harrigan'
 
 from flask import abort, jsonify
-from flask.ext.restful import Resource, reqparse
+from flask_restful import Resource, reqparse
 import socket
 from flask_restful_swagger import swagger
 
@@ -63,7 +63,7 @@ in a field named "command"
             connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             connection.connect(('localhost', COGSERVER_PORT))
         except socket.error as msg:
-            print msg
+            print(msg)
 
         # Validate, parse and send the command
         data = reqparse.request.get_json()

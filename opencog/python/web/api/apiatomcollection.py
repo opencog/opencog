@@ -4,7 +4,7 @@ from flask import abort, json, current_app, jsonify
 from flask_restful import Resource, reqparse, marshal
 import opencog.cogserver
 from opencog.atomspace import Atom
-from mappers import *
+from web.api.mappers import *
 from flask_restful.utils import cors
 from flask_restful_swagger import swagger
 
