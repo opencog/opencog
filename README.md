@@ -28,7 +28,7 @@ The AtomSpace also provides Scheme (guile) and Python bindings. The
 AtomSpace is maintained in a separate git repo:
 http://github.com/opencog/atomspace
 
-This git repository contains assorted projects that are central to the
+This git repository contains assorted projects that are part of the
 OpenCog project, but are not yet mature or stable, and are subject to
 active development and experimentation. These include:
 * An assortment of natural language processing subsystems, including:
@@ -36,32 +36,10 @@ active development and experimentation. These include:
   * Natural language generation (for expressiong thoughts as sentences).
   * Natural language input (for reading and hearing).
   * Assorted chatbots, some of which are embodied.
-* PLN, a probabilistic reasoning and inference system.
-* Attention Allocation, for managing combinatoric explosion during
-  reasoning and language generation.
-* Space-time servers, for managing spatial and time data (grounding
-  common-sense natural language concepts such as "next-to", "nearby",
-  and "soon".)
-* An embodiment subsystem, attaching language to visual and auditory
-  senses.  This is primarily located in the
-  [ROS Behavior Scripting](https://github.com/opencog/ros-behavior-scripting)
-  repository.
 * OpenPsi, a model of psychological states. Its currently a mashup of
   two unrelated ideas: a generic rule-class selection and planning
   system, and a model of human psychological states. An open to-do item
   is to untangle these two.
-* A supervised learning system, MOSES, for extracting patterns from
-  tabular data. This is located in a seperate repository,
-  [MOSES](https://github.com/opencog/moses).
-* The CogServer, a network server providing shell access and a REST API.
-* Several (obsolete!?) data visualization subsystems.
-
-With the exception of MOSES and the CogServer, all of the above are in
-active development, are half-baked, poorly documented, mis-designed,
-subject to experimentation, and generally in need of love and attention.
-This is where experimentation and integration are taking place, and,
-like any laboratory, things are a bit fluid and chaotic.
-
 
 Building and Running
 --------------------
@@ -104,6 +82,31 @@ be built and run.
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
+###### URE
+> OpenCog Unified Rule Engine
+> http://github.com/opencog/ure
+> Required for PLN
+> It uses exactly the same build proceedure as this package. Be sure
+  to `sudo make install` at the end.
+
+###### pln
+> OpenCog Probabilisitc Logic Networks
+> http://github.com/opencog/pln
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
+
+###### spacetime
+> OpenCog Spacetime Server - locations of objects in space and time.
+> http://github.com/opencog/spacetime
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
+
+###### ros-behavior-scripting
+> Visual and auditory senses, robot motor control
+> http://github.com/opencog/ros-behavior-scripting
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
+
 
 Optional Prerequisites
 ----------------------
@@ -119,19 +122,6 @@ the build, will be more precise as to which parts will not be built.
 ###### MOSES
 > MOSES Machine Learning
 > http://github.com/opencog/moses
-> It uses exactly the same build proceedure as this package. Be sure
-  to `sudo make install` at the end.
-
-###### SpaceTime Server
-> OpenCog SpaceTime server.
-> http://github.com/opencog/spacetime
-> It uses exactly the same build procedure as this package. Be sure
-  to `sudo make install` at the end.
-
-###### URE
-> OpenCog Unified Rule Engine
-> http://github.com/opencog/ure
-> Required for PLN
 > It uses exactly the same build proceedure as this package. Be sure
   to `sudo make install` at the end.
 
