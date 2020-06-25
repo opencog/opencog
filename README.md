@@ -101,23 +101,6 @@ be built and run.
 > https://www.abisource.com/projects/link-grammar/
 
 
-Obsolete Prerequisites
-----------------------
-The following packages are needed to build some of the old, obsolete
-packages. (The Web/RESTful server)
-
-###### CppREST
-> C++ HTTP RESTful interfaces
-> Used by the Pattern miner for distributed processing (this will be
-  replaced by gearman in future releases).
-> `sudo apt-get install libcpprest-dev`
-
-###### Threading Building Blocks
-> C++ template library for parallel programming
-> Used to implement the optional REST API. (TODO: the REST API should
-  be refactored to not use TBB)
-> `sudo apt-get install libtbb-dev`
-
 Building OpenCog
 ----------------
 Perform the following steps at the shell prompt:
