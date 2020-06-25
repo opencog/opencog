@@ -353,8 +353,6 @@ ADD_CUSTOM_TARGET(cscope
 	COMMENT "Generating CScope database"
 )
 
-ADD_SUBDIRECTORY(experiments EXCLUDE_FROM_ALL)
-
 IF (NOT WIN32)
 	ADD_CUSTOM_TARGET (experiments
 		# using CMAKE_BUILD_TOOL results in teh cryptic error message
