@@ -42,7 +42,7 @@ Prerequisites
 To build and run OpenCog, the packages listed below are required.
 With a few exceptions, most Linux distributions will provide these
 packages. Users of Ubuntu may use the dependency installer from the
-`/opencog/octool` repoitory.  Users of any version of Linux may
+`/opencog/octool` repository.  Users of any version of Linux may
 use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
@@ -74,11 +74,11 @@ be built and run.
 > OpenCog Unified Rule Engine
 > https://github.com/opencog/ure
 > Required for PLN
-> It uses exactly the same build proceedure as this package. Be sure
+> It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
 ###### pln
-> OpenCog Probabilisitc Logic Networks
+> OpenCog Probabilistic Logic Networks
 > https://github.com/opencog/pln
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
