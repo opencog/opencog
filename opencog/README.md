@@ -14,8 +14,6 @@ nlp             -- English language processing tools.
 
 ghost           -- A chatbot and behavior-scripting system.
 
-attention       -- ECAN Attention allocation server and tools.
-
 cogserver       -- Multi-user network server.
 
 eva             -- Code to control the Hanson Robotics Eva robot.
@@ -24,4 +22,4 @@ eva             -- Code to control the Hanson Robotics Eva robot.
 
 cython          -- Miscellaneous python wrappers for misc. components.
 
-python          -- REST web API and assorted misc. code.
+python          -- REST web API

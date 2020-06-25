@@ -1,11 +1,3 @@
-Using Python with OpenCog
-=========================
-
-## Tutorial ##
-
-The OpenCog wiki contains the Python tutorial:
-
-http://wiki.opencog.org/w/Python
 
 ## Web API ##
 The Web API provides a REST interface to the AtomSpace. Unfortunately,
