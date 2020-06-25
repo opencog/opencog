@@ -73,7 +73,7 @@ setup(name = 'pyopencog',
     author = 'Joel Pitt',
     author_email = 'joel@opencog.org',
     url = 'http://wiki.opencog.org/w/Python',
-    long_description = read('README'),
+    long_description = read('README.md'),
     version = '0.1',
     classifiers=[
         "Development Status :: 3 - Alpha",

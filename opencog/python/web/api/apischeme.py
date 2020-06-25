@@ -1,7 +1,7 @@
 __author__ = 'Cosmo Harrigan'
 
 from flask import abort, jsonify
-from flask.ext.restful import Resource, reqparse
+from flask_restful import Resource, reqparse
 from opencog.scheme_wrapper import scheme_eval, __init__
 from flask_restful_swagger import swagger
 
