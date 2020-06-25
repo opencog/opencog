@@ -71,6 +71,8 @@ ENDIF (COGUTIL_FOUND)
 list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 
 include(${COGUTIL_DATA_DIR}/cmake/OpenCogGccOptions.cmake)
+include(${COGUTIL_DATA_DIR}/cmake/OpenCogLibOptions.cmake)
+include(${COGUTIL_DATA_DIR}/cmake/OpenCogInstallOptions.cmake)
 include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 
 # ===================================================================
@@ -156,23 +158,6 @@ ENDIF (STACK_FOUND)
 MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
 
 # ----------------------------------------------------------
-# This is required for Guile
-FIND_LIBRARY(GMP_LIBRARY gmp)
-FIND_PATH(GMP_INCLUDE_DIR gmp.h)
-
-# Gnu Guile scheme interpreter
-# Version 2.2.2 is needed for mrs io ports, compilation, atomics, nlp
-FIND_PACKAGE(Guile 2.2.2)
-IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
-	ADD_DEFINITIONS(-DHAVE_GUILE)
-	SET(HAVE_GUILE 1)
-	INCLUDE_DIRECTORIES(${GUILE_INCLUDE_DIR})
-ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
-	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
-	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
-ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
-
-# ----------------------------------------------------------
 # Link-Grammar is needed for several NLP subsystems
 # Only 5.6.2 or newer has the required API in it.
 FIND_PACKAGE(LinkGrammar 5.6.2)
@@ -193,8 +178,9 @@ ELSE (UUID_FOUND)
 ENDIF (UUID_FOUND)
 
 # ----------------------------------------------------------
-# Python and Cython
+# This is required for Guile, Python and Cython
 
+include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
@@ -213,9 +199,6 @@ ELSE (VALGRIND_FOUND)
 ENDIF (VALGRIND_FOUND)
 
 # ===================================================================
-# Global includes
-
-# -------------------------------------------------
 # Include configuration.
 
 # Set default include paths.
@@ -230,53 +213,6 @@ ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
 INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
 INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
 INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
-
-# -------------------------------------------------
-# Library configuration
-
-# Small hack to handle unixes that use "/usr/lib64" instead of
-# "/usr/lib" as the default lib path on 64 bit archs.
-IF (NOT DEFINED LIB_DIR_SUFFIX)
-	EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} -print-search-dirs OUTPUT_VARIABLE PRINT_SEARCH_DIRS_OUTPUT)
-	STRING(REGEX MATCH "\r?\nlibraries:.*\r?\n" COMPILER_LIB_SEARCH_DIRS ${PRINT_SEARCH_DIRS_OUTPUT})
-	IF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
-		STRING(REGEX MATCH "/lib64/:|/lib64:|/lib64\n" HAS_LIB64 ${COMPILER_LIB_SEARCH_DIRS})
-		IF (NOT ${HAS_LIB64} STREQUAL "")
-			SET(LIB_DIR_SUFFIX "64")
-		ENDIF (NOT ${HAS_LIB64} STREQUAL "")
-	ENDIF (NOT ${COMPILER_LIB_SEARCH_DIRS} STREQUAL "")
-ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
-
-# RPATH handling (see https://cmake.org/Wiki/CMake_RPATH_handling)
-# Note: RPATH only supported under Linux!
-SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH
-	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
-	"${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
-
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# -------------------------------------------------
-# Install configuration
-
-# Only list install files that have actually changed.
-SET(CMAKE_INSTALL_MESSAGE "LAZY")
-
-# Set confdir and datadir
-IF (NOT DEFINED CONFDIR)
-	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
-ENDIF (NOT DEFINED CONFDIR)
-
-IF (NOT DEFINED DATADIR)
-	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
-ENDIF (NOT DEFINED DATADIR)
-
-ADD_DEFINITIONS(-DCONFDIR="${CONFDIR}")
-ADD_DEFINITIONS(-DDATADIR="${DATADIR}")
-
-# (re?)define MAN_INSTALL_DIR
-SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -307,9 +243,6 @@ IF (CXXTEST_FOUND)
 			# combined across all tests (the latter is MUCH faster). Use a define?
 			# There is coverage specific stuff in AddCxxTest.cmake now...
 			# -
-			# Depends on cogserver because RESTFulTest needs it
-			# and cmake has no way to add non-test dependencies to tests
-			DEPENDS tests cogserver
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
 
@@ -424,13 +357,10 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing tools" HAVE_NLP)
 SUMMARY_ADD("OpenPsi" "MicroPsi OpenCog implementation" HAVE_OPENPSI)
 SUMMARY_ADD("Ghost" "Ghost chatbot" HAVE_GHOST)
 SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)
-SUMMARY_ADD("REST Events" "REST Atomspace Event Publisher module"
-	HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 
 SUMMARY_SHOW()
