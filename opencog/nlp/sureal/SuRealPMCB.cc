@@ -922,7 +922,7 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
 
     if (not _variables->varset.empty())
     {
-        if (setup_neighbor_search())
+        if (setup_neighbor_search(_pattern->pmandatory))
             return choice_loop(pmc, "sssssss neighbor_search uuuuuuuu");
     }
 
