@@ -933,15 +933,15 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
     // Reaching here means no constants, so do some search space
     // reduction here
     PatternTermPtr root_clause = _pattern->pmandatory[0];
-    Handle bestClause = root_clause->getHandle();
+    PatternTermPtr bestClause = root_clause;
 
     logger().debug("[SuReal] Start pred is: %s",
-                   bestClause->to_short_string().c_str());
+                   bestClause->to_full_string().c_str());
 
     // keep only links of the same type as bestClause and
     // have linkage to InterpretationNode
     HandleSeq qCandidate;
-    m_as->get_handles_by_type(std::back_inserter(qCandidate), bestClause->get_type());
+    m_as->get_handles_by_type(std::back_inserter(qCandidate), bestClause->getHandle()->get_type());
 
     // selected candidates, a subset of qCandidate
     std::vector<CandHandle> sCandidate;
@@ -1014,7 +1014,7 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
  *                the result if is a variable
  */
 Handle SuRealPMCB::find_starter_recursive(const PatternTermPtr& ptm, size_t& depth,
-                                          Handle& start, size_t& width)
+                                          PatternTermPtr& start, size_t& width)
 {
     Handle rh = InitiateSearchMixin::find_starter_recursive(ptm, depth, start, width);
 

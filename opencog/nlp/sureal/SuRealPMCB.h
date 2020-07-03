@@ -66,7 +66,7 @@ public:
     std::map<Handle, HandleMapSeq> m_results;   // store the PM results
 
 private:
-    virtual Handle find_starter_recursive(const PatternTermPtr&, size_t&, Handle&, size_t&);
+    virtual Handle find_starter_recursive(const PatternTermPtr&, size_t&, PatternTermPtr&, size_t&);
     bool disjunct_match(const Handle&, const Handle&);
 
     AtomSpace* m_as;
