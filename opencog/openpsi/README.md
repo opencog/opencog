@@ -27,7 +27,7 @@ Each rule has the abstract form
 
 ## OpenPsi concepts
 
-1. Psi-rule:
+**1. Psi-rule:**
   * A rule is an ImplicationLink structured as
     ```scheme
             (ImplicationLink  <TV>
@@ -44,7 +44,7 @@ Each rule has the abstract form
     because, usage of the function results in the atom being added to
     openpsi's index.
 
-2. Context:
+**2. Context:**
   * The context part of the rule must be a set of predicates, i.e. atoms
     that can be evaluated, and, when evaluated, return truth values
     (typically a crisp TRUE_TV or FALSE_TV) to indicate if the rule
@@ -55,7 +55,7 @@ Each rule has the abstract form
   * The function `psi-satisfiable?`, which is defined in [OpenPsiSCM.cc](OpenPsiSCM.cc),
     is used to check if a psi-rule is satisfiable or not.
 
-3. Action:
+**3. Action:**
   * The action part of the rule will be executed if the rule is triggered,
     i.e. if the rule was selected by the action selector. The intent is
     that the action will alter the atomspace, or send messages to some
@@ -63,7 +63,7 @@ Each rule has the abstract form
   * The function `psi-imply`, which is defined in [OpenPsiSCM.cc](OpenPsiSCM.cc),
     is used to execute an action of a satisfiable rule.
 
-4. Goal:
+**4. Goal:**
   * It is an atom used to represent the goal parameter. It has two values, the
     goal-value(gv) which is a measure of the current goal state, and the
     desired-goal-value(dgv) which is preferred goal state.
@@ -71,13 +71,13 @@ Each rule has the abstract form
   * The function `psi-goal`, which is defined in [rule.scm](rule.scm), is used
     to create goals.
 
-5. Category:
+**5. Category:**
   * A set of psi-rules are grouped into a psi-category.
   * The function `psi-add-category`, which is defined in [OpenPsiSCM.cc](OpenPsiSCM.cc),
     is used to declare a category. A psi-rule is inserted to a category during
     declartion.
 
-6. Component:
+**6. Component:**
   * A component is a psi-rule category, an action-selector associated to
     work on these rules, and the openpsi steps to be executed during a single
     openpsi loop iteration.
@@ -85,7 +85,7 @@ Each rule has the abstract form
     used to define a component and it's associated steps.
   * [Ghost](../ghost) is implemented as a openpsi component.
 
-7. Action-selector:
+**7. Action-selector:**
   * It is an executable atom the defines how rules in a category should be
     chosen.
   * The function `psi-get-satisfiable-rules`. which is defined in [rule.scm](rule.scm),
@@ -94,7 +94,7 @@ Each rule has the abstract form
     function `psi-set-action-selector!`, which is defined in
    [action-selector.scm](action-selector.scm), can be used.
 
-8. Step:
+**8. Step:**
   * It is a single iteration of openpsi process loop.
   * The function `psi-step`, which is defined in [main.scm](main.scm),
     implements the default step of components. First it performs action
