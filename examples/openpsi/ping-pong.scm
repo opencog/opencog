@@ -40,24 +40,18 @@
     (List)))
 
 ; Define ping goal
-(define ping-goal (Concept "ping"))
+(define ping-goal (psi-goal "ping" 0))
+
+; Define ping-component that uses the default step `psi-step` and default
+; action-selector `psi-get-satisfiable-rules`.
+(define ping-component (psi-component "ping"))
 
 ; Define ping rules
-(define ping-component (psi-component  "ping"))
-
 ; The truthvalue for the rule can be used by the action selector for determing
 ; which action to choose. If you choose to use it when defining your
 ; action-selector.
 (psi-rule ping-context-1 ping-action ping-goal (stv 1 1) ping-component)
 (psi-rule ping-context-2 ping-action ping-goal (stv 1 1) ping-component)
-
-; Define ping's action-selector
-(define (ping-action-selector)
-  (psi-get-satisfiable-rules ping-component))
-
-(psi-set-action-selector!
-  ping-component
-  (ExecutionOutput (GroundedSchema "scm: ping-action-selector") (List)))
 
 ; ----------------------------------------------------------------------
 ; DEFINING PONGING
@@ -67,26 +61,47 @@
   (State ball state-var)
   (Equal state-var pinged)))
 
+; Define pong goal
+(define pong-goal (psi-goal "pong" 1))
+
 ; Define ping action
 (define (pong)
-  (sleep 5)
+  (sleep 1)
   (display "\nJust ponged\n")
-  (State ball ponged))
+  (State ball ponged)
+  ; The side-effect of the action decreases the urge.
+  (psi-decrease-urge pong-goal 1))
 
 (define pong-action
   (ExecutionOutput
     (GroundedSchema "scm: pong")
     (List)))
 
-; Define pong goal
-(define pong-goal (Concept "pong"))
+; Define pong-component that uses custom step in place of `psi-step` and default
+; action-selector `psi-get-satisfiable-rules`.
+(define (pong-step)
+  (sleep 3)
+  (let ((urge (psi-urge pong-goal)))
+    (if (< urge 0.7)
+      (begin
+        (format #t "\nNot yet feeling like ponging the ball. Urge = ~a\n" urge)
+        (psi-increase-urge pong-goal 0.2))
+      (begin
+        (format #t "\nFeeling like ponging the ball. Urge = ~a\n" urge)
+        (psi-increase-urge pong-goal 0.2)
+        (psi-step (Concept "pong"))))
+  )
+  (stv 1 1))
 
-; Define pong rules
-(define pong-component (psi-component  "pong"))
 
-(psi-rule pong-context pong-action pong-goal (stv 1 1) pong-component)
+(define pong-steper
+  (Evaluation
+    (GroundedPredicate "scm: pong-step")
+    (List)))
 
-; Define pong's action-selector
+(define pong-component (psi-component  "pong" pong-steper))
+
+; Replace the default action-selector for the pong-component.
 (define (pong-action-selector)
   (psi-get-satisfiable-rules pong-component))
 
@@ -94,12 +109,14 @@
   pong-component
   (ExecutionOutput (GroundedSchema "scm: pong-action-selector") (List)))
 
+; Define pong rules
+(psi-rule pong-context pong-action pong-goal (stv 1 1) pong-component)
+
 ; ----------------------------------------------------------------------
-; Start ping pong components
-; ----------------------------------------------------------------------
+; Start ping and pong components
 (psi-run pong-component)
 (psi-run ping-component)
 
-; For stopping the components use psi-halt
+; Stop ping and pong components
 ; (psi-halt ping-component)
 ; (psi-halt pong-component)
