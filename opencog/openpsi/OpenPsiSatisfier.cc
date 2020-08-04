@@ -48,7 +48,7 @@ bool OpenPsiSatisfier::grounding(const HandleMap &var_soln,
   if (0 < var_soln.size()) {
     for( auto it = var_soln.begin(); it != var_soln.end(); ++it )
     {
-      if(nameserver().isA(VARIABLE_NODE, (it->second)->get_type())) {
+      if(nameserver().isA((it->second)->get_type(), VARIABLE_NODE)) {
         return false;
       }
     }
