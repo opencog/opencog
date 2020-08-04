@@ -1,7 +1,9 @@
 ## ping-pong.scm
 
 1. Build and install opencog
+
 2. Load examples by running `guile -l ping-pong.scm`
+
 3. The output will be similar to the following
 ```
 scheme@(guile-user)>
@@ -31,4 +33,11 @@ Not yet feeling like ponging the ball. Urge = 0.5999999999999999
 
 Feeling like ponging the ball. Urge = 0.7999999999999998
 
+```
+
+4. For halting the running components run the following (the order doesn't
+   matter)
+```
+(psi-halt ping-component)
+(psi-halt pong-component)
 ```
