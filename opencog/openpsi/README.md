@@ -9,7 +9,7 @@ Each rule has the abstract form
    if (context) and (action is taken) then (goal is fulfilled).
 ```
 
-For examples see here[examples](../../examples/openpsi/)
+For examples see [here.](../../examples/openpsi/)
 
 ## OpenPsi concepts
 
