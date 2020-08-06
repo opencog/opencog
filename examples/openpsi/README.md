@@ -5,9 +5,9 @@ This is a basic example to get you started.
 
 2. Load examples by running `guile -l ping.scm`
 
-3. Start running the ping-component by executing `(psi-run ping-component )`
+3. Start running the ping-component by executing `(psi-run ping-component)`
 
-4. The output will be
+4. After few seconds the output will be
 ```
 scheme@(guile-user)>
 Just pinged
@@ -30,7 +30,7 @@ This expands on the `ping.scm` example above.
 (psi-run pong-component)
 ```
 
-4. The output will be similar to the following
+4. After few seconds the output will be similar to the following
 ```
 scheme@(guile-user)>
 Not yet feeling like ponging the ball. Urge = 0.0

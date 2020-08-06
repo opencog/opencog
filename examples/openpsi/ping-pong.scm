@@ -39,8 +39,8 @@
     (GroundedSchema "scm: pong")
     (List)))
 
-; Define pong-component that uses custom step in place of `psi-step` and default
-; action-selector `psi-get-satisfiable-rules`.
+; Define pong-component that uses custom step in place of `psi-step` and
+; default action-selector `psi-get-satisfiable-rules`.
 (define (pong-step)
   (sleep 3)
   (let ((urge (psi-urge pong-goal)))
