@@ -129,8 +129,7 @@
     evaluated, should return a true or false TV.  The action is taken
     only if the boolean-AND of the return values is true.
 
-  ACTION is an evaluatable atom, i.e. it should return a TV when
-    evaluated by `cog-evaluate!`.
+  ACTION is an executable atom, i.e. it should return an atom when executed.
 
   GOAL is an atom that represents what goal is affected when an action
     is made in the specified context. If multiple goals are affected by

@@ -5,25 +5,11 @@ behavior control mechanism for robots. It is loosely inspired by
 Joscha Bach's MicroPsi.
 
 Each rule has the abstract form
+```
    if (context) and (action is taken) then (goal is fulfilled).
+```
 
-### TODO
-
-* If no exact match to a context can be found, fuzzy matching should
-  be performed, to find a context that most closely applies to the
-  current situation.
-
-* If no fuzzy match can be found, then a MOSES-inspired mechanism
-  should kick in to create new rules.  This includes the selective
-  pruning of existing contexts (called "knob-turning" in MOSES),
-  exploration of minor elaborations to contexts (also controlled
-  by knob-turning) and genetic cross-over.
-
-* The learning mechanism needs to be elaborated into a  "small-data"
-  learning system, so that the system can learn from only a handful of
-  situations/examples.
-
-* Update [examples](../../examples/openpsi/)
+For examples see [here.](../../examples/openpsi/)
 
 ## OpenPsi concepts
 
@@ -106,6 +92,22 @@ Each rule has the abstract form
   * To repeatedly run a component's steps in a separate thread use `psi-run`.
     The function `psi-halt` stops the thread. Both function are defined in
     [main.scm](main.scm)
+
+### TODO
+
+* If no exact match to a context can be found, fuzzy matching should
+  be performed, to find a context that most closely applies to the
+  current situation.
+
+* If no fuzzy match can be found, then a MOSES-inspired mechanism
+  should kick in to create new rules.  This includes the selective
+  pruning of existing contexts (called "knob-turning" in MOSES),
+  exploration of minor elaborations to contexts (also controlled
+  by knob-turning) and genetic cross-over.
+
+* The learning mechanism needs to be elaborated into a  "small-data"
+  learning system, so that the system can learn from only a handful of
+  situations/examples.
 
 ## Open Issues
 

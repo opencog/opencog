@@ -32,6 +32,7 @@
 ; but there activities are defined using openpsi-rules and action-selectors
 ; associated with it.
 (define psi-component-node (ConceptNode "component"))
+; TODO: Adding  a component to a category makes no sense
 (psi-add-category psi-component-node)
 
 ; --------------------------------------------------------------
