@@ -1,10 +1,6 @@
 (use-modules (opencog)
              (opencog openpsi))
 
-;(use-modules (opencog logger))
-;(cog-logger-set-level! (psi-get-logger) "debug")
-;(cog-logger-set-stdout! (psi-get-logger) #t)
-
 ; Ball states
 (define neutral (Node "neutral"))
 (define pinged (Node "pinged"))
