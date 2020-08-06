@@ -1,52 +1,18 @@
 (use-modules (opencog)
              (opencog openpsi))
 
-; Ball states
-(define neutral (Node "neutral"))
-(define pinged (Node "pinged"))
+; This expands on the `ping.scm` example by adding a pong component. Thus,
+; start by loading it.
+(load "ping.scm")
+
+; Exapnd ball states
 (define ponged (Node "ponged"))
 
-; Define the initial state of the ball.
-(define ball (Concept "ball"))
-(State ball neutral)
-
-(define state-var (Variable "state"))
-
-; ----------------------------------------------------------------------
-; DEFINING PINGING
-; ----------------------------------------------------------------------
-; Define ping contexts
-(define ping-context-1 (list
-  (State ball state-var)
-  (Equal state-var neutral)))
-
+; Expand Pinging rules
 (define ping-context-2 (list
   (State ball state-var)
   (Equal state-var ponged)))
 
-; Define ping action
-(define (ping)
-  (sleep 5)
-  (display "\nJust pinged\n")
-  (State ball pinged))
-
-(define ping-action
-  (ExecutionOutput
-    (GroundedSchema "scm: ping")
-    (List)))
-
-; Define ping goal
-(define ping-goal (psi-goal "ping" 0))
-
-; Define ping-component that uses the default step `psi-step` and default
-; action-selector `psi-get-satisfiable-rules`.
-(define ping-component (psi-component "ping"))
-
-; Define ping rules
-; The truthvalue for the rule can be used by the action selector for determing
-; which action to choose. If you choose to use it when defining your
-; action-selector.
-(psi-rule ping-context-1 ping-action ping-goal (stv 1 1) ping-component)
 (psi-rule ping-context-2 ping-action ping-goal (stv 1 1) ping-component)
 
 ; ----------------------------------------------------------------------
@@ -110,8 +76,8 @@
 
 ; ----------------------------------------------------------------------
 ; Start ping and pong components
-(psi-run pong-component)
-(psi-run ping-component)
+; (psi-run pong-component)
+; (psi-run ping-component)
 
 ; Stop ping and pong components
 ; (psi-halt ping-component)
