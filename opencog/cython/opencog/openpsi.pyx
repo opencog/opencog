@@ -1,9 +1,8 @@
-
 from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
-from atomspace cimport *
-from opencog.scheme_wrapper import scheme_eval
+from opencog.atomspace cimport *
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h, scheme_eval_v
 from opencog.type_constructors import ConceptNode
 
 is_scm_initialized = False
@@ -54,38 +53,42 @@ cdef class OpenPsi:
         cdef cHandle handle = openPsi.c_add_category(deref(new_category.handle))
         return Atom.createAtom(handle)
 
+    def get_urge(self, Atom goal):
+        urge_byte_str = scheme_eval(self._as, '(psi-urge %s)' % goal)
+        return float(str(urge_byte_str, 'utf-8')[:-1])
+
     def increase_urge(self, Atom goal, value):
-        scheme_eval(self._as, '(psi-increase-urge ConceptNode("%s") %d)' % (goal.name, value))
+        command = '(psi-increase-urge %s %f)' % (goal, value)
+        return scheme_eval_h(self._as, command)
 
     def decrease_urge(self, Atom goal, value):
-        command = '(psi-decrease-urge (ConceptNode "%s") %f)' % (goal.name, value)
-        scheme_eval(self._as, command)
+        command = '(psi-decrease-urge %s %f)' % (goal, value)
+        return scheme_eval_h(self._as, command)
 
-    def set_action_selector(self, Atom component, selector_name):
-        name = component.name
-        scheme_eval(self._as, '''
-            (psi-set-action-selector!
-                (ConceptNode "%s")
-                (ExecutionOutput
-                    (GroundedSchema "py: %s")
-                    (List (ConceptNode "%s")))
-            )
-        '''.strip() % (name, selector_name, name))
+    def get_satisfiable_rules(self, Atom category):
+        return scheme_eval_h(self._as, '(psi-get-satisfiable-rules %s)' % category)
+
+    def set_action_selector(self, Atom component,  Atom selector):
+        return scheme_eval_h(self._as, '(psi-set-action-selector! %s %s)' % (component, selector))
 
     def create_goal(self, goal_name, value = 1.0, desired_value = 1.0):
         command = '(psi-goal "%s" %f %f)' % (goal_name,  value, desired_value)
         scheme_eval(self._as, command)
         return ConceptNode(goal_name)
 
-    def create_component(self, component_name):
-        scheme_eval(self._as, '(psi-component "%s")' % component_name)
-        return ConceptNode(component_name)
+    def create_component(self, name, step=False):
+        if isinstance(step, Atom):
+            return scheme_eval_h(self._as, '(psi-component "%s" %s)' % (name, step))
+        return scheme_eval_h(self._as, '(psi-component "%s")' % name)
 
-    def run(self, component):
-        scheme_eval(self._as, '(psi-run (ConceptNode "%s"))' % component.name)
+    def step(self, Atom component):
+        return scheme_eval_v(self._as, '(psi-step %s)' % component)
 
-    def halt(self, component):
-        scheme_eval(self._as, '(psi-halt (ConceptNode "%s"))' % component.name)
+    def run(self, Atom component):
+        scheme_eval(self._as, '(psi-run %s)' % component)
+
+    def halt(self, Atom component):
+        scheme_eval(self._as, '(psi-halt %s)' % component)
 
 
 cdef class OpenPsiRule:

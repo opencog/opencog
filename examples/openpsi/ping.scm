@@ -2,8 +2,8 @@
              (opencog openpsi))
 
 ; Ball states
-(define neutral (Node "neutral"))
-(define pinged (Node "pinged"))
+(define neutral (Concept "neutral"))
+(define pinged (Concept "pinged"))
 
 ; Define the initial state of the ball.
 (define ball (Concept "ball"))
@@ -33,7 +33,7 @@
 ; Define ping goal
 (define ping-goal (psi-goal "ping" 0))
 
-; Define ping-component that uses the default step `psi-step` and default
+; Define ping component that uses the default step `psi-step` and default
 ; action-selector `psi-get-satisfiable-rules`.
 (define ping-component (psi-component "ping"))
 

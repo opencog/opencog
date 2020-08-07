@@ -6,9 +6,9 @@
 (load "ping.scm")
 
 ; Exapnd ball states
-(define ponged (Node "ponged"))
+(define ponged (Concept "ponged"))
 
-; Expand Pinging rules
+; Expand pinging rules
 (define ping-context-2 (list
   (State ball state-var)
   (Equal state-var ponged)))
@@ -39,7 +39,7 @@
     (GroundedSchema "scm: pong")
     (List)))
 
-; Define pong-component that uses custom step in place of `psi-step` and
+; Define pong component that uses custom step in place of `psi-step` and
 ; default action-selector `psi-get-satisfiable-rules`.
 (define (pong-step)
   (sleep 3)
@@ -56,14 +56,14 @@
   (stv 1 1))
 
 
-(define pong-steper
+(define pong-stepper
   (Evaluation
     (GroundedPredicate "scm: pong-step")
     (List)))
 
-(define pong-component (psi-component  "pong" pong-steper))
+(define pong-component (psi-component "pong" pong-stepper))
 
-; Replace the default action-selector for the pong-component.
+; Replace the default action-selector of the pong component.
 (define (pong-action-selector)
   (psi-get-satisfiable-rules pong-component))
 
