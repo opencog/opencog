@@ -78,7 +78,6 @@ class OpenPsiTest(TestCase):
         self.assertEqual(context, rule.get_context())
         self.assertEqual(action, rule.get_action())
 
-    @unittest.skip("Issue https://github.com/opencog/opencog/issues/3532")
     def test_run_openpsi(self):
         openpsi = OpenPsi(atomspace)
 
