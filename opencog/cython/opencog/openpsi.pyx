@@ -65,25 +65,21 @@ cdef class OpenPsi:
         command = '(psi-decrease-urge %s %f)' % (goal, value)
         return scheme_eval_h(self._as, command)
 
-    def set_action_selector(self, Atom component, selector_name):
-        name = component.name
-        scheme_eval(self._as, '''
-            (psi-set-action-selector!
-                (ConceptNode "%s")
-                (ExecutionOutput
-                    (GroundedSchema "py: %s")
-                    (List (ConceptNode "%s")))
-            )
-        '''.strip() % (name, selector_name, name))
+    def get_satisfiable_rules(self, Atom category):
+        return scheme_eval_h(self._as, '(psi-get-satisfiable-rules %s)' % category)
+
+    def set_action_selector(self, Atom component,  Atom selector):
+        return scheme_eval_h(self._as, '(psi-set-action-selector! %s %s)' % (component, selector))
 
     def create_goal(self, goal_name, value = 1.0, desired_value = 1.0):
         command = '(psi-goal "%s" %f %f)' % (goal_name,  value, desired_value)
         scheme_eval(self._as, command)
         return ConceptNode(goal_name)
 
-    def create_component(self, component_name):
-        scheme_eval(self._as, '(psi-component "%s")' % component_name)
-        return ConceptNode(component_name)
+    def create_component(self, name, step=False):
+        if isinstance(step, Atom):
+            return scheme_eval_h(self._as, '(psi-component "%s" %s)' % (name, step))
+        return scheme_eval_h(self._as, '(psi-component "%s")' % name)
 
     def step(self, Atom component):
         return scheme_eval_v(self._as, '(psi-step %s)' % component)
