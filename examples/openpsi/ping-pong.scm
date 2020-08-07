@@ -6,7 +6,7 @@
 (load "ping.scm")
 
 ; Exapnd ball states
-(define ponged (Node "ponged"))
+(define ponged (Concept "ponged"))
 
 ; Expand Pinging rules
 (define ping-context-2 (list

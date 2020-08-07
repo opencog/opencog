@@ -2,8 +2,8 @@
              (opencog openpsi))
 
 ; Ball states
-(define neutral (Node "neutral"))
-(define pinged (Node "pinged"))
+(define neutral (Concept "neutral"))
+(define pinged (Concept "pinged"))
 
 ; Define the initial state of the ball.
 (define ball (Concept "ball"))
