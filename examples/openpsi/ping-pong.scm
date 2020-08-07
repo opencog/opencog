@@ -56,14 +56,14 @@
   (stv 1 1))
 
 
-(define pong-steper
+(define pong-stepper
   (Evaluation
     (GroundedPredicate "scm: pong-step")
     (List)))
 
-(define pong-component (psi-component  "pong" pong-steper))
+(define pong-component (psi-component "pong" pong-stepper))
 
-; Replace the default action-selector for the pong-component.
+; Replace the default action-selector of the pong component.
 (define (pong-action-selector)
   (psi-get-satisfiable-rules pong-component))
 
