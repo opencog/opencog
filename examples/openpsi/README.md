@@ -32,7 +32,7 @@ op.run(ping_component)
 ```
 
 4. After few seconds the output will be similar to the following
-```python
+```
 Not yet feeling like ponging the ball. Urge = 0.000000
 
 
