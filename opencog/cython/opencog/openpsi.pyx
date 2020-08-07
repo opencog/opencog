@@ -2,7 +2,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.atomspace cimport *
-from opencog.scheme_wrapper import scheme_eval
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
 from opencog.type_constructors import ConceptNode
 
 is_scm_initialized = False
@@ -53,12 +53,17 @@ cdef class OpenPsi:
         cdef cHandle handle = openPsi.c_add_category(deref(new_category.handle))
         return Atom.createAtom(handle)
 
+    def get_urge(self, Atom goal):
+        urge_byte_str = scheme_eval(self._as, '(psi-urge %s)' % goal)
+        return float(str(urge_byte_str, 'utf-8')[:-1])
+
     def increase_urge(self, Atom goal, value):
-        scheme_eval(self._as, '(psi-increase-urge ConceptNode("%s") %d)' % (goal.name, value))
+        command = '(psi-increase-urge %s %f)' % (goal, value)
+        return scheme_eval_h(self._as, command)
 
     def decrease_urge(self, Atom goal, value):
-        command = '(psi-decrease-urge (ConceptNode "%s") %f)' % (goal.name, value)
-        scheme_eval(self._as, command)
+        command = '(psi-decrease-urge %s %f)' % (goal, value)
+        return scheme_eval_h(self._as, command)
 
     def set_action_selector(self, Atom component, selector_name):
         name = component.name
