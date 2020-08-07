@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import time
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import pop_default_atomspace
 from opencog.scheme_wrapper import scheme_eval
 from opencog.execute import execute_atom
 from opencog.openpsi import *
@@ -27,11 +27,11 @@ class OpenPsiTest(TestCase):
     def setUpClass(cls):
         global atomspace
         atomspace = AtomSpace()
-        initialize_opencog(atomspace)
+        set_default_atomspace(atomspace)
 
     @classmethod
     def tearDownClass(cls):
-        finalize_opencog()
+        pop_default_atomspace()
         global atomspace
         del atomspace
 
