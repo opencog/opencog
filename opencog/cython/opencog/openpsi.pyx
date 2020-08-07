@@ -1,8 +1,7 @@
-
 from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
-from atomspace cimport *
+from opencog.atomspace cimport *
 from opencog.scheme_wrapper import scheme_eval
 from opencog.type_constructors import ConceptNode
 
