@@ -2,7 +2,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.atomspace cimport *
-from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h, scheme_eval_v
 from opencog.type_constructors import ConceptNode
 
 is_scm_initialized = False
@@ -85,11 +85,14 @@ cdef class OpenPsi:
         scheme_eval(self._as, '(psi-component "%s")' % component_name)
         return ConceptNode(component_name)
 
-    def run(self, component):
-        scheme_eval(self._as, '(psi-run (ConceptNode "%s"))' % component.name)
+    def step(self, Atom component):
+        return scheme_eval_v(self._as, '(psi-step %s)' % component)
 
-    def halt(self, component):
-        scheme_eval(self._as, '(psi-halt (ConceptNode "%s"))' % component.name)
+    def run(self, Atom component):
+        scheme_eval(self._as, '(psi-run %s)' % component)
+
+    def halt(self, Atom component):
+        scheme_eval(self._as, '(psi-halt %s)' % component)
 
 
 cdef class OpenPsiRule:

@@ -33,7 +33,7 @@
 ; Define ping goal
 (define ping-goal (psi-goal "ping" 0))
 
-; Define ping-component that uses the default step `psi-step` and default
+; Define ping component that uses the default step `psi-step` and default
 ; action-selector `psi-get-satisfiable-rules`.
 (define ping-component (psi-component "ping"))
 

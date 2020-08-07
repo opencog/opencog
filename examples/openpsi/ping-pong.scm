@@ -8,7 +8,7 @@
 ; Exapnd ball states
 (define ponged (Concept "ponged"))
 
-; Expand Pinging rules
+; Expand pinging rules
 (define ping-context-2 (list
   (State ball state-var)
   (Equal state-var ponged)))
@@ -39,7 +39,7 @@
     (GroundedSchema "scm: pong")
     (List)))
 
-; Define pong-component that uses custom step in place of `psi-step` and
+; Define pong component that uses custom step in place of `psi-step` and
 ; default action-selector `psi-get-satisfiable-rules`.
 (define (pong-step)
   (sleep 3)
