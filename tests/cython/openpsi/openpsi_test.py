@@ -108,7 +108,7 @@ class OpenPsiTest(TestCase):
         InheritanceLink(ConceptNode("apple-1"), ConceptNode("apple"))
         InheritanceLink(ConceptNode("apple-2"), ConceptNode("apple"))
 
-        delay = 0.2
+        delay = 5
         time.sleep(delay)
         openpsi.halt(component)
 
