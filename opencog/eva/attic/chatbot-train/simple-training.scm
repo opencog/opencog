@@ -128,7 +128,7 @@
         (set! result #f)
     )
     ; Remove the temp needed listified string
-    (cog-extract listified-string)
+    (cog-extract! listified-string)
 	result
 )
 

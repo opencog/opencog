@@ -288,7 +288,7 @@
 
     ; Delete the filter-from SetLink and its encompasing MapLink.
     ; FIXME: This results in 'result' being 'Invalid handle' sometimes.
-    ;(cog-extract-recursive filter-from)
+    ;(cog-extract-recursive! filter-from)
 
     result
 )

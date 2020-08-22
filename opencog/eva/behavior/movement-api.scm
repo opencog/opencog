@@ -15,7 +15,7 @@
 		(cog-get-link 'DefineLink 'DefinedPredicateNode
 			(DefinedPredicate STR)))
 
-	(if (not (null? dfn)) (cog-extract (car dfn)) #f))
+	(if (not (null? dfn)) (cog-extract! (car dfn)) #f))
 
 ; Printer stub -- Prints to the opencog log file.
 (define-public (prt-pred-defn PRED . REST)

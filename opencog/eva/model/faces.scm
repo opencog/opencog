@@ -116,7 +116,7 @@
 
  Quick hack to remove face ID from the room
 "
-	(cog-extract (EvaluationLink (PredicateNode "visible face")
+	(cog-extract! (EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id)))))
 
 ; -----------------------------------------------------------------
@@ -155,7 +155,7 @@
 
 ;; ----
 (define (undefine def)
-	(cog-extract (car (cog-incoming-set def))))
+	(cog-extract! (car (cog-incoming-set def))))
 
 #|
 ;; Example usage:

@@ -68,7 +68,7 @@
 							      )
 								; do not want a copy of the link for every changes to the node, just want one
 								(if (not (equal? (get-orig-link ni) old-link))
-									(cog-extract old-link)
+									(cog-extract! old-link)
 								)
 							      
 								(mod-link results-set (get-chunk-index ni) (get-link-index ni) new-link)
@@ -92,7 +92,7 @@
 						(mod-chunk results-set index (get-chunk inputs-set index))
 					)
 				
-					(cog-extract temp-set-link)
+					(cog-extract! temp-set-link)
 				)
 			)
 		)

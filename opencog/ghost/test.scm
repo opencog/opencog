@@ -266,7 +266,7 @@
   (define rtn (cog-outgoing-set rset))
 
   ; Remove the SetLink
-  (cog-extract rset)
+  (cog-extract! rset)
 
   rtn
 )

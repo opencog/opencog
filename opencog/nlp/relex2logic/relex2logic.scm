@@ -38,7 +38,7 @@
         ; XXX maybe this should be part of the ure module??
         (if (or (equal? 'ListLink (cog-type A-LINK)) IS-FROM-FC)
             (let ((returned-list (cog-outgoing-set A-LINK)))
-                    (cog-extract A-LINK)
+                    (cog-extract! A-LINK)
                     returned-list)
             (list A-LINK))
     )

@@ -356,7 +356,7 @@
 "
 	; Purge stuff associated with a single LgLinkInstanceNode
 	(define (extract-link-instance li)
-		(if (cog-atom? li) (cog-extract-recursive li))
+		(if (cog-atom? li) (cog-extract-recursive! li))
 	)
 
 	; Purge stuff associated with a single word-instance.
@@ -394,10 +394,10 @@
 					; Extract the NumberNode, but only if it's not used.
 					((eq? 'WordSequenceLink (cog-type x))
 						(let ((oset (cog-outgoing-set x)))
-							(cog-extract x)
-							(cog-extract (cadr oset))))))
+							(cog-extract! x)
+							(cog-extract! (cadr oset))))))
 			(cog-incoming-set wi))
-		(cog-extract-recursive wi)
+		(cog-extract-recursive! wi)
 	)
 
 	; Purge, recusively, all of the word-instances in the parse.
@@ -415,7 +415,7 @@
 					(extract-word-instance (car (cog-outgoing-set x)))))
 			(cog-incoming-set parse)
 		)
-		(cog-extract-recursive parse)
+		(cog-extract-recursive! parse)
 	)
 
 	; For each parse of the sentence, extract the parse
@@ -434,8 +434,8 @@
 				; Extract the NumberNode, but only if it's not used.
 				((eq? 'SentenceSequenceLink (cog-type x))
 					(let ((oset (cog-outgoing-set x)))
-						(cog-extract x)
-						(cog-extract (cadr oset))))
+						(cog-extract! x)
+						(cog-extract! (cadr oset))))
 			)
 		)
 		(cog-incoming-set sent)
@@ -443,7 +443,7 @@
 
 	; This delete will fail if there are still incoming links ...
 	; this is intentional. Its up to the caller to cleanup.
-	(cog-extract sent)
+	(cog-extract! sent)
 )
 
 ; ---------------------------------------------------------------------
@@ -467,11 +467,11 @@
 "
 	(let ((n 0))
 	; (define (delit atom) (set! n (+ n 1)) #f)
-	; (define (delit atom) (cog-extract-recursive atom) #f)
-	(define (delit atom) (cog-extract-recursive atom) (set! n (+ n 1)) #f)
+	; (define (delit atom) (cog-extract-recursive! atom) #f)
+	(define (delit atom) (cog-extract-recursive! atom) (set! n (+ n 1)) #f)
 
-	; (define (delone atom) (cog-extract atom) #f)
-	; (define (delone atom) (cog-extract atom) (set! n (+ n 1)) #f)
+	; (define (delone atom) (cog-extract! atom) #f)
+	; (define (delone atom) (cog-extract! atom) (set! n (+ n 1)) #f)
 	(define (delone atom) (extract-hypergraph atom) (set! n (+ n 1)) #f)
 
 	; Can't delete InheritanceLink, its used to mark wsd completed...
