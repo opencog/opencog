@@ -55,7 +55,7 @@
             (if (equal? (cog-arity fuzzy-results) 0)
                 (State fuzzy-reply no-result)
                 (let ((rtn (pick-and-generate (cog-outgoing-set fuzzy-results))))
-                    (cog-extract fuzzy-results)
+                    (cog-extract! fuzzy-results)
                     (if (nil? rtn)
                         ; Could happen if none of them can be used to generate
                         ; an actual sentence

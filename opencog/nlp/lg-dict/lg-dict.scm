@@ -50,12 +50,12 @@
 		(let ((dentry (LgDictEntry WORD (LgDictNode "en"))))
 			; XXX Argh. This function gets called in par-map in sureal,
 			; and because it races, the dentry could already be deleted
-			; by now, in another thread. If so, the the cog-extract throws.
+			; by now, in another thread. If so, the the cog-extract! throws.
 			; Yuck.
 			(catch 'wrong-type-arg
 				(lambda ()
 					(cog-execute! dentry)
-					(cog-extract dentry))
+					(cog-extract! dentry))
 				(lambda (key . args) #f))
 			(cog-incoming-by-type WORD 'LgDisjunct)
 		)

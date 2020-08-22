@@ -215,7 +215,7 @@
 		)
 
 		; Free up anything attached to the anchor.
-		(map cog-extract-recursive (get-grounded-replies))
+		(map cog-extract-recursive! (get-grounded-replies))
 
 		reply-words
 	)

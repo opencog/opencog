@@ -26,7 +26,7 @@
 					(if (nil? iset) '()
 						(let* ((lnk (car iset))
 								(item (cog-get-partner lnk ANCHOR)))
-							(cog-extract-recursive lnk)
+							(cog-extract-recursive! lnk)
 							item))))))
 )
 
@@ -50,11 +50,11 @@
   Release all items attached to ANCHOR.
 "
 
-	; Use cog-extract-recursive, not cog-extract, because some poorly
+	; Use cog-extract-recursive!, not cog-extract!, because some poorly
 	; written code somewhere is running a badly-scoped search pattern,
 	; which results in links getting wrapped in a SetLink. So the
 	; recursive-extract forcibly breaks such mal-formed usages.
-	(for-each (lambda (x) (cog-extract-recursive x))
+	(for-each (lambda (x) (cog-extract-recursive! x))
 		(cog-incoming-set anchor)
 	)
 )

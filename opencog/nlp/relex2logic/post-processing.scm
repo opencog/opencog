@@ -324,7 +324,7 @@
 		(define results-list (append-map helper marker-list))
 		; delete the markers links and the marker itself
 		(for-each extract-hypergraph marker-list)
-		(cog-extract marker)
+		(cog-extract! marker)
 		; return the results
 		results-list
 	)
