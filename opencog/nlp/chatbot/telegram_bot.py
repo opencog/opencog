@@ -6,9 +6,10 @@ TOKEN = 'YOUR_TOKEN'  # don't tell anyone!
 
 from opencog.scheme_wrapper import scheme_eval_as, scheme_eval
 
+python_atomspace = AtomSpace()
+scheme_eval(python_atomspace, "(use-modules (opencog) (opencog exec))")
 atomspace = scheme_eval_as('(cog-atomspace)')
 scheme_eval(atomspace, '(use-modules (ice-9 readline))')
-scheme_eval(atomspace, '(use-modules (opencog))')
 scheme_eval(atomspace, '(use-modules (opencog cogserver))')
 scheme_eval(atomspace, '(use-modules (opencog nlp))')
 scheme_eval(atomspace, '(use-modules (opencog nlp chatbot))')
