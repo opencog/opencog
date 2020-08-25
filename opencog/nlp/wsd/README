@@ -1,3 +1,57 @@
+                      Word Sense Disambiguation
+                      -------------------------
+
+The code in this directory is no longer maintained or used. However, it
+contains a very important seed of an idea -- fundamental, even -- within
+it, that has been long ignored, and needs to be revived and modernized.
+And this is why this directory has not been nuked into oblivion -- it is
+a kind-of a reminder to "modernize this stuff".
+
+The original idea is as follows. To ever word, associate a vector of
+word-senses (exactly like Webster's dictionary or any natural language
+dictionary). Then, given a sentence (or paragraph), for each word, look
+up the vector.  The claim is that the correct meaning for the sentence
+involves only those word-senses that are the most similar.
+
+The canonical example is "The church bells rang on Sunday" -- the "ring"
+could be "the ring on your finger" or "the sound" but since there are
+no hands or fingers or other body-parts in that sentence, we conclude
+it's the sound.   The "bell" could be the "bell curve" or "the doorbell"
+or something else. But bell-curves do not make sounds; door-bells and
+other bells do (oddly enough, the kind of sound they make is called
+"ringing"... Hmm .. interesting...). A "church" could be the abstract
+political structure in Rome, or it could be a reference to a physical,
+architectural building. Now, abstract political structures do not
+contain any "bells" (they do contain "dog-whistles", but that's something
+else), so, here, "church" probably means "the building".  Sunday, well,
+Sunday could simply be the 7th day of the week, for example, the radio
+advertisement "SUNDAY AT THE US30 SPEEDWAY THE TOP NITRO-FUELED MUNSTERS
+DRAG-U-LA WILL BE TAKING ON RAY FARHNER'S BOOTHILL EXPRESS...", but it's
+probably more about the religious holiday that comes around once a week.
+This also fits, because "churches" have something to do with religion.
+
+The desired generalization of the code here would be the creation of a
+"vector of factoids" for each word, and then one or more algorithms to
+compare factoids, to discover the most likely ones.  Comparison could be
+as trivial as counting the words-in-common in the definitions (e.g. the
+definition of "bell" probably has the word "ring" in it) but you could
+also do more complex reasoning (e.g. ringing is-a kind-of sound and
+bells perform sounds, therefore ...)
+
+Now, natural-language neural-nets do something like the above, but the
+actual "reasoning" that they perform is tightly mashed up and compressed
+into opaque weight-vectors of floats. We don't know what those
+weight-vectors are doing. (It's kind-of like trying to figure out what a
+compressed file is, without uncompressing it. It looks like random
+bytes. Neural nets are like "homomorphic computing" - they work directly
+with the compressed form.) So here, instead, the goal is to "uncompress"
+those weight-vectors, and work with a sparse representation, where we
+have "human-readable" access to the factoids attached to each word.  The
+sparse representation should be more accurate (as, famously, compression
+loses image quality/audio quality ....)
+
+
+Here is the original README:
 
                       Word Sense Disambiguation
                       -------------------------
