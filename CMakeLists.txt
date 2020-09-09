@@ -67,13 +67,12 @@ ELSE (COGUTIL_FOUND)
     MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF (COGUTIL_FOUND)
 
-# add the 'cmake' directory from cogutil to search path
-list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
-
-include(${COGUTIL_DATA_DIR}/cmake/OpenCogGccOptions.cmake)
-include(${COGUTIL_DATA_DIR}/cmake/OpenCogLibOptions.cmake)
-include(${COGUTIL_DATA_DIR}/cmake/OpenCogInstallOptions.cmake)
-include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
+# Add the 'cmake' directory from cogutil to search path
+LIST(APPEND CMAKE_MODULE_PATH ${COGUTIL_DATA_DIR}/cmake)
+INCLUDE(OpenCogGccOptions)
+INCLUDE(OpenCogLibOptions)
+INCLUDE(OpenCogInstallOptions)
+INCLUDE(Summary)
 
 # ===================================================================
 # Check for existance of various required, optional packages.
@@ -210,9 +209,12 @@ IF (NOT DEFINED ATOMSPACE_DATA_DIR)
 	SET (ATOMSPACE_DATA_DIR "${COGUTIL_DATA_DIR}")
 ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
 
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
+# Add the 'cmake' directory from atomspace to search path (should be
+# the same as cogutil, but we add it just in case)
+LIST(APPEND CMAKE_MODULE_PATH ${ATOMSPACE_DATA_DIR}/cmake)
+INCLUDE(OpenCogMacros)
+INCLUDE(OpenCogGuile)
+INCLUDE(OpenCogCython)
 
 # ==========================================================
 # Decide what to build, based on the packages found.
