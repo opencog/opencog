@@ -16,6 +16,7 @@
 (use-modules (srfi srfi-1) )
 
 (use-modules (opencog pointmem)); needed for maps
+(use-modules (opencog spacetime))
 
 (define last-speaker (Concept "last person who spoke"))
 (define prev-speaker (Concept "previous person who spoke"))

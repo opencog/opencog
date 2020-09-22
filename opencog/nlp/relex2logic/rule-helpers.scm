@@ -1,5 +1,5 @@
 (use-modules (srfi srfi-1))
-(use-modules (opencog))
+(use-modules (opencog) (opencog spacetime))
 
 ; -----------------------------------------------------------------------
 ; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
