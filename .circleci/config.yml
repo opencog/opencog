@@ -77,6 +77,13 @@ jobs:
             cd /ws/attention/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - run:
+          name: Checkout SpaceTime
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/spacetime /ws/spacetime
+            mkdir -p /ws/spacetime/build
+            cd /ws/spacetime/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
+      - run:
           name: Checkout PLN
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/pln /ws/pln

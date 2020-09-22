@@ -14,6 +14,7 @@
              (opencog exec)
              (opencog ure)
              (opencog attention-bank)
+             (opencog spacetime)
              (opencog nlp)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)

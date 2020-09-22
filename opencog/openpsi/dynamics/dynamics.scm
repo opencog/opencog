@@ -3,6 +3,7 @@
 (define-module (opencog openpsi dynamics)
   #:use-module (srfi srfi-1)
   #:use-module (opencog)
+  #:use-module (opencog spacetime)
   #:use-module (opencog openpsi)
   #:export (
     ; From emotion.scm
