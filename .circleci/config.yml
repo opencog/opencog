@@ -81,7 +81,7 @@ jobs:
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/spacetime /ws/spacetime
             mkdir -p /ws/spacetime/build
-            cd /ws/spacetim/build && cmake .. && make -j2 && make -j2 install
+            cd /ws/spacetime/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - run:
           name: Checkout PLN
