@@ -103,9 +103,6 @@
   ; Store the weight of each evaluated rule
   (define rule-weight-alist '())
 
-  ; For random number generation
-  (define total-weight 0)
-
   ; Store which rules satisfied the current context
   (define rules-satisfied '())
 
@@ -216,6 +213,7 @@
               rules-satisfied
             )
             (let* ((accum-weight 0)
+                   (total-weight (fold + 0 (map cdr rule-weight-alist)))
                    (cutoff (* total-weight (random:uniform (random-state-from-platform))))
                    (rule-rtn
                      (find
