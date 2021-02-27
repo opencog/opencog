@@ -273,7 +273,7 @@
 	(define results (cog-execute! maplk))
 
 	; Remove the bindlink, to avoid garbaging up the atomspace.
-	(cog-delete maplk)
+	(cog-extract! maplk)
 	results
 )
 
