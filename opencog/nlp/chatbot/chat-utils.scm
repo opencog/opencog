@@ -78,7 +78,7 @@
 
     (let ((sents (cog-execute! query)))
         (for-each last-sent (cog-outgoing-set sents))
-        (cog-delete sents)
+        (cog-extract! sents)
         result
     )
 )
@@ -118,7 +118,7 @@
 
     (let ((sents (cog-execute! query)))
         (for-each last-sent (cog-outgoing-set sents))
-        (cog-delete sents)
+        (cog-extract! sents)
         result
     )
 )
