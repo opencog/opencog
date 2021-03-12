@@ -176,7 +176,7 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 		sentence_delete(sent);
 		parse_options_delete(opts);
 		throw FatalErrorException(TRACE_INFO,
-			"LGParseLink: Unexpected parser error!");
+			"LGParseLink: Unexpected parser error while parsing >>%s<<", phrstr);
 	}
 
 	// If num_links is zero, try again, allowing null linked words.
