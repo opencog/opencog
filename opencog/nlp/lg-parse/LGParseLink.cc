@@ -146,12 +146,26 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 
 	// Work with the default parse options (mostly).
 	// Suppress printing of combinatorial-overflow warning.
-	// Larger linkage limit; improves sample accuracy.
-	// Set timeout to 30 seconds; the default is infinite.
+	// Set timeout to 60 seconds; the default is infinite.
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
-	parse_options_set_linkage_limit(opts, 38000);
 	parse_options_set_max_parse_time(opts, 60);
+
+	// The number of linkages to process.
+	int max_linkages = 0;
+	if (3 == _outgoing.size())
+	{
+		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
+		max_linkages = nnp->get_value() + 0.5;
+		parse_options_set_linkage_limit(opts, max_linkages);
+	}
+	else
+	{
+		// Avoid ingesting an absurdly large number of
+		// linkages. If the user really wants more, they
+		// need to ask for more.
+		parse_options_set_linkage_limit(opts, 100);
+	}
 
 	// XXX FIXME -- We should fish parse options out of the atomspace.
 	// Something like this, maybe:
@@ -198,14 +212,6 @@ ValuePtr LGParseLink::execute(AtomSpace* as, bool silent)
 
 	// Post-processor might not accept all of the parses.
 	num_linkages = sentence_num_valid_linkages(sent);
-
-	// The number of linkages to process.
-	int max_linkages = 0;
-	if (3 == _outgoing.size())
-	{
-		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
-		max_linkages = nnp->get_value() + 0.5;
-	}
 
 	// Takes limit from parameter only if it's positive and smaller
 	if ((max_linkages > 0) && (max_linkages < num_linkages))
