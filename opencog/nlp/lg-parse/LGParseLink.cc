@@ -282,8 +282,10 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		// no offsets, we need to handle those differently.
 		// strndupa allocates on stack, no need to free.
 		const char* wrd;
-		if (eb == sb)
+		if (eb == sb) // Both are equal to -1
+		{
 			wrd = linkage_get_word(lkg, w);
+		}
 		else
 		{
 			// eb points at the byte after the last char,
