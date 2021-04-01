@@ -10,8 +10,10 @@
 //
 // ====================================================================
 //
-WORD_NODE <- NODE
-WORD_CLASS_NODE <- NODE  // A signifier of a set of words
+// WordNodes are lexical, because we'll be using them to look up
+// information in a table.
+WORD_NODE <- LEXICAL_NODE
+WORD_CLASS_NODE <- LEXICAL_NODE  // A signifier of a set of words
 
 REFERENCE_LINK <- ORDERED_LINK
 
@@ -21,6 +23,10 @@ ACTION_LINK <- ORDERED_LINK
 
 // Custom atoms to identify documents, sentences, word instances.
 // These are emitted by RelEx and are used to input text into OpenCog.
+// XXX FIXME - Every place a ConceptNode is used below, it should
+// probably be replaced by LexicalNode. That's because these nodes are
+// used to perform a lookup in a table. They're not really abstract
+// "concepts".
 DOCUMENT_NODE <- CONCEPT_NODE
 SENTENCE_NODE <- CONCEPT_NODE
 SENTENCE_LINK <- ASSOCIATIVE_LINK
