@@ -124,6 +124,5 @@ bool opencog::haveDictEntry(Dictionary _dictionary,
                             const std::string& word)
 {
 	// See if we know about this word, or not.
-// XXX As above, this should make use of the regexes!
-	return boolean_dictionary_lookup(_dictionary, word.c_str());
+	return dictionary_word_is_known(_dictionary, word.c_str());
 }
