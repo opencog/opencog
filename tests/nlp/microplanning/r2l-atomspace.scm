@@ -2815,11 +2815,11 @@
    (WordInstanceNode "?@38ea74a1-60c9-447a-ace3-1ce881f5e434")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -2828,11 +2828,11 @@
    (WordInstanceNode ".@b9a01102-f039-47c5-bf25-2488fecefbc1")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -2841,7 +2841,7 @@
    (WordInstanceNode "brown@62945422-ac5f-4aef-bca6-4491369928dc")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "+")
       )
    )
@@ -2850,15 +2850,15 @@
    (WordInstanceNode "steals@40cc074b-75f1-4e8d-a1dc-b55c529078f3")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -2867,11 +2867,11 @@
    (WordInstanceNode "grow@4cf777c1-a989-4aac-831c-8c1175d4b197")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
    )
@@ -2880,15 +2880,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@8ea9842b-a66c-42bf-8a32-1cbaa596c457_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -2897,11 +2897,11 @@
    (WordInstanceNode "they@deb8f479-5b5a-447c-9ef3-c31a60e21371")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "+")
       )
    )
@@ -2910,15 +2910,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@c32280f6-14d5-4af1-adfb-ec99494c1dd4_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -2927,11 +2927,11 @@
    (WordInstanceNode "grow@cbf77b70-75b4-4902-9339-a54639377ec4")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
    )
@@ -2940,11 +2940,11 @@
    (WordInstanceNode "John@6a8c11d0-cfb9-4740-a88e-1aaab20af288")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "+")
       )
    )
@@ -2953,11 +2953,11 @@
    (WordInstanceNode ".@a5482656-464e-46b9-9b87-ec75cabba1af")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -2966,15 +2966,15 @@
    (WordInstanceNode "dogs@e80edc9e-b5c5-4cae-90d9-eb91296b2e18")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Dmc")
+         (LgConnNode "Dmc")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "+")
       )
    )
@@ -2983,7 +2983,7 @@
    (WordInstanceNode "the@b93a907b-84f5-42c1-bc1f-abaeb0dcfd3d")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -2992,15 +2992,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@b98794e2-4a35-4642-b0ac-59914848df22_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -3009,16 +3009,16 @@
    (WordInstanceNode "bones@b30ec255-69ae-433d-bdb4-4ba943ce659f")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "-")
          (LgConnMultiNode "@")
       )
       (LgConnector
-         (LgConnectorNode "Dmc")
+         (LgConnNode "Dmc")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Op")
+         (LgConnNode "Op")
          (LgConnDirNode "-")
       )
    )
@@ -3027,11 +3027,11 @@
    (WordInstanceNode "tree@70199077-d25f-4abd-9519-5fddd34c5e18")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ds**c")
+         (LgConnNode "Ds**c")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Os")
+         (LgConnNode "Os")
          (LgConnDirNode "-")
       )
    )
@@ -3040,11 +3040,11 @@
    (WordInstanceNode "'s@bacbf373-f106-43f9-93c1-fba6c106a7bd")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "YS")
+         (LgConnNode "YS")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -3053,15 +3053,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@bb54d100-5325-400d-ac0b-9f5d2c1bd4bf_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -3070,7 +3070,7 @@
    (WordInstanceNode "tiny@7db7acbd-9ef8-483c-88e6-5e04964b0eef")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "+")
       )
    )
@@ -3079,7 +3079,7 @@
    (WordInstanceNode "the@a8b4b026-e253-4adc-9b97-55d84de4a7c7")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -3088,7 +3088,7 @@
    (WordInstanceNode "the@cce7f69a-9d6d-41a1-b0db-acd72486931b")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -3097,7 +3097,7 @@
    (WordInstanceNode "the@526b055a-cd08-46e5-8e1a-04132d9a996a")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -3106,11 +3106,11 @@
    (WordInstanceNode "I@58decb35-c9b0-4328-88a2-f1d0ff42470d")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Sp*i")
+         (LgConnNode "Sp*i")
          (LgConnDirNode "+")
       )
    )
@@ -3119,15 +3119,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@73cbe607-c500-435c-9893-16704bb84be1_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -3136,11 +3136,11 @@
    (WordInstanceNode ".@2997225b-691d-473e-a8ac-bb1790e8e42e")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -3149,15 +3149,15 @@
    (WordInstanceNode "climbs@0addbb01-d017-47ff-bd2d-c7a2afa3c60c")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -3166,7 +3166,7 @@
    (WordInstanceNode "the@e44e8335-3aec-4990-8816-9c54aef4d822")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -3175,20 +3175,20 @@
    (WordInstanceNode "cat@9f3565d0-834e-4b30-a598-11cfb8adb3b9")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "-")
          (LgConnMultiNode "@")
       )
       (LgConnector
-         (LgConnectorNode "Ds**x")
+         (LgConnNode "Ds**x")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "+")
       )
    )
@@ -3197,11 +3197,11 @@
    (WordInstanceNode "John@82cd9bb7-b68a-44d5-a5ee-8dd96313532b")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "+")
       )
    )
@@ -3210,11 +3210,11 @@
    (WordInstanceNode ".@45eac6cd-fcff-4f59-971f-f232ec685eff")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -3223,11 +3223,11 @@
    (WordInstanceNode "what@63e66bb3-7efa-4580-b6b0-ce8411276a2f")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ws")
+         (LgConnNode "Ws")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ss*w")
+         (LgConnNode "Ss*w")
          (LgConnDirNode "+")
       )
    )
@@ -3236,15 +3236,15 @@
    (WordInstanceNode "Sam@8c89bbba-4638-4370-a4ad-4c8918f3bdc6")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "ZZZ")
+         (LgConnNode "ZZZ")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "+")
       )
    )
@@ -3253,15 +3253,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@6c386699-9d21-4d1f-8eec-ff8518c18d90_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -3270,11 +3270,11 @@
    (WordInstanceNode ".@d82aa918-166e-4be0-aecc-3e85fb7e622a")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -3283,7 +3283,7 @@
    (WordInstanceNode "the@47de1134-299c-48c7-b5d2-9ff76f3d3ce1")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "D")
+         (LgConnNode "D")
          (LgConnDirNode "+")
       )
    )
@@ -3292,15 +3292,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@c98270c2-c94e-47ec-8d57-94d67930c972_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -3309,15 +3309,15 @@
    (WordInstanceNode "steals@95cb50da-10ac-493c-928a-d52e6f2c3644")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -3326,11 +3326,11 @@
    (WordInstanceNode "orange@138d2783-960d-4030-86d9-e19597d3b5e9")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ds**v")
+         (LgConnNode "Ds**v")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Os")
+         (LgConnNode "Os")
          (LgConnDirNode "-")
       )
    )
@@ -3339,11 +3339,11 @@
    (WordInstanceNode "table@54e19a50-96a3-48c4-805b-954e1c91dce6")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ds**c")
+         (LgConnNode "Ds**c")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Os")
+         (LgConnNode "Os")
          (LgConnDirNode "-")
       )
    )
@@ -3352,7 +3352,7 @@
    (WordInstanceNode "it@3cbaf1c9-026d-4464-9fb3-afcd4bc09574")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Osm")
+         (LgConnNode "Osm")
          (LgConnDirNode "-")
       )
    )
@@ -3361,15 +3361,15 @@
    (WordInstanceNode "LEFT-WALL@sentence@8989dbfa-4ebd-4b78-9b5d-11c48fb87475_parse_0")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ws")
+         (LgConnNode "Ws")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "hWV")
+         (LgConnNode "hWV")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "+")
       )
    )
@@ -3378,11 +3378,11 @@
    (WordInstanceNode ".@1d3c5cc7-1ae2-42f3-a439-2200187b9cda")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -3391,15 +3391,15 @@
    (WordInstanceNode "mean@3973436d-87f8-4abf-b5c8-f297c173c6a7")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -3408,15 +3408,15 @@
    (WordInstanceNode "burns@e491539f-5f54-487b-ace6-d1055a422ec5")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -3425,7 +3425,7 @@
    (WordInstanceNode "apple@dd5f32bb-5bca-4b23-81f0-39f71e06b55f")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "YS")
+         (LgConnNode "YS")
          (LgConnDirNode "+")
       )
    )
@@ -3434,15 +3434,15 @@
    (WordInstanceNode "collects@553733bb-8159-44a5-a0b0-1b815aeafdce")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -3451,7 +3451,7 @@
    (WordInstanceNode "tall@66156a86-5eb9-4eaf-80ee-f17a04d1de7e")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "+")
       )
    )
@@ -3460,16 +3460,16 @@
    (WordInstanceNode "man@8cffb349-5881-433f-af6d-79cd72c23aa7")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "-")
          (LgConnMultiNode "@")
       )
       (LgConnector
-         (LgConnectorNode "Ds**x")
+         (LgConnNode "Ds**x")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Os")
+         (LgConnNode "Os")
          (LgConnDirNode "-")
       )
    )
@@ -3478,11 +3478,11 @@
    (WordInstanceNode ".@cc6f999d-f779-494b-81c8-8d9e36a02854")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Xp")
+         (LgConnNode "Xp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "RW")
+         (LgConnNode "RW")
          (LgConnDirNode "+")
       )
    )
@@ -3490,539 +3490,539 @@
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Os@ef5b6df6-63ef-49bf-a356-95ecb0de3182")
    (LgConnector
-      (LgConnectorNode "O")
+      (LgConnNode "O")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Os")
+      (LgConnNode "Os")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@5b3d6cfa-2827-44db-afa7-f1d4295f75e9")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "A@fdc0827b-f1be-4b48-b02b-3c9c9fd9c292")
    (LgConnector
-      (LgConnectorNode "A")
+      (LgConnNode "A")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "A")
+      (LgConnNode "A")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Os@0c2576eb-fb1d-40e2-b2ef-f8768374eb15")
    (LgConnector
-      (LgConnectorNode "O")
+      (LgConnNode "O")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Os")
+      (LgConnNode "Os")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**x@b7d96691-41fe-42a2-9eec-966c891bed74")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**x")
+      (LgConnNode "Ds**x")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**v@180cd187-d804-4373-b04e-c2720fa9446e")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**v")
+      (LgConnNode "Ds**v")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ws@7f9d7031-01b0-47ea-9702-3e72f00701e9")
    (LgConnector
-      (LgConnectorNode "Ws")
+      (LgConnNode "Ws")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ws")
+      (LgConnNode "Ws")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@539473f6-9d84-4ad6-aa37-79c82ac5e2eb")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@18722252-fbb2-4b3c-9bf8-698dfbb84fa7")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Dmc@e48da3e3-c273-4524-b128-25ff6a9fa32d")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Dmc")
+      (LgConnNode "Dmc")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**x@70f0028c-01ea-4d07-9a17-8c945e521ff8")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**x")
+      (LgConnNode "Ds**x")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Sp@822550bc-a595-45a2-854a-d56b0c8431c3")
    (LgConnector
-      (LgConnectorNode "Sp")
+      (LgConnNode "Sp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Sp")
+      (LgConnNode "Sp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@0b47785f-f0f6-4d74-8930-2b3d70071915")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ss@850ba150-f0de-4afe-9493-a63201b47feb")
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Op@9f5290a2-0443-4bb5-af58-c5bf0ba96440")
    (LgConnector
-      (LgConnectorNode "O")
+      (LgConnNode "O")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Op")
+      (LgConnNode "Op")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**c@2c49dbae-8e8a-49e6-9cc5-0ce0cce3bd19")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**c")
+      (LgConnNode "Ds**c")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Dmc@c58316a0-da3c-4ec0-9182-4e26abb85e28")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Dmc")
+      (LgConnNode "Dmc")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@79e5f188-db8b-4eb9-bb19-949d174efa78")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ss@55caf999-1fa0-4987-8bc7-7e2778a3badb")
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ss@e21122f0-759b-4f4d-b1f9-594460940b2b")
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@13b227dd-3546-47ac-a5c0-c8ef726e9590")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@0e424683-92df-4dbb-8f67-9f2e27c8ddb4")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@8cafae31-7a72-4403-ba8b-6b808b0b9481")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@312908d5-ef45-42e4-bb71-7f61fcc48e47")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "A@bbe5ff2a-efde-4d6a-bc68-42c23274c1f1")
    (LgConnector
-      (LgConnectorNode "A")
+      (LgConnNode "A")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "A")
+      (LgConnNode "A")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Os@c89ff359-9ebb-4375-9f41-42fe3d4d3d17")
    (LgConnector
-      (LgConnectorNode "O")
+      (LgConnNode "O")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Os")
+      (LgConnNode "Os")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@87538538-aa01-489d-be9e-ff87e958f35f")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@78f0be3e-2f25-4e30-8535-131543046a08")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@3a072e59-ef1d-4ef0-b740-d1ae28f8fba8")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@fc26f6ee-76f7-4505-95c5-df49d63764fc")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "A@b14b24ed-ce2f-4ccc-8daa-1cdc0b99efb4")
    (LgConnector
-      (LgConnectorNode "A")
+      (LgConnNode "A")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "A")
+      (LgConnNode "A")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "YS@709e8d11-fce7-44e0-9049-99fe5d3c2c1d")
    (LgConnector
-      (LgConnectorNode "YS")
+      (LgConnNode "YS")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "YS")
+      (LgConnNode "YS")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@01c52027-403c-4a9b-9531-a38fcd163c4f")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Os@d0d1e8dc-63a8-42e6-9988-c526d2ab72b0")
    (LgConnector
-      (LgConnectorNode "O")
+      (LgConnNode "O")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Os")
+      (LgConnNode "Os")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@93de2567-d437-45b2-8f43-8e3b98ac1a57")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Osm@9a50b435-4695-4def-bca2-d479e3f75123")
    (LgConnector
-      (LgConnectorNode "O")
+      (LgConnNode "O")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Osm")
+      (LgConnNode "Osm")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@bad30900-81b5-411c-9fb8-37dcdb01dbad")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**c@e7688675-c89e-4403-a208-9ab2dcd9558f")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**c")
+      (LgConnNode "Ds**c")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@a31eb17a-cc93-49f8-9b82-a0f321fd5afc")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@6b102f24-48c9-4222-a053-3fb3775f6382")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Sp*i@694b5346-56d3-4894-a8ce-71b1257fefca")
    (LgConnector
-      (LgConnectorNode "Sp*i")
+      (LgConnNode "Sp*i")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Sp")
+      (LgConnNode "Sp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@c73defe8-cf06-4a11-9d6a-d82069f8c8e9")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@38516ea5-6d18-41c7-b881-d7b7862d6e6a")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Xp@617d8bcc-85c2-4408-9110-c09cb370fef5")
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Xp")
+      (LgConnNode "Xp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ss*w@888051a7-500a-4309-a0a2-36e11bc44210")
    (LgConnector
-      (LgConnectorNode "Ss*w")
+      (LgConnNode "Ss*w")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Sp@ca87f55c-26f9-4473-b66a-7373d6708e6a")
    (LgConnector
-      (LgConnectorNode "Sp")
+      (LgConnNode "Sp")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Sp")
+      (LgConnNode "Sp")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ss@aa79ca62-9b81-407b-bd16-a1cc1d8b7707")
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ss")
+      (LgConnNode "Ss")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Wd@d533752e-bede-4117-9b47-c06ce5bb7494")
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Wd")
+      (LgConnNode "Wd")
       (LgConnDirNode "-")
    )
 )
 (LgLinkInstanceLink
    (LgLinkInstanceNode "WV@0bc59e2f-8c60-4258-a4e8-381914bd0ba8")
    (LgConnector
-      (LgConnectorNode "hWV")
+      (LgConnNode "hWV")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "dWV")
+      (LgConnNode "dWV")
       (LgConnDirNode "-")
    )
 )

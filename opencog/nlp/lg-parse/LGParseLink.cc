@@ -340,7 +340,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 					"LGParseLink: Dictionary has a bug; Uuexpectedly long connector=%s", djstr);
 			strncpy(cstr, p, len);
 			cstr[len] = 0;
-			Handle con(createNode(LG_CONNECTOR_NODE, cstr));
+			Handle con(createNode(LG_CONN_NODE, cstr));
 			cstr[0] = *(p+len);
 			cstr[1] = 0;
 			Handle dir(createNode(LG_CONN_DIR_NODE, cstr));
@@ -395,10 +395,10 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		as->add_link(LG_LINK_INSTANCE_LINK,
 			linst,
 			as->add_link(LG_CONNECTOR,
-				as->add_node(LG_CONNECTOR_NODE, llab),
+				as->add_node(LG_CONN_NODE, llab),
 				as->add_node(LG_CONN_DIR_NODE, "+")),
 			as->add_link(LG_CONNECTOR,
-				as->add_node(LG_CONNECTOR_NODE, rlab),
+				as->add_node(LG_CONN_NODE, rlab),
 				as->add_node(LG_CONN_DIR_NODE, "-")));
 	}
 

@@ -25,7 +25,7 @@ The `(cog-incoming-set (WordNode "..."))` should resemble the below:
    (LgDisjunct
       (WordNode "...")
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "-")
       )
    )
@@ -33,11 +33,11 @@ The `(cog-incoming-set (WordNode "..."))` should resemble the below:
       (WordNode "...")
       (LgAnd
          (LgConnector
-            (LgConnectorNode "Sp")
+            (LgConnNode "Sp")
             (LgConnDirNode "-")
          )
          (LgConnector
-            (LgConnectorNode "dWV")
+            (LgConnNode "dWV")
             (LgConnDirNode "-")
          )
          ...
@@ -62,8 +62,8 @@ where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.
 Note that `LgOr` is actually a menu choice, and NOT a boolean OR.
 
 Each LG connector is fully described within the `LgConnector` link,
-with the connector name in `LgConnectorNode`, direction in
-`LgConnDirNode`, and the multi-connect property in `LgConnMultiNode`.
+with the connector name in `LgConnNode`, direction in `LgConnDirNode`,
+and the multi-connect property in `LgConnMultiNode`.
 
 The connector ordering is kept intact. Connectors and their meaning and
 usage are described in the [Link Grammar documentation](http://www.abisource.com/projects/link-grammar/dict/introduction.html),
