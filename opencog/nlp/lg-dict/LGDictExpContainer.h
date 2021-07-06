@@ -40,7 +40,7 @@ namespace opencog
 class LGDictExpContainer
 {
 public:
-    LGDictExpContainer(Exp_type, Exp* exp);
+    LGDictExpContainer(Exp_type, const Exp* exp);
     LGDictExpContainer(Exp_type, const std::vector<LGDictExpContainer>&);
 
     HandleSeq to_handle(const Handle& h);
