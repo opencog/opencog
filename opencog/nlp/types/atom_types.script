@@ -123,7 +123,7 @@ LG_PARSE_MINIMAL <- LG_PARSE_LINK
 
 // Connector: same meaning and syntax as in link-grammar, except that
 // the direction and the multi-connector parts get distinct types.
-LG_CONNECTOR_NODE <- PREDICATE_NODE   // e.g. "MX"
+LG_CONN_NODE <- PREDICATE_NODE   // e.g. "MX"
 LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
 LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 

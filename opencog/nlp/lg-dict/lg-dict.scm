@@ -100,7 +100,7 @@
 
 (define-public (lg-conn-get-type conn)
 "
-  lg-conn-get-type CON - Get the LgConnectorNode out of LgConnector link
+  lg-conn-get-type CON - Get the LgConnNode out of LgConnector link
 "
 	(cog-outgoing-atom conn 0)
 )

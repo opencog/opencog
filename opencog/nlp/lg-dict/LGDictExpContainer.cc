@@ -230,7 +230,7 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
 {
     static Handle multi(createNode(LG_CONN_MULTI_NODE, "@"));
     static Handle optnl(createLink(LG_CONNECTOR,
-                           Handle(createNode(LG_CONNECTOR_NODE, "0"))));
+                           Handle(createNode(LG_CONN_NODE, "0"))));
 
     if (m_type == CONNECTOR_type)
     {
@@ -238,7 +238,7 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
         // blown up into pairs of disjuncts, one with and one without.
         if (m_string == "OPTIONAL") return { optnl };
 
-        Handle connector(createNode(LG_CONNECTOR_NODE,
+        Handle connector(createNode(LG_CONN_NODE,
                                     std::move(std::string(m_string))));
         Handle direction(createNode(LG_CONN_DIR_NODE,
                           std::move(std::string(1, m_direction))));

@@ -85,11 +85,11 @@ links of the style:
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**c@4432ef3-3c4e-42a9-8072-9975d168a12c")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**c")
+      (LgConnNode "Ds**c")
       (LgConnDirNode "-")
    )
 )
@@ -127,11 +127,11 @@ to link the two words in the sentence.
 (LgLinkInstanceLink
    (LgLinkInstanceNode "Ds**c@4432ef3-3c4e-42a9-8072-9975d168a12c")
    (LgConnector
-      (LgConnectorNode "D")
+      (LgConnNode "D")
       (LgConnDirNode "+")
    )
    (LgConnector
-      (LgConnectorNode "Ds**c")
+      (LgConnNode "Ds**c")
       (LgConnDirNode "-")
    )
 )

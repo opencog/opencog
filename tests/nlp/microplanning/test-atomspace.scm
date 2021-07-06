@@ -655,7 +655,7 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "tall@7bd00625-1ff7-4e77-9900-5e943141d281")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "+")
       )
    )
@@ -664,15 +664,15 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "mean@524fdbed-149e-47ce-a2a2-494e80962580")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -681,11 +681,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "I@5219488c-e6f1-413a-8494-77deeb9f33f3")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Sp*i")
+         (LgConnNode "Sp*i")
          (LgConnDirNode "+")
       )
    )
@@ -694,11 +694,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Sp")
+         (LgConnNode "Sp")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "dWV")
+         (LgConnNode "dWV")
          (LgConnDirNode "-")
       )
    )
@@ -707,11 +707,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "plants@0f71e243-1327-49af-8020-f6aa3ef0d273")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "VJr*i")
+         (LgConnNode "VJr*i")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
@@ -720,11 +720,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "collects@78c90976-cb18-4b09-9169-00bc3cc6a70a")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "VJl*i")
+         (LgConnNode "VJl*i")
          (LgConnDirNode "+")
       )
    )
@@ -733,7 +733,7 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "tiny@ab783d83-a6cb-4be8-9d6d-45b97a1bd955")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "+")
       )
    )
@@ -742,11 +742,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Dmc")
+         (LgConnNode "Dmc")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Op")
+         (LgConnNode "Op")
          (LgConnDirNode "-")
       )
    )
@@ -755,7 +755,7 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "eats@5ec780eb-a98b-4650-a680-3b0163a8822e")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "VJr*t")
+         (LgConnNode "VJr*t")
          (LgConnDirNode "-")
       )
    )
@@ -764,7 +764,7 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "steals@d88d647d-5c02-481e-b8d0-cfd20d33fb23")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "VJl*t")
+         (LgConnNode "VJl*t")
          (LgConnDirNode "+")
       )
    )
@@ -773,11 +773,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "Bob@fd5fb72f-0d3f-4517-8b20-8147df2ee7d3")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "+")
       )
    )
@@ -786,11 +786,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "climbs@cc237a97-1cde-4939-bf7e-93d607eb3d7d")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
       (LgConnector
-         (LgConnectorNode "VJl*i")
+         (LgConnNode "VJl*i")
          (LgConnDirNode "+")
       )
    )
@@ -799,7 +799,7 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "green@7bdd117a-14ab-4699-81e3-f89259d848df")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "+")
       )
    )
@@ -808,15 +808,15 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "robot@91c3e125-bca8-42f3-8a48-deea6a29c0de")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ds**c")
+         (LgConnNode "Ds**c")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Wd")
+         (LgConnNode "Wd")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ss")
+         (LgConnNode "Ss")
          (LgConnDirNode "+")
       )
    )
@@ -825,16 +825,16 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "apple@ca552878-32d4-41e3-aaa3-34239ba98f34")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "A")
+         (LgConnNode "A")
          (LgConnDirNode "-")
          (LgConnMultiNode "@")
       )
       (LgConnector
-         (LgConnectorNode "Dmu")
+         (LgConnNode "Dmu")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Ou")
+         (LgConnNode "Ou")
          (LgConnDirNode "-")
       )
    )
@@ -843,11 +843,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "tree@160bc480-942c-4421-b798-04c004c011f5")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "Ds**c")
+         (LgConnNode "Ds**c")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "Os")
+         (LgConnNode "Os")
          (LgConnDirNode "-")
       )
    )
@@ -856,11 +856,11 @@ For now, most of the results are in r2l-atomspace.scm
    (WordInstanceNode "grabs@50f22d3b-c293-41e7-afdd-b2731d6578ef")
    (LgAnd
       (LgConnector
-         (LgConnectorNode "VJr*i")
+         (LgConnNode "VJr*i")
          (LgConnDirNode "-")
       )
       (LgConnector
-         (LgConnectorNode "O")
+         (LgConnNode "O")
          (LgConnDirNode "+")
       )
    )
