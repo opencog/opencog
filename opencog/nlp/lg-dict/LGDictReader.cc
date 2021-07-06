@@ -54,11 +54,11 @@ static LGDictExpContainer lg_exp_to_container(const Exp* exp)
         el = el->next;
     }
 #else
-    const Exp* subexp = lg_exp_operand_first(exp);
+    const Exp* subexp = lg_exp_operand_first((Exp*) exp);
     while (subexp)
     {
         subcontainers.push_back(lg_exp_to_container(subexp));
-        subexp = lg_exp_operand_next(subexp);
+        subexp = lg_exp_operand_next((Exp*) subexp);
     }
 #endif
 
