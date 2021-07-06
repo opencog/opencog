@@ -36,7 +36,7 @@ using namespace opencog;
  * @param exp   the input expression trees
  * @return      the flatten container
  */
-static LGDictExpContainer lg_exp_to_container(Exp* exp)
+static LGDictExpContainer lg_exp_to_container(const Exp* exp)
 {
     if (CONNECTOR_type == exp->type)
         return LGDictExpContainer(CONNECTOR_type, exp);
@@ -54,11 +54,11 @@ static LGDictExpContainer lg_exp_to_container(Exp* exp)
         el = el->next;
     }
 #else
-    Exp* subexp = lg_exp_operand_first(exp);
+    const Exp* subexp = lg_exp_operand_first((Exp*) exp);
     while (subexp)
     {
         subcontainers.push_back(lg_exp_to_container(subexp));
-        subexp = lg_exp_operand_next(subexp);
+        subexp = lg_exp_operand_next((Exp*) subexp);
     }
 #endif
 

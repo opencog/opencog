@@ -36,7 +36,7 @@ using namespace opencog;
  * @param t     must be CONNECTOR_type
  * @param exp   pointer to the LG Exp structure
  */
-LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
+LGDictExpContainer::LGDictExpContainer(Exp_type t, const Exp* exp)
     : m_type(t)
 {
     if (t != CONNECTOR_type)
