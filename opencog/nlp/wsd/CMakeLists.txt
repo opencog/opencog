@@ -28,7 +28,7 @@ ADD_LIBRARY (wsd SHARED
 #	WordSenseProcessor.cc
 )
 
-ADD_DEPENDENCIES(wsd nlp_atom_types)
+ADD_DEPENDENCIES(wsd nlp_oc_atom_types)
 
 TARGET_LINK_LIBRARIES(wsd nlp-types)
 
