@@ -3,12 +3,10 @@ OpenCog
 
 [![CircleCI](https://circleci.com/gh/opencog/opencog.svg?style=svg)](https://circleci.com/gh/opencog/opencog)
 
-OpenCog is a framework for developing AI systems, especially appropriate
-for integrative multi-algorithm systems, and artificial general intelligence
-systems.  Though much work remains to be done, it currently contains a
-functional core framework, and a number of cognitive agents at varying levels
-of completion, some already displaying interesting and useful functionalities
-alone and in combination.
+OpenCog is a framework integrating multiple distinct algorithms and systems.
+The long-term goal is to develop artificial general intelligence systems.
+The short term goal is to practice cobbling together a functional system
+that is capable of interesting behaviors.
 
 The main project site is at https://opencog.org
 
@@ -17,9 +15,9 @@ Overview
 OpenCog consists of multiple components. These can be found in assorted
 git repos under https://github.com/opencog
 
-This git repository contains an assortment of natural language tools,
-embodied chatbots, and control/action-selection mechanisms.
-These include:
+This git repository contains a crude natural language processing
+pipeline, several embodied chatbots, and some control/action-selection
+mechanisms.  These include:
 
 * Ghost, a Chatscript-compatible chatbot with additional capabilities
   for accepting visual sensory input, and for controlling robot
