@@ -118,24 +118,9 @@ The idea was that if there was a question, and grammatical pattern
 machining cannot find an exact answer in the AtomSpace, then perhaps
 a "fuzzy" match might find something "good enough". Underwhelming.
 
-ghost
------
-A dialog authoring system. Resembles ChatScript.
-
 irc
 ---
 Interfaces to IRC; provide an easy way to connect opencog to IRC.
-
-lg-dict
--------
-Import Link Grammar dictionary entries into the AtomSpace. These are
-used by `sureal` to generate grammatically correct sentences.
-Implements the `LgDictNode` and the `LgDictLookup` atoms.
-
-lg-parse
---------
-Parse sentences and place parse results into the AtomSpace. Implements
-the `LgParse` atom.
 
 lojban
 ------
@@ -161,8 +146,7 @@ viable alternative.
 scm
 ---
 The scm directory contains miscellaneous scheme scripts of general
-utility for NLP work. This includes scripts for pulling out link-grammar
-disjuncts from parse data.
+utility for NLP work.
 
 sentiment
 ---------
