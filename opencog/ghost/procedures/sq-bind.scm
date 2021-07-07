@@ -20,7 +20,7 @@
       (WordInstance (Variable "$word-inst-p") (Variable "$parse"))
       (Reference (Variable "$pred-inst") (Variable "$word-inst-p"))
       (Implication (Variable "$pred-inst") (Variable "$pred"))
-      (Tense (Variable "$word-inst-p") (Variable "$tense")))
+      (TenseLink (Variable "$word-inst-p") (Variable "$tense")))
     (list
       (Inheritance
         (InterpretationNode "MicroplanningNewSentence")
