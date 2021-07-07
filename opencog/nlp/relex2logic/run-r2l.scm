@@ -7,7 +7,7 @@
 (use-modules (ice-9 readline))
 (activate-readline)
 
-(use-modules (opencog) (opencog nlp))
+(use-modules (opencog) (opencog nlp) (opencog nlp oc))
 (use-modules (opencog nlp relex2logic))
 
 ; The demo uses the `nlp-parse` function in the chatbot.

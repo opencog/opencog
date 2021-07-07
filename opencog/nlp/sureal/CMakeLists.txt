@@ -16,6 +16,7 @@ TARGET_LINK_LIBRARIES(sureal
 	lg-dict
 	neighbors
 	nlp-types
+	nlp-oc-types
 	${ATOMSPACE_LIBRARIES}
 )
 

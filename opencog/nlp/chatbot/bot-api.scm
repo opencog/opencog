@@ -5,7 +5,7 @@
 ; Somewhat generic, somewhat IRC-specific.
 ;
 
-(use-modules (opencog nlp) (opencog nlp fuzzy))
+(use-modules (opencog nlp) (opencog nlp oc) (opencog nlp fuzzy))
 
 ;-------------------------------------------------------------------
 ;--------------------------------------------------------------------

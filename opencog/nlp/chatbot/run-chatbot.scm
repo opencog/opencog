@@ -8,7 +8,7 @@
 ; Stuff actually needed to get the chatbot running...
 (use-modules (opencog) (opencog cogserver))
 
-(use-modules (opencog nlp) (opencog nlp chatbot))
+(use-modules (opencog nlp) (opencog nlp oc) (opencog nlp chatbot))
 (use-modules (opencog nlp relex2logic))
 
 ; Unfortunately, due to the design of the URE, the list of rules

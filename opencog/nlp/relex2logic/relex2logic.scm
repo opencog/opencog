@@ -4,6 +4,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog nlp))
+(use-modules (opencog nlp oc))
 (use-modules (opencog ure))
 
 (load "relex2logic/rule-utils.scm")

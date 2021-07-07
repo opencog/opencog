@@ -7,6 +7,7 @@
              (opencog exec)
              (opencog ure)
              (opencog nlp)
+             (opencog nlp oc)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)
              (opencog nlp relex2logic))

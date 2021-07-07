@@ -7,6 +7,7 @@
              (ice-9 optargs)      ; for doing define*-public
              (opencog)
              (opencog nlp)
+             (opencog nlp oc)
              (opencog nlp sureal)
              (opencog nlp microplanning))
 
