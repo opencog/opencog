@@ -3,7 +3,7 @@
 ;;anaphor is "their"
 ;;antecedent is "waitresses"
 
-(use-modules (opencog) (opencog nlp))
+(use-modules (opencog) (opencog nlp) (opencog nlp oc))
 
 
 ;; Expected result:
