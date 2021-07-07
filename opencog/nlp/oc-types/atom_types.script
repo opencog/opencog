@@ -20,9 +20,6 @@ ACTION_LINK <- ORDERED_LINK
 UTTERANCE_NODE <- CONCEPT_NODE
 DIALOG_NODE <- CONCEPT_NODE
 
-// Ghost (was chatlang) needs a PHRASE_NODE
-PHRASE_NODE <- NODE
-
 // Custom atoms to identify features, relations
 // These are not used anywhere, right???
 FEATURE_NODE <- PREDICATE_NODE

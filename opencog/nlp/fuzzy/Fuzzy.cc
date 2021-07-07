@@ -28,6 +28,7 @@
 #include <opencog/neighbors/GetPredicates.h>
 #include <opencog/neighbors/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
+#include <opencog/nlp/oc-types/atom_types.h>
 
 #include "Fuzzy.h"
 

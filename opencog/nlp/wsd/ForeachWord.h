@@ -21,6 +21,7 @@
 #include <opencog/neighbors/ForeachChaseLink.h>
 #include <opencog/neighbors/FollowLink.h>
 #include <opencog/nlp/types/atom_types.h>
+#include <opencog/nlp/oc-types/atom_types.h>
 
 namespace opencog {
 
