@@ -33,6 +33,7 @@ class AnaphoraUnitTester(TestCase):
 
         scheme_eval(self.atomspace, "(use-modules (opencog))")
         scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
+        scheme_eval(self.atomspace, "(use-modules (opencog nlp oc))")
 
         self.hobbsAgent=HobbsAgent()
 

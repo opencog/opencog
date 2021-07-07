@@ -1,0 +1,77 @@
+//
+// Script for automatic "atom type" generation. For more information,
+// consult the README file at
+// https://github.com/opencog/atomspace/tree/master/opencog/atoms/atom_types
+//
+// Please note: some of the types below are used only via the scheme
+// bindings. Thus, just because you can comment some of these out, and
+// the code still compiles, that does not mean that these types are
+// unused!  Be sure to grep for the CamelCase names, to see if they
+// show up elsewhere!
+//
+// ====================================================================
+//
+// Imperative command. See chatbot-eva for details.
+// Kind-of-like ExecutionLink, except more like ExecutionOutputLink
+ACTION_LINK <- ORDERED_LINK
+
+// These are needed for AIML conversion and dialog/speech handling.
+// Analogous to SENTENCE_NODE and DOCUMENT_NODE, but for speech.
+UTTERANCE_NODE <- CONCEPT_NODE
+DIALOG_NODE <- CONCEPT_NODE
+
+// Custom atoms to identify features, relations
+// These are not used anywhere, right???
+FEATURE_NODE <- PREDICATE_NODE
+FEATURE_LINK <- ORDERED_LINK
+
+// Used to represent RelEx dependency relations
+// Since RelEx is deprecated, thes should eventually go away.
+DEFINED_LINGUISTIC_CONCEPT_NODE <- CONCEPT_NODE // is this used anywhere??
+DEFINED_LINGUISTIC_PREDICATE_NODE <- PREDICATE_NODE
+DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
+PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
+
+// ---------------------------------------------------------------
+// Wordnet-import nodes.
+// See nlp/wordnet-import/README and nlp/wsd/README for details.
+// LEMMA_NODE appears to be currently unused.
+WORD_SENSE_NODE <- CONCEPT_NODE
+WORD_SENSE_LINK <- ASSOCIATIVE_LINK
+PART_OF_SPEECH_NODE <- FEATURE_NODE
+PART_OF_SPEECH_LINK <- FEATURE_LINK
+LEMMA_NODE <- CONCEPT_NODE
+LEMMA_LINK <- ORDERED_LINK
+HOLONYM_LINK <- INHERITANCE_LINK
+
+TENSE_NODE <- CONCEPT_NODE
+TENSE_LINK <- FEATURE_LINK
+
+// Word-sense-disambiguation nodes.
+// See nlp/wsd/README for details.
+COSENSE_LINK <- UNORDERED_LINK
+
+// ---------------------------------------------------------------
+// Concept-formation anchors.
+// See nlp/seme/README for details.
+// These are more-or-less obsolete, and should probably be removed.
+SEME_NODE <- CONCEPT_NODE
+SEMANTIC_RELATION_NODE <- SEME_NODE
+// CONTEXT_NODE <- CONCEPT_NODE // apparently useless
+
+// Atoms to identify different interpretations of a single parse.
+// Added for Relex2Logic processing of meanings in sentences.
+INTERPRETATION_NODE <- NODE
+INTERPRETATION_LINK <- LINK
+SPECIFIC_ENTITY_NODE <- NODE
+
+// ---------------------------------------------------------------
+// Types used in the Lojban Parser
+// XXX FIXME - these names are excessively generic, and are
+// undocumented. Based on conversations, both of these links appear to
+// be special cases of TypedAtomLink, see discussion at
+// https://github.com/opencog/opencog/pull/3115
+SET_TYPE_LINK <- ORDERED_LINK
+SET_SIZE_LINK <- ORDERED_LINK
+MY_NOT_LINK <- UNORDERED_LINK
+MY_OR_LINK <- UNORDERED_LINK

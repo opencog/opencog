@@ -95,10 +95,12 @@ be built and run.
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
-###### Link Grammar
+###### lg-atomese
 > Natural Language Parser for English, Russian, other languages.
 > Required for natural language generation, and the chatbot.
-> https://www.abisource.com/projects/link-grammar/
+> https://github.com/opencog/lg-atomese
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
 
 
 Building OpenCog

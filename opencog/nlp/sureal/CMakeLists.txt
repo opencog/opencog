@@ -9,13 +9,14 @@ ADD_LIBRARY (sureal SHARED
 )
 
 ADD_DEPENDENCIES (sureal
-	nlp_atom_types            # also include the default types by dependencies
+	nlp_oc_atom_types      # also include the default types by dependencies
 )
 
 TARGET_LINK_LIBRARIES(sureal
 	lg-dict
 	neighbors
 	nlp-types
+	nlp-oc-types
 	${ATOMSPACE_LIBRARIES}
 )
 

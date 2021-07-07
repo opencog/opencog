@@ -127,6 +127,16 @@ ELSE (PLN_FOUND)
 	MESSAGE(STATUS "PLN was not found. Ghost will not be built.")
 ENDIF (PLN_FOUND)
 
+# LGAtomese
+FIND_PACKAGE(LGAtomese 1.0.0 CONFIG)
+IF (LGATOMESE_FOUND)
+	MESSAGE(STATUS "LGAtomese found.")
+	ADD_DEFINITIONS(-DHAVE_NLP)
+	SET(HAVE_NLP 1)
+ELSE (LGATOMESE_FOUND)
+	MESSAGE(STATUS "LGAtomese was not found. Ghost will not be built.")
+ENDIF (LGATOMESE_FOUND)
+
 # ----------------------------------------------------------
 # Needed for unit tests
 
@@ -155,26 +165,6 @@ ELSE (STACK_FOUND)
 	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
 ENDIF (STACK_FOUND)
 MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
-
-# ----------------------------------------------------------
-# Link-Grammar is needed for several NLP subsystems
-# Only 5.6.2 or newer has the required API in it.
-FIND_PACKAGE(LinkGrammar 5.6.2)
-IF (LINK_GRAMMAR_FOUND)
-	SET(HAVE_LINK_GRAMMAR 1)
-	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
-ELSE (LINK_GRAMMAR_FOUND)
-	MESSAGE(STATUS "Link Grammar missing: needed for NLP.")
-ENDIF (LINK_GRAMMAR_FOUND)
-
-FIND_PACKAGE(UUID)
-IF (UUID_FOUND)
-	SET(HAVE_UUID 1)
-	INCLUDE_DIRECTORIES(${UUID_INCLUDE_DIRS})
-	ADD_DEFINITIONS(${UUID_DEFINITIONS})
-ELSE (UUID_FOUND)
-	MESSAGE(STATUS "UUID library missing: needed for NLP.")
-ENDIF (UUID_FOUND)
 
 # ----------------------------------------------------------
 # This is required for Guile, Python and Cython
@@ -222,10 +212,6 @@ INCLUDE(OpenCogCython)
 IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_BANK AND HAVE_URE)
 	SET(HAVE_OPENPSI 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_BANK AND HAVE_URE)
-
-IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR AND HAVE_UUID)
-	SET(HAVE_NLP 1)
-ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR AND HAVE_UUID)
 
 IF(HAVE_BANK AND HAVE_OPENPSI AND HAVE_NLP AND HAVE_PLN)
 	SET(HAVE_GHOST 1)
@@ -360,7 +346,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
-SUMMARY_ADD("NLP" "Natural Language Processing tools" HAVE_NLP)
 SUMMARY_ADD("OpenPsi" "MicroPsi OpenCog implementation" HAVE_OPENPSI)
 SUMMARY_ADD("Ghost" "Ghost chatbot" HAVE_GHOST)
 SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)

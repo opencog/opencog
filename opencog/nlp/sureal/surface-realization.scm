@@ -12,6 +12,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog nlp)
+             (opencog nlp oc)
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
 

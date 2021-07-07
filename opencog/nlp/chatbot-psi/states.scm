@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog nlp))
+(use-modules (opencog) (opencog nlp) (opencog nlp oc))
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states

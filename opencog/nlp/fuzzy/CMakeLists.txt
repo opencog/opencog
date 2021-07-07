@@ -8,6 +8,7 @@ ADD_LIBRARY (nlpfz SHARED
 TARGET_LINK_LIBRARIES (nlpfz
 	neighbors
 	nlp-types
+	nlp-oc-types
 	${ATTENTIONBANK_LIBRARIES}
 	${ATOMSPACE_LIBRARIES}
 )

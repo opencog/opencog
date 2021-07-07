@@ -4,7 +4,7 @@
 (define-module (opencog nlp aiml))
 
 (use-modules (srfi srfi-1) (rnrs io ports))
-(use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
+(use-modules (opencog) (opencog nlp) (opencog nlp oc) (opencog exec) (opencog openpsi))
 
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")

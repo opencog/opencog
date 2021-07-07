@@ -18,6 +18,7 @@ atomspace = AtomSpace()
 # __init__(atomspace)
 scheme_eval(atomspace,  "(use-modules (opencog) (opencog exec))")
 scheme_eval(atomspace,  "(use-modules (opencog nlp))")
+scheme_eval(atomspace,  "(use-modules (opencog nlp oc))")
 
 #status2 = load_scm(atomspace, "opencog/nlp/anaphora/tests/atomspace.scm")
 

@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog nlp) (opencog nlp relex2logic))
+(use-modules (opencog) (opencog nlp) (opencog nlp oc) (opencog nlp relex2logic))
 
 (load "states.scm")
 (load "utils.scm")
