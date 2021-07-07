@@ -69,6 +69,7 @@ class BindLinkExecution():
         self.response=None
         scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec))")
         scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
+        scheme_eval(self.atomspace, "(use-modules (opencog nlp oc))")
 
     def execution(self):
 
