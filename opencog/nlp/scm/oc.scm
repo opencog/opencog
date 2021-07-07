@@ -10,11 +10,11 @@
 (load-extension (string-append opencog-ext-path-nlp-oc-types "libnlp-oc-types") "nlp_oc_types_init")
 
 ; Load various parts....
-(load "nlp/types/nlp_types.scm")
+(load "oc/nlp_oc_types.scm")
 ; NOTE: relex-utils.scm is used by cmake for configuring relex dependent tests.
 ; Update relevant paths should you move it.
-(load "nlp/relex-utils.scm")
-(load "nlp/processing-utils.scm")
+(load "oc/relex-utils.scm")
+(load "oc/processing-utils.scm")
 
 ; Weird ... MUST say `(export)` or no define-publics are visible!
 ; XXX What? nothing else anywhere needs this! FIXME, somethings broke.
