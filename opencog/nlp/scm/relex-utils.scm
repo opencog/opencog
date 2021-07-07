@@ -93,7 +93,7 @@
     (define eval-dlrn (append-map (lambda (n)
         (cog-get-pred n 'DefinedLinguisticRelationshipNode)) word-inst-nodes))
     (define eval-lgrn (append-map (lambda (n)
-        (cog-get-pred n 'LinkGrammarRelationshipNode)) word-inst-nodes))
+        (cog-get-pred n 'LgLinkNode)) word-inst-nodes))
     (define eval-lgin (append-map (lambda (n)
         (cog-get-pred n 'LgLinkInstanceNode)) word-inst-nodes))
 
