@@ -29,32 +29,32 @@ ENDIF ()
 
 ##################### NLP Types ##################
 
-CYTHON_ADD_MODULE_PYX(nlp_types
-	"nlp_types.pyx"
+CYTHON_ADD_MODULE_PYX(nlp_oc_types
+	"nlp_oc_types.pyx"
 )
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "nlp_types.cpp")
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "nlp_oc_types.cpp")
 
-# opencog.nlp_types Python bindings
+# opencog.nlp_oc_types Python bindings
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-ADD_LIBRARY(nlp_types_cython SHARED
-	nlp_types.cpp
+ADD_LIBRARY(nlp_oc_types_cython SHARED
+	nlp_oc_types.cpp
 )
 
-ADD_DEPENDENCIES(nlp_types_cython nlp-types)
+ADD_DEPENDENCIES(nlp_oc_types_cython nlp-oc-types)
 
-TARGET_LINK_LIBRARIES(nlp_types_cython
-	nlp-types
+TARGET_LINK_LIBRARIES(nlp_oc_types_cython
+	nlp-oc-types
 	${ATOMSPACE_LIBRARIES}
 	${PYTHON_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES(nlp_types_cython PROPERTIES
+SET_TARGET_PROPERTIES(nlp_oc_types_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME nlp_types)
+	OUTPUT_NAME nlp_oc_types)
 
-INSTALL (TARGETS nlp_types_cython
+INSTALL (TARGETS nlp_oc_types_cython
 	DESTINATION "${PYTHON_DEST}")
 
 ##################### OpenPsi ##################
