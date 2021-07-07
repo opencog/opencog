@@ -4,7 +4,7 @@
 ADD_SUBDIRECTORY (irc)
 ADD_SUBDIRECTORY (scm)
 ADD_SUBDIRECTORY (sentiment)
-ADD_SUBDIRECTORY (types)
+ADD_SUBDIRECTORY (oc-types)
 ADD_SUBDIRECTORY (wsd)
 
 # NOTE: Set BUILD_LOJBAN variable by running `cmake -DBUILD_LOJBAN=1 ..` from
