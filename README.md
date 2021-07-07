@@ -7,17 +7,18 @@ This git repository contains the "OpenCog Framework", which has served
 as a (scientific, technical) laboratory for researching, exploring and
 learning how to integrate AI algorithms and systems into humanoid
 robotic systems.  Most of the activity within this particular repo has
-focused on integrating natural langauge chat, common-sense reasoning,
+focused on integrating natural language chat, common-sense reasoning,
 assorted types of learning, and motor control of humanoid robots.
 
 A stated goal of the [OpenCog project](https://opencog.org) is to develop
 artificial general intelligence (AGI) systems.  This is all and well;
-however, what can be found here is very far from that. The code here
-really is ... a laboratory for integrating various types of AI systems.
-As such, it is a compilation of several decades of work by a large and
-varying collection of students, professors and software engineers.
-As a laboratory, it is filled with all sorts of devices in varying
-states of working order, from well-polished to mostly-broken.
+however, what can be found here, in this particular repo, is very far
+from that. The code here really is ... a laboratory for integrating
+various types of AI systems.  As such, it is a compilation of several
+decades of work by a large and varying collection of students,
+researchers, professors and software engineers.  As a laboratory, it is
+filled with all sorts of devices in varying states of working order,
+from well-polished to mostly-broken.
 
 
 Overview
@@ -43,7 +44,7 @@ mechanisms.  These include:
   * Natural language input (for reading and hearing).
   * Relex2logic, converting natural language to logic expressions.
   * Assorted chatbots, some of which are embodied.
-  * A lojban tool.
+  * A Lojban tool.
 
 Prerequisites
 -------------
@@ -84,7 +85,7 @@ preconfigured can be found in the `opencog/docker` repo.
   to `sudo make install` at the end.
 
 ###### pln
-> OpenCog Probabilistic Logic Networks resoning system.
+> OpenCog Probabilistic Logic Networks reasoning system.
 > https://github.com/opencog/pln
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
