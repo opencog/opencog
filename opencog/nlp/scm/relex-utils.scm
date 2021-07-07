@@ -529,8 +529,7 @@
       (display " \n" s)
       (set! result (get-string-all s))
       (close-port s)
-      (or (string-match "; NO PARSES\n" result)
-          (string-match "; No parses!\n" result))
+      (if (string-match "; NO PARSES\n" result) #t #f)
     )
     #f
   )
