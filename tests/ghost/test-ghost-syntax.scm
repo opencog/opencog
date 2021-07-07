@@ -11,6 +11,7 @@
 (use-modules
   (opencog)
   (opencog nlp)
+  (opencog nlp oc)
   (opencog nlp relex2logic)
   (opencog nlp chatbot)
   (opencog openpsi)
