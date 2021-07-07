@@ -532,6 +532,7 @@
       (or (string-match "; NO PARSES\n" result)
           (string-match "; No parses!\n" result))
     )
+    #f
   )
 )
 
