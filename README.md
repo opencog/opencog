@@ -8,7 +8,7 @@ as a (scientific, technical) laboratory for researching, exploring and
 learning how to integrate AI algorithms and systems into humanoid
 robotic systems.  Most of the activity within this particular repo has
 focused on integrating natural language chat, common-sense reasoning,
-assorted types of learning, and motor control of humanoid robots.
+assorted learning algorithms, and motor control of humanoid robots.
 
 A stated goal of the [OpenCog project](https://opencog.org) is to develop
 artificial general intelligence (AGI) systems.  This is all and well;
