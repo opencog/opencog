@@ -20,6 +20,12 @@ researchers, professors and software engineers.  As a laboratory, it is
 filled with all sorts of devices in varying states of working order,
 from well-polished to mostly-broken.
 
+See also:
+* ROCCA - [Rational OpenCog Controlled Agent](https://github.com/opencog/rocca).
+  This is a different assemblage of assorted OpenCog components,
+  so that they operate within Minecraft, in the OpenAI Gym. The focus
+  is on learning with the pattern miner, and reasoning with PLN.
+
 
 Overview
 --------
@@ -50,8 +56,9 @@ Prerequisites
 -------------
 To build and run the system here, the packages listed below are required.
 Users of Ubuntu may use the dependency installer from the
-`/opencog/octool` repository.  Docker containers with OpenCog
-preconfigured can be found in the `opencog/docker` repo.
+[`/opencog/octool`](https://github.com/opencog/octool) repository.
+Docker containers with OpenCog preconfigured can be found in the
+[`opencog/docker`](https://github.com/opencog/docker) repo.
 
 ###### cogutil
 > Common OpenCog C++ utilities.
