@@ -11,6 +11,8 @@
 (define-module (opencog nlp sureal))
 
 (use-modules (opencog oc-config))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp oc))
 
 (load-extension (string-append opencog-ext-path-sureal "libsureal") "opencog_nlp_sureal_init")
 
