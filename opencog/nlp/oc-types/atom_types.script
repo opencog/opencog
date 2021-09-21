@@ -51,6 +51,10 @@ TENSE_LINK <- FEATURE_LINK
 // See nlp/wsd/README for details.
 COSENSE_LINK <- UNORDERED_LINK
 
+// Link to represent the magnitude or the multitude of something,
+// such as 10kg, 10s, $10, etc.
+QUANTITY_LINK <- ORDERED_LINK
+
 // ---------------------------------------------------------------
 // Concept-formation anchors.
 // See nlp/seme/README for details.
