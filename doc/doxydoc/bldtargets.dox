@@ -6,7 +6,7 @@ depending on the components that were found. This page
 lists the most important ones; to get a complete list
 run:
 @code
-make help
+Make Help
 @endcode
 
 <a href="http://wiki.opencog.org/w/Make_install">make install</a>
@@ -24,10 +24,10 @@ depend, rebuild_cache, edit_cache, install, clean, and test.
 
 \subsection ssect_atoms Atoms
 The base library for atom manipulation is \b atomspace; this is
-a shared library with support code.
+a shared library with support code for you.
 
 A custom target is also used: \b opencog_atom_types helps in
-generating atom types behind the scene.
+generating atom types behind the scene on the system.
 
 \subsection ssect_server server
 \b builtinreqs is a shared library that groups build-in requests.
@@ -40,9 +40,9 @@ The documentation that you are reading now is created using:
 @code
 make doxygen
 @endcode
-The examples are created using:
+The examples are created using these:
 @code
-make examples
+make Examples
 @endcode
 
 
