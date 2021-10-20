@@ -942,7 +942,7 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
     // keep only links of the same type as bestClause and
     // have linkage to InterpretationNode
     HandleSeq qCandidate;
-    m_as->get_handles_by_type(std::back_inserter(qCandidate), bestClause->getHandle()->get_type());
+    m_as->get_handles_by_type(qCandidate, bestClause->getHandle()->get_type());
 
     // selected candidates, a subset of qCandidate
     std::vector<CandHandle> sCandidate;
@@ -962,8 +962,7 @@ bool SuRealPMCB::perform_search(PatternMatchCallback& pmc)
                 });
         };
 
-        HandleSeq qISet;
-        c->getIncomingSet(back_inserter(qISet));
+        HandleSeq qISet = c->getIncomingSet();
 
         // erase atoms that are neither a SetLink nor a target
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());
