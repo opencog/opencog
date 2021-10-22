@@ -38,7 +38,7 @@ using namespace opencog;
 class OpenPsiRulesUTest : public CxxTest::TestSuite
 {
 private:
-  AtomSpace* _as;
+  AtomSpacePtr _as;
   SchemeEval* _scm;
   OpenPsiRules* _opr;
 
@@ -63,7 +63,7 @@ public:
   void setUp()
   {
     // The scheme environment is reset between each test.
-    _as = new AtomSpace();
+    _as = createAtomSpace();
     _scm = new SchemeEval(_as);
 
     // Configure scheme load-paths that are common for all tests.
@@ -72,14 +72,13 @@ public:
     _scm->eval("(add-to-load-path \"" OPENPSI_TEST_PATH "/../../opencog/openpsi\")");
     CHKERR
 
-    _opr = new OpenPsiRules(_as);
+    _opr = new OpenPsiRules(_as.get());
 
     logger().info("##### Finished setting up to run a test #####");
   }
 
   void tearDown()
   {
-    delete _as;
     _as = nullptr;
     delete _scm;
     _scm = nullptr;

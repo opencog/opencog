@@ -37,13 +37,13 @@ using namespace opencog;
 class OpenPsiSCMUTest : public CxxTest::TestSuite
 {
 private:
-    AtomSpace* _as;
+    AtomSpacePtr _as;
     SchemeEval* _scm;
 
 public:
     OpenPsiSCMUTest()
     {
-        _as = new AtomSpace();
+        _as = createAtomSpace();
         _scm = new SchemeEval(_as);
 
         logger().set_level(Logger::DEBUG);
@@ -65,7 +65,6 @@ public:
     ~OpenPsiSCMUTest()
     {
         // Clean Up
-        delete _as;
         _as = nullptr;
         delete _scm;
         _scm = nullptr;
