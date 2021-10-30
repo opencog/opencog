@@ -30,7 +30,7 @@ ADD_LIBRARY (wsd SHARED
 
 ADD_DEPENDENCIES(wsd nlp_oc_atom_types)
 
-TARGET_LINK_LIBRARIES(wsd nlp-types)
+TARGET_LINK_LIBRARIES(wsd nlp-oc-types)
 
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(wsd
