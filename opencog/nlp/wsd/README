@@ -7,7 +7,8 @@ it, that has been long ignored, and needs to be revived and modernized.
 And this is why this directory has not been nuked into oblivion -- it is
 a kind-of a reminder to "modernize this stuff".
 
-The original idea is as follows. To ever word, associate a vector of
+The original idea is as follows. (This is a recap of Mihalcea's original
+papers on this topic. Read them!) To every word, associate a vector of
 word-senses (exactly like Webster's dictionary or any natural language
 dictionary). Then, given a sentence (or paragraph), for each word, look
 up the vector.  The claim is that the correct meaning for the sentence
