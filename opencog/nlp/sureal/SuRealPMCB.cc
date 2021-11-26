@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <list>
+
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/pattern/PatternTerm.h>
 #include <opencog/query/PatternMatchEngine.h>
