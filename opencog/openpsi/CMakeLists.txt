@@ -1,7 +1,7 @@
 ADD_GUILE_MODULE (FILES
+	openpsi.scm
 	action-selector.scm
 	main.scm
-	openpsi.scm
 	rule.scm
 	utilities.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/openpsi"
