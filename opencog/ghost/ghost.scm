@@ -9,7 +9,6 @@
   #:use-module (opencog exec)
   #:use-module (opencog ghost procedures)
   #:use-module (opencog attention-bank)
-  #:use-module (opencog attention)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs io ports)
   #:use-module (ice-9 popen)

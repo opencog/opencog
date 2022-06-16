@@ -14,7 +14,6 @@
   #:use-module (opencog)
   #:use-module (opencog oc-config)
   #:use-module (opencog exec)
-  #:use-module (opencog attention)
   #:use-module (opencog logger)
 
   #:export (
