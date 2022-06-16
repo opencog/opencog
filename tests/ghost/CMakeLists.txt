@@ -4,7 +4,7 @@
 #    other services too.
 # 2. Make it not depend on guile
 IF(HAVE_GUILE)
-  SET(RELEX_UTILS "${PROJECT_SOURCE_DIR}/opencog/nlp/scm/relex-utils.scm")
+  SET(RELEX_UTILS "${PROJECT_SOURCE_DIR}/opencog/nlp/scm/oc/relex-utils.scm")
   SET(CHECK_RELEX "
     (define loaded (catch #t (lambda () (load \"${RELEX_UTILS}\") #t)
       (lambda (e . args) #f)))

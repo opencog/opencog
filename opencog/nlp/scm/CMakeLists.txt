@@ -2,7 +2,7 @@
 # Update relevant paths should you move it.
 ADD_GUILE_MODULE (FILES
 	oc.scm
-	relex-utils.scm
-	processing-utils.scm
+	oc/relex-utils.scm
+	oc/processing-utils.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/nlp/oc"
 )
