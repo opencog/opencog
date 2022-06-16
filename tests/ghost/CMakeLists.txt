@@ -26,7 +26,7 @@ IF("${RELEX_REACHABLE}" STREQUAL "#t")
 #        APPEND PROPERTY ENVIRONMENT
 #        "PYTHONPATH=${PYTHON_ROOT}:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents:${PYTHON_ROOT}"
 #  )
-  ADD_GUILE_TEST(GhostProcedureUTest test-ghost-procedures.scm)
+#  ADD_GUILE_TEST(GhostProcedureUTest test-ghost-procedures.scm)
 #  ADD_GUILE_TEST(GhostUTest test-ghost.scm)
   
 ELSEIF("${RELEX_REACHABLE}" STREQUAL "config-error")
