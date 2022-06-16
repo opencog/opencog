@@ -1,3 +1,5 @@
+(use-modules (opencog nlp oc)) ; Needed for TenseLink
+
 ; Helper for generating a new BindLink with the base elements
 (define (generate-bindlink . elmts)
   (define vars (append (car sq-base) (append-map car elmts)))
