@@ -69,7 +69,11 @@ public:
     // Configure scheme load-paths that are common for all tests.
     _scm->eval("(add-to-load-path \"/usr/local/share/guile/site/3.0/\")");
     CHKERR
+    _scm->eval("(add-to-load-path \"" OPENPSI_TEST_PATH "\")");
+    CHKERR
     _scm->eval("(add-to-load-path \"" OPENPSI_TEST_PATH "/../../opencog/openpsi\")");
+    CHKERR
+    _scm->eval("(add-to-load-path \"" OPENPSI_TEST_PATH "/../../build/opencog/scm\")");
     CHKERR
 
     _opr = new OpenPsiRules(_as.get());
