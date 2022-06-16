@@ -67,7 +67,7 @@ public:
     _scm = new SchemeEval(_as);
 
     // Configure scheme load-paths that are common for all tests.
-    _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    _scm->eval("(add-to-load-path \"/usr/local/share/guile/site/3.0/\")");
     CHKERR
     _scm->eval("(add-to-load-path \"" OPENPSI_TEST_PATH "/../../opencog/openpsi\")");
     CHKERR
@@ -95,6 +95,7 @@ public:
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+    logger().info("Looking for test files at >>%s<<", OPENPSI_TEST_PATH);
     // Common Setup
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
     CHKERR
