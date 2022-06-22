@@ -155,7 +155,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
     if (h->get_type() != SET_LINK)
         return HandleSeqSeq();
 
-    AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
+    AtomSpacePtr asp = SchemeSmob::ss_get_env_as("sureal-match");
+    AtomSpace* pAS = asp.get();
 
     HandleSet sVars;
 

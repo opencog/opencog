@@ -119,8 +119,8 @@ Handle FuzzySCM::find_approximate_match(Handle hp)
 	for (auto rs: ranked_solns)
 		solns.emplace_back(rs.first);
 
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
-	return as->add_link(LIST_LINK, std::move(solns));
+	AtomSpacePtr asp = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
+	return asp->add_link(LIST_LINK, std::move(solns));
 }
 
 /**
@@ -137,9 +137,9 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
                                     const HandleSeq& excl_list,
                                     bool af_only)
 {
-    AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
+    AtomSpacePtr asp = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
 
-    Fuzzy fpm(as, rtn_type, excl_list, af_only);
+    Fuzzy fpm(asp.get(), rtn_type, excl_list, af_only);
 
     // A vector of solutions sorted in descending order of similarity
     RankedHandleSeq solns = fpm.perform_search(pat);
@@ -148,13 +148,13 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     // Create NumberNodes to store the similarity scores, wrap together
     // with the Handles of the solutions in ReferenceLinks
     for (auto soln : solns) {
-        Handle l = as->add_link(REFERENCE_LINK, soln.first,
-                       as->add_node(NUMBER_NODE, std::to_string(soln.second)));
+        Handle l = asp->add_link(REFERENCE_LINK, soln.first,
+                       asp->add_node(NUMBER_NODE, std::to_string(soln.second)));
         rtn_solns.push_back(l);
     }
 
     // Wrap everything in a ListLink and then return it
-    Handle results = as->add_link(LIST_LINK, std::move(rtn_solns));
+    Handle results = asp->add_link(LIST_LINK, std::move(rtn_solns));
 
     return results;
 }
@@ -168,13 +168,13 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
  */
 Handle FuzzySCM::do_nlp_fuzzy_compare(Handle h1, Handle h2)
 {
-    AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-compare");
+    AtomSpacePtr asp = SchemeSmob::ss_get_env_as("nlp-fuzzy-compare");
 
-    Fuzzy fpm(as);
+    Fuzzy fpm(asp.get());
 
     double score = fpm.fuzzy_compare(h1, h2);
 
-    return as->add_node(NUMBER_NODE, std::to_string(score));
+    return asp->add_node(NUMBER_NODE, std::to_string(score));
 }
 
 void opencog_nlp_fuzzy_init(void)

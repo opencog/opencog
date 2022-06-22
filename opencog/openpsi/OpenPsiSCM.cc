@@ -74,75 +74,75 @@ void OpenPsiSCM::init()
 
 TruthValuePtr OpenPsiSCM::was_action_executed(const Handle& rule)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-action-executed");
-  return openpsi_implicator(as).was_action_executed(rule);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-action-executed");
+  return openpsi_implicator(asp.get()).was_action_executed(rule);
 }
 
 Handle OpenPsiSCM::add_category(const Handle& new_category)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-add-category");
-  return openpsi_cache(as).add_category(new_category);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-add-category");
+  return openpsi_cache(asp.get()).add_category(new_category);
 }
 
 Handle OpenPsiSCM::add_rule(const HandleSeq& context, const Handle& action,
   const Handle& goal, const TruthValuePtr stv, const Handle& category)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-rule");
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-rule");
   // TODO: Should this be a singleton? What could be the issues that need
   // to be handled? How to handle multiple atomspace, maybe a singleton per
   // atomspace?
-  Handle rule = openpsi_cache(as).add_rule(context, action, goal, stv);
+  Handle rule = openpsi_cache(asp.get()).add_rule(context, action, goal, stv);
   // TODO: Add to multiple categories using scheme rest list.
-  openpsi_cache(as).add_to_category(rule, category);
+  openpsi_cache(asp.get()).add_to_category(rule, category);
   return rule;
 }
 
 Handle OpenPsiSCM::add_to_category(const Handle& rule, const Handle& category)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-add-to-category");
-  return openpsi_cache(as).add_to_category(rule, category);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-add-to-category");
+  return openpsi_cache(asp.get()).add_to_category(rule, category);
 }
 
 Handle OpenPsiSCM::get_action(const Handle& rule)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-get-action");
-  return openpsi_cache(as).get_action(rule);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-get-action");
+  return openpsi_cache(asp.get()).get_action(rule);
 }
 
 HandleSeq& OpenPsiSCM::get_categories()
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-categories");
-  return openpsi_cache(as).get_categories();
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-categories");
+  return openpsi_cache(asp.get()).get_categories();
 }
 
 HandleSeq& OpenPsiSCM::get_context(const Handle& rule)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-get-context");
-  return openpsi_cache(as).get_context(rule);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-get-context");
+  return openpsi_cache(asp.get()).get_context(rule);
 }
 
 Handle OpenPsiSCM::get_goal(const Handle& rule)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-get-goal");
-  return openpsi_cache(as).get_goal(rule);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-get-goal");
+  return openpsi_cache(asp.get()).get_goal(rule);
 }
 
 Handle OpenPsiSCM::imply(const Handle& rule)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-imply");
-  return openpsi_implicator(as).imply(rule, openpsi_cache(as));
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-imply");
+  return openpsi_implicator(asp.get()).imply(rule, openpsi_cache(asp.get()));
 }
 
 bool OpenPsiSCM::is_rule(const Handle& rule)
 {
-  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-rule?");
-  return openpsi_cache(as).is_rule(rule);
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-rule?");
+  return openpsi_cache(asp.get()).is_rule(rule);
 }
 
 TruthValuePtr OpenPsiSCM::is_satisfiable(const Handle& rule)
 {
-  AtomSpace *as = SchemeSmob::ss_get_env_as("psi-satisfiable?");
-  return openpsi_implicator(as).check_satisfiability(rule, openpsi_cache(as));
+  AtomSpacePtr asp = SchemeSmob::ss_get_env_as("psi-satisfiable?");
+  return openpsi_implicator(asp.get()).check_satisfiability(rule, openpsi_cache(asp.get()));
 }
 
 OpenPsiSCM& opencog::get_openpsi_scm() {
