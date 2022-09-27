@@ -2,7 +2,7 @@
 
 ; Load rule files. The order of the load matters
 (load "../rule-utils.scm")
-(load "load-rules.scm")
+(load "../loader.scm")
 
 ; Define r2l-rulebase for English.
 (ure-define-rbs r2l-rules 100)
