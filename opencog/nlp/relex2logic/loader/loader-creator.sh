@@ -1,7 +1,7 @@
 #!/bin/bash
-rm load-rules.scm
+rm -f loader.scm
 cd ..
-for var in `ls *.scm`
+for var in `ls rules/*.scm`
 do
-echo "(load \"../"$var"\")" >>"loader/load-rules.scm"
+echo "(include \""$var"\")" >> "loader/loader.scm"
 done
