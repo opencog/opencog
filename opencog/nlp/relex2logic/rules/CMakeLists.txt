@@ -1,4 +1,5 @@
 ADD_GUILE_MODULE (FILES
+	rules.scm
 	adverbialpp.scm
 	advmod.scm
 	amod.scm
