@@ -56,6 +56,13 @@ jobs:
           paths:
             - /ws/atomspace/opencog/haskell/.stack-work
       - run:
+          name: Checkout Unify
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/unify /ws/unify
+            mkdir -p /ws/unify/build
+            cd /ws/unify/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
+      - run:
           name: Checkout URE
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure /ws/ure
