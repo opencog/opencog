@@ -17,21 +17,24 @@ ENDIF (HAVE_BANK)
 #	ADD_SUBDIRECTORY (microplanning)
 #ENDIF (HAVE_URE AND HAVE_NLP)
 
-IF (HAVE_NOSETESTS)
-
-	# AnaphoraUTest fails on guile-2.2 with a bdw-gc error:
-	# "Too many root sets".  It appears to work for guile-3.0
-	IF (GUILE_FOUND AND (GUILE_VERSION_MAJOR EQUAL 3)
-			OR ((GUILE_VERSION_MAJOR EQUAL 2) AND
-				(GUILE_VERSION_MINOR GREATER 4)))
-		ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
-		SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
-			"PYTHONPATH=${PYTHON_ROOT}:${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython"
-		)
-	ENDIF ()
-
-ENDIF (HAVE_NOSETESTS)
+# Disable AnaphoraUTest (March 2023) It has not been used in more than
+# a decade. It has dependencies on MindAgents, which were eliminated
+# years ago.
+#IF (HAVE_NOSETESTS)
+#
+#	# AnaphoraUTest fails on guile-2.2 with a bdw-gc error:
+#	# "Too many root sets".  It appears to work for guile-3.0
+#	IF (GUILE_FOUND AND (GUILE_VERSION_MAJOR EQUAL 3)
+#			OR ((GUILE_VERSION_MAJOR EQUAL 2) AND
+#				(GUILE_VERSION_MINOR GREATER 4)))
+#		ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
+#			${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
+#		SET_TESTS_PROPERTIES(AnaphoraTest PROPERTIES ENVIRONMENT
+#			"PYTHONPATH=${PYTHON_ROOT}:${PROJECT_SOURCE_DIR}/opencog/nlp/anaphora:${PROJECT_BINARY_DIR}/opencog/cython"
+#		)
+#	ENDIF ()
+#
+#ENDIF (HAVE_NOSETESTS)
 
 IF (HAVE_STACK AND BUILD_LOJBAN)
 	# Lojban is currently failing to build; see for example
