@@ -36,6 +36,8 @@ IF (CXXTEST_FOUND)
 
 ENDIF (CXXTEST_FOUND)
 
-IF (HAVE_GHOST)
-	ADD_SUBDIRECTORY(ghost)
-ENDIF(HAVE_GHOST)
+# Disable ghost (March 2023) Seems to depend on RelEx, but RelEx has
+# been obsolete for many years. Dead, unmaintained code. Oh well.
+#IF (HAVE_GHOST)
+#	ADD_SUBDIRECTORY(ghost)
+#ENDIF(HAVE_GHOST)
