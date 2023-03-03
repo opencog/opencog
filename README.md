@@ -3,6 +3,15 @@ OpenCog
 
 [![CircleCI](https://circleci.com/gh/opencog/opencog.svg?style=svg)](https://circleci.com/gh/opencog/opencog)
 
+***This repo is no longer maintained!***
+Please use the following, instead:
+* [opencog/atomspace](https://github.com/opencog/atomspace)
+* [opencog/atomspace-cog](https://github.com/opencog/atomspace-cog)
+* [opencog/atomspace-rocks](https://github.com/opencog/atomspace-rocks)
+* [opencog/cogserver](https://github.com/opencog/cogserver)
+* [opencog/lg-atomese](https://github.com/opencog/lg-atomese)
+* [opencog/learn](https://github.com/opencog/learn)
+
 ***Obsolete!*** As of 2021, the most interesting and actively maintained
 parts of this git repo have been split off into their own distinct git
 repos.  What is left here is a mish-mash of unmatained stuff that is in
