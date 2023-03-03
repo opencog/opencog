@@ -8,16 +8,7 @@
 # -- configure various config files.
 # -- print pretty summary
 #
-
-# cogutils already requires 2.8.12.2, so may as well ask for that.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
-IF (COMMAND CMAKE_POLICY)
-	CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF (COMMAND CMAKE_POLICY)
-
-IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
-	CMAKE_POLICY(SET CMP0037 OLD)
-ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 PROJECT(opencog)
 
@@ -225,7 +216,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(check
 			# TODO lcov should be found by cmake first
 			# TODO set it up so that we can pick to run coverage per test, or
 			# combined across all tests (the latter is MUCH faster). Use a define?
@@ -242,7 +233,7 @@ IF (CXXTEST_FOUND)
 		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# If this is a build with coverage enabled then test normally
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(check
 			DEPENDS tests
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
