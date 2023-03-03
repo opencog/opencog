@@ -3,6 +3,16 @@ OpenCog
 
 [![CircleCI](https://circleci.com/gh/opencog/opencog.svg?style=svg)](https://circleci.com/gh/opencog/opencog)
 
+***Obsolete!*** As of 2021, the most interesting and actively maintained
+parts of this git repo have been split off into their own distinct git
+repos.  What is left here is a mish-mash of unmatained stuff that is in
+the process of bit-rotting. Some unit tests fail. Some unit tests
+won't run. Some code won't compile. Perhaps there's some good stuff in
+here. Perhaps it can be brought back to life and used for something or
+other. However... for the most part, it is obsolete.
+
+----------------------
+
 This git repository contains the "OpenCog Framework", which has served
 as a (scientific, technical) laboratory for researching, exploring and
 learning how to integrate AI algorithms and systems into humanoid
