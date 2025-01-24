@@ -317,7 +317,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  * @return           always return false to search for more solutions, unless a
  *                   good enough solution is found
  */
-bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln)
+bool SuRealPMCB::propose_grounding(const HandleMap &var_soln, const HandleMap &pred_soln)
 {
     if (m_use_cache) {
         int cached = SuRealCache::instance().grounding_match(var_soln, pred_soln);

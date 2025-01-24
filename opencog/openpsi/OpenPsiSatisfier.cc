@@ -43,7 +43,7 @@ bool OpenPsiSatisfier::grounding(const HandleMap &var_soln,
   // as PMCGroundings is used instead. Update to handle such cases.
 
   // The psi-rule weight calculations could be done here.
-  _result = TruthValue::TRUE_TV();
+  _result = true;
 
   if (0 < var_soln.size()) {
     for( auto it = var_soln.begin(); it != var_soln.end(); ++it )

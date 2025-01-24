@@ -53,8 +53,8 @@ public:
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
     virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h);
-    virtual bool grounding(const HandleMap &var_soln,
-                           const HandleMap &pred_soln);
+    virtual bool propose_grounding(const HandleMap &var_soln,
+                                   const HandleMap &pred_soln);
     virtual bool perform_search(PatternMatchCallback&);
     virtual void set_pattern(const Variables& vars,
                              const Pattern& pat)
