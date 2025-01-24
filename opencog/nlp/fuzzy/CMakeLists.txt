@@ -1,8 +1,8 @@
 ADD_LIBRARY (nlpfz SHARED
-	Fuzzy
-	FuzzyMatch
-	FuzzyMatchBasic
-	FuzzySCM
+	Fuzzy.cc
+	FuzzyMatch.cc
+	FuzzyMatchBasic.cc
+	FuzzySCM.cc
 )
 
 TARGET_LINK_LIBRARIES (nlpfz

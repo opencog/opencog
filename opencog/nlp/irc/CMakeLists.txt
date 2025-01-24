@@ -3,10 +3,10 @@
 # it translates between IRC protocol and the cog-server
 #
 ADD_EXECUTABLE(cogita
-	CogitaConfig
-	IRC
-	go-irc
-	whirr-sockets
+	CogitaConfig.cc
+	IRC.cc
+	go-irc.cc
+	whirr-sockets.cc
 )
 
 LINK_DIRECTORIES (

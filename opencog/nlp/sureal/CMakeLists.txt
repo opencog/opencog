@@ -3,9 +3,9 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (sureal SHARED
-	SuRealCache
-	SuRealSCM
-	SuRealPMCB
+	SuRealCache.cc
+	SuRealSCM.cc
+	SuRealPMCB.cc
 )
 
 ADD_DEPENDENCIES (sureal

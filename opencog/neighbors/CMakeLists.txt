@@ -1,6 +1,6 @@
 ADD_LIBRARY (neighbors
-	GetPredicates
-	Neighbors
+	GetPredicates.cc
+	Neighbors.cc
 )
 
 TARGET_LINK_LIBRARIES(neighbors
