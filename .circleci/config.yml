@@ -70,6 +70,13 @@ jobs:
             cd /ws/ure/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - run:
+          name: Checkout AtomSpace Storage
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-storage /ws/atomspace-storage
+            mkdir -p /ws/atomspace-storage/build
+            cd /ws/atomspace-storage/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
+      - run:
           name: Checkout CogServer
           command: |
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver /ws/cogserver
@@ -96,13 +103,6 @@ jobs:
             git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/pln /ws/pln
             mkdir -p /ws/pln/build
             cd /ws/pln/build && cmake .. && make -j2 && make -j2 install
-            ldconfig
-      - run:
-          name: Checkout AtomSpace Storage
-          command: |
-            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-storage /ws/atomspace-storage
-            mkdir -p /ws/atomspace-storage/build
-            cd /ws/atomspace-storage/build && cmake .. && make -j2 && make -j2 install
             ldconfig
       - run:
           name: Checkout LG-Atomese
