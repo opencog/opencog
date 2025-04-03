@@ -111,7 +111,22 @@ jobs:
             mkdir -p /ws/lg-atomese/build
             cd /ws/lg-atomese/build && cmake .. && make -j2 && make -j2 install
             ldconfig
-      - checkout
+
+      # The checkout directive only works if there is a deploy key
+      # configured in github. Most repos have this, but some do not.
+      # Work around this by doing the clone manually. This is all
+      # read-only anyway, so I have no clue why the special key was
+      # needed.
+      #
+      # Without the deploy key, one gets the cryptic error message
+      # Either git or ssh (required by git to clone through SSH) is Not Installed in the Image
+      # apt-get installing openssh-client says 'access denied', which
+      # tells us that the deploy key is missing.
+      #
+      # - checkout
+      - run:
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog /ws/opencog
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
