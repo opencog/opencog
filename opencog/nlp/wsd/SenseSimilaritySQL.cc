@@ -152,7 +152,7 @@ SimpleTruthValuePtr SenseSimilaritySQL::similarity(const Handle& first_sense,
 	// data, and maybe try to gather some.
 	if (!rp.have_data)
 	{
-		return SimpleTruthValue::createSTV(0.0f, 0.9f);
+		return createSimpleTruthValue(0.0f, 0.9f);
 	}
 
 	std::string first_pos = get_part_of_speech(first_sense);
@@ -188,7 +188,7 @@ SimpleTruthValuePtr SenseSimilaritySQL::similarity(const Handle& first_sense,
 	}
 #endif
 
-	return SimpleTruthValue::createSTV((float) sim, 0.9f);
+	return createSimpleTruthValue((float) sim, 0.9f);
 }
 
 #endif /* HAVE_SQL_STORAGE */

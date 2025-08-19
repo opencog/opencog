@@ -168,7 +168,7 @@ bool ReportRank::renorm_sense(const Handle& word_sense_h,
 	// go negative, likely scores will go positive.  "Typical"
 	// distributions seem to go from -0.8 to +3.5 or there-abouts.
 	//
-	TruthValuePtr stv(CountTruthValue::createTV(1.0f, 0.0f, (float) score));
+	TruthValuePtr stv(createCountTruthValue(1.0f, 0.0f, (float) score));
 	sense_link_h->setTruthValue(stv);
 
 #ifdef DEBUG

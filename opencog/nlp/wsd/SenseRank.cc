@@ -91,7 +91,7 @@ bool SenseRank::init_word(const Handle& h)
 bool SenseRank::init_senses(const Handle& word_sense_h,
                             const Handle& sense_link_h)
 {
-	TruthValuePtr ctv(CountTruthValue::createTV(1.0f, 0.0f, 1.0f));
+	TruthValuePtr ctv(createCountTruthValue(1.0f, 0.0f, 1.0f));
 	sense_link_h->setTruthValue(ctv);
 	return false;
 }
@@ -247,7 +247,7 @@ void SenseRank::rank_sense(const Handle& sense_link_h)
 	converge += convergence_damper * fabs(rank_sum - old_rank);
 
 	// Update the count for this sense.
-	TruthValuePtr ctv(CountTruthValue::createTV(1.0, 0.0, (float) rank_sum));
+	TruthValuePtr ctv(createCountTruthValue(1.0, 0.0, (float) rank_sum));
 	sense_link_h->setTruthValue(ctv);
 }
 

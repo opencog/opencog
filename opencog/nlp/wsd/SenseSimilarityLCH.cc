@@ -85,7 +85,7 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(const Handle& fs,
 	    (0 == first_pos.compare("adj")) ||
 	    (0 == first_pos.compare("adv")))
 	{
-		return SimpleTruthValue::createSTV(0.0, 0.5);
+		return createSimpleTruthValue(0.0, 0.5);
 	}
 
 	// As of wordnet-3.0, the depth of verb taxonomy is 14, noun is 20.
@@ -138,7 +138,7 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(const Handle& fs,
 	// printf("----\n");
 #endif
 
-	return SimpleTruthValue::createSTV((float) sim, 0.9f);
+	return createSimpleTruthValue((float) sim, 0.9f);
 }
 
 bool SenseSimilarityLCH::up_first(const Handle& up)
