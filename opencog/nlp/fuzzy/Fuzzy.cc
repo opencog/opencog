@@ -32,6 +32,8 @@
 
 #include "Fuzzy.h"
 
+#include <cmath>
+
 using namespace opencog::nlp;
 using namespace opencog;
 
@@ -230,7 +232,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
         size_t num_sents_contains_it = hs.size();
 
         double tf = (double) word_cnt / num_of_words;
-        double idf = log2((double) num_of_sents / num_sents_contains_it);
+        double idf = std::log2((double) num_of_sents / num_sents_contains_it);
         double tfidf = tf * idf;
 
         tfidf_weights[wi] = tfidf;
